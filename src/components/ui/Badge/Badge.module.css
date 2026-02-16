@@ -1,0 +1,27 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-weight: var(--font-semibold);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  line-height: 1.4;
+}
+
+.discount {
+  background-color: var(--color-accent);
+  color: var(--color-neutral-dark);
+}
+
+.new {
+  background-color: var(--color-primary);
+  color: var(--color-neutral-light);
+}
+
+.outOfStock {
+  background-color: var(--color-soft-gray);
+  color: var(--color-neutral-light);
+}
