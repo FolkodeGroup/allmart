@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { CartContext, CartItem } from './CartContextUtils';
+import { CartContext } from './CartContextUtils';
+import type { CartItem } from './CartContextUtils';
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items] = useState<CartItem[]>([]);
