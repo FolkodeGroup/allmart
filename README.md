@@ -71,3 +71,56 @@ export default defineConfig([
   },
 ])
 ```
+
+# CI/CD con GitHub Actions
+
+Este proyecto utiliza un pipeline de Integración y Despliegue Continuo (CI/CD) configurado con **GitHub Actions**. El flujo automatiza la ejecución de pruebas, el build y el despliegue a entornos de staging o producción.
+
+## Flujo del pipeline
+
+1. **Ejecución automática**: Cada push o pull request a las ramas `main`, `develop`, `staging` o `production` dispara el pipeline.
+2. **Instalación de dependencias**: Se ejecuta `npm ci` para instalar dependencias de forma limpia.
+3. **Pruebas automáticas**: Se ejecutan los tests con `npm test`.
+4. **Build**: Se construye el proyecto con `npm run build`.
+5. **Despliegue**: Si el push es a `staging` o `production`, se ejecuta un paso de despliegue (actualmente simulado, modificar según tu entorno real).
+
+El workflow está definido en `.github/workflows/ci-cd.yml`.
+
+### Ejemplo de archivo de workflow
+
+```yaml
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [ main, develop, staging, production ]
+  pull_request:
+    branches: [ main, develop, staging, production ]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/production' || github.ref == 'refs/heads/staging'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+      - run: npm run build
+      - run: echo "Desplegando a ${{ github.ref }}... (simulación)"
+```
+
+## Personalización del despliegue
+
+- Para un despliegue real, reemplaza el paso de `echo` por comandos de tu proveedor (Vercel, Netlify, FTP, etc).
+- Puedes agregar secretos en la configuración del repositorio para manejar credenciales.
