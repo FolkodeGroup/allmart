@@ -36,7 +36,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: var(--space-6);
   max-width: var(--container-2xl);
   margin: 0 auto;
@@ -53,9 +53,9 @@
   display: block;
 }
 
-.card:nth-child(1) {
+/* .card:nth-child(1) {
   grid-column: span 2;
-}
+} */
 
 .cardImage {
   width: 100%;
@@ -88,6 +88,7 @@
   font-size: var(--text-xl);
   font-weight: var(--font-bold);
   color: var(--color-neutral-light);
+  /* color: rgb(104, 100, 100); */
   margin-bottom: var(--space-1);
 }
 

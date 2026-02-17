@@ -4,7 +4,7 @@ import { Button } from '../../../components/ui/Button/Button';
 import styles from './CategoryGrid.module.css';
 
 export function CategoryGrid() {
-  const featured = categories.slice(0, 5);
+  const featured = categories.slice(0, 6);
 
   return (
     <section className={styles.section} aria-label="Categorías destacadas">
@@ -33,9 +33,9 @@ export function CategoryGrid() {
             />
             <div className={styles.cardOverlay}>
               <h3 className={styles.cardName}>{cat.name}</h3>
-              <span className={styles.cardCount}>
+              {/* <span className={styles.cardCount}>
                 {cat.itemCount} productos
-              </span>
+              </span> */}
             </div>
           </Link>
         ))}
