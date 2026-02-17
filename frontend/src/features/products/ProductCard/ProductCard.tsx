@@ -29,13 +29,15 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <article className={styles.card} aria-label={product.name}>
       <div className={styles.imageWrapper}>
-        <img
-          className={styles.image}
-          src={product.images[0]}
-          alt={product.name}
-          loading="lazy"
-          decoding="async"
-        />
+        <Link to={`/producto/${product.slug}`}>
+          <img
+            className={styles.image}
+            src={product.images[0]}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+          />
+        </Link>
         <div className={styles.badges}>
           {hasDiscount && (
             <Badge variant="discount">-{product.discount}%</Badge>
