@@ -1,0 +1,49 @@
+name: Registrar puntaje y mover a Hecho
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  puntaje_y_movimiento:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extraer puntaje y comentar
+        id: puntaje
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const match = body.match(/PUNTAJE\s*[:：]\s*(\d+)/i);
+            const score = match ? parseInt(match[1], 10) : 0;
+            if (score > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `Puntaje registrado automáticamente: ${score}`
+              });
+            }
+            core.setOutput('score', score);
+            core.setOutput('issue_node_id', context.payload.issue.node_id);
+      - name: Mover issue a columna "Hecho" (Projects)
+        if: steps.puntaje.outputs.score != 0
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          ORGANIZATION: FolkodeGroup
+          PROJECT_NUMBER: 16
+          COLUMN_DONE: DONE
+          ISSUE_NODE_ID: ${{ steps.puntaje.outputs.issue_node_id }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          gh auth setup-git
+          gh auth login --with-token < <(echo "$GH_TOKEN")
+          # Obtener ID del proyecto y campos
+          gh api graphql -f query='query($org: String!, $number: Int!) { organization(login: $org){ projectV2(number: $number) { id fields(first:20) { nodes { ... on ProjectV2Field { id name } ... on ProjectV2SingleSelectField { id name options { id name } } } } } } }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+          PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)
+          STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json)
+          DONE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name==env.COLUMN_DONE) | .id' project_data.json)
+          # Buscar el item del issue en el proyecto
+          ITEM_ID=$(gh api graphql -f query='query($project:ID!,$content:ID!){ projectV2ItemByContent(projectId:$project, contentId:$content){ id } }' -f project=$PROJECT_ID -f content=$ISSUE_NODE_ID --jq '.data.projectV2ItemByContent.id')
+          # Cambiar el estado a "Hecho"
+          gh api graphql -f query='mutation($project:ID!,$item:ID!,$field:ID!,$option:ID!){ updateProjectV2ItemFieldValue(input:{projectId:$project,itemId:$item,fieldId:$field,value:{singleSelectOptionId:$option}}){ projectV2Item { id } } }' -f project=$PROJECT_ID -f item=$ITEM_ID -f field=$STATUS_FIELD_ID -f option=$DONE_OPTION_ID
