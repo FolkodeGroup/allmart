@@ -76,7 +76,7 @@
   flex-direction: column;
   justify-content: flex-end;
   padding: var(--space-6);
-  transition: background var(--transition-slow);
+  transition:all 350ms ease-out 0s;;
 }
 
 .card:hover .cardOverlay {
