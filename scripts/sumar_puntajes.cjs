@@ -27,15 +27,28 @@ async function fetchIssues(page = 1, issues = []) {
 }
 
 function extractScore(body) {
-  const match = body && body.match(/PUNTAJE\s*[:：]\s*(\d+)/i);
-  return match ? parseInt(match[1], 10) : 0;
+  // Busca PUNTAJE: <número> en una sola línea
+  let match = body && body.match(/PUNTAJE\s*[:：]\s*(\d+)/i);
+  if (match) return parseInt(match[1], 10);
+  // Busca **PUNTAJE:** <salto de línea> <número> (formato Markdown)
+  match = body && body.match(/\*\*PUNTAJE:\*\*\s*\n\s*(\d+)/i);
+  if (match) return parseInt(match[1], 10);
+  return 0;
 }
 
 (async () => {
   const issues = await fetchIssues();
+  console.log('Total issues cerrados encontrados:', issues.length);
   const scores = {};
   const details = [];
   for (const issue of issues) {
+    console.log('Procesando issue:', {
+      number: issue.number,
+      title: issue.title,
+      assignees: issue.assignees?.map(a => a.login),
+      body: issue.body,
+      pull_request: !!issue.pull_request
+    });
     if (issue.pull_request) continue; // Saltar PRs
     const score = extractScore(issue.body || '');
     if (score > 0 && issue.assignees && issue.assignees.length > 0) {
