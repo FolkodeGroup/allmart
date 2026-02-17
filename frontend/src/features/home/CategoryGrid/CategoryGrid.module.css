@@ -71,7 +71,7 @@
 .cardOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 60%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.900) 0%, rgba(0, 0, 0, 0) 80%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -90,6 +90,8 @@
   color: var(--color-neutral-light);
   /* color: rgb(104, 100, 100); */
   margin-bottom: var(--space-1);
+  
+
 }
 
 .cardCount {
