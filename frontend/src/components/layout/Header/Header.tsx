@@ -40,7 +40,7 @@ export function Header() {
               <input
                 type="search"
                 className={styles.searchInput}
-                placeholder="Buscar productos..."
+                placeholder="¿Qué producto estás buscando?"
                 aria-label="Buscar productos"
                 onBlur={() => setSearchOpen(false)}
               />

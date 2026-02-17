@@ -173,16 +173,25 @@
   position: relative;
   display: flex;
   align-items: center;
+  gap: var(--sapce-3);
+  background: transparent;
+  border: none !important;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  transition: border-color var(--transition-base);
 }
 
 .searchInput {
   width: 100% !important;
   padding: var(--space-2) var(--space-4);
+  flex: 1;
   padding-right: var(--sapce-10);
-  border: none;
+  border: 1.5px solid #000000;
   outline: none;
-  background: transparent;
-  border-radius: var(--radius-full);
+  background: var(--color-neutral-light);
+  border-radius: var(--radius-sm);
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   color: var(--color-text-primary);
@@ -231,7 +240,7 @@
   transition: all var(--transition-base);
   color: var(--color-text-secondary);
   font-size: var(--text-lg);
-  position: absolute;
+  position: static;
   right: 0;
   z-index: 1;
 }
