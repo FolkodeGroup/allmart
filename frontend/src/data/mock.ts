@@ -4,50 +4,55 @@ import type { Product, Category, NavigationItem, SortOption } from '../types';
 export const categories: Category[] = [
   {
     id: 'cat-1',
-    name: 'Cocina',
+    name: 'Todo para la cocina',
     slug: 'cocina',
     description: 'Todo para equipar tu cocina con estilo',
     image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80',
     itemCount: 142,
   },
   {
+    // #TODO: cambiar Descripcion y image"
     id: 'cat-2',
-    name: 'Hogar & Deco',
-    slug: 'hogar-deco',
+    name: 'Especial mate y café', 
+    slug: 'especial-mate-cafe',
     description: 'Decoración y organización para tu hogar',
-    image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80',
+    image: 'https://i.pinimg.com/736x/a1/48/e5/a148e50a9bf713aaa663b37466e14d38.jpg',
     itemCount: 98,
   },
   {
+    // #TODO: cambiar Descripcion y image"
     id: 'cat-3',
-    name: 'Baño',
+    name: 'Bar y coctelería',
+    slug: 'bar-cocteleria',
+    description: 'Manteles, cortinas y textiles para el hogar',
+    image: 'https://i.pinimg.com/1200x/20/c5/92/20c592560771b087c7b961adc0964792.jpg',
+    itemCount: 54,
+  },
+  {
+    // #TODO: cambiar Descripcion y image"
+    id: 'cat-4',
+    name: 'Equipá tu baño',
     slug: 'bano',
     description: 'Accesorios y textiles para el baño',
     image: 'https://images.unsplash.com/photo-1620626011761-996317b8d101?w=600&q=80',
     itemCount: 67,
   },
   {
-    id: 'cat-4',
-    name: 'Textil',
-    slug: 'textil',
-    description: 'Manteles, cortinas y textiles para el hogar',
-    image: 'https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=600&q=80',
-    itemCount: 54,
-  },
-  {
+    // #TODO: cambiar Descripcion y image"
     id: 'cat-5',
-    name: 'Jardín & Exterior',
-    slug: 'jardin-exterior',
+    name: 'Todo para repostería',
+    slug: 'reposteria',
     description: 'Herramientas y deco para tu espacio exterior',
-    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&q=80',
+    image: 'https://i.pinimg.com/736x/73/13/02/731302eee2a4680f0bcb63204d41ea93.jpg',
     itemCount: 38,
   },
   {
+    // #TODO: cambiar Descripcion y image"
     id: 'cat-6',
-    name: 'Limpieza',
-    slug: 'limpieza',
-    description: 'Productos y accesorios de limpieza',
-    image: 'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=600&q=80',
+    name: 'Especial ferretería',
+    slug: 'ferreteria',
+    description: 'Productos y accesorios de ferretería',
+    image: 'https://i.pinimg.com/736x/3e/3f/a9/3e3fa932561e25752367ca352d07b69e.jpg',
     itemCount: 45,
   },
 ];
