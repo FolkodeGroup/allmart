@@ -7,18 +7,127 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Dependency directories
+node_modules/
+bower_components/
+
+# Build output
+build/
+dist/
+dist-ssr/
+.vite/
+coverage/
+
+# System files
+.DS_Store
+Thumbs.db
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Misc
+*.local
+*.cache
+.cache/
+.nyc_output/
+*.tgz
+
+# Test output
+junit.xml
+
+# Mac system files
+.AppleDouble
+.LSOverride
+
+# Windows system files
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux system files
+*~
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Yarn Integrity file
+yarn.lock
+
+# Parcel-bundler cache
+.cache/
+.parcel-cache/
+
+# SvelteKit build
+.svelte-kit/
+
+# Storybook build
+.out/
+
+# Next.js build
+.next/
+
+# Nuxt.js build
+.nuxt/
+
+# Gatsby files
+.cache/
+public/
+
+# Vuepress build
+.vuepress/dist/
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+db.local/
+
+# TernJS port file
+.tern-port
+
+# VS Code settings
+.vscode/
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Prettier
+.prettierignore
+
+# Optional stylelint cache
+.stylelintcache
+
+# Python virtualenv
+.venv/
+venv/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Miscellaneous
+*.bak
+*.tmp
+
+# End of file
