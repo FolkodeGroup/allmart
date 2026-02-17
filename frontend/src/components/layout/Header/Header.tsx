@@ -26,11 +26,56 @@ export function Header() {
       role="banner"
     >
       <div className={styles.inner}>
-        {/* Logo */}
-        <div className={styles.logo}>
-          <Link to="/" className={styles.logoText} aria-label="Allmart - Inicio">
-            allmart
-          </Link>
+        
+        
+        <div className={styles.topRow}>
+          <div className={styles.logo}>
+            <Link to="/" className={styles.logoText} aria-label="Allmart - Inicio">
+              allmart
+            </Link>
+          </div>
+          
+          <div className={styles.searchBar}>
+            <div className={`${styles.searchWrapper} ${searchOpen ? styles.open : ''}`}>
+              <input
+                type="search"
+                className={styles.searchInput}
+                placeholder="¿Qué producto estás buscando?"
+                aria-label="Buscar productos"
+                onBlur={() => setSearchOpen(false)}
+              />
+              <button
+                className={styles.searchBtn}
+                onClick={() => setSearchOpen(!searchOpen)}
+                aria-label="Abrir búsqueda"
+                type="button"
+              >
+                🔍
+              </button>
+            </div>
+          </div>
+          <div className={styles.userActions}>
+            <button className={styles.iconBtn} aria-label="Mi cuenta" type="button">
+              👤
+            </button>
+          
+            <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
+              🛒
+              <span className={styles.cartCount}>0</span>
+            </Link>
+          </div>
+          <div className={styles.mobileMenuTogle}>
+            {/* Mobile menu toggle */}
+            <button
+              className={styles.menuToggle}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={mobileMenuOpen}
+              type="button"
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
         </div>
 
         {/* Desktop Nav */}
@@ -70,46 +115,7 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Actions */}
-        <div className={styles.actions}>
-          <div className={`${styles.searchWrapper} ${searchOpen ? styles.open : ''}`}>
-            <input
-              type="search"
-              className={styles.searchInput}
-              placeholder="Buscar productos..."
-              aria-label="Buscar productos"
-              onBlur={() => setSearchOpen(false)}
-            />
-            <button
-              className={styles.searchBtn}
-              onClick={() => setSearchOpen(!searchOpen)}
-              aria-label="Abrir búsqueda"
-              type="button"
-            >
-              🔍
-            </button>
-          </div>
-
-          <button className={styles.iconBtn} aria-label="Mi cuenta" type="button">
-            👤
-          </button>
-
-          <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
-            🛒
-            <span className={styles.cartCount}>0</span>
-          </Link>
-
-          {/* Mobile menu toggle */}
-          <button
-            className={styles.menuToggle}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            aria-expanded={mobileMenuOpen}
-            type="button"
-          >
-            {mobileMenuOpen ? '✕' : '☰'}
-          </button>
-        </div>
+        
       </div>
 
       {/* Mobile Nav */}
