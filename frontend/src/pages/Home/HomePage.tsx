@@ -8,7 +8,6 @@ export function HomePage() {
   return (
     <main>
       <Hero />
-      <Benefits />
       <CategoryGrid />
       <FeaturedProducts
         title="Productos destacados"
@@ -23,6 +22,7 @@ export function HomePage() {
         tag="oferta"
         limit={4}
       />
+      <Benefits />
     </main>
   );
 }
