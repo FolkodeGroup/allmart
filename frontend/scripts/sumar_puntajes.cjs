@@ -3,6 +3,8 @@
 
 const fs = require('fs');
 const fetch = require('node-fetch');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Cargar .env desde frontend
 
 const OWNER = 'FolkodeGroup'; // Cambia por tu organización/usuario
 const REPO = 'allmart'; // Cambia por tu repo
