@@ -5,16 +5,24 @@ import styles from './HeroSlider.module.css';
 
 const slides = [
   {
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
-    alt: 'Productos de cocina y hogar de alta calidad',
+    image: 'https://images.unsplash.com/photo-1687942918532-69295473701d?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'Decoraciones de Cocina',
   },
   {
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80',
-    alt: 'Decoración moderna para el hogar',
+    image: 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'Decoraciones del Hogar',
   },
   {
-    image: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=800&q=80',
-    alt: 'Ambiente acogedor en el living',
+    image: 'https://plus.unsplash.com/premium_photo-1661639413040-ad00da34a3e4?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'Decoraciones de Baño',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1619154666839-03c9710cbdd1?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'Decoraciones del Jardín',
+  },
+    {
+    image: 'https://images.unsplash.com/photo-1642764732956-260a242876b8?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'Limpieza',
   },
 ];
 
