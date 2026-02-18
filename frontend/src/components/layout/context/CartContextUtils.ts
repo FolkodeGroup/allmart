@@ -18,6 +18,7 @@ export interface CartItem {
 export interface CartContextType {
   items: CartItem[];
   toggleCart: () => void;
+  addToCart: (item: CartItem) => void;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);

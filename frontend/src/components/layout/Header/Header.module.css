@@ -42,6 +42,7 @@
     align-items: center;
     gap: var(--space-2);
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .header.scrolled .inner {
@@ -247,15 +248,16 @@
 
 .cartCount {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 1px;
+  right: -18px;
   width: 18px;
   height: 18px;
   font-size: 10px;
   font-weight: var(--font-bold);
   background: var(--color-primary);
+  background-color:  #A9A9A9;
   color: var(--color-neutral-light);
-  border-radius: var(--radius-full);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
