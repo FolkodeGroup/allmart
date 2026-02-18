@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </Link>
         <div className={styles.badges}>
           {hasDiscount && (
-            <Badge variant="discount">-{product.discount}%</Badge>
+            <Badge className={styles.badge} variant="discount">-{product.discount}%</Badge>
           )}
           {isNew && <Badge variant="new">Nuevo</Badge>}
         </div>
