@@ -37,67 +37,89 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: var(--space-6);
+  gap: var(--space-4);
   max-width: var(--container-2xl);
   margin: 0 auto;
   padding: 0 var(--space-6);
 }
 
+/* ── Card ── */
 .card {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  aspect-ratio: 4/3;
+  border-radius: var(--radius-2xl);
+  aspect-ratio: 3/4;
   cursor: pointer;
   text-decoration: none;
   display: block;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
-/* .card:nth-child(1) {
-  grid-column: span 2;
-} */
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
 
 .cardImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow);
+  filter: brightness(1.05) saturate(1.05);
 }
 
 .card:hover .cardImage {
   transform: scale(1.06);
 }
 
+/* ── Overlay: semitransparente centrado estilo Econo ── */
 .cardOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.900) 0%, rgba(0, 0, 0, 0) 80%);
+  background: rgba(0, 0, 0, 0.32);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: var(--space-6);
-  transition:all 350ms ease-out 0s;;
+  padding: var(--space-5) var(--space-4);
+  transition: background var(--transition-base);
 }
 
 .card:hover .cardOverlay {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.05) 60%);
+  background: rgba(0, 0, 0, 0.22);
 }
 
+/* ── Title container ── */
 .cardName {
   font-family: var(--font-heading);
-  font-size: var(--text-xl);
-  font-weight: var(--font-bold);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
   color: var(--color-neutral-light);
-  /* color: rgb(104, 100, 100); */
-  margin-bottom: var(--space-1);
-  
-
+  margin: 0;
+  line-height: var(--leading-tight);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.cardCount {
-  font-family: var(--font-ui);
+/* Primera línea: peso normal, ligeramente más pequeña */
+.cardNamePrefix {
+  display: block;
+  font-weight: var(--font-regular);
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: var(--tracking-wide);
+  text-transform: capitalize;
+}
+
+/* Segunda línea: bold y grande, estilo Econo */
+.cardNameBold {
+  display: block;
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  line-height: 1.1;
 }
 
 .viewAll {
@@ -106,20 +128,24 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 1280px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+}
+
 @media (max-width: 1024px) {
   .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .card:nth-child(1) {
-    grid-column: span 1;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
   }
 }
 
 @media (max-width: 768px) {
   .grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
     padding: 0 var(--space-4);
   }
 
@@ -128,6 +154,22 @@
   }
 
   .card {
-    aspect-ratio: 16/9;
+    aspect-ratio: 4/5;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    padding: 0 var(--space-3);
+  }
+
+  .card {
+    aspect-ratio: 3/4;
+  }
+
+  .cardNameBold {
+    font-size: var(--text-base);
   }
 }
