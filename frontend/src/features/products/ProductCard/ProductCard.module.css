@@ -7,11 +7,12 @@
   overflow: hidden;
   transition: transform var(--transition-slow), box-shadow var(--transition-slow);
   border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-lg)
 }
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-xl);
 }
 
 .imageWrapper {
@@ -31,6 +32,12 @@
 
 .card:hover .image {
   transform: scale(1.05);
+}
+
+.badge{
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
 }
 
 .badges {
@@ -76,7 +83,7 @@
 
 .category {
   font-family: var(--font-ui);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wider);
   color: var(--color-primary);
@@ -85,7 +92,7 @@
 
 .name {
   font-family: var(--font-heading);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: var(--font-semibold);
   color: var(--color-text-primary);
   line-height: var(--leading-tight);
@@ -111,7 +118,7 @@
   align-items: center;
   gap: var(--space-1);
   font-family: var(--font-ui);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-text-tertiary);
 }
 

@@ -1,6 +1,6 @@
 .section {
   padding: var(--space-20) 0;
-  background: var(--color-bg-secondary);
+  background: var(--color-primary-light);
 }
 
 .header {
