@@ -299,8 +299,25 @@ export const products: Product[] = [
 
 /* ── Navigation ── */
 export const navigation: NavigationItem[] = [
-  { label: 'Ofertas', href: '/productos?tag=oferta' },
-  { label: 'Novedades', href: '/productos?tag=nuevo' },
+  {
+    label: 'Ofertas',
+    href: '/productos?tag=oferta',
+    children: [
+      { label: 'Decoración', href: '/productos?category=hogar-deco&sub=decoracion' },
+      { label: 'Jardín', href: '/productos?category=jardin-exterior' },
+    ]
+  },
+  {
+    label: 'Novedades',
+    href: '/productos?tag=nuevo',
+    children: [
+      { label: 'Cuchillería', href: '/productos?category=cocina&sub=cuchilleria' },
+      { label: 'Decoración', href: '/productos?category=hogar-deco&sub=decoracion' },
+      { label: 'Limpieza', href: '/productos?category=limpieza' },
+      { label: 'Sartenes', href: '/productos?category=cocina&sub=sartenes' },
+      { label: 'Textil', href: '/productos?category=textil' },
+    ],
+  },
   {
     label: 'Cocina',
     href: '/productos?category=cocina',
@@ -321,9 +338,30 @@ export const navigation: NavigationItem[] = [
       { label: 'Textil', href: '/productos?category=textil' },
     ],
   },
-  { label: 'Baño', href: '/productos?category=bano' },
-  { label: 'Jardín', href: '/productos?category=jardin-exterior' },
-  { label: 'Limpieza', href: '/productos?category=limpieza' },
+  {
+    label: 'Baño',
+    href: '/productos?category=bano',
+    children: [
+      { label: 'Limpieza', href: '/productos?category=limpieza' },
+      { label: 'Decoración', href: '/productos?category=hogar-deco&sub=decoracion' },
+    ]
+  },
+  {
+    label: 'Jardín',
+    href: '/productos?category=jardin-exterior',
+    children: [
+      { label: 'Organización', href: '/productos?category=hogar-deco&sub=organizacion' },
+      { label: 'Textil', href: '/productos?category=textil' },
+    ]
+  },
+  {
+    label: 'Limpieza',
+    href: '/productos?category=limpieza',
+    children: [
+      { label: 'Organización', href: '/productos?category=hogar-deco&sub=organizacion' },
+      { label: 'Limpieza', href: '/productos?category=limpieza' },
+    ]
+  },
 ];
 
 /* ── Sort Options ── */
