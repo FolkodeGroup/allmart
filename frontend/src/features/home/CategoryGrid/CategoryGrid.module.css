@@ -1,7 +1,14 @@
+/* ============================================================
+   CategoryGrid — tokens de diseño Allmart aplicados al 100%
+   ============================================================ */
+
+/* ── Sección ── */
 .section {
   padding: var(--space-20) 0;
+  background-color: var(--color-bg-primary);
 }
 
+/* ── Encabezado ── */
 .header {
   text-align: center;
   margin-bottom: var(--space-12);
@@ -24,16 +31,20 @@
   font-weight: var(--font-bold);
   color: var(--color-text-primary);
   margin-bottom: var(--space-3);
+  line-height: var(--leading-tight);
 }
 
 .subtitle {
   font-family: var(--font-body);
   font-size: var(--text-base);
+  font-weight: var(--font-regular);
   color: var(--color-text-tertiary);
+  line-height: var(--leading-relaxed);
   max-width: 500px;
   margin: 0 auto;
 }
 
+/* ── Grid ── */
 .grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -52,46 +63,39 @@
   cursor: pointer;
   text-decoration: none;
   display: block;
-  /* Sombra base sutil, idéntica a Econo en reposo */
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.10),
-    0 1px 3px rgba(0, 0, 0, 0.08);
-  /* Elevación + sombra en 180ms, igual de rápido que Econo */
+  /* Token de sombra base del sistema Allmart */
+  box-shadow: var(--shadow-md);
+  /* Transición definida en tokens: fast para la elevación */
   transition:
-    transform 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    box-shadow 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  /* Fuerza compositing en GPU para evitar parpadeos */
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
   will-change: transform, box-shadow;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
-/* Hover desktop */
+/* Hover desktop — sombra elevada usando token xl */
 .card:hover,
 .card:focus-visible {
   transform: translateY(-6px) scale(1.01);
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.18),
-    0 4px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-xl);
   outline: none;
 }
 
-/* Active (press) — feedback táctil */
+/* Active (press) — feedback táctil con token sm */
 .card:active {
   transform: translateY(-2px) scale(1.005);
-  box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.14),
-    0 2px 6px rgba(0, 0, 0, 0.10);
-  transition-duration: 80ms;
+  box-shadow: var(--shadow-sm);
+  transition: transform 80ms ease, box-shadow 80ms ease;
 }
 
+/* ── Imagen ── */
 .cardImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Zoom ligeramente más marcado que Econo, en sintonía con la elevación */
-  transition: transform 320ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              filter 320ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Token smooth para zoom fluido */
+  transition: transform var(--transition-smooth), filter var(--transition-smooth);
   filter: brightness(1.0) saturate(1.0);
   will-change: transform, filter;
 }
@@ -99,7 +103,6 @@
 .card:hover .cardImage,
 .card:focus-visible .cardImage {
   transform: scale(1.08);
-  /* Ligero boost de brillo al hacer hover, igual que en Econo */
   filter: brightness(1.10) saturate(1.08);
 }
 
@@ -108,47 +111,47 @@
   filter: brightness(1.05) saturate(1.04);
 }
 
-/* ── Overlay base: velo muy sutil sobre toda la card ── */
+/* ── Overlay ── */
+/*
+ * Se usa --color-overlay (rgba 0,0,0,0.4) como base del token.
+ * El radial-gradient localiza la oscuridad en la esquina donde vive el texto,
+ * mientras el linear-gradient ancla el borde inferior.
+ * El token --transition-base controla el fade del overlay en hover.
+ */
 .cardOverlay {
   position: absolute;
   inset: 0;
-  /*
-   * Dos capas de gradiente combinadas:
-   * 1) Esquina superior-izquierda: mancha oscura donde vive el texto
-   * 2) Borde inferior: degradado ligero para anclar visualmente la card
-   * Resultado: texto siempre legible sin importar la imagen (claro u oscuro)
-   */
   background:
     radial-gradient(
       ellipse 80% 60% at 0% 0%,
-      rgba(0, 0, 0, 0.52) 0%,
-      rgba(0, 0, 0, 0.0) 70%
+      var(--color-overlay) 0%,        /* token: rgba(0,0,0,0.4) */
+      transparent 70%
     ),
     linear-gradient(
       to top,
       rgba(0, 0, 0, 0.28) 0%,
-      rgba(0, 0, 0, 0.0) 35%
+      transparent 35%
     );
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;   /* texto arriba, igual que Econo */
-  padding: var(--space-4) var(--space-4);
-  transition: background 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  justify-content: flex-start;
+  padding: var(--space-4);
+  transition: background var(--transition-base);
 }
 
-/* Hover: el velo superior se aclara para mostrar más la imagen */
+/* Hover: el velo se alivia para dejar ver la imagen */
 .card:hover .cardOverlay,
 .card:focus-visible .cardOverlay {
   background:
     radial-gradient(
       ellipse 80% 60% at 0% 0%,
-      rgba(0, 0, 0, 0.42) 0%,
-      rgba(0, 0, 0, 0.0) 70%
+      rgba(0, 0, 0, 0.28) 0%,         /* ~70% del token overlay */
+      transparent 70%
     ),
     linear-gradient(
       to top,
-      rgba(0, 0, 0, 0.18) 0%,
-      rgba(0, 0, 0, 0.0) 35%
+      rgba(0, 0, 0, 0.15) 0%,
+      transparent 35%
     );
 }
 
@@ -156,69 +159,72 @@
   background:
     radial-gradient(
       ellipse 80% 60% at 0% 0%,
-      rgba(0, 0, 0, 0.48) 0%,
-      rgba(0, 0, 0, 0.0) 70%
+      rgba(0, 0, 0, 0.35) 0%,
+      transparent 70%
     ),
     linear-gradient(
       to top,
-      rgba(0, 0, 0, 0.24) 0%,
-      rgba(0, 0, 0, 0.0) 35%
+      rgba(0, 0, 0, 0.22) 0%,
+      transparent 35%
     );
 }
 
-/* ── Bloque de texto ── */
+/* ── Texto: nombre de categoría ── */
+/*
+ * color: --color-text-inverse (blanco semántico del sistema)
+ * font-family: --font-heading (Montserrat, coherente con el resto de headings)
+ * leading: --leading-tight para bloques compactos sobre imagen
+ * text-shadow: capas múltiples para garantizar contraste sobre cualquier fondo
+ */
 .cardName {
   font-family: var(--font-heading);
   font-size: var(--text-base);
   font-weight: var(--font-regular);
-  color: var(--color-neutral-light);
+  color: var(--color-text-inverse);
   margin: 0;
   line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-normal);
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  /*
-   * text-shadow múltiple:
-   * - capa 1: sombra directa muy densa bajo cada glifo
-   * - capa 2: halo difuso para fondos complejos
-   * - capa 3: contorno tenue para imágenes muy claras
-   * Garantiza legibilidad sobre CUALQUIER imagen
-   */
+  gap: var(--space-1);
   text-shadow:
     0 1px 3px rgba(0, 0, 0, 0.90),
     0 2px 8px rgba(0, 0, 0, 0.70),
     0 0px 16px rgba(0, 0, 0, 0.50);
 }
 
-/* Primera línea: peso normal, ligeramente más pequeña — idéntico a Econo */
+/* Primera línea: peso regular, tamaño sm */
 .cardNamePrefix {
   display: block;
+  font-family: var(--font-ui);
   font-weight: var(--font-regular);
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-wide);
   text-transform: capitalize;
-  /* Sombra extra en la línea pequeña para no perder legibilidad */
+  color: var(--color-text-inverse);
   text-shadow:
     0 1px 3px rgba(0, 0, 0, 0.95),
     0 2px 8px rgba(0, 0, 0, 0.75),
     0 0px 16px rgba(0, 0, 0, 0.55);
 }
 
-/* Segunda línea: bold y grande, estilo Econo */
+/* Segunda línea: bold, uppercase, tamaño lg — acento visual de marca */
 .cardNameBold {
   display: block;
+  font-family: var(--font-heading);
   font-weight: var(--font-bold);
   font-size: var(--text-lg);
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  line-height: 1.1;
-  /* El bold ya tiene más masa visual; la sombra refuerza sobre fondos claros */
+  letter-spacing: var(--tracking-wider);
+  line-height: var(--leading-tight);
+  color: var(--color-text-inverse);
   text-shadow:
     0 1px 4px rgba(0, 0, 0, 0.90),
     0 3px 10px rgba(0, 0, 0, 0.65),
     0 0px 20px rgba(0, 0, 0, 0.45);
 }
 
+/* ── Botón "Ver todas" ── */
 .viewAll {
   text-align: center;
   margin-top: var(--space-10);
@@ -240,14 +246,18 @@
 }
 
 @media (max-width: 768px) {
+  .section {
+    padding: var(--space-12) 0;
+  }
+
   .grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-3);
     padding: 0 var(--space-4);
   }
 
-  .section {
-    padding: var(--space-12) 0;
+  .title {
+    font-size: var(--text-xl);
   }
 
   .card {
@@ -268,5 +278,6 @@
 
   .cardNameBold {
     font-size: var(--text-base);
+    letter-spacing: var(--tracking-wide);
   }
 }
