@@ -75,11 +75,17 @@
 }
 
 /* Hover desktop — sombra elevada usando token xl */
-.card:hover,
+.card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Focus visible — ring accesible para navegación por teclado */
 .card:focus-visible {
   transform: translateY(-6px) scale(1.01);
   box-shadow: var(--shadow-xl);
-  outline: none;
+  outline: 3px solid var(--color-primary);
+  outline-offset: 4px;
 }
 
 /* Active (press) — feedback táctil con token sm */
