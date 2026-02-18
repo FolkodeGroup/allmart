@@ -1,4 +1,5 @@
 import type { Product, Category, NavigationItem, SortOption } from '../types';
+import cafetera from '../assests/images/products/cocina/cafetera.jpg';
 
 /* ── Categories ── */
 export const categories: Category[] = [
@@ -7,7 +8,7 @@ export const categories: Category[] = [
     name: 'Todo para la cocina',
     slug: 'cocina',
     description: 'Todo para equipar tu cocina con estilo',
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80',
+    image: cafetera,
     itemCount: 142,
   },
   {
