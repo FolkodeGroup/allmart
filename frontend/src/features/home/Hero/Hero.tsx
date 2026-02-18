@@ -1,4 +1,5 @@
 // ...existing code...
+
 import { HeroSlider } from './HeroSlider';
 import styles from './Hero.module.css';
 
