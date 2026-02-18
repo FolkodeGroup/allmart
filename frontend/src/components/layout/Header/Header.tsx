@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import { navigation } from '../../../data/mock';
 import styles from './Header.module.css';
+import { useCart } from '../context/CartContextUtils';
 
 export function Header() {
+  const { items } = useCart()
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -61,7 +63,7 @@ export function Header() {
           
             <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
               🛒
-              <span className={styles.cartCount}>0</span>
+              <span className={styles.cartCount}>{ items.length }</span>
             </Link>
           </div>
           <div className={styles.mobileMenuTogle}>

@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductDetailPage.module.css';
+import { useCart } from '../../components/layout/context/CartContextUtils';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('es-AR', {
@@ -22,6 +23,7 @@ function renderStars(rating: number): string {
 }
 
 export function ProductDetailPage() {
+  const { addToCart } = useCart();
   const { slug } = useParams<{ slug: string }>();
   const product = products.find((p) => p.slug === slug);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -50,6 +52,16 @@ export function ProductDetailPage() {
   const hasDiscount = product.discount && product.discount > 0;
   const isNew = product.tags.includes('nuevo');
 
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart({
+        id: product.id,
+        quantity: quantity,
+      })
+    }
+    alert('¡Producto agregado!')
+  };
+  
   return (
     <main className={styles.page}>
       {/* Breadcrumb */}
@@ -192,7 +204,7 @@ export function ProductDetailPage() {
             </div>
 
             <div className={styles.buttonsRow}>
-              <Button variant="primary" size="lg" fullWidth>
+              <Button variant="primary" size="lg" fullWidth onClick={handleAddToCart}>
                 Agregar al carrito
               </Button>
               <Button variant="secondary" size="lg">
