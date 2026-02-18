@@ -89,6 +89,11 @@ yarn.lock
 # Gatsby files
 .cache/
 public/
+!frontend/public/favicon.ico
+!frontend/public/favicon-16x16.png
+!frontend/public/favicon-32x32.png
+!frontend/public/apple-touch-icon.png
+!frontend/public/site.webmanifest
 
 # Vuepress build
 .vuepress/dist/
