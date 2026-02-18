@@ -19,5 +19,9 @@ El frontend se comunica con el backend mediante peticiones HTTP (por ejemplo, us
 ## Estructura
 - `/src` — Código fuente del frontend
 - `/public` — Archivos estáticos
+- `/src/assets/images/categories/` imagenes de las categorias, ejemplo: cocina, baño, etc. 
+- `/src/assets/images/featured/` imagenes de productos destacados.
+- `/src/assets/images/products/` imagenes de productos.
+
 
 Para más detalles sobre la arquitectura y la comunicación, consulta el archivo ARCHITECTURE.md en la raíz del proyecto.
