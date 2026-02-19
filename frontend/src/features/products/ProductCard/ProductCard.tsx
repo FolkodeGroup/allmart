@@ -1,8 +1,10 @@
+import {useState, useEffect} from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
+
 
 interface ProductCardProps {
   product: Product;
@@ -24,8 +26,24 @@ function formatPrice(price: number): string {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const storageKey = `wishlist-${product.id}`;
+  const [isFavorito, setIsFavorito] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false; // Seguridad por si usas SSR (Next.js)
+    const saved = localStorage.getItem(storageKey);
+    return saved === "true";
+  });
+  
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(isFavorito));
+  }, [isFavorito, storageKey]);
+
   const hasDiscount = product.discount && product.discount > 0;
   const isNew = product.tags.includes("nuevo");
+
+  const toggleFavorito = (e:React.MouseEvent) => {
+    e.preventDefault();
+    setIsFavorito(!isFavorito);
+  };
 
   return (
     <article className={styles.card} aria-label={product.name}>
@@ -48,9 +66,10 @@ export function ProductCard({ product }: ProductCardProps) {
           {isNew && <Badge variant="new">Nuevo</Badge>}
         </div>
         <button
-          className={styles.wishlistBtn}
+          className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
           aria-label={`Agregar ${product.name} a favoritos`}
           type="button"
+          onClick={toggleFavorito}
         >
           ♡
         </button>
@@ -85,4 +104,3 @@ export function ProductCard({ product }: ProductCardProps) {
     </article>
   );
 }
-//comentario para que se suba la rama 49 atentamente 
