@@ -148,3 +148,11 @@
   color: var(--color-soft-gray);
   text-decoration: line-through;
 }
+.exploreButton{
+  width: 80%;
+  margin: auto;
+  margin-bottom: var(--space-3);
+}
+.ButtonExplore {
+  width: 100%;
+}

@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom';
-import type { Product } from '../../../types';
-import { Badge } from '../../../components/ui/Badge/Badge';
-import styles from './ProductCard.module.css';
+import { Link } from "react-router-dom";
+import type { Product } from "../../../types";
+import { Badge } from "../../../components/ui/Badge/Badge";
+import styles from "./ProductCard.module.css";
+import { Button } from "../../../components/ui/Button/Button";
 
 interface ProductCardProps {
   product: Product;
@@ -11,20 +12,20 @@ function renderStars(rating: number): string {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5 ? 1 : 0;
   const empty = 5 - full - half;
-  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+  return "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
 }
 
 function formatPrice(price: number): string {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
     minimumFractionDigits: 0,
   }).format(price);
 }
 
 export function ProductCard({ product }: ProductCardProps) {
   const hasDiscount = product.discount && product.discount > 0;
-  const isNew = product.tags.includes('nuevo');
+  const isNew = product.tags.includes("nuevo");
 
   return (
     <article className={styles.card} aria-label={product.name}>
@@ -40,7 +41,9 @@ export function ProductCard({ product }: ProductCardProps) {
         </Link>
         <div className={styles.badges}>
           {hasDiscount && (
-            <Badge className={styles.badge} variant="discount">-{product.discount}%</Badge>
+            <Badge className={styles.badge} variant="discount">
+              -{product.discount}%
+            </Badge>
           )}
           {isNew && <Badge variant="new">Nuevo</Badge>}
         </div>
@@ -58,7 +61,10 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className={styles.name}>
           <Link to={`/producto/${product.slug}`}>{product.name}</Link>
         </h3>
-        <div className={styles.rating} aria-label={`Valoración: ${product.rating} de 5`}>
+        <div
+          className={styles.rating}
+          aria-label={`Valoración: ${product.rating} de 5`}
+        >
           <span className={styles.stars}>{renderStars(product.rating)}</span>
           <span>({product.reviewCount})</span>
         </div>
@@ -71,6 +77,11 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </div>
+      <Link className={styles.exploreButton} to={`/productos?category=${product.category.slug}`}>
+        <Button className={styles.ButtonExplore} variant="primary" size="lg">
+          Explorar catálogo
+        </Button>
+      </Link>
     </article>
   );
 }
