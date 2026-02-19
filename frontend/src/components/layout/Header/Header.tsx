@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { navigation } from '../../../data/mock';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
+import logo from '../../../assests/images/logos/favicon_io/favicon.ico'
 
 export function Header() {
   const { items } = useCart()
@@ -33,7 +34,7 @@ export function Header() {
         <div className={styles.topRow}>
           <div className={styles.logo}>
             <Link to="/" className={styles.logoText} aria-label="Allmart - Inicio">
-              allmart
+              <img src={logo} alt='Allmart Logo' className={ styles.logoImage }></img>
             </Link>
           </div>
           
