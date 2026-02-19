@@ -1,5 +1,9 @@
 import type { Product, Category, NavigationItem, SortOption } from '../types';
 import cafetera from '../assets/images/products/cocina/cafetera.jpg';
+import cubiertos from '../assets/images/featured/set24cubiertos1.jpg';
+import baño from '../assets/images/featured/setcompletobaño.jpg';
+import cocina from '../assets/images/featured/setnegrohudsonsartenes.jpg';
+import vasocapuchino from '../assets/images/featured/vasocapuchino.jpg'; 
 
 /* ── Categories ── */
 export const categories: Category[] = [
@@ -70,7 +74,7 @@ export const products: Product[] = [
     originalPrice: 109990,
     discount: 18,
     images: [
-      'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
+      cocina,
       'https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?w=800&q=80',
       'https://images.unsplash.com/photo-1584990347449-a6a6015b1495?w=800&q=80',
     ],
@@ -121,6 +125,7 @@ export const products: Product[] = [
     originalPrice: 42990,
     discount: 19,
     images: [
+      cubiertos,
       'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=800&q=80',
       'https://images.unsplash.com/photo-1566454419290-57a64afe1e04?w=800&q=80',
     ],
@@ -211,6 +216,7 @@ export const products: Product[] = [
     shortDescription: 'Mopa con escurridor centrífugo de acero inoxidable.',
     price: 29990,
     images: [
+      baño,
       'https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=800&q=80',
     ],
     category: categories[5],
@@ -247,6 +253,7 @@ export const products: Product[] = [
     originalPrice: 32990,
     discount: 15,
     images: [
+      vasocapuchino,
       'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=800&q=80',
     ],
     category: categories[0],
