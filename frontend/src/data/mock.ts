@@ -1,9 +1,9 @@
 import type { Product, Category, NavigationItem, SortOption } from '../types';
-import cafetera from '../assests/images/products/cocina/cafetera.jpg';
-import cubiertos from '../assests/images/featured/set24cubiertos1.jpg';
-import baño from '../assests/images/featured/setcompletobaño.jpg';
-import cocina from '../assests/images/featured/setnegrohudsonsartenes.jpg';
-import vasocapuchino from '../assests/images/featured/vasocapuchino.jpg'; 
+import cafetera from '../assets/images/products/cocina/cafetera.jpg';
+import cubiertos from '../assets/images/featured/set24cubiertos1.jpg';
+import baño from '../assets/images/featured/setcompletobaño.jpg';
+import cocina from '../assets/images/featured/setnegrohudsonsartenes.jpg';
+import vasocapuchino from '../assets/images/featured/vasocapuchino.jpg'; 
 
 /* ── Categories ── */
 export const categories: Category[] = [
