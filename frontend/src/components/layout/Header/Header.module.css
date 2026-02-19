@@ -89,12 +89,22 @@
 }
 
 /* ── Navigation ── */
+
+.navBarStrip {
+    width: 100%;
+    background-color: #8fa99a ;
+    border-top: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+    
+}
+
 .nav {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   flex: 1;
-  justify-content: center;
+  justify-content: flex-start;
+  height: 45;
 }
 
 .navItem {
@@ -117,7 +127,6 @@
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   cursor: pointer;
-  background: none;
   border: none;
 }
 
@@ -142,7 +151,7 @@
   top: 100%;
   left: 0;
   min-width: 200px;
-  background: var(--color-neutral-light);
+  background: #ffffff;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   padding: var(--space-2);
