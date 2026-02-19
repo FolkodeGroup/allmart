@@ -18,15 +18,15 @@
   justify-content: space-between;
   height: auto;
   gap: var(--space-2);
-  max-width: var(--container-2xl);
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 var(--space-6);
+  padding: 1.5rem 2rem;
 }
 /*--- Header Rows ---*/
 .topRow {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     width: 100%;
     gap: var(--space-4)
 }
@@ -42,6 +42,7 @@
     align-items: center;
     gap: var(--space-2);
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .header.scrolled .inner {
@@ -52,17 +53,35 @@
 .logo {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  background-color: #ffffff;
   flex-shrink: 0;
+  padding: 0;
+  margin-right: 2.5rem;
+  overflow: hidden;
+}
+.logoImage {
+    height: 48px;
+    width: 64;
+    object-fit: contain;
+    display: inline-block;
+    vertical-align: middle;
+    mix-blend-mode: multiply;
+    filter: brightness(1.1);
+    margin-right: 4px;
 }
 
 .logoText {
   font-family: var(--font-heading);
-  font-size: var(--text-xl);
+  font-size: 1.5rem;
   font-weight: var(--font-bold);
   color: var(--color-text-primary);
   letter-spacing: var(--tracking-tight);
   text-decoration: none;
   transition: color var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .logoText:hover {
@@ -70,12 +89,22 @@
 }
 
 /* ── Navigation ── */
+
+.navBarStrip {
+    width: 100%;
+    background-color: #8fa99a ;
+    border-top: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+    
+}
+
 .nav {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   flex: 1;
-  justify-content: center;
+  justify-content: flex-start;
+  height: 45;
 }
 
 .navItem {
@@ -98,7 +127,6 @@
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   cursor: pointer;
-  background: none;
   border: none;
 }
 
@@ -123,7 +151,7 @@
   top: 100%;
   left: 0;
   min-width: 200px;
-  background: var(--color-neutral-light);
+  background: #ffffff;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   padding: var(--space-2);
@@ -247,15 +275,16 @@
 
 .cartCount {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 1px;
+  right: -18px;
   width: 18px;
   height: 18px;
   font-size: 10px;
   font-weight: var(--font-bold);
   background: var(--color-primary);
+  background-color:  #A9A9A9;
   color: var(--color-neutral-light);
-  border-radius: var(--radius-full);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -370,6 +370,24 @@ export const navigation: NavigationItem[] = [
       { label: 'Limpieza', href: '/productos?category=limpieza' },
     ]
   },
+  {
+    label: 'Ver todo el catalogo',
+    href: '/productos?category=todocatalogo',
+    children: [
+      { label: 'Organización', href: '/productos?category=hogar-deco&sub=organizacion' },
+      { label: 'Limpieza', href: '/productos?category=limpieza' },
+      { label: 'Textil', href: '/productos?category=textil' },
+      { label: 'Decoración', href: '/productos?category=hogar-deco&sub=decoracion' },
+      { label: 'Baterías', href: '/productos?category=cocina&sub=baterias' },
+      { label: 'Utensilios', href: '/productos?category=cocina&sub=utensilios' },
+      { label: 'Cuchillería', href: '/productos?category=cocina&sub=cuchilleria' },
+      { label: 'Vidrio', href: '/productos?category=cocina&sub=vidrio' },
+      { label: 'Sartenes', href: '/productos?category=cocina&sub=sartenes' },
+      { label: 'Jardín', href: '/productos?category=jardin-exterior' },
+      
+    ]
+    
+  },
 ];
 
 /* ── Sort Options ── */

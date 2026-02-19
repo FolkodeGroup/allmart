@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import { navigation } from '../../../data/mock';
 import styles from './Header.module.css';
+import { useCart } from '../context/CartContextUtils';
+// import logo from '../../../assests/images/logos/favicon_io/android-chrome-192x192.png'
 
 export function Header() {
+  const { items } = useCart()
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,7 +34,8 @@ export function Header() {
         <div className={styles.topRow}>
           <div className={styles.logo}>
             <Link to="/" className={styles.logoText} aria-label="Allmart - Inicio">
-              allmart
+              {/*  <img src={logo} alt='Allmart Logo' className={ styles.logoImage }></img> */}
+              <span className={ styles.logoText }>allmart</span>
             </Link>
           </div>
           
@@ -61,7 +65,7 @@ export function Header() {
           
             <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
               🛒
-              <span className={styles.cartCount}>0</span>
+              <span className={styles.cartCount}>{ items.length }</span>
             </Link>
           </div>
           <div className={styles.mobileMenuTogle}>
@@ -77,46 +81,51 @@ export function Header() {
             </button>
           </div>
         </div>
-
-        {/* Desktop Nav */}
-        <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
-          {navigation.map((item) => (
-            <div className={styles.navItem} key={item.label}>
-              {item.children ? (
-                <>
-                  <button
-                    className={styles.navLink}
-                    aria-expanded="false"
-                    aria-haspopup="true"
-                    type="button"
-                  >
+      </div>
+      
+      <div className={styles.navBarStrip}>
+        <div className={styles.inner}>
+          {/* Desktop Nav */}
+          <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
+            {navigation.map((item) => (
+              <div className={styles.navItem} key={item.label}>
+                {item.children ? (
+                  <>
+                    <button
+                      className={styles.navLink}
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      type="button"
+                    >
+                      {item.label}
+                      <span className={styles.chevron} aria-hidden="true">▾</span>
+                    </button>
+                    <div className={styles.dropdown} role="menu">
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.label}
+                          to={child.href}
+                          className={styles.dropdownLink}
+                          role="menuitem"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <Link to={item.href} className={styles.navLink}>
                     {item.label}
-                    <span className={styles.chevron} aria-hidden="true">▾</span>
-                  </button>
-                  <div className={styles.dropdown} role="menu">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.label}
-                        to={child.href}
-                        className={styles.dropdownLink}
-                        role="menuitem"
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <Link to={item.href} className={styles.navLink}>
-                  {item.label}
-                </Link>
-              )}
-            </div>
-          ))}
-        </nav>
+                  </Link>
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
+      </div>
 
         
-      </div>
+        
 
       {/* Mobile Nav */}
       <nav
