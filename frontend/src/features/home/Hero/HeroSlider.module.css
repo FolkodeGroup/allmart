@@ -1,3 +1,90 @@
+@media (max-width: 768px) {
+  .slider {
+    min-height: 220px;
+    height: 60vw;
+    position: relative;
+  }
+
+  .carouselTrack {
+    height: 100%;
+  }
+
+  .carouselSlide {
+    flex-direction: column;
+    height: 100%;
+    min-width: 100%;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .heroImage {
+    height: 60vw;
+    min-height: 180px;
+    max-height: 320px;
+  }
+
+  .overlayContent {
+    align-items: center;
+    padding: 8vw 2vw;
+    text-align: center;
+    justify-content: flex-end;
+    height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.85) 100%);
+  }
+
+  .arrow {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.2rem;
+    top: 90%;
+    transform: translateY(-50%);
+    z-index: 5;
+  }
+  .left {
+    left: 1vw;
+    top: 90%;
+  }
+  .right {
+    right: 1vw;
+    top: 90%;
+  }
+
+  .dots {
+    bottom: 0.5rem;
+    gap: 0.3rem;
+  }
+
+  .cta {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .slider {
+    min-height: 140px;
+    height: 40vw;
+    position: relative;
+  }
+
+  .heroImage {
+    height: 40vw;
+    min-height: 100px;
+    max-height: 180px;
+  }
+
+  .overlayContent {
+    padding: 4vw 1vw;
+    font-size: 0.95rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.95) 100%);
+  }
+}
+
 /* Carrusel tipo slide */
 .carouselTrack {
   display: flex;
@@ -41,13 +128,6 @@
   pointer-events: auto;
 }
 
-@media (max-width: 768px) {
-  .overlayContent {
-    align-items: center;
-    padding: 8vw 2vw;
-    text-align: center;
-  }
-}
 .slider {
   position: absolute;
   top: 0;
