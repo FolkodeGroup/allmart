@@ -81,46 +81,51 @@ export function Header() {
             </button>
           </div>
         </div>
-
-        {/* Desktop Nav */}
-        <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
-          {navigation.map((item) => (
-            <div className={styles.navItem} key={item.label}>
-              {item.children ? (
-                <>
-                  <button
-                    className={styles.navLink}
-                    aria-expanded="false"
-                    aria-haspopup="true"
-                    type="button"
-                  >
+      </div>
+      
+      <div className={styles.navBarStrip}>
+        <div className={styles.inner}>
+          {/* Desktop Nav */}
+          <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
+            {navigation.map((item) => (
+              <div className={styles.navItem} key={item.label}>
+                {item.children ? (
+                  <>
+                    <button
+                      className={styles.navLink}
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      type="button"
+                    >
+                      {item.label}
+                      <span className={styles.chevron} aria-hidden="true">▾</span>
+                    </button>
+                    <div className={styles.dropdown} role="menu">
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.label}
+                          to={child.href}
+                          className={styles.dropdownLink}
+                          role="menuitem"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <Link to={item.href} className={styles.navLink}>
                     {item.label}
-                    <span className={styles.chevron} aria-hidden="true">▾</span>
-                  </button>
-                  <div className={styles.dropdown} role="menu">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.label}
-                        to={child.href}
-                        className={styles.dropdownLink}
-                        role="menuitem"
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <Link to={item.href} className={styles.navLink}>
-                  {item.label}
-                </Link>
-              )}
-            </div>
-          ))}
-        </nav>
+                  </Link>
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
+      </div>
 
         
-      </div>
+        
 
       {/* Mobile Nav */}
       <nav
