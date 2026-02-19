@@ -15,7 +15,7 @@ interface SliderProps {
   itemsPerPage?: number;
 }
 
-const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 4 }) => {
+const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const totalPages = Math.ceil(products.length / itemsPerPage);
 
@@ -33,15 +33,19 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 4 }) => {
 
   return (
     <div className={styles.sliderContainer}>
-      {/* Flecha izquierda */}
-      {currentPage > 0 && (
-        <button className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`} onClick={handlePrev} aria-label="Anterior">
+      {/* Wrapper con flechas y track en fila */}
+      <div className={styles.sliderWrapper}>
+        <button
+          className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
+          onClick={handlePrev}
+          aria-label="Anterior"
+          disabled={currentPage === 0}
+        >
           &#8592;
         </button>
-      )}
 
-      {/* Track de productos */}
-      <div className={styles.sliderTrack} style={{ transform: `translateX(-${currentPage * 100}%)` }}>
+        {/* Track de productos */}
+        <div className={styles.sliderTrack} style={{ '--items-per-page': itemsPerPage } as React.CSSProperties}>
         {visibleProducts.map((product) => {
           const hasDiscount = product.discount && product.discount > 0;
           const isNew = product.tags.includes('nuevo');
@@ -96,14 +100,17 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 4 }) => {
             </div>
           );
         })}
-      </div>
+        </div>
 
-      {/* Flecha derecha */}
-      {currentPage < totalPages - 1 && (
-        <button className={`${styles.sliderArrow} ${styles.sliderArrowRight}`} onClick={handleNext} aria-label="Siguiente">
+        <button
+          className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
+          onClick={handleNext}
+          aria-label="Siguiente"
+          disabled={currentPage >= totalPages - 1}
+        >
           &#8594;
         </button>
-      )}
+      </div>
 
       {/* Dots de navegación */}
       <div className={styles.sliderNav}>
