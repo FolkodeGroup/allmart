@@ -85,3 +85,4 @@ export function ProductCard({ product }: ProductCardProps) {
     </article>
   );
 }
+//comentario para que se suba la rama 49 atentamente 
