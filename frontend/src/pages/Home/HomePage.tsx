@@ -1,6 +1,8 @@
 import { Hero } from '../../features/home/Hero/Hero';
 import { CategoryGrid } from '../../features/home/CategoryGrid/CategoryGrid';
 import { FeaturedProducts } from '../../features/home/FeaturedProducts/FeaturedProducts';
+import { products } from '../../data/mock';
+import Slider from '../../components/ui/Slider/Slider';
 import { Benefits } from '../../features/home/Benefits/Benefits';
 import { AboutSection } from '../../features/home/AboutSection/AboutSection';
 
@@ -16,12 +18,13 @@ export function HomePage() {
         limit={4}
       />
       <AboutSection />
-      <FeaturedProducts
-        title="Ofertas del mes"
-        label="Ahorrá"
-        tag="oferta"
-        limit={4}
-      />
+      <section style={{ background: 'var(--color-primary-light)', padding: '40px 0' }} aria-label="Ofertas del mes">
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          <span style={{ color: '#a67c52', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontSize: 14 }}>Ahorrá</span>
+          <h2 style={{ fontSize: 32, fontWeight: 800, margin: '8px 0 24px 0' }}>Ofertas del mes</h2>
+          <Slider products={products.filter(p => p.tags.includes('oferta'))} itemsPerPage={4} />
+        </div>
+      </section>
       <Benefits />
     </main>
   );
