@@ -31,7 +31,7 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
 
   return (
     <div className={styles.sliderContainer}>
-      {/* Wrapper: flecha izq + viewport + flecha der */}
+      {/* Wrapper: flecha izq + viewport + flecha der */} 
       <div className={styles.sliderWrapper}>
         <button
           className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
