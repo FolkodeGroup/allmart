@@ -1,5 +1,5 @@
 import type { Product, Category, NavigationItem, SortOption } from '../types';
-import cafetera from '../assests/images/products/cocina/cafetera.jpg';
+import cafetera from '../assets/images/products/cocina/cafetera.jpg';
 
 /* ── Categories ── */
 export const categories: Category[] = [

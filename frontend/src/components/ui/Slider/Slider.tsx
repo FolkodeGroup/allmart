@@ -15,95 +15,105 @@ interface SliderProps {
   itemsPerPage?: number;
 }
 
-const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 4 }) => {
+const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  // Agrupar productos en páginas
+  const pages = Array.from({ length: totalPages }, (_, i) =>
+    products.slice(i * itemsPerPage, i * itemsPerPage + itemsPerPage)
+  );
 
   const goToPage = (page: number) => {
     if (page < 0 || page >= totalPages) return;
     setCurrentPage(page);
   };
 
-  const handlePrev = () => goToPage(currentPage - 1);
-  const handleNext = () => goToPage(currentPage + 1);
-
-  const startIdx = currentPage * itemsPerPage;
-  const endIdx = startIdx + itemsPerPage;
-  const visibleProducts = products.slice(startIdx, endIdx);
-
   return (
     <div className={styles.sliderContainer}>
-      {/* Flecha izquierda */}
-      {currentPage > 0 && (
-        <button className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`} onClick={handlePrev} aria-label="Anterior">
+      {/* Wrapper: flecha izq + viewport + flecha der */}
+      <div className={styles.sliderWrapper}>
+        <button
+          className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
+          onClick={() => goToPage(currentPage - 1)}
+          aria-label="Anterior"
+          disabled={currentPage === 0}
+        >
           &#8592;
         </button>
-      )}
 
-      {/* Track de productos */}
-      <div className={styles.sliderTrack} style={{ transform: `translateX(-${currentPage * 100}%)` }}>
-        {visibleProducts.map((product) => {
-          const hasDiscount = product.discount && product.discount > 0;
-          const isNew = product.tags.includes('nuevo');
-          return (
-            <div className={styles.sliderCard} key={product.id}>
-              <div style={{ position: 'relative' }}>
-                <img
-                  className={styles.sliderImage}
-                  src={product.images[0]}
-                  alt={product.name}
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 8 }}>
-                  {hasDiscount && (
-                    <span style={{ background: '#e7b17a', color: '#fff', borderRadius: 8, padding: '2px 8px', fontWeight: 600, fontSize: 14 }}>
-                      -{product.discount}%
-                    </span>
-                  )}
-                  {isNew && (
-                    <span style={{ background: '#a67c52', color: '#fff', borderRadius: 8, padding: '2px 8px', fontWeight: 600, fontSize: 14 }}>
-                      Nuevo
-                    </span>
-                  )}
-                </div>
-                <button
-                  style={{ position: 'absolute', top: 12, right: 12, background: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: 18, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
-                  aria-label={`Agregar ${product.name} a favoritos`}
-                  type="button"
-                >
-                  ♡
-                </button>
+        {/* Viewport con overflow hidden — aquí vive la transición */}
+        <div className={styles.sliderViewport}>
+          <div
+            className={styles.sliderTrack}
+            style={{ transform: `translateX(-${currentPage * 100}%)` }}
+          >
+            {pages.map((pageProducts, pageIdx) => (
+              <div
+                key={pageIdx}
+                className={styles.sliderPage}
+                style={{ '--items-per-page': itemsPerPage } as React.CSSProperties}
+              >
+                {pageProducts.map((product) => {
+                  const hasDiscount = product.discount && product.discount > 0;
+                  const isNew = product.tags.includes('nuevo');
+                  return (
+                    <div className={styles.sliderCard} key={product.id}>
+                      <div className={styles.sliderImageWrapper}>
+                        <img
+                          className={styles.sliderImage}
+                          src={product.images[0]}
+                          alt={product.name}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <div className={styles.sliderBadges}>
+                          {hasDiscount && (
+                            <span className={styles.badgeDiscount}>-{product.discount}%</span>
+                          )}
+                          {isNew && (
+                            <span className={styles.badgeNew}>Nuevo</span>
+                          )}
+                        </div>
+                        <button className={styles.wishlistBtn} aria-label={`Agregar ${product.name} a favoritos`} type="button">
+                          ♡
+                        </button>
+                      </div>
+                      <div className={styles.sliderCardBody}>
+                        <span className={styles.sliderCategory}>{product.category.name}</span>
+                        <h3 className={styles.sliderName}>{product.name}</h3>
+                        <div className={styles.sliderRating}>
+                          <span>★ {product.rating.toFixed(1)}</span>
+                          <span>({product.reviewCount})</span>
+                        </div>
+                        <div className={styles.sliderPriceRow}>
+                          <span className={styles.sliderPrice}>
+                            {product.price.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
+                          </span>
+                          {hasDiscount && product.originalPrice && (
+                            <span className={styles.sliderOriginalPrice}>
+                              {product.originalPrice.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div style={{ padding: '16px 12px 12px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ color: '#a67c52', fontSize: 13, fontWeight: 500 }}>{product.category.name}</span>
-                <h3 style={{ fontSize: 17, fontWeight: 600, margin: 0 }}>{product.name}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#888' }}>
-                  <span>★ {product.rating.toFixed(1)}</span>
-                  <span>({product.reviewCount})</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <span style={{ fontWeight: 700, fontSize: 18, color: '#222' }}>
-                    {product.price.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-                  </span>
-                  {hasDiscount && product.originalPrice && (
-                    <span style={{ textDecoration: 'line-through', color: '#bdbdbd', fontSize: 15 }}>
-                      {product.originalPrice.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        </div>
 
-      {/* Flecha derecha */}
-      {currentPage < totalPages - 1 && (
-        <button className={`${styles.sliderArrow} ${styles.sliderArrowRight}`} onClick={handleNext} aria-label="Siguiente">
+        <button
+          className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
+          onClick={() => goToPage(currentPage + 1)}
+          aria-label="Siguiente"
+          disabled={currentPage >= totalPages - 1}
+        >
           &#8594;
         </button>
-      )}
+      </div>
 
       {/* Dots de navegación */}
       <div className={styles.sliderNav}>
