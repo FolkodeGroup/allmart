@@ -1,6 +1,6 @@
 // Productos mock para slider local con imágenes locales
 import type { Product } from '../types';
-import platohondo from '../assets/images/products/cocina/platohondo.jpg';
+import platohondo from '../assets/images/products/cocina/platohondo.jpg'; 
 import sartenhudson from '../assets/images/products/cocina/sartenhudson.jpg';
 import set24cubiertos1 from '../assets/images/products/cocina/set24cubiertos1.jpg';
 import set24cubiertos2 from '../assets/images/products/cocina/set24cubiertos2.jpg';
