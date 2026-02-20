@@ -29,8 +29,8 @@ export function FeaturedProducts({
           <h2 className={styles.title}>{title}</h2>
         </div>
         <Link to={`/productos?tag=${tag}`}>
-          <Button variant="ghost" size="sm">
-            Ver todos →
+          <Button className={styles.butSecundaryAdaptado} variant="secondary" size="sm">
+            Ver todos
           </Button>
         </Link>
       </div>

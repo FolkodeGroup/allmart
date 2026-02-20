@@ -43,6 +43,10 @@
   margin: 0 auto;
   padding: 0 var(--space-6);
 }
+.butSecundaryAdaptado{
+  /* background-color: var(--color-warm-gray-light); // para que destaque menos este */
+  background-color: var(--color-accent); 
+}
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
