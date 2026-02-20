@@ -104,3 +104,4 @@ export function ProductCard({ product }: ProductCardProps) {
     </article>
   );
 }
+//Las Cards estan alineadas no hubo modificaciones
