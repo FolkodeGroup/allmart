@@ -78,6 +78,10 @@
   letter-spacing: var(--tracking-wide);
 }
 
+.color-title{
+  color: var(--color-warm-gray);
+}
+
 /* ── Responsive ── */
 @media (max-width: 1024px) {
   .inner {

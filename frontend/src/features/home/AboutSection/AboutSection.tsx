@@ -12,16 +12,16 @@ export function AboutSection() {
           decoding="async"
         />
         <div className={styles.content}>
-          <span className={styles.label}>Sobre nosotros</span>
-          <h2 className={styles.title}>
-            Más de 25 años llevando calidad a tu hogar
+          <span className={styles.label}>Sobre</span>
+          <h2 className={styles.title + ' ' + styles['color-title']}>
+            Allmart
           </h2>
           <p className={styles.description}>
-            En Allmart somos proveedores de la más amplia variedad de productos
-            de bazar, regalería, decoración, accesorios de limpieza y más.
-            Estamos preparados para abastecer comercios y hogares con stock
-            permanente. Nuestro objetivo es que puedas resolver tus necesidades
-            de manera fácil, con un solo proveedor.
+            Allmart ofrece productos de alta calidad diseñados para acompañarte en la rutina diaria de tu hogar.
+            <br />
+            Cada artículo busca simplificar tus tareas cotidianas, brindándote utilidad, rapidez y practicidad.
+            <br />
+            Incluye productos para las diferentes áreas de la casa —como cocina, sala de estar y baño— y pronto incorporará también textiles y blanco.
           </p>
           <div className={styles.stats}>
             <div className={styles.stat}>
