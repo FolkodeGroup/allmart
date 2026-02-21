@@ -16,6 +16,8 @@ interface FormErrors {
 
 import type { CartItem } from '../../../types';
 import { buildWhatsAppMessage, buildWhatsAppUrl } from '../../../utils/whatsapp';
+import { ORDERS_STORAGE_KEY } from '../../../context/AdminOrdersContext';
+import type { Order } from '../../../context/AdminOrdersContext';
 
 interface OrderConfirmationFormProps {
   totalPrice: number;
@@ -113,9 +115,30 @@ export function OrderConfirmationForm({
     setTimeout(() => {
       setProcessing(false);
       setSuccess(true);
-      // Guardar en localStorage
+      // Guardar datos del formulario
+      try { localStorage.setItem(ORDER_FORM_STORAGE_KEY, JSON.stringify(form)); } catch {}
+      // Guardar pedido en el panel de administración
       try {
-        localStorage.setItem(ORDER_FORM_STORAGE_KEY, JSON.stringify(form));
+        const existing: Order[] = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) ?? '[]');
+        const newOrder: Order = {
+          id: `ord-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          customer: {
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+          },
+          items: cartItems.map(i => ({
+            productId: i.product.id,
+            productName: i.product.name,
+            productImage: i.product.images?.[0],
+            quantity: i.quantity,
+            unitPrice: i.product.price,
+          })),
+          total: totalPrice,
+          status: 'pendiente',
+        };
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([newOrder, ...existing]));
       } catch {}
       // Limpiar carrito
       onCartClear();

@@ -15,6 +15,7 @@ import { AdminRoute } from './components/AdminRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import { AdminProductsProvider } from './context/AdminProductsContext';
 import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
+import { AdminOrdersProvider } from './context/AdminOrdersContext';
 import { AdminCategories } from './pages/Admin/sections/AdminCategories';
 import { AdminVariants } from './pages/Admin/sections/AdminVariants';
 
@@ -52,9 +53,11 @@ function App() {
     <AdminAuthProvider>
       <AdminCategoriesProvider>
         <AdminProductsProvider>
-          <CartProvider>
-            <RouterProvider router={router} />
-          </CartProvider>
+          <AdminOrdersProvider>
+            <CartProvider>
+              <RouterProvider router={router} />
+            </CartProvider>
+          </AdminOrdersProvider>
         </AdminProductsProvider>
       </AdminCategoriesProvider>
     </AdminAuthProvider>
