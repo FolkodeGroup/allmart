@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { products, categories, sortOptions } from '../../data/mock';
+import { getProducts } from '../../data/productsLocal';
+import { categories, sortOptions } from '../../data/mock';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductListPage.module.css';
 
@@ -16,7 +17,7 @@ export function ProductListPage() {
   };
 
   const sortedProducts = useMemo(() => {
-    let result = [...products];
+    let result = [...getProducts()];
 
     // Filter
     if (selectedCategories.length > 0) {

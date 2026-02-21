@@ -6,13 +6,14 @@ import { products as mockProducts, categories as mockCategories } from '../data/
 export interface AdminProduct extends Omit<Product, 'category'> {
   category: Category;
   stock: number;
-  variants?: ProductVariant[];
+  variants?: VariantGroup[];
 }
 
-export interface ProductVariant {
+/** Grupo de variante: ej. { id, name: "Color", values: ["Rojo","Azul"] } */
+export interface VariantGroup {
   id: string;
   name: string;
-  value: string;
+  values: string[];
 }
 
 const STORAGE_KEY = 'allmart_admin_products';

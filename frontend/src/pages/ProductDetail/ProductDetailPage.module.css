@@ -1,3 +1,61 @@
+/* ── Variantes ── */
+.variantsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.variantGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.variantLabel {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  min-width: 80px;
+}
+
+.variantOptions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.variantOption {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: var(--space-2) var(--space-4);
+  min-width: 72px;
+  min-height: 36px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-medium);
+}
+.variantOption:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-primary);
+}
+.variantOptionSelected {
+  background: var(--color-primary);
+  color: var(--color-neutral-light);
+  border-color: var(--color-primary-dark);
+  min-width: 72px;
+  min-height: 36px;
+  font-weight: var(--font-medium);
+}
 .page {
   padding-top: var(--space-8);
   padding-bottom: var(--space-20);

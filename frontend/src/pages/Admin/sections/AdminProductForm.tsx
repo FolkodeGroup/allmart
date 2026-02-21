@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { AdminProduct, ProductVariant } from '../../../context/AdminProductsContext';
+import type { AdminProduct, VariantGroup } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import styles from './AdminProductForm.module.css';
@@ -37,8 +37,9 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const [form, setForm] = useState<Omit<AdminProduct, 'id'>>(EMPTY);
   const [tagInput, setTagInput] = useState('');
   const [featureInput, setFeatureInput] = useState('');
-  const [variantName, setVariantName] = useState('');
-  const [variantValue, setVariantValue] = useState('');
+  const [newGroupName, setNewGroupName] = useState('');
+  // mapa groupId → valor del input para agregar un valor nuevo
+  const [newGroupValues, setNewGroupValues] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -87,20 +88,32 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const removeFeature = (i: number) =>
     set('features', (form.features ?? []).filter((_, idx) => idx !== i));
 
-  const addVariant = () => {
-    if (!variantName.trim() || !variantValue.trim()) return;
-    const v: ProductVariant = {
-      id: `v-${Date.now()}`,
-      name: variantName.trim(),
-      value: variantValue.trim(),
-    };
-    set('variants', [...(form.variants ?? []), v]);
-    setVariantName('');
-    setVariantValue('');
+  const addVariantGroup = () => {
+    const name = newGroupName.trim();
+    if (!name) return;
+    const g: VariantGroup = { id: `g-${Date.now()}`, name, values: [] };
+    set('variants', [...(form.variants ?? []), g]);
+    setNewGroupName('');
   };
 
-  const removeVariant = (id: string) =>
-    set('variants', (form.variants ?? []).filter(v => v.id !== id));
+  const removeVariantGroup = (groupId: string) =>
+    set('variants', (form.variants ?? []).filter(g => g.id !== groupId));
+
+  const addVariantValue = (groupId: string) => {
+    const val = (newGroupValues[groupId] ?? '').trim();
+    if (!val) return;
+    set('variants', (form.variants ?? []).map(g =>
+      g.id === groupId && !g.values.includes(val)
+        ? { ...g, values: [...g.values, val] }
+        : g
+    ));
+    setNewGroupValues(prev => ({ ...prev, [groupId]: '' }));
+  };
+
+  const removeVariantValue = (groupId: string, value: string) =>
+    set('variants', (form.variants ?? []).map(g =>
+      g.id === groupId ? { ...g, values: g.values.filter(v => v !== value) } : g
+    ));
 
   const setImage = (i: number, val: string) => {
     const imgs = [...form.images];
@@ -268,29 +281,47 @@ export function AdminProductForm({ productId, onClose }: Props) {
           {/* ── Variantes ── */}
           <fieldset className={styles.fieldset}>
             <legend className={styles.legend}>Variantes</legend>
-            <div className={styles.row}>
-              <div className={styles.field}>
-                <label className={styles.label}>Nombre de variante</label>
-                <input className={styles.input} value={variantName}
-                  onChange={e => setVariantName(e.target.value)} placeholder="Ej: Color, Tamaño" />
-              </div>
-              <div className={styles.field}>
-                <label className={styles.label}>Valor</label>
-                <input className={styles.input} value={variantValue}
-                  onChange={e => setVariantValue(e.target.value)} placeholder="Ej: Rojo, XL" />
-              </div>
-              <button type="button" className={`${styles.addBtn} ${styles.variantBtn}`} onClick={addVariant}>＋</button>
+            <p className={styles.fieldHint}>Agrupá opciones como Color o Tamaño. Podés gestionar variantes en detalle desde la sección <em>Variantes</em> del menú.</p>
+
+            {/* Agregar nuevo grupo */}
+            <div className={styles.tagRow}>
+              <input
+                className={styles.input}
+                value={newGroupName}
+                onChange={e => setNewGroupName(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVariantGroup())}
+                placeholder="Nombre del grupo, ej: Color, Tamaño..."
+              />
+              <button type="button" className={styles.addBtn} onClick={addVariantGroup}>+ Grupo</button>
             </div>
-            {(form.variants ?? []).length > 0 && (
-              <div className={styles.tags}>
-                {(form.variants ?? []).map(v => (
-                  <span key={v.id} className={styles.tag}>
-                    <strong>{v.name}:</strong> {v.value}
-                    <button type="button" onClick={() => removeVariant(v.id)} className={styles.tagRemove}>✕</button>
-                  </span>
-                ))}
+
+            {/* Grupos existentes */}
+            {(form.variants ?? []).map(group => (
+              <div key={group.id} className={styles.variantGroup}>
+                <div className={styles.variantGroupHeader}>
+                  <span className={styles.variantGroupName}>{group.name}</span>
+                  <button type="button" className={styles.removeBtn} onClick={() => removeVariantGroup(group.id)}>✕</button>
+                </div>
+                <div className={styles.tags}>
+                  {group.values.map(val => (
+                    <span key={val} className={styles.tag}>
+                      {val}
+                      <button type="button" className={styles.tagRemove} onClick={() => removeVariantValue(group.id, val)}>✕</button>
+                    </span>
+                  ))}
+                </div>
+                <div className={styles.tagRow}>
+                  <input
+                    className={styles.input}
+                    value={newGroupValues[group.id] ?? ''}
+                    onChange={e => setNewGroupValues(prev => ({ ...prev, [group.id]: e.target.value }))}
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVariantValue(group.id))}
+                    placeholder={`Agregar valor a ${group.name}...`}
+                  />
+                  <button type="button" className={styles.addBtn} onClick={() => addVariantValue(group.id)}>＋</button>
+                </div>
               </div>
-            )}
+            ))}
           </fieldset>
 
           {error && <div className={styles.error}>{error}</div>}

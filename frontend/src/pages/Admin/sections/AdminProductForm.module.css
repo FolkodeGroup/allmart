@@ -268,3 +268,36 @@
   transition: background 0.15s;
 }
 .submitBtn:hover { background: var(--color-primary-dark); }
+
+/* ── Variant groups ── */
+.variantGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.variantGroupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.variantGroupName {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+}
+
+.fieldHint {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-3);
+  line-height: 1.4;
+}
