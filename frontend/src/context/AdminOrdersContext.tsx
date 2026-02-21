@@ -18,6 +18,8 @@ export interface OrderItem {
   unitPrice: number;
 }
 
+export type PaymentStatus = 'no-abonado' | 'abonado';
+
 export interface Order {
   id: string;
   createdAt: string; // ISO 8601
@@ -29,6 +31,8 @@ export interface Order {
   items: OrderItem[];
   total: number;
   status: OrderStatus;
+  paymentStatus?: PaymentStatus;
+  paidAt?: string; // ISO 8601
   notes?: string;
 }
 
@@ -112,6 +116,7 @@ interface AdminOrdersContextType {
   updateOrder: (id: string, data: Partial<Order>) => void;
   deleteOrder: (id: string) => void;
   getOrder: (id: string) => Order | undefined;
+  markAsPaid: (id: string) => void;
 }
 
 const AdminOrdersContext = createContext<AdminOrdersContextType | undefined>(undefined);
@@ -159,9 +164,21 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
 
   const getOrder = (id: string) => orders.find(o => o.id === id);
 
+  const markAsPaid = (id: string) => {
+    setOrders(prev => {
+      const next = prev.map(o =>
+        o.id === id
+          ? { ...o, paymentStatus: 'abonado' as PaymentStatus, paidAt: new Date().toISOString() }
+          : o
+      );
+      saveOrders(next);
+      return next;
+    });
+  };
+
   return (
     <AdminOrdersContext.Provider value={{
-      orders, addOrder, updateOrderStatus, updateOrder, deleteOrder, getOrder,
+      orders, addOrder, updateOrderStatus, updateOrder, deleteOrder, getOrder, markAsPaid,
     }}>
       {children}
     </AdminOrdersContext.Provider>
