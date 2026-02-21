@@ -1,11 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import styles from './AdminLogin.module.css';
 
-export function AdminLogin({ onLogin }: { onLogin: (user: string, token: string) => void }) {
+export function AdminLogin() {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAdminAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +23,8 @@ export function AdminLogin({ onLogin }: { onLogin: (user: string, token: string)
       });
       const data = await res.json();
       if (res.ok && data.token) {
-        onLogin(user, data.token);
+        login(user, data.token);
+        navigate('/admin/dashboard');
       } else {
         setError(data.message || 'Credenciales inválidas');
       }
