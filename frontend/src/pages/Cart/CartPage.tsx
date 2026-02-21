@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
-import type { OrderFormData } from '../../components/ui/OrderConfirmationForm';
+/* import type { OrderFormData } from '../../components/ui/OrderConfirmationForm'; */
 // import { OrderSuccess } from '../../components/ui/OrderSuccess';
-import type { CartItem } from '../../types';
+/* import type { CartItem } from '../../types'; */
 import styles from './CartPage.module.css';
 
 function formatPrice(price: number): string {

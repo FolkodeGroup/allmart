@@ -26,7 +26,7 @@ export function OrderSuccess({ client, items, totalPrice }: OrderSuccessProps) {
   const freeShipping = totalPrice >= SHIPPING_THRESHOLD;
   const shippingLabel = freeShipping ? 'Gratis 🎉' : 'A calcular';
 
-  const whatsappMessage = buildWhatsAppMessage(client, items, totalPrice, shippingLabel);
+  const whatsappMessage = buildWhatsAppMessage(client, items, totalPrice);
   const whatsappUrl = buildWhatsAppUrl(whatsappMessage);
 
   const [copied, setCopied] = useState(false);
