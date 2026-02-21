@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
 import type { OrderFormData } from '../../components/ui/OrderConfirmationForm';
+import { OrderSuccess } from '../../components/ui/OrderSuccess';
+import type { CartItem } from '../../types';
 import styles from './CartPage.module.css';
 
 function formatPrice(price: number): string {
@@ -18,30 +20,28 @@ export function CartPage() {
     useCart();
 
   const [showForm, setShowForm] = useState(false);
-  const [confirmedOrder, setConfirmedOrder] = useState<OrderFormData | null>(null);
+  const [confirmedOrder, setConfirmedOrder] = useState<{
+    client: OrderFormData;
+    items: CartItem[];
+    totalPrice: number;
+  } | null>(null);
 
   function handleConfirm(data: OrderFormData) {
-    setConfirmedOrder(data);
+    /* Capturamos snapshot ANTES de vaciar el carrito */
+    const snapshot = { client: data, items: [...items], totalPrice };
     setShowForm(false);
     clearCart();
+    setConfirmedOrder(snapshot);
   }
 
-  /* ── Pedido confirmado ── */
+  /* ── Pedido confirmado: vista con resumen y WhatsApp ── */
   if (confirmedOrder) {
     return (
-      <main className={styles.page}>
-        <div className={styles.empty}>
-          <span className={styles.emptyIcon} aria-hidden="true">✅</span>
-          <h1 className={styles.emptyTitle}>¡Pedido confirmado!</h1>
-          <p className={styles.emptyText}>
-            Gracias, <strong>{confirmedOrder.firstName} {confirmedOrder.lastName}</strong>.<br />
-            Te enviaremos los detalles a <strong>{confirmedOrder.email}</strong>.
-          </p>
-          <Link to="/" className={styles.emptyLink}>
-            Volver al inicio
-          </Link>
-        </div>
-      </main>
+      <OrderSuccess
+        client={confirmedOrder.client}
+        items={confirmedOrder.items}
+        totalPrice={confirmedOrder.totalPrice}
+      />
     );
   }
 
