@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContextUtils';
 // import logo from '../../../assests/images/logos/favicon_io/android-chrome-192x192.png'
 
 export function Header() {
-  const { items } = useCart()
+  const { totalItems } = useCart()
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -65,7 +65,7 @@ export function Header() {
           
             <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
               🛒
-              <span className={styles.cartCount}>{ items.length }</span>
+              <span className={styles.cartCount}>{ totalItems > 0 ? totalItems : null }</span>
             </Link>
           </div>
           <div className={styles.mobileMenuTogle}>

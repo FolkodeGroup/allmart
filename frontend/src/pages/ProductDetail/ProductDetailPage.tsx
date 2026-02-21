@@ -52,14 +52,13 @@ export function ProductDetailPage() {
   const hasDiscount = product.discount && product.discount > 0;
   const isNew = product.tags.includes('nuevo');
 
+  const [addedFeedback, setAddedFeedback] = useState(false);
+
   const handleAddToCart = () => {
-    if (product) {
-      addToCart({
-        id: product.id,
-        quantity: quantity,
-      })
-    }
-    alert('¡Producto agregado!')
+    if (!product) return;
+    addToCart({ product, quantity });
+    setAddedFeedback(true);
+    setTimeout(() => setAddedFeedback(false), 2000);
   };
   
   return (
@@ -204,8 +203,8 @@ export function ProductDetailPage() {
             </div>
 
             <div className={styles.buttonsRow}>
-              <Button variant="primary" size="lg" fullWidth onClick={handleAddToCart}>
-                Agregar al carrito
+              <Button variant="primary" size="lg" fullWidth onClick={handleAddToCart} disabled={addedFeedback}>
+                {addedFeedback ? '¡Agregado al carrito! ✓' : 'Agregar al carrito'}
               </Button>
               <Button variant="secondary" size="lg">
                 ♡
