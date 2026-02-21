@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
-import type { Order, OrderStatus } from '../../../context/AdminOrdersContext';
+import type { Order, OrderStatus, PaymentStatus } from '../../../context/AdminOrdersContext';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 
@@ -13,6 +13,15 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   entregado: 'Entregado',
   cancelado: 'Cancelado',
 };
+
+const PAYMENT_LABELS: Record<PaymentStatus, string> = {
+  'no-abonado': 'Sin abonar',
+  'abonado': 'Abonado',
+};
+
+function paymentClass(status: PaymentStatus): string {
+  return status === 'abonado' ? styles.paymentAbonado : styles.paymentNoAbonado;
+}
 
 const STATUS_OPTIONS: OrderStatus[] = [
   'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
@@ -51,9 +60,13 @@ function formatPrice(n: number): string {
 
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
-  const { updateOrderStatus, updateOrder, deleteOrder } = useAdminOrders();
+  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmPaid, setConfirmPaid] = useState(false);
+
+  const paymentStatus: PaymentStatus = order.paymentStatus ?? 'no-abonado';
+  const isAbonado = paymentStatus === 'abonado';
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     updateOrderStatus(order.id, e.target.value as OrderStatus);
@@ -100,6 +113,57 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
                 ))}
               </select>
             </div>
+          </section>
+
+          {/* Pago / Confirmación WhatsApp */}
+          <section className={styles.detailSection}>
+            <h3 className={styles.detailSectionTitle}>Pago</h3>
+            <div className={styles.paymentRow}>
+              <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus)}`}>
+                {isAbonado ? '✓' : '○'} {PAYMENT_LABELS[paymentStatus]}
+              </span>
+              {isAbonado && order.paidAt && (
+                <span className={styles.paidAt}>
+                  Confirmado el {formatDateTime(order.paidAt)}
+                </span>
+              )}
+            </div>
+            {!isAbonado && (
+              <div className={styles.whatsappActions}>
+                {!confirmPaid ? (
+                  <button
+                    className={styles.whatsappBtn}
+                    type="button"
+                    onClick={() => setConfirmPaid(true)}
+                  >
+                    <span className={styles.whatsappIcon}>💬</span>
+                    Marcar como abonado
+                  </button>
+                ) : (
+                  <div className={styles.confirmPaidBox}>
+                    <span className={styles.confirmPaidText}>
+                      ¿Confirmar que el cliente abonó este pedido vía WhatsApp?
+                    </span>
+                    <div className={styles.confirmPaidActions}>
+                      <button
+                        className={styles.whatsappBtnConfirm}
+                        type="button"
+                        onClick={() => { markAsPaid(order.id); setConfirmPaid(false); }}
+                      >
+                        ✓ Sí, confirmar pago
+                      </button>
+                      <button
+                        className={styles.cancelBtn}
+                        type="button"
+                        onClick={() => setConfirmPaid(false)}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
 
           {/* Datos del cliente */}
@@ -227,6 +291,8 @@ export function AdminOrders() {
     }, {} as Record<OrderStatus, number>);
   }, [orders]);
 
+  const totalAbonados = useMemo(() => orders.filter(o => o.paymentStatus === 'abonado').length, [orders]);
+
   return (
     <div className={sectionStyles.page}>
       {/* Header */}
@@ -266,6 +332,11 @@ export function AdminOrders() {
           <span className={styles.summaryIcon}>✅</span>
           <span className={`${styles.summaryNum} ${styles.numEntregado}`}>{summary.entregado}</span>
           <span className={styles.summaryLabel}>Entregados</span>
+        </div>
+        <div className={`${styles.summaryCard} ${styles.cardAbonado}`}>
+          <span className={styles.summaryIcon}>💬</span>
+          <span className={`${styles.summaryNum} ${styles.numAbonado}`}>{totalAbonados}</span>
+          <span className={styles.summaryLabel}>Abonados</span>
         </div>
       </div>
 
@@ -364,6 +435,11 @@ export function AdminOrders() {
                       <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
                         {STATUS_LABELS[order.status]}
                       </span>
+                      {order.paymentStatus === 'abonado' && (
+                        <span className={`${styles.paymentBadge} ${styles.paymentAbonado} ${styles.paymentBadgeInline}`}>
+                          ✓ Abonado
+                        </span>
+                      )}
                     </td>
                     <td>
                       <button
@@ -390,9 +466,16 @@ export function AdminOrders() {
                 <div key={order.id} className={styles.mobileCard} onClick={() => setSelectedOrder(order)}>
                   <div className={styles.mobileCardTop}>
                     <span className={styles.mobileCardId}>#{order.id.slice(0,8).toUpperCase()}</span>
-                    <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
-                      {STATUS_LABELS[order.status]}
-                    </span>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
+                        {STATUS_LABELS[order.status]}
+                      </span>
+                      {order.paymentStatus === 'abonado' && (
+                        <span className={`${styles.paymentBadge} ${styles.paymentAbonado}`}>
+                          ✓ Abonado
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className={styles.mobileCardMid}>
                     <div className={styles.mobileCardCustomer}>
