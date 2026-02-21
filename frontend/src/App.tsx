@@ -5,6 +5,7 @@ import { ProductListPage } from './pages/ProductList/ProductListPage';
 import { ProductDetailPage } from './pages/ProductDetail/ProductDetailPage';
 import { CartProvider } from './components/layout/context/CartContext';
 import { CartPage } from './pages/Cart/CartPage';
+import { AdminLogin } from './pages/AdminLogin/AdminLogin';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
       { path: 'productos', element: <ProductListPage /> },
       { path: 'producto/:slug', element: <ProductDetailPage /> },
       { path: 'carrito', element: <CartPage /> },
+      { path: 'admin/login', element: <AdminLogin onLogin={() => {}} /> },
     ],
   },
 ]);
