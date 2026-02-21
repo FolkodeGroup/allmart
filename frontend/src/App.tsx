@@ -14,6 +14,8 @@ import { AdminReports } from './pages/Admin/sections/AdminReports';
 import { AdminRoute } from './components/AdminRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import { AdminProductsProvider } from './context/AdminProductsContext';
+import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
+import { AdminCategories } from './pages/Admin/sections/AdminCategories';
 
 const router = createBrowserRouter([
   {
@@ -36,6 +38,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
       { path: 'productos', element: <AdminProducts /> },
+      { path: 'categorias', element: <AdminCategories /> },
       { path: 'pedidos', element: <AdminOrders /> },
       { path: 'reportes', element: <AdminReports /> },
     ],
@@ -45,11 +48,13 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AdminAuthProvider>
-      <AdminProductsProvider>
-        <CartProvider>
-          <RouterProvider router={router} />
-        </CartProvider>
-      </AdminProductsProvider>
+      <AdminCategoriesProvider>
+        <AdminProductsProvider>
+          <CartProvider>
+            <RouterProvider router={router} />
+          </CartProvider>
+        </AdminProductsProvider>
+      </AdminCategoriesProvider>
     </AdminAuthProvider>
   );
 }

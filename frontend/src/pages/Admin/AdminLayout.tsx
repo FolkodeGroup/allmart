@@ -5,6 +5,7 @@ import styles from './AdminLayout.module.css';
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠' },
   { label: 'Productos', to: '/admin/productos', icon: '📦' },
+  { label: 'Categorías', to: '/admin/categorias', icon: '🗂️' },
   { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒' },
   { label: 'Reportes', to: '/admin/reportes', icon: '📊' },
 ];

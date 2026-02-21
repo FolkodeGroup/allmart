@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { AdminProduct, ProductVariant } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import styles from './AdminProductForm.module.css';
 
 interface Props {
@@ -29,7 +30,8 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
 };
 
 export function AdminProductForm({ productId, onClose }: Props) {
-  const { addProduct, updateProduct, getProduct, categories } = useAdminProducts();
+  const { addProduct, updateProduct, getProduct } = useAdminProducts();
+  const { categories } = useAdminCategories();
   const isEdit = !!productId;
 
   const [form, setForm] = useState<Omit<AdminProduct, 'id'>>(EMPTY);

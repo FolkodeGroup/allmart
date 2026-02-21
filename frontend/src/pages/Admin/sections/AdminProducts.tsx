@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { AdminProductForm } from './AdminProductForm';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminProducts.module.css';
@@ -12,7 +13,7 @@ export function AdminProducts() {
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const { categories } = useAdminProducts();
+  const { categories } = useAdminCategories();
 
   const filtered = products.filter(p => {
     const matchSearch =
