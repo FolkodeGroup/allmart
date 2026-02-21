@@ -13,6 +13,7 @@ import { AdminOrders } from './pages/Admin/sections/AdminOrders';
 import { AdminReports } from './pages/Admin/sections/AdminReports';
 import { AdminRoute } from './components/AdminRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
+import { AdminProductsProvider } from './context/AdminProductsContext';
 
 const router = createBrowserRouter([
   {
@@ -44,9 +45,11 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AdminAuthProvider>
-      <CartProvider>
-        <RouterProvider router={router} />
-      </CartProvider>
+      <AdminProductsProvider>
+        <CartProvider>
+          <RouterProvider router={router} />
+        </CartProvider>
+      </AdminProductsProvider>
     </AdminAuthProvider>
   );
 }

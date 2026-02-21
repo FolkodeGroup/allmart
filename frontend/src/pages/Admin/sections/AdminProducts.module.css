@@ -1,0 +1,232 @@
+/* ============================================
+   ALLMART — ADMIN PRODUCTS LIST
+   ============================================ */
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.newBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  background: var(--color-primary);
+  color: var(--color-neutral-light);
+  border: none;
+  border-radius: 10px;
+  padding: var(--space-3) var(--space-6);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.newBtn:hover { background: var(--color-primary-dark); }
+
+/* ── Filtros ── */
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+}
+
+.searchInput,
+.select {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.searchInput { min-width: 220px; }
+.searchInput:focus,
+.select:focus { border-color: var(--color-primary); }
+
+.count {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-left: auto;
+}
+
+/* ── Tabla ── */
+.tableWrapper {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeIn 0.3s both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row {
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background 0.12s;
+}
+.row:last-child { border-bottom: none; }
+.row:hover { background: var(--color-bg-secondary); }
+
+.td {
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  vertical-align: middle;
+}
+
+/* ── Product cell ── */
+.productCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.productName {
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+}
+
+.productSku {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Badge / chips ── */
+.badge {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  padding: 2px var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Price ── */
+.priceCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.price {
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+.discount {
+  font-size: var(--text-xs);
+  color: var(--color-accent-dark);
+  font-weight: var(--font-semibold);
+}
+
+/* ── Stock ── */
+.stockOk {
+  font-weight: var(--font-semibold);
+  color: var(--color-primary-dark);
+}
+.stockOut {
+  font-weight: var(--font-semibold);
+  color: var(--color-error);
+}
+
+/* ── Status ── */
+.statusActive {
+  background: rgba(118, 146, 130, 0.12);
+  color: var(--color-primary-dark);
+  border-radius: 999px;
+  padding: 2px var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+.statusInactive {
+  background: rgba(199, 80, 80, 0.1);
+  color: var(--color-error);
+  border-radius: 999px;
+  padding: 2px var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+
+/* ── Actions ── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.editBtn,
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-base);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 6px;
+  transition: background 0.13s;
+}
+.editBtn:hover { background: var(--color-bg-tertiary); }
+.deleteBtn:hover { background: rgba(199, 80, 80, 0.1); }
+
+.confirmDeleteBtn,
+.cancelDeleteBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  border-radius: 6px;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  border: 1px solid;
+  transition: background 0.13s;
+}
+.confirmDeleteBtn {
+  background: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+}
+.confirmDeleteBtn:hover { background: #a83d3d; }
+.cancelDeleteBtn {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+.cancelDeleteBtn:hover { background: var(--color-bg-tertiary); }
