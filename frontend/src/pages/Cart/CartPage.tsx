@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
+import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
+import type { OrderFormData } from '../../components/ui/OrderConfirmationForm';
 import styles from './CartPage.module.css';
 
 function formatPrice(price: number): string {
@@ -13,6 +16,34 @@ function formatPrice(price: number): string {
 export function CartPage() {
   const { items, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } =
     useCart();
+
+  const [showForm, setShowForm] = useState(false);
+  const [confirmedOrder, setConfirmedOrder] = useState<OrderFormData | null>(null);
+
+  function handleConfirm(data: OrderFormData) {
+    setConfirmedOrder(data);
+    setShowForm(false);
+    clearCart();
+  }
+
+  /* ── Pedido confirmado ── */
+  if (confirmedOrder) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.empty}>
+          <span className={styles.emptyIcon} aria-hidden="true">✅</span>
+          <h1 className={styles.emptyTitle}>¡Pedido confirmado!</h1>
+          <p className={styles.emptyText}>
+            Gracias, <strong>{confirmedOrder.firstName} {confirmedOrder.lastName}</strong>.<br />
+            Te enviaremos los detalles a <strong>{confirmedOrder.email}</strong>.
+          </p>
+          <Link to="/" className={styles.emptyLink}>
+            Volver al inicio
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -140,7 +171,11 @@ export function CartPage() {
             <span>{formatPrice(totalPrice)}</span>
           </div>
 
-          <button className={styles.checkoutBtn} type="button">
+          <button
+            className={styles.checkoutBtn}
+            type="button"
+            onClick={() => setShowForm(true)}
+          >
             Iniciar compra
           </button>
 
@@ -153,6 +188,15 @@ export function CartPage() {
           </button>
         </aside>
       </div>
+
+      {/* ── Modal formulario de confirmación ── */}
+      {showForm && (
+        <OrderConfirmationForm
+          totalPrice={totalPrice}
+          onConfirm={handleConfirm}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
     </main>
   );
 }
