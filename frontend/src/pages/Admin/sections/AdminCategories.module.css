@@ -1,0 +1,339 @@
+/* ============================================
+   ALLMART — ADMIN CATEGORIES
+   ============================================ */
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.newBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  background: var(--color-primary);
+  color: var(--color-neutral-light);
+  border: none;
+  border-radius: 10px;
+  padding: var(--space-3) var(--space-6);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.newBtn:hover { background: var(--color-primary-dark); }
+
+/* ── Grid de tarjetas ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+  animation: fadeIn 0.3s both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Tarjeta de categoría ── */
+.card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.card:hover { box-shadow: 0 4px 20px rgba(118,146,130,0.12); }
+
+.cardImg {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.cardImgPlaceholder {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-tertiary);
+  font-size: 3rem;
+  color: var(--color-border);
+}
+
+.cardBody {
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.cardName {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.cardSlug {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.cardDesc {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--leading-relaxed);
+}
+
+/* ── Acciones tarjeta ── */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.editBtn, .deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-base);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 6px;
+  transition: background 0.13s;
+}
+.editBtn:hover { background: var(--color-bg-tertiary); }
+.deleteBtn:hover { background: rgba(199,80,80,0.1); }
+
+.confirmDeleteBtn, .cancelDeleteBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  border-radius: 6px;
+  padding: 2px var(--space-2);
+  cursor: pointer;
+  border: 1px solid;
+}
+.confirmDeleteBtn { background: var(--color-error); color: white; border-color: var(--color-error); }
+.confirmDeleteBtn:hover { background: #a83d3d; }
+.cancelDeleteBtn { background: var(--color-bg-secondary); color: var(--color-text-secondary); border-color: var(--color-border); }
+
+/* ── Sección de productos ── */
+.productSection {
+  border-top: 1px solid var(--color-border-light);
+  padding-top: var(--space-3);
+}
+
+.toggleProductsBtn {
+  background: none;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+.toggleProductsBtn:hover { text-decoration: underline; }
+
+.productList {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.noProducts {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.productRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background: var(--color-bg-secondary);
+  border-radius: 6px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.productName {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.reassignSelect {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  outline: none;
+  flex-shrink: 0;
+}
+.reassignSelect:focus { border-color: var(--color-primary); }
+
+/* ── Modal ── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: var(--space-4);
+  animation: fadeIn 0.2s both;
+}
+
+.panel {
+  background: var(--color-bg-primary);
+  border-radius: 16px;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.18);
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp 0.25s both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.panelTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: var(--text-lg);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.closeBtn:hover { background: var(--color-bg-tertiary); }
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+}
+
+.input {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--color-primary); background: var(--color-bg-primary); }
+
+.imagePreview {
+  margin-top: var(--space-2);
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-light);
+}
+
+.error {
+  color: var(--color-error);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.cancelBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+}
+.cancelBtn:hover { background: var(--color-bg-tertiary); }
+
+.submitBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  background: var(--color-primary);
+  color: var(--color-neutral-light);
+  border: none;
+  border-radius: 8px;
+  padding: var(--space-2) var(--space-6);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.submitBtn:hover { background: var(--color-primary-dark); }
