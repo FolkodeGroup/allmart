@@ -15,7 +15,7 @@ export function buildWhatsAppMessage(
   client: OrderFormData,
   items: CartItem[],
   totalPrice: number,
-  shippingLabel: string = 'A calcular'
+  // shippingLabel: string = 'A calcular'
 ): string {
   const date = new Date().toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -42,7 +42,6 @@ export function buildWhatsAppMessage(
     productLines,
     '',
     '📊 *Resumen*',
-    `  Envío: ${shippingLabel}`,
     `  *Total: ${formatPrice(totalPrice)}*`,
     '',
     '¡Gracias por tu compra! 🙌',
