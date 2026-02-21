@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
-import type { Order, OrderStatus, PaymentStatus } from '../../../context/AdminOrdersContext';
+import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 
@@ -58,19 +58,82 @@ function formatPrice(n: number): string {
   }).format(n);
 }
 
+/* ── Iconos por estado ── */
+const STATUS_ICONS: Record<OrderStatus, string> = {
+  pendiente: '⏳',
+  confirmado: '✔️',
+  'en-preparacion': '🔧',
+  enviado: '🚚',
+  entregado: '✅',
+  cancelado: '❌',
+};
+
+/* ── Componente Timeline de estados ─────────────────────────────── */
+function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[]; currentStatus: OrderStatus }) {
+  if (history.length === 0) {
+    return (
+      <p className={styles.timelineEmpty}>No hay registros de cambios de estado aún.</p>
+    );
+  }
+
+  // Mostrar del más reciente al más antiguo
+  const sorted = [...history].reverse();
+
+  return (
+    <ol className={styles.timeline}>
+      {sorted.map((entry, idx) => {
+        const isCurrent = entry.status === currentStatus && idx === 0;
+        const isLast = idx === sorted.length - 1;
+        return (
+          <li key={entry.changedAt + idx} className={`${styles.timelineItem} ${isCurrent ? styles.timelineItemCurrent : ''}`}>
+            <div className={styles.timelineDotWrap}>
+              <span className={styles.timelineDot}>
+                {STATUS_ICONS[entry.status]}
+              </span>
+              {!isLast && <span className={styles.timelineLine} />}
+            </div>
+            <div className={styles.timelineContent}>
+              <div className={styles.timelineHeader}>
+                <span className={`${styles.statusBadge} ${statusClass(entry.status)}`}>
+                  {STATUS_LABELS[entry.status]}
+                </span>
+                {isCurrent && (
+                  <span className={styles.timelineCurrentTag}>Estado actual</span>
+                )}
+              </div>
+              <time className={styles.timelineDate}>{formatDateTime(entry.changedAt)}</time>
+              {entry.note && (
+                <p className={styles.timelineNote}>{entry.note}</p>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
   const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmPaid, setConfirmPaid] = useState(false);
+  const [statusNote, setStatusNote] = useState('');
+  const [pendingStatus, setPendingStatus] = useState<OrderStatus>(order.status);
 
   const paymentStatus: PaymentStatus = order.paymentStatus ?? 'no-abonado';
   const isAbonado = paymentStatus === 'abonado';
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateOrderStatus(order.id, e.target.value as OrderStatus);
+  const hasStatusChange = pendingStatus !== order.status;
+
+  const handleStatusApply = () => {
+    updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
+    setStatusNote('');
   };
+
+  // Sync local pendingStatus if order.status changes externally
+  const currentStatus = order.status;
 
   const handleSaveNotes = () => {
     updateOrder(order.id, { notes });
@@ -100,19 +163,45 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           <section className={styles.detailSection}>
             <h3 className={styles.detailSectionTitle}>Estado del pedido</h3>
             <div className={styles.statusRow}>
-              <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
-                {STATUS_LABELS[order.status]}
+              <span className={`${styles.statusBadge} ${statusClass(currentStatus)}`}>
+                {STATUS_LABELS[currentStatus]}
               </span>
               <select
                 className={styles.statusSelect}
-                value={order.status}
-                onChange={handleStatusChange}
+                value={pendingStatus}
+                onChange={e => setPendingStatus(e.target.value as OrderStatus)}
               >
                 {STATUS_OPTIONS.map(s => (
                   <option key={s} value={s}>{STATUS_LABELS[s]}</option>
                 ))}
               </select>
             </div>
+            {hasStatusChange && (
+              <div className={styles.statusChangeBox}>
+                <input
+                  className={styles.statusNoteInput}
+                  type="text"
+                  placeholder="Nota del cambio (opcional, ej: enviado por OCA #123)..."
+                  value={statusNote}
+                  onChange={e => setStatusNote(e.target.value)}
+                  maxLength={120}
+                />
+                <div className={styles.statusChangeActions}>
+                  <button className={styles.applyStatusBtn} type="button" onClick={handleStatusApply}>
+                    Guardar cambio
+                  </button>
+                  <button className={styles.cancelBtn} type="button" onClick={() => { setPendingStatus(currentStatus); setStatusNote(''); }}>
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Historial de estados */}
+          <section className={styles.detailSection}>
+            <h3 className={styles.detailSectionTitle}>Historial de estados</h3>
+            <OrderTimeline history={order.statusHistory ?? []} currentStatus={order.status} />
           </section>
 
           {/* Pago / Confirmación WhatsApp */}
