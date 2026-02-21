@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
-import type { OrderFormData } from '../../components/ui/OrderConfirmationForm';
-import { OrderSuccess } from '../../components/ui/OrderSuccess';
-import type { CartItem } from '../../types';
+/* import type { OrderFormData } from '../../components/ui/OrderConfirmationForm'; */
+// import { OrderSuccess } from '../../components/ui/OrderSuccess';
+/* import type { CartItem } from '../../types'; */
 import styles from './CartPage.module.css';
 
 function formatPrice(price: number): string {
@@ -20,30 +20,11 @@ export function CartPage() {
     useCart();
 
   const [showForm, setShowForm] = useState(false);
-  const [confirmedOrder, setConfirmedOrder] = useState<{
-    client: OrderFormData;
-    items: CartItem[];
-    totalPrice: number;
-  } | null>(null);
 
-  function handleConfirm(data: OrderFormData) {
-    /* Capturamos snapshot ANTES de vaciar el carrito */
-    const snapshot = { client: data, items: [...items], totalPrice };
-    setShowForm(false);
-    clearCart();
-    setConfirmedOrder(snapshot);
-  }
 
-  /* ── Pedido confirmado: vista con resumen y WhatsApp ── */
-  if (confirmedOrder) {
-    return (
-      <OrderSuccess
-        client={confirmedOrder.client}
-        items={confirmedOrder.items}
-        totalPrice={confirmedOrder.totalPrice}
-      />
-    );
-  }
+
+
+
 
   if (items.length === 0) {
     return (
@@ -193,7 +174,8 @@ export function CartPage() {
       {showForm && (
         <OrderConfirmationForm
           totalPrice={totalPrice}
-          onConfirm={handleConfirm}
+          cartItems={items}
+          onCartClear={clearCart}
           onCancel={() => setShowForm(false)}
         />
       )}
