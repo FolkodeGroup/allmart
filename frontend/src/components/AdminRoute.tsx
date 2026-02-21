@@ -1,9 +1,18 @@
 import { Navigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import type { ReactNode } from 'react';
+import type { Permission } from '../utils/permissions';
 
-export function AdminRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAdminAuth();
+interface AdminRouteProps {
+  children: ReactNode;
+  requiredPermission?: Permission;
+}
+
+export function AdminRoute({ children, requiredPermission }: AdminRouteProps) {
+  const { isAuthenticated, can } = useAdminAuth();
   if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
+  if (requiredPermission && !can(requiredPermission)) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
   return <>{children}</>;
 }

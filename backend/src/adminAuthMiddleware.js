@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'allmart_super_secret';
+const VALID_ROLES = ['admin', 'editor'];
 
 export default function adminAuthMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -10,7 +11,7 @@ export default function adminAuthMiddleware(req, res, next) {
   }
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.role !== 'admin') {
+    if (!VALID_ROLES.includes(decoded.role)) {
       return res.status(403).json({ message: 'Acceso denegado' });
     }
     req.admin = decoded;

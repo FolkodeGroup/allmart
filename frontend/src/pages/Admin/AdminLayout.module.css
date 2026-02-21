@@ -143,3 +143,47 @@
   padding: var(--space-8);
   overflow-y: auto;
 }
+
+/* ── Nav locked (sin permiso) ── */
+.navItemLocked {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.navItemLocked:hover {
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+}
+
+.navLockIcon {
+  font-size: 11px;
+  margin-left: auto;
+}
+
+/* ── Usuario — detalles con rol ── */
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.roleBadge {
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.roleBadge_admin {
+  background: rgba(118, 146, 130, 0.25);
+  color: var(--color-primary);
+  border: 1px solid rgba(118, 146, 130, 0.4);
+}
+
+.roleBadge_editor {
+  background: rgba(221, 176, 140, 0.2);
+  color: var(--color-accent);
+  border: 1px solid rgba(221, 176, 140, 0.35);
+}
