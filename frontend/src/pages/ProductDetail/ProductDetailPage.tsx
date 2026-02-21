@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import type { VariantGroup } from '../../context/AdminProductsContext';
 import { useParams, Link } from 'react-router-dom';
-import { products } from '../../data/mock';
+import { getProducts } from '../../data/productsLocal';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
@@ -25,9 +26,13 @@ function renderStars(rating: number): string {
 export function ProductDetailPage() {
   const { addToCart } = useCart();
   const { slug } = useParams<{ slug: string }>();
-  const product = products.find((p) => p.slug === slug);
+  const product = getProducts().find((p) => p.slug === slug);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+
+  // Selección de variantes
+  const variantGroups: VariantGroup[] = (product as any).variants ?? [];
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
 
   if (!product) {
     return (
@@ -43,7 +48,7 @@ export function ProductDetailPage() {
     );
   }
 
-  const relatedProducts = products
+  const relatedProducts = getProducts()
     .filter(
       (p) => p.category.id === product.category.id && p.id !== product.id
     )
@@ -56,6 +61,7 @@ export function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    // En el futuro: pasar variantes seleccionadas al carrito
     addToCart({ product, quantity });
     setAddedFeedback(true);
     setTimeout(() => setAddedFeedback(false), 2000);
@@ -153,6 +159,35 @@ export function ProductDetailPage() {
             )}
           </div>
 
+
+          {/* Variantes (si existen) */}
+          {variantGroups.length > 0 && (
+            <div className={styles.variantsBlock}>
+              {variantGroups.map(group => (
+                <div key={group.id} className={styles.variantGroup}>
+                  <span className={styles.variantLabel}>{group.name}:</span>
+                  <div className={styles.variantOptions}>
+                    {group.values.map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        className={
+                          selectedVariants[group.id] === val
+                            ? styles.variantOptionSelected
+                            : styles.variantOption
+                        }
+                        onClick={() => setSelectedVariants(prev => ({ ...prev, [group.id]: val }))}
+                        aria-pressed={selectedVariants[group.id] === val}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Description */}
           <p className={styles.description}>{product.description}</p>
 
@@ -203,8 +238,21 @@ export function ProductDetailPage() {
             </div>
 
             <div className={styles.buttonsRow}>
-              <Button variant="primary" size="lg" fullWidth onClick={handleAddToCart} disabled={addedFeedback}>
-                {addedFeedback ? '¡Agregado al carrito! ✓' : 'Agregar al carrito'}
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={handleAddToCart}
+                disabled={
+                  addedFeedback ||
+                  (variantGroups.length > 0 && variantGroups.some(g => !selectedVariants[g.id]))
+                }
+              >
+                {addedFeedback
+                  ? '¡Agregado al carrito! ✓'
+                  : variantGroups.length > 0 && variantGroups.some(g => !selectedVariants[g.id])
+                    ? 'Seleccioná todas las variantes'
+                    : 'Agregar al carrito'}
               </Button>
               <Button variant="secondary" size="lg">
                 ♡

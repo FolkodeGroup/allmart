@@ -16,6 +16,7 @@ import { AdminAuthProvider } from './context/AdminAuthContext';
 import { AdminProductsProvider } from './context/AdminProductsContext';
 import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
 import { AdminCategories } from './pages/Admin/sections/AdminCategories';
+import { AdminVariants } from './pages/Admin/sections/AdminVariants';
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
       { path: 'productos', element: <AdminProducts /> },
+      { path: 'variantes', element: <AdminVariants /> },
       { path: 'categorias', element: <AdminCategories /> },
       { path: 'pedidos', element: <AdminOrders /> },
       { path: 'reportes', element: <AdminReports /> },
