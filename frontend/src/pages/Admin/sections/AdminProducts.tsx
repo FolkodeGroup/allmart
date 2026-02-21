@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { AdminProductForm } from './AdminProductForm';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
 export function AdminProducts() {
   const { products, deleteProduct } = useAdminProducts();
+  const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
@@ -47,9 +49,11 @@ export function AdminProducts() {
               Gestioná el catálogo de productos, precios y disponibilidad.
             </p>
           </div>
-          <button className={styles.newBtn} onClick={handleNew}>
-            + Nuevo producto
-          </button>
+          {can('products.create') && (
+            <button className={styles.newBtn} onClick={handleNew}>
+              + Nuevo producto
+            </button>
+          )}
         </div>
 
         {/* Filtros */}
@@ -136,30 +140,37 @@ export function AdminProducts() {
                   </td>
                   <td className={styles.td}>
                     <div className={styles.actions}>
-                      <button
-                        className={styles.editBtn}
-                        onClick={() => handleEdit(p.id)}
-                        title="Editar"
-                      >
-                        ✏️
-                      </button>
-                      {deleteConfirm === p.id ? (
-                        <>
-                          <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(p.id)}>
-                            Confirmar
-                          </button>
-                          <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>
-                            Cancelar
-                          </button>
-                        </>
-                      ) : (
+                      {can('products.edit') && (
                         <button
-                          className={styles.deleteBtn}
-                          onClick={() => setDeleteConfirm(p.id)}
-                          title="Eliminar"
+                          className={styles.editBtn}
+                          onClick={() => handleEdit(p.id)}
+                          title="Editar"
                         >
-                          🗑️
+                          ✏️
                         </button>
+                      )}
+                      {can('products.delete') && (
+                        deleteConfirm === p.id ? (
+                          <>
+                            <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(p.id)}>
+                              Confirmar
+                            </button>
+                            <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>
+                              Cancelar
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => setDeleteConfirm(p.id)}
+                            title="Eliminar"
+                          >
+                            🗑️
+                          </button>
+                        )
+                      )}
+                      {!can('products.edit') && !can('products.delete') && (
+                        <span style={{ color: 'var(--color-text-muted, #aaa)', fontSize: '12px' }}>Solo lectura</span>
                       )}
                     </div>
                   </td>

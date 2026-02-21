@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 
@@ -9,6 +10,7 @@ const EMPTY = { name: '', description: '', image: '', itemCount: 0 };
 export function AdminCategories() {
   const { categories, addCategory, updateCategory, deleteCategory } = useAdminCategories();
   const { products, updateProduct } = useAdminProducts();
+  const { can } = useAdminAuth();
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -80,7 +82,9 @@ export function AdminCategories() {
               Creá, editá y eliminá categorías. Asigná productos a cada una.
             </p>
           </div>
-          <button className={styles.newBtn} onClick={openNew}>+ Nueva categoría</button>
+          {can('categories.create') && (
+            <button className={styles.newBtn} onClick={openNew}>+ Nueva categoría</button>
+          )}
         </div>
       </div>
 
@@ -111,14 +115,18 @@ export function AdminCategories() {
                       <span className={styles.cardSlug}>/{cat.slug}</span>
                     </div>
                     <div className={styles.cardActions}>
-                      <button className={styles.editBtn} onClick={() => openEdit(cat.id)} title="Editar">✏️</button>
-                      {deleteConfirm === cat.id ? (
-                        <>
-                          <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(cat.id)}>Confirmar</button>
-                          <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>Cancelar</button>
-                        </>
-                      ) : (
-                        <button className={styles.deleteBtn} onClick={() => setDeleteConfirm(cat.id)} title="Eliminar">🗑️</button>
+                      {can('categories.edit') && (
+                        <button className={styles.editBtn} onClick={() => openEdit(cat.id)} title="Editar">✏️</button>
+                      )}
+                      {can('categories.delete') && (
+                        deleteConfirm === cat.id ? (
+                          <>
+                            <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(cat.id)}>Confirmar</button>
+                            <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>Cancelar</button>
+                          </>
+                        ) : (
+                          <button className={styles.deleteBtn} onClick={() => setDeleteConfirm(cat.id)} title="Eliminar">🗑️</button>
+                        )
                       )}
                     </div>
                   </div>

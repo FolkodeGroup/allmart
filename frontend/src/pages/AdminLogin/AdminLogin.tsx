@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import type { Role } from '../../utils/permissions';
 import styles from './AdminLogin.module.css';
 
 export function AdminLogin() {
@@ -23,7 +24,8 @@ export function AdminLogin() {
       });
       const data = await res.json();
       if (res.ok && data.token) {
-        login(user, data.token);
+        const role: Role = data.role === 'editor' ? 'editor' : 'admin';
+        login(user, data.token, role);
         navigate('/admin/dashboard');
       } else {
         setError(data.message || 'Credenciales inválidas');

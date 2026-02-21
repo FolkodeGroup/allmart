@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 
@@ -116,6 +117,7 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
   const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
+  const { can } = useAdminAuth();
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmPaid, setConfirmPaid] = useState(false);
@@ -318,24 +320,26 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           </section>
 
           {/* Zona peligrosa */}
-          <section className={styles.detailSection}>
-            <h3 className={styles.detailSectionTitle}>Zona peligrosa</h3>
-            <div className={styles.dangerSection}>
-              {!confirmDelete ? (
-                <button className={styles.deleteBtn} type="button" onClick={() => setConfirmDelete(true)}>
-                  🗑️ Eliminar este pedido
-                </button>
-              ) : (
-                <div className={styles.confirmDelete}>
-                  <span>¿Seguro que querés eliminar este pedido? Esta acción no se puede deshacer.</span>
-                  <div className={styles.confirmActions}>
-                    <button className={styles.deleteConfirmBtn} type="button" onClick={handleDelete}>Sí, eliminar</button>
-                    <button className={styles.cancelBtn} type="button" onClick={() => setConfirmDelete(false)}>Cancelar</button>
+          {can('orders.delete') && (
+            <section className={styles.detailSection}>
+              <h3 className={styles.detailSectionTitle}>Zona peligrosa</h3>
+              <div className={styles.dangerSection}>
+                {!confirmDelete ? (
+                  <button className={styles.deleteBtn} type="button" onClick={() => setConfirmDelete(true)}>
+                    🗑️ Eliminar este pedido
+                  </button>
+                ) : (
+                  <div className={styles.confirmDelete}>
+                    <span>¿Seguro que querés eliminar este pedido? Esta acción no se puede deshacer.</span>
+                    <div className={styles.confirmActions}>
+                      <button className={styles.deleteConfirmBtn} type="button" onClick={handleDelete}>Sí, eliminar</button>
+                      <button className={styles.cancelBtn} type="button" onClick={() => setConfirmDelete(false)}>Cancelar</button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </section>
+                )}
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </div>
