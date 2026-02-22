@@ -1,7 +1,7 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
+| dgimenezdeveloper | 1500 |
 | FedericoPaal | 210 |
-| dgimenezdeveloper | 1020 |
 | Nahuel-Dalesio | 270 |
 | CelinaJP | 120 |
 | agustin-ovejero | 280 |
@@ -10,6 +10,22 @@
 ## Detalle por issue
 | Dev | Puntaje | Título del Issue | Fecha de cierre |
 |-----|---------|------------------|-----------------|
+| dgimenezdeveloper | 20 | Seguridad y control de acceso | 2026-02-21 |
+| dgimenezdeveloper | 40 | Implementar reportes y estadísticas visuales | 2026-02-21 |
+| dgimenezdeveloper | 20 | Historial y seguimiento de pedidos | 2026-02-21 |
+| dgimenezdeveloper | 20 | Confirmación de pago de ventas por WhatsApp | 2026-02-21 |
+| dgimenezdeveloper | 60 | Visualización y gestión de pedidos | 2026-02-21 |
+| dgimenezdeveloper | 40 | Gestión de variantes de productos | 2026-02-21 |
+| dgimenezdeveloper | 20 | Implementar gestión de categorías | 2026-02-21 |
+| dgimenezdeveloper | 40 | Implementar gestión de productos (ABM) | 2026-02-21 |
+| dgimenezdeveloper | 20 | Crear dashboard principal del panel de administración | 2026-02-21 |
+| dgimenezdeveloper | 60 | Crear login seguro para el panel de administración | 2026-02-21 |
+| dgimenezdeveloper | 20 | Validar flujo completo y casos de error | 2026-02-21 |
+| dgimenezdeveloper | 20 | Mock de procesamiento de compra y feedback al usuario | 2026-02-21 |
+| dgimenezdeveloper | 20 | Implementar botón de envío por WhatsApp | 2026-02-21 |
+| dgimenezdeveloper | 20 | Generar resumen de pedido para WhatsApp | 2026-02-21 |
+| dgimenezdeveloper | 30 | Crear formulario de confirmación de pedido | 2026-02-21 |
+| dgimenezdeveloper | 30 | Implementar persistencia del carrito con localStorage | 2026-02-21 |
 | FedericoPaal | 10 | Agregar texto institucional en la sección "Sobre nosotros" | 2026-02-20 |
 | dgimenezdeveloper | 10 | Integrar el slider en la sección "Ofertas del mes" | 2026-02-19 |
 | dgimenezdeveloper | 20 | Adaptar el diseño del slider a la identidad de allmart | 2026-02-19 |
