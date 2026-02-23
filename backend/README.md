@@ -162,10 +162,13 @@ cp .env.example .env
 sudo -u postgres psql -f scripts/create_db.sql
 # Ver docs/DB_SETUP.md para instrucciones detalladas y troubleshooting
 
-# 4. Iniciar en modo desarrollo (hot-reload)
+# 4. Ejecutar migraciones (crea las tablas en la BD)
+npm run migrate
+
+# 5. Iniciar en modo desarrollo (hot-reload)
 npm run dev
 
-# 5. O compilar y ejecutar en producción
+# 6. O compilar y ejecutar en producción
 npm run build
 npm start
 ```
@@ -181,6 +184,7 @@ npm start
 | `npm run dev` | Inicia con `ts-node-dev` y hot-reload |
 | `npm run build` | Compila TypeScript → `dist/` |
 | `npm start` | Inicia el servidor desde `dist/` (producción) |
+| `npm run migrate` | Aplica migraciones SQL pendientes a PostgreSQL |
 
 ## Variables de entorno
 
