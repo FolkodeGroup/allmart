@@ -156,17 +156,23 @@ npm install
 
 # 2. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con los valores reales (ver sección Variables de entorno)
+# Completar DB_PASSWORD con el password del superusuario postgres
 
-# 3. Iniciar en modo desarrollo (hot-reload)
+# 3. Crear la base de datos PostgreSQL (solo la primera vez)
+sudo -u postgres psql -f scripts/create_db.sql
+# Ver docs/DB_SETUP.md para instrucciones detalladas y troubleshooting
+
+# 4. Iniciar en modo desarrollo (hot-reload)
 npm run dev
 
-# 4. O compilar y ejecutar en producción
+# 5. O compilar y ejecutar en producción
 npm run build
 npm start
 ```
 
 > El servidor queda disponible en **http://localhost:3001**
+
+> Para resetear la base de datos en desarrollo: `sudo -u postgres psql -f scripts/drop_db.sql`
 
 ### Scripts disponibles
 
@@ -191,7 +197,13 @@ Todas las variables quedan centralizadas en `src/config/env.ts`.
 | `ADMIN_HASH` | **Sí** | — | Hash bcrypt de la contraseña admin |
 | `EDITOR_USER` | No | `editor` | Nombre del usuario editor |
 | `EDITOR_HASH` | **Sí** | — | Hash bcrypt de la contraseña editor |
-| `DATABASE_URL` | No | — | URL de conexión a BD (futuro) |
+| `DB_HOST` | No | `localhost` | Host de PostgreSQL |
+| `DB_PORT` | No | `5432` | Puerto de PostgreSQL |
+| `DB_USER` | No | `postgres` | Superusuario de PostgreSQL |
+| `DB_PASSWORD` | **Sí** | — | Password del superusuario postgres |
+| `DB_NAME` | No | `allmart_db` | Nombre de la base de datos |
+
+> Ver [docs/DB\_SETUP.md](docs/DB_SETUP.md) para instrucciones detalladas de configuración de PostgreSQL.
 
 > Para generar un hash bcrypt:
 > ```bash
