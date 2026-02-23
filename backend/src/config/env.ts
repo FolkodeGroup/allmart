@@ -18,6 +18,10 @@ export const env = {
   EDITOR_USER: process.env.EDITOR_USER || 'editor',
   EDITOR_HASH: process.env.EDITOR_HASH || '$2b$10$mt.YMa6mFiMmnnxRettsAO/brFQfx1rJQBWFN.HePpYNYtoj7ZRhu',
 
-  // Database — cuando se conecte una BD real, agregar aquí
-  // DATABASE_URL: process.env.DATABASE_URL || '',
+  // ─── PostgreSQL ───────────────────────────────────────────────────────────
+  DB_HOST:     process.env.DB_HOST     || 'localhost',
+  DB_PORT:     parseInt(process.env.DB_PORT || '5432', 10),
+  DB_USER:     process.env.DB_USER     || 'postgres',
+  DB_PASSWORD: process.env.DB_PASSWORD || '',
+  DB_NAME:     process.env.DB_NAME     || 'allmart_db',
 } as const;
