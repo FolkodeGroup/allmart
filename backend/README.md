@@ -141,23 +141,62 @@ Ejemplo: agregar **documentos** de proveedores.
 
 ---
 
-## Scripts
+## Instalación y ejecución
 
-```bash
-npm install          # Instala dependencias
-npm run dev          # Modo desarrollo con hot-reload (ts-node-dev)
-npm run build        # Compila TypeScript → dist/
-npm start            # Inicia desde dist/ (producción)
-```
-
-## Requisitos
+### Requisitos
 
 - Node.js >= 18
-- TypeScript >= 5
+- npm >= 9 (o pnpm / yarn)
+
+### Pasos
+
+```bash
+# 1. Instalar dependencias
+npm install
+
+# 2. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con los valores reales (ver sección Variables de entorno)
+
+# 3. Iniciar en modo desarrollo (hot-reload)
+npm run dev
+
+# 4. O compilar y ejecutar en producción
+npm run build
+npm start
+```
+
+> El servidor queda disponible en **http://localhost:3001**
+
+### Scripts disponibles
+
+| Script | Descripción |
+|--------|-------------|
+| `npm run dev` | Inicia con `ts-node-dev` y hot-reload |
+| `npm run build` | Compila TypeScript → `dist/` |
+| `npm start` | Inicia el servidor desde `dist/` (producción) |
 
 ## Variables de entorno
 
-Ver `.env` en la raíz del backend. Variables disponibles en `src/config/env.ts`.
+Copiar `.env.example` → `.env` y completar los valores.
+Todas las variables quedan centralizadas en `src/config/env.ts`.
+
+| Variable | Requerida | Default | Descripción |
+|----------|-----------|---------|-------------|
+| `NODE_ENV` | No | `development` | Entorno de ejecución |
+| `PORT` | No | `3001` | Puerto del servidor Express |
+| `CORS_ORIGIN` | No | `http://localhost:5173` | URL del frontend permitida |
+| `JWT_SECRET` | **Sí** | — | Clave secreta para firma de JWT |
+| `ADMIN_USER` | No | `admin` | Nombre del usuario administrador |
+| `ADMIN_HASH` | **Sí** | — | Hash bcrypt de la contraseña admin |
+| `EDITOR_USER` | No | `editor` | Nombre del usuario editor |
+| `EDITOR_HASH` | **Sí** | — | Hash bcrypt de la contraseña editor |
+| `DATABASE_URL` | No | — | URL de conexión a BD (futuro) |
+
+> Para generar un hash bcrypt:
+> ```bash
+> node -e "require('bcryptjs').hash('tu_password', 10).then(console.log)"
+> ```
 
 ---
 
