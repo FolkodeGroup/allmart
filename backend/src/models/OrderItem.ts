@@ -6,12 +6,11 @@
 export interface OrderItem {
   id: string;
   orderId: string;
-  productId: string;
-  productVariantId?: string;
-  productName: string; // Snapshot del nombre al momento de la venta
-  unitPrice: number;   // Snapshot del precio al momento de la venta
+  productId?: string;
+  productName: string;
+  productImage?: string;
+  unitPrice: number;
   quantity: number;
-  subtotal: number;
 }
 
 export type CreateOrderItemDTO = Omit<OrderItem, 'id'>;

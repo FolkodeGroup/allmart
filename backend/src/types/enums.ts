@@ -11,11 +11,17 @@ export enum UserRole {
 }
 
 export enum OrderStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  SHIPPED = 'shipped',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
+  PENDING    = 'pendiente',
+  CONFIRMED  = 'confirmado',
+  PROCESSING = 'en-preparacion',
+  SHIPPED    = 'enviado',
+  DELIVERED  = 'entregado',
+  CANCELLED  = 'cancelado',
+}
+
+export enum PaymentStatus {
+  UNPAID = 'no-abonado',
+  PAID   = 'abonado',
 }
 
 export enum ProductStatus {
