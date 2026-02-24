@@ -21,7 +21,7 @@ export async function getCategoryById(id: string): Promise<Category> {
 
 export async function createCategory(dto: CreateCategoryDTO): Promise<Category> {
   const now = new Date();
-  const category: Category = { ...dto, id: uuidv4(), createdAt: now, updatedAt: now };
+  const category: Category = { ...dto, id: uuidv4(), itemCount: 0, createdAt: now, updatedAt: now };
   store.set(category.id, category);
   return category;
 }
