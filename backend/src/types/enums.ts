@@ -30,3 +30,8 @@ export enum StockMovementType {
   OUT = 'out',
   ADJUSTMENT = 'adjustment',
 }
+
+export enum CategoryStatus {
+  ACTIVE   = 'active',
+  INACTIVE = 'inactive',
+}

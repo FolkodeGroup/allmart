@@ -24,5 +24,24 @@ export type CreateCategoryDTO = Omit<Category, 'id' | 'itemCount' | 'createdAt' 
 /** Actualización parcial de categoría */
 export type UpdateCategoryDTO = Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>;
 
-/** Vista pública de categoría (para el frontend) */
-export type PublicCategory = Omit<Category, 'createdAt' | 'updatedAt'>;
+/** Vista pública que el frontend consume: imagen como "image", sin timestamps */
+export interface PublicCategoryDTO {
+  id:          string;
+  name:        string;
+  slug:        string;
+  description: string | null;
+  image:       string | null;
+  itemCount:   number;
+}
+
+/** Mapea el modelo interno al DTO público */
+export function toPublicDTO(c: Category): PublicCategoryDTO {
+  return {
+    id:          c.id,
+    name:        c.name,
+    slug:        c.slug,
+    description: c.description,
+    image:       c.imageUrl,
+    itemCount:   c.itemCount,
+  };
+}

@@ -94,6 +94,7 @@ public/
 !frontend/public/favicon-32x32.png
 !frontend/public/apple-touch-icon.png
 !frontend/public/site.webmanifest
+!backend/src/routes/public/
 
 # Vuepress build
 .vuepress/dist/

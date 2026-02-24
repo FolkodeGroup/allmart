@@ -7,11 +7,12 @@
  */
 
 import { Router } from 'express';
-import authRouter      from './admin/auth';
-import productsRouter  from './admin/products';
-import categoriesRouter from './admin/categories';
-import ordersRouter    from './admin/orders';
-import usersRouter     from './admin/users';
+import authRouter                from './admin/auth';
+import productsRouter            from './admin/products';
+import categoriesRouter          from './admin/categories';
+import ordersRouter              from './admin/orders';
+import usersRouter               from './admin/users';
+import publicCategoriesRouter    from './public/categories';
 
 const adminRouter = Router();
 
@@ -21,8 +22,13 @@ adminRouter.use('/categories', categoriesRouter);
 adminRouter.use('/orders',     ordersRouter);
 adminRouter.use('/users',      usersRouter);
 
+// ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
+const publicRouter = Router();
+publicRouter.use('/categories', publicCategoriesRouter);
+
 // Router principal de la API
 const apiRouter = Router();
-apiRouter.use('/admin', adminRouter);
+apiRouter.use('/admin',  adminRouter);
+apiRouter.use('/',       publicRouter);  // /api/categories, etc.
 
 export default apiRouter;
