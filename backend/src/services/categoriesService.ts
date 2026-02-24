@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Category, CreateCategoryDTO, UpdateCategoryDTO } from '../models/Category';
-import { CategoryStatus } from '../types/enums';
 import { createError } from '../middlewares/errorHandler';
 
 const store: Map<string, Category> = new Map();
@@ -18,11 +17,12 @@ export async function getAllCategories(): Promise<Category[]> {
   return Array.from(store.values());
 }
 
-/** Devuelve solo las categorías con status ACTIVE (para endpoints públicos) */
+/**
+ * Devuelve categorías visibles al público.
+ * Cuando se agregue el campo `status` a la BD, filtrar aquí por status = 'active'.
+ */
 export async function getAllActiveCategories(): Promise<Category[]> {
-  return Array.from(store.values()).filter(
-    (c) => c.status === CategoryStatus.ACTIVE,
-  );
+  return Array.from(store.values());
 }
 
 export async function getCategoryById(id: string): Promise<Category> {
@@ -42,14 +42,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category> {
 
 export async function createCategory(dto: CreateCategoryDTO): Promise<Category> {
   const now = new Date();
-  const category: Category = {
-    ...dto,
-    id:        uuidv4(),
-    itemCount: dto.itemCount ?? 0,
-    status:    dto.status    ?? CategoryStatus.ACTIVE,
-    createdAt: now,
-    updatedAt: now,
-  };
+  const category: Category = { ...dto, id: uuidv4(), itemCount: 0, createdAt: now, updatedAt: now };
   store.set(category.id, category);
   return category;
 }

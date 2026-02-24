@@ -5,9 +5,9 @@
  */
 
 export enum UserRole {
-  ADMIN = 'admin',
-  EDITOR = 'editor',
-  VIEWER = 'viewer',
+  ADMIN    = 'admin',
+  EDITOR   = 'editor',
+  CUSTOMER = 'customer',  // cliente final (antes VIEWER)
 }
 
 export enum OrderStatus {

@@ -1,32 +1,37 @@
 /**
  * models/Category.ts
- * Modelo de datos para las categorías de productos.
+ * Modelo de datos alineado con la tabla PostgreSQL `categories`.
+ * Refleja exactamente los campos de migrations/002_create_categories.sql.
  */
 
-import { CategoryStatus } from '../types/enums';
-
+// ─── Entidad completa (espejo de la fila en BD) ───────────────────────────────
 export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  imageUrl?: string;
-  itemCount: number;
-  status: CategoryStatus;
-  parentId?: string; // Para categorías anidadas (árbol de categorías ERP)
-  createdAt: Date;
-  updatedAt: Date;
+  id:          string;
+  name:        string;
+  slug:        string;
+  description: string | null;
+  imageUrl:    string | null;
+  itemCount:   number;
+  createdAt:   Date;
+  updatedAt:   Date;
 }
 
-// ─── DTOs públicos ─────────────────────────────────────────────────────────────
-/** Forma que el frontend consume: nombres camelCase, imagen como "image" */
+// ─── DTOs ─────────────────────────────────────────────────────────────────────
+
+/** Datos para crear una categoría nueva (sin id ni timestamps) */
+export type CreateCategoryDTO = Omit<Category, 'id' | 'itemCount' | 'createdAt' | 'updatedAt'>;
+
+/** Actualización parcial de categoría */
+export type UpdateCategoryDTO = Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>;
+
+/** Vista pública que el frontend consume: imagen como "image", sin timestamps */
 export interface PublicCategoryDTO {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  image?: string;
-  itemCount: number;
+  id:          string;
+  name:        string;
+  slug:        string;
+  description: string | null;
+  image:       string | null;
+  itemCount:   number;
 }
 
 /** Mapea el modelo interno al DTO público */
@@ -40,6 +45,3 @@ export function toPublicDTO(c: Category): PublicCategoryDTO {
     itemCount:   c.itemCount,
   };
 }
-
-export type CreateCategoryDTO = Omit<Category, 'id' | 'createdAt' | 'updatedAt'>;
-export type UpdateCategoryDTO = Partial<CreateCategoryDTO>;
