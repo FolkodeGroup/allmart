@@ -11,13 +11,6 @@ export const env = {
   JWT_SECRET: process.env.JWT_SECRET || 'allmart_super_secret',
   NODE_ENV: process.env.NODE_ENV || 'development',
 
-  // Admin credentials (in-memory, migrate to DB when available)
-  ADMIN_USER: process.env.ADMIN_USER || 'admin',
-  ADMIN_HASH: process.env.ADMIN_HASH || '$2b$10$zLj./2iqsqnoBqxpT92mVOwUtayNkYy6tL8in443IuB82L905yOau',
-
-  EDITOR_USER: process.env.EDITOR_USER || 'editor',
-  EDITOR_HASH: process.env.EDITOR_HASH || '$2b$10$mt.YMa6mFiMmnnxRettsAO/brFQfx1rJQBWFN.HePpYNYtoj7ZRhu',
-
   // ─── PostgreSQL ───────────────────────────────────────────────────────────
   DB_HOST:     process.env.DB_HOST     || 'localhost',
   DB_PORT:     parseInt(process.env.DB_PORT || '5432', 10),
