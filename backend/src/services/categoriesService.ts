@@ -41,6 +41,9 @@ export async function getCategoryBySlug(slug: string): Promise<Category> {
 // ─── Mutaciones ────────────────────────────────────────────────────────────────
 
 export async function createCategory(dto: CreateCategoryDTO): Promise<Category> {
+  if (!dto.name) {
+    throw createError('El nombre de la categoría es obligatorio', 400);
+  }
   const now = new Date();
   const category: Category = { ...dto, id: uuidv4(), itemCount: 0, createdAt: now, updatedAt: now };
   store.set(category.id, category);
@@ -49,7 +52,16 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
 
 export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promise<Category> {
   const existing = await getCategoryById(id);
-  const updated: Category = { ...existing, ...dto, updatedAt: new Date() };
+
+  let slug = existing.slug;
+
+  if (dto.slug) {
+    slug = dto.slug;
+  } else if (dto.name) {
+    slug = generateSlug(dto.name);
+  }
+
+  const updated: Category = { ...existing, ...dto, slug, updatedAt: new Date() };
   store.set(id, updated);
   return updated;
 }
