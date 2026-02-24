@@ -8,6 +8,7 @@ export * from './enums';
 
 // ─── Payload JWT ──────────────────────────────────────────────────────────────
 export interface JwtPayload {
+  userId: string;
   user: string;
   role: string;
   iat?: number;

@@ -1,25 +1,13 @@
 /**
  * services/authService.ts
  * Lógica de negocio para autenticación de administradores.
- * Actualmente usa usuarios en memoria; migrar a BD cuando esté disponible.
+ * Valida credenciales contra la tabla users de la base de datos.
  */
 
-import { env } from '../config/env';
+import { pool } from '../config/db';
 import { comparePassword } from '../utils/bcrypt';
 import { signToken } from '../utils/jwt';
 import { UserRole } from '../types';
-
-interface InMemoryUser {
-  user: string;
-  hash: string;
-  role: UserRole;
-}
-
-// En memoria hasta integrar BD
-const USERS: InMemoryUser[] = [
-  { user: env.ADMIN_USER,  hash: env.ADMIN_HASH,  role: UserRole.ADMIN  },
-  { user: env.EDITOR_USER, hash: env.EDITOR_HASH, role: UserRole.EDITOR },
-];
 
 export interface LoginResult {
   token: string;
@@ -27,12 +15,28 @@ export interface LoginResult {
 }
 
 export async function login(username: string, password: string): Promise<LoginResult> {
-  const found = USERS.find(u => u.user === username);
-  if (!found) throw Object.assign(new Error('Usuario inválido'), { statusCode: 401 });
+  // Solo admin y editor tienen acceso al panel de administración
+  const { rows } = await pool.query<{ id: string; email: string; password_hash: string; role: UserRole }>(
+    `SELECT id, email, password_hash, role
+     FROM users
+     WHERE email = $1
+       AND role IN ('admin', 'editor')
+       AND is_active = TRUE
+     LIMIT 1`,
+    [username]
+  );
 
-  const valid = await comparePassword(password, found.hash);
-  if (!valid) throw Object.assign(new Error('Contraseña incorrecta'), { statusCode: 401 });
+  if (rows.length === 0) {
+    throw Object.assign(new Error('Credenciales inválidas'), { statusCode: 401 });
+  }
 
-  const token = signToken({ user: found.user, role: found.role });
-  return { token, role: found.role };
+  const user = rows[0];
+
+  const valid = await comparePassword(password, user.password_hash);
+  if (!valid) {
+    throw Object.assign(new Error('Credenciales inválidas'), { statusCode: 401 });
+  }
+
+  const token = signToken({ userId: user.id, user: user.email, role: user.role });
+  return { token, role: user.role };
 }
