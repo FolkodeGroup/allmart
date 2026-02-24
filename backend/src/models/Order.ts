@@ -3,15 +3,17 @@
  * Modelo de pedido / venta.
  */
 
-import { OrderStatus } from '../types';
+import { OrderStatus, PaymentStatus } from '../types';
 
 export interface Order {
   id: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-  status: OrderStatus;
+  customerFirstName: string;
+  customerLastName: string;
+  customerEmail: string;
   total: number;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  paidAt?: Date;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
