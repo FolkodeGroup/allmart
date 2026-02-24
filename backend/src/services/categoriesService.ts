@@ -56,7 +56,12 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
     throw createError('El nombre de la categoría es obligatorio', 400);
   }
   const now = new Date();
-  const slug = generateSlug(dto.name);
+
+  // Validamos que si no se pasa slug, se genere uno a partir del nombre.
+  const sourceForSlug = dto.slug && dto.slug.trim() !== '' ? dto.slug : dto.name;
+  
+  const slug = generateSlug(sourceForSlug);
+
   const category: Category = { ...dto, slug, id: uuidv4(), itemCount: 0, createdAt: now, updatedAt: now };
   store.set(category.id, category);
   return category;
