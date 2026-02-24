@@ -11,6 +11,17 @@ import { createError } from '../middlewares/errorHandler';
 
 const store: Map<string, Category> = new Map();
 
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
 // ─── Consultas ─────────────────────────────────────────────────────────────────
 
 export async function getAllCategories(): Promise<Category[]> {
@@ -45,7 +56,8 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
     throw createError('El nombre de la categoría es obligatorio', 400);
   }
   const now = new Date();
-  const category: Category = { ...dto, id: uuidv4(), itemCount: 0, createdAt: now, updatedAt: now };
+  const slug = generateSlug(dto.name);
+  const category: Category = { ...dto, slug, id: uuidv4(), itemCount: 0, createdAt: now, updatedAt: now };
   store.set(category.id, category);
   return category;
 }
