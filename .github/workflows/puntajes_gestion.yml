@@ -1,0 +1,152 @@
+name: Registrar puntajes de gestión
+
+# Captura todas las actividades de gestión que merecen puntaje
+on:
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    types: [opened, closed]
+  milestone:
+    types: [created, closed]
+  issues:
+    types: [opened, labeled, assigned]
+
+jobs:
+  registrar_puntaje_gestion:
+    runs-on: ubuntu-latest
+    # Solo procesar si el actor es dgimenezdeveloper o folkodegroup
+    if: |
+      github.actor == 'dgimenezdeveloper' ||
+      github.actor == 'folkodegroup'
+
+    steps:
+      - name: Calcular puntaje y registrar actividad
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const actor = context.actor;
+            // Siempre acreditar a dgimenezdeveloper (también cubre folkodegroup)
+            const devAcreditado = 'dgimenezdeveloper';
+            const eventName = context.eventName;
+            const payload = context.payload;
+
+            let puntaje = 0;
+            let actividad = '';
+            let referencia = '';
+
+            // ── Pull Request Reviews ──────────────────────────────────────────
+            if (eventName === 'pull_request_review') {
+              const state = payload.review?.state?.toLowerCase();
+              const prNum = payload.pull_request?.number;
+              const prTitle = payload.pull_request?.title || '';
+              referencia = `PR #${prNum}: ${prTitle}`;
+
+              if (state === 'approved') {
+                puntaje = 15;
+                actividad = 'Revisión de PR — Aprobación';
+              } else if (state === 'changes_requested') {
+                puntaje = 10;
+                actividad = 'Revisión de PR — Solicitud de cambios';
+              } else if (state === 'commented') {
+                puntaje = 5;
+                actividad = 'Revisión de PR — Comentario de revisión';
+              }
+            }
+
+            // ── Pull Requests ─────────────────────────────────────────────────
+            if (eventName === 'pull_request') {
+              const pr = payload.pull_request;
+              referencia = `PR #${pr.number}: ${pr.title}`;
+
+              if (payload.action === 'opened') {
+                puntaje = 5;
+                actividad = 'Apertura de PR';
+              } else if (payload.action === 'closed' && pr.merged === true) {
+                puntaje = 15;
+                actividad = 'Merge de PR';
+              }
+            }
+
+            // ── Milestones ────────────────────────────────────────────────────
+            if (eventName === 'milestone') {
+              const ms = payload.milestone;
+              referencia = `Milestone: ${ms.title}`;
+
+              if (payload.action === 'created') {
+                puntaje = 5;
+                actividad = 'Creación de milestone';
+              } else if (payload.action === 'closed') {
+                puntaje = 15;
+                actividad = 'Cierre de milestone';
+              }
+            }
+
+            // ── Issues ────────────────────────────────────────────────────────
+            if (eventName === 'issues') {
+              const issue = payload.issue;
+              referencia = `Issue #${issue.number}: ${issue.title}`;
+
+              if (payload.action === 'opened') {
+                puntaje = 3;
+                actividad = 'Creación de issue';
+              } else if (payload.action === 'labeled') {
+                puntaje = 2;
+                const label = payload.label?.name || '';
+                actividad = `Etiquetado de issue (${label})`;
+              } else if (payload.action === 'assigned') {
+                puntaje = 3;
+                const assignee = payload.assignee?.login || '';
+                actividad = `Asignación de issue a ${assignee}`;
+              }
+            }
+
+            // Si no hay puntaje válido, salir sin error
+            if (puntaje === 0) {
+              console.log('Evento sin puntaje asignable, saliendo sin cambios.');
+              return;
+            }
+
+            const fecha = new Date().toISOString().split('T')[0];
+            const nuevaFila = `| ${devAcreditado} | ${puntaje} | ${actividad} | ${referencia.replace(/\|/g, ' ')} | ${fecha} |\n`;
+
+            console.log(`Registrando: ${nuevaFila.trim()}`);
+
+            // ── Actualizar MANAGEMENT_LOG.md vía API (para evitar race conditions) ──
+            const logPath = 'MANAGEMENT_LOG.md';
+            const cabecera = '| Dev | Puntaje | Actividad | Referencia | Fecha |\n|-----|---------|-----------|------------|-------|\n';
+
+            let sha = undefined;
+            let contenidoActual = '';
+
+            try {
+              const { data } = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: logPath,
+              });
+              sha = data.sha;
+              contenidoActual = Buffer.from(data.content, 'base64').toString('utf8');
+            } catch (e) {
+              // El archivo no existe aún — se creará con cabecera
+              contenidoActual = `# Log de actividades de gestión\n\n${cabecera}`;
+            }
+
+            // Si el archivo existe pero no tiene la tabla, añadir cabecera
+            if (!contenidoActual.includes('| Dev | Puntaje |')) {
+              contenidoActual += `\n## Actividades\n\n${cabecera}`;
+            }
+
+            const nuevoContenido = contenidoActual + nuevaFila;
+            const contentEncoded = Buffer.from(nuevoContenido).toString('base64');
+
+            await github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: logPath,
+              message: `chore: registrar puntaje de gestión — ${actividad} (${puntaje} pts) [skip ci]`,
+              content: contentEncoded,
+              sha,
+            });
+
+            console.log(`✅ MANAGEMENT_LOG.md actualizado: +${puntaje} pts para ${devAcreditado}`);

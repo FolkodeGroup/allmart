@@ -29,3 +29,40 @@ Cálculo:
 
 ---
 Este archivo debe actualizarse si se modifica el sistema de puntajes o las reglas de reparto.
+
+---
+
+## Tabla de puntajes por tipo de tarea
+
+### Issues (tareas de desarrollo)
+| Complejidad    | Puntaje sugerido |
+|----------------|-----------------|
+| Muy baja       | 10              |
+| Baja           | 20              |
+| Media          | 30–40           |
+| Alta           | 60–80           |
+| Muy alta       | 100–200         |
+
+### Actividades de gestión (automáticas — acreditadas a dgimenezdeveloper)
+Estas actividades son registradas automáticamente por GitHub Actions en `MANAGEMENT_LOG.md` cada vez que ocurren, y se suman a los puntajes del responsable de gestión del repositorio.
+
+| Actividad                                         | Puntaje |
+|---------------------------------------------------|---------|
+| Revisión de PR — Aprobación                       | 15      |
+| Revisión de PR — Solicitud de cambios             | 10      |
+| Revisión de PR — Comentario de revisión           | 5       |
+| Merge de PR                                       | 15      |
+| Apertura de PR                                    | 5       |
+| Creación de milestone                             | 5       |
+| Cierre de milestone                               | 15      |
+| Creación de issue                                 | 3       |
+| Etiquetado de issue                               | 2       |
+| Asignación de issue                               | 3       |
+
+> **Nota:** El usuario `folkodegroup` también se mapea a `dgimenezdeveloper` a efectos de puntaje, ya que representa la misma persona actuando como organización.
+
+### Reglas de transparencia y auditoría
+- Todas las actividades de gestión quedan registradas en `MANAGEMENT_LOG.md` con fecha, tipo de acción y puntaje.
+- El script `sumar_puntajes.cjs` consolida tanto los puntajes de issues como los de gestión en `SCORES.md`.
+- Cada domingo se genera automáticamente un recordatorio (issue en GitHub) si el `SCORES.md` no fue actualizado en los últimos 7 días.
+- Cualquier colaborador puede auditar el log en `MANAGEMENT_LOG.md` o ejecutar el script localmente con su propio `GITHUB_TOKEN`.
