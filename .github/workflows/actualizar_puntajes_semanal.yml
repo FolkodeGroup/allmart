@@ -1,0 +1,47 @@
+name: Actualización automática de puntajes
+
+on:
+  schedule:
+    # Todos los domingos a las 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Permite ejecución manual desde la pestaña Actions
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necesario para pushear cambios
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: npm ci
+
+      - name: Generar Log de Gestión (Retroactivo + Sync)
+        working-directory: frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+        run: node scripts/generar_management_log.cjs
+
+      - name: Consolidar SCORES.md
+        working-directory: frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+        run: node scripts/sumar_puntajes.cjs
+
+      - name: Commitear y pushear cambios
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: actualización automática de puntajes semanal [skip ci]"
+          file_pattern: 'MANAGEMENT_LOG.md frontend/SCORES.md'
+          # Esto evita que el workflow se dispare a sí mismo si hubiera un trigger de push
+          commit_author: Author <actions@github.com>

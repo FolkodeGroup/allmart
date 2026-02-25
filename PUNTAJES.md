@@ -63,6 +63,6 @@ Estas actividades son registradas automáticamente por GitHub Actions en `MANAGE
 
 ### Reglas de transparencia y auditoría
 - Todas las actividades de gestión quedan registradas en `MANAGEMENT_LOG.md` con fecha, tipo de acción y puntaje.
+- **Actualización Automática:** Cada domingo a las 00:00 UTC, un workflow de GitHub Actions (`actualizar_puntajes_semanal.yml`) sincroniza todo el historial y actualiza `SCORES.md` automáticamente.
 - El script `sumar_puntajes.cjs` consolida tanto los puntajes de issues como los de gestión en `SCORES.md`.
-- Cada domingo se genera automáticamente un recordatorio (issue en GitHub) si el `SCORES.md` no fue actualizado en los últimos 7 días.
 - Cualquier colaborador puede auditar el log en `MANAGEMENT_LOG.md` o ejecutar el script localmente con su propio `GITHUB_TOKEN`.
