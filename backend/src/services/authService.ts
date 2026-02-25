@@ -5,9 +5,15 @@
  */
 
 import { pool } from '../config/db';
-import { comparePassword } from '../utils/bcrypt';
+import { comparePassword, hashPassword } from '../utils/bcrypt';
 import { signToken } from '../utils/jwt';
 import { UserRole } from '../types';
+
+export interface RegistrationResult {
+  userId: string;
+  email: string;
+  role: UserRole;
+}
 
 export interface LoginResult {
   token: string;
@@ -76,4 +82,41 @@ export async function loginCustomer(email: string, password: string): Promise<Lo
   // El token JWT expira en 24 horas como solicita el issue
   const token = signToken({ userId: user.id, user: user.email, role: user.role }, '24h');
   return { token, role: user.role, userId: user.id };
+}
+
+/**
+ * registerCustomer (Público)
+ * Crea un nuevo usuario con rol customer.
+ */
+export async function registerCustomer(
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string
+): Promise<RegistrationResult> {
+  // Verificar si el email ya existe
+  const { rows: existingRows } = await pool.query<{ id: string }>(
+    'SELECT id FROM users WHERE email = $1 LIMIT 1',
+    [email]
+  );
+
+  if (existingRows.length > 0) {
+    throw Object.assign(new Error('El email ya se encuentra registrado'), { statusCode: 409 });
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  const { rows } = await pool.query<{ id: string; email: string; role: string }>(
+    `INSERT INTO users (first_name, last_name, email, password_hash, role)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, email, role`,
+    [firstName, lastName, email, passwordHash, UserRole.CUSTOMER]
+  );
+
+  const newUser = rows[0];
+  return {
+    userId: newUser.id,
+    email: newUser.email,
+    role: newUser.role as UserRole,
+  };
 }
