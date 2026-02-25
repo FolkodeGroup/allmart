@@ -4,10 +4,11 @@
  * Actualmente usa un store en memoria; sustituir por llamadas a BD.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { Product, CreateProductDTO, UpdateProductDTO } from '../models/Product';
-import { ProductStatus } from '../types';
-import { createError } from '../middlewares/errorHandler';
+import { v4 as uuidv4 } from "uuid";
+import { Product, CreateProductDTO, UpdateProductDTO } from "../models/Product";
+import { ProductStatus } from "../types";
+import { createError } from "../middlewares/errorHandler";
+import { getCategoryBySlug } from "./categoriesService";
 
 // Store in-memory (reemplazar con repositorio de BD)
 const store: Map<string, Product> = new Map();
@@ -18,7 +19,7 @@ export async function getAllProducts(): Promise<Product[]> {
 
 export async function getProductById(id: string): Promise<Product> {
   const product = store.get(id);
-  if (!product) throw createError('Producto no encontrado', 404);
+  if (!product) throw createError("Producto no encontrado", 404);
   return product;
 }
 
@@ -35,7 +36,10 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   return product;
 }
 
-export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
+export async function updateProduct(
+  id: string,
+  dto: UpdateProductDTO,
+): Promise<Product> {
   const existing = await getProductById(id);
   const updated: Product = { ...existing, ...dto, updatedAt: new Date() };
   store.set(id, updated);
@@ -43,7 +47,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  if (!store.has(id)) throw createError('Producto no encontrado', 404);
+  if (!store.has(id)) throw createError("Producto no encontrado", 404);
   store.delete(id);
 }
 
@@ -51,7 +55,7 @@ export async function deleteProduct(id: string): Promise<void> {
 type ProductQuery = {
   category?: string;
   q?: string;
-  sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
+  sort?: "price_asc" | "price_desc" | "rating" | "newest";
   page?: number;
   limit?: number;
 };
@@ -63,30 +67,33 @@ export async function getPublicProducts(query: ProductQuery) {
 
   // Filtrar por categoría
   if (category) {
-    products = products.filter(p => p.categoryId === category);
+    const foundCategory = await getCategoryBySlug(category);
+
+    products = products.filter((p) => p.categoryId === foundCategory.id);
   }
 
   // Búsqueda por texto
   if (q) {
     const search = q.toLowerCase();
-    products = products.filter(p =>
-      p.name.toLowerCase().includes(search) ||
-      p.description?.toLowerCase().includes(search)
+    products = products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(search) ||
+        p.description?.toLowerCase().includes(search),
     );
   }
 
   // Ordenamiento
   if (sort) {
     switch (sort) {
-      case 'price_asc':
+      case "price_asc":
         products.sort((a, b) => a.price - b.price);
         break;
 
-      case 'price_desc':
+      case "price_desc":
         products.sort((a, b) => b.price - a.price);
         break;
 
-      case 'newest':
+      case "newest":
         products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         break;
     }
@@ -106,14 +113,14 @@ export async function getPublicProducts(query: ProductQuery) {
     total,
     page,
     limit,
-    totalPages
+    totalPages,
   };
 }
 export async function getProductBySlug(slug: string): Promise<Product> {
-  const product = Array.from(store.values()).find(p => p.slug === slug);
+  const product = Array.from(store.values()).find((p) => p.slug === slug);
 
   if (!product) {
-    throw createError('Producto no encontrado', 404);
+    throw createError("Producto no encontrado", 404);
   }
 
   return product;

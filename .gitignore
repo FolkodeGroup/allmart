@@ -95,6 +95,7 @@ public/
 !frontend/public/apple-touch-icon.png
 !frontend/public/site.webmanifest
 !backend/src/routes/public/
+!backend/src/controllers/public/
 
 # Vuepress build
 .vuepress/dist/
