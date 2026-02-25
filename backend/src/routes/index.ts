@@ -13,6 +13,7 @@ import categoriesRouter          from './admin/categories';
 import ordersRouter              from './admin/orders';
 import usersRouter               from './admin/users';
 import publicCategoriesRouter    from './public/categories';
+import publicAuthRouter          from './public/auth';
 import { adminMiddleware }        from '../middlewares/auth';
 
 const adminRouter = Router();
@@ -30,6 +31,7 @@ adminRouter.use('/users',      usersRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();
+publicRouter.use('/auth',       publicAuthRouter);
 publicRouter.use('/categories', publicCategoriesRouter);
 
 // Router principal de la API
