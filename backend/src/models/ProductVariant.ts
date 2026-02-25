@@ -7,14 +7,11 @@
 export interface ProductVariant {
   id: string;
   productId: string;
-  sku: string;
-  attributes: Record<string, string>; // { color: 'rojo', talle: 'M' }
-  price?: number;                      // Si difiere del precio base
-  stock: number;
-  imageUrl?: string;
+  name: string; // Ej: "Color", "Talle"
+  values: string[]; // Ej: ["Rojo", "Azul"]
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type CreateProductVariantDTO = Omit<ProductVariant, 'id' | 'createdAt' | 'updatedAt'>;
-export type UpdateProductVariantDTO = Partial<CreateProductVariantDTO>;
+export type UpdateProductVariantDTO = Partial<Omit<CreateProductVariantDTO, 'productId'>>;
