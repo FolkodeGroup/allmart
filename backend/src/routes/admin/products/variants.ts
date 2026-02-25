@@ -15,10 +15,10 @@ const router = Router({ mergeParams: true }); // mergeParams para acceder a :pro
 
 router.use(authMiddleware);
 
-router.get('/',    requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.index);
-router.get('/:id', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.show);
-router.post('/',   requireRole(UserRole.ADMIN), ctrl.create);
-router.put('/:id', requireRole(UserRole.ADMIN), ctrl.update);
-router.delete('/:id', requireRole(UserRole.ADMIN), ctrl.remove);
+router.get('/',           requireRole(UserRole.ADMIN), ctrl.index);
+router.get('/:variantId',    requireRole(UserRole.ADMIN), ctrl.show);
+router.post('/',           requireRole(UserRole.ADMIN), ctrl.create);
+router.put('/:variantId',    requireRole(UserRole.ADMIN), ctrl.update);
+router.delete('/:variantId', requireRole(UserRole.ADMIN), ctrl.remove);
 
 export default router;

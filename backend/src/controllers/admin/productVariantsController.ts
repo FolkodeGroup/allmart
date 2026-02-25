@@ -19,29 +19,28 @@ export async function index(req: AuthenticatedRequest, res: Response, next: Next
 
 export async function show(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const variant = await variantsService.getVariantById(req.params.id);
+    const variant = await variantsService.getVariantById(req.params.productId, req.params.variantId);
     sendSuccess(res, variant);
   } catch (err) { next(err); }
 }
 
 export async function create(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const dto: CreateProductVariantDTO = { ...req.body, productId: req.params.productId };
-    const variant = await variantsService.createVariant(dto);
+    const variant = await variantsService.createVariant(req.params.productId, req.body);
     sendSuccess(res, variant, 201, 'Variante creada');
   } catch (err) { next(err); }
 }
 
 export async function update(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const variant = await variantsService.updateVariant(req.params.id, req.body as UpdateProductVariantDTO);
+    const variant = await variantsService.updateVariant(req.params.productId, req.params.variantId, req.body as UpdateProductVariantDTO);
     sendSuccess(res, variant, 200, 'Variante actualizada');
   } catch (err) { next(err); }
 }
 
 export async function remove(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    await variantsService.deleteVariant(req.params.id);
+    await variantsService.deleteVariant(req.params.productId, req.params.variantId);
     sendSuccess(res, null, 200, 'Variante eliminada');
   } catch (err) { next(err); }
 }
