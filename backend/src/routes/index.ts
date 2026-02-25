@@ -13,6 +13,7 @@ import categoriesRouter          from './admin/categories';
 import ordersRouter              from './admin/orders';
 import usersRouter               from './admin/users';
 import publicCategoriesRouter    from './public/categories';
+import publicProductsRouter from './public/products';
 import publicAuthRouter          from './public/auth';
 import { adminMiddleware }        from '../middlewares/auth';
 
@@ -33,6 +34,7 @@ adminRouter.use('/users',      usersRouter);
 const publicRouter = Router();
 publicRouter.use('/auth',       publicAuthRouter);
 publicRouter.use('/categories', publicCategoriesRouter);
+publicRouter.use('/products', publicProductsRouter);
 
 // Router principal de la API
 const apiRouter = Router();

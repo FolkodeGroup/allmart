@@ -16,7 +16,6 @@ app.get('/', (req, res) => {
 import adminAuth from './adminAuth.js';
 app.use('/api/admin', adminAuth);
 
-app.use('/api/admin/categories', adminCategoriesRoutes);
 
 // Ejemplo de ruta protegida para admins
 app.get('/api/admin/panel', adminAuthMiddleware, (req, res) => {
