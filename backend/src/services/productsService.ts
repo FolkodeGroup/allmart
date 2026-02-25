@@ -9,7 +9,7 @@ import { Product, CreateProductDTO, UpdateProductDTO } from "../models/Product";
 import { ProductStatus } from "../types";
 import { createError } from "../middlewares/errorHandler";
 import * as categoriesService from './categoriesService'; // Para obtener la categoría completa
-
+import { getCategoryBySlug } from "./categoriesService";
 // Store in-memory (reemplazar con repositorio de BD)
 const store: Map<string, Product> = new Map();
 
@@ -105,8 +105,86 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     categoryId: updatedProduct.categoryId
   };
 }
-
 export async function deleteProduct(id: string): Promise<void> {
   if (!store.has(id)) throw createError("Producto no encontrado", 404);
   store.delete(id);
+}
+
+// 1️⃣ Función para obtener productos del catálogo (con filtros)
+type ProductQuery = {
+  category?: string;
+  q?: string;
+  sort?: "price_asc" | "price_desc" | "rating" | "newest";
+  page?: number;
+  limit?: number;
+};
+
+export async function getPublicProducts(query: ProductQuery) {
+  let products = Array.from(store.values());
+
+  const { category, q, sort, page = 1, limit = 12 } = query;
+
+  // Filtrar por categoría
+  if (category) {
+    const foundCategory = await getCategoryBySlug(category);
+
+    products = products.filter((p) => p.categoryId === foundCategory.id);
+  }
+
+  // Búsqueda por texto
+  if (q) {
+    const search = q.toLowerCase();
+    products = products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(search) ||
+        p.description?.toLowerCase().includes(search),
+    );
+  }
+
+  // Ordenamiento
+  if (sort) {
+    switch (sort) {
+      case "price_asc":
+        products.sort((a, b) => a.price - b.price);
+        break;
+
+      case "price_desc":
+        products.sort((a, b) => b.price - a.price);
+        break;
+
+      case "rating":
+      products.sort((a, b) => b.rating - a.rating);
+      break;
+
+      case "newest":
+        products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        break;
+    }
+  }
+
+  const total = products.length;
+
+  const start = (page - 1) * limit;
+  const end = start + limit;
+
+  const paginated = products.slice(start, end);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    data: paginated,
+    total,
+    page,
+    limit,
+    totalPages,
+  };
+}
+export async function getProductBySlug(slug: string): Promise<Product> {
+  const product = Array.from(store.values()).find((p) => p.slug === slug);
+
+  if (!product) {
+    throw createError("Producto no encontrado", 404);
+  }
+
+  return product;
 }

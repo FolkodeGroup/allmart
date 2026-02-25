@@ -13,10 +13,18 @@ import categoriesRouter          from './admin/categories';
 import ordersRouter              from './admin/orders';
 import usersRouter               from './admin/users';
 import publicCategoriesRouter    from './public/categories';
+import publicProductsRouter from './public/products';
+import publicAuthRouter          from './public/auth';
+import { adminMiddleware }        from '../middlewares/auth';
 
 const adminRouter = Router();
 
+// Rutas públicas dentro de /admin
 adminRouter.use('/auth',       authRouter);
+
+// A partir de aquí, todas las rutas requieren autenticación y rol de admin o editor
+adminRouter.use(adminMiddleware);
+
 adminRouter.use('/products',   productsRouter);
 adminRouter.use('/categories', categoriesRouter);
 adminRouter.use('/orders',     ordersRouter);
@@ -24,7 +32,9 @@ adminRouter.use('/users',      usersRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();
+publicRouter.use('/auth',       publicAuthRouter);
 publicRouter.use('/categories', publicCategoriesRouter);
+publicRouter.use('/products', publicProductsRouter);
 
 // Router principal de la API
 const apiRouter = Router();

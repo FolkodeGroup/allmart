@@ -18,6 +18,7 @@ export interface Product {
   status: ProductStatus;
   sku?: string;
   stock: number;
+  rating:number;
   createdAt: Date;
   updatedAt: Date;
 }

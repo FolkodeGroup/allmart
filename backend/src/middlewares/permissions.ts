@@ -13,7 +13,7 @@ import { UserRole, AuthenticatedRequest } from '../types';
  */
 export function requireRole(...roles: UserRole[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    const userRole = req.admin?.role as UserRole | undefined;
+    const userRole = req.user?.role as UserRole | undefined;
 
     if (!userRole || !roles.includes(userRole)) {
       res.status(403).json({
