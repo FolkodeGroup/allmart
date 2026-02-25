@@ -16,9 +16,10 @@ app.get('/', (req, res) => {
 import adminAuth from './adminAuth.js';
 app.use('/api/admin', adminAuth);
 
+
 // Ejemplo de ruta protegida para admins
 app.get('/api/admin/panel', adminAuthMiddleware, (req, res) => {
-  res.json({ message: 'Bienvenido al panel de administración', user: req.admin.user });
+  res.json({ message: 'Bienvenido al panel de administración', user: req.user.user });
 });
 
 app.listen(PORT, () => {
