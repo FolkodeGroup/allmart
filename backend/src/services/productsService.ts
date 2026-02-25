@@ -93,6 +93,10 @@ export async function getPublicProducts(query: ProductQuery) {
         products.sort((a, b) => b.price - a.price);
         break;
 
+      case "rating":
+      products.sort((a, b) => b.rating - a.rating);
+      break;
+
       case "newest":
         products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         break;
