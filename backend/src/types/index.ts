@@ -39,5 +39,5 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 import { Request } from 'express';
 
 export interface AuthenticatedRequest extends Request {
-  admin?: JwtPayload;
+  user?: JwtPayload;
 }
