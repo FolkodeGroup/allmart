@@ -1,0 +1,55 @@
+name: Actualización automática de puntajes
+
+on:
+  schedule:
+    # Todos los domingos a las 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Permite ejecución manual desde la pestaña Actions
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necesario para pushear cambios
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: npm ci
+
+      - name: Generar Log de Gestión (Retroactivo + Sync)
+        working-directory: frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+        run: node scripts/generar_management_log.cjs
+
+      - name: Consolidar SCORES.md
+        working-directory: frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+        run: node scripts/sumar_puntajes.cjs
+
+      - name: Crear Pull Request automático con cambios de puntaje
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+          commit-message: "chore: actualización automática de puntajes semanal [skip ci]"
+          title: "🔄 Actualización automática de puntajes semanal"
+          body: |
+            Este Pull Request fue generado automáticamente por el workflow semanal.
+            Incluye la actualización de MANAGEMENT_LOG.md y frontend/SCORES.md.
+            Por favor, revisa y mergea para mantener los puntajes al día.
+          branch: chore/actualizacion-puntajes-semanal
+          delete-branch: true
+          add-paths: |
+            MANAGEMENT_LOG.md
+            frontend/SCORES.md

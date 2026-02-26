@@ -1,24 +1,56 @@
-# Script para sumar puntajes de issues cerrados
+# Sistema de puntajes — Scripts
 
-Este script suma automáticamente los puntajes de todos los issues cerrados y genera una tabla con el puntaje acumulado por cada dev en el archivo SCORES.md.
+## Flujo completo (primera vez o actualización total)
 
-## Uso
+```
+frontend/           ← ejecutar desde acá
+├── scripts/
+│   ├── generar_management_log.cjs   ← PASO 1: genera historial retroactivo
+│   └── sumar_puntajes.cjs           ← PASO 2: consolida todo en SCORES.md
+```
 
-1. Instala las dependencias:
-   ```bash
-   npm install node-fetch@2
-   ```
-2. Exporta tu token de GitHub (con permisos de repo):
-   ```bash
-   export GITHUB_TOKEN=tu_token_aqui
-   ```
-3. Ejecuta el script:
-   ```bash
-   node scripts/sumar_puntajes.js
-   ```
+### Paso 0 — Configurar token
+
+Creá el archivo `frontend/.env` con tu token de GitHub:
+```
+GITHUB_TOKEN=ghp_tu_token_aqui
+```
+
+### Paso 1 — Generar historial retroactivo (solo la primera vez o cuando quieras reconstruirlo)
+
+Este script recorre **todo el historial del repo** y genera `MANAGEMENT_LOG.md` con:
+- PRs abiertos y mergeados por dgimenezdeveloper/folkodegroup
+- Reviews de PRs (aprobaciones, cambios solicitados, comentarios)
+- Milestones creados y cerrados
+- Issues creados, etiquetados y asignados
+
+```bash
+cd frontend
+node scripts/generar_management_log.cjs
+```
+
+### Paso 2 — Consolidar todo en SCORES.md
+
+Este script suma:
+1. Puntajes de **issues cerrados** (busca `PUNTAJE: N` en el cuerpo)
+2. Puntajes de **actividades de gestión** desde `MANAGEMENT_LOG.md`
+
+```bash
+node scripts/sumar_puntajes.cjs
+```
+
+El resultado se escribe en `frontend/SCORES.md`.
+
+---
+
+## Flujo semanal (mantenimiento)
+
+A partir de la primera ejecución, los puntajes de gestión se acumulan automáticamente via GitHub Actions (`puntajes_gestion.yml`). Solo necesitás correr el **Paso 2** cada semana (o cuando recibas el issue de recordatorio dominical).
+
+---
 
 ## Notas
-- El script busca la línea `PUNTAJE: <número>` en el cuerpo de cada issue cerrado.
-- Suma el puntaje a cada usuario asignado al issue.
-- Actualiza o crea el archivo SCORES.md en la raíz del proyecto.
-- Puedes programar este script para que corra periódicamente o al final del proyecto.
+- `folkodegroup` se mapea automáticamente a `dgimenezdeveloper`.
+- `MANAGEMENT_LOG.md` está en la **raíz del repo** (no en frontend/).
+- No editar `MANAGEMENT_LOG.md` manualmente; puede ser sobreescrito.
+- El recordatorio dominical crea un issue automático si SCORES.md no fue actualizado en 7 días.
