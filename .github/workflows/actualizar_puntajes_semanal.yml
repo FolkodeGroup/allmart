@@ -38,10 +38,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
         run: node scripts/sumar_puntajes.cjs
 
-      - name: Commitear y pushear cambios
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Crear Pull Request automático con cambios de puntaje
+        uses: peter-evans/create-pull-request@v6
         with:
-          commit_message: "chore: actualización automática de puntajes semanal [skip ci]"
-          file_pattern: 'MANAGEMENT_LOG.md frontend/SCORES.md'
-          # Esto evita que el workflow se dispare a sí mismo si hubiera un trigger de push
-          commit_author: Author <actions@github.com>
+          token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
+          commit-message: "chore: actualización automática de puntajes semanal [skip ci]"
+          title: "🔄 Actualización automática de puntajes semanal"
+          body: |
+            Este Pull Request fue generado automáticamente por el workflow semanal.
+            Incluye la actualización de MANAGEMENT_LOG.md y frontend/SCORES.md.
+            Por favor, revisa y mergea para mantener los puntajes al día.
+          branch: chore/actualizacion-puntajes-semanal
+          delete-branch: true
+          add-paths: |
+            MANAGEMENT_LOG.md
+            frontend/SCORES.md
