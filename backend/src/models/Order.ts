@@ -19,5 +19,5 @@ export interface Order {
   updatedAt: Date;
 }
 
-export type CreateOrderDTO = Omit<Order, 'id' | 'status' | 'createdAt' | 'updatedAt'>;
+export type CreateOrderDTO = Omit<Order, 'id' | 'status' | 'paymentStatus' | 'paidAt' | 'createdAt' | 'updatedAt'>;
 export type UpdateOrderDTO = Partial<Omit<Order, 'id' | 'createdAt' | 'updatedAt'>>;
