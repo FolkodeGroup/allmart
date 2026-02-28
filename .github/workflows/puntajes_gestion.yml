@@ -1,4 +1,9 @@
+
 name: Registrar puntajes de gestión
+
+concurrency:
+  group: gestion-puntaje-auto-${{ github.ref }}
+  cancel-in-progress: true
 
 # Captura todas las actividades de gestión que merecen puntaje
 on:

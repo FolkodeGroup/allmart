@@ -1,4 +1,9 @@
+
 name: Actualización automática de puntajes
+
+concurrency:
+  group: actualizacion-puntajes-semanal-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
