@@ -121,11 +121,7 @@ export async function getAllOrders(
   ]);
 
   return {
-<<<<<<< Updated upstream
-    data: dataResult.rows.map(toOrder),
-=======
     data: rows.map(toOrder),
->>>>>>> Stashed changes
     total,
     page: pageNumber,
     totalPages: Math.ceil(total / limitNumber)
@@ -139,8 +135,8 @@ export async function getOrderById(
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
-      items: true,
-      statusHistory: {
+      orderItems: true,
+      orderStatusHistory: {
         orderBy: { changedAt: 'asc' }
       }
     }
@@ -150,38 +146,19 @@ export async function getOrderById(
     throw createError('Pedido no encontrado', 404);
   }
 
-<<<<<<< Updated upstream
-  const order = toOrder(orderResult.rows[0]);
-
-  const itemsResult = await prisma.query(
-    'SELECT * FROM order_items WHERE order_id = $1',
-    [id]
-  );
-
-  const historyResult = await prisma.query(
-    'SELECT * FROM order_status_history WHERE order_id = $1 ORDER BY changed_at ASC',
-    [id]
-  );
-
-  return {
-    ...order,
-    items: itemsResult.rows.map(item => ({
-      productId: item.product_id,
-      productName: item.product_name,
-      productImage: item.product_image,
-      unitPrice: Number(item.unit_price),
-      quantity: item.quantity
-    })),
-    statusHistory: historyResult.rows.map(h => ({
-      status: prismaStatusToOrderStatus(h.status),
-      changedAt: h.changed_at
-    }))
-=======
   return {
     ...toOrder(order),
-    items: order.items,
-    statusHistory: order.statusHistory
->>>>>>> Stashed changes
+    items: order.orderItems.map(item => ({
+      productId: item.productId || '',
+      productName: item.productName,
+      productImage: item.productImage || undefined,
+      unitPrice: Number(item.unitPrice),
+      quantity: item.quantity
+    })),
+    statusHistory: order.orderStatusHistory.map(h => ({
+      status: prismaStatusToOrderStatus(h.status),
+      changedAt: h.changedAt
+    }))
   };
 }
 
@@ -234,8 +211,8 @@ export async function updateOrderStatus(
     const order = await tx.order.findUnique({
       where: { id },
       include: {
-        items: true,
-        statusHistory: true
+        orderItems: true,
+        orderStatusHistory: true
       }
     });
 
@@ -243,7 +220,7 @@ export async function updateOrderStatus(
       throw createError('Pedido no encontrado', 404);
     }
 
-    const newStatus = orderStatusToPrismaStatus(dto.status);
+    const newStatus = orderStatusToPrismaStatus(dto.status) as any;
 
     // 🔹 Actualiza estado
     await tx.order.update({
@@ -275,8 +252,8 @@ export async function updateOrderStatus(
     const updatedOrder = await tx.order.findUnique({
       where: { id },
       include: {
-        items: true,
-        statusHistory: {
+        orderItems: true,
+        orderStatusHistory: {
           orderBy: { changedAt: 'asc' }
         }
       }
@@ -288,8 +265,17 @@ export async function updateOrderStatus(
 
     return {
       ...toOrder(updatedOrder),
-      items: updatedOrder.items,
-      statusHistory: updatedOrder.statusHistory
+      items: updatedOrder.orderItems.map(item => ({
+        productId: item.productId || '',
+        productName: item.productName,
+        productImage: item.productImage || undefined,
+        unitPrice: Number(item.unitPrice),
+        quantity: item.quantity
+      })),
+      statusHistory: updatedOrder.orderStatusHistory.map(h => ({
+        status: prismaStatusToOrderStatus(h.status),
+        changedAt: h.changedAt
+      }))
     };
   });
 }
