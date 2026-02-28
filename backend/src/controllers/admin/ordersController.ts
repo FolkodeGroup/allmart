@@ -43,18 +43,28 @@ export async function remove(req: AuthenticatedRequest, res: Response, next: Nex
     sendSuccess(res, null, 200, 'Pedido eliminado');
   } catch (err) { next(err); }
 }
-export async function updatePaymentStatus(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
+
+export async function updateStatus(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const order = await ordersService.updateOrderStatus(
+      req.params.id,
+      req.body
+    );
+
+    sendSuccess(res, order);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updatePayment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const order = await ordersService.updateOrderPaymentStatus(
       req.params.id,
       req.body
     );
 
-    res.json(order);
+    sendSuccess(res, order, 200, 'Estado de pago actualizado');
   } catch (error) {
     next(error);
   }
