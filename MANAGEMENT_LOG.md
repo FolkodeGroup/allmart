@@ -17,3 +17,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #193: 🔄 Registrar puntaje de gestión | 2026-02-28 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #234:  he solucionado el problema de concurrencia en los workflows que usan… | 2026-02-28 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #236: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #237: 🔄 Registrar puntaje de gestión | 2026-02-28 |
