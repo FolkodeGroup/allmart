@@ -57,31 +57,21 @@ function paymentStatusToPrismaStatus(s: PaymentStatus): string {
 }
 
 // Mapea Prisma Order al tipo Order de la app
-function toOrder(row: {
-  id: string;
-  customerFirstName: string;
-  customerLastName: string;
-  customerEmail: string;
-  total: import('@prisma/client/runtime/client').Decimal;
-  status: string;
-  paymentStatus: string;
-  paidAt: Date | null;
-  notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}): Order {
+function toOrder(row: any): Order {
   return {
     id: row.id,
-    customerFirstName: row.customerFirstName,
-    customerLastName: row.customerLastName,
-    customerEmail: row.customerEmail,
-    total: row.total.toNumber(),
+    customer: {
+      firstName: row.customerFirstName || row.customer_first_name,
+      lastName: row.customerLastName || row.customer_last_name,
+      email: row.customerEmail || row.customer_email,
+    },
+    total: typeof row.total === 'object' && row.total.toNumber ? row.total.toNumber() : Number(row.total),
     status: prismaStatusToOrderStatus(row.status),
-    paymentStatus: prismaPaymentToPaymentStatus(row.paymentStatus),
-    paidAt: row.paidAt ?? undefined,
+    paymentStatus: prismaPaymentToPaymentStatus(row.paymentStatus || row.payment_status),
+    paidAt: row.paidAt || row.paid_at || undefined,
     notes: row.notes ?? undefined,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
+    createdAt: row.createdAt || row.created_at,
+    updatedAt: row.updatedAt || row.updated_at,
   };
 }
 
@@ -144,7 +134,7 @@ export async function getAllOrders(
   const total = Number(countResult.rows[0].count);
 
   return {
-    data: dataResult.rows,
+    data: dataResult.rows.map(toOrder),
     total,
     page: pageNumber,
     totalPages: Math.ceil(total / limitNumber)
@@ -164,7 +154,7 @@ export async function getOrderById(
     throw createError('Pedido no encontrado', 404);
   }
 
-  const order = orderResult.rows[0];
+  const order = toOrder(orderResult.rows[0]);
 
   const itemsResult = await prisma.query(
     'SELECT * FROM order_items WHERE order_id = $1',
@@ -178,17 +168,26 @@ export async function getOrderById(
 
   return {
     ...order,
-    items: itemsResult.rows,
-    statusHistory: historyResult.rows
+    items: itemsResult.rows.map(item => ({
+      productId: item.product_id,
+      productName: item.product_name,
+      productImage: item.product_image,
+      unitPrice: Number(item.unit_price),
+      quantity: item.quantity
+    })),
+    statusHistory: historyResult.rows.map(h => ({
+      status: prismaStatusToOrderStatus(h.status),
+      changedAt: h.changed_at
+    }))
   };
 }
 
 export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
   const row = await prisma.order.create({
     data: {
-      customerFirstName: dto.customerFirstName,
-      customerLastName:  dto.customerLastName,
-      customerEmail:     dto.customerEmail,
+      customerFirstName: dto.customer.firstName,
+      customerLastName:  dto.customer.lastName,
+      customerEmail:     dto.customer.email,
       total:             dto.total,
       notes:             dto.notes ?? null,
       status:            orderStatusToPrismaStatus(OrderStatus.PENDING) as Parameters<typeof prisma.order.create>[0]['data']['status'],
