@@ -36,7 +36,7 @@ function mapCartToDTO(cart: any): CartDTO {
     unitPrice: Number(ci.product.price),
   }));
 
-  const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const total = items.reduce((sum, item) => sum + item.quantity * (item.unitPrice ?? 0), 0);
 
   return {
     id: cart.id,

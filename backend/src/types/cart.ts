@@ -11,6 +11,7 @@ export interface CartDTO {
   userId?: string;
   sessionId?: string;
   items: CartItemDTO[];
+  total: number;
   createdAt: Date;
   updatedAt: Date;
 }

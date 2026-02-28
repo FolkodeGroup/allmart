@@ -1,11 +1,12 @@
 // controllers/public/cartController.ts
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../../types';
 import * as cartService from '../../services/cartService';
 
 // Devuelve el carrito actual
-export async function getCart(req: Request, res: Response, next: NextFunction) {
+export async function getCart(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const sessionId = req.cookies.session_id;
     const cart = await cartService.getCart(userId, sessionId);
     res.json(cart);
@@ -15,9 +16,9 @@ export async function getCart(req: Request, res: Response, next: NextFunction) {
 }
 
 // Agrega un producto al carrito
-export async function addItem(req: Request, res: Response, next: NextFunction) {
+export async function addItem(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const sessionId = req.cookies.session_id;
     const { productId, quantity } = req.body;
     const cart = await cartService.addItem(userId, sessionId, productId, quantity ?? 1);
@@ -28,9 +29,9 @@ export async function addItem(req: Request, res: Response, next: NextFunction) {
 }
 
 // Actualiza la cantidad de un producto
-export async function updateItem(req: Request, res: Response, next: NextFunction) {
+export async function updateItem(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const sessionId = req.cookies.session_id;
     const { productId } = req.params;
     const { quantity } = req.body;
@@ -42,9 +43,9 @@ export async function updateItem(req: Request, res: Response, next: NextFunction
 }
 
 // Elimina un producto del carrito
-export async function removeItem(req: Request, res: Response, next: NextFunction) {
+export async function removeItem(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const sessionId = req.cookies.session_id;
     const { productId } = req.params;
     const cart = await cartService.removeItem(userId, sessionId, productId);
@@ -55,9 +56,9 @@ export async function removeItem(req: Request, res: Response, next: NextFunction
 }
 
 // Vacía todo el carrito
-export async function clearCart(req: Request, res: Response, next: NextFunction) {
+export async function clearCart(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const sessionId = req.cookies.session_id;
     const cart = await cartService.clearCart(userId, sessionId);
     res.json(cart);
