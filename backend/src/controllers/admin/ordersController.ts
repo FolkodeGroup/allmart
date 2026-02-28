@@ -43,3 +43,19 @@ export async function remove(req: AuthenticatedRequest, res: Response, next: Nex
     sendSuccess(res, null, 200, 'Pedido eliminado');
   } catch (err) { next(err); }
 }
+export async function updatePaymentStatus(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const order = await ordersService.updateOrderPaymentStatus(
+      req.params.id,
+      req.body
+    );
+
+    res.json(order);
+  } catch (error) {
+    next(error);
+  }
+}

@@ -21,4 +21,10 @@ router.post('/',   requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.create);
 router.put('/:id', requireRole(UserRole.ADMIN), ctrl.update);
 router.delete('/:id', requireRole(UserRole.ADMIN), ctrl.remove);
 
+router.patch(
+  '/:id/payment',
+  requireRole(UserRole.ADMIN, UserRole.EDITOR),
+  ctrl.updatePaymentStatus
+);
+
 export default router;

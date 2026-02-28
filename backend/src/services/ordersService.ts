@@ -219,3 +219,42 @@ export async function deleteOrder(id: string): Promise<void> {
   await prisma.order.delete({ where: { id } });
 }
 
+export async function updateOrderPaymentStatus(
+  id: string,
+  dto: { paymentStatus: PaymentStatus }
+): Promise<Order> {
+
+  if (!dto.paymentStatus) {
+    throw createError('paymentStatus es requerido', 400);
+  }
+
+  if (!Object.values(PaymentStatus).includes(dto.paymentStatus)) {
+    throw createError('Estado de pago inválido', 400);
+  }
+
+  return prisma.$transaction(async (tx) => {
+
+    const order = await tx.order.findUnique({
+      where: { id }
+    });
+
+    if (!order) {
+      throw createError('Pedido no encontrado', 404);
+    }
+
+    const newPaymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
+
+    const updated = await tx.order.update({
+      where: { id },
+      data: {
+        paymentStatus: newPaymentStatus,
+        paidAt:
+          dto.paymentStatus === PaymentStatus.PAID
+            ? new Date()
+            : null
+      }
+    });
+
+    return toOrder(updated);
+  });
+}
