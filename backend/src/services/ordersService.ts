@@ -90,51 +90,38 @@ export async function getAllOrders(
 
   const pageNumber = Number(page);
   const limitNumber = Number(limit);
-  const offset = (pageNumber - 1) * limitNumber;
+  const skip = (pageNumber - 1) * limitNumber;
 
-  let baseSql = 'FROM orders WHERE 1=1';
-  const params: any[] = [];
+  const where: any = {};
 
   if (status) {
-    params.push(status);
-    baseSql += ` AND status = $${params.length}`;
+    where.status = orderStatusToPrismaStatus(status);
   }
 
   if (paymentStatus) {
-    params.push(paymentStatus);
-    baseSql += ` AND payment_status = $${params.length}`;
+    where.paymentStatus = paymentStatusToPrismaStatus(paymentStatus);
   }
 
   if (q) {
-    params.push(`%${q}%`);
-    baseSql += ` AND (
-      customer_first_name ILIKE $${params.length}
-      OR customer_last_name ILIKE $${params.length}
-      OR customer_email ILIKE $${params.length}
-    )`;
+    where.OR = [
+      { customerFirstName: { contains: q, mode: 'insensitive' } },
+      { customerLastName:  { contains: q, mode: 'insensitive' } },
+      { customerEmail:     { contains: q, mode: 'insensitive' } },
+    ];
   }
 
-  // 🔹 Query de datos paginados
-  const dataSql = `
-    SELECT *
-    ${baseSql}
-    ORDER BY created_at DESC
-    LIMIT $${params.length + 1}
-    OFFSET $${params.length + 2}
-  `;
-
-  const dataParams = [...params, limitNumber, offset];
-
-  const dataResult = await prisma.query(dataSql, dataParams);
-
-  // 🔹 Query para total
-  const countSql = `SELECT COUNT(*) ${baseSql}`;
-  const countResult = await prisma.query(countSql, params);
-
-  const total = Number(countResult.rows[0].count);
+  const [rows, total] = await prisma.$transaction([
+    prisma.order.findMany({
+      where,
+      skip,
+      take: limitNumber,
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.order.count({ where })
+  ]);
 
   return {
-    data: dataResult.rows.map(toOrder),
+    data: rows.map(toOrder),
     total,
     page: pageNumber,
     totalPages: Math.ceil(total / limitNumber)
@@ -145,39 +132,32 @@ export async function getOrderById(
   id: string
 ): Promise<AdminOrderDTO> {
 
-  const orderResult = await prisma.query(
-    'SELECT * FROM orders WHERE id = $1',
-    [id]
-  );
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      orderItems: true,
+      orderStatusHistory: {
+        orderBy: { changedAt: 'asc' }
+      }
+    }
+  });
 
-  if (orderResult.rowCount === 0) {
+  if (!order) {
     throw createError('Pedido no encontrado', 404);
   }
 
-  const order = toOrder(orderResult.rows[0]);
-
-  const itemsResult = await prisma.query(
-    'SELECT * FROM order_items WHERE order_id = $1',
-    [id]
-  );
-
-  const historyResult = await prisma.query(
-    'SELECT * FROM order_status_history WHERE order_id = $1 ORDER BY changed_at ASC',
-    [id]
-  );
-
   return {
-    ...order,
-    items: itemsResult.rows.map(item => ({
-      productId: item.product_id,
-      productName: item.product_name,
-      productImage: item.product_image,
-      unitPrice: Number(item.unit_price),
+    ...toOrder(order),
+    items: order.orderItems.map(item => ({
+      productId: item.productId || '',
+      productName: item.productName,
+      productImage: item.productImage || undefined,
+      unitPrice: Number(item.unitPrice),
       quantity: item.quantity
     })),
-    statusHistory: historyResult.rows.map(h => ({
+    statusHistory: order.orderStatusHistory.map(h => ({
       status: prismaStatusToOrderStatus(h.status),
-      changedAt: h.changed_at
+      changedAt: h.changedAt
     }))
   };
 }
@@ -211,6 +191,93 @@ export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Orde
     data: data as Parameters<typeof prisma.order.update>[0]['data'],
   });
   return toOrder(row);
+}
+
+export async function updateOrderStatus(
+  id: string,
+  dto: { status: OrderStatus; note?: string }
+): Promise<AdminOrderDTO> {
+
+  if (!dto.status) {
+    throw createError('Status es requerido', 400);
+  }
+
+  if (!Object.values(OrderStatus).includes(dto.status)) {
+    throw createError('Estado inválido', 400);
+  }
+
+  return prisma.$transaction(async (tx) => {
+
+    const order = await tx.order.findUnique({
+      where: { id },
+      include: {
+        orderItems: true,
+        orderStatusHistory: true
+      }
+    });
+
+    if (!order) {
+      throw createError('Pedido no encontrado', 404);
+    }
+
+    const newStatus = orderStatusToPrismaStatus(dto.status) as any;
+
+    // 🔹 Actualiza estado
+    await tx.order.update({
+      where: { id },
+      data: { status: newStatus }
+    });
+
+    // 🔹 Registra historial
+    await tx.orderStatusHistory.create({
+      data: {
+        orderId: id,
+        status: newStatus,
+        note: dto.note ?? null
+      }
+    });
+
+    // 🔹 Si es entregado, registrar venta
+    if (dto.status === OrderStatus.DELIVERED) {
+      await tx.sale.create({
+        data: {
+          orderId: id,
+          total: order.total,
+          createdAt: new Date()
+        }
+      });
+    }
+
+    // 🔹 Devuelve pedido actualizado con historial completo
+    const updatedOrder = await tx.order.findUnique({
+      where: { id },
+      include: {
+        orderItems: true,
+        orderStatusHistory: {
+          orderBy: { changedAt: 'asc' }
+        }
+      }
+    });
+
+    if (!updatedOrder) {
+      throw createError('Error recuperando pedido actualizado', 500);
+    }
+
+    return {
+      ...toOrder(updatedOrder),
+      items: updatedOrder.orderItems.map(item => ({
+        productId: item.productId || '',
+        productName: item.productName,
+        productImage: item.productImage || undefined,
+        unitPrice: Number(item.unitPrice),
+        quantity: item.quantity
+      })),
+      statusHistory: updatedOrder.orderStatusHistory.map(h => ({
+        status: prismaStatusToOrderStatus(h.status),
+        changedAt: h.changedAt
+      }))
+    };
+  });
 }
 
 export async function deleteOrder(id: string): Promise<void> {
