@@ -218,4 +218,4 @@ export async function deleteOrder(id: string): Promise<void> {
   if (!existing) throw createError('Pedido no encontrado', 404);
   await prisma.order.delete({ where: { id } });
 }
-
+// Delete verificado 
