@@ -1,190 +1,201 @@
 /**
  * services/productsService.ts
- * Lógica de negocio para el dominio de productos.
- * Actualmente usa un store en memoria; sustituir por llamadas a BD.
+ * Lógica de negocio para el dominio de productos usando Prisma Client.
  */
 
-import { v4 as uuidv4 } from "uuid";
-import { Product, CreateProductDTO, UpdateProductDTO } from "../models/Product";
-import { ProductStatus } from "../types";
-import { createError } from "../middlewares/errorHandler";
-import * as categoriesService from './categoriesService'; // Para obtener la categoría completa
-import { getCategoryBySlug } from "./categoriesService";
-// Store in-memory (reemplazar con repositorio de BD)
-const store: Map<string, Product> = new Map();
+import { Decimal } from '@prisma/client/runtime/client';
+import { ProductStatus as PrismaProductStatus } from '@prisma/client';
+import { prisma } from '../config/prisma';
+import { Product, CreateProductDTO, UpdateProductDTO } from '../models/Product';
+import { ProductStatus } from '../types';
+import { createError } from '../middlewares/errorHandler';
+import * as categoriesService from './categoriesService';
+import { getCategoryBySlug } from './categoriesService';
 
-// Función auxiliar para el slug (según requerimiento: auto-generar desde name)
+// Función auxiliar para el slug
 function generateSlug(name: string): string {
   return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 }
 
+// Mapea el resultado de Prisma al tipo Product del proyecto
+function toProduct(row: {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: Decimal;
+  originalPrice: Decimal | null;
+  categoryId: string | null;
+  status: string;
+  sku: string | null;
+  stock: number;
+  rating: Decimal;
+  createdAt: Date;
+  updatedAt: Date;
+}): Product {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description ?? undefined,
+    price: row.price.toNumber(),
+    compareAtPrice: row.originalPrice?.toNumber(),
+    categoryId: row.categoryId ?? '',
+    status: row.status as ProductStatus,
+    sku: row.sku ?? undefined,
+    stock: row.stock,
+    rating: row.rating.toNumber(),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
 export async function getAllProducts(): Promise<Product[]> {
-  return Array.from(store.values());
+  const rows = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+  return rows.map(toProduct);
 }
 
 export async function getProductById(id: string): Promise<Product> {
-  const product = store.get(id);
-  if (!product) throw createError("Producto no encontrado", 404);
-  return product;
+  const row = await prisma.product.findUnique({ where: { id } });
+  if (!row) throw createError('Producto no encontrado', 404);
+  return toProduct(row);
 }
 
 export async function createProduct(dto: CreateProductDTO): Promise<Product> {
-  // 1. Validar campos requeridos: name, price, categoryId, sku
-  // (Nota: Ajusto a categoryId por tu interfaz, si es category_id cámbialo aquí)
   if (!dto.name || dto.price === undefined || !dto.categoryId || !dto.sku) {
-    throw createError("Campos requeridos: name, price, categoryId, sku", 400);
+    throw createError('Campos requeridos: name, price, categoryId, sku', 400);
   }
 
-  // 2. Verifica que el SKU sea único
-  const isSkuTaken = Array.from(store.values()).some((p) => p.sku === dto.sku);
-  if (isSkuTaken) {
-    throw createError(`El SKU "${dto.sku}" ya está en uso`, 409);
-  }
+  const skuExists = await prisma.product.findUnique({ where: { sku: dto.sku } });
+  if (skuExists) throw createError(`El SKU "${dto.sku}" ya está en uso`, 409);
 
-  // 3. Obtener la categoría (para validar que existe y para la respuesta completa)
-  const categoryId = await categoriesService.getCategoryById(dto.categoryId);
+  // Validar que la categoría existe
+  await categoriesService.getCategoryById(dto.categoryId);
 
-  // 4. Auto-generar slug a partir del name
   const slug = generateSlug(dto.name);
 
-  const now = new Date();
-  const product: Product = {
-    ...dto,
-    id: uuidv4(),
-    slug,
-    categoryId: categoryId.id, // Aseguramos que el producto tenga el ID de la categoría
-    status: dto.status ?? ProductStatus.DRAFT,
-    createdAt: now,
-    updatedAt: now,
-  };
-  store.set(product.id, product);
-  return product;
+  const row = await prisma.product.create({
+    data: {
+      name: dto.name,
+      slug,
+      description: dto.description ?? null,
+      price: dto.price,
+      originalPrice: dto.compareAtPrice ?? null,
+      categoryId: dto.categoryId,
+      status: (dto.status ?? ProductStatus.DRAFT) as unknown as PrismaProductStatus,
+      sku: dto.sku,
+      stock: dto.stock ?? 0,
+      rating: dto.rating ?? 0,
+    },
+  });
+
+  return toProduct(row);
 }
 
 export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
-  // 1. Verificar que el producto existe
-  const existing = store.get(id);
-  if (!existing) {
-    throw createError('Producto no encontrado', 404);
-  }
+  const existing = await prisma.product.findUnique({ where: { id } });
+  if (!existing) throw createError('Producto no encontrado', 404);
 
-  // 2. Si se provee un nuevo SKU, verificar que sea único (excluyendo este producto)
   if (dto.sku && dto.sku !== existing.sku) {
-    const isSkuTaken = Array.from(store.values()).some(
-      (p) => p.sku === dto.sku && p.id !== id
-    );
-    if (isSkuTaken) {
-      throw createError(`El SKU "${dto.sku}" ya está en uso por otro producto`, 409);
-    }
+    const skuExists = await prisma.product.findFirst({
+      where: { sku: dto.sku, id: { not: id } },
+    });
+    if (skuExists) throw createError(`El SKU "${dto.sku}" ya está en uso por otro producto`, 409);
   }
 
-  // 3. Si se cambia el nombre, se re-genera el slug automáticamente (según issue)
   let slug = existing.slug;
   if (dto.name) {
     slug = generateSlug(dto.name);
   }
 
-  // 4. Obtener la categoría (para la respuesta completa y validar si cambió)
-  // Si el DTO no trae categoryId, usamos el que ya tenía el producto
-  const categoryIdToFetch = dto.categoryId || existing.categoryId;
-  const category = await categoriesService.getCategoryById(categoryIdToFetch);
+  const categoryId = dto.categoryId || existing.categoryId;
+  if (dto.categoryId) {
+    await categoriesService.getCategoryById(dto.categoryId);
+  }
 
-  // 5. Mezclar los datos, actualizar el slug y la fecha de actualización
-  const updatedProduct: Product = {
-    ...existing,
-    ...dto,
-    slug,
-    updatedAt: new Date(),
-  };
+  const row = await prisma.product.update({
+    where: { id },
+    data: {
+      name: dto.name ?? existing.name,
+      slug,
+      description: dto.description !== undefined ? dto.description : existing.description,
+      price: dto.price ?? existing.price,
+      originalPrice: dto.compareAtPrice !== undefined ? dto.compareAtPrice : existing.originalPrice,
+      categoryId,
+      status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
+      sku: dto.sku !== undefined ? dto.sku : existing.sku,
+      stock: dto.stock !== undefined ? dto.stock : existing.stock,
+      rating: dto.rating !== undefined ? dto.rating : existing.rating,
+    },
+  });
 
-  store.set(id, updatedProduct);
-
-  // 6. RESULTADO ESPERADO: Devolver producto completo (con categoría)
-  return {
-    ...updatedProduct,
-    categoryId: updatedProduct.categoryId
-  };
+  return toProduct(row);
 }
+
 export async function deleteProduct(id: string): Promise<void> {
-  if (!store.has(id)) throw createError("Producto no encontrado", 404);
-  store.delete(id);
+  const existing = await prisma.product.findUnique({ where: { id } });
+  if (!existing) throw createError('Producto no encontrado', 404);
+  await prisma.product.delete({ where: { id } });
 }
 
-// 1️⃣ Función para obtener productos del catálogo (con filtros)
+// Función para obtener productos del catálogo (con filtros)
 type ProductQuery = {
   category?: string;
   q?: string;
-  sort?: "price_asc" | "price_desc" | "rating" | "newest";
+  sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
   page?: number;
   limit?: number;
 };
 
 export async function getPublicProducts(query: ProductQuery) {
-  let products = Array.from(store.values());
-
   const { category, q, sort, page = 1, limit = 12 } = query;
 
-  // Filtrar por categoría
+  const where: Record<string, unknown> = { status: 'active' };
+
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
-
-    products = products.filter((p) => p.categoryId === foundCategory.id);
+    where.categoryId = foundCategory.id;
   }
 
-  // Búsqueda por texto
   if (q) {
     const search = q.toLowerCase();
-    products = products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(search) ||
-        p.description?.toLowerCase().includes(search),
-    );
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
   }
 
-  // Ordenamiento
-  if (sort) {
-    switch (sort) {
-      case "price_asc":
-        products.sort((a, b) => a.price - b.price);
-        break;
-
-      case "price_desc":
-        products.sort((a, b) => b.price - a.price);
-        break;
-
-      case "rating":
-      products.sort((a, b) => b.rating - a.rating);
-      break;
-
-      case "newest":
-        products.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-        break;
-    }
+  const orderBy: Record<string, string> = {};
+  switch (sort) {
+    case 'price_asc':   orderBy.price = 'asc';  break;
+    case 'price_desc':  orderBy.price = 'desc'; break;
+    case 'rating':      orderBy.rating = 'desc'; break;
+    case 'newest':
+    default:            orderBy.createdAt = 'desc';
   }
 
-  const total = products.length;
-
-  const start = (page - 1) * limit;
-  const end = start + limit;
-
-  const paginated = products.slice(start, end);
-
-  const totalPages = Math.ceil(total / limit);
+  const [total, rows] = await Promise.all([
+    prisma.product.count({ where: where as never }),
+    prisma.product.findMany({
+      where: where as never,
+      orderBy: orderBy as never,
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
 
   return {
-    data: paginated,
+    data: rows.map(toProduct),
     total,
     page,
     limit,
-    totalPages,
+    totalPages: Math.ceil(total / limit),
   };
 }
+
 export async function getProductBySlug(slug: string): Promise<Product> {
-  const product = Array.from(store.values()).find((p) => p.slug === slug);
-
-  if (!product) {
-    throw createError("Producto no encontrado", 404);
-  }
-
-  return product;
+  const row = await prisma.product.findUnique({ where: { slug } });
+  if (!row) throw createError('Producto no encontrado', 404);
+  return toProduct(row);
 }
+

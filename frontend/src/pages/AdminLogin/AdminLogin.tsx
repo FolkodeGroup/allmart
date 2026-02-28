@@ -17,15 +17,16 @@ export function AdminLogin() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/admin/login', {
+      const res = await fetch('http://localhost:3001/api/admin/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user, password }),
       });
       const data = await res.json();
-      if (res.ok && data.token) {
-        const role: Role = data.role === 'editor' ? 'editor' : 'admin';
-        login(user, data.token, role);
+      if (res.ok && data.success && data.data.token) {
+        const { token, role: userRole } = data.data;
+        const role: Role = userRole === 'editor' ? 'editor' : 'admin';
+        login(user, token, role);
         navigate('/admin/dashboard');
       } else {
         setError(data.message || 'Credenciales inválidas');
