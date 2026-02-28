@@ -12,9 +12,31 @@ dist/
 # ─── Logs ─────────────────────────────────────────────────────────────────────
 *.log
 npm-debug.log*
+# Node
+node_modules/
+dist/
+npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Prisma
+prisma/dev.db
+prisma/migrations/*/README.md
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# SO
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # ─── OS / Editor ──────────────────────────────────────────────────────────────
 .DS_Store
