@@ -90,51 +90,42 @@ export async function getAllOrders(
 
   const pageNumber = Number(page);
   const limitNumber = Number(limit);
-  const offset = (pageNumber - 1) * limitNumber;
+  const skip = (pageNumber - 1) * limitNumber;
 
-  let baseSql = 'FROM orders WHERE 1=1';
-  const params: any[] = [];
+  const where: any = {};
 
   if (status) {
-    params.push(status);
-    baseSql += ` AND status = $${params.length}`;
+    where.status = orderStatusToPrismaStatus(status);
   }
 
   if (paymentStatus) {
-    params.push(paymentStatus);
-    baseSql += ` AND payment_status = $${params.length}`;
+    where.paymentStatus = paymentStatusToPrismaStatus(paymentStatus);
   }
 
   if (q) {
-    params.push(`%${q}%`);
-    baseSql += ` AND (
-      customer_first_name ILIKE $${params.length}
-      OR customer_last_name ILIKE $${params.length}
-      OR customer_email ILIKE $${params.length}
-    )`;
+    where.OR = [
+      { customerFirstName: { contains: q, mode: 'insensitive' } },
+      { customerLastName:  { contains: q, mode: 'insensitive' } },
+      { customerEmail:     { contains: q, mode: 'insensitive' } },
+    ];
   }
 
-  // 🔹 Query de datos paginados
-  const dataSql = `
-    SELECT *
-    ${baseSql}
-    ORDER BY created_at DESC
-    LIMIT $${params.length + 1}
-    OFFSET $${params.length + 2}
-  `;
-
-  const dataParams = [...params, limitNumber, offset];
-
-  const dataResult = await prisma.query(dataSql, dataParams);
-
-  // 🔹 Query para total
-  const countSql = `SELECT COUNT(*) ${baseSql}`;
-  const countResult = await prisma.query(countSql, params);
-
-  const total = Number(countResult.rows[0].count);
+  const [rows, total] = await prisma.$transaction([
+    prisma.order.findMany({
+      where,
+      skip,
+      take: limitNumber,
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.order.count({ where })
+  ]);
 
   return {
+<<<<<<< Updated upstream
     data: dataResult.rows.map(toOrder),
+=======
+    data: rows.map(toOrder),
+>>>>>>> Stashed changes
     total,
     page: pageNumber,
     totalPages: Math.ceil(total / limitNumber)
@@ -145,15 +136,21 @@ export async function getOrderById(
   id: string
 ): Promise<AdminOrderDTO> {
 
-  const orderResult = await prisma.query(
-    'SELECT * FROM orders WHERE id = $1',
-    [id]
-  );
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      items: true,
+      statusHistory: {
+        orderBy: { changedAt: 'asc' }
+      }
+    }
+  });
 
-  if (orderResult.rowCount === 0) {
+  if (!order) {
     throw createError('Pedido no encontrado', 404);
   }
 
+<<<<<<< Updated upstream
   const order = toOrder(orderResult.rows[0]);
 
   const itemsResult = await prisma.query(
@@ -179,6 +176,12 @@ export async function getOrderById(
       status: prismaStatusToOrderStatus(h.status),
       changedAt: h.changed_at
     }))
+=======
+  return {
+    ...toOrder(order),
+    items: order.items,
+    statusHistory: order.statusHistory
+>>>>>>> Stashed changes
   };
 }
 
@@ -211,6 +214,84 @@ export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Orde
     data: data as Parameters<typeof prisma.order.update>[0]['data'],
   });
   return toOrder(row);
+}
+
+export async function updateOrderStatus(
+  id: string,
+  dto: { status: OrderStatus; note?: string }
+): Promise<AdminOrderDTO> {
+
+  if (!dto.status) {
+    throw createError('Status es requerido', 400);
+  }
+
+  if (!Object.values(OrderStatus).includes(dto.status)) {
+    throw createError('Estado inválido', 400);
+  }
+
+  return prisma.$transaction(async (tx) => {
+
+    const order = await tx.order.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        statusHistory: true
+      }
+    });
+
+    if (!order) {
+      throw createError('Pedido no encontrado', 404);
+    }
+
+    const newStatus = orderStatusToPrismaStatus(dto.status);
+
+    // 🔹 Actualiza estado
+    await tx.order.update({
+      where: { id },
+      data: { status: newStatus }
+    });
+
+    // 🔹 Registra historial
+    await tx.orderStatusHistory.create({
+      data: {
+        orderId: id,
+        status: newStatus,
+        note: dto.note ?? null
+      }
+    });
+
+    // 🔹 Si es entregado, registrar venta
+    if (dto.status === OrderStatus.DELIVERED) {
+      await tx.sale.create({
+        data: {
+          orderId: id,
+          total: order.total,
+          createdAt: new Date()
+        }
+      });
+    }
+
+    // 🔹 Devuelve pedido actualizado con historial completo
+    const updatedOrder = await tx.order.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        statusHistory: {
+          orderBy: { changedAt: 'asc' }
+        }
+      }
+    });
+
+    if (!updatedOrder) {
+      throw createError('Error recuperando pedido actualizado', 500);
+    }
+
+    return {
+      ...toOrder(updatedOrder),
+      items: updatedOrder.items,
+      statusHistory: updatedOrder.statusHistory
+    };
+  });
 }
 
 export async function deleteOrder(id: string): Promise<void> {
