@@ -1,3 +1,4 @@
+// types/OrderStatus.ts
 export interface CreatePublicOrderDTO {
   customer: {
     firstName: string;

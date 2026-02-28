@@ -2,11 +2,13 @@
  * services/ordersService.ts
  * Lógica de negocio para el dominio de pedidos usando Prisma Client.
  */
-
 import { prisma } from '../config/prisma';
 import { Order, CreateOrderDTO, UpdateOrderDTO } from '../models/Order';
 import { OrderStatus, PaymentStatus } from '../types';
 import { createError } from '../middlewares/errorHandler';
+import { PaginatedResponseDTO } from '../types/admin/pagination';
+import { AdminOrdersQueryDTO } from '../types/admin/order';
+import { AdminOrderDTO } from '../types/admin/order';
 
 // ─── Conversiones de enums Prisma ↔ aplicación ────────────────────────────────
 // Prisma genera enum keys con underscore (en_preparacion, no_abonado)
@@ -83,15 +85,102 @@ function toOrder(row: {
   };
 }
 
-export async function getAllOrders(): Promise<Order[]> {
-  const rows = await prisma.order.findMany({ orderBy: { createdAt: 'desc' } });
-  return rows.map(toOrder);
+
+export async function getAllOrders(
+  query: AdminOrdersQueryDTO
+): Promise<PaginatedResponseDTO<Order>> {
+
+  const {
+    status,
+    paymentStatus,
+    q,
+    page = 1,
+    limit = 10
+  } = query;
+
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
+  const offset = (pageNumber - 1) * limitNumber;
+
+  let baseSql = 'FROM orders WHERE 1=1';
+  const params: any[] = [];
+
+  if (status) {
+    params.push(status);
+    baseSql += ` AND status = $${params.length}`;
+  }
+
+  if (paymentStatus) {
+    params.push(paymentStatus);
+    baseSql += ` AND payment_status = $${params.length}`;
+  }
+
+  if (q) {
+    params.push(`%${q}%`);
+    baseSql += ` AND (
+      customer_first_name ILIKE $${params.length}
+      OR customer_last_name ILIKE $${params.length}
+      OR customer_email ILIKE $${params.length}
+    )`;
+  }
+
+  // 🔹 Query de datos paginados
+  const dataSql = `
+    SELECT *
+    ${baseSql}
+    ORDER BY created_at DESC
+    LIMIT $${params.length + 1}
+    OFFSET $${params.length + 2}
+  `;
+
+  const dataParams = [...params, limitNumber, offset];
+
+  const dataResult = await prisma.query(dataSql, dataParams);
+
+  // 🔹 Query para total
+  const countSql = `SELECT COUNT(*) ${baseSql}`;
+  const countResult = await prisma.query(countSql, params);
+
+  const total = Number(countResult.rows[0].count);
+
+  return {
+    data: dataResult.rows,
+    total,
+    page: pageNumber,
+    totalPages: Math.ceil(total / limitNumber)
+  };
 }
 
-export async function getOrderById(id: string): Promise<Order> {
-  const row = await prisma.order.findUnique({ where: { id } });
-  if (!row) throw createError('Pedido no encontrado', 404);
-  return toOrder(row);
+export async function getOrderById(
+  id: string
+): Promise<AdminOrderDTO> {
+
+  const orderResult = await prisma.query(
+    'SELECT * FROM orders WHERE id = $1',
+    [id]
+  );
+
+  if (orderResult.rowCount === 0) {
+    throw createError('Pedido no encontrado', 404);
+  }
+
+  const order = orderResult.rows[0];
+
+  const itemsResult = await prisma.query(
+    'SELECT * FROM order_items WHERE order_id = $1',
+    [id]
+  );
+
+  const historyResult = await prisma.query(
+    'SELECT * FROM order_status_history WHERE order_id = $1 ORDER BY changed_at ASC',
+    [id]
+  );
+
+  return {
+    ...order,
+    items: itemsResult.rows,
+    statusHistory: historyResult.rows
+  };
 }
 
 export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
