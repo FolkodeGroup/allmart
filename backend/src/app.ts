@@ -7,6 +7,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import apiRouter from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -14,6 +15,7 @@ const app = express();
 
 // ─── Middlewares globales ──────────────────────────────────────────────────────
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   credentials: true,
