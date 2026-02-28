@@ -7,17 +7,27 @@ import { OrderStatus, PaymentStatus } from '../types';
 
 export interface Order {
   id: string;
-  customerFirstName: string;
-  customerLastName: string;
-  customerEmail: string;
+  createdAt: Date;
+  updatedAt: Date;
+  customer: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   total: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paidAt?: Date;
   notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-export type CreateOrderDTO = Omit<Order, 'id' | 'status' | 'paymentStatus' | 'paidAt' | 'createdAt' | 'updatedAt'>;
-export type UpdateOrderDTO = Partial<Omit<Order, 'id' | 'createdAt' | 'updatedAt'>>;
+export type CreateOrderDTO = {
+  customer: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  total: number;
+  notes?: string;
+};
+export type UpdateOrderDTO = Partial<Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'customer'>>;

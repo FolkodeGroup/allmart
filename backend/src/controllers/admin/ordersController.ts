@@ -11,7 +11,7 @@ import { CreateOrderDTO, UpdateOrderDTO } from '../../models/Order';
 
 export async function index(_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const orders = await ordersService.getAllOrders();
+    const orders = await ordersService.getAllOrders(_req.query);
     sendSuccess(res, orders);
   } catch (err) { next(err); }
 }
