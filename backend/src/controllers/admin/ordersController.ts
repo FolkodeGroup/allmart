@@ -40,7 +40,7 @@ export async function update(req: AuthenticatedRequest, res: Response, next: Nex
 export async function remove(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     await ordersService.deleteOrder(req.params.id);
-    sendSuccess(res, null, 200, 'Pedido eliminado');
+    res.status(204).send();
   } catch (err) { next(err); }
 }
 
