@@ -1,0 +1,22 @@
+# =============================================================================
+# Allmart Backend — .dockerignore
+# Archivos y carpetas excluidos del contexto de build de Docker.
+# =============================================================================
+
+node_modules
+npm-debug.log*
+dist
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.vscode
+.idea
+*.md
+!README.md
+Dockerfile
+.dockerignore
+coverage
+.nyc_output
+*.log
