@@ -70,7 +70,6 @@ async function seed() {
         where: { slug: cat.slug },
         update: {},
         create: {
-          id: cat.id,
           name: cat.name,
           slug: cat.slug,
           description: cat.description || null,
@@ -86,11 +85,16 @@ async function seed() {
     const productsToInsert = products.slice(0, 5); // primeros 5 productos del mock
 
     for (const prod of productsToInsert) {
+      // Buscar el UUID real de la categoría por slug
+      const dbCategory = await prisma.category.findUnique({ where: { slug: prod.category.slug } });
+      if (!dbCategory) {
+        console.warn(`Categoría no encontrada para el producto: ${prod.name}`);
+        continue;
+      }
       await prisma.product.upsert({
         where: { slug: prod.slug },
         update: {},
         create: {
-          id: prod.id,
           name: prod.name,
           slug: prod.slug,
           description: prod.description || null,
@@ -99,7 +103,7 @@ async function seed() {
           originalPrice: prod.originalPrice || null,
           discount: prod.discount || null,
           images: prod.images,
-          categoryId: prod.category.id,
+          categoryId: dbCategory.id,
           tags: prod.tags || [],
           rating: prod.rating || 0,
           reviewCount: prod.reviewCount || 0,
