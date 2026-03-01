@@ -1,7 +1,7 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 4804 |
-| Nahuel-Dalesio | 650 |
+| dgimenezdeveloper | 5668 |
+| Nahuel-Dalesio | 1250 |
 | agustin-ovejero | 280 |
 | FedericoPaal | 210 |
 | CelinaJP | 120 |
@@ -10,12 +10,135 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 180 | Issue | Dockerización completa del proyecto Allmart (backend + frontend) con documentación multiplataforma | 2026-03-01 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #256: 🔄 Registrar puntaje de gestión | 2026-03-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #256: 🔄 Registrar puntaje de gestión | 2026-03-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #255: issues 156 | 2026-03-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #254: 🔄 Registrar puntaje de gestión | 2026-03-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #254: 🔄 Registrar puntaje de gestión | 2026-03-01 |
+| Nahuel-Dalesio | 80 | Issue | Seeders: datos iniciales de usuarios admin, categorías y productos | 2026-03-01 |
+| dgimenezdeveloper | 80 | Issue | Implementación de Calidad de Código y Git Hooks (Husky + TypeScript Check) | 2026-02-28 |
+| dgimenezdeveloper | 180 | Issue | Transicion a Prismas | 2026-02-28 |
+| dgimenezdeveloper | 70 | Issue | Crear controladores públicos para categorías y autenticación de clientes | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #254: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #253: Lo que se documentó/mejoró para Windows: | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #252: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #251: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #250: 248 entación de calidad de código y git hooks husky typescript check | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #249: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #247: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #245: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #243: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #240: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #237: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #236: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #235: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #234:  he solucionado el problema de concurrencia en los workflows que usan… | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #193: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #192: 190 transicion a prismas | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #191: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #189: He realizado las siguientes acciones: | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #188: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #254: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #253: Lo que se documentó/mejoró para Windows: | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #253: Lo que se documentó/mejoró para Windows: | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #252: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #251: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #250: 248 entación de calidad de código y git hooks husky typescript check | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #249: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #247: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #246: isuues 153 | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #245: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #244: issues 152 delete hecho verificado | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #243: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #242: issues 151 | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #241: isuess 150 | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #240: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #239: issus 149 | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #237: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #236: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #235: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #234:  he solucionado el problema de concurrencia en los workflows que usan… | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #234:  he solucionado el problema de concurrencia en los workflows que usan… | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #193: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #192: 190 transicion a prismas | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #191: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #189: He realizado las siguientes acciones: | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #188: 🔄 Registrar puntaje de gestión | 2026-02-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #253: Lo que se documentó/mejoró para Windows: | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: ADMIN - LAYOUT & NAVEGACIÓN | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: ADMIN - VISUALIZACION DE DATOS Y ESTADÍSTICAS | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: ADMIN - UX & DETALLES INTERACTIVOS | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: PROCESAR IMÁGENES | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: INFREAESTRUCTURA, DOCKERIZACIÓN Y CI/CD | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #248: Implementación de Calidad de Código y Git Hooks (Husky + TypeScript Check) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #238: Dockerización completa del proyecto Allmart (backend + frontend) con documentación multiplataforma | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #233: Verificar visualización de imágenes y favicon en el frontend | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #232: Crear README visual de recursos gráficos | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #231: Optimizar imágenes para web (peso/calidad) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #230: Documentar proceso de generación de favicon | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #229: Generar favicon en todos los tamaños requeridos | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #228: Procesar y exportar el logo en formatos web | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #227: Documentar estructura y nombres de imágenes | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #226: Clasificar imágenes por categoría de producto | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #225: Subir imágenes a carpeta compartida en Google Drive | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #224: Descargar imágenes de productos desde Canva | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #223: Dashboard: Widget de "Notas del Staff" | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #222: UX: Validaciones de Formulario en Tiempo Real | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #221: UI: Botones de Acción con Estados de Carga (Spinners) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #220: Dashboard: Personalización de Widgets (Drag & Drop) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #219: UX: Scroll Infinito vs Paginación en Listas Admin | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #218: Dashboard: Feed de Actividad en Vivo | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #217: UI: Refactorización de Modales (Transitions) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #216: Dashboard: Widget de Estado del Sistema | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #215: UX: Barra de Búsqueda Global en el Header | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #214: Dashboard: Panel de "Acciones Rápidas" Dinámico | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #213: Dashboard: Filtro Global de Fecha para el Panel | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #212: Dashboard: Gráfico de Barras - Productos más Vendidos | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #211: Dashboard: Tarjeta de "Mejores Clientes" | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #210: Dashboard: Widget de Objetivos Mensuales | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #209: Dashboard: Mapa de Calor de Ventas (Simplificado) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #208: Dashboard: Alerta de Stock Crítico (Filtro Rápido) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #207: Dashboard: Widget de "Pedidos Recientes" | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #206: Dashboard: Gráfico de Distribución por Categorías | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #205: Dashboard: Tarjetas de Métricas de Alto Impacto | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #204: Dashboard: Widget de Ventas Semanales (Gráfico) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #203: UI: Tema Oscuro/Claro para el Panel Admin | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #202: Dashboard: Banner de Bienvenida Personalizado | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #201: Layout: Esqueleto de Carga (Skeletons) para Secciones | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #200: Sidebar: Badges Dinámicos en Ítems de Menú | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #199: UI: Sistema de Notificaciones "Toast" Global | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #198: Sidebar: Sección de Perfil de Usuario Integrada | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #197: Dashboard: Grid Adaptativo de Pantalla Completa | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #196: Layout: Sticky Header con Breadcrumbs Dinámicos | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #195: Sidebar: Indicadores de Estado Activo y Hover Modernos | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #194: Refactorización de Sidebar: Colapsable y Responsive | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #190: Transicion a Prismas | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #187: Crear controladores públicos para categorías y autenticación de clientes | 2026-02-28 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (BACKEND) — Issue #248: Implementación de Calidad de Código y Git Hooks (Husky + TypeScript Check) | 2026-02-28 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (DEVOPS) — Issue #248: Implementación de Calidad de Código y Git Hooks (Husky + TypeScript Check) | 2026-02-28 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #248: Implementación de Calidad de Código y Git Hooks (Husky + TypeScript Check) | 2026-02-28 |
+| Nahuel-Dalesio | 100 | Issue | Endpoints: gestión del carrito de compras (`/api/cart`) | 2026-02-28 |
+| Nahuel-Dalesio | 60 | Issue | Endpoint admin: eliminar pedido (`DELETE /api/admin/orders/:id`) | 2026-02-28 |
+| Nahuel-Dalesio | 80 | Issue | Endpoint admin: marcar pedido como abonado (`PATCH /api/admin/orders/:id/payment`) | 2026-02-28 |
+| Nahuel-Dalesio | 100 | Issue | Endpoint admin: actualizar estado de pedido (`PATCH /api/admin/orders/:id/status`) | 2026-02-28 |
+| Nahuel-Dalesio | 80 | Issue | Endpoints admin: listar y filtrar pedidos (`GET /api/admin/orders`) | 2026-02-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #186: 🔄 Registrar puntaje de gestión | 2026-02-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #186: 🔄 Registrar puntaje de gestión | 2026-02-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #185: Issus 148 | 2026-02-27 |
+| Nahuel-Dalesio | 100 | Issue | Endpoint: POST `/api/orders` — Crear pedido desde el carrito | 2026-02-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #184: Managment log | 2026-02-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #183: 🔄 Registrar puntaje de gestión | 2026-02-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #184: Managment log | 2026-02-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #183: 🔄 Registrar puntaje de gestión | 2026-02-26 |
 | dgimenezdeveloper | 80 | Issue | Middleware de autenticación JWT para rutas protegidas | 2026-02-25 |
 | dgimenezdeveloper | 80 | Issue | Endpoint: POST `/api/auth/login` — Login de clientes | 2026-02-25 |
 | dgimenezdeveloper | 80 | Issue | Endpoint: POST `/api/auth/register` — Registro de clientes | 2026-02-25 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #182: Management log | 2026-02-25 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #180: He implementado el endpoint de registro para clientes POST /api/auth/… | 2026-02-25 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #179: He implementado el endpoint de login para clientes POST /api/auth/log… | 2026-02-25 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #178: He mejorado y tipado la lógica de autenticación JWT, refactorizando e… | 2026-02-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #182: Management log | 2026-02-25 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #181: issus 147 completa | 2026-02-25 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #180: He implementado el endpoint de registro para clientes POST /api/auth/… | 2026-02-25 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #179: He implementado el endpoint de login para clientes POST /api/auth/log… | 2026-02-25 |
@@ -80,38 +203,9 @@
 | dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #163: Creación y configuración inicial de base de datos PostgreSQL, usuario y permisos para Allmart | 2026-02-23 |
 | dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #158: Estructura escalable y modular para backend ERP-ready | 2026-02-23 |
 | dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #157: Documentación del backend: README.md completo con endpoints, setup y variables de entorno | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #156: Seeders: datos iniciales de usuarios admin, categorías y productos | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #155: Endpoints de reportes y estadísticas admin (`GET /api/admin/reports`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #154: Endpoint: creación de envío (`POST /api/admin/orders/:id/shipment`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #153: Endpoints: gestión del carrito de compras (`/api/cart`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #152: Endpoint admin: eliminar pedido (`DELETE /api/admin/orders/:id`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #151: Endpoint admin: marcar pedido como abonado (`PATCH /api/admin/orders/:id/payment`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #150: Endpoint admin: actualizar estado de pedido (`PATCH /api/admin/orders/:id/status`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #149: Endpoints admin: listar y filtrar pedidos (`GET /api/admin/orders`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #148: Endpoint: POST `/api/orders` — Crear pedido desde el carrito | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #147: Endpoints CRUD admin: variantes de productos (`/api/admin/products/:id/variants`) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #146: Endpoints CRUD admin: POST, PUT, DELETE `/api/admin/products` | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #145: Endpoints públicos: `GET /api/products` con filtros y paginación | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #144: Endpoints CRUD admin: POST, PUT, DELETE `/api/admin/categories` | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #143: Endpoints CRUD: `GET /api/categories` y `GET /api/categories/:slug` | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #142: Middleware de autenticación JWT para rutas protegidas | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #141: Migración: creación de tabla `shipments` (RESOLVER LUEGO DE LA 136) | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #140: Endpoint: POST `/api/auth/login` — Login de clientes | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #139: Endpoint: POST `/api/auth/register` — Registro de clientes | 2026-02-23 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #138: Endpoint: POST `/api/auth/admin/login` — Login de administrador | 2026-02-23 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #127: Se actualzia puntaje sluego del sprint 1 de la demo del front con dat… | 2026-02-22 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #127: Se actualzia puntaje sluego del sprint 1 de la demo del front con dat… | 2026-02-22 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: BACKEND ALLMART — SPRINT 2 | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #137: Migración: creación de tabla `sales` (ventas cerradas) | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #136: Migración: creación de tablas `carts` y `cart_items` | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #135: Migración: creación de tabla `order_status_history` | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #134: Migración: creación de tablas `orders` y `order_items` | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #133: Migración: creación de tabla `product_variants` | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #132: Migración: creación de tabla `products` | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #131: Migración: creación de tabla `categories` | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #130: Migración: creación de tabla `users` | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #129: Configuración de conexión a base de datos PostgreSQL con pool de conexiones | 2026-02-22 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #128: Configuración inicial del proyecto backend (Node.js + Express + TypeScript) | 2026-02-22 |
 | dgimenezdeveloper | 20 | Issue | Seguridad y control de acceso | 2026-02-21 |
 | dgimenezdeveloper | 40 | Issue | Implementar reportes y estadísticas visuales | 2026-02-21 |
 | dgimenezdeveloper | 20 | Issue | Historial y seguimiento de pedidos | 2026-02-21 |
@@ -163,22 +257,6 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #101: Cambios realizados | 2026-02-21 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: CARRITO DE COMPRAS | 2026-02-21 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: ADMIN | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #116: Seguridad y control de acceso | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #115: Implementar reportes y estadísticas visuales | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #114: Historial y seguimiento de pedidos | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #113: Confirmación de pago de ventas por WhatsApp | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #112: Visualización y gestión de pedidos | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #111: Gestión de variantes de productos | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #110: Implementar gestión de categorías | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #109: Implementar gestión de productos (ABM) | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #108: Crear dashboard principal del panel de administración | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #107: Crear login seguro para el panel de administración | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #100: Validar flujo completo y casos de error | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #99: Mock de procesamiento de compra y feedback al usuario | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #98: Implementar botón de envío por WhatsApp | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #97: Generar resumen de pedido para WhatsApp | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #96: Crear formulario de confirmación de pedido | 2026-02-21 |
-| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #95: Implementar persistencia del carrito con localStorage | 2026-02-21 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #94: Se implementa titulos y textos en AboutSection. Tambien se agrega una… | 2026-02-20 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #93: boton ver todos de prod destacados modificado | 2026-02-20 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #92: card alineadas | 2026-02-20 |
@@ -252,11 +330,6 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #59: Se ha realizado: | 2026-02-18 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #47: Clasificaque cada imagen descargada según su uso (categoría, destacad… | 2026-02-18 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #46: Se agregan imagenes nuevas y optimizadas en cada slide para cada secc… | 2026-02-18 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #45: Tarea 30: Crear la estructura de carpetas dentro del proyecto (fronte… | 2026-02-18 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #44: 19 implementar movimiento automático e infinito en el slider | 2026-02-18 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #43: imagenes descargadas | 2026-02-18 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #42: Se crea componente TestSlider para tener a mano los textos y CTA del … | 2026-02-18 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #41: agregano en mock.ts los labels con sus correctas categorias para que … | 2026-02-18 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: PRODUCTOS DESTACADOS | 2026-02-18 |
 | FedericoPaal | 20 | Issue | Agregar textos y llamados a la acción en el Slider | 2026-02-18 |
 | FedericoPaal | 30 | Issue | Integrar imágenes de productos de bazar en el Slider | 2026-02-18 |
@@ -267,22 +340,6 @@
 | dgimenezdeveloper | 180 | Issue | Separar arquitectura del proyecto en backend y frontend | 2026-02-17 |
 | dgimenezdeveloper | 120 | Issue | Automatizar puntaje y movimiento de issues con GitHub Actions | 2026-02-17 |
 | dgimenezdeveloper | 200 | Issue | Implementar pipeline de CI/CD | 2026-02-17 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #11: SE HA REALIZADO: | 2026-02-17 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #10: ✅ El pipeline CI/CD está configurado en GitHub Actions y listo para e… | 2026-02-17 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #9: Prueba scores | 2026-02-17 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #8: 4 automatizar puntaje y movimiento de issues con GitHub actions | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #40: link a imagenes producto/slug | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #39: cambio de ubicacion en layout productos destacados y benefits | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #38: 12 agregar barra de búsqueda central en el navbar | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #37: Se crea componente HeroSlider con su css y se hacen cambios en el Her… | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #36: cambio de transicion de la card de categorias destacadas | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #35: overlay mas oscuro | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #34: Se realizaron todas las tareas del issus | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #11: SE HA REALIZADO: | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #10: ✅ El pipeline CI/CD está configurado en GitHub Actions y listo para e… | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #10: ✅ El pipeline CI/CD está configurado en GitHub Actions y listo para e… | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #9: Prueba scores | 2026-02-17 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #8: 4 automatizar puntaje y movimiento de issues con GitHub actions | 2026-02-17 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: NAVBAR | 2026-02-17 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: HERO SECTION | 2026-02-17 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: CATEGORIAS SECTION | 2026-02-17 |
@@ -295,8 +352,4 @@
 | Nahuel-Dalesio | 30 | Issue | Cambiar categorías destacadas por nuevas categorías | 2026-02-17 |
 | dgimenezdeveloper | 60 | Issue | Crear y documentar el sistema de puntajes para devs | 2026-02-16 |
 | dgimenezdeveloper | 100 | Issue | Configuración inicial del proyecto Allmart | 2026-02-16 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #7: Todos los requerimientos cumplidos: | 2026-02-16 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #2: Se ha realziado el primer issue de configuraicon inicial dle proyecto… | 2026-02-16 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #7: Todos los requerimientos cumplidos: | 2026-02-16 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #2: Se ha realziado el primer issue de configuraicon inicial dle proyecto… | 2026-02-16 |
 | dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: CONFIGURACION INICIAL | 2026-02-16 |
