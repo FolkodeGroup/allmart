@@ -1,0 +1,23 @@
+# =============================================================================
+# Allmart — .gitattributes
+# Fuerza finales de línea LF en archivos críticos para Docker/Linux.
+# Esto evita que en Windows los scripts .sh se conviertan a CRLF,
+# lo cual rompe la ejecución dentro de contenedores Docker.
+# =============================================================================
+
+# Forzar LF en scripts de shell (CRÍTICO para Docker)
+*.sh text eol=lf
+
+# Forzar LF en archivos de configuración de Docker
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+*.dockerfile text eol=lf
+
+# Forzar LF en scripts SQL
+*.sql text eol=lf
+
+# Forzar LF en configuración de nginx
+nginx.conf text eol=lf
+
+# Archivos de entorno
+.env* text eol=lf

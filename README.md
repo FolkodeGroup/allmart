@@ -23,10 +23,28 @@ npm install
 npm run dev
 ```
 
+## 🐳 Docker (levantar todo con un solo comando)
+
+Si tenés Docker instalado, podés levantar todo el proyecto (backend + frontend + base de datos) sin instalar nada más:
+
+```bash
+# 1. Copiar las variables de entorno
+cp .env.docker.example .env        # Linux/Mac
+copy .env.docker.example .env      # Windows CMD
+
+# 2. Levantar todo
+docker compose up --build
+
+# 3. Abrir en el navegador: http://localhost:8080
+```
+
+> 📖 **Guía completa con instrucciones detalladas para Windows, Linux y Mac:** consulta [DOCKER.md](DOCKER.md)
+
 ## Documentación
 
 - Consulta `frontend/README.md` y `backend/README.md` para instrucciones específicas de cada parte.
 - Consulta `ARCHITECTURE.md` para detalles sobre la arquitectura y la comunicación entre frontend y backend.
+- Consulta `DOCKER.md` para la guía completa de Docker (instalación, uso, troubleshooting).
 
 ## Calidad de Código y Git Hooks
 
