@@ -157,11 +157,11 @@ sudo systemctl enable postgresql  # Para que arranque automáticamente al inicia
    - Abrir el menú inicio → buscar **Services** → buscar `postgresql-x64-16` → debería estar en estado "Running".
    - O desde PowerShell: `Get-Service -Name postgresql*`
 
-> **Windows — Agregar PostgreSQL al PATH:**  
-> Para poder usar `psql` desde la terminal sin indicar la ruta completa:  
-> 1. Ir a **Panel de Control → Sistema → Configuración avanzada → Variables de entorno**.  
-> 2. En "Variables del sistema", editar `Path`.  
-> 3. Agregar: `C:\Program Files\PostgreSQL\16\bin` (ajustar según la versión instalada).  
+> **Windows — Agregar PostgreSQL al PATH:**
+> Para poder usar `psql` desde la terminal sin indicar la ruta completa:
+> 1. Ir a **Panel de Control → Sistema → Configuración avanzada → Variables de entorno**.
+> 2. En "Variables del sistema", editar `Path`.
+> 3. Agregar: `C:\Program Files\PostgreSQL\16\bin` (ajustar según la versión instalada).
 > 4. Reiniciar la terminal.
 
 ---
@@ -266,8 +266,8 @@ DB_NAME=allmart_db
 DATABASE_URL="postgresql://postgres:tu_contraseña_de_postgres@localhost:5432/allmart_db?schema=public"
 ```
 
-> **Importante:** `DATABASE_URL` debe tener exactamente una sola línea con ese formato.  
-> Si la contraseña tiene caracteres especiales como `@`, `#`, `%`, `/`, deberás codificarlos.  
+> **Importante:** `DATABASE_URL` debe tener exactamente una sola línea con ese formato.
+> Si la contraseña tiene caracteres especiales como `@`, `#`, `%`, `/`, deberás codificarlos.
 > Por ejemplo: `@` → `%40`, `#` → `%23`, `%` → `%25`.
 
 ---
@@ -325,7 +325,7 @@ Deberías ver:
 ✔ Generated Prisma Client (v7.4.2) to ./node_modules/@prisma/client
 ```
 
-> **¿Cuándo volver a ejecutar este comando?**  
+> **¿Cuándo volver a ejecutar este comando?**
 > Siempre que se modifique el archivo `prisma/schema.prisma`.
 
 ---
@@ -359,8 +359,8 @@ npm run prisma:studio
 
 ### Error: `FATAL: Peer authentication failed for user "postgres"`
 
-**Sistema:** Linux  
-**Causa:** PostgreSQL en Linux intenta autenticar por "peer" (usuario del sistema), que no coincide cuando se usa `-h localhost`.  
+**Sistema:** Linux
+**Causa:** PostgreSQL en Linux intenta autenticar por "peer" (usuario del sistema), que no coincide cuando se usa `-h localhost`.
 **Solución:** Siempre usar `-h localhost` en los comandos psql para forzar autenticación TCP/IP con contraseña:
 ```bash
 # ✗ Incorrecto (usa peer auth)
@@ -374,7 +374,7 @@ psql -h localhost -U postgres
 
 ### Error: `FATAL: password authentication failed for user "postgres"`
 
-**Causa:** La contraseña ingresada no coincide con la configurada en PostgreSQL.  
+**Causa:** La contraseña ingresada no coincide con la configurada en PostgreSQL.
 **Solución:**
 ```bash
 # Cambiar la contraseña del usuario postgres
@@ -388,7 +388,7 @@ sudo -u postgres psql -c "\password postgres"
 
 ### Error: `ECONNREFUSED — connect ECONNREFUSED 127.0.0.1:5432`
 
-**Causa:** PostgreSQL no está corriendo.  
+**Causa:** PostgreSQL no está corriendo.
 **Solución Linux:**
 ```bash
 sudo systemctl start postgresql
@@ -405,7 +405,7 @@ Start-Service postgresql-x64-16   # ajustar nombre según versión
 
 ### Error: `database "allmart_db" does not exist`
 
-**Causa:** La base de datos no fue creada todavía.  
+**Causa:** La base de datos no fue creada todavía.
 **Solución:**
 ```bash
 psql -h localhost -U postgres -c "CREATE DATABASE allmart_db;"
@@ -415,26 +415,26 @@ psql -h localhost -U postgres -c "CREATE DATABASE allmart_db;"
 
 ### Error: `Authentication failed against database server, the provided database credentials for 'johndoe' are not valid`
 
-**Causa:** El archivo `.env` tiene dos líneas `DATABASE_URL` y la segunda (el ejemplo de Prisma con `johndoe`) está sobreescribiendo la correcta.  
+**Causa:** El archivo `.env` tiene dos líneas `DATABASE_URL` y la segunda (el ejemplo de Prisma con `johndoe`) está sobreescribiendo la correcta.
 **Solución:** Abrir `.env` y eliminar la línea duplicada que contenga `johndoe:randompassword`. Dejar solo la que tiene tus credenciales reales.
 
 ---
 
 ### Error: `npm run migrate` falla con `psql: command not found`
 
-**Causa:** `psql` no está en el PATH del sistema.  
+**Causa:** `psql` no está en el PATH del sistema.
 **Solución Linux:**
 ```bash
 sudo apt install -y postgresql-client
 ```
-**Solución Windows:**  
+**Solución Windows:**
 Agregar `C:\Program Files\PostgreSQL\16\bin` al PATH de variables de entorno del sistema (ver sección de instalación).
 
 ---
 
 ### Error: `Cannot find module '@prisma/client'` o `Property 'user' does not exist on type 'PrismaClient'`
 
-**Causa:** El Prisma Client no fue generado o está desactualizado.  
+**Causa:** El Prisma Client no fue generado o está desactualizado.
 **Solución:**
 ```bash
 npm run prisma:generate
@@ -444,7 +444,7 @@ npm run prisma:generate
 
 ### Error: `Error: listen EADDRINUSE: address already in use :::3001`
 
-**Causa:** Ya hay otro proceso usando el puerto 3001.  
+**Causa:** Ya hay otro proceso usando el puerto 3001.
 **Solución Linux:**
 ```bash
 # Ver qué proceso usa el puerto 3001
@@ -464,7 +464,7 @@ taskkill /PID <PID> /F
 
 ### El servidor arranca pero dice `Authentication failed` al hacer login
 
-**Causa:** La contraseña del usuario `admin` en la base de datos no coincide con la que estás ingresando.  
+**Causa:** La contraseña del usuario `admin` en la base de datos no coincide con la que estás ingresando.
 **Solución:** Generar un nuevo hash y actualizar la base de datos:
 ```bash
 # 1. Generar el hash de la nueva contraseña (ej: "admin")
@@ -480,7 +480,7 @@ psql -h localhost -U postgres -d allmart_db \
 
 ### Prisma Studio no muestra tablas
 
-**Causa:** El Prisma Client no está sincronizado con la base de datos actual.  
+**Causa:** El Prisma Client no está sincronizado con la base de datos actual.
 **Solución:**
 ```bash
 # Introspect la BD y actualizar schema.prisma
@@ -497,7 +497,7 @@ npm run prisma:studio
 
 ### Error en Windows: `'prisma' is not recognized as an internal or external command`
 
-**Causa:** Prisma no está en el PATH porque `node_modules/.bin` no está accesible directamente.  
+**Causa:** Prisma no está en el PATH porque `node_modules/.bin` no está accesible directamente.
 **Solución:** Usar siempre los scripts de `npm` definidos en `package.json` en lugar de llamar a `prisma` directamente:
 ```powershell
 # ✗ No usar directamente
@@ -511,7 +511,7 @@ npm run prisma:generate
 
 ### Error en Windows: los scripts `.sh` no funcionan
 
-**Causa:** Los archivos `start-backend.sh` y `start-frontend.sh` son scripts Bash, que no se ejecutan en CMD o PowerShell nativamente.  
+**Causa:** Los archivos `start-backend.sh` y `start-frontend.sh` son scripts Bash, que no se ejecutan en CMD o PowerShell nativamente.
 **Solución:**
 - Usar **Git Bash** (se instala con Git for Windows) para ejecutar scripts `.sh`.
 - O usar **WSL** (Windows Subsystem for Linux).
@@ -742,4 +742,47 @@ El `PrismaClient` en Prisma 7 requiere un **driver adapter** para conexión dire
 | Helpers | `src/utils/` | Funciones reutilizables (JWT, bcrypt, response) |
 
 > **Regla de oro:** los servicios nunca dependen de Express (sin `req`/`res`). Los controladores son delgados: sólo orquestan llamadas al servicio y devuelven la respuesta HTTP.
+
+---
+
+## Crear usuario admin manualmente (para desarrollo)
+
+Si necesitas crear un usuario admin con contraseña `admin` en la base de datos, seguí estos pasos:
+
+### 0. Ingresar a psql (Windows)
+
+Desde la terminal, ejecutá:
+
+```bash
+psql -U postgres -h localhost -p <PUERTO> -d allmart_db
+```
+
+Reemplazá `<PUERTO>` por el puerto real de tu instalación (ejemplo: 5433 si no usaste el default 5432).
+
+Si la base de datos no existe, créala antes:
+
+```bash
+createdb -U postgres -h localhost -p <PUERTO> allmart_db
+```
+
+1. **Generar el hash bcrypt de la contraseña "admin":**
+
+  ```bash
+  node -e "require('bcryptjs').hash('admin', 10).then(console.log)"
+  ```
+
+  Copia el hash generado (ejemplo: `$2b$10$xxxx...`).
+
+2. **Insertar el usuario en la base de datos:**
+
+  Ingresá a psql y ejecutá:
+
+  ```sql
+  INSERT INTO users (email, password_hash, role, created_at, updated_at)
+  VALUES ('admin@admin.com', '<HASH>', 'admin', NOW(), NOW());
+  ```
+
+  Reemplazá `<HASH>` por el hash generado en el paso anterior.
+
+Si la tabla `users` tiene otros campos obligatorios, completalos según corresponda.
 

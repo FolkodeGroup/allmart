@@ -1,7 +1,3 @@
-import { Link } from 'react-router-dom';
-import { useAdminAuth } from '../../context/AdminAuthContext';
-import styles from './AdminDashboard.module.css';
-
 const sections = [
   {
     icon: '📦',
@@ -25,9 +21,45 @@ const sections = [
     color: 'warm',
   },
 ];
+import { Link } from 'react-router-dom';
+// import { useAdminAuth } from '../../context/AdminAuthContext';
+import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
+import { useAdminOrders } from '../../context/AdminOrdersContext';
+import styles from './AdminDashboard.module.css';
+import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
+
 
 export function AdminDashboard() {
-  const { user } = useAdminAuth();
+  const { orders } = useAdminOrders();
+
+  // Últimos 7 días
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - (6 - i));
+    return date;
+  });
+  const dayLabels = days.map(d => d.toLocaleDateString('es-AR', { weekday: 'short' }));
+
+  // Contar pedidos por día
+  function getWeeklyOrderCounts(): WeeklySalesData[] {
+    return days.map((day, idx) => {
+      // Pedidos cuyo createdAt es ese día
+      const count = orders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate.getFullYear() === day.getFullYear() &&
+          orderDate.getMonth() === day.getMonth() &&
+          orderDate.getDate() === day.getDate();
+      }).length;
+      return {
+        day: dayLabels[idx].charAt(0).toUpperCase() + dayLabels[idx].slice(1),
+        sales: count,
+      };
+    });
+  }
+
+  const salesData = getWeeklyOrderCounts();
+  const totalSales = salesData.reduce((acc, d) => acc + d.sales, 0);
 
   return (
     <div className={styles.page}>
@@ -35,7 +67,7 @@ export function AdminDashboard() {
       <div className={styles.header}>
         <div>
           <span className={styles.label}>Panel de administración</span>
-          <h1 className={styles.title}>¡Bienvenido, {user}!</h1>
+          <h1 className={styles.title}>¡Bienvenido!</h1>
           <p className={styles.subtitle}>
             Accedé rápidamente a todas las secciones del panel.
           </p>
@@ -58,6 +90,11 @@ export function AdminDashboard() {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* Ventas Semanales Widget */}
+      <section className={styles.section}>
+        <WeeklySalesWidget data={salesData} totalSales={totalSales} />
       </section>
 
       {/* Status bar */}
