@@ -21,12 +21,12 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.actor == 'dgimenezdeveloper' || github.actor == 'folkodegroup') &&
-      github.event.pull_request.user.login != 'github-actions[bot]' &&
-      github.event.pull_request.user.login != 'folkodegroup'
+      github.event.pull_request.head.ref != 'chore/gestion-puntaje-auto'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
