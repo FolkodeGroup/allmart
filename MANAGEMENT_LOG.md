@@ -37,6 +37,7 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #267: 🔄 Registrar puntaje de gestión | 2026-03-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #266: 🔄 Registrar puntaje de gestión | 2026-03-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #265: 🔄 Registrar puntaje de gestión | 2026-03-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #278: 194 refactorización de sidebar colapsable y responsive | 2026-03-04 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #270: 🔄 Registrar puntaje de gestión | 2026-03-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #270: 🔄 Registrar puntaje de gestión | 2026-03-04 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #269: 🔄 Registrar puntaje de gestión | 2026-03-04 |
