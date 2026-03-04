@@ -167,7 +167,7 @@ jobs:
             Incluye la actualización de MANAGEMENT_LOG.md.
             Por favor, revisa y mergea para mantener los puntajes al día.
           branch: chore/gestion-puntaje-auto
-          base: ${{ github.head_ref || github.ref_name }}
+          base: main
           delete-branch: true
           add-paths: |
             MANAGEMENT_LOG.md
