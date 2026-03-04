@@ -168,3 +168,6 @@ jobs:
           delete-branch: true
           add-paths: |
             MANAGEMENT_LOG.md
+          branch-suffix: timestamp
+          # Si quieres evitar conflictos, descomenta la siguiente línea:
+          # branch-suffix: timestamp
