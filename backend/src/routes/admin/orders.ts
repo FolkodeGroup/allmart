@@ -24,10 +24,6 @@ router.delete("/:id", requireRole(UserRole.ADMIN), ctrl.remove);
 
 router.patch("/:id/status", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.updateStatus);
 router.patch("/:id/payment", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.updatePayment);
-router.post(
-  "/:id/shipment",
-  requireRole(UserRole.ADMIN),
-  shipmentCtrl.upsertShipment
-);
+router.post("/:id/shipment",requireRole(UserRole.ADMIN),shipmentCtrl.upsertShipment);
 
 export default router;
