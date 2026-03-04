@@ -1,9 +1,4 @@
-
 name: Registrar puntajes de gestión
-
-concurrency:
-  group: gestion-puntaje-auto-${{ github.ref }}
-  cancel-in-progress: true
 
 # Captura todas las actividades de gestión que merecen puntaje
 on:
@@ -19,19 +14,14 @@ on:
 jobs:
   registrar_puntaje_gestion:
     runs-on: ubuntu-latest
+    # Solo procesar si el actor es dgimenezdeveloper o folkodegroup
+    # Ignorar eventos generados por el propio bot (chore PRs)
     if: |
       (github.actor == 'dgimenezdeveloper' || github.actor == 'folkodegroup') &&
       github.event.pull_request.head.ref != 'chore/gestion-puntaje-auto'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
+    steps:
       - name: Calcular puntaje y registrar actividad
-        id: calcular
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
@@ -123,7 +113,7 @@ jobs:
 
             console.log(`Registrando: ${nuevaFila.trim()}`);
 
-            // ── Actualizar MANAGEMENT_LOG.md vía API (para evitar race conditions) ──
+            // ── Actualizar MANAGEMENT_LOG.md vía API ──────────────────────────
             const logPath = 'MANAGEMENT_LOG.md';
             const cabecera = '| Dev | Puntaje | Actividad | Referencia | Fecha |\n|-----|---------|-----------|------------|-------|\n';
 
@@ -151,23 +141,13 @@ jobs:
             const nuevoContenido = contenidoActual + nuevaFila;
             const contentEncoded = Buffer.from(nuevoContenido).toString('base64');
 
-            // Guardar el archivo actualizado localmente para el siguiente paso
-            const fs = require('fs');
-            fs.writeFileSync(logPath, nuevoContenido);
-            console.log(`✅ MANAGEMENT_LOG.md actualizado localmente: +${puntaje} pts para ${devAcreditado}`);
+            await github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: logPath,
+              message: `chore: registrar puntaje de gestión — ${actividad} (${puntaje} pts) [skip ci]`,
+              content: contentEncoded,
+              sha,
+            });
 
-      - name: Crear Pull Request automático con cambios de puntaje
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
-          commit-message: "chore: registrar puntaje de gestión [skip ci]"
-          title: "🔄 Registrar puntaje de gestión"
-          body: |
-            Este Pull Request fue generado automáticamente por el workflow de puntajes de gestión.
-            Incluye la actualización de MANAGEMENT_LOG.md.
-            Por favor, revisa y mergea para mantener los puntajes al día.
-          branch: chore/gestion-puntaje-auto
-          base: main
-          delete-branch: true
-          add-paths: |
-            MANAGEMENT_LOG.md
+            console.log(`✅ MANAGEMENT_LOG.md actualizado: +${puntaje} pts para ${devAcreditado}`);
