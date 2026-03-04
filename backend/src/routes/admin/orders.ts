@@ -10,6 +10,7 @@ import * as ctrl from "../../controllers/admin/ordersController";
 import { authMiddleware } from "../../middlewares/auth";
 import { requireRole } from "../../middlewares/permissions";
 import { UserRole } from "../../types";
+import * as shipmentCtrl from "../../controllers/admin/shipmentController";
 
 const router = Router();
 
@@ -23,5 +24,10 @@ router.delete("/:id", requireRole(UserRole.ADMIN), ctrl.remove);
 
 router.patch("/:id/status", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.updateStatus);
 router.patch("/:id/payment", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.updatePayment);
+router.post(
+  "/:id/shipment",
+  requireRole(UserRole.ADMIN),
+  shipmentCtrl.upsertShipment
+);
 
 export default router;
