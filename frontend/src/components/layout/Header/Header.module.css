@@ -90,11 +90,44 @@
 
 /* ── Navigation ── */
 
+.navBarStrip.collapsed {
+    width: 80px;
+}
+
+.navBarStrip.collapsed .navLabel,
+.navBarStrip.collapsed .chevron {
+  display: none;
+}
+
+.navIcon {
+  min-width: 24px; 
+  display: flex;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.collapsedBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 5px;
+  color: white;
+  transition: background 0.3s;
+}
+
+.collapsedBtn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
 .navBarStrip {
     width: 100%;
     background-color: #8fa99a ;
     border-top: 1px solid var(--color-border-light);
     border-bottom: 1px solid var(--color-border-light);
+    transition: all 0.3s ease;
+    overflow: hidden;
     
 }
 
@@ -112,7 +145,7 @@
 }
 
 .navLink {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   font-family: var(--font-ui);
@@ -312,12 +345,36 @@
   display: none;
   position: fixed;
   inset: 0;
-  top: var(--header-height);
-  background: var(--color-neutral-light);
-  z-index: var(--z-overlay);
-  padding: var(--space-6);
+  top: 70px;
+  background: #ffffff;
+  z-index: 1000;
+  padding: 1rem 2rem;
   overflow-y: auto;
-  animation: slideIn var(--transition-slow) forwards;
+  animation: slideIn 0.3s ease forwards;
+}
+
+.mobileNavItemContainer {
+  border-bottom: 1px solid var(--color-border-light);
+  width: 100%;
+  display: block;
+}
+
+.mobileCategoryBtn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4a5d5e; /* Color similar al de tu imagen */
+  text-transform: uppercase;
+  letter-spacing: 1px
 }
 
 @keyframes slideIn {
@@ -333,11 +390,11 @@
 
 .mobileNavLink {
   display: block;
-  font-family: var(--font-ui);
-  font-size: var(--text-lg);
-  font-weight: var(--font-medium);
-  color: var(--color-text-primary);
-  padding: var(--space-4) 0;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4a5d5e;
+  padding: 1.5rem 0;
   text-decoration: none;
   border-bottom: 1px solid var(--color-border-light);
   text-transform: uppercase;
@@ -355,14 +412,40 @@
 .mobileSubLink {
   display: block;
   font-family: var(--font-ui);
-  font-size: var(--text-base);
-  color: var(--color-text-secondary);
-  padding: var(--space-2) 0;
+  font-size: 1rem;
+  color: #666;
+  padding: 0.8rem 0;
   text-decoration: none;
+  transition: color 0.2s;
 }
 
 .mobileSubLink:hover {
   color: var(--color-primary);
+}
+
+.mobileSubLinksContainer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileSubLinksContainer.show {
+  max-height: 1000px; /* Valor alto para permitir que crezca */
+  opacity: 1;
+  padding-bottom: 1rem;
+}
+
+.chevronMobile {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+  color: #8fa99a; /* Color de tu marca */
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
 }
 
 /* ── Responsive ── */
