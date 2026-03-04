@@ -20,7 +20,9 @@ jobs:
   registrar_puntaje_gestion:
     runs-on: ubuntu-latest
     if: |
-      github.actor == 'dgimenezdeveloper' || github.actor == 'folkodegroup'
+      (github.actor == 'dgimenezdeveloper' || github.actor == 'folkodegroup') &&
+      github.event.pull_request.user.login != 'github-actions[bot]' &&
+      github.event.pull_request.user.login != 'folkodegroup'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -168,6 +170,3 @@ jobs:
           delete-branch: true
           add-paths: |
             MANAGEMENT_LOG.md
-          branch-suffix: timestamp
-          # Si quieres evitar conflictos, descomenta la siguiente línea:
-          # branch-suffix: timestamp
