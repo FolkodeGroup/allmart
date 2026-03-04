@@ -1,0 +1,38 @@
+.card {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 2rem;
+}
+.title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.98rem;
+}
+.table th, .table td {
+  padding: 0.7rem 0.5rem;
+  text-align: left;
+}
+.table th {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+}
+.table tr:not(:last-child) td {
+  border-bottom: 1px solid var(--color-border-light);
+}
+.email {
+  font-size: 0.85em;
+  color: var(--color-text-tertiary);
+}
+.emptyState {
+  text-align: center;
+  color: var(--color-text-tertiary);
+  padding: 2rem 0;
+}

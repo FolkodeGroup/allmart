@@ -25,6 +25,7 @@ import { Link } from 'react-router-dom';
 // import { useAdminAuth } from '../../context/AdminAuthContext';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
+import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 import { useAdminProducts } from '../../context/AdminProductsContext';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
 import styles from './AdminDashboard.module.css';
@@ -195,6 +196,8 @@ export function AdminDashboard() {
             <CategoryDistributionChart data={categoryData} />
           </div>
         </div>
+        {/* Pedidos Recientes */}
+        <RecentOrdersWidget />
       </section>
 
       {/* Status bar */}
