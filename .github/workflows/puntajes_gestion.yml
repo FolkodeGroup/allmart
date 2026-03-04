@@ -1,9 +1,4 @@
-
 name: Registrar puntajes de gestión
-
-concurrency:
-  group: gestion-puntaje-auto-${{ github.ref }}
-  cancel-in-progress: true
 
 # Captura todas las actividades de gestión que merecen puntaje
 on:
@@ -19,14 +14,16 @@ on:
 jobs:
   registrar_puntaje_gestion:
     runs-on: ubuntu-latest
+    # Solo procesar si el actor es dgimenezdeveloper o folkodegroup
+    # Ignorar eventos generados por el propio bot (chore PRs)
     if: |
       (github.actor == 'dgimenezdeveloper' || github.actor == 'folkodegroup') &&
       github.event.pull_request.head.ref != 'chore/gestion-puntaje-auto'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: main
           token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
@@ -123,37 +120,9 @@ jobs:
 
             console.log(`Registrando: ${nuevaFila.trim()}`);
 
-            // ── Actualizar MANAGEMENT_LOG.md vía API (para evitar race conditions) ──
-            const logPath = 'MANAGEMENT_LOG.md';
-            const cabecera = '| Dev | Puntaje | Actividad | Referencia | Fecha |\n|-----|---------|-----------|------------|-------|\n';
-
-            let sha = undefined;
-            let contenidoActual = '';
-
-            try {
-              const { data } = await github.rest.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: logPath,
-              });
-              sha = data.sha;
-              contenidoActual = Buffer.from(data.content, 'base64').toString('utf8');
-            } catch (e) {
-              // El archivo no existe aún — se creará con cabecera
-              contenidoActual = `# Log de actividades de gestión\n\n${cabecera}`;
-            }
-
-            // Si el archivo existe pero no tiene la tabla, añadir cabecera
-            if (!contenidoActual.includes('| Dev | Puntaje |')) {
-              contenidoActual += `\n## Actividades\n\n${cabecera}`;
-            }
-
-            const nuevoContenido = contenidoActual + nuevaFila;
-            const contentEncoded = Buffer.from(nuevoContenido).toString('base64');
-
             // Guardar el archivo actualizado localmente para el siguiente paso
             const fs = require('fs');
-            fs.writeFileSync(logPath, nuevoContenido);
+            fs.writeFileSync('MANAGEMENT_LOG.md', nuevaFila, { flag: 'a' });
             console.log(`✅ MANAGEMENT_LOG.md actualizado localmente: +${puntaje} pts para ${devAcreditado}`);
 
       - name: Crear Pull Request automático con cambios de puntaje

@@ -36,7 +36,7 @@ export async function upsertShipment(
         addressZip: data.addressZip,
         carrier: data.carrier,
         trackingNumber: data.trackingNumber,
-        status: 'shipped',
+        status: 'enviado',
         shippedAt: new Date(),
       },
       update: {
@@ -46,17 +46,17 @@ export async function upsertShipment(
         addressZip: data.addressZip,
         carrier: data.carrier,
         trackingNumber: data.trackingNumber,
-        status: 'shipped',
+        status: 'enviado',
         shippedAt: new Date(),
       },
     });
 
     // 3️⃣ Actualizar estado del pedido si no está enviado
-    if (order.status !== 'shipped') {
+    if (order.status !== 'enviado') {
       await tx.order.update({
         where: { id: orderId },
         data: {
-          status: 'shipped',
+          status: 'enviado' as any,
         },
       });
     }
