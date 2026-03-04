@@ -178,3 +178,26 @@
   font-weight: var(--font-medium);
   text-transform: capitalize;
 }
+
+/* ── Métricas ── */
+.metricsSection {
+  margin: 2.2rem 0 1.2rem 0;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+}
+
+@media (max-width: 1100px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+}
