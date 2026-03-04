@@ -33,3 +33,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 5 | Apertura de PR | PR #264: Ahora el workflow está configurado para crear un branch único en cada… | 2026-03-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #266: 🔄 Registrar puntaje de gestión | 2026-03-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #265: 🔄 Registrar puntaje de gestión | 2026-03-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #278: 194 refactorización de sidebar colapsable y responsive | 2026-03-04 |
