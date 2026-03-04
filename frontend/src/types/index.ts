@@ -38,6 +38,7 @@ export interface CartItem {
 export interface NavigationItem {
   label: string;
   href: string;
+  icon?: string;
   children?: NavigationItem[];
 }
 

@@ -5,11 +5,52 @@ import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
 // import logo from '../../../assests/images/logos/favicon_io/android-chrome-192x192.png'
 
+function MobileNavItem({ item, closeMenu }: { item: any, closeMenu: () => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  if (!item.children) {
+    return (
+      <Link to={item.href} className={styles.mobileNavLink} onClick={closeMenu}>
+        {item.label}
+      </Link>
+    ); 
+  }
+
+  return (
+  <div className={styles.mobileNavItemContainer}>
+    <button
+      type='button'
+      className={styles.mobileCategoryBtn}
+      onClick={() => setIsOpen(!isOpen)}
+      aria-expanded={!isOpen}
+    >
+      <span>{item.label}</span>
+      <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>▾</span>
+    </button>
+    
+    <div className={`${styles.mobileSubLink} ${isOpen ? styles.show : ''}`}>
+      {item.children.map((child: any) => (
+        <Link
+          key={child.label}
+          to={child.href}
+          className={styles.mobileSubLink}
+          onClick={closeMenu}
+        >
+          {child.label}
+        </Link>
+      ))}
+    </div>
+  </div>
+)
+}
+
+
+
 export function Header() {
   const { totalItems } = useCart()
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -83,46 +124,56 @@ export function Header() {
         </div>
       </div>
       
-      <div className={styles.navBarStrip}>
-        <div className={styles.inner}>
-          {/* Desktop Nav */}
-          <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
-            {navigation.map((item) => (
-              <div className={styles.navItem} key={item.label}>
-                {item.children ? (
-                  <>
-                    <button
-                      className={styles.navLink}
-                      aria-expanded="false"
-                      aria-haspopup="true"
-                      type="button"
-                    >
-                      {item.label}
-                      <span className={styles.chevron} aria-hidden="true">▾</span>
-                    </button>
-                    <div className={styles.dropdown} role="menu">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.label}
-                          to={child.href}
-                          className={styles.dropdownLink}
-                          role="menuitem"
-                        >
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <Link to={item.href} className={styles.navLink}>
-                    {item.label}
-                  </Link>
-                )}
-              </div>
-            ))}
-          </nav>
+      {!mobileMenuOpen && (
+        <div className={`${styles.navBarStrip} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
+          <div className={styles.inner}>
+            
+            <button
+              className={styles.collapsedBtn}
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              type='button'
+            >
+              {isSidebarCollapsed ? '→' : '←'}
+            </button>
+            
+            {/* Desktop Nav */}
+            <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
+              {navigation.map((item) => (
+                <div className={styles.navItem} key={item.label}>
+                  {item.children ? (
+                    <>
+                      <button className={styles.navLink} type="button">
+                        <span className={styles.navIcon}>{item.icon || '📦'} </span>
+                        <span className={styles.navLabel}>{item.label}</span>
+                        <span className={styles.chevron} aria-hidden="true">▾</span>
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                      </button>
+                      <div className={styles.dropdown} role="menu">
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.label}
+                            to={child.href}
+                            className={styles.dropdownLink}
+                            role="menuitem"
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <Link to={item.href} className={styles.navLink}>
+                      <span className={styles.navIcon}>{item.icon || '📦'} </span>
+                      <span className={styles.navLabel}>{item.label}</span>
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </nav>
+          </div>
         </div>
-      </div>
+      )}
 
         
         
@@ -134,29 +185,11 @@ export function Header() {
         aria-label="Navegación móvil"
       >
         {navigation.map((item) => (
-          <div key={item.label}>
-            <Link
-              to={item.href}
-              className={styles.mobileNavLink}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {item.label}
-            </Link>
-            {item.children && (
-              <div className={styles.mobileSubLinks}>
-                {item.children.map((child) => (
-                  <Link
-                    key={child.label}
-                    to={child.href}
-                    className={styles.mobileSubLink}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {child.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+          <MobileNavItem
+            key={item.label}
+            item={item}
+            closeMenu={() => setMobileMenuOpen(false)}
+          />
         ))}
       </nav>
     </header>
