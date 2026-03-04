@@ -1,0 +1,25 @@
+.card {
+  background: var(--color-bg-card, #fff);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.5rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 280px;
+  min-height: 340px;
+}
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-text-title, #222);
+  font-family: inherit;
+}
+.empty {
+  text-align: center;
+  color: #888;
+  font-size: 1rem;
+  padding: 2rem;
+}

@@ -24,6 +24,8 @@ const sections = [
 import { Link } from 'react-router-dom';
 // import { useAdminAuth } from '../../context/AdminAuthContext';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
+import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
+import { useAdminProducts } from '../../context/AdminProductsContext';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
 import styles from './AdminDashboard.module.css';
 import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
@@ -31,6 +33,7 @@ import MetricCard from '../../components/ui/MetricCard';
 
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
+  const { products } = useAdminProducts();
   // --- Métricas mensuales ---
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -93,6 +96,34 @@ export function AdminDashboard() {
   const salesData = getWeeklyOrderCounts();
   const totalSales = salesData.reduce((acc, d) => acc + d.sales, 0);
 
+  // --- Distribución por categoría (ventas) ---
+  function getCategoryDistribution() {
+    // Colores por defecto
+    const COLORS = [
+      '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#a4de6c', '#d0ed57', '#8dd1e1', '#83a6ed', '#ea7e7e', '#b47ae7',
+    ];
+    // Map productId -> category
+    const productCategoryMap = products.reduce((acc, p) => {
+      acc[p.id] = p.category?.name || 'Sin categoría';
+      return acc;
+    }, {} as Record<string, string>);
+    // Agrupar ventas por categoría
+    const categoryTotals: Record<string, number> = {};
+    orders.forEach(order => {
+      order.items.forEach(item => {
+        const cat = productCategoryMap[item.productId] || 'Sin categoría';
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + item.quantity;
+      });
+    });
+    // Formatear para el gráfico
+    return Object.entries(categoryTotals).map(([category, value], idx) => ({
+      category,
+      value,
+      color: COLORS[idx % COLORS.length],
+    })).sort((a, b) => b.value - a.value);
+  }
+  const categoryData = getCategoryDistribution();
+
   return (
     <div className={styles.page}>
       {/* Header */}
@@ -154,9 +185,16 @@ export function AdminDashboard() {
         </div>
       </section>
 
-      {/* Ventas Semanales Widget */}
+      {/* Gráficos: Ventas Semanales y Distribución por Categoría */}
       <section className={styles.section}>
-        <WeeklySalesWidget data={salesData} totalSales={totalSales} />
+        <div className={styles.chartsGrid}>
+          <div className={styles.chartLeft}>
+            <WeeklySalesWidget data={salesData} totalSales={totalSales} />
+          </div>
+          <div className={styles.chartRight}>
+            <CategoryDistributionChart data={categoryData} />
+          </div>
+        </div>
       </section>
 
       {/* Status bar */}
