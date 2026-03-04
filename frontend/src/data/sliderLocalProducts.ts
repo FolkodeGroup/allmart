@@ -1,15 +1,15 @@
 // Productos mock para slider local con imágenes locales
 import type { Product } from '../types';
-import platohondo from '../assets/images/products/cocina/platohondo.jpg'; 
-import sartenhudson from '../assets/images/products/cocina/sartenhudson.jpg';
-import set24cubiertos1 from '../assets/images/products/cocina/set24cubiertos1.jpg';
-import set24cubiertos2 from '../assets/images/products/cocina/set24cubiertos2.jpg';
-import setblancodesatenesyfuentes from '../assets/images/products/cocina/setblancodesatenesyfuentes.jpg';
-import setnegrohudsonsartenes from '../assets/images/products/cocina/setnegrohudsonsartenes.jpg';
-import setollassartenesnegro from '../assets/images/products/cocina/setollassartenesnegro.jpg';
-import setsartebesgrises from '../assets/images/products/cocina/setsartebesgrises.jpg';
-import termo from '../assets/images/products/cocina/termo.jpg';
-import vasocapuchino from '../assets/images/products/cocina/vasocapuchino.jpg';
+// import platohondo from '../assets/images/products/cocina/platohondo.jpg'; 
+// import sartenhudson from '../assets/images/products/cocina/sartenhudson.jpg';
+// import set24cubiertos1 from '../assets/images/products/cocina/set24cubiertos1.jpg';
+// import set24cubiertos2 from '../assets/images/products/cocina/set24cubiertos2.jpg';
+// import setblancodesatenesyfuentes from '../assets/images/products/cocina/setblancodesatenesyfuentes.jpg';
+// import setnegrohudsonsartenes from '../assets/images/products/cocina/setnegrohudsonsartenes.jpg';
+// import setollassartenesnegro from '../assets/images/products/cocina/setollassartenesnegro.jpg';
+// import setsartebesgrises from '../assets/images/products/cocina/setsartebesgrises.jpg';
+// import termo from '../assets/images/products/cocina/termo.jpg';
+// import vasocapuchino from '../assets/images/products/cocina/vasocapuchino.jpg';
 
 export const sliderLocalProducts: Product[] = [
   {
@@ -19,7 +19,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 1000,
-    images: [platohondo],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.5,
@@ -34,7 +34,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 2000,
-    images: [sartenhudson],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.7,
@@ -49,7 +49,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 3000,
-    images: [set24cubiertos1],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.6,
@@ -64,7 +64,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 3200,
-    images: [set24cubiertos2],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.8,
@@ -79,7 +79,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 4000,
-    images: [setblancodesatenesyfuentes],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.9,
@@ -94,7 +94,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 4100,
-    images: [setnegrohudsonsartenes],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.4,
@@ -109,7 +109,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 4200,
-    images: [setollassartenesnegro],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.3,
@@ -124,7 +124,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 4300,
-    images: [setsartebesgrises],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.2,
@@ -139,7 +139,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 4400,
-    images: [termo],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.1,
@@ -154,7 +154,7 @@ export const sliderLocalProducts: Product[] = [
     description: '',
     shortDescription: '',
     price: 4500,
-    images: [vasocapuchino],
+    images: [],
     category: { id: 'cocina', name: 'Cocina', slug: 'cocina' },
     tags: [],
     rating: 4.0,

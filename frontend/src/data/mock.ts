@@ -1,6 +1,6 @@
 import type { Product, Category, NavigationItem, SortOption } from '../types';
-import cafetera from '../assets/images/products/cocina/cafetera.jpg';
-import cubiertos from '../assets/images/featured/set24cubiertos1.jpg';
+// import cafetera from '../assets/images/products/cocina/cafetera.jpg';
+// import cubiertos from '../assets/images/featured/set24cubiertos1.jpg';
 import baño from '../assets/images/featured/setcompletobaño.jpg';
 import cocina from '../assets/images/featured/setnegrohudsonsartenes.jpg';
 import vasocapuchino from '../assets/images/featured/vasocapuchino.jpg'; 
@@ -12,7 +12,7 @@ export const categories: Category[] = [
     name: 'Todo para la cocina',
     slug: 'cocina',
     description: 'Todo para equipar tu cocina con estilo',
-    image: cafetera,
+    image: '',
     itemCount: 142,
   },
   {
@@ -125,7 +125,7 @@ export const products: Product[] = [
     originalPrice: 42990,
     discount: 19,
     images: [
-      cubiertos,
+      // cubiertos,
       'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=800&q=80',
       'https://images.unsplash.com/photo-1566454419290-57a64afe1e04?w=800&q=80',
     ],

@@ -53,8 +53,8 @@ const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
               <Cell key={`cell-${idx}`} fill={entry.color || COLORS[idx % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value, name) => [`${value ?? 0} ventas`, String(name)]} />
-          <Legend layout="vertical" align="right" verticalAlign="middle" formatter={(value) => <span style={{ fontSize: 14 }}>{value}</span>} />
+          <Tooltip formatter={(value: number, name: string) => [`${value ?? 0} ventas`, String(name)]} />
+          <Legend layout="vertical" align="right" verticalAlign="middle" formatter={(value: string) => <span style={{ fontSize: 14 }}>{value}</span>} />
         </PieChart>
       </ResponsiveContainer>
     </div>
