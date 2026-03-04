@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  max-width: 900px;
+  max-width: 1500px;
 }
 
 /* ── Header ── */
@@ -199,5 +199,34 @@
 @media (max-width: 700px) {
   .metricsGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ── Charts Grid ── */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+.chartLeft {
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+.chartRight {
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .chartLeft, .chartRight {
+    justify-content: center;
+    align-items: center;
   }
 }
