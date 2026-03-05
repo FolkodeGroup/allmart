@@ -45,3 +45,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #283: Se agrega grafico de donut de ventas por categorias al Dashboard / Se… | 2026-03-04 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #288: Agregue fotos y arme las carpetas en drive | 2026-03-04 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #293: issues 155 | 2026-03-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #295: issues 157 | 2026-03-05 |
