@@ -28,6 +28,7 @@ import CategoryDistributionChart from '../../components/ui/CategoryDistributionC
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 import { useAdminProducts } from '../../context/AdminProductsContext';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
+import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
 import styles from './AdminDashboard.module.css';
 import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
 import MetricCard from '../../components/ui/MetricCard';
@@ -155,6 +156,15 @@ export function AdminDashboard() {
           ))}
         </div>
       </section>
+
+        {/* Alerta de Stock Crítico (Filtro Rápido) */}
+        <CriticalStockAlert
+          products={products.map(p => ({
+            id: p.id,
+            name: p.name,
+            stock: typeof p.stock === 'number' ? p.stock : 0,
+          }))}
+        />
 
       {/* Métricas mensuales */}
       <section className={styles.metricsSection}>
