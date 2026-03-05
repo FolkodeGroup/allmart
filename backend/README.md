@@ -8,7 +8,7 @@ Backend de Allmart construido con **Node.js + Express + TypeScript + Prisma + Po
 
 | Tecnología | Versión | Función |
 |------------|---------|---------|
-| Node.js | >= 18 | Runtime |
+| Node.js | >= 20 | Runtime |
 | Express | ^4.18 | Framework HTTP |
 | TypeScript | ^5.4 | Tipado estático |
 | Prisma ORM | ^7.4 | ORM y acceso a BD |
@@ -17,7 +17,7 @@ Backend de Allmart construido con **Node.js + Express + TypeScript + Prisma + Po
 | bcryptjs | ^3.0 | Hash de contraseñas |
 | jsonwebtoken | ^9.0 | Autenticación JWT |
 | dotenv | ^17.3 | Variables de entorno |
-
+| Docker | >= 24 | Contenerización y despliegue del backend |
 ---
 
 ## Estructura de carpetas
@@ -36,14 +36,19 @@ backend/
 │   ├── types/
 │   │   ├── index.ts           — Tipos globales (ApiResponse, JwtPayload, etc.)
 │   │   ├── enums.ts           — Enumeraciones (UserRole, OrderStatus, etc.)
-│   │   └── orders.ts          — DTOs públicos de pedidos
+│   │   ├── orders.ts         — DTOs públicos de pedidos
+|   |   ├── carts.ts           — DTOs del carrito de compras (CartDTO, CartItemDTO)
+│   │   └── admin/
+│   │         ├── order.ts       — DTOs y tipos utilizados por endpoints admin de pedidos
+│   │         └── pagination.ts  — Tipos para respuestas paginadas en endpoints admin
 │   ├── models/
 │   │   ├── User.ts            — Interfaz User + DTOs
 │   │   ├── Category.ts        — Interfaz Category + DTOs
 │   │   ├── Product.ts         — Interfaz Product + DTOs
 │   │   ├── ProductVariant.ts  — Subdominio de productos
 │   │   ├── ProductImage.ts    — Imágenes (almacenadas en JSONB)
-│   │   └── Order.ts           — Interfaz Order + DTOs
+│   │   ├── Order.ts           — Interfaz Order + DTOs
+|   |   └── OrderItems.ts      — Ítems individuales dentro de un pedido
 │   ├── middlewares/
 │   │   ├── auth.ts            — Verificación JWT
 │   │   ├── permissions.ts     — Control de acceso por roles
@@ -60,16 +65,48 @@ backend/
 │   │   ├── productImagesService.ts   — Imágenes en JSONB (Prisma)
 │   │   ├── ordersService.ts        — CRUD pedidos admin (Prisma)
 │   │   ├── publicOrderService.ts   — Creación de pedidos pública (Prisma tx)
+│   │   ├── shipmentService.ts      — Gestión de envíos de pedidos (crear/actualizar envío y tracking)
+│   │   ├── reportsService.ts       — Reportes para panel admin (ventas, órdenes, top productos)
+│   |   ├── cartService.ts          — Gestión del carrito de compras (agregar, actualizar, eliminar productos)
 │   │   └── usersService.ts         — CRUD usuarios (Prisma)
 │   ├── controllers/
-│   │   ├── admin/             — Controladores del panel admin
-│   │   └── public/            — Controladores del catálogo público
+│   │   ├── admin/
+│   │   │   ├── authController.ts            — Autenticación del panel admin (login)
+│   │   │   ├── categoriesController.ts      — Endpoints CRUD de categorías
+│   │   │   ├── ordersController.ts          — Gestión de pedidos desde el panel admin
+│   │   │   ├── productImagesController.ts   — Gestión de imágenes de productos
+│   │   │   ├── productsController.ts        — CRUD de productos
+│   │   │   ├── productVariantsController.ts — Gestión de variantes de productos
+│   │   │   ├── reportsController.ts         — Endpoints de reportes y estadísticas
+│   │   │   ├── shipmentController.ts        — Gestión de envíos y tracking de pedidos
+│   │   │   └── usersController.ts           — Administración de usuarios
+│   │   └── public/
+│   │       ├── authController.ts        — Registro y login de clientes
+│   │       ├── cartController.ts        — Gestión del carrito de compras
+│   │       ├── categoriesController.ts  — Listado público de categorías
+│   │       ├── ordersController.ts      — Creación de pedidos por clientes
+│   │       └── productsController.ts    — Catálogo público de productos
 │   ├── routes/
-│   │   ├── index.ts           — Router raíz que monta todos los dominios
-│   │   ├── admin/             — Rutas protegidas (requieren JWT admin/editor)
-│   │   └── public/            — Rutas públicas
-│   ├── app.ts                 — Configuración Express
-│   └── index.ts               — Punto de entrada del servidor
+│   |   ├── index.ts               — Punto de entrada del servidor
+│   │   ├── admin/
+│   │   │   ├── auth.ts            — Rutas de autenticación del panel admin
+│   │   │   ├── categories.ts      — Endpoints CRUD de categorías
+│   │   │   ├── orders.ts          — Gestión de pedidos desde el panel admin
+│   │   │   ├── products.ts        — CRUD de productos
+│   │   │   ├── reports.ts         — Endpoints de reportes y métricas
+│   │   │   ├── users.ts           — Administración de usuarios
+│   │   │   │
+│   │   │   └── products/
+│   │   │       ├── images.ts      — Gestión de imágenes de productos
+│   │   │       └── variants.ts    — Gestión de variantes de productos
+│   │   │
+│   │   └── public/
+│   │       ├── auth.ts            — Registro y login de clientes
+│   │       ├── cart.ts            — Endpoints del carrito de compras
+│   │       ├── categories.ts      — Listado público de categorías
+│   │       ├── orders.ts          — Creación de pedidos
+│   │       ├── products.ts        — Catálogo público de productos
+│   │       └── index.ts           — Registro central de rutas públicas
 ├── migrations/                — Migraciones SQL manuales (legacy, ya ejecutadas)
 ├── .env                       — Variables de entorno (no commitable)
 └── .env.example               — Plantilla de variables de entorno
@@ -565,6 +602,26 @@ DATABASE_URL="postgresql://postgres:tu_password@localhost:5432/allmart_db?schema
 > ```
 
 ---
+
+## Docker
+
+El backend incluye un **Dockerfile multi-stage optimizado para producción**.
+
+Características:
+
+- Imagen base `node:20-alpine`
+- Build multi-stage para reducir tamaño de imagen
+- Compilación de TypeScript dentro del contenedor
+- Generación automática de Prisma Client
+- Usuario no-root por seguridad
+- Healthcheck configurado
+- Ejecución automática de migraciones al iniciar el contenedor
+
+### Construir la imagen 
+
+```bash
+docker build -t allmart-backend .
+```
 
 ## Scripts disponibles
 
