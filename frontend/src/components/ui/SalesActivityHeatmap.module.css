@@ -1,0 +1,89 @@
+.heatmapCard {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  margin-top: 1.2rem;
+  box-shadow: 0 2px 12px rgba(136, 132, 216, 0.07);
+  animation: fadeIn 0.5s both;
+}
+.heatmapTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+  margin-bottom: 1.2rem;
+}
+/* El grid ahora se define inline en el componente para soportar dinámicamente las filas/columnas. */
+.heatmapGrid {
+  overflow-x: auto;
+  /* El display: grid y las templates se definen inline en el componente para soportar dinámicamente las filas/columnas. */
+}
+/* Header y eje Y usan grid-area, pero mantienen estilos visuales */
+.heatmapCorner {
+  width: 2.5rem;
+  height: 1.8rem;
+}
+.heatmapHour {
+  min-width: 2.2rem;
+  height: 1.8rem;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-ui);
+  font-weight: var(--font-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.heatmapDay {
+  width: 2.5rem;
+  text-align: right;
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-ui);
+  font-weight: var(--font-medium);
+  padding-right: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+/* Celdas del heatmap: cuadradas, bordes suaves, buen contraste */
+/* Celdas cuadradas, alineadas al grid */
+.heatmapCell {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  border: 1px solid #e6e6f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s, border-color 0.18s;
+  cursor: pointer;
+  position: relative;
+}
+.heatmapCell:hover {
+  border-color: #8884d8;
+  outline: 2px solid #8884d8;
+  z-index: 2;
+}
+.heatmapValue {
+  font-size: var(--text-xs);
+  color: #222;
+  font-weight: var(--font-bold);
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+}
+@media (max-width: 700px) {
+  .heatmapCard {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+  }
+  .heatmapHour, .heatmapCell {
+    min-width: 1.6rem;
+    height: 1.6rem;
+  }
+  .heatmapDay {
+    width: 1.6rem;
+    font-size: 0.8rem;
+  }
+}
