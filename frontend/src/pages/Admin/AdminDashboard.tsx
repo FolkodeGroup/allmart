@@ -26,6 +26,7 @@ import { Link } from 'react-router-dom';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
+import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
 import { useAdminProducts } from '../../context/AdminProductsContext';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
 import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
@@ -97,6 +98,20 @@ export function AdminDashboard() {
   }
   const salesData = getWeeklyOrderCounts();
   const totalSales = salesData.reduce((acc, d) => acc + d.sales, 0);
+
+    // --- Mapa de calor de ventas (día/hora) ---
+    // Eje vertical: días de la semana (Lunes a Domingo)
+    const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    // Eje horizontal: horas (0-23)
+    const hourLabels = Array.from({ length: 24 }, (_, h) => h.toString().padStart(2, '0'));
+    // Inicializar matriz [día][hora]
+    const heatmapData: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+    orders.forEach(order => {
+      const d = new Date(order.createdAt);
+      const dayIdx = d.getDay(); // 0=Dom, 1=Lun, ...
+      const hourIdx = d.getHours();
+      heatmapData[dayIdx][hourIdx] += 1;
+    });
 
   // --- Distribución por categoría (ventas) ---
   function getCategoryDistribution() {
@@ -201,6 +216,12 @@ export function AdminDashboard() {
         <div className={styles.chartsGrid}>
           <div className={styles.chartLeft}>
             <WeeklySalesWidget data={salesData} totalSales={totalSales} />
+            {/* Mapa de calor de ventas debajo del gráfico de líneas */}
+            <SalesActivityHeatmap
+              data={heatmapData}
+              dayLabels={weekDays}
+              hourLabels={hourLabels}
+            />
           </div>
           <div className={styles.chartRight}>
             <CategoryDistributionChart data={categoryData} />
