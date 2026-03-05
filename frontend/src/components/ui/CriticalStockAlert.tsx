@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './CriticalStockAlert.module.css';
 
 export interface CriticalStockProduct {
