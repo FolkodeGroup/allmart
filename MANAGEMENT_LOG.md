@@ -47,3 +47,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #293: issues 155 | 2026-03-04 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #295: issues 157 | 2026-03-05 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #302: README_RECURSOS.md | 2026-03-05 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #306:  cualquier cambio que hagas en tu carpeta local de backend o frontend… | 2026-03-05 |
