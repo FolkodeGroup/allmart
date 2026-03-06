@@ -54,3 +54,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 2 | Etiquetado de issue (BUGS) | Issue #312: Reparar menú hamburguesa y navbar en frontend: versión móvil y escritorio | 2026-03-06 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #313: 312 reparar menú hamburguesa y navbar en frontend versión móvil y escritorio | 2026-03-06 |
 | dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #316: Desplegar proeycto en vps cloud | 2026-03-06 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #317: Se implementa Objetivo Mensual de Ventas en el Dashboard | 2026-03-06 |
