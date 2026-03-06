@@ -1,0 +1,96 @@
+.widget {
+  background: var(--color-bg-card, #fff);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 260px;
+  max-width: 260px;
+  width: 100%;
+  margin: 2rem 2rem 2rem 0rem;
+}
+.title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-primary, #3f51b5);
+}
+.content {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  width: 100%;
+}
+.progressContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.progressCircle {
+  width: 80px;
+  height: 80px;
+}
+.bg {
+  stroke: #eee;
+}
+.fg {
+  stroke: var(--color-primary, #3f51b5);
+  transition: stroke-dashoffset 0.5s cubic-bezier(.4,2,.6,1);
+}
+.percentText {
+  font-size: 1.1rem;
+  font-weight: 700;
+  fill: var(--color-primary, #3f51b5);
+}
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+.label {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 0.1rem;
+}
+.input {
+  width: 110px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #222;
+  background: #fafbfc;
+  outline: none;
+  transition: border 0.2s;
+}
+.input:focus {
+  border: 1.5px solid var(--color-primary, #3f51b5);
+}
+.ventasInfo {
+  margin-top: 0.7rem;
+  font-size: 0.98rem;
+  color: #444;
+}
+.ventas {
+  font-weight: 600;
+  color: var(--color-primary, #3f51b5);
+}
+@media (max-width: 900px) {
+  .widget {
+    max-width: 100%;
+    min-width: 0;
+    padding: 1rem;
+  }
+  .content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+  .progressCircle {
+    width: 64px;
+    height: 64px;
+  }
+}

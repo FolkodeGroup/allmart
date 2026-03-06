@@ -27,6 +27,7 @@ import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
+import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
 import { useAdminProducts } from '../../context/AdminProductsContext';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
 import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
@@ -225,6 +226,7 @@ export function AdminDashboard() {
           </div>
           <div className={styles.chartRight}>
             <CategoryDistributionChart data={categoryData} />
+            <MonthlyGoalWidget ventasDelMes={ingresosActual} />
           </div>
         </div>
         {/* Pedidos Recientes */}
