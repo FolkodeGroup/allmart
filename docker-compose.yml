@@ -68,8 +68,7 @@ services:
       start_period: 40s
     networks:
       - allmart-network
-    volumes:
-      - ./backend:/app
+    # Volumen eliminado, solo para producción
 
   # ─── Frontend (React + Vite servido con nginx) ────────────────────────────
   frontend:
@@ -91,8 +90,7 @@ services:
       start_period: 10s
     networks:
       - allmart-network
-    volumes:
-      - ./frontend:/app
+    # Volumen eliminado, solo para producción
 
 # ─── Volúmenes persistentes ─────────────────────────────────────────────────
 volumes:
