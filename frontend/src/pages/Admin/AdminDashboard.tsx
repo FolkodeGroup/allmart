@@ -140,7 +140,34 @@ export function AdminDashboard() {
       color: COLORS[idx % COLORS.length],
     })).sort((a, b) => b.value - a.value);
   }
+
   const categoryData = getCategoryDistribution();
+
+  // --- Mejores Clientes (Top 5) ---
+  // Agrupar por email (o id si existe), sumar total gastado y contar pedidos
+  type ClienteStats = {
+    nombre: string;
+    email: string;
+    pedidos: number;
+    totalGastado: number;
+  };
+  const clientesMap: Record<string, ClienteStats> = {};
+  orders.forEach(order => {
+    const email = order.customer.email;
+    if (!clientesMap[email]) {
+      clientesMap[email] = {
+        nombre: `${order.customer.firstName} ${order.customer.lastName}`.trim() || email,
+        email,
+        pedidos: 0,
+        totalGastado: 0,
+      };
+    }
+    clientesMap[email].pedidos += 1;
+    clientesMap[email].totalGastado += order.total;
+  });
+  const mejoresClientes = Object.values(clientesMap)
+    .sort((a, b) => b.totalGastado - a.totalGastado)
+    .slice(0, 5);
 
   return (
     <div className={styles.page}>
@@ -226,7 +253,28 @@ export function AdminDashboard() {
           </div>
           <div className={styles.chartRight}>
             <CategoryDistributionChart data={categoryData} />
-            <MonthlyGoalWidget ventasDelMes={ingresosActual} />
+            <div className={styles.goalAndClientsRow}>
+              <div className={styles.goalCard}>
+                <MonthlyGoalWidget ventasDelMes={ingresosActual} />
+              </div>
+              <div className={styles.metricCard}>
+                <h3 className={styles.cardTitle} style={{ marginBottom: '1rem' }}>Mejores Clientes</h3>
+                <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  <li style={{ display: 'flex', fontWeight: 600, color: '#888', borderBottom: '1px solid #eee', paddingBottom: 4, marginBottom: 6 }}>
+                    <span style={{ flex: 2 }}>Cliente</span>
+                    <span style={{ flex: 1, textAlign: 'center' }}>Pedidos</span>
+                    <span style={{ flex: 1, textAlign: 'right' }}>Total</span>
+                  </li>
+                  {mejoresClientes.map((c, idx) => (
+                    <li key={c.email} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', borderBottom: idx < mejoresClientes.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                      <span style={{ flex: 2, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nombre}</span>
+                      <span style={{ flex: 1, textAlign: 'center' }}>{c.pedidos}</span>
+                      <span style={{ flex: 1, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{c.totalGastado.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
           </div>
         </div>
         {/* Pedidos Recientes */}

@@ -1,3 +1,27 @@
+.goalAndClientsRow {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  align-items: stretch;
+  margin-top: 1.5rem;
+}
+.goalCard {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.metricCard {
+    box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0px;
+    max-width: 650px;
+    background: var(--color-bg-card, #fff);
+    border-radius: 1rem;
+    padding: 1.2rem 1.4rem;
+    gap: 0.7rem;
+    flex: 1 1 0px;
+}
 /* ============================================
    ALLMART — ADMIN DASHBOARD
    ============================================ */
