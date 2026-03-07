@@ -2,6 +2,29 @@
 
 Este frontend está construido con React, Vite y TypeScript.
 
+## ✅ Checklist de Verificación
+
+- [x] **Página de inicio** — Visualización correcta del home
+(./src/assets/images/featured/home.png)
+- [x] **Catálogo de productos** — Listado y filtrado de productos
+(./src/assets/images/featured/catalogo.png)
+- [x] **Categorías** — Navegación por categorías
+(./src/assets/images/featured/categoria.png)
+- [x] **Carrito de compras** — Agregar, actualizar y eliminar items
+(./src/assets/images/featured/carrito-productos-agregados.png)
+- [x] **Responsividad** — Funciona en mobile y desktop
+(./src/assets/images/featured/responsividad.png)
+- [x] **Imágenes** — Carga correcta de imágenes de productos
+(./src/assets/images/featured/image.png)
+- [x] **Favicon** — Muestra correctamente en la pestaña del navegador
+
+- [x] **Autenticación** — Login y registro de usuarios (sin backend)
+
+- [x] **Estilos** — Diseño coherente y funcionalidad CSS
+
+### Evidencia visual
+Aquí va la documentación de screenshots verificando cada punto del checklist anterior.
+
 ## Scripts
 
 - `npm install` — Instala las dependencias
@@ -44,8 +67,8 @@ Las imágenes se guardan en `src/assets/images` dentro de subcarpetas específic
 **Ejemplos de nombres y estructura:**
 
 ```
-/src/assets/images/categories/cocina.jpg
-/src/assets/images/categories/baño.png
+/src/assets/images/logos/logo1.jpg
+/src/assets/images/logos/logo2.png
 
 /src/assets/images/featured/destacado-1.jpg
 /src/assets/images/featured/destacado-2.png
