@@ -1,7 +1,7 @@
 const sections = [
   {
     icon: '',
-    title: 'Pro',
+    title: 'Productos',
     description: 'Administrá el catálogo, precios y stock.',
     to: '/admin/productos',
     color: 'primary',
@@ -21,6 +21,7 @@ const sections = [
     color: 'warm',
   },
 ];
+import React from 'react';
 import { Link } from 'react-router-dom';
 // import { useAdminAuth } from '../../context/AdminAuthContext';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
@@ -32,6 +33,7 @@ import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
 import { useAdminProducts } from '../../context/AdminProductsContext';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
 import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
+import DateRangeCard from '../../components/ui/DateRangeCard';
 import styles from './AdminDashboard.module.css';
 import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
 import MetricCard from '../../components/ui/MetricCard';
@@ -39,36 +41,66 @@ import MetricCard from '../../components/ui/MetricCard';
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
   const { products } = useAdminProducts();
-  // --- Métricas mensuales ---
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const [dateRange, setDateRange] = React.useState(() => {
+    // Por defecto: últimos 7 días
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 6);
+    return {
+      from: from.toISOString().slice(0, 10),
+      to: to.toISOString().slice(0, 10),
+    };
+  });
 
-  // Filtrar pedidos por mes
-  const ordersThisMonth = orders.filter(o => {
-    const d = new Date(o.createdAt);
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-  });
-  const ordersPrevMonth = orders.filter(o => {
-    const d = new Date(o.createdAt);
-    return d.getMonth() === prevMonth && d.getFullYear() === prevYear;
-  });
+  // Helper para filtrar por rango de fechas (inclusive)
+  function isInRange(dateStr: string) {
+    const d = new Date(dateStr);
+    d.setHours(0,0,0,0);
+    const from = new Date(dateRange.from);
+    from.setHours(0,0,0,0);
+    const to = new Date(dateRange.to);
+    to.setHours(23,59,59,999);
+    return d >= from && d <= to;
+  }
+
+  // Filtrar pedidos por rango
+  const filteredOrders = orders.filter(o => isInRange(o.createdAt));
+
+  // --- Métricas ---
+  // Para comparación, calculamos el rango anterior de igual cantidad de días
+  const rangeDays = Math.ceil((new Date(dateRange.to).getTime() - new Date(dateRange.from).getTime()) / (1000*60*60*24)) + 1;
+  const prevFrom = new Date(dateRange.from);
+  prevFrom.setDate(prevFrom.getDate() - rangeDays);
+  const prevTo = new Date(dateRange.from);
+  prevTo.setDate(prevTo.getDate() - 1);
+  const prevRange = {
+    from: prevFrom.toISOString().slice(0,10),
+    to: prevTo.toISOString().slice(0,10),
+  };
+  function isInPrevRange(dateStr: string) {
+    const d = new Date(dateStr);
+    d.setHours(0,0,0,0);
+    const from = new Date(prevRange.from);
+    from.setHours(0,0,0,0);
+    const to = new Date(prevRange.to);
+    to.setHours(23,59,59,999);
+    return d >= from && d <= to;
+  }
+  const prevOrders = orders.filter(o => isInPrevRange(o.createdAt));
 
   // Ingresos
-  const ingresosActual = ordersThisMonth.reduce((acc, o) => acc + o.total, 0);
-  const ingresosPrevio = ordersPrevMonth.reduce((acc, o) => acc + o.total, 0);
+  const ingresosActual = filteredOrders.reduce((acc, o) => acc + o.total, 0);
+  const ingresosPrevio = prevOrders.reduce((acc, o) => acc + o.total, 0);
   const ingresosVar = ingresosPrevio === 0 ? 0 : ((ingresosActual - ingresosPrevio) / ingresosPrevio) * 100;
 
   // Pedidos
-  const pedidosActual = ordersThisMonth.length;
-  const pedidosPrevio = ordersPrevMonth.length;
+  const pedidosActual = filteredOrders.length;
+  const pedidosPrevio = prevOrders.length;
   const pedidosVar = pedidosPrevio === 0 ? 0 : ((pedidosActual - pedidosPrevio) / pedidosPrevio) * 100;
 
   // Nuevos clientes (emails únicos)
-  const clientesActual = Array.from(new Set(ordersThisMonth.map(o => o.customer.email))).length;
-  const clientesPrevio = Array.from(new Set(ordersPrevMonth.map(o => o.customer.email))).length;
+  const clientesActual = Array.from(new Set(filteredOrders.map(o => o.customer.email))).length;
+  const clientesPrevio = Array.from(new Set(prevOrders.map(o => o.customer.email))).length;
   const clientesVar = clientesPrevio === 0 ? 0 : ((clientesActual - clientesPrevio) / clientesPrevio) * 100;
 
   // Tasa de conversión (pedidos/clientes)
@@ -76,17 +108,17 @@ export function AdminDashboard() {
   const conversionPrevio = clientesPrevio === 0 ? 0 : (pedidosPrevio / clientesPrevio) * 100;
   const conversionVar = conversionPrevio === 0 ? 0 : ((conversionActual - conversionPrevio) / conversionPrevio) * 100;
 
-  // --- Gráfico semanal ---
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() - (6 - i));
-    return date;
-  });
+  // --- Gráfico semanal (ahora: gráfico por días del rango seleccionado) ---
+  const days: Date[] = [];
+  const fromDate = new Date(dateRange.from);
+  const toDate = new Date(dateRange.to);
+  for (let d = new Date(fromDate); d <= toDate; d.setDate(d.getDate() + 1)) {
+    days.push(new Date(d));
+  }
   const dayLabels = days.map(d => d.toLocaleDateString('es-AR', { weekday: 'short' }));
-  function getWeeklyOrderCounts(): WeeklySalesData[] {
+  function getOrderCountsByDay(): WeeklySalesData[] {
     return days.map((day, idx) => {
-      const count = orders.filter(order => {
+      const count = filteredOrders.filter(order => {
         const orderDate = new Date(order.createdAt);
         return orderDate.getFullYear() === day.getFullYear() &&
           orderDate.getMonth() === day.getMonth() &&
@@ -98,22 +130,22 @@ export function AdminDashboard() {
       };
     });
   }
-  const salesData = getWeeklyOrderCounts();
+  const salesData = getOrderCountsByDay();
   const totalSales = salesData.reduce((acc, d) => acc + d.sales, 0);
 
-    // --- Mapa de calor de ventas (día/hora) ---
-    // Eje vertical: días de la semana (Lunes a Domingo)
-    const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    // Eje horizontal: horas (0-23)
-    const hourLabels = Array.from({ length: 24 }, (_, h) => h.toString().padStart(2, '0'));
-    // Inicializar matriz [día][hora]
-    const heatmapData: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
-    orders.forEach(order => {
-      const d = new Date(order.createdAt);
-      const dayIdx = d.getDay(); // 0=Dom, 1=Lun, ...
-      const hourIdx = d.getHours();
-      heatmapData[dayIdx][hourIdx] += 1;
-    });
+  // --- Mapa de calor de ventas (día/hora) ---
+  // Eje vertical: días de la semana (Lunes a Domingo)
+  const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  // Eje horizontal: horas (0-23)
+  const hourLabels = Array.from({ length: 24 }, (_, h) => h.toString().padStart(2, '0'));
+  // Inicializar matriz [día][hora]
+  const heatmapData: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+  filteredOrders.forEach(order => {
+    const d = new Date(order.createdAt);
+    const dayIdx = d.getDay(); // 0=Dom, 1=Lun, ...
+    const hourIdx = d.getHours();
+    heatmapData[dayIdx][hourIdx] += 1;
+  });
 
   // --- Distribución por categoría (ventas) ---
   function getCategoryDistribution() {
@@ -128,7 +160,7 @@ export function AdminDashboard() {
     }, {} as Record<string, string>);
     // Agrupar ventas por categoría
     const categoryTotals: Record<string, number> = {};
-    orders.forEach(order => {
+    filteredOrders.forEach(order => {
       order.items.forEach(item => {
         const cat = productCategoryMap[item.productId] || 'Sin categoría';
         categoryTotals[cat] = (categoryTotals[cat] || 0) + item.quantity;
@@ -153,7 +185,7 @@ export function AdminDashboard() {
     totalGastado: number;
   };
   const clientesMap: Record<string, ClienteStats> = {};
-  orders.forEach(order => {
+  filteredOrders.forEach(order => {
     const email = order.customer.email;
     if (!clientesMap[email]) {
       clientesMap[email] = {
@@ -173,7 +205,7 @@ export function AdminDashboard() {
   // --- Top 10 productos más vendidos ---
   // Agrupar ventas por productId
   const productSalesMap: Record<string, { name: string; sku: string; sales: number }> = {};
-  orders.forEach(order => {
+  filteredOrders.forEach(order => {
     order.items.forEach(item => {
       if (!productSalesMap[item.productId]) {
         // Buscar el producto para obtener el SKU
@@ -222,14 +254,19 @@ export function AdminDashboard() {
         </div>
       </section>
 
-        {/* Alerta de Stock Crítico (Filtro Rápido) */}
-        <CriticalStockAlert
-          products={products.map(p => ({
-            id: p.id,
-            name: p.name,
-            stock: typeof p.stock === 'number' ? p.stock : 0,
-          }))}
-        />
+      {/* Alerta de Stock Crítico (Filtro Rápido) */}
+      <CriticalStockAlert
+        products={products.map(p => ({
+          id: p.id,
+          name: p.name,
+          stock: typeof p.stock === 'number' ? p.stock : 0,
+        }))}
+      />
+
+      {/* Filtro global de rango de fechas */}
+      <section className={styles.section}>
+        <DateRangeCard value={dateRange} onChange={setDateRange} />
+      </section>
 
       {/* Métricas mensuales */}
       <section className={styles.metricsSection}>
@@ -261,7 +298,7 @@ export function AdminDashboard() {
         </div>
       </section>
 
-      {/* Gráficos: Ventas Semanales y Distribución por Categoría */}
+      {/* Gráficos: Ventas y Distribución por Categoría */}
       <section className={styles.section}>
         <div className={styles.chartsGrid}>
           <div className={styles.chartLeft}>
