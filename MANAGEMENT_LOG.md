@@ -57,3 +57,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #317: Se implementa Objetivo Mensual de Ventas en el Dashboard | 2026-03-06 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #320: se refactoriza el sidebar para que sea colapsable y responsive | 2026-03-07 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #323: Se implementa Grafico de Barras del Top 10 Productos en el Dashboard | 2026-03-07 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #325: Se implementa un Filtrado Global de Fechas en el Dashboard | 2026-03-07 |
