@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import styles from './AdminLayout.module.css';
+
 
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠', permission: null },
@@ -19,6 +21,17 @@ const ROLE_LABELS: Record<string, string> = {
 export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
   const navigate = useNavigate();
+  
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+      const saved = localStorage.getItem('admin-sidebar-collapsed');
+      return saved ? JSON.parse(saved) : false;
+    });
+  
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  
+  useEffect(() => {
+      localStorage.setItem('admin-sidebar-collapsed', JSON.stringify(isCollapsed));
+    }, [isCollapsed]);
 
   const handleLogout = () => {
     logout();
@@ -26,22 +39,43 @@ export function AdminLayout() {
   };
 
   return (
-    <div className={styles.wrapper}>
-      <aside className={styles.sidebar}>
+    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''}`}>
+      <button className={styles.mobileToggle} onClick={() => setIsMobileOpen(true)}>
+        ☰
+      </button>
+      {isMobileOpen && (
+        <div
+          className={styles.backdrop}
+          onClick={() => setIsMobileOpen(false)}
+          role='presentation'
+          />
+        )}
+      <aside className={`${styles.sidebar} ${isMobileOpen ? styles.mobileVisible : ''}`}>
         <div className={styles.brand}>
           <span className={styles.brandLogo}>allmart</span>
-          <span className={styles.brandTag}>Admin</span>
+          {!isCollapsed && <span className={styles.brandTag}>Admin</span>}
+          <button 
+            className={styles.desktopToggle} 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label="Colapsar/Expandir barra lateral"
+          >
+            {isCollapsed ? '❯' : '❮'}
+          </button>
         </div>
 
         <nav className={styles.nav}>
           {navItems.map(item => {
             const locked = item.permission !== null && !can(item.permission);
+            const commonProps = {
+              key: item.to,
+              title: isCollapsed ? item.label : '',
+              onClick: () => setIsMobileOpen(false) // Cierra drawer al clickear en mobile
+              };
             if (locked) {
               return (
                 <span
-                  key={item.to}
+                  {...commonProps}
                   className={`${styles.navItem} ${styles.navItemLocked}`}
-                  title="Sin acceso para tu rol"
                 >
                   <span className={styles.navIcon}>{item.icon}</span>
                   <span className={styles.navLabel}>{item.label}</span>
@@ -49,9 +83,12 @@ export function AdminLayout() {
                 </span>
               );
             }
+            
+            
+            
             return (
               <NavLink
-                key={item.to}
+                {...commonProps}
                 to={item.to}
                 className={({ isActive }) =>
                   `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
@@ -69,7 +106,7 @@ export function AdminLayout() {
             <span className={styles.userIcon}>👤</span>
             <div className={styles.userDetails}>
               <span className={styles.userName}>{user}</span>
-              {role && (
+              {role && !isCollapsed && (
                 <span className={`${styles.roleBadge} ${styles[`roleBadge_${role}`]}`}>
                   {ROLE_LABELS[role] ?? role}
                 </span>
@@ -77,7 +114,7 @@ export function AdminLayout() {
             </div>
           </div>
           <button className={styles.logoutBtn} onClick={handleLogout}>
-            Cerrar sesión
+            {isCollapsed ? '🚪' : 'Cerrar sesión'}
           </button>
         </div>
       </aside>
