@@ -7,19 +7,29 @@
   min-height: 100vh;
   background: var(--color-bg-secondary);
   font-family: var(--font-ui);
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 80px;
+  transition: all 0.3s ease;
+}
+
+.wrapper.collapsed {
+  --sidebar-width: var(--sidebar-collapsed-width);
 }
 
 /* ── Sidebar ── */
 .sidebar {
-  width: 240px;
+  width: var(--sidebar-width);
   min-height: 100vh;
   background: var(--color-neutral-dark);
   display: flex;
   flex-direction: column;
   padding: var(--space-6) 0;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   flex-shrink: 0;
+  z-index: 1000;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
 }
 
 .brand {
@@ -36,6 +46,11 @@
   font-weight: var(--font-bold);
   color: var(--color-neutral-light);
   letter-spacing: var(--tracking-tight);
+  transition: opacity 0.3s ease;
+}
+
+.wrapper.collapsed .brandLogo {
+  display: none;
 }
 
 .brandTag {
@@ -48,6 +63,11 @@
   background: rgba(221, 176, 140, 0.15);
   padding: 2px 8px;
   border-radius: 999px;
+  transition: opacity 0.3s ease;
+}
+
+.wrapper.collapsed .brandTag {
+  display: none;
 }
 
 /* ── Nav ── */
@@ -62,6 +82,7 @@
 .navItem {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg, 10px);
@@ -69,7 +90,13 @@
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   text-decoration: none;
-  transition: background 0.18s, color 0.18s;
+  transition: background 0.18s, color 0.18s, padding 0.3s ease, gap 0.3s ease;
+}
+
+.wrapper.collapsed .navItem {
+  justify-content: center;
+  padding: var(--space-3);
+  gap: 0;
 }
 
 .navItem:hover {
@@ -91,6 +118,11 @@
 
 .navLabel {
   flex: 1;
+  transition: opacity 0.3s ease;
+}
+
+.wrapper.collapsed .navLabel {
+  display: none;
 }
 
 /* ── Footer sidebar ── */
@@ -129,7 +161,7 @@
   border-radius: var(--radius-lg, 8px);
   padding: var(--space-2) var(--space-3);
   cursor: pointer;
-  transition: background 0.18s;
+  transition: background 0.18s, opacity 0.3s ease;
   text-align: center;
 }
 
@@ -137,11 +169,23 @@
   background: rgba(221, 176, 140, 0.2);
 }
 
+.wrapper.collapsed .logoutBtn {
+  padding: var(--space-2);
+  font-size: 0;
+}
+
+.wrapper.collapsed .logoutBtn::before {
+  content: '🚪';
+  font-size: var(--text-xs);
+}
+
 /* ── Main content ── */
 .main {
   flex: 1;
   padding: var(--space-8);
   overflow-y: auto;
+  margin-left: var(--sidebar-width); 
+  transition: margin-left 0.3s ease;
 }
 
 /* ── Nav locked (sin permiso) ── */
@@ -165,6 +209,11 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  transition: opacity 0.3s ease;
+}
+
+.wrapper.collapsed .userDetails {
+  display: none;
 }
 
 .roleBadge {
@@ -186,4 +235,103 @@
   background: rgba(221, 176, 140, 0.2);
   color: var(--color-accent);
   border: 1px solid rgba(221, 176, 140, 0.35);
+}
+
+/* Botón para colapsar en Desktop (dentro de .brand) */
+.desktopToggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-neutral-light);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-lg, 8px);
+  font-size: 12px;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+.desktopToggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Botón Hamburguesa para Mobile */
+.mobileToggle {
+  display: none; /* Se activa en el media query abajo */
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: 900;
+  background: var(--color-neutral-dark);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+
+/* Capa oscura de fondo para mobile */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 950;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  /* En mobile, la sidebar siempre es ancha (drawer) */
+  .wrapper.collapsed {
+    --sidebar-width: 260px;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    width: 260px;
+    height: 100vh;
+    z-index: 1001;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobileVisible {
+    transform: translateX(0);
+  }
+
+  .main {
+    margin-left: 0 !important;
+    padding-top: var(--space-16);
+  }
+
+  .mobileToggle {
+    display: block;
+  }
+
+  .desktopToggle {
+    display: none;
+  }
+
+  /* Cuando el drawer está visible, mostrar todo el contenido */
+  .mobileVisible .navLabel,
+  .mobileVisible .brandTag,
+  .mobileVisible .userName,
+  .mobileVisible .userDetails,
+  .mobileVisible .roleBadge {
+    display: block !important;
+  }
+
+  /* Reset en mobile para collapsed */
+  .wrapper.collapsed .navItem {
+    justify-content: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
 }

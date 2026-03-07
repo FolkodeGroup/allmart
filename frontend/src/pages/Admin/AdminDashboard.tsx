@@ -1,7 +1,7 @@
 const sections = [
   {
-    icon: '📦',
-    title: 'Productos',
+    icon: '',
+    title: 'Pro',
     description: 'Administrá el catálogo, precios y stock.',
     to: '/admin/productos',
     color: 'primary',
