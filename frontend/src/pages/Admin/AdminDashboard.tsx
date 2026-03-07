@@ -25,6 +25,7 @@ import { Link } from 'react-router-dom';
 // import { useAdminAuth } from '../../context/AdminAuthContext';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
+import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
 import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
@@ -169,6 +170,27 @@ export function AdminDashboard() {
     .sort((a, b) => b.totalGastado - a.totalGastado)
     .slice(0, 5);
 
+  // --- Top 10 productos más vendidos ---
+  // Agrupar ventas por productId
+  const productSalesMap: Record<string, { name: string; sku: string; sales: number }> = {};
+  orders.forEach(order => {
+    order.items.forEach(item => {
+      if (!productSalesMap[item.productId]) {
+        // Buscar el producto para obtener el SKU
+        const prod = products.find(p => p.id === item.productId);
+        productSalesMap[item.productId] = {
+          name: item.productName,
+          sku: prod?.sku || '',
+          sales: 0,
+        };
+      }
+      productSalesMap[item.productId].sales += item.quantity;
+    });
+  });
+  const topProducts = Object.values(productSalesMap)
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 10);
+
   return (
     <div className={styles.page}>
       {/* Header */}
@@ -275,6 +297,8 @@ export function AdminDashboard() {
                 </ol>
               </div>
             </div>
+            {/* Gráfico de barras Top 10 productos más vendidos */}
+            <BarChartTopProducts data={topProducts} />
           </div>
         </div>
         {/* Pedidos Recientes */}
