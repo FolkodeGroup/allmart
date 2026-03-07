@@ -69,6 +69,7 @@ export function AdminLayout() {
             const commonProps = {
               key: item.to,
               title: isCollapsed ? item.label : '',
+              'data-label': item.label,
               onClick: () => setIsMobileOpen(false) // Cierra drawer al clickear en mobile
               };
             if (locked) {
