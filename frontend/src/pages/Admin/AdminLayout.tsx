@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { AdminHeader } from '../../components/layout/AdminHeader/AdminHeader';
 import styles from './AdminLayout.module.css';
 
 
@@ -47,8 +48,10 @@ export function AdminLayout() {
         <div
           className={styles.backdrop}
           onClick={() => setIsMobileOpen(false)}
-          role='presentation'
-          />
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && setIsMobileOpen(false)}
+        />
         )}
       <aside className={`${styles.sidebar} ${isMobileOpen ? styles.mobileVisible : ''}`}>
         <div className={styles.brand}>
@@ -121,7 +124,10 @@ export function AdminLayout() {
       </aside>
 
       <main className={styles.main}>
-        <Outlet />
+        <AdminHeader />
+        <div className={styles.content}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );

@@ -149,7 +149,13 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
 
   return (
-    <div className={styles.backdrop} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div
+      className={styles.backdrop}
+      onClick={e => e.target === e.currentTarget && onClose()}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && onClose()}
+    >
       <div className={styles.detailPanel} role="dialog" aria-modal="true">
         {/* Header */}
         <div className={styles.detailHeader}>
@@ -456,16 +462,18 @@ export function AdminOrders() {
           ))}
         </select>
         <div className={styles.dateFilters}>
-          <label className={styles.dateLabel}>Desde</label>
+          <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
           <input
             className={styles.dateInput}
+            id="order-date-from"
             type="date"
             value={filterDateFrom}
             onChange={e => setFilterDateFrom(e.target.value)}
           />
-          <label className={styles.dateLabel}>Hasta</label>
+          <label className={styles.dateLabel} htmlFor="order-date-to">Hasta</label>
           <input
             className={styles.dateInput}
+            id="order-date-to"
             type="date"
             value={filterDateTo}
             onChange={e => setFilterDateTo(e.target.value)}
@@ -511,7 +519,14 @@ export function AdminOrders() {
               </thead>
               <tbody>
                 {filtered.map(order => (
-                  <tr key={order.id} className={styles.row} onClick={() => setSelectedOrder(order)}>
+                  <tr
+                    key={order.id}
+                    className={styles.row}
+                    onClick={() => setSelectedOrder(order)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
+                  >
                     <td className={styles.orderId}>#{order.id.slice(0,8).toUpperCase()}</td>
                     <td className={styles.orderDate}>{formatDate(order.createdAt)}</td>
                     <td>
@@ -556,7 +571,14 @@ export function AdminOrders() {
               const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
               const totalQty = order.items.reduce((s, i) => s + i.quantity, 0);
               return (
-                <div key={order.id} className={styles.mobileCard} onClick={() => setSelectedOrder(order)}>
+                <div
+                  key={order.id}
+                  className={styles.mobileCard}
+                  onClick={() => setSelectedOrder(order)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
+                >
                   <div className={styles.mobileCardTop}>
                     <span className={styles.mobileCardId}>#{order.id.slice(0,8).toUpperCase()}</span>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
