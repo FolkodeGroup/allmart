@@ -48,8 +48,10 @@ export function AdminLayout() {
         <div
           className={styles.backdrop}
           onClick={() => setIsMobileOpen(false)}
-          role='presentation'
-          />
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && setIsMobileOpen(false)}
+        />
         )}
       <aside className={`${styles.sidebar} ${isMobileOpen ? styles.mobileVisible : ''}`}>
         <div className={styles.brand}>

@@ -175,7 +175,13 @@ export function AdminCategories() {
 
       {/* Modal formulario */}
       {showForm && (
-        <div className={styles.backdrop} onClick={e => e.target === e.currentTarget && setShowForm(false)}>
+        <div
+          className={styles.backdrop}
+          onClick={e => e.target === e.currentTarget && setShowForm(false)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && setShowForm(false)}
+        >
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
               <h2 className={styles.panelTitle}>{editId ? 'Editar categoría' : 'Nueva categoría'}</h2>
@@ -188,13 +194,13 @@ export function AdminCategories() {
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Descripción</label>
-                <input className={styles.input} value={form.description}
+                <label className={styles.label} htmlFor="category-description">Descripción</label>
+                <input className={styles.input} id="category-description" value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>URL de imagen</label>
-                <input className={styles.input} value={form.image}
+                <label className={styles.label} htmlFor="category-image">URL de imagen</label>
+                <input className={styles.input} id="category-image" value={form.image}
                   onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
                   placeholder="https://..." />
                 {form.image && (

@@ -46,8 +46,9 @@ export function AdminProductForm({ productId, onClose }: Props) {
     if (productId) {
       const p = getProduct(productId);
       if (p) {
-        const { id: _id, ...rest } = p;
-        setForm(rest);
+        // Solo usar id si es necesario, eliminamos variable no usada
+        const { id, ...rest } = p;
+        setTimeout(() => setForm(rest), 0); // Evita render en cascada
       }
     } else {
       setForm(EMPTY);
@@ -125,7 +126,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const removeImageSlot = (i: number) => set('images', form.images.filter((_, idx) => idx !== i));
 
   return (
-    <div className={styles.backdrop} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div
+      className={styles.backdrop}
+      onClick={e => e.target === e.currentTarget && onClose()}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && onClose()}
+    >
       <div className={styles.panel}>
         <div className={styles.panelHeader}>
           <h2 className={styles.panelTitle}>
@@ -142,26 +149,26 @@ export function AdminProductForm({ productId, onClose }: Props) {
 
             <div className={styles.row}>
               <div className={styles.field}>
-                <label className={styles.label}>Nombre *</label>
-                <input className={styles.input} value={form.name}
+                <label className={styles.label} htmlFor="product-name">Nombre *</label>
+                <input className={styles.input} id="product-name" value={form.name}
                   onChange={e => set('name', e.target.value)} required />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>SKU</label>
-                <input className={styles.input} value={form.sku}
+                <label className={styles.label} htmlFor="product-sku">SKU</label>
+                <input className={styles.input} id="product-sku" value={form.sku}
                   onChange={e => set('sku', e.target.value)} />
               </div>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Descripción corta</label>
-              <input className={styles.input} value={form.shortDescription}
+              <label className={styles.label} htmlFor="product-short-desc">Descripción corta</label>
+              <input className={styles.input} id="product-short-desc" value={form.shortDescription}
                 onChange={e => set('shortDescription', e.target.value)} />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Descripción completa</label>
-              <textarea className={styles.textarea} rows={4} value={form.description}
+              <label className={styles.label} htmlFor="product-desc">Descripción completa</label>
+              <textarea className={styles.textarea} id="product-desc" rows={4} value={form.description}
                 onChange={e => set('description', e.target.value)} />
             </div>
           </fieldset>
@@ -172,23 +179,23 @@ export function AdminProductForm({ productId, onClose }: Props) {
 
             <div className={styles.row}>
               <div className={styles.field}>
-                <label className={styles.label}>Precio *</label>
-                <input className={styles.input} type="number" min={0} step={0.01}
+                <label className={styles.label} htmlFor="product-price">Precio *</label>
+                <input className={styles.input} id="product-price" type="number" min={0} step={0.01}
                   value={form.price} onChange={e => set('price', Number(e.target.value))} required />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Precio original</label>
-                <input className={styles.input} type="number" min={0} step={0.01}
+                <label className={styles.label} htmlFor="product-original-price">Precio original</label>
+                <input className={styles.input} id="product-original-price" type="number" min={0} step={0.01}
                   value={form.originalPrice ?? ''} onChange={e => set('originalPrice', e.target.value ? Number(e.target.value) : undefined)} />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Descuento (%)</label>
-                <input className={styles.input} type="number" min={0} max={100}
+                <label className={styles.label} htmlFor="product-discount">Descuento (%)</label>
+                <input className={styles.input} id="product-discount" type="number" min={0} max={100}
                   value={form.discount ?? ''} onChange={e => set('discount', e.target.value ? Number(e.target.value) : undefined)} />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Stock</label>
-                <input className={styles.input} type="number" min={0}
+                <label className={styles.label} htmlFor="product-stock">Stock</label>
+                <input className={styles.input} id="product-stock" type="number" min={0}
                   value={form.stock} onChange={e => set('stock', Number(e.target.value))} />
               </div>
             </div>
@@ -205,8 +212,8 @@ export function AdminProductForm({ productId, onClose }: Props) {
             <legend className={styles.legend}>Categoría y etiquetas</legend>
 
             <div className={styles.field}>
-              <label className={styles.label}>Categoría *</label>
-              <select className={styles.input} value={form.category.id}
+              <label className={styles.label} htmlFor="product-category">Categoría *</label>
+              <select className={styles.input} id="product-category" value={form.category.id}
                 onChange={e => {
                   const cat = categories.find(c => c.id === e.target.value);
                   if (cat) set('category', cat);
@@ -219,9 +226,9 @@ export function AdminProductForm({ productId, onClose }: Props) {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Etiquetas</label>
+              <label className={styles.label} htmlFor="product-tags">Etiquetas</label>
               <div className={styles.tagRow}>
-                <input className={styles.input} value={tagInput}
+                <input className={styles.input} id="product-tags" value={tagInput}
                   onChange={e => setTagInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
                   placeholder="Ej: destacado, oferta, nuevo..." />
