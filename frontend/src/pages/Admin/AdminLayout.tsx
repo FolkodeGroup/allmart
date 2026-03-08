@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { AdminHeader } from '../../components/layout/AdminHeader/AdminHeader';
 import styles from './AdminLayout.module.css';
 
 
@@ -121,7 +122,10 @@ export function AdminLayout() {
       </aside>
 
       <main className={styles.main}>
-        <Outlet />
+        <AdminHeader />
+        <div className={styles.content}>
+          <Outlet />
+        </div>
       </main>
     </div>
   );
