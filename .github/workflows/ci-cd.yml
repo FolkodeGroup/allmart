@@ -15,6 +15,8 @@
 #   - VPS_DB_NAME             Nombre de la base de datos en producción
 #   - VPS_JWT_SECRET          JWT secret para producción (mínimo 64 chars)
 #   - VPS_CORS_ORIGIN         URL del frontend en el VPS (ej: http://IP:8082)
+#   - VPS_SEED_ADMIN_PASSWORD Contraseña inicial para el usuario admin@admin.com
+#   - VPS_SEED_EDITOR_PASSWORD Contraseña inicial para el usuario editor@admin.com
 #   - GITGUARDIAN_API_KEY     API key de GitGuardian para escaneo de secretos
 # =============================================================================
 
@@ -173,12 +175,14 @@ jobs:
             DB_USER=${{ secrets.VPS_DB_USER }}
             DB_PASSWORD=${{ secrets.VPS_DB_PASSWORD }}
             DB_NAME=${{ secrets.VPS_DB_NAME }}
-            DB_PORT_HOST=5433
+            DB_PORT_HOST=5434
             NODE_ENV=production
             BACKEND_PORT=3002
             FRONTEND_PORT=8082
             JWT_SECRET=${{ secrets.VPS_JWT_SECRET }}
             CORS_ORIGIN=${{ secrets.VPS_CORS_ORIGIN }}
+            SEED_ADMIN_PASSWORD=${{ secrets.VPS_SEED_ADMIN_PASSWORD }}
+            SEED_EDITOR_PASSWORD=${{ secrets.VPS_SEED_EDITOR_PASSWORD }}
             DATABASE_URL=postgresql://${{ secrets.VPS_DB_USER }}:${{ secrets.VPS_DB_PASSWORD }}@db:5432/${{ secrets.VPS_DB_NAME }}?schema=public
             EOF
 
