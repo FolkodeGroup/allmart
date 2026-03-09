@@ -17,13 +17,17 @@ export function AdminLogin() {
     setError('');
     setLoading(true);
     try {
+      // Log para depuración
+      console.log('Login payload:', { user, password });
       const res = await fetch('/api/admin/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user, password }),
       });
       const data = await res.json();
-      if (res.ok && data.success && data.data.token) {
+      // Log para depuración
+      console.log('Login response:', data);
+      if (res.ok && data.success && data.data && data.data.token) {
         const { token, role: userRole } = data.data;
         const role: Role = userRole === 'editor' ? 'editor' : 'admin';
         login(user, token, role);
