@@ -1,0 +1,98 @@
+# =============================================================================
+# Allmart — Docker Compose PRODUCCIÓN (VPS)
+#
+# Usa imágenes pre-construidas desde DockerHub.
+# No compilar localmente: los contenedores se descargan listos.
+#
+# Uso en VPS:
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml down
+#
+# Requisitos:
+#   - Archivo .env en la raíz del proyecto en el VPS
+#   - Docker instalado en el VPS
+# =============================================================================
+
+services:
+  # ─── Base de datos PostgreSQL ─────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: allmart-prod-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT_HOST:-5433}:5432"
+    volumes:
+      - allmart_pgdata:/var/lib/postgresql/data
+      - ./docker/init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - allmart-prod-network
+
+  # ─── Backend (imagen desde DockerHub) ─────────────────────────────────────
+  backend:
+    image: dgimenezdeveloper/allmart-backend:${IMAGE_TAG:-latest}
+    container_name: allmart-prod-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    ports:
+      - "${BACKEND_PORT:-3002}:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - allmart-prod-network
+
+  # ─── Frontend (imagen desde DockerHub, servida con nginx) ─────────────────
+  frontend:
+    image: dgimenezdeveloper/allmart-frontend:${IMAGE_TAG:-latest}
+    container_name: allmart-prod-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8082}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - allmart-prod-network
+
+# ─── Volúmenes persistentes ─────────────────────────────────────────────────
+volumes:
+  allmart_pgdata:
+    driver: local
+
+# ─── Red interna ────────────────────────────────────────────────────────────
+networks:
+  allmart-prod-network:
+    driver: bridge
