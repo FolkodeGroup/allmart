@@ -10,7 +10,7 @@
 #   docker compose -f docker-compose.prod.yml down
 #
 # Requisitos:
-#   - Archivo .env en la raíz del proyecto (copiar de .env.vps.example)
+#   - Archivo .env en la raíz del proyecto en el VPS
 #   - Docker instalado en el VPS
 # =============================================================================
 

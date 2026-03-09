@@ -8,7 +8,6 @@
 # Requisitos:
 #   - Docker instalado en el VPS
 #   - Archivo .env configurado en DEPLOY_DIR
-#   - Variables de entorno inyectadas por CI/CD o presentes en .env
 #
 # Uso manual en el VPS:
 #   chmod +x scripts/deploy-vps.sh
@@ -29,7 +28,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 log()    { echo -e "${BLUE}[DEPLOY]${NC} $1"; }
 success(){ echo -e "${GREEN}[OK]${NC} $1"; }
@@ -46,7 +45,7 @@ cd "$DEPLOY_DIR"
 
 # ─── Verificar que existe el .env ─────────────────────────────────────────────
 if [ ! -f ".env" ]; then
-  error "No se encontró .env en $DEPLOY_DIR. Crea uno a partir de .env.vps.example"
+  error "No se encontró .env en $DEPLOY_DIR. Crea el archivo .env con las variables requeridas."
 fi
 
 # ─── Verificar que existe docker-compose.prod.yml ─────────────────────────────
