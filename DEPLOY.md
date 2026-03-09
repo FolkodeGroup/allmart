@@ -218,3 +218,25 @@ docker compose -f docker-compose.prod.yml logs
 ### Conflicto de puertos con el otro proyecto del VPS
 - El proyecto Allmart usa puertos `8082`, `3002` y `5433`
 - Si hay conflicto, modificar los valores `FRONTEND_PORT`, `BACKEND_PORT` y `DB_PORT_HOST` en el `.env` del VPS
+
+---
+
+## Migraciones y seed automáticos
+
+1. Al iniciar el backend en Docker, se ejecutan automáticamente todas las migraciones SQL pendientes.
+2. Si existen las variables de entorno `SEED_ADMIN_PASSWORD` y `SEED_EDITOR_PASSWORD`, se ejecuta el script de seed para crear los usuarios admin/editor y poblar categorías/productos.
+3. Las variables de seed deben definirse en el archivo `.env` (ver `.env.vps.example` y `.env.docker.example`).
+4. El acceso al panel de administración se realiza con los usuarios creados (`admin@admin.com`, `editor@admin.com`).
+5. El proceso está documentado en el MANAGEMENT_LOG.md.
+
+**Importante:** Nunca usar contraseñas reales en archivos `.example`. Utilizar siempre marcadores como `TU_PASSWORD_ADMIN_AQUI`.
+
+**Cambios realizados:**
+- Automatización de migraciones y seed en el entrypoint de Docker.
+- Actualización de archivos de ejemplo y compose para variables de seed.
+- Corrección de rutas de importación en el seed.
+- Documentación de la issue en el log de gestión.
+
+---
+
+Para más detalles, revisar el MANAGEMENT_LOG.md y los archivos `.env.example`.
