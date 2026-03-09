@@ -167,22 +167,49 @@ jobs:
             set -e
             cd ${{ env.DEPLOY_DIR }}
 
-            echo "Escribiendo .env de produccion..."
-            cat > .env << EOF
-            IMAGE_TAG=${{ needs.docker-build-push.outputs.image_tag }}
-            DB_USER=${{ secrets.VPS_DB_USER }}
-            DB_PASSWORD=${{ secrets.VPS_DB_PASSWORD }}
-            DB_NAME=${{ secrets.VPS_DB_NAME }}
-            DB_PORT_HOST=5434
-            NODE_ENV=production
-            BACKEND_PORT=3002
-            FRONTEND_PORT=8082
-            JWT_SECRET=${{ secrets.VPS_JWT_SECRET }}
-            CORS_ORIGIN=${{ secrets.VPS_CORS_ORIGIN }}
-            SEED_ADMIN_PASSWORD=${{ secrets.VPS_SEED_ADMIN_PASSWORD }}
-            SEED_EDITOR_PASSWORD=${{ secrets.VPS_SEED_EDITOR_PASSWORD }}
-            DATABASE_URL=postgresql://${{ secrets.VPS_DB_USER }}:${{ secrets.VPS_DB_PASSWORD }}@db:5432/${{ secrets.VPS_DB_NAME }}?schema=public
-            EOF
+            echo "Sincronizando .env de produccion..."
+            
+            # 1. Asegurar que .env exista
+            touch .env
+
+            # 2. Función para actualizar o añadir variable en .env
+            update_env() {
+              key=$1
+              value=$2
+              if grep -q "^${key}=" .env; then
+                # Si existe, la actualizamos respetando el formato key=value
+                sed -i "s|^${key}=.*|${key}=${value}|" .env
+              else
+                # Si no existe, la añadimos al final
+                echo "${key}=${value}" >> .env
+              fi
+            }
+
+            # 3. Actualizar variables críticas base (vienen de secrets o contexto CI)
+            update_env "IMAGE_TAG" "${{ needs.docker-build-push.outputs.image_tag }}"
+            update_env "DB_USER" "${{ secrets.VPS_DB_USER }}"
+            update_env "DB_PASSWORD" "${{ secrets.VPS_DB_PASSWORD }}"
+            update_env "DB_NAME" "${{ secrets.VPS_DB_NAME }}"
+            update_env "DB_PORT_HOST" "5434"
+            update_env "NODE_ENV" "production"
+            update_env "BACKEND_PORT" "3002"
+            update_env "FRONTEND_PORT" "8082"
+            update_env "JWT_SECRET" "${{ secrets.VPS_JWT_SECRET }}"
+            update_env "CORS_ORIGIN" "${{ secrets.VPS_CORS_ORIGIN }}"
+            
+            # Solo actualizar seed passwords si el secret NO está vacío en GitHub
+            if [ -n "${{ secrets.VPS_SEED_ADMIN_PASSWORD }}" ]; then
+              update_env "SEED_ADMIN_PASSWORD" "${{ secrets.VPS_SEED_ADMIN_PASSWORD }}"
+            fi
+            if [ -n "${{ secrets.VPS_SEED_EDITOR_PASSWORD }}" ]; then
+              update_env "SEED_EDITOR_PASSWORD" "${{ secrets.VPS_SEED_EDITOR_PASSWORD }}"
+            fi
+
+            # Construir DATABASE_URL dinámicamente si falta
+            DB_USER_VAL=$(grep "^DB_USER=" .env | cut -d'=' -f2-)
+            DB_PASS_VAL=$(grep "^DB_PASSWORD=" .env | cut -d'=' -f2-)
+            DB_NAME_VAL=$(grep "^DB_NAME=" .env | cut -d'=' -f2-)
+            update_env "DATABASE_URL" "postgresql://${DB_USER_VAL}:${DB_PASS_VAL}@db:5432/${DB_NAME_VAL}?schema=public"
 
             echo "Descargando imagenes actualizadas..."
             docker pull ${{ env.BACKEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
