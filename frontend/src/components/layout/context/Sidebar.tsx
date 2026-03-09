@@ -22,6 +22,8 @@ export const Sidebar = () => {
           aria-label="Cerrar menú"
           className="fixed inset-0 bg-black/50 z-40 transition-opacity"
           onClick={toggleOpen}
+          tabIndex={0}
+          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleOpen()}
         />
       )}
 
@@ -43,6 +45,9 @@ export const Sidebar = () => {
           <div
             className={`flex items-center p-4 hover:bg-white/10 cursor-pointer overflow-hidden ${isCollapsed && !isMobile ? 'justify-center' : ''}`}
             onClick={() => isMobile && toggleOpen()}
+            tabIndex={0}
+            role="button"
+            onKeyDown={e => (isMobile && (e.key === 'Enter' || e.key === ' ')) && toggleOpen()}
           >
             <span className="text-xl min-w-[24px]">🏠</span>
             {(!isCollapsed || isMobile) && <span className="ml-4 font-medium">Inicio</span>}
@@ -50,6 +55,9 @@ export const Sidebar = () => {
           <div
             className={`flex items-center p-4 hover:bg-white/10 cursor-pointer overflow-hidden ${isCollapsed && !isMobile ? 'justify-center' : ''}`}
             onClick={() => isMobile && toggleOpen()}
+            tabIndex={0}
+            role="button"
+            onKeyDown={e => (isMobile && (e.key === 'Enter' || e.key === ' ')) && toggleOpen()}
           >
             <span className="text-xl min-w-[24px]">📦</span>
             {(!isCollapsed || isMobile) && <span className="ml-4 font-medium">Productos</span>}

@@ -26,13 +26,20 @@ function renderStars(rating: number): string {
 export function ProductDetailPage() {
   const { addToCart } = useCart();
   const { slug } = useParams<{ slug: string }>();
-  const product = getProducts().find((p) => p.slug === slug);
+  const products = getProducts();
+  const product = products.find((p) => p.slug === slug);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-
-  // Selección de variantes
-  const variantGroups: VariantGroup[] = (product as any).variants ?? [];
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [addedFeedback, setAddedFeedback] = useState(false);
+
+  // Evitar hooks condicionales
+  const variantGroups: VariantGroup[] = product ? (product as any).variants ?? [] : [];
+  const relatedProducts = product ? products.filter(
+    (p) => p.category.id === product.category.id && p.id !== product.id
+  ).slice(0, 4) : [];
+  const hasDiscount = product ? product.discount && product.discount > 0 : false;
+  const isNew = product ? product.tags.includes('nuevo') : false;
 
   if (!product) {
     return (
@@ -47,17 +54,6 @@ export function ProductDetailPage() {
       </main>
     );
   }
-
-  const relatedProducts = getProducts()
-    .filter(
-      (p) => p.category.id === product.category.id && p.id !== product.id
-    )
-    .slice(0, 4);
-
-  const hasDiscount = product.discount && product.discount > 0;
-  const isNew = product.tags.includes('nuevo');
-
-  const [addedFeedback, setAddedFeedback] = useState(false);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -103,8 +99,8 @@ export function ProductDetailPage() {
                     idx === selectedImage ? styles.active : ''
                   }`}
                   onClick={() => setSelectedImage(idx)}
-                  role="tab"
-                  aria-selected={idx === selectedImage}
+                  tabIndex={0}
+                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedImage(idx)}
                   aria-label={`Imagen ${idx + 1} de ${product.name}`}
                   type="button"
                 >
@@ -177,6 +173,8 @@ export function ProductDetailPage() {
                             : styles.variantOption
                         }
                         onClick={() => setSelectedVariants(prev => ({ ...prev, [group.id]: val }))}
+                        tabIndex={0}
+                        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedVariants(prev => ({ ...prev, [group.id]: val }))}
                         aria-pressed={selectedVariants[group.id] === val}
                       >
                         {val}

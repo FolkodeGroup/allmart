@@ -163,6 +163,12 @@ export function OrderConfirmationForm({
       className={styles.backdrop}
       onClick={handleBackdropClick}
       role="dialog"
+      tabIndex={0}
+      onKeyDown={e => {
+        if (e.key === 'Escape' || e.key === 'Enter') {
+          onCancel();
+        }
+      }}
       aria-modal="true"
       aria-labelledby="order-form-title"
     >

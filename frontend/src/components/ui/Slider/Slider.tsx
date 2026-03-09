@@ -122,6 +122,9 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
             key={idx}
             className={idx === currentPage ? `${styles.sliderDot} ${styles.sliderDotActive}` : styles.sliderDot}
             onClick={() => goToPage(idx)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && goToPage(idx)}
           />
         ))}
       </div>

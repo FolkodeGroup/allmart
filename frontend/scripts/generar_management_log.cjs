@@ -83,7 +83,8 @@ async function fetchAllPages(endpoint, acc = []) {
 }
 
 async function fetchAllPagesRec(baseUrl, acc = [], page = 2) {
-  const url = baseUrl.replace(/page=\d+/, `page=${page}`);
+  // Usamos un lookbehind para no confundir "per_page=100" con el param "page"
+  const url = baseUrl.replace(/([?&])page=\d+/, `$1page=${page}`);
   await rateLimitPause();
   const data = await apiGet(url);
   if (!Array.isArray(data) || data.length === 0) return acc;
@@ -288,7 +289,7 @@ Este archivo es generado y actualizado automáticamente por:
     .map(e => `| ${e.dev} | ${e.score} | ${e.actividad} | ${(e.referencia || '').replace(/\|/g, ' ')} | ${e.fecha} |`)
     .join('\n');
 
-  const logPath = path.resolve(__dirname, '../../../MANAGEMENT_LOG.md');
+  const logPath = path.resolve(__dirname, '../../MANAGEMENT_LOG.md');
   fs.writeFileSync(logPath, cabecera + filas + '\n');
 
   console.log('\n✅  MANAGEMENT_LOG.md generado');

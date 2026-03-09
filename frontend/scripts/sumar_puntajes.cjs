@@ -69,7 +69,7 @@ async function fetchIssues(page = 1, acc = []) {
  * como array de { dev, score, actividad, referencia, fecha }.
  */
 function readManagementLog() {
-  const logPath = path.resolve(__dirname, '../../../MANAGEMENT_LOG.md');
+  const logPath = path.resolve(__dirname, '../../MANAGEMENT_LOG.md');
   if (!fs.existsSync(logPath)) {
     console.log('ℹ️  MANAGEMENT_LOG.md no encontrado — se omiten actividades de gestión');
     return [];

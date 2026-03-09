@@ -248,10 +248,22 @@
 /* ── Main content ── */
 .main {
   flex: 1;
-  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   margin-left: var(--sidebar-width); 
   transition: margin-left 0.3s ease;
+  background: var(--color-bg-secondary);
+}
+
+.wrapper.collapsed .main {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-8);
+  overflow-y: auto;
 }
 
 /* ── Nav locked (sin permiso) ── */
@@ -397,7 +409,14 @@
 
   .main {
     margin-left: 0 !important;
+    padding: 0;
+  }
+
+  .content {
     padding-top: var(--space-16);
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+    padding-bottom: var(--space-8);
   }
 
   .mobileToggle {
