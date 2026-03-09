@@ -55,6 +55,8 @@ services:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
+      SEED_EDITOR_PASSWORD: ${SEED_EDITOR_PASSWORD}
     ports:
       - "${BACKEND_PORT:-3001}:3001"
     depends_on:

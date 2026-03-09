@@ -96,7 +96,17 @@ node -e "
   run().catch(err => { console.error('[Migrate] Error:', err.message); process.exit(1); });
 "
 
-echo "[Docker] Migraciones completadas. Arrancando servidor..."
+echo "[Docker] Migraciones completadas. Ejecutando seed..."
+
+# Ejecutar seed (upsert de admin, categorías y productos) si se proporcionan las variables
+# Usamos node sobre el archivo compilado en dist/
+if [ -n "$SEED_ADMIN_PASSWORD" ] && [ -n "$SEED_EDITOR_PASSWORD" ]; then
+  npm run seed:prod
+else
+  echo "[Docker] No se detectaron contraseñas de SEED ($SEED_ADMIN_PASSWORD y $SEED_EDITOR_PASSWORD). Saltando paso."
+fi
+
+echo "[Docker] Arrancando servidor..."
 
 # Arrancar el servidor
 exec node dist/index.js

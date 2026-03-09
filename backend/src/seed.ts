@@ -11,10 +11,10 @@
  *   SEED_EDITOR_PASSWORD
  */
 
-import { prisma } from './src/config/prisma';
+import { prisma } from './config/prisma';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { categories, products } from './src/moks/mock';
+import { categories, products } from './moks/mock';
 import { UserRole, ProductStatus, CategoryStatus } from './src/types';
 
 dotenv.config();
