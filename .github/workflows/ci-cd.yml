@@ -132,8 +132,6 @@ jobs:
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ steps.meta.outputs.image_tag }}
-          build-args: |
-            VITE_API_URL=http://${{ env.VPS_HOST }}:3002
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
