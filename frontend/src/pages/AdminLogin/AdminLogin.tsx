@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import type { Role } from '../../utils/permissions';
 import styles from './AdminLogin.module.css';
@@ -7,14 +8,12 @@ import styles from './AdminLogin.module.css';
 export function AdminLogin() {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAdminAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     try {
       const res = await fetch('http://localhost:3001/api/admin/auth/login', {
@@ -27,12 +26,13 @@ export function AdminLogin() {
         const { token, role: userRole } = data.data;
         const role: Role = userRole === 'editor' ? 'editor' : 'admin';
         login(user, token, role);
+        toast.success(`¡Bienvenido, ${user}!`);
         navigate('/admin/dashboard');
       } else {
-        setError(data.message || 'Credenciales inválidas');
+        toast.error(data.message || 'Credenciales inválidas');
       }
     } catch (err) {
-      setError('Error de red o servidor');
+      toast.error('Error de red o servidor');
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,6 @@ export function AdminLogin() {
           autoComplete="current-password"
           required
         />
-        {error && <div className={styles.error}>{error}</div>}
         <button className={styles.button} type="submit" disabled={loading}>
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
