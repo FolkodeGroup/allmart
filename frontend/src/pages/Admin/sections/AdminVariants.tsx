@@ -33,7 +33,9 @@ export function AdminVariants() {
   // ── Helpers ──────────────────────────────────────────────────────
   const saveVariants = (groups: VariantGroup[]) => {
     if (!selectedId) return;
-    updateProduct(selectedId, { variants: groups });
+    updateProduct(selectedId, { variants: groups }).catch((err) =>
+      console.error('Error al guardar variantes:', err),
+    );
   };
 
   const addGroup = () => {

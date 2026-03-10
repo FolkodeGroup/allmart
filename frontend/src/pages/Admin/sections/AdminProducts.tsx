@@ -7,7 +7,7 @@ import sectionStyles from './AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
 export function AdminProducts() {
-  const { products, deleteProduct } = useAdminProducts();
+  const { products, deleteProduct, loading, error } = useAdminProducts();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -45,8 +45,12 @@ export function AdminProducts() {
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
-  const handleDelete = (id: string) => {
-    deleteProduct(id);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProduct(id);
+    } catch (err) {
+      console.error('Error al eliminar producto:', err);
+    }
     setDeleteConfirm(null);
   };
 
@@ -150,7 +154,20 @@ export function AdminProducts() {
       </div>
 
       {/* Tabla */}
-      {filtered.length === 0 ? (
+      {loading && (
+        <div className={sectionStyles.emptyState}>
+          <p className={sectionStyles.emptyText}>Cargando productos...</p>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className={sectionStyles.emptyState}>
+          <span className={sectionStyles.emptyIcon}>⚠️</span>
+          <p className={sectionStyles.emptyText}>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (filtered.length === 0 ? (
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>📦</span>
           <p className={sectionStyles.emptyText}>No se encontraron productos.</p>
@@ -249,7 +266,7 @@ export function AdminProducts() {
             </tbody>
           </table>
         </div>
-      )}
+      ))}
 
       {/* Controles de paginación */}
       {filtered.length > PRODUCTS_PER_PAGE && (

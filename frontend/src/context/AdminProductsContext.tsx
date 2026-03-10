@@ -1,7 +1,25 @@
-import { createContext, useContext, useState } from 'react';
+/**
+ * context/AdminProductsContext.tsx
+ * Contexto de gestión de productos para el panel admin.
+ * Usa llamadas HTTP al backend — sin mocks ni localStorage.
+ */
+
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
-import { products as mockProducts, categories as mockCategories } from '../data/mock';
+import { useAdminAuth } from './AdminAuthContext';
+import { useAdminCategories } from './AdminCategoriesContext';
+import {
+  fetchAdminProducts,
+  createAdminProduct,
+  updateAdminProduct,
+  deleteAdminProduct,
+  mapApiProductToProduct,
+  mapAdminProductToPayload,
+  type ApiProduct,
+} from '../services/productsService';
+
+// ─── Tipos exportados ─────────────────────────────────────────────────────────
 
 export interface AdminProduct extends Omit<Product, 'category'> {
   category: Category;
@@ -16,79 +34,147 @@ export interface VariantGroup {
   values: string[];
 }
 
-const STORAGE_KEY = 'allmart_admin_products';
+// ─── Mapeador: ApiProduct → AdminProduct ──────────────────────────────────────
 
-function loadProducts(): AdminProduct[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch { /* ignore */ }
-  // Cargar productos del mock como datos iniciales
-  return mockProducts.map(p => ({ ...p, stock: 10, variants: [] }));
+function apiToAdminProduct(api: ApiProduct, categories: Category[]): AdminProduct {
+  const base = mapApiProductToProduct(api, categories);
+  return {
+    ...base,
+    stock: api.stock,
+    variants: [],
+  };
 }
 
-function saveProducts(products: AdminProduct[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-}
+// ─── Tipos del contexto ───────────────────────────────────────────────────────
 
 interface AdminProductsContextType {
   products: AdminProduct[];
   categories: Category[];
-  addProduct: (p: Omit<AdminProduct, 'id'>) => void;
-  updateProduct: (id: string, p: Partial<AdminProduct>) => void;
-  deleteProduct: (id: string) => void;
+  loading: boolean;
+  error: string | null;
+  refreshProducts: () => Promise<void>;
+  addProduct: (p: Omit<AdminProduct, 'id'>) => Promise<void>;
+  updateProduct: (id: string, p: Partial<AdminProduct>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
   getProduct: (id: string) => AdminProduct | undefined;
 }
 
+// ─── Contexto ─────────────────────────────────────────────────────────────────
+
 const AdminProductsContext = createContext<AdminProductsContextType | undefined>(undefined);
 
+// ─── Provider ─────────────────────────────────────────────────────────────────
+
 export function AdminProductsProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<AdminProduct[]>(loadProducts);
+  const { token } = useAdminAuth();
+  const { categories } = useAdminCategories();
 
-  const addProduct = (p: Omit<AdminProduct, 'id'>) => {
-    const newProduct: AdminProduct = {
-      ...p,
-      id: `prod-${Date.now()}`,
-      slug: p.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-    };
-    setProducts(prev => {
-      const next = [newProduct, ...prev];
-      saveProducts(next);
-      return next;
-    });
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /** Carga (o recarga) los productos desde el backend */
+  const refreshProducts = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const apiProducts = await fetchAdminProducts(token);
+      setProducts(apiProducts.map((p) => apiToAdminProduct(p, categories)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar productos');
+    } finally {
+      setLoading(false);
+    }
+  }, [token, categories]);
+
+  /* Carga inicial cuando el token o las categorías están disponibles */
+  useEffect(() => {
+    refreshProducts();
+  }, [refreshProducts]);
+
+  // ─── CRUD ────────────────────────────────────────────────────────────────────
+
+  const addProduct = async (p: Omit<AdminProduct, 'id'>) => {
+    if (!token) throw new Error('No autenticado');
+    const payload = mapAdminProductToPayload(p);
+    const created = await createAdminProduct(payload, token);
+    const newProduct = apiToAdminProduct(created, categories);
+    // Preservar campos extra (variants, images, tags, etc.) que el backend no almacena aún
+    setProducts((prev) => [
+      { ...newProduct, variants: p.variants, images: p.images, tags: p.tags, features: p.features },
+      ...prev,
+    ]);
   };
 
-  const updateProduct = (id: string, data: Partial<AdminProduct>) => {
-    setProducts(prev => {
-      const next = prev.map(p => p.id === id ? { ...p, ...data } : p);
-      saveProducts(next);
-      return next;
-    });
+  const updateProduct = async (id: string, data: Partial<AdminProduct>) => {
+    if (!token) throw new Error('No autenticado');
+
+    // Aplicar cambio en estado local de inmediato (actualización optimista)
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+
+    // Determinar si hay campos que el backend entiende para hacer la llamada HTTP
+    const hasApiFields =
+      data.name !== undefined ||
+      data.price !== undefined ||
+      data.description !== undefined ||
+      data.originalPrice !== undefined ||
+      data.category !== undefined ||
+      data.sku !== undefined ||
+      data.stock !== undefined ||
+      data.rating !== undefined;
+
+    if (hasApiFields) {
+      const current = products.find((p) => p.id === id);
+      if (!current) return;
+      const merged = { ...current, ...data };
+      const payload = mapAdminProductToPayload(merged);
+      const updated = await updateAdminProduct(id, payload, token);
+      // Sincronizar respuesta del backend y preservar campos locales
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...apiToAdminProduct(updated, categories),
+                variants: merged.variants,
+                images: merged.images,
+                tags: merged.tags,
+                features: merged.features,
+              }
+            : p,
+        ),
+      );
+    }
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts(prev => {
-      const next = prev.filter(p => p.id !== id);
-      saveProducts(next);
-      return next;
-    });
+  const deleteProduct = async (id: string) => {
+    if (!token) throw new Error('No autenticado');
+    await deleteAdminProduct(id, token);
+    setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const getProduct = (id: string) => products.find(p => p.id === id);
+  const getProduct = (id: string) => products.find((p) => p.id === id);
 
   return (
-    <AdminProductsContext.Provider value={{
-      products,
-      categories: mockCategories,
-      addProduct,
-      updateProduct,
-      deleteProduct,
-      getProduct,
-    }}>
+    <AdminProductsContext.Provider
+      value={{
+        products,
+        categories,
+        loading,
+        error,
+        refreshProducts,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        getProduct,
+      }}
+    >
       {children}
     </AdminProductsContext.Provider>
   );
 }
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useAdminProducts() {
   const ctx = useContext(AdminProductsContext);
