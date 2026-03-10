@@ -4,7 +4,7 @@
  */
 
 import { Decimal } from '@prisma/client/runtime/client';
-import { ProductStatus as PrismaProductStatus } from '@prisma/client';
+import { Prisma, ProductStatus as PrismaProductStatus } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { Product, CreateProductDTO, UpdateProductDTO } from '../models/Product';
 import { ProductStatus } from '../types';
@@ -123,7 +123,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       price: dto.price ?? existing.price,
       originalPrice: dto.compareAtPrice !== undefined ? dto.compareAtPrice : existing.originalPrice,
       discount: dto.discount !== undefined ? dto.discount : existing.discount,
-      images: Array.isArray(dto.images) ? dto.images : existing.images,
+      images: Array.isArray(dto.images) ? dto.images : (existing.images ?? Prisma.JsonNull),
       categoryId,
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
       sku: dto.sku !== undefined ? dto.sku : existing.sku,
@@ -131,8 +131,8 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       rating: dto.rating !== undefined ? dto.rating : existing.rating,
       reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : existing.reviewCount,
       inStock: dto.inStock !== undefined ? dto.inStock : existing.inStock,
-      tags: Array.isArray(dto.tags) ? dto.tags : existing.tags,
-      features: Array.isArray(dto.features) ? dto.features : existing.features,
+      tags: Array.isArray(dto.tags) ? dto.tags : (existing.tags ?? Prisma.JsonNull),
+      features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
     },
   });
 

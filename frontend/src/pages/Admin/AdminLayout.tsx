@@ -85,14 +85,14 @@ export function AdminLayout() {
           {navItems.map(item => {
             const locked = item.permission !== null && !can(item.permission);
             const commonProps = {
-              key: item.to,
               title: isCollapsed ? item.label : '',
               'data-label': item.label,
               onClick: () => setIsMobileOpen(false) // Cierra drawer al clickear en mobile
-              };
+            };
             if (locked) {
               return (
                 <span
+                  key={item.to}
                   {...commonProps}
                   className={`${styles.navItem} ${styles.navItemLocked}`}
                 >
@@ -102,11 +102,9 @@ export function AdminLayout() {
                 </span>
               );
             }
-            
-            
-            
             return (
               <NavLink
+                key={item.to}
                 {...commonProps}
                 to={item.to}
                 className={({ isActive }) =>
