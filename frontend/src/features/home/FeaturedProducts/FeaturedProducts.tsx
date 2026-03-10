@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../../../types';
 import {
   fetchPublicProducts,
-  fetchPublicCategories,
   mapApiProductToProduct,
 } from '../../../services/productsService';
+import { fetchPublicCategories } from '../../../services/categoriesService';
 import { ProductCard } from '../../products/ProductCard/ProductCard';
 import { Button } from '../../../components/ui/Button/Button';
 import styles from './FeaturedProducts.module.css';

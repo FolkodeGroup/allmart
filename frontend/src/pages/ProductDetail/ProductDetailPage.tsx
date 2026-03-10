@@ -5,9 +5,9 @@ import type { Product } from '../../types';
 import {
   fetchPublicProductBySlug,
   fetchPublicProducts,
-  fetchPublicCategories,
   mapApiProductToProduct,
 } from '../../services/productsService';
+import { fetchPublicCategories } from '../../services/categoriesService';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
