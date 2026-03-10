@@ -1,3 +1,27 @@
+/* ── Sugerencias/autocompletado ── */
+.suggestionsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  z-index: 10;
+}
+.suggestionItem {
+  padding: 8px 14px;
+  transition: background 0.13s;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+}
+.suggestionActive {
+  background: var(--color-bg-secondary);
+}
 /* ============================================
    ALLMART — ADMIN PRODUCTS LIST
    ============================================ */

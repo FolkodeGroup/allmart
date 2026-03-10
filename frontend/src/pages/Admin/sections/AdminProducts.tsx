@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -10,6 +10,9 @@ export function AdminProducts() {
   const { products, deleteProduct } = useAdminProducts();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -17,6 +20,15 @@ export function AdminProducts() {
 
   const { categories } = useAdminCategories();
 
+  // Sugerencias para autocompletado (máx 8)
+  const suggestions = search.length > 0
+    ? products.filter(p =>
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.sku.toLowerCase().includes(search.toLowerCase())
+      ).slice(0, 8)
+    : [];
+
+  // Filtrado principal
   const filtered = products.filter(p => {
     const matchSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -57,14 +69,62 @@ export function AdminProducts() {
         </div>
 
         {/* Filtros */}
-        <div className={styles.filters}>
+        <div className={styles.filters} style={{ position: 'relative' }}>
           <input
+            ref={inputRef}
             className={styles.searchInput}
             type="search"
             placeholder="Buscar por nombre o SKU..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            autoComplete="off"
+            onChange={e => {
+              setSearch(e.target.value);
+              setShowSuggestions(true);
+              setHighlightedIndex(-1);
+            }}
+            onFocus={() => search && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+            onKeyDown={e => {
+              if (!showSuggestions || suggestions.length === 0) return;
+              if (e.key === 'ArrowDown') {
+                setHighlightedIndex(i => (i < suggestions.length - 1 ? i + 1 : 0));
+                e.preventDefault();
+              } else if (e.key === 'ArrowUp') {
+                setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
+                e.preventDefault();
+              } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+                setSearch(suggestions[highlightedIndex].name);
+                setShowSuggestions(false);
+                setHighlightedIndex(-1);
+                // Opcional: enfocar input
+                inputRef.current?.blur();
+                setTimeout(() => inputRef.current?.focus(), 0);
+                e.preventDefault();
+              }
+            }}
           />
+          {/* Sugerencias de autocompletado */}
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className={styles.suggestionsList} style={{ position: 'absolute', top: '110%', left: 0, right: 0, zIndex: 10 }}>
+              {suggestions.map((s, idx) => (
+                <li
+                  key={s.id}
+                  className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
+                  style={{ cursor: 'pointer', background: idx === highlightedIndex ? 'var(--color-bg-secondary)' : undefined }}
+                  onMouseDown={() => {
+                    setSearch(s.name);
+                    setShowSuggestions(false);
+                    setHighlightedIndex(-1);
+                  }}
+                >
+                  <span style={{ fontWeight: 500 }}>{s.name}</span>
+                  {s.sku && <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>SKU: {s.sku}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+
+
           <select
             className={styles.select}
             value={categoryFilter}
