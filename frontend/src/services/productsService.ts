@@ -164,13 +164,6 @@ export function mapAdminProductToPayload(product: {
 
 // ─── API pública ──────────────────────────────────────────────────────────────
 
-/** GET /api/categories — Obtiene todas las categorías del catálogo */
-export async function fetchPublicCategories(): Promise<Category[]> {
-  const res = await fetch('/api/categories');
-  const body = await handleResponse<ApiSuccess<ApiCategory[]>>(res);
-  return body.data.map(mapApiCategoryToCategory);
-}
-
 /** GET /api/products — Lista paginada de productos activos */
 export async function fetchPublicProducts(
   params: PublicProductsParams = {},

@@ -1,69 +1,105 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Category } from '../types';
-import { categories as mockCategories } from '../data/mock';
-
-const STORAGE_KEY = 'allmart_admin_categories';
-
-function loadCategories(): Category[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch { /* ignore */ }
-  return mockCategories;
-}
-
-function saveCategories(cats: Category[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cats));
-}
+import * as categoriesService from '../services/categoriesService';
+import { useAdminAuth } from './AdminAuthContext';
 
 interface AdminCategoriesContextType {
   categories: Category[];
-  addCategory: (c: Omit<Category, 'id'>) => Category;
-  updateCategory: (id: string, data: Partial<Category>) => void;
-  deleteCategory: (id: string) => void;
+  isLoading: boolean;
+  error: string | null;
+  refreshCategories: () => Promise<void>;
+  addCategory: (c: Omit<Category, 'id'>) => Promise<Category>;
+  updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
   getCategory: (id: string) => Category | undefined;
 }
 
 const AdminCategoriesContext = createContext<AdminCategoriesContextType | undefined>(undefined);
 
 export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>(loadCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { token } = useAdminAuth();
 
-  const addCategory = (c: Omit<Category, 'id'>): Category => {
-    const newCat: Category = {
-      ...c,
-      id: `cat-${Date.now()}`,
-      slug: c.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-    };
-    setCategories(prev => {
-      const next = [...prev, newCat];
-      saveCategories(next);
-      return next;
-    });
-    return newCat;
+  const refreshCategories = useCallback(async () => {
+    if (!token) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await categoriesService.fetchAdminCategories(token);
+      setCategories(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar categorías');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    refreshCategories();
+  }, [refreshCategories]);
+
+  const addCategory = async (c: Omit<Category, 'id'>): Promise<Category> => {
+    if (!token) throw new Error('No hay sesión activa');
+    setIsLoading(true);
+    try {
+      const newCat = await categoriesService.createAdminCategory(token, c);
+      setCategories(prev => [...prev, newCat]);
+      return newCat;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al crear categoría';
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const updateCategory = (id: string, data: Partial<Category>) => {
-    setCategories(prev => {
-      const next = prev.map(c => c.id === id ? { ...c, ...data } : c);
-      saveCategories(next);
-      return next;
-    });
+  const updateCategory = async (id: string, data: Partial<Category>) => {
+    if (!token) throw new Error('No hay sesión activa');
+    setIsLoading(true);
+    try {
+      const updatedCat = await categoriesService.updateAdminCategory(token, id, data);
+      setCategories(prev => prev.map(c => c.id === id ? updatedCat : c));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al actualizar categoría';
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteCategory = (id: string) => {
-    setCategories(prev => {
-      const next = prev.filter(c => c.id !== id);
-      saveCategories(next);
-      return next;
-    });
+  const deleteCategory = async (id: string) => {
+    if (!token) throw new Error('No hay sesión activa');
+    setIsLoading(true);
+    try {
+      await categoriesService.deleteAdminCategory(token, id);
+      setCategories(prev => prev.filter(c => c.id !== id));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al eliminar categoría';
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getCategory = (id: string) => categories.find(c => c.id === id);
 
   return (
-    <AdminCategoriesContext.Provider value={{ categories, addCategory, updateCategory, deleteCategory, getCategory }}>
+    <AdminCategoriesContext.Provider value={{ 
+      categories, 
+      isLoading, 
+      error, 
+      refreshCategories,
+      addCategory, 
+      updateCategory, 
+      deleteCategory, 
+      getCategory 
+    }}>
       {children}
     </AdminCategoriesContext.Provider>
   );
