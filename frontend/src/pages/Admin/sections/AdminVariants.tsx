@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import type { VariantGroup, AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -32,21 +33,42 @@ export function AdminVariants() {
 
   // ── Helpers ──────────────────────────────────────────────────────
   const saveVariants = (groups: VariantGroup[]) => {
-    if (!selectedId) return;
-    updateProduct(selectedId, { variants: groups });
+    try {
+      if (!selectedId) return;
+      updateProduct(selectedId, { variants: groups });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al guardar variantes: ${message}`);
+    }
   };
 
   const addGroup = () => {
     const name = newGroupName.trim();
     if (!name || !selectedId) return;
     const exists = variants.some(g => g.name.toLowerCase() === name.toLowerCase());
-    if (exists) return;
-    saveVariants([...variants, { id: `g-${Date.now()}`, name, values: [] }]);
-    setNewGroupName('');
+    if (exists) {
+      toast.error('Este grupo de variantes ya existe');
+      return;
+    }
+    try {
+      saveVariants([...variants, { id: `g-${Date.now()}`, name, values: [] }]);
+      toast.success(`Grupo "${name}" creado con éxito`);
+      setNewGroupName('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al crear grupo: ${message}`);
+    }
   };
 
   const deleteGroup = (groupId: string) => {
-    saveVariants(variants.filter(g => g.id !== groupId));
+    try {
+      const groupName = variants.find(g => g.id === groupId)?.name;
+      saveVariants(variants.filter(g => g.id !== groupId));
+      toast.success(`Grupo "${groupName}" eliminado con éxito`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al eliminar: ${message}`);
+    }
   };
 
   const startEditGroupName = (group: VariantGroup) => {
@@ -57,7 +79,13 @@ export function AdminVariants() {
   const commitEditGroupName = (groupId: string) => {
     const name = editingGroupName.trim();
     if (name) {
-      saveVariants(variants.map(g => g.id === groupId ? { ...g, name } : g));
+      try {
+        saveVariants(variants.map(g => g.id === groupId ? { ...g, name } : g));
+        toast.success('Nombre actualizado con éxito');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al actualizar: ${message}`);
+      }
     }
     setEditingGroupId(null);
     setEditingGroupName('');
@@ -66,18 +94,30 @@ export function AdminVariants() {
   const addValue = (groupId: string) => {
     const val = (newValues[groupId] ?? '').trim();
     if (!val) return;
-    saveVariants(variants.map(g =>
-      g.id === groupId && !g.values.includes(val)
-        ? { ...g, values: [...g.values, val] }
-        : g
-    ));
-    setNewValues(prev => ({ ...prev, [groupId]: '' }));
+    try {
+      saveVariants(variants.map(g =>
+        g.id === groupId && !g.values.includes(val)
+          ? { ...g, values: [...g.values, val] }
+          : g
+      ));
+      toast.success(`Valor "${val}" agregado con éxito`);
+      setNewValues(prev => ({ ...prev, [groupId]: '' }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al agregar valor: ${message}`);
+    }
   };
 
   const removeValue = (groupId: string, value: string) => {
-    saveVariants(variants.map(g =>
-      g.id === groupId ? { ...g, values: g.values.filter(v => v !== value) } : g
-    ));
+    try {
+      saveVariants(variants.map(g =>
+        g.id === groupId ? { ...g, values: g.values.filter(v => v !== value) } : g
+      ));
+      toast.success(`Valor "${value}" eliminado con éxito`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al eliminar: ${message}`);
+    }
   };
 
   // ── Render ────────────────────────────────────────────────────────

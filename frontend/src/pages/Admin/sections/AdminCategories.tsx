@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -33,28 +34,41 @@ export function AdminCategories() {
     e.preventDefault();
     if (!form.name.trim()) return setError('El nombre es obligatorio');
     setError('');
-    if (editId) {
-      updateCategory(editId, {
-        name: form.name.trim(),
-        description: form.description.trim() || undefined,
-        image: form.image.trim() || undefined,
-      });
-    } else {
-      addCategory({
-        name: form.name.trim(),
-        slug: '',
-        description: form.description.trim() || undefined,
-        image: form.image.trim() || undefined,
-        itemCount: 0,
-      });
+    try {
+      if (editId) {
+        updateCategory(editId, {
+          name: form.name.trim(),
+          description: form.description.trim() || undefined,
+          image: form.image.trim() || undefined,
+        });
+        toast.success('Categoría actualizada con éxito');
+      } else {
+        addCategory({
+          name: form.name.trim(),
+          slug: '',
+          description: form.description.trim() || undefined,
+          image: form.image.trim() || undefined,
+          itemCount: 0,
+        });
+        toast.success('Categoría creada con éxito');
+      }
+      setShowForm(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error: ${message}`);
     }
-    setShowForm(false);
   };
 
   const handleDelete = (id: string) => {
-    // Productos con esta categoría quedan sin categoría asignada
-    deleteCategory(id);
-    setDeleteConfirm(null);
+    try {
+      // Productos con esta categoría quedan sin categoría asignada
+      deleteCategory(id);
+      toast.success('Categoría eliminada con éxito');
+      setDeleteConfirm(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al eliminar: ${message}`);
+    }
   };
 
   // Productos de una categoría

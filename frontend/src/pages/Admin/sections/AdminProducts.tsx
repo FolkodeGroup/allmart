@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -28,8 +29,14 @@ export function AdminProducts() {
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
   const handleDelete = (id: string) => {
-    deleteProduct(id);
-    setDeleteConfirm(null);
+    try {
+      deleteProduct(id);
+      toast.success('Producto eliminado con éxito');
+      setDeleteConfirm(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al eliminar: ${message}`);
+    }
   };
 
   const formatPrice = (n: number) =>

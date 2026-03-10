@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import type { AdminProduct, VariantGroup } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
@@ -64,12 +65,19 @@ export function AdminProductForm({ productId, onClose }: Props) {
     if (!form.price || form.price <= 0) return setError('El precio debe ser mayor a 0');
     if (!form.category.id) return setError('Seleccioná una categoría');
     setError('');
-    if (isEdit && productId) {
-      updateProduct(productId, form);
-    } else {
-      addProduct(form);
+    try {
+      if (isEdit && productId) {
+        updateProduct(productId, form);
+        toast.success('Producto actualizado con éxito');
+      } else {
+        addProduct(form);
+        toast.success('Producto creado con éxito');
+      }
+      onClose();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error: ${message}`);
     }
-    onClose();
   };
 
   const addTag = () => {
