@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { AdminProduct, VariantGroup } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
+import { useAdminImages } from '../../../context/AdminImagesContext';
+import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
 
 interface Props {
@@ -32,6 +34,16 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
 export function AdminProductForm({ productId, onClose }: Props) {
   const { addProduct, updateProduct, getProduct } = useAdminProducts();
   const { categories } = useAdminCategories();
+  const {
+    images: apiImages,
+    isLoading: imagesLoading,
+    error: imagesError,
+    loadImages,
+    addImage,
+    updateImage,
+    deleteImage,
+    clearImages,
+  } = useAdminImages();
   const isEdit = !!productId;
 
   const [form, setForm] = useState<Omit<AdminProduct, 'id'>>(EMPTY);
@@ -43,6 +55,17 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // ── Estado para gestión de imágenes via API (solo cuando se edita) ──────────
+  const [imgNewUrl, setImgNewUrl] = useState('');
+  const [imgNewAlt, setImgNewAlt] = useState('');
+  const [showAddImgForm, setShowAddImgForm] = useState(false);
+  const [editingImgId, setEditingImgId] = useState<string | null>(null);
+  const [editingImgUrl, setEditingImgUrl] = useState('');
+  const [editingImgAlt, setEditingImgAlt] = useState('');
+  const [savingImgId, setSavingImgId] = useState<string | null>(null);
+  const [deletingImgId, setDeletingImgId] = useState<string | null>(null);
+  const addImgUrlRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (productId) {
       const p = getProduct(productId);
@@ -51,10 +74,64 @@ export function AdminProductForm({ productId, onClose }: Props) {
         const { id, ...rest } = p;
         setTimeout(() => setForm(rest), 0); // Evita render en cascada
       }
+      // Cargar imágenes vía API para modo edición
+      loadImages(productId);
     } else {
       setForm(EMPTY);
+      clearImages();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
+
+  // ── Funciones de gestión de imágenes via API ────────────────────────────────
+
+  const handleApiAddImage = async () => {
+    const url = imgNewUrl.trim();
+    if (!url || !productId) return;
+    try {
+      await addImage(productId, { url, altText: imgNewAlt.trim() || undefined });
+      setImgNewUrl('');
+      setImgNewAlt('');
+      setShowAddImgForm(false);
+    } catch {
+      // error guardado en contexto
+    }
+  };
+
+  const handleApiStartEdit = (img: ProductImageItem) => {
+    setEditingImgId(img.id);
+    setEditingImgUrl(img.url);
+    setEditingImgAlt(img.altText ?? '');
+  };
+
+  const handleApiCommitEdit = async (imageId: string) => {
+    const url = editingImgUrl.trim();
+    if (!url || !productId) return;
+    setSavingImgId(imageId);
+    try {
+      await updateImage(productId, imageId, {
+        url,
+        altText: editingImgAlt.trim() || undefined,
+      });
+      setEditingImgId(null);
+    } catch {
+      // error en contexto
+    } finally {
+      setSavingImgId(null);
+    }
+  };
+
+  const handleApiDeleteImage = async (imageId: string) => {
+    if (!productId || !window.confirm('¿Eliminar esta imagen?')) return;
+    setDeletingImgId(imageId);
+    try {
+      await deleteImage(productId, imageId);
+    } catch {
+      // error en contexto
+    } finally {
+      setDeletingImgId(null);
+    }
+  };
 
   const set = <K extends keyof typeof form>(key: K, value: typeof form[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
@@ -68,8 +145,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
     setSaving(true);
     try {
       if (isEdit && productId) {
-        await updateProduct(productId, form);
+        // Al editar, las imágenes se gestionan vía la API de imágenes;
+        // no incluimos el campo images en el update del producto
+        const { images: _omitted, ...formWithoutImages } = form;
+        void _omitted;
+        await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
       } else {
+        // Al crear, enviamos las URLs capturadas en el formulario
         await addProduct(form);
       }
       onClose();
@@ -258,17 +340,144 @@ export function AdminProductForm({ productId, onClose }: Props) {
           {/* ── Imágenes ── */}
           <fieldset className={styles.fieldset}>
             <legend className={styles.legend}>Imágenes</legend>
-            {form.images.map((img, i) => (
-              <div key={i} className={styles.tagRow}>
-                <input className={styles.input} value={img}
-                  onChange={e => setImage(i, e.target.value)}
-                  placeholder="URL de la imagen" />
-                {form.images.length > 1 && (
-                  <button type="button" className={styles.removeBtn} onClick={() => removeImageSlot(i)}>✕</button>
+
+            {isEdit ? (
+              /* ── Modo edición: gestión via API ─────────────────────────── */
+              <div className={styles.imgManager}>
+                {imagesError && (
+                  <p className={styles.imgError}>Error: {imagesError}</p>
+                )}
+                {imagesLoading && apiImages.length === 0 ? (
+                  <p className={styles.imgHint}>Cargando imágenes...</p>
+                ) : apiImages.length === 0 ? (
+                  <p className={styles.imgHint}>Sin imágenes. Agregá la primera abajo.</p>
+                ) : (
+                  <div className={styles.imgList}>
+                    {apiImages.map(img => (
+                      <div key={img.id} className={styles.imgRow}>
+                        {/* Miniatura */}
+                        <div className={styles.imgThumb}>
+                          {img.url
+                            ? <img src={img.url} alt={img.altText ?? 'imagen'} className={styles.imgThumbImg}
+                                onError={e => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/60x45?text=?'; }} />
+                            : <span className={styles.imgThumbEmpty}>?</span>
+                          }
+                        </div>
+
+                        {editingImgId === img.id ? (
+                          /* Edición inline */
+                          <div className={styles.imgEditInline}>
+                            <input
+                              className={styles.input}
+                              value={editingImgUrl}
+                              onChange={e => setEditingImgUrl(e.target.value)}
+                              placeholder="URL de la imagen *"
+                              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiCommitEdit(img.id))}
+                            />
+                            <input
+                              className={styles.input}
+                              value={editingImgAlt}
+                              onChange={e => setEditingImgAlt(e.target.value)}
+                              placeholder="Texto alt (opcional)"
+                              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiCommitEdit(img.id))}
+                            />
+                            <div className={styles.imgEditActions}>
+                              <button type="button" className={styles.imgSaveBtn}
+                                onClick={() => handleApiCommitEdit(img.id)}
+                                disabled={savingImgId === img.id || !editingImgUrl.trim()}>
+                                {savingImgId === img.id ? '...' : 'Guardar'}
+                              </button>
+                              <button type="button" className={styles.imgCancelBtn}
+                                onClick={() => setEditingImgId(null)}>
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Vista normal */
+                          <div className={styles.imgInfo}>
+                            <span className={styles.imgUrl} title={img.url}>{img.url}</span>
+                            {img.altText && <span className={styles.imgAlt}>{img.altText}</span>}
+                          </div>
+                        )}
+
+                        {/* Acciones (editar / eliminar) – solo si no está editando */}
+                        {editingImgId !== img.id && (
+                          <div className={styles.imgActions}>
+                            <button type="button" className={styles.imgEditBtn}
+                              onClick={() => handleApiStartEdit(img)}
+                              title="Editar URL">
+                              ✏️
+                            </button>
+                            <button type="button" className={styles.imgDeleteBtn}
+                              onClick={() => handleApiDeleteImage(img.id)}
+                              disabled={deletingImgId === img.id}
+                              title="Eliminar imagen">
+                              {deletingImgId === img.id ? '...' : '✕'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Formulario para agregar nueva imagen */}
+                {showAddImgForm ? (
+                  <div className={styles.imgAddForm}>
+                    <input
+                      ref={addImgUrlRef}
+                      className={styles.input}
+                      value={imgNewUrl}
+                      onChange={e => setImgNewUrl(e.target.value)}
+                      placeholder="URL de la imagen *"
+                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiAddImage())}
+                    />
+                    <input
+                      className={styles.input}
+                      value={imgNewAlt}
+                      onChange={e => setImgNewAlt(e.target.value)}
+                      placeholder="Texto alternativo (opcional)"
+                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiAddImage())}
+                    />
+                    <div className={styles.imgEditActions}>
+                      <button type="button" className={styles.imgSaveBtn}
+                        onClick={handleApiAddImage}
+                        disabled={!imgNewUrl.trim() || imagesLoading}>
+                        {imagesLoading ? 'Agregando...' : 'Agregar'}
+                      </button>
+                      <button type="button" className={styles.imgCancelBtn}
+                        onClick={() => { setShowAddImgForm(false); setImgNewUrl(''); setImgNewAlt(''); }}>
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" className={styles.addBtn}
+                    onClick={() => {
+                      setShowAddImgForm(true);
+                      setTimeout(() => addImgUrlRef.current?.focus(), 50);
+                    }}>
+                    + Agregar imagen
+                  </button>
                 )}
               </div>
-            ))}
-            <button type="button" className={styles.addBtn} onClick={addImageSlot}>+ Agregar imagen</button>
+            ) : (
+              /* ── Modo creación: URLs en estado local ─────────────────────── */
+              <>
+                {form.images.map((img, i) => (
+                  <div key={i} className={styles.tagRow}>
+                    <input className={styles.input} value={img}
+                      onChange={e => setImage(i, e.target.value)}
+                      placeholder="URL de la imagen" />
+                    {form.images.length > 1 && (
+                      <button type="button" className={styles.removeBtn} onClick={() => removeImageSlot(i)}>✕</button>
+                    )}
+                  </div>
+                ))}
+                <button type="button" className={styles.addBtn} onClick={addImageSlot}>+ Agregar imagen</button>
+              </>
+            )}
           </fieldset>
 
           {/* ── Características ── */}

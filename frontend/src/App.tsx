@@ -17,8 +17,10 @@ import { AdminProductsProvider } from './context/AdminProductsContext';
 import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
 import { AdminOrdersProvider } from './context/AdminOrdersContext';
 import { AdminVariantsProvider } from './context/AdminVariantsContext';
+import { AdminImagesProvider } from './context/AdminImagesContext';
 import { AdminCategories } from './pages/Admin/sections/AdminCategories';
 import { AdminVariants } from './pages/Admin/sections/AdminVariants';
+import { AdminImages } from './pages/Admin/sections/AdminImages';
 
 const router = createBrowserRouter([
   {
@@ -41,6 +43,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
       { path: 'productos', element: <AdminProducts /> },
+      { path: 'imagenes', element: <AdminImages /> },
       { path: 'variantes', element: <AdminVariants /> },
       { path: 'categorias', element: <AdminCategories /> },
       { path: 'pedidos', element: <AdminOrders /> },
@@ -55,11 +58,13 @@ function App() {
       <AdminCategoriesProvider>
         <AdminProductsProvider>
           <AdminVariantsProvider>
-            <AdminOrdersProvider>
-              <CartProvider>
-                <RouterProvider router={router} />
-              </CartProvider>
-            </AdminOrdersProvider>
+            <AdminImagesProvider>
+              <AdminOrdersProvider>
+                <CartProvider>
+                  <RouterProvider router={router} />
+                </CartProvider>
+              </AdminOrdersProvider>
+            </AdminImagesProvider>
           </AdminVariantsProvider>
         </AdminProductsProvider>
       </AdminCategoriesProvider>
