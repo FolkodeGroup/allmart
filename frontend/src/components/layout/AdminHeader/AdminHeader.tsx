@@ -51,26 +51,7 @@ export function AdminHeader() {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <div className={styles.breadcrumbSection}>
-          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-            {breadcrumbs.map((crumb, index) => (
-              <div key={crumb.path} className={styles.breadcrumbItem}>
-                {index > 0 && <span className={styles.separator}>/</span>}
-                {crumb.isActive ? (
-                  <span className={styles.breadcrumbActive}>{crumb.label}</span>
-                ) : (
-                  <a href={crumb.path} className={styles.breadcrumbLink}>
-                    {crumb.label}
-                  </a>
-                )}
-              </div>
-            ))}
-          </nav>
-        </div>
-
-        <div className={styles.titleSection}>
-          <h1 className={styles.title}>{currentSection}</h1>
-        </div>
+        <h1 className={styles.title}>{currentSection}</h1>
       </div>
     </header>
   );
