@@ -12,13 +12,20 @@ export interface Product {
   name: string;
   slug: string;
   description?: string;
+  shortDescription?: string;
   price: number;
-  compareAtPrice?: number;  // Precio tachado / precio original
+  compareAtPrice?: number;  // original_price en DB
+  discount?: number;
+  images: string[];         // Json en DB
   categoryId: string;
-  status: ProductStatus;
-  sku?: string;
+  tags: string[];           // Json en DB
+  rating: number;
+  reviewCount: number;
+  inStock: boolean;
   stock: number;
-  rating:number;
+  sku?: string;
+  features: string[];       // Json en DB
+  status: ProductStatus;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -14,13 +14,20 @@ export interface ApiProduct {
   name: string;
   slug: string;
   description?: string;
+  shortDescription?: string;
   price: number;
   compareAtPrice?: number;
+  discount?: number;
+  images: string[];
   categoryId: string;
+  tags: string[];
   status: string;
   sku?: string;
   stock: number;
   rating: number;
+  reviewCount: number;
+  inStock: boolean;
+  features: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -64,13 +71,20 @@ export interface PublicProductsParams {
 export interface ProductPayload {
   name: string;
   description?: string;
+  shortDescription?: string;
   price: number;
   compareAtPrice?: number;
+  discount?: number;
+  images?: string[];
   categoryId: string;
   status?: string;
   sku?: string;
   stock?: number;
   rating?: number;
+  reviewCount?: number;
+  inStock?: boolean;
+  tags?: string[];
+  features?: string[];
 }
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
@@ -119,46 +133,44 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     name: api.name,
     slug: api.slug,
     description: api.description ?? '',
-    shortDescription: api.description ? api.description.slice(0, 120) : '',
+    shortDescription: api.shortDescription ?? '',
     price: api.price,
     originalPrice: api.compareAtPrice,
-    discount:
+    discount: api.discount ?? (
       api.compareAtPrice && api.compareAtPrice > api.price
         ? Math.round(((api.compareAtPrice - api.price) / api.compareAtPrice) * 100)
-        : undefined,
-    images: [],
+        : undefined
+    ),
+    images: Array.isArray(api.images) ? api.images : [],
     category,
-    tags: [],
+    tags: Array.isArray(api.tags) ? api.tags : [],
     rating: api.rating,
-    reviewCount: 0,
-    inStock: api.stock > 0,
+    reviewCount: api.reviewCount ?? 0,
+    inStock: api.inStock ?? api.stock > 0,
     sku: api.sku ?? '',
-    features: [],
+    features: Array.isArray(api.features) ? api.features : [],
   };
 }
 
 /** Convierte un AdminProduct del frontend al payload que acepta el backend */
-export function mapAdminProductToPayload(product: {
-  name: string;
-  description?: string;
-  price: number;
-  originalPrice?: number;
-  category: { id: string };
-  sku?: string;
-  stock?: number;
-  rating?: number;
-  status?: string;
-}): ProductPayload {
+export function mapAdminProductToPayload(product: any): ProductPayload {
   return {
     name: product.name,
     description: product.description,
+    shortDescription: product.shortDescription,
     price: product.price,
     compareAtPrice: product.originalPrice,
+    discount: product.discount,
+    images: product.images,
     categoryId: product.category.id,
-    status: product.status ?? 'active',
+    status: product.status ?? (product.inStock ? 'active' : 'inactive'),
     sku: product.sku,
     stock: product.stock ?? 0,
     rating: product.rating ?? 0,
+    reviewCount: product.reviewCount ?? 0,
+    inStock: product.inStock ?? true,
+    tags: product.tags,
+    features: product.features,
   };
 }
 
