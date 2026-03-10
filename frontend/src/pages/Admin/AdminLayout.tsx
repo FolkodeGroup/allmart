@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { AdminHeader } from '../../components/layout/AdminHeader/AdminHeader';
@@ -22,6 +22,7 @@ const ROLE_LABELS: Record<string, string> = {
 export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
   const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [isCollapsed, setIsCollapsed] = useState(() => {
       const saved = localStorage.getItem('admin-sidebar-collapsed');
@@ -29,10 +30,24 @@ export function AdminLayout() {
     });
   
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   useEffect(() => {
       localStorage.setItem('admin-sidebar-collapsed', JSON.stringify(isCollapsed));
     }, [isCollapsed]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isDropdownOpen]);
 
   const handleLogout = () => {
     logout();
@@ -105,9 +120,13 @@ export function AdminLayout() {
           })}
         </nav>
 
-        <div className={styles.sidebarFooter}>
-          <div className={styles.userInfo}>
-            <span className={styles.userIcon}>👤</span>
+        <div className={styles.sidebarFooter} ref={dropdownRef}>
+          <button
+            className={styles.profileBtn}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-label="Abrir menú de perfil"
+          >
+            <div className={styles.avatar}>👤</div>
             <div className={styles.userDetails}>
               <span className={styles.userName}>{user}</span>
               {role && !isCollapsed && (
@@ -116,10 +135,29 @@ export function AdminLayout() {
                 </span>
               )}
             </div>
-          </div>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            {isCollapsed ? '🚪' : 'Cerrar sesión'}
+            <span className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`}>
+              ▼
+            </span>
           </button>
+
+          {isDropdownOpen && (
+            <div className={styles.dropdown}>
+              <button className={styles.dropdownItem}>
+                <span className={styles.dropdownIcon}>⚙️</span>
+                <span>Configuración</span>
+              </button>
+              <button
+                className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  handleLogout();
+                }}
+              >
+                <span className={styles.dropdownIcon}>🚪</span>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
