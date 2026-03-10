@@ -172,20 +172,17 @@ jobs:
             # 1. Asegurar que .env exista
             touch .env
 
-            # 2. Función para actualizar o añadir variable en .env
+            # 2. Función robusa para actualizar .env sin problemas de caracteres especiales
             update_env() {
               key=$1
               value=$2
-              if grep -q "^${key}=" .env; then
-                # Si existe, la actualizamos respetando el formato key=value
-                sed -i "s|^${key}=.*|${key}=${value}|" .env
-              else
-                # Si no existe, la añadimos al final
-                echo "${key}=${value}" >> .env
-              fi
+              # Eliminar la línea si ya existe y añadirla limpia
+              grep -v "^${key}=" .env > .env.tmp || true
+              echo "${key}=${value}" >> .env.tmp
+              mv .env.tmp .env
             }
 
-            # 3. Actualizar variables críticas base (vienen de secrets o contexto CI)
+            # 3. Actualizar variables críticas base
             update_env "IMAGE_TAG" "${{ needs.docker-build-push.outputs.image_tag }}"
             update_env "DB_USER" "${{ secrets.VPS_DB_USER }}"
             update_env "DB_PASSWORD" "${{ secrets.VPS_DB_PASSWORD }}"
