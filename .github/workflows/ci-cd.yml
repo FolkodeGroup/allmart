@@ -195,11 +195,23 @@ jobs:
             update_env "CORS_ORIGIN" "${{ secrets.VPS_CORS_ORIGIN }}"
             
             # Solo actualizar seed passwords si el secret NO está vacío en GitHub
-            if [ -n "${{ secrets.VPS_SEED_ADMIN_PASSWORD }}" ]; then
-              update_env "SEED_ADMIN_PASSWORD" "${{ secrets.VPS_SEED_ADMIN_PASSWORD }}"
+            SEED_ADMIN="${{ secrets.VPS_SEED_ADMIN_PASSWORD }}"
+            SEED_EDITOR="${{ secrets.VPS_SEED_EDITOR_PASSWORD }}"
+            if [ -n "$SEED_ADMIN" ]; then
+              update_env "SEED_ADMIN_PASSWORD" "$SEED_ADMIN"
             fi
-            if [ -n "${{ secrets.VPS_SEED_EDITOR_PASSWORD }}" ]; then
-              update_env "SEED_EDITOR_PASSWORD" "${{ secrets.VPS_SEED_EDITOR_PASSWORD }}"
+            if [ -n "$SEED_EDITOR" ]; then
+              update_env "SEED_EDITOR_PASSWORD" "$SEED_EDITOR"
+            fi
+
+            # Garantizar que SEED passwords existan en .env (fallback si secrets están vacíos)
+            if ! grep -q "^SEED_ADMIN_PASSWORD=." .env; then
+              echo "WARN: SEED_ADMIN_PASSWORD vacío. Configurando valor por defecto."
+              update_env "SEED_ADMIN_PASSWORD" "Admin2026!"
+            fi
+            if ! grep -q "^SEED_EDITOR_PASSWORD=." .env; then
+              echo "WARN: SEED_EDITOR_PASSWORD vacío. Configurando valor por defecto."
+              update_env "SEED_EDITOR_PASSWORD" "Editor2026!"
             fi
 
             # Construir DATABASE_URL dinámicamente si falta
