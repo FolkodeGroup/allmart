@@ -16,6 +16,7 @@ import { AdminAuthProvider } from './context/AdminAuthContext';
 import { AdminProductsProvider } from './context/AdminProductsContext';
 import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
 import { AdminOrdersProvider } from './context/AdminOrdersContext';
+import { AdminVariantsProvider } from './context/AdminVariantsContext';
 import { AdminCategories } from './pages/Admin/sections/AdminCategories';
 import { AdminVariants } from './pages/Admin/sections/AdminVariants';
 
@@ -53,11 +54,13 @@ function App() {
     <AdminAuthProvider>
       <AdminCategoriesProvider>
         <AdminProductsProvider>
-          <AdminOrdersProvider>
-            <CartProvider>
-              <RouterProvider router={router} />
-            </CartProvider>
-          </AdminOrdersProvider>
+          <AdminVariantsProvider>
+            <AdminOrdersProvider>
+              <CartProvider>
+                <RouterProvider router={router} />
+              </CartProvider>
+            </AdminOrdersProvider>
+          </AdminVariantsProvider>
         </AdminProductsProvider>
       </AdminCategoriesProvider>
     </AdminAuthProvider>

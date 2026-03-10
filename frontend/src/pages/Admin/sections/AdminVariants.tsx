@@ -1,21 +1,32 @@
 import { useState } from 'react';
-import type { VariantGroup, AdminProduct } from '../../../context/AdminProductsContext';
+import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminVariants } from '../../../context/AdminVariantsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminVariants.module.css';
 
 export function AdminVariants() {
-  const { products, updateProduct } = useAdminProducts();
+  const { products } = useAdminProducts();
+  const {
+    variants,
+    selectedProductId,
+    isLoading,
+    error: apiError,
+    loadVariants,
+    addVariant,
+    updateVariant,
+    deleteVariant,
+    addValueToVariant,
+    removeValueFromVariant,
+  } = useAdminVariants();
   const { can } = useAdminAuth();
 
   const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  // Estado para inputs de nuevo grupo y nuevos valores por grupo
+  // Inputs de nuevo grupo y nuevos valores por grupo
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
-  // Estado para edición inline del nombre de grupo
+  // Edición inline del nombre de grupo
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
 
@@ -24,62 +35,59 @@ export function AdminVariants() {
     (p.sku ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const selectedProduct: AdminProduct | undefined = selectedId
-    ? products.find(p => p.id === selectedId)
+  const selectedProduct: AdminProduct | undefined = selectedProductId
+    ? products.find(p => p.id === selectedProductId)
     : undefined;
 
-  const variants: VariantGroup[] = selectedProduct?.variants ?? [];
-
-  // ── Helpers ──────────────────────────────────────────────────────
-  const saveVariants = (groups: VariantGroup[]) => {
-    if (!selectedId) return;
-    updateProduct(selectedId, { variants: groups }).catch((err) =>
-      console.error('Error al guardar variantes:', err),
-    );
+  // ── Selección de producto ──────────────────────────────────────────
+  const handleSelectProduct = async (productId: string) => {
+    if (productId === selectedProductId) return;
+    setNewGroupName('');
+    setNewValues({});
+    setEditingGroupId(null);
+    await loadVariants(productId);
   };
 
-  const addGroup = () => {
+  // ── CRUD de grupos ────────────────────────────────────────────────
+  const addGroup = async () => {
     const name = newGroupName.trim();
-    if (!name || !selectedId) return;
+    if (!name || !selectedProductId) return;
     const exists = variants.some(g => g.name.toLowerCase() === name.toLowerCase());
     if (exists) return;
-    saveVariants([...variants, { id: `g-${Date.now()}`, name, values: [] }]);
+    await addVariant(selectedProductId, name);
     setNewGroupName('');
   };
 
-  const deleteGroup = (groupId: string) => {
-    saveVariants(variants.filter(g => g.id !== groupId));
+  const deleteGroup = async (variantId: string) => {
+    if (!selectedProductId) return;
+    await deleteVariant(selectedProductId, variantId);
   };
 
-  const startEditGroupName = (group: VariantGroup) => {
-    setEditingGroupId(group.id);
-    setEditingGroupName(group.name);
+  const startEditGroupName = (id: string, currentName: string) => {
+    setEditingGroupId(id);
+    setEditingGroupName(currentName);
   };
 
-  const commitEditGroupName = (groupId: string) => {
+  const commitEditGroupName = async (variantId: string) => {
     const name = editingGroupName.trim();
-    if (name) {
-      saveVariants(variants.map(g => g.id === groupId ? { ...g, name } : g));
+    if (name && selectedProductId) {
+      await updateVariant(selectedProductId, variantId, { name });
     }
     setEditingGroupId(null);
     setEditingGroupName('');
   };
 
-  const addValue = (groupId: string) => {
-    const val = (newValues[groupId] ?? '').trim();
-    if (!val) return;
-    saveVariants(variants.map(g =>
-      g.id === groupId && !g.values.includes(val)
-        ? { ...g, values: [...g.values, val] }
-        : g
-    ));
-    setNewValues(prev => ({ ...prev, [groupId]: '' }));
+  // ── CRUD de valores ───────────────────────────────────────────────
+  const addValue = async (variantId: string) => {
+    const val = (newValues[variantId] ?? '').trim();
+    if (!val || !selectedProductId) return;
+    await addValueToVariant(selectedProductId, variantId, val);
+    setNewValues(prev => ({ ...prev, [variantId]: '' }));
   };
 
-  const removeValue = (groupId: string, value: string) => {
-    saveVariants(variants.map(g =>
-      g.id === groupId ? { ...g, values: g.values.filter(v => v !== value) } : g
-    ));
+  const removeValue = async (variantId: string, value: string) => {
+    if (!selectedProductId) return;
+    await removeValueFromVariant(selectedProductId, variantId, value);
   };
 
   // ── Render ────────────────────────────────────────────────────────
@@ -114,26 +122,26 @@ export function AdminVariants() {
               <li className={styles.emptyList}>Sin resultados</li>
             )}
             {filtered.map(p => {
-              const groupCount = (p.variants ?? []).length;
-              const valueCount = (p.variants ?? []).reduce((s, g) => s + g.values.length, 0);
+              const groupCount = selectedProductId === p.id ? variants.length : 0;
+              const valueCount = selectedProductId === p.id
+                ? variants.reduce((s, g) => s + g.values.length, 0)
+                : 0;
               return (
                 <li
                   key={p.id}
-                  className={`${styles.productItem} ${selectedId === p.id ? styles.selected : ''}`}
-                  onClick={() => {
-                    setSelectedId(p.id);
-                    setNewGroupName('');
-                    setNewValues({});
-                    setEditingGroupId(null);
-                  }}
+                  className={`${styles.productItem} ${selectedProductId === p.id ? styles.selected : ''}`}
+                  onClick={() => handleSelectProduct(p.id)}
                 >
                   <div className={styles.productName}>{p.name}</div>
                   {p.sku && <div className={styles.productSku}>{p.sku}</div>}
                   <div className={styles.productMeta}>
-                    {groupCount === 0
-                      ? <span className={styles.noVariants}>Sin variantes</span>
-                      : <span className={styles.variantBadge}>{groupCount} grupo{groupCount !== 1 ? 's' : ''} · {valueCount} valor{valueCount !== 1 ? 'es' : ''}</span>
-                    }
+                    {selectedProductId === p.id ? (
+                      groupCount === 0
+                        ? <span className={styles.noVariants}>Sin variantes</span>
+                        : <span className={styles.variantBadge}>{groupCount} grupo{groupCount !== 1 ? 's' : ''} · {valueCount} valor{valueCount !== 1 ? 'es' : ''}</span>
+                    ) : (
+                      <span className={styles.noVariants}>Seleccioná para ver</span>
+                    )}
                   </div>
                 </li>
               );
@@ -148,8 +156,17 @@ export function AdminVariants() {
               <div className={sectionStyles.emptyIcon}>🎨</div>
               <p className={sectionStyles.emptyText}>Seleccioná un producto para gestionar sus variantes</p>
             </div>
+          ) : isLoading && variants.length === 0 ? (
+            <div className={sectionStyles.emptyState}>
+              <p className={sectionStyles.emptyText}>Cargando variantes...</p>
+            </div>
           ) : (
             <>
+              {apiError && (
+                <div className={sectionStyles.errorState ?? ''}>
+                  <p style={{ color: 'var(--color-error, red)', padding: '0.5rem' }}>Error: {apiError}</p>
+                </div>
+              )}
               <div className={styles.contentHeader}>
                 <div>
                   <h2 className={styles.contentTitle}>{selectedProduct.name}</h2>
@@ -210,7 +227,7 @@ export function AdminVariants() {
                       ) : (
                         <button
                           className={styles.groupName}
-                          onClick={() => can('variants.edit') && startEditGroupName(group)}
+                          onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
                           type="button"
                           title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
                           style={can('variants.edit') ? undefined : { cursor: 'default' }}
