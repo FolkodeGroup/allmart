@@ -9,76 +9,30 @@
   background: rgba(26, 26, 26, 0.85);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(221, 176, 140, 0.15);
-  padding: var(--space-6) 0;
+  padding: var(--space-3) 0;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 0;
   max-width: 100%;
   padding: 0 var(--space-8);
 }
 
 /* ── Breadcrumb Section ── */
 .breadcrumbSection {
-  display: flex;
-  align-items: center;
-  min-height: 24px;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.breadcrumbItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.separator {
-  font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.4);
-  font-weight: var(--font-regular);
-  margin: 0 var(--space-1);
-}
-
-.breadcrumbLink {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: rgba(255, 255, 255, 0.65);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-  letter-spacing: var(--tracking-normal);
-}
-
-.breadcrumbLink:hover {
-  color: var(--color-accent);
-}
-
-.breadcrumbActive {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--color-accent);
-  letter-spacing: var(--tracking-normal);
+  display: none;
 }
 
 /* ── Title Section ── */
 .titleSection {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-4);
+  display: none;
 }
 
 .title {
   font-family: var(--font-heading);
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
   font-weight: var(--font-bold);
   color: var(--color-neutral-light);
   letter-spacing: var(--tracking-tight);
@@ -90,20 +44,15 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .header {
-    padding: var(--space-4) 0;
+    padding: var(--space-2) 0;
   }
 
   .container {
-    gap: var(--space-3);
+    gap: 0;
     padding: 0 var(--space-4);
   }
 
   .title {
-    font-size: var(--text-2xl);
-  }
-
-  .breadcrumbLink,
-  .breadcrumbActive {
-    font-size: var(--text-xs);
+    font-size: var(--text-lg);
   }
 }

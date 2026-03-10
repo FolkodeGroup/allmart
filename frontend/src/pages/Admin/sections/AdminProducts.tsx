@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -7,16 +7,29 @@ import sectionStyles from './AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
 export function AdminProducts() {
-  const { products, deleteProduct } = useAdminProducts();
+  const { products, deleteProduct, loading, error } = useAdminProducts();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const { categories } = useAdminCategories();
 
+  // Sugerencias para autocompletado (máx 8)
+  const suggestions = search.length > 0
+    ? products.filter(p =>
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.sku.toLowerCase().includes(search.toLowerCase())
+      ).slice(0, 8)
+    : [];
+
+  // Filtrado principal
   const filtered = products.filter(p => {
     const matchSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -25,10 +38,19 @@ export function AdminProducts() {
     return matchSearch && matchCat;
   });
 
+  // Paginación
+  const PRODUCTS_PER_PAGE = 8;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE));
+  const paginated = filtered.slice((page - 1) * PRODUCTS_PER_PAGE, page * PRODUCTS_PER_PAGE);
+
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
-  const handleDelete = (id: string) => {
-    deleteProduct(id);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProduct(id);
+    } catch (err) {
+      console.error('Error al eliminar producto:', err);
+    }
     setDeleteConfirm(null);
   };
 
@@ -57,18 +79,70 @@ export function AdminProducts() {
         </div>
 
         {/* Filtros */}
-        <div className={styles.filters}>
+        <div className={styles.filters} style={{ position: 'relative' }}>
           <input
+            ref={inputRef}
             className={styles.searchInput}
             type="search"
             placeholder="Buscar por nombre o SKU..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            autoComplete="off"
+            onChange={e => {
+              setSearch(e.target.value);
+              setShowSuggestions(true);
+              setHighlightedIndex(-1);
+              setPage(1); // Reiniciar página al buscar
+            }}
+            onFocus={() => search && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+            onKeyDown={e => {
+              if (!showSuggestions || suggestions.length === 0) return;
+              if (e.key === 'ArrowDown') {
+                setHighlightedIndex(i => (i < suggestions.length - 1 ? i + 1 : 0));
+                e.preventDefault();
+              } else if (e.key === 'ArrowUp') {
+                setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
+                e.preventDefault();
+              } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+                setSearch(suggestions[highlightedIndex].name);
+                setShowSuggestions(false);
+                setHighlightedIndex(-1);
+                setPage(1); // Reiniciar página al seleccionar sugerencia
+                inputRef.current?.blur();
+                setTimeout(() => inputRef.current?.focus(), 0);
+                e.preventDefault();
+              }
+            }}
           />
+          {/* Sugerencias de autocompletado */}
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className={styles.suggestionsList} style={{ position: 'absolute', top: '110%', left: 0, right: 0, zIndex: 10 }}>
+              {suggestions.map((s, idx) => (
+                <li
+                  key={s.id}
+                  className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
+                  style={{ cursor: 'pointer', background: idx === highlightedIndex ? 'var(--color-bg-secondary)' : undefined }}
+                  onMouseDown={() => {
+                    setSearch(s.name);
+                    setShowSuggestions(false);
+                    setHighlightedIndex(-1);
+                    setPage(1); // Reiniciar página al seleccionar sugerencia
+                  }}
+                >
+                  <span style={{ fontWeight: 500 }}>{s.name}</span>
+                  {s.sku && <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>SKU: {s.sku}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+
           <select
             className={styles.select}
             value={categoryFilter}
-            onChange={e => setCategoryFilter(e.target.value)}
+            onChange={e => {
+              setCategoryFilter(e.target.value);
+              setPage(1); // Reiniciar página al cambiar categoría
+            }}
           >
             <option value="">Todas las categorías</option>
             {categories.map(c => (
@@ -80,7 +154,20 @@ export function AdminProducts() {
       </div>
 
       {/* Tabla */}
-      {filtered.length === 0 ? (
+      {loading && (
+        <div className={sectionStyles.emptyState}>
+          <p className={sectionStyles.emptyText}>Cargando productos...</p>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className={sectionStyles.emptyState}>
+          <span className={sectionStyles.emptyIcon}>⚠️</span>
+          <p className={sectionStyles.emptyText}>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (filtered.length === 0 ? (
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>📦</span>
           <p className={sectionStyles.emptyText}>No se encontraron productos.</p>
@@ -99,7 +186,7 @@ export function AdminProducts() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(p => (
+              {paginated.map(p => (
                 <tr key={p.id} className={styles.row}>
                   <td className={styles.td}>
                     <div className={styles.productCell}>
@@ -178,6 +265,29 @@ export function AdminProducts() {
               ))}
             </tbody>
           </table>
+        </div>
+      ))}
+
+      {/* Controles de paginación */}
+      {filtered.length > PRODUCTS_PER_PAGE && (
+        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+          <button
+            className={styles.pageBtn}
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >Anterior</button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={styles.pageBtn + (page === i + 1 ? ' ' + styles.pageActive : '')}
+              onClick={() => setPage(i + 1)}
+            >{i + 1}</button>
+          ))}
+          <button
+            className={styles.pageBtn}
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+          >Siguiente</button>
         </div>
       )}
 
