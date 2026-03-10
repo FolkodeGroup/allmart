@@ -100,51 +100,27 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     const payload = mapAdminProductToPayload(p);
     const created = await createAdminProduct(payload, token);
     const newProduct = apiToAdminProduct(created, categories);
-    // Preservar campos extra (variants, images, tags, etc.) que el backend no almacena aún
-    setProducts((prev) => [
-      { ...newProduct, variants: p.variants, images: p.images, tags: p.tags, features: p.features },
-      ...prev,
-    ]);
+    
+    setProducts((prev) => [newProduct, ...prev]);
   };
 
   const updateProduct = async (id: string, data: Partial<AdminProduct>) => {
     if (!token) throw new Error('No autenticado');
 
-    // Aplicar cambio en estado local de inmediato (actualización optimista)
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
-
-    // Determinar si hay campos que el backend entiende para hacer la llamada HTTP
-    const hasApiFields =
-      data.name !== undefined ||
-      data.price !== undefined ||
-      data.description !== undefined ||
-      data.originalPrice !== undefined ||
-      data.category !== undefined ||
-      data.sku !== undefined ||
-      data.stock !== undefined ||
-      data.rating !== undefined;
-
-    if (hasApiFields) {
-      const current = products.find((p) => p.id === id);
-      if (!current) return;
-      const merged = { ...current, ...data };
-      const payload = mapAdminProductToPayload(merged);
-      const updated = await updateAdminProduct(id, payload, token);
-      // Sincronizar respuesta del backend y preservar campos locales
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === id
-            ? {
-                ...apiToAdminProduct(updated, categories),
-                variants: merged.variants,
-                images: merged.images,
-                tags: merged.tags,
-                features: merged.features,
-              }
-            : p,
-        ),
-      );
-    }
+    const current = products.find((p) => p.id === id);
+    if (!current) return;
+    
+    const merged = { ...current, ...data };
+    const payload = mapAdminProductToPayload(merged);
+    
+    // Si hay datos que pertenecen a la API, actualizamos
+    const updated = await updateAdminProduct(id, payload, token);
+    
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === id ? apiToAdminProduct(updated, categories) : p
+      )
+    );
   };
 
   const deleteProduct = async (id: string) => {

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
-import { categories } from '../../../data/mock';
+import { useState, useEffect } from 'react';
+import type { Category } from '../../../types';
+import * as categoriesService from '../../../services/categoriesService';
 import { Button } from '../../../components/ui/Button/Button';
 import styles from './CategoryGrid.module.css';
 
@@ -36,6 +38,16 @@ function splitCategoryName(name: string): { prefix: string; bold: string } {
 }
 
 export function CategoryGrid() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    categoriesService.fetchPublicCategories()
+      .then(setCategories)
+      .catch((err) => console.error('Error fetching categories:', err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
   const featured = categories.slice(0, 6);
 
   return (
@@ -48,35 +60,43 @@ export function CategoryGrid() {
         </p>
       </div>
 
-      <div className={styles.grid}>
-        {featured.map((cat) => {
-          const { prefix, bold } = splitCategoryName(cat.name);
-          return (
-            <Link
-              key={cat.id}
-              to={`/productos?category=${cat.slug}`}
-              className={styles.card}
-              aria-label={`Ver categoría ${cat.name}`}
-            >
-              <img
-                className={styles.cardImage}
-                src={cat.image}
-                alt={cat.name}
-                loading="lazy"
-                decoding="async"
-              />
-              <div className={styles.cardOverlay}>
-                <h3 className={styles.cardName}>
-                  {prefix && (
-                    <span className={styles.cardNamePrefix}>{prefix}</span>
-                  )}
-                  <strong className={styles.cardNameBold}>{bold}</strong>
-                </h3>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      {isLoading ? (
+        <div className={styles.loading}>Cargando categorías...</div>
+      ) : (
+        <div className={styles.grid}>
+          {featured.map((cat) => {
+            const { prefix, bold } = splitCategoryName(cat.name);
+            return (
+              <Link
+                key={cat.id}
+                to={`/productos?category=${cat.slug}`}
+                className={styles.card}
+                aria-label={`Ver categoría ${cat.name}`}
+              >
+                {cat.image ? (
+                  <img
+                    className={styles.cardImage}
+                    src={cat.image}
+                    alt={cat.name}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div className={styles.imagePlaceholder}>🗂️</div>
+                )}
+                <div className={styles.cardOverlay}>
+                  <h3 className={styles.cardName}>
+                    {prefix && (
+                      <span className={styles.cardNamePrefix}>{prefix}</span>
+                    )}
+                    <strong className={styles.cardNameBold}>{bold}</strong>
+                  </h3>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
       <div className={styles.viewAll}>
         <Link to="/productos">

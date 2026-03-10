@@ -8,11 +8,12 @@ import styles from './AdminCategories.module.css';
 const EMPTY = { name: '', description: '', image: '', itemCount: 0 };
 
 export function AdminCategories() {
-  const { categories, addCategory, updateCategory, deleteCategory } = useAdminCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, isLoading, error: apiError } = useAdminCategories();
   const { products, updateProduct } = useAdminProducts();
   const { can } = useAdminAuth();
 
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState('');
@@ -29,32 +30,42 @@ export function AdminCategories() {
     setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return setError('El nombre es obligatorio');
     setError('');
-    if (editId) {
-      updateCategory(editId, {
-        name: form.name.trim(),
-        description: form.description.trim() || undefined,
-        image: form.image.trim() || undefined,
-      });
-    } else {
-      addCategory({
-        name: form.name.trim(),
-        slug: '',
-        description: form.description.trim() || undefined,
-        image: form.image.trim() || undefined,
-        itemCount: 0,
-      });
+    setIsSubmitting(true);
+    try {
+      if (editId) {
+        await updateCategory(editId, {
+          name: form.name.trim(),
+          description: form.description.trim() || undefined,
+          image: form.image.trim() || undefined,
+        });
+      } else {
+        await addCategory({
+          name: form.name.trim(),
+          slug: '',
+          description: form.description.trim() || undefined,
+          image: form.image.trim() || undefined,
+          itemCount: 0,
+        });
+      }
+      setShowForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al procesar la categoría');
+    } finally {
+      setIsSubmitting(false);
     }
-    setShowForm(false);
   };
 
-  const handleDelete = (id: string) => {
-    // Productos con esta categoría quedan sin categoría asignada
-    deleteCategory(id);
-    setDeleteConfirm(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCategory(id);
+      setDeleteConfirm(null);
+    } catch (err) {
+      console.error('Error al eliminar categoría:', err);
+    }
   };
 
   // Productos de una categoría
@@ -91,7 +102,11 @@ export function AdminCategories() {
       </div>
 
       {/* Listado */}
-      {categories.length === 0 ? (
+      {isLoading && !categories.length ? (
+        <div className={sectionStyles.loadingState}>Cargando categorías...</div>
+      ) : apiError ? (
+        <div className={sectionStyles.errorState}>Error: {apiError}</div>
+      ) : categories.length === 0 ? (
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>🗂️</span>
           <p className={sectionStyles.emptyText}>No hay categorías creadas.</p>
@@ -212,8 +227,10 @@ export function AdminCategories() {
               </div>
               {error && <p className={styles.error}>{error}</p>}
               <div className={styles.formActions}>
-                <button type="button" className={styles.cancelBtn} onClick={() => setShowForm(false)}>Cancelar</button>
-                <button type="submit" className={styles.submitBtn}>{editId ? 'Guardar cambios' : 'Crear categoría'}</button>
+                <button type="button" className={styles.cancelBtn} onClick={() => setShowForm(false)} disabled={isSubmitting}>Cancelar</button>
+                <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
+                  {isSubmitting ? 'Procesando...' : (editId ? 'Guardar cambios' : 'Crear categoría')}
+                </button>
               </div>
             </form>
           </div>

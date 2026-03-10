@@ -99,7 +99,17 @@ async function seed() {
       }
       await prisma.product.upsert({
         where: { slug: prod.slug },
-        update: {},
+        update: {
+          images: prod.images,
+          shortDescription: prod.shortDescription || null,
+          description: prod.description || null,
+          price: prod.price,
+          originalPrice: prod.originalPrice || null,
+          discount: prod.discount || null,
+          tags: prod.tags || [],
+          features: prod.features || [],
+          status: ProductStatus.ACTIVE,
+        },
         create: {
           name: prod.name,
           slug: prod.slug,

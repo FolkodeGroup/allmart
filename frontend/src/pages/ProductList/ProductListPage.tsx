@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import type { Product, Category } from '../../types';
 import {
   fetchPublicProducts,
-  fetchPublicCategories,
   mapApiProductToProduct,
   type PublicProductsParams,
 } from '../../services/productsService';
+import { fetchPublicCategories } from '../../services/categoriesService';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductListPage.module.css';
 
