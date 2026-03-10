@@ -64,7 +64,9 @@ export function AdminCategories() {
   const reassignProduct = (productId: string, newCatId: string) => {
     const newCat = categories.find(c => c.id === newCatId);
     if (!newCat) return;
-    updateProduct(productId, { category: newCat });
+    updateProduct(productId, { category: newCat }).catch((err) =>
+      console.error('Error al reasignar categoría:', err),
+    );
   };
 
   return (

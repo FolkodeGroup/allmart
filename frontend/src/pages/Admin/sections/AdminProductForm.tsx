@@ -41,6 +41,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
   // mapa groupId → valor del input para agregar un valor nuevo
   const [newGroupValues, setNewGroupValues] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (productId) {
@@ -58,18 +59,25 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const set = <K extends keyof typeof form>(key: K, value: typeof form[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return setError('El nombre es obligatorio');
     if (!form.price || form.price <= 0) return setError('El precio debe ser mayor a 0');
     if (!form.category.id) return setError('Seleccioná una categoría');
     setError('');
-    if (isEdit && productId) {
-      updateProduct(productId, form);
-    } else {
-      addProduct(form);
+    setSaving(true);
+    try {
+      if (isEdit && productId) {
+        await updateProduct(productId, form);
+      } else {
+        await addProduct(form);
+      }
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar el producto');
+    } finally {
+      setSaving(false);
     }
-    onClose();
   };
 
   const addTag = () => {
@@ -334,9 +342,9 @@ export function AdminProductForm({ productId, onClose }: Props) {
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.actions}>
-            <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancelar</button>
-            <button type="submit" className={styles.submitBtn}>
-              {isEdit ? 'Guardar cambios' : 'Crear producto'}
+            <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={saving}>Cancelar</button>
+            <button type="submit" className={styles.submitBtn} disabled={saving}>
+              {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear producto'}
             </button>
           </div>
         </form>
