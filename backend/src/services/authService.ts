@@ -26,10 +26,10 @@ export interface LoginResult {
  * Valida credenciales contra la tabla users usando Prisma.
  * Solo para roles admin y editor.
  */
-export async function login(username: string, password: string): Promise<LoginResult> {
+export async function login(email: string, password: string): Promise<LoginResult> {
   const user = await prisma.user.findFirst({
     where: {
-      email: username,
+      email: email,
       role: { in: ['admin', 'editor'] },
       isActive: true,
     },
@@ -46,7 +46,7 @@ export async function login(username: string, password: string): Promise<LoginRe
   }
 
   const role = user.role as unknown as UserRole;
-  const token = signToken({ userId: user.id, user: user.email, role });
+  const token = signToken({ userId: user.id, email: user.email, role });
   return { token, role, userId: user.id };
 }
 
