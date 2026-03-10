@@ -17,6 +17,7 @@ export function AdminProducts() {
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const { categories } = useAdminCategories();
 
@@ -36,6 +37,11 @@ export function AdminProducts() {
     const matchCat = !categoryFilter || p.category.id === categoryFilter;
     return matchSearch && matchCat;
   });
+
+  // Paginación
+  const PRODUCTS_PER_PAGE = 8;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE));
+  const paginated = filtered.slice((page - 1) * PRODUCTS_PER_PAGE, page * PRODUCTS_PER_PAGE);
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
@@ -81,6 +87,7 @@ export function AdminProducts() {
               setSearch(e.target.value);
               setShowSuggestions(true);
               setHighlightedIndex(-1);
+              setPage(1); // Reiniciar página al buscar
             }}
             onFocus={() => search && setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
@@ -96,7 +103,7 @@ export function AdminProducts() {
                 setSearch(suggestions[highlightedIndex].name);
                 setShowSuggestions(false);
                 setHighlightedIndex(-1);
-                // Opcional: enfocar input
+                setPage(1); // Reiniciar página al seleccionar sugerencia
                 inputRef.current?.blur();
                 setTimeout(() => inputRef.current?.focus(), 0);
                 e.preventDefault();
@@ -115,6 +122,7 @@ export function AdminProducts() {
                     setSearch(s.name);
                     setShowSuggestions(false);
                     setHighlightedIndex(-1);
+                    setPage(1); // Reiniciar página al seleccionar sugerencia
                   }}
                 >
                   <span style={{ fontWeight: 500 }}>{s.name}</span>
@@ -124,11 +132,13 @@ export function AdminProducts() {
             </ul>
           )}
 
-
           <select
             className={styles.select}
             value={categoryFilter}
-            onChange={e => setCategoryFilter(e.target.value)}
+            onChange={e => {
+              setCategoryFilter(e.target.value);
+              setPage(1); // Reiniciar página al cambiar categoría
+            }}
           >
             <option value="">Todas las categorías</option>
             {categories.map(c => (
@@ -159,7 +169,7 @@ export function AdminProducts() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(p => (
+              {paginated.map(p => (
                 <tr key={p.id} className={styles.row}>
                   <td className={styles.td}>
                     <div className={styles.productCell}>
@@ -238,6 +248,29 @@ export function AdminProducts() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Controles de paginación */}
+      {filtered.length > PRODUCTS_PER_PAGE && (
+        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+          <button
+            className={styles.pageBtn}
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >Anterior</button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={styles.pageBtn + (page === i + 1 ? ' ' + styles.pageActive : '')}
+              onClick={() => setPage(i + 1)}
+            >{i + 1}</button>
+          ))}
+          <button
+            className={styles.pageBtn}
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+          >Siguiente</button>
         </div>
       )}
 
