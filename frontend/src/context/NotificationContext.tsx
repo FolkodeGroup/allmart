@@ -53,23 +53,3 @@ export const useNotification = () => {
   }
   return context;
 };
-        }
-      `}</style>
-      <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{notification.message}</span>
-      <button 
-        onClick={onHide}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '0.2rem',
-          color: '#999',
-          fontSize: '1.2rem',
-          marginLeft: '1rem'
-        }}
-      >
-        ×
-      </button>
-    </div>
-  );
-};
