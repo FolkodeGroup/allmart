@@ -21,6 +21,19 @@ export class ApiError extends Error {
  */
 export async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
+    if (res.status === 401) {
+      // Manejar expiración de token de forma centralizada
+      console.warn('[API Error] 401 Unauthorized - Sesión expirada o inválida');
+      
+      // Notificar si estamos en el cliente y hay localStorage disponible
+      if (typeof window !== 'undefined') {
+        const STORAGE_KEY = 'allmart_admin_token';
+        localStorage.removeItem(STORAGE_KEY);
+        // Disparar evento para que AdminAuthContext se entere y limpie el estado
+        window.dispatchEvent(new CustomEvent('unauthorized'));
+      }
+    }
+
     const errorData = await res.json().catch(() => ({})) as { message?: string, errors?: any };
     const errorMessage = errorData.message ?? `Error en la solicitud: ${res.status} ${res.statusText}`;
     
