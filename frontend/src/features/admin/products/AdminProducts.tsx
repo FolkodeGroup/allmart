@@ -255,7 +255,7 @@ export function AdminProducts() {
       </div>
 
       {/* Panel de edición masiva */}
-      {selectedIds.length > 0 && (
+      {selectedIds.length > 0 && can('products.edit') && (
         <BulkEditBar
           selectedCount={selectedIds.length}
           onBulkEdit={handleBulkEdit}
@@ -280,7 +280,7 @@ export function AdminProducts() {
           onCancel={cancelBulkEdit}
         />
       )}
-      {products.length > 0 && (
+      {products.length > 0 && (can('products.edit') || can('products.delete')) && (
         <CheckboxGeneral
           checked={allVisibleSelected}
           indeterminate={someVisibleSelected && !allVisibleSelected}
@@ -328,7 +328,7 @@ export function AdminProducts() {
               onDelete={() => setDeleteConfirm(p.id)}
               selected={selectedIds.includes(p.id)}
               onSelectChange={handleSelectProduct}
-              showCheckbox={true}
+              showCheckbox={can('products.edit') || can('products.delete')}
             />
           ))}
         </div>
