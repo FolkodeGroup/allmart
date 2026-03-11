@@ -3,6 +3,9 @@ import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { AdminProductForm } from './AdminProductForm';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { PackageSearch, AlertCircle } from 'lucide-react';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
@@ -154,24 +157,27 @@ export function AdminProducts() {
       </div>
 
       {/* Tabla */}
-      {loading && (
-        <div className={sectionStyles.emptyState}>
-          <p className={sectionStyles.emptyText}>Cargando productos...</p>
-        </div>
-      )}
+      {loading && <LoadingSpinner message="Cargando catálogo de productos..." size="lg" />}
 
       {!loading && error && (
-        <div className={sectionStyles.emptyState}>
-          <span className={sectionStyles.emptyIcon}>⚠️</span>
-          <p className={sectionStyles.emptyText}>{error}</p>
-        </div>
+        <EmptyState 
+          icon={<AlertCircle size={48} color="#ef4444" />}
+          title="Error al cargar productos"
+          description={error}
+          action={{ label: 'Reintentar', onClick: () => window.location.reload() }}
+        />
       )}
 
       {!loading && !error && (filtered.length === 0 ? (
-        <div className={sectionStyles.emptyState}>
-          <span className={sectionStyles.emptyIcon}>📦</span>
-          <p className={sectionStyles.emptyText}>No se encontraron productos.</p>
-        </div>
+        <EmptyState 
+          icon={<PackageSearch size={48} color="#94a3b8" />}
+          title="No se encontraron productos"
+          description={search || categoryFilter 
+            ? "Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás."
+            : "Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!"
+          }
+          action={can('products.create') ? { label: 'Nuevo Producto', onClick: handleNew } : undefined}
+        />
       ) : (
         <div className={styles.tableWrapper}>
           <table className={styles.table}>

@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { Palette, Box, Search, AlertCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { EmptyState } from '../../../components/ui/EmptyState';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminVariants.module.css';
 
@@ -118,10 +121,13 @@ export function AdminVariants() {
             onChange={e => setSearch(e.target.value)}
           />
           <ul className={styles.productList}>
-            {filtered.length === 0 && (
-              <li className={styles.emptyList}>Sin resultados</li>
-            )}
-            {filtered.map(p => {
+            {filtered.length === 0 ? (
+              <EmptyState 
+                icon={<Search size={32} />}
+                title="Sin resultados"
+                description="No se encontraron productos con esos términos."
+              />
+            ) : filtered.map(p => {
               const groupCount = selectedProductId === p.id ? variants.length : 0;
               const valueCount = selectedProductId === p.id
                 ? variants.reduce((s, g) => s + g.values.length, 0)
@@ -151,20 +157,22 @@ export function AdminVariants() {
 
         {/* ── Panel derecho: gestión de variantes ── */}
         <main className={styles.content}>
-          {!selectedProduct ? (
-            <div className={sectionStyles.emptyState}>
-              <div className={sectionStyles.emptyIcon}>🎨</div>
-              <p className={sectionStyles.emptyText}>Seleccioná un producto para gestionar sus variantes</p>
+          {isLoading ? (
+            <div className={sectionStyles.loadingContainer}>
+              <LoadingSpinner size="lg" message="Cargando variantes..." />
             </div>
-          ) : isLoading && variants.length === 0 ? (
-            <div className={sectionStyles.emptyState}>
-              <p className={sectionStyles.emptyText}>Cargando variantes...</p>
-            </div>
+          ) : !selectedProduct ? (
+            <EmptyState
+              icon={<Palette size={48} />}
+              title="No hay producto seleccionado"
+              description="Seleccioná un producto del panel izquierdo para gestionar sus variantes."
+            />
           ) : (
             <>
               {apiError && (
-                <div className={sectionStyles.errorState ?? ''}>
-                  <p style={{ color: 'var(--color-error, red)', padding: '0.5rem' }}>Error: {apiError}</p>
+                <div className={sectionStyles.errorState}>
+                  <AlertCircle size={20} />
+                  <p>Error: {apiError}</p>
                 </div>
               )}
               <div className={styles.contentHeader}>
@@ -197,102 +205,104 @@ export function AdminVariants() {
               )}
 
               {/* Sin variantes */}
-              {variants.length === 0 && (
-                <div className={styles.noGroupsHint}>
-                  Este producto no tiene variantes aún. Creá el primer grupo arriba.
+              {variants.length === 0 ? (
+                <EmptyState
+                  icon={<Box size={40} />}
+                  title="Sin variantes"
+                  description="Este producto no tiene variantes aún. Podés crear el primer grupo arriba."
+                />
+              ) : (
+                /* Lista de grupos */
+                <div className={styles.groupsGrid}>
+                  {variants.map(group => (
+                    <div key={group.id} className={styles.groupCard}>
+                      {/* Header del grupo */}
+                      <div className={styles.groupHeader}>
+                        {editingGroupId === group.id ? (
+                          <input
+                            className={styles.groupNameEdit}
+                            value={editingGroupName}
+                            autoFocus
+                            onChange={e => setEditingGroupName(e.target.value)}
+                            onBlur={() => commitEditGroupName(group.id)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') commitEditGroupName(group.id);
+                              if (e.key === 'Escape') {
+                                setEditingGroupId(null);
+                                setEditingGroupName('');
+                              }
+                            }}
+                          />
+                        ) : (
+                          <button
+                            className={styles.groupName}
+                            onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
+                            type="button"
+                            title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
+                            style={can('variants.edit') ? undefined : { cursor: 'default' }}
+                          >
+                            {group.name}
+                            {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
+                          </button>
+                        )}
+                        {can('variants.delete') && (
+                          <button
+                            className={styles.deleteGroupBtn}
+                            onClick={() => deleteGroup(group.id)}
+                            type="button"
+                            title="Eliminar grupo"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Valores / chips */}
+                      <div className={styles.valuesContainer}>
+                        {group.values.length === 0 && (
+                          <span className={styles.noValues}>Sin valores aún</span>
+                        )}
+                        {group.values.map(val => (
+                          <span key={val} className={styles.valueChip}>
+                            {val}
+                            {can('variants.delete') && (
+                              <button
+                                type="button"
+                                className={styles.chipRemove}
+                                onClick={() => removeValue(group.id, val)}
+                                title={`Eliminar ${val}`}
+                              >\
+                                ×
+                              </button>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Input para agregar valor */}
+                      {can('variants.edit') && (
+                        <div className={styles.addValueRow}>
+                          <input
+                            className={styles.valueInput}
+                            type="text"
+                            placeholder={`Agregar valor a ${group.name}...`}
+                            value={newValues[group.id] ?? ''}
+                            onChange={e => setNewValues(prev => ({ ...prev, [group.id]: e.target.value }))}
+                            onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
+                          />
+                          <button
+                            className={styles.addValueBtn}
+                            type="button"
+                            onClick={() => addValue(group.id)}
+                          >
+                            ＋
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
-
-              {/* Lista de grupos */}
-              <div className={styles.groupsGrid}>
-                {variants.map(group => (
-                  <div key={group.id} className={styles.groupCard}>
-                    {/* Header del grupo */}
-                    <div className={styles.groupHeader}>
-                      {editingGroupId === group.id ? (
-                        <input
-                          className={styles.groupNameEdit}
-                          value={editingGroupName}
-                          autoFocus
-                          onChange={e => setEditingGroupName(e.target.value)}
-                          onBlur={() => commitEditGroupName(group.id)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') commitEditGroupName(group.id);
-                            if (e.key === 'Escape') {
-                              setEditingGroupId(null);
-                              setEditingGroupName('');
-                            }
-                          }}
-                        />
-                      ) : (
-                        <button
-                          className={styles.groupName}
-                          onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
-                          type="button"
-                          title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
-                          style={can('variants.edit') ? undefined : { cursor: 'default' }}
-                        >
-                          {group.name}
-                          {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
-                        </button>
-                      )}
-                      {can('variants.delete') && (
-                        <button
-                          className={styles.deleteGroupBtn}
-                          onClick={() => deleteGroup(group.id)}
-                          type="button"
-                          title="Eliminar grupo"
-                        >
-                          🗑️
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Valores / chips */}
-                    <div className={styles.valuesContainer}>
-                      {group.values.length === 0 && (
-                        <span className={styles.noValues}>Sin valores aún</span>
-                      )}
-                      {group.values.map(val => (
-                        <span key={val} className={styles.valueChip}>
-                          {val}
-                          {can('variants.delete') && (
-                            <button
-                              type="button"
-                              className={styles.chipRemove}
-                              onClick={() => removeValue(group.id, val)}
-                              title={`Eliminar ${val}`}
-                            >
-                              ×
-                            </button>
-                          )}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Input para agregar valor */}
-                    {can('variants.edit') && (
-                      <div className={styles.addValueRow}>
-                        <input
-                          className={styles.valueInput}
-                          type="text"
-                          placeholder={`Agregar valor a ${group.name}...`}
-                          value={newValues[group.id] ?? ''}
-                          onChange={e => setNewValues(prev => ({ ...prev, [group.id]: e.target.value }))}
-                          onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
-                        />
-                        <button
-                          className={styles.addValueBtn}
-                          type="button"
-                          onClick={() => addValue(group.id)}
-                        >
-                          ＋
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
             </>
           )}
         </main>

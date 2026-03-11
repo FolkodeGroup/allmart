@@ -2,6 +2,9 @@ import { useState, useRef } from 'react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { FolderSearch, AlertCircle } from 'lucide-react';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 
@@ -147,14 +150,21 @@ export function AdminCategories() {
 
       {/* Listado */}
       {isLoading && !categories.length ? (
-        <div className={sectionStyles.loadingState}>Cargando categorías...</div>
+        <LoadingSpinner message="Cargando categorías..." size="lg" />
       ) : apiError ? (
-        <div className={sectionStyles.errorState}>Error: {apiError}</div>
+        <EmptyState 
+          icon={<AlertCircle size={48} color="#ef4444" />}
+          title="Error al cargar categorías"
+          description={apiError}
+          action={{ label: 'Reintentar', onClick: () => window.location.reload() }}
+        />
       ) : categories.length === 0 ? (
-        <div className={sectionStyles.emptyState}>
-          <span className={sectionStyles.emptyIcon}>🗂️</span>
-          <p className={sectionStyles.emptyText}>No hay categorías creadas.</p>
-        </div>
+        <EmptyState 
+          icon={<FolderSearch size={48} color="#94a3b8" />}
+          title="No hay categorías"
+          description="Todavía no creaste ninguna categoría para organizar tus productos. ¡Empezá ahora!"
+          action={can('categories.create') ? { label: 'Nueva Categoría', onClick: openNew } : undefined}
+        />
       ) : (
         <div className={styles.grid}>
           {categories.map(cat => {
