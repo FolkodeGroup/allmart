@@ -21,6 +21,8 @@ import { AdminImagesProvider } from './context/AdminImagesContext';
 import { AdminCategories } from './pages/Admin/sections/AdminCategories';
 import { AdminVariants } from './pages/Admin/sections/AdminVariants';
 import { AdminImages } from './pages/Admin/sections/AdminImages';
+import { NotificationProvider } from './context/NotificationContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const router = createBrowserRouter([
   {
@@ -54,21 +56,25 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AdminAuthProvider>
-      <AdminCategoriesProvider>
-        <AdminProductsProvider>
-          <AdminVariantsProvider>
-            <AdminImagesProvider>
-              <AdminOrdersProvider>
-                <CartProvider>
-                  <RouterProvider router={router} />
-                </CartProvider>
-              </AdminOrdersProvider>
-            </AdminImagesProvider>
-          </AdminVariantsProvider>
-        </AdminProductsProvider>
-      </AdminCategoriesProvider>
-    </AdminAuthProvider>
+    <ErrorBoundary>
+      <NotificationProvider>
+        <AdminAuthProvider>
+          <AdminCategoriesProvider>
+            <AdminProductsProvider>
+              <AdminVariantsProvider>
+                <AdminImagesProvider>
+                  <AdminOrdersProvider>
+                    <CartProvider>
+                      <RouterProvider router={router} />
+                    </CartProvider>
+                  </AdminOrdersProvider>
+                </AdminImagesProvider>
+              </AdminVariantsProvider>
+            </AdminProductsProvider>
+          </AdminCategoriesProvider>
+        </AdminAuthProvider>
+      </NotificationProvider>
+    </ErrorBoundary>
   );
 }
 

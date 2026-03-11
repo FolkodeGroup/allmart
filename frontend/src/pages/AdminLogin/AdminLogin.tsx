@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { handleResponse } from '../../utils/apiErrorHandler';
 import type { Role } from '../../utils/permissions';
 import styles from './AdminLogin.module.css';
 
@@ -24,10 +25,13 @@ export function AdminLogin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user, password }),
       });
-      const data = await res.json();
+      
+      const data = await handleResponse<{ success: boolean; data: { token: string; role: string }; message?: string }>(res);
+      
       // Log para depuración
       console.log('Login response:', data);
-      if (res.ok && data.success && data.data && data.data.token) {
+      
+      if (data.success && data.data && data.data.token) {
         const { token, role: userRole } = data.data;
         const role: Role = userRole === 'editor' ? 'editor' : 'admin';
         login(user, token, role);
@@ -36,7 +40,7 @@ export function AdminLogin() {
         setError(data.message || 'Credenciales inválidas');
       }
     } catch (err) {
-      setError('Error de red o servidor');
+      setError(err instanceof Error ? err.message : 'Error de red o servidor');
     } finally {
       setLoading(false);
     }

@@ -13,6 +13,8 @@
  *   GET    /api/images/products/:id/thumb                 → servir miniatura WebP (público)
  */
 
+import { handleResponse } from '../utils/apiErrorHandler';
+
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 /** Imagen tal como la devuelve el backend */
@@ -75,14 +77,6 @@ function authHeaders(token: string): HeadersInit {
 function authHeadersFormData(token: string): HeadersInit {
   // NO incluir Content-Type — el browser lo fija con el boundary correcto para multipart
   return { Authorization: `Bearer ${token}` };
-}
-
-async function handleResponse<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({})) as { message?: string };
-    throw new Error(err.message ?? `Error HTTP ${res.status}`);
-  }
-  return res.json() as Promise<T>;
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
