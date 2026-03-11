@@ -12,6 +12,7 @@ interface AdminCategoriesContextType {
   addCategory: (c: Omit<Category, 'id'>) => Promise<Category>;
   updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
+  uploadCategoryImage: (id: string, file: File) => Promise<string>;
   getCategory: (id: string) => Category | undefined;
 }
 
@@ -87,6 +88,25 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const uploadCategoryImage = async (id: string, file: File): Promise<string> => {
+    if (!token) throw new Error('No hay sesión activa');
+    setIsLoading(true);
+    try {
+      const imageUrl = await categoriesService.uploadAdminCategoryImage(token, id, file);
+      // Actualizamos localmente el estado de la categoría con la nueva imagen
+      setCategories(prev => prev.map(c => 
+        c.id === id ? { ...c, image: imageUrl } : c
+      ));
+      return imageUrl;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al subir la imagen';
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getCategory = (id: string) => categories.find(c => c.id === id);
 
   return (
@@ -98,6 +118,7 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
       addCategory, 
       updateCategory, 
       deleteCategory, 
+      uploadCategoryImage,
       getCategory 
     }}>
       {children}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -8,7 +8,7 @@ import styles from './AdminCategories.module.css';
 const EMPTY = { name: '', description: '', image: '', itemCount: 0 };
 
 export function AdminCategories() {
-  const { categories, addCategory, updateCategory, deleteCategory, isLoading, error: apiError } = useAdminCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, uploadCategoryImage, isLoading, error: apiError } = useAdminCategories();
   const { products, updateProduct } = useAdminProducts();
   const { can } = useAdminAuth();
 
@@ -20,6 +20,11 @@ export function AdminCategories() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [assignCatId, setAssignCatId] = useState<string | null>(null);
 
+  // ── Gestión de imágenes ──
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const openNew = () => { setEditId(null); setForm(EMPTY); setError(''); setShowForm(true); };
   const openEdit = (id: string) => {
     const c = categories.find(c => c.id === id);
@@ -28,6 +33,45 @@ export function AdminCategories() {
     setForm({ name: c.name, description: c.description ?? '', image: c.image ?? '', itemCount: c.itemCount ?? 0 });
     setError('');
     setShowForm(true);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processAndUploadImage(file);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    await processAndUploadImage(file);
+  };
+
+  const processAndUploadImage = async (file: File) => {
+    // Si estamos editando, subimos de inmediato
+    if (editId) {
+      setIsUploading(true);
+      try {
+        const url = await uploadCategoryImage(editId, file);
+        setForm(f => ({ ...f, image: url }));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error al subir imagen');
+      } finally {
+        setIsUploading(false);
+      }
+    } else {
+      // Si es nueva categoría, solo previsualizamos (el backend requiere ID para guardar el BYTEA)
+      // OPCIÓN: Podríamos guardar el File en el estado y subirlo DESPUÉS de crear la categoría
+      // Pero para simplificar y mantener consistencia con Products, el backend requiere el ID.
+      // Así que usaremos una URL temporal o alertaremos que debe crearse primero.
+      setError('Primero creá la categoría y luego subí su imagen.');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setForm(f => ({ ...f, image: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -216,13 +260,44 @@ export function AdminCategories() {
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="category-image">URL de imagen</label>
-                <input className={styles.input} id="category-image" value={form.image}
-                  onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
-                  placeholder="https://..." />
-                {form.image && (
-                  <img src={form.image} alt="preview" className={styles.imagePreview}
-                    onError={e => (e.currentTarget.style.display = 'none')} />
+                <label className={styles.label}>Imagen de categoría</label>
+                {form.image ? (
+                  <div className={styles.previewContainer}>
+                    <img src={form.image} alt="Vista previa" className={styles.previewImg} />
+                    <button type="button" className={styles.removeImgBtn} onClick={handleRemoveImage} title="Quitar imagen">✕</button>
+                    {isUploading && (
+                      <div className={styles.uploadingOverlay}>
+                        <div className={styles.spinner}></div>
+                        Subiendo...
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ''}`}
+                    onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      style={{ display: 'none' }}
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                    <span className={styles.dropZoneIcon}>📁</span>
+                    <span className={styles.dropZoneText}>
+                      Arrastrá una imagen o hacé clic <br /> para subir
+                    </span>
+                    <span className={styles.dropZoneHint}>
+                      Se convertirá a WebP automáticamente.
+                    </span>
+                    {!editId && <span className={styles.dropZoneHint} style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Se habilitará al guardar</span>}
+                  </div>
                 )}
               </div>
               {error && <p className={styles.error}>{error}</p>}
