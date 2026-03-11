@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-import sectionStyles from './AdminSection.module.css';
+import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 
 /* ── Helpers ──────────────────────────────────────────────────── */

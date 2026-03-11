@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Category } from '../types';
-import * as categoriesService from '../services/categoriesService';
+import * as categoriesService from '../features/admin/categories/categoriesService';
 import { useAdminAuth } from './AdminAuthContext';
 import { useNotification } from './NotificationContext';
 

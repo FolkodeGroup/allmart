@@ -6,7 +6,7 @@ import { AdminProductForm } from './AdminProductForm';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
-import sectionStyles from './AdminSection.module.css';
+import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
 export function AdminProducts() {
