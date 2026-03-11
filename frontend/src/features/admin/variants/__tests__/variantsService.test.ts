@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as variantsService from '../variantsService';
-import { server } from '../../test/setup';
+import { server } from '../../../../test/setup';
 import { http, HttpResponse } from 'msw';
 
 describe('variantsService', () => {

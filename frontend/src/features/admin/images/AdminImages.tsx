@@ -6,7 +6,7 @@ import { useAdminImages } from '../../../context/AdminImagesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
-import sectionStyles from './AdminSection.module.css';
+import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminImages.module.css';
 
 export function AdminImages() {
