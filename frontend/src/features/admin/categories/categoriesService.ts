@@ -68,10 +68,19 @@ export async function fetchPublicCategories(): Promise<Category[]> {
 
 // ─── API admin (requieren token de autenticación) ─────────────────────────────
 
-/** GET /api/admin/categories — Lista todas las categorías para administración */
-export async function fetchAdminCategories(token: string): Promise<Category[]> {
-  const body = await apiFetch<ApiSuccess<ApiCategory[]>>('/api/admin/categories', {}, token);
-  return (body.data || []).map(mapApiCategoryToCategory);
+/** GET /api/admin/categories — Lista todas las categorías para administración con paginación */
+export async function fetchAdminCategories(
+  token: string,
+  params: AdminCategoriesParams = {},
+): Promise<PaginatedCategories> {
+  const qs = new URLSearchParams();
+  if (params.q)     qs.set('q', params.q);
+  if (params.page)  qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+
+  const url = `/api/admin/categories${qs.toString() ? `?${qs}` : ''}`;
+  const body = await apiFetch<ApiSuccess<PaginatedCategories>>(url, {}, token);
+  return body.data;
 }
 
 /** POST /api/admin/categories — Crea una nueva categoría */

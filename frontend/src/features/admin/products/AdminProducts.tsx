@@ -10,7 +10,7 @@ import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
 export function AdminProducts() {
-  const { products, deleteProduct, loading, error } = useAdminProducts();
+  const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -20,31 +20,28 @@ export function AdminProducts() {
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
 
   const { categories } = useAdminCategories();
 
-  // Sugerencias para autocompletado (máx 8)
+  // Debounce para búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refreshProducts({ q: search, categoryId: categoryFilter, page: 1, limit: 10 });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search, categoryFilter, refreshProducts]);
+
+  const handlePageChange = (newPage: number) => {
+    refreshProducts({ q: search, categoryId: categoryFilter, page: newPage, limit: 10 });
+  };
+
+  // Sugerencias para autocompletado (usamos los productos ya cargados como base)
   const suggestions = search.length > 0
     ? products.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
         p.sku.toLowerCase().includes(search.toLowerCase())
       ).slice(0, 8)
     : [];
-
-  // Filtrado principal
-  const filtered = products.filter(p => {
-    const matchSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase());
-    const matchCat = !categoryFilter || p.category.id === categoryFilter;
-    return matchSearch && matchCat;
-  });
-
-  // Paginación
-  const PRODUCTS_PER_PAGE = 8;
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE));
-  const paginated = filtered.slice((page - 1) * PRODUCTS_PER_PAGE, page * PRODUCTS_PER_PAGE);
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
@@ -94,7 +91,6 @@ export function AdminProducts() {
               setSearch(e.target.value);
               setShowSuggestions(true);
               setHighlightedIndex(-1);
-              setPage(1); // Reiniciar página al buscar
             }}
             onFocus={() => search && setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
@@ -110,7 +106,6 @@ export function AdminProducts() {
                 setSearch(suggestions[highlightedIndex].name);
                 setShowSuggestions(false);
                 setHighlightedIndex(-1);
-                setPage(1); // Reiniciar página al seleccionar sugerencia
                 inputRef.current?.blur();
                 setTimeout(() => inputRef.current?.focus(), 0);
                 e.preventDefault();
@@ -131,8 +126,7 @@ export function AdminProducts() {
                     setHighlightedIndex(-1);
                     setPage(1); // Reiniciar página al seleccionar sugerencia
                   }}
-                >
-                  <span style={{ fontWeight: 500 }}>{s.name}</span>
+                ><span style={{ fontWeight: 500 }}>{s.name}</span>
                   {s.sku && <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>SKU: {s.sku}</span>}
                 </li>
               ))}
@@ -147,15 +141,14 @@ export function AdminProducts() {
               setPage(1); // Reiniciar página al cambiar categoría
             }}
           >
+            }}
+          >
             <option value="">Todas las categorías</option>
             {categories.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          <span className={styles.count}>{filtered.length} productos</span>
-        </div>
-      </div>
-
+          <span className={styles.count}>{total
       {/* Tabla */}
       {loading && <LoadingSpinner message="Cargando catálogo de productos..." size="lg" />}
 
@@ -169,6 +162,8 @@ export function AdminProducts() {
       )}
 
       {!loading && !error && (filtered.length === 0 ? (
+        <EmptyState 
+          icon={<PackageSearchproducts.length === 0 ? (
         <EmptyState 
           icon={<PackageSearch size={48} color="#94a3b8" />}
           title="No se encontraron productos"
@@ -192,9 +187,7 @@ export function AdminProducts() {
               </tr>
             </thead>
             <tbody>
-              {paginated.map(p => (
-                <tr key={p.id} className={styles.row}>
-                  <td className={styles.td}>
+              {productsassName={styles.td}>
                     <div className={styles.productCell}>
                       {p.images[0] && (
                         <img
@@ -277,24 +270,24 @@ export function AdminProducts() {
       {/* Controles de paginación */}
       {filtered.length > PRODUCTS_PER_PAGE && (
         <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+       total > 10 && (
+        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
           <button
             className={styles.pageBtn}
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
+            disabled={apiPage === 1}
+            onClick={() => handlePageChange(apiPage - 1)}
           >Anterior</button>
-          {Array.from({ length: totalPages }, (_, i) => (
+          {Array.from({ length: apiTotalPages }, (_, i) => (
             <button
               key={i + 1}
-              className={styles.pageBtn + (page === i + 1 ? ' ' + styles.pageActive : '')}
-              onClick={() => setPage(i + 1)}
+              className={styles.pageBtn + (apiPage === i + 1 ? ' ' + styles.pageActive : '')}
+              onClick={() => handlePageChange(i + 1)}
             >{i + 1}</button>
           ))}
           <button
             className={styles.pageBtn}
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-          >Siguiente</button>
-        </div>
+            disabled={apiPage === apiTotalPages}
+            onClick={() => handlePageChange(apiP
       )}
 
       {/* Modal de formulario */}

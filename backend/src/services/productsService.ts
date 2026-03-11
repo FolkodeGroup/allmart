@@ -145,6 +145,49 @@ export async function deleteProduct(id: string): Promise<void> {
   await prisma.product.delete({ where: { id } });
 }
 
+// Función para obtener productos con búsqueda y paginación (Admin)
+export async function getAdminProducts(query: {
+  q?: string;
+  categoryId?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const { q, categoryId, page = 1, limit = 10 } = query;
+
+  const where: Record<string, any> = {};
+
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+
+  if (q) {
+    const search = q.toLowerCase();
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { sku: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  const [total, rows] = await Promise.all([
+    prisma.product.count({ where }),
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
+
+  return {
+    data: rows.map(toProduct),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
 // Función para obtener productos del catálogo (con filtros)
 type ProductQuery = {
   category?: string;

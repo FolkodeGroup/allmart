@@ -88,6 +88,23 @@ export interface ProductPayload {
   features?: string[];
 }
 
+/** Parámetros de filtro para el catálogo público */
+export interface PublicProductsParams {
+  category?: string;
+  q?: string;
+  sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
+  page?: number;
+  limit?: number;
+}
+
+/** Parámetros de filtro para administración */
+export interface AdminProductsParams {
+  q?: string;
+  categoryId?: string;
+  page?: number;
+  limit?: number;
+}
+
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
 // ─── Mapeos entre tipos API y tipos frontend ──────────────────────────────────
@@ -182,9 +199,19 @@ export async function fetchPublicProductBySlug(slug: string): Promise<ApiProduct
 
 // ─── API admin (requieren token de autenticación) ─────────────────────────────
 
-/** GET /api/admin/products — Lista todos los productos para administración */
-export async function fetchAdminProducts(token: string): Promise<ApiProduct[]> {
-  const body = await apiFetch<ApiSuccess<ApiProduct[]>>('/api/admin/products', {}, token);
+/** GET /api/admin/products — Lista todos los productos para administración con paginación */
+export async function fetchAdminProducts(
+  token: string,
+  params: AdminProductsParams = {},
+): Promise<PaginatedProducts> {
+  const qs = new URLSearchParams();
+  if (params.q)          qs.set('q', params.q);
+  if (params.categoryId) qs.set('categoryId', params.categoryId);
+  if (params.page)       qs.set('page', String(params.page));
+  if (params.limit)      qs.set('limit', String(params.limit));
+
+  const url = `/api/admin/products${qs.toString() ? `?${qs}` : ''}`;
+  const body = await apiFetch<ApiSuccess<PaginatedProducts>>(url, {}, token);
   return body.data;
 }
 

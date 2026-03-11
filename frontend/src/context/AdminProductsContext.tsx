@@ -18,6 +18,7 @@ import {
   mapApiProductToProduct,
   mapAdminProductToPayload,
   type ApiProduct,
+  type AdminProductsParams,
 } from '../features/admin/products/productsService';
 
 // ─── Tipos exportados ─────────────────────────────────────────────────────────
@@ -52,8 +53,11 @@ interface AdminProductsContextType {
   products: AdminProduct[];
   categories: Category[];
   loading: boolean;
+  total: number;
+  page: number;
+  totalPages: number;
   error: string | null;
-  refreshProducts: () => Promise<void>;
+  refreshProducts: (params?: AdminProductsParams) => Promise<void>;
   addProduct: (p: Omit<AdminProduct, 'id'>) => Promise<void>;
   updateProduct: (id: string, p: Partial<AdminProduct>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -74,15 +78,25 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    totalPages: 1,
+  });
 
-  /** Carga (o recarga) los productos desde el backend */
-  const refreshProducts = useCallback(async () => {
+  /** Carga (o recarga) los productos desde el backend con paginación y búsqueda */
+  const refreshProducts = useCallback(async (params?: AdminProductsParams) => {
     if (!token) return;
     setLoading(true);
     setError(null);
     try {
-      const apiProducts = await fetchAdminProducts(token);
-      setProducts(apiProducts.map((p) => apiToAdminProduct(p, categories)));
+      const response = await fetchAdminProducts(token, params);
+      setProducts(response.data.map((p) => apiToAdminProduct(p, categories)));
+      setPagination({
+        total: response.total,
+        page: response.page,
+        totalPages: response.totalPages,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al cargar productos';
       setError(msg);
@@ -161,6 +175,9 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         products,
         categories,
         loading,
+        total: pagination.total,
+        page: pagination.page,
+        totalPages: pagination.totalPages,
         error,
         refreshProducts,
         addProduct,

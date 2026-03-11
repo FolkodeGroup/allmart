@@ -9,10 +9,15 @@ import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
 import { CreateCategoryDTO, UpdateCategoryDTO } from '../../models/Category';
 
-export async function index(_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+export async function index(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const categories = await categoriesService.getAllCategories();
-    sendSuccess(res, categories);
+    const { q, page, limit } = req.query;
+    const result = await categoriesService.getAdminCategories({
+      q: q as string,
+      page: page ? parseInt(page as string) : undefined,
+      limit: limit ? parseInt(limit as string) : undefined,
+    });
+    sendSuccess(res, result);
   } catch (err) { next(err); }
 }
 

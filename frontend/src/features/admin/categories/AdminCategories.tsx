@@ -12,7 +12,7 @@ import styles from './AdminCategories.module.css';
 const EMPTY = { name: '', description: '', image: '', itemCount: 0 };
 
 export function AdminCategories() {
-  const { categories, addCategory, updateCategory, deleteCategory, uploadCategoryImage, isLoading, error: apiError } = useAdminCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, uploadCategoryImage, isLoading, error: apiError, refreshCategories, page: apiPage, totalPages: apiTotalPages, total } = useAdminCategories();
   const { products, updateProduct } = useAdminProducts();
   const { can } = useAdminAuth();
 
@@ -24,6 +24,19 @@ export function AdminCategories() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [assignCatId, setAssignCatId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+
+  // Debounce para búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refreshCategories({ q: search, page: 1, limit: 10 });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search, refreshCategories]);
+
+  const handlePageChange = (newPage: number) => {
+    refreshCategories({ q: search, page: newPage, limit: 10 });
+  };
 
   // ── Gestión de imágenes ──
   const [isDragging, setIsDragging] = useState(false);
@@ -177,6 +190,17 @@ export function AdminCategories() {
               Creá, editá y eliminá categorías. Asigná productos a cada una.
             </p>
           </div>
+          {/* Barra de búsqueda */}
+          <div className={styles.searchBox} style={{ flex: 1, maxWidth: 400, margin: '0 20px' }}>
+            <input
+              type="search"
+              placeholder="Buscar categorías..."
+              className={styles.searchInput}
+              style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)' }}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
           {can('categories.create') && (
             <button className={styles.newBtn} onClick={openNew}>+ Nueva categoría</button>
           )}
@@ -268,7 +292,32 @@ export function AdminCategories() {
                               </select>
                             </div>
                           ))
-                        )}
+          Controles de paginación */}
+      {total > 10 && (
+        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+          <button
+            className={styles.pageBtn}
+            style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 4, background: 'var(--color-bg-primary)', cursor: apiPage === 1 ? 'not-allowed' : 'pointer', opacity: apiPage === 1 ? 0.5 : 1 }}
+            disabled={apiPage === 1}
+            onClick={() => handlePageChange(apiPage - 1)}
+          >Anterior</button>
+          {Array.from({ length: apiTotalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 4, background: apiPage === i + 1 ? 'var(--color-primary)' : 'var(--color-bg-primary)', color: apiPage === i + 1 ? 'white' : 'inherit', cursor: 'pointer' }}
+              onClick={() => handlePageChange(i + 1)}
+            >{i + 1}</button>
+          ))}
+          <button
+            className={styles.pageBtn}
+            style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 4, background: 'var(--color-bg-primary)', cursor: apiPage === apiTotalPages ? 'not-allowed' : 'pointer', opacity: apiPage === apiTotalPages ? 0.5 : 1 }}
+            disabled={apiPage === apiTotalPages}
+            onClick={() => handlePageChange(apiPage + 1)}
+          >Siguiente</button>
+        </div>
+      )}
+
+      {/*               )}
                       </div>
                     )}
                   </div>

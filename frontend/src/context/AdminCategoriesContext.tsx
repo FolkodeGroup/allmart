@@ -8,8 +8,11 @@ import { useNotification } from './NotificationContext';
 interface AdminCategoriesContextType {
   categories: Category[];
   isLoading: boolean;
+  total: number;
+  page: number;
+  totalPages: number;
   error: string | null;
-  refreshCategories: () => Promise<void>;
+  refreshCategories: (params?: categoriesService.AdminCategoriesParams) => Promise<void>;
   addCategory: (c: Omit<Category, 'id'>) => Promise<Category>;
   updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
@@ -23,16 +26,27 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    totalPages: 1,
+  });
   const { token } = useAdminAuth();
   const { showNotification } = useNotification();
 
-  const refreshCategories = useCallback(async () => {
+  /** Carga (o recarga) las categorías desde el backend con paginación y búsqueda */
+  const refreshCategories = useCallback(async (params?: categoriesService.AdminCategoriesParams) => {
     if (!token) return;
     setIsLoading(true);
     setError(null);
     try {
-      const data = await categoriesService.fetchAdminCategories(token);
-      setCategories(data);
+      const response = await categoriesService.fetchAdminCategories(token, params);
+      setCategories(response.data.map(categoriesService.mapApiCategoryToCategory));
+      setPagination({
+        total: response.total,
+        page: response.page,
+        totalPages: response.totalPages,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al cargar categorías';
       setError(msg);
@@ -122,6 +136,9 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     <AdminCategoriesContext.Provider value={{ 
       categories, 
       isLoading, 
+      total: pagination.total,
+      page: pagination.page,
+      totalPages: pagination.totalPages,
       error, 
       refreshCategories,
       addCategory, 
