@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { Image as ImageIcon, Search, Plus, AlertCircle, Trash2, Edit2, X, Check } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminImages } from '../../../context/AdminImagesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { EmptyState } from '../../../components/ui/EmptyState';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminImages.module.css';
 
@@ -165,10 +168,13 @@ export function AdminImages() {
             onChange={e => setSearch(e.target.value)}
           />
           <ul role="listbox" aria-label="Seleccionar producto" className={styles.productList}>
-            {filtered.length === 0 && (
-              <li className={styles.emptyList}>Sin resultados</li>
-            )}
-            {filtered.map(p => {
+            {filtered.length === 0 ? (
+              <EmptyState 
+                icon={<Search size={32} />}
+                title="Sin resultados"
+                description="No hay productos con ese nombre o SKU."
+              />
+            ) : filtered.map(p => {
               const count = selectedProductId === p.id ? images.length : 0;
               return (
                 <li
@@ -199,19 +205,23 @@ export function AdminImages() {
 
         {/* ── Panel derecho: gestión de imágenes ── */}
         <main className={styles.content}>
-          {!selectedProduct ? (
-            <div className={sectionStyles.emptyState}>
-              <div className={sectionStyles.emptyIcon}>🖼️</div>
-              <p className={sectionStyles.emptyText}>Seleccioná un producto para gestionar sus imágenes</p>
+          {isLoading ? (
+            <div className={sectionStyles.loadingContainer}>
+              <LoadingSpinner size="lg" message="Cargando imágenes..." />
             </div>
-          ) : isLoading && images.length === 0 ? (
-            <div className={sectionStyles.emptyState}>
-              <p className={sectionStyles.emptyText}>Cargando imágenes...</p>
-            </div>
+          ) : !selectedProduct ? (
+            <EmptyState
+              icon={<ImageIcon size={48} />}
+              title="No hay producto seleccionado"
+              description="Seleccioná un producto para gestionar sus imágenes."
+            />
           ) : (
             <>
               {apiError && (
-                <p className={styles.errorMsg}>Error: {apiError}</p>
+                <div className={sectionStyles.errorState}>
+                  <AlertCircle size={20} />
+                  <p>Error: {apiError}</p>
+                </div>
               )}
 
               <div className={styles.contentHeader}>
@@ -227,7 +237,13 @@ export function AdminImages() {
               </div>
 
               {/* Grid de imágenes existentes */}
-              {images.length > 0 && (
+              {images.length === 0 ? (
+                <EmptyState
+                  icon={<ImageIcon size={40} />}
+                  title="Sin imágenes"
+                  description="Este producto no tiene imágenes. Podés subir una usando el botón de abajo."
+                />
+              ) : (
                 <div className={styles.imageGrid}>
                   {images.map(img => (
                     <div key={img.id} className={styles.imageCard}>
@@ -297,7 +313,7 @@ export function AdminImages() {
                                 onClick={() => startEdit(img.id, img.altText)}
                                 type="button"
                               >
-                                Editar alt
+                                <Edit2 size={14} /> Editar alt
                               </button>
                             )}
                             {can('products.delete') && (
@@ -307,7 +323,13 @@ export function AdminImages() {
                                 disabled={deletingId === img.id}
                                 type="button"
                               >
-                                {deletingId === img.id ? '...' : 'Eliminar'}
+                                {deletingId === img.id ? (
+                                  '...'
+                                ) : (
+                                  <>
+                                    <Trash2 size={14} /> Eliminar
+                                  </>
+                                )}
                               </button>
                             )}
                           </div>
@@ -315,13 +337,6 @@ export function AdminImages() {
                       )}
                     </div>
                   ))}
-                </div>
-              )}
-
-              {/* Sin imágenes */}
-              {!isLoading && images.length === 0 && (
-                <div className={styles.noImagesMsg}>
-                  <p>Este producto no tiene imágenes. Subí la primera imagen abajo.</p>
                 </div>
               )}
 
@@ -334,7 +349,7 @@ export function AdminImages() {
                       onClick={() => setIsAdding(true)}
                       type="button"
                     >
-                      + Subir imagen
+                      <Plus size={18} /> Subir imagen
                     </button>
                   ) : (
                     <div className={styles.addForm}>
@@ -358,7 +373,7 @@ export function AdminImages() {
                           />
                         ) : (
                           <>
-                            <span className={styles.dropIcon}>📁</span>
+                            <ImageIcon size={48} className={styles.dropIcon} />
                             <p className={styles.dropText}>
                               Arrastrá una imagen aquí o hacé clic para seleccionarla
                             </p>
@@ -394,10 +409,10 @@ export function AdminImages() {
                         <p className={styles.uploadStatus}>⏳ Convirtiendo a WebP y guardando...</p>
                       )}
                       {uploadProgress === 'done' && (
-                        <p className={`${styles.uploadStatus} ${styles.uploadOk}`}>✅ Imagen subida correctamente</p>
+                        <p className={`${styles.uploadStatus} ${styles.uploadOk}`}><Check size={16} /> Imagen subida correctamente</p>
                       )}
                       {uploadProgress === 'error' && (
-                        <p className={`${styles.uploadStatus} ${styles.uploadErr}`}>❌ Error al subir la imagen</p>
+                        <p className={`${styles.uploadStatus} ${styles.uploadErr}`}><X size={16} /> Error al subir la imagen</p>
                       )}
 
                       <div className={styles.addFormActions}>
@@ -407,7 +422,11 @@ export function AdminImages() {
                           disabled={!uploadFile || uploadProgress === 'uploading'}
                           type="button"
                         >
-                          {uploadProgress === 'uploading' ? 'Subiendo...' : 'Subir imagen'}
+                          {uploadProgress === 'uploading' ? 'Subiendo...' : (
+                            <>
+                              <Plus size={16} /> Subir imagen
+                            </>
+                          )}
                         </button>
                         <button
                           className={styles.cancelEditBtn}

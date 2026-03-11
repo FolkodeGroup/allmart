@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { Palette, Box, Search, PackageSearch, AlertCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { EmptyState } from '../../../components/ui/EmptyState';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminVariants.module.css';
 
@@ -118,10 +121,13 @@ export function AdminVariants() {
             onChange={e => setSearch(e.target.value)}
           />
           <ul className={styles.productList}>
-            {filtered.length === 0 && (
-              <li className={styles.emptyList}>Sin resultados</li>
-            )}
-            {filtered.map(p => {
+            {filtered.length === 0 ? (
+              <EmptyState 
+                icon={<Search size={32} />}
+                title="Sin resultados"
+                message="No se encontraron productos con esos términos."
+              />
+            ) : filtered.map(p => {
               const groupCount = selectedProductId === p.id ? variants.length : 0;
               const valueCount = selectedProductId === p.id
                 ? variants.reduce((s, g) => s + g.values.length, 0)
@@ -151,20 +157,22 @@ export function AdminVariants() {
 
         {/* ── Panel derecho: gestión de variantes ── */}
         <main className={styles.content}>
-          {!selectedProduct ? (
-            <div className={sectionStyles.emptyState}>
-              <div className={sectionStyles.emptyIcon}>🎨</div>
-              <p className={sectionStyles.emptyText}>Seleccioná un producto para gestionar sus variantes</p>
+          {isLoading ? (
+            <div className={sectionStyles.loadingContainer}>
+              <LoadingSpinner size="lg" message="Cargando variantes..." />
             </div>
-          ) : isLoading && variants.length === 0 ? (
-            <div className={sectionStyles.emptyState}>
-              <p className={sectionStyles.emptyText}>Cargando variantes...</p>
-            </div>
+          ) : !selectedProduct ? (
+            <EmptyState
+              icon={<Palette size={48} />}
+              title="No hay producto seleccionado"
+              message="Seleccioná un producto del panel izquierdo para gestionar sus variantes."
+            />
           ) : (
             <>
               {apiError && (
-                <div className={sectionStyles.errorState ?? ''}>
-                  <p style={{ color: 'var(--color-error, red)', padding: '0.5rem' }}>Error: {apiError}</p>
+                <div className={sectionStyles.errorState}>
+                  <AlertCircle size={20} />
+                  <p>Error: {apiError}</p>
                 </div>
               )}
               <div className={styles.contentHeader}>
@@ -197,15 +205,16 @@ export function AdminVariants() {
               )}
 
               {/* Sin variantes */}
-              {variants.length === 0 && (
-                <div className={styles.noGroupsHint}>
-                  Este producto no tiene variantes aún. Creá el primer grupo arriba.
-                </div>
-              )}
-
-              {/* Lista de grupos */}
-              <div className={styles.groupsGrid}>
-                {variants.map(group => (
+              {variants.length === 0 ? (
+                <EmptyState
+                  icon={<Box size={40} />}
+                  title="Sin variantes"
+                  message="Este producto no tiene variantes aún. Podés crear el primer grupo arriba."
+                />
+              ) : (
+                /* Lista de grupos */
+                <div className={styles.groupsGrid}>
+                  {variants.map(group => (
                   <div key={group.id} className={styles.groupCard}>
                     {/* Header del grupo */}
                     <div className={styles.groupHeader}>
