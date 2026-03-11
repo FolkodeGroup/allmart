@@ -3,6 +3,7 @@ import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { AdminProductForm } from './AdminProductForm';
+import { AdminProductCard } from './AdminProductCard';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
@@ -54,8 +55,6 @@ export function AdminProducts() {
     setDeleteConfirm(null);
   };
 
-  const formatPrice = (n: number) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n);
 
   return (
     <div className={sectionStyles.page}>
@@ -153,7 +152,7 @@ export function AdminProducts() {
       {loading && <LoadingSpinner message="Cargando catálogo de productos..." size="lg" />}
 
       {!loading && error && (
-        <EmptyState 
+        <EmptyState
           icon={<AlertCircle size={48} color="#ef4444" />}
           title="Error al cargar productos"
           description={error}
@@ -162,108 +161,38 @@ export function AdminProducts() {
       )}
 
       {!loading && !error && (products.length === 0 ? (
-        <EmptyState 
+        <EmptyState
           icon={<PackageSearch size={48} color="#94a3b8" />}
           title="No se encontraron productos"
-          description={search || categoryFilter 
+          description={search || categoryFilter
             ? "Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás."
             : "Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!"
           }
           action={can('products.create') ? { label: 'Nuevo Producto', onClick: handleNew } : undefined}
         />
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={styles.th}>Producto</th>
-                <th className={styles.th}>Categoría</th>
-                <th className={styles.th}>Precio</th>
-                <th className={styles.th}>Stock</th>
-                <th className={styles.th}>Estado</th>
-                <th className={styles.th}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map(p => (
-                <tr key={p.id} className={styles.row}>
-                  <td className={styles.td}>
-                    <div className={styles.productCell}>
-                      {p.images[0] && (
-                        <img
-                          src={p.images[0]}
-                          alt={p.name}
-                          className={styles.thumb}
-                          onError={e => (e.currentTarget.style.display = 'none')}
-                        />
-                      )}
-                      <div>
-                        <div className={styles.productName}>{p.name}</div>
-                        {p.sku && <div className={styles.productSku}>SKU: {p.sku}</div>}
-                      </div>
-                    </div>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={styles.badge}>{p.category.name}</span>
-                  </td>
-                  <td className={styles.td}>
-                    <div className={styles.priceCell}>
-                      <span className={styles.price}>{formatPrice(p.price)}</span>
-                      {p.discount && p.discount > 0 && (
-                        <span className={styles.discount}>-{p.discount}%</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={p.stock > 0 ? styles.stockOk : styles.stockOut}>
-                      {p.stock}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={p.inStock ? styles.statusActive : styles.statusInactive}>
-                      {p.inStock ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <div className={styles.actions}>
-                      {can('products.edit') && (
-                        <button
-                          className={styles.editBtn}
-                          onClick={() => handleEdit(p.id)}
-                          title="Editar"
-                        >
-                          ✏️
-                        </button>
-                      )}
-                      {can('products.delete') && (
-                        deleteConfirm === p.id ? (
-                          <>
-                            <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(p.id)}>
-                              Confirmar
-                            </button>
-                            <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>
-                              Cancelar
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            className={styles.deleteBtn}
-                            onClick={() => setDeleteConfirm(p.id)}
-                            title="Eliminar"
-                          >
-                            🗑️
-                          </button>
-                        )
-                      )}
-                      {!can('products.edit') && !can('products.delete') && (
-                        <span style={{ color: 'var(--color-text-muted, #aaa)', fontSize: '12px' }}>Solo lectura</span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className={styles.cardsGrid}>
+          {products.map(p => (
+            <AdminProductCard
+              key={p.id}
+              id={p.id}
+              name={p.name}
+              sku={p.sku}
+              price={p.price}
+              discount={p.discount}
+              stock={p.stock}
+              inStock={p.inStock}
+              image={p.images && p.images[0]}
+              category={p.category?.name || ''}
+              canEdit={can('products.edit')}
+              canDelete={can('products.delete')}
+              onEdit={handleEdit}
+              onDelete={() => setDeleteConfirm(p.id)}
+              deleteConfirm={deleteConfirm === p.id}
+              onCancelDelete={() => setDeleteConfirm(null)}
+              onConfirmDelete={() => handleDelete(p.id)}
+            />
+          ))}
         </div>
       ))}
 
