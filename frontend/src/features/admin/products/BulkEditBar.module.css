@@ -1,0 +1,55 @@
+.bulkEditBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  animation: fadeIn 0.2s both;
+}
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+}
+.input {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  min-width: 110px;
+}
+.applyBtn {
+  background: var(--color-primary);
+  color: var(--color-neutral-light);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.applyBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.cancelBtn {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-left: 10px;
+}
