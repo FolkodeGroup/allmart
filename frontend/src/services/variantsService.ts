@@ -5,7 +5,6 @@
  * Endpoints: /api/admin/products/:productId/variants
  */
 
-import { handleResponse } from '../utils/apiErrorHandler';
 import { apiFetch } from '../utils/apiClient';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -40,13 +39,6 @@ interface ApiSuccess<T> {
 }
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
-
-function authHeaders(token: string): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 

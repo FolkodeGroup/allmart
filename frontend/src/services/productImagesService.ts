@@ -13,7 +13,6 @@
  *   GET    /api/images/products/:id/thumb                 → servir miniatura WebP (público)
  */
 
-import { handleResponse } from '../utils/apiErrorHandler';
 import { apiFetch } from '../utils/apiClient';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -67,18 +66,6 @@ interface ApiSuccess<T> {
 }
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
-
-function authHeaders(token: string): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
-
-function authHeadersFormData(token: string): HeadersInit {
-  // NO incluir Content-Type — el browser lo fija con el boundary correcto para multipart
-  return { Authorization: `Bearer ${token}` };
-}
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 

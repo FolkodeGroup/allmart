@@ -5,7 +5,6 @@
  */
 
 import type { Category } from '../types';
-import { handleResponse } from '../utils/apiErrorHandler';
 import { apiFetch } from '../utils/apiClient';
 
 // ─── Tipos que retorna el backend ─────────────────────────────────────────────
@@ -35,14 +34,6 @@ export interface CategoryPayload {
 }
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
-
-/** Cabeceras con autenticación */
-function authHeaders(token: string): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
 
 // ─── Mapeos entre tipos API y tipos frontend ──────────────────────────────────
 
