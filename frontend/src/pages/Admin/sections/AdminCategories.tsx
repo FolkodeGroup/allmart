@@ -12,6 +12,7 @@ export function AdminCategories() {
   const { products, updateProduct } = useAdminProducts();
   const { can } = useAdminAuth();
 
+  const [isLoading, _setIsLoading] = useState<boolean>(false);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY);
@@ -69,6 +70,24 @@ export function AdminCategories() {
     );
   };
 
+  const CategoryCardSkeleton = () => (
+    <div className={styles.card}>
+      <div className={styles.skeletonCardImg}></div>
+      <div className={styles.cardBody}>
+        <div className={styles.cardTop}>
+          <div className={styles.skeletonCardInfo}>
+            <div className={styles.skeletonCardName}></div>
+            <div className={styles.skeletonCardSlug}></div>
+          </div>
+        </div>
+        <div className={styles.skeletonCardDesc}></div>
+        <div className={styles.productSection}>
+          <div className={styles.skeletonProductBtn}></div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className={sectionStyles.page}>
 
@@ -91,7 +110,13 @@ export function AdminCategories() {
       </div>
 
       {/* Listado */}
-      {categories.length === 0 ? (
+      {isLoading ? (
+        <div className={styles.grid}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CategoryCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : categories.length === 0 ? (
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>🗂️</span>
           <p className={sectionStyles.emptyText}>No hay categorías creadas.</p>

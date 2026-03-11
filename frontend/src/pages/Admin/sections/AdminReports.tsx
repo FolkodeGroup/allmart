@@ -254,6 +254,7 @@ function exportOrdersCSV(orders: Order[]) {
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
   const { orders } = useAdminOrders();
+  const [isLoading, _setIsLoading] = useState<boolean>(false);
   const [period, setPeriod] = useState<Period>('30d');
 
   /* ── Ventana de fechas ── */
@@ -354,6 +355,45 @@ export function AdminReports() {
     ? ((kpis.totalRevenue - prevPeriodRevenue) / prevPeriodRevenue) * 100
     : null;
 
+  const KPISkeleton = () => (
+    <div className={styles.kpiCard}>
+      <div className={styles.skeletonKPIIcon}></div>
+      <div className={styles.kpiBody}>
+        <div className={styles.skeletonKPIValue}></div>
+        <div className={styles.skeletonKPILabel}></div>
+      </div>
+    </div>
+  );
+
+  const BarChartSkeleton = () => (
+    <div className={styles.skeletonChartContainer}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', width: '100%' }}>
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div key={i} className={styles.skeletonChartBar} style={{ height: `${30 + Math.random() * 70}%` }}></div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const DonutChartSkeleton = () => (
+    <div className={styles.donutWrap}>
+      <div className={styles.skeletonDonut}></div>
+      <div className={styles.skeletonLegend}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className={styles.skeletonLegendItem}></div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const ProductRankingSkeleton = () => (
+    <div className={styles.skeletonProductRanking}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className={styles.skeletonProductRankItem}></div>
+      ))}
+    </div>
+  );
+
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage}`}>
       {/* Header */}
@@ -393,179 +433,235 @@ export function AdminReports() {
 
       {/* KPI Cards */}
       <div className={styles.kpiGrid}>
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiIcon}>💰</span>
-          <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{formatPrice(kpis.totalRevenue)}</span>
-            <span className={styles.kpiLabel}>Ingresos totales</span>
-            {revenueChange !== null && (
-              <span className={`${styles.kpiChange} ${revenueChange >= 0 ? styles.kpiChangePos : styles.kpiChangeNeg}`}>
-                {revenueChange >= 0 ? '▲' : '▼'} {Math.abs(revenueChange).toFixed(1)}% vs período anterior
-              </span>
-            )}
-          </div>
-        </div>
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiIcon}>🛒</span>
-          <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{kpis.orderCount}</span>
-            <span className={styles.kpiLabel}>Pedidos activos</span>
-          </div>
-        </div>
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiIcon}>🎯</span>
-          <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{formatPrice(kpis.avgTicket)}</span>
-            <span className={styles.kpiLabel}>Ticket promedio</span>
-          </div>
-        </div>
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiIcon}>✅</span>
-          <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{kpis.completionRate}%</span>
-            <span className={styles.kpiLabel}>Tasa de entrega</span>
-          </div>
-        </div>
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiIcon}>💬</span>
-          <div className={styles.kpiBody}>
-            <span className={styles.kpiValue}>{kpis.paid}</span>
-            <span className={styles.kpiLabel}>Abonados (WhatsApp)</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Gráfica de ventas */}
-      <div className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <h2 className={styles.panelTitle}>📈 Ventas — {PERIOD_LABELS[period]}</h2>
-          <span className={styles.panelSubtitle}>
-            {period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
-            {' · '}ingresos de pedidos activos
-          </span>
-        </div>
-        {barData.every(d => d.value === 0) ? (
-          <p className={styles.noData}>Sin ventas en este período.</p>
+        {isLoading ? (
+          <>
+            <KPISkeleton />
+            <KPISkeleton />
+            <KPISkeleton />
+            <KPISkeleton />
+            <KPISkeleton />
+          </>
         ) : (
-          <BarChart data={barData} />
+          <>
+            <div className={styles.kpiCard}>
+              <span className={styles.kpiIcon}>💰</span>
+              <div className={styles.kpiBody}>
+                <span className={styles.kpiValue}>{formatPrice(kpis.totalRevenue)}</span>
+                <span className={styles.kpiLabel}>Ingresos totales</span>
+                {revenueChange !== null && (
+                  <span className={`${styles.kpiChange} ${revenueChange >= 0 ? styles.kpiChangePos : styles.kpiChangeNeg}`}>
+                    {revenueChange >= 0 ? '▲' : '▼'} {Math.abs(revenueChange).toFixed(1)}% vs período anterior
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className={styles.kpiCard}>
+              <span className={styles.kpiIcon}>🛒</span>
+              <div className={styles.kpiBody}>
+                <span className={styles.kpiValue}>{kpis.orderCount}</span>
+                <span className={styles.kpiLabel}>Pedidos activos</span>
+              </div>
+            </div>
+            <div className={styles.kpiCard}>
+              <span className={styles.kpiIcon}>🎯</span>
+              <div className={styles.kpiBody}>
+                <span className={styles.kpiValue}>{formatPrice(kpis.avgTicket)}</span>
+                <span className={styles.kpiLabel}>Ticket promedio</span>
+              </div>
+            </div>
+            <div className={styles.kpiCard}>
+              <span className={styles.kpiIcon}>✅</span>
+              <div className={styles.kpiBody}>
+                <span className={styles.kpiValue}>{kpis.completionRate}%</span>
+                <span className={styles.kpiLabel}>Tasa de entrega</span>
+              </div>
+            </div>
+            <div className={styles.kpiCard}>
+              <span className={styles.kpiIcon}>💬</span>
+              <div className={styles.kpiBody}>
+                <span className={styles.kpiValue}>{kpis.paid}</span>
+                <span className={styles.kpiLabel}>Abonados (WhatsApp)</span>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
-      {/* Top productos + Distribución de estados */}
-      <div className={styles.twoCol}>
-        <div className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h2 className={styles.panelTitle}>🏆 Productos más vendidos</h2>
-            <span className={styles.panelSubtitle}>Por ingresos generados</span>
+      {isLoading ? (
+        <>
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div className={styles.skeletonPanelTitle}></div>
+              <div className={styles.skeletonPanelSubtitle}></div>
+            </div>
+            <BarChartSkeleton />
           </div>
-          {topProducts.length === 0 ? (
-            <p className={styles.noData}>Sin datos en este período.</p>
-          ) : (
-            <ol className={styles.productRanking}>
-              {topProducts.map((p, i) => (
-                <li key={p.name} className={styles.productRankItem}>
-                  <div className={styles.productRankMeta}>
-                    <span className={styles.productRankPos}>{i + 1}</span>
-                    <div className={styles.productRankInfo}>
-                      <span className={styles.productRankName}>{p.name}</span>
-                      <div className={styles.productRankStats}>
-                        <span className={styles.productRankQty}>{p.qty} und.</span>
-                        <span className={styles.productRankRevenue}>{formatPrice(p.revenue)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.productBarWrap}>
-                    <div
-                      className={`${styles.productBar} ${i === 0 ? styles.productBarTop : ''}`}
-                      style={{ width: `${Math.max((p.revenue / maxProductRevenue) * 100, 4)}%` }}
-                    />
-                  </div>
-                </li>
+
+          <div className={styles.twoCol}>
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <div className={styles.skeletonPanelTitle}></div>
+                <div className={styles.skeletonPanelSubtitle}></div>
+              </div>
+              <ProductRankingSkeleton />
+            </div>
+
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <div className={styles.skeletonPanelTitle}></div>
+                <div className={styles.skeletonPanelSubtitle}></div>
+              </div>
+              <DonutChartSkeleton />
+            </div>
+          </div>
+
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div className={styles.skeletonPanelTitle}></div>
+              <div className={styles.skeletonPanelSubtitle}></div>
+            </div>
+            <div className={styles.skeletonTableSkeleton}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className={styles.skeletonTableRow}></div>
               ))}
-            </ol>
-          )}
-        </div>
-
-        <div className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h2 className={styles.panelTitle}>📦 Por estado de pedido</h2>
-            <span className={styles.panelSubtitle}>Todos los pedidos del período</span>
+            </div>
           </div>
-          {periodOrders.length === 0 ? (
-            <p className={styles.noData}>Sin datos en este período.</p>
-          ) : (
-            <DonutChart slices={statusSlices} />
-          )}
-        </div>
-      </div>
-
-      {/* Tabla resumen */}
-      <div className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
-          <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
-        </div>
-        {periodOrders.length === 0 ? (
-          <p className={styles.noData}>Sin pedidos en este período.</p>
-        ) : (
-          <div className={styles.summaryTableWrap}>
-            <table className={styles.summaryTable}>
-              <thead>
-                <tr>
-                  <th>N° Pedido</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th className={styles.tdRight}>Total</th>
-                  <th>Estado</th>
-                  <th>Pago</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...periodOrders]
-                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                  .slice(0, 10)
-                  .map(o => {
-                    const statusLabel =
-                      o.status === 'pendiente' ? 'Pendiente'
-                      : o.status === 'confirmado' ? 'Confirmado'
-                      : o.status === 'en-preparacion' ? 'En preparación'
-                      : o.status === 'enviado' ? 'Enviado'
-                      : o.status === 'entregado' ? 'Entregado'
-                      : 'Cancelado';
-                    const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
-                    return (
-                      <tr key={o.id}>
-                        <td className={styles.tblId}>#{o.id.slice(0, 8).toUpperCase()}</td>
-                        <td className={styles.tblDate}>
-                          {new Date(o.createdAt).toLocaleDateString('es-AR', {
-                            day: '2-digit', month: 'short', year: 'numeric',
-                          })}
-                        </td>
-                        <td>{o.customer.firstName} {o.customer.lastName}</td>
-                        <td className={`${styles.tblTotal} ${styles.tdRight}`}>
-                          {formatPrice(o.total)}
-                        </td>
-                        <td>
-                          <span className={`${styles.stBadge} ${stClass}`}>{statusLabel}</span>
-                        </td>
-                        <td>
-                          <span className={`${styles.payBadge} ${o.paymentStatus === 'abonado' ? styles.payAbonado : styles.payPending}`}>
-                            {o.paymentStatus === 'abonado' ? '✓ Abonado' : '○ Sin abonar'}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-            {periodOrders.length > 10 && (
-              <p className={styles.moreHint}>
-                Mostrando 10 de {periodOrders.length}. Exportá el CSV para ver todos.
-              </p>
+        </>
+      ) : (
+        <>
+          {/* Gráfica de ventas */}
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>📈 Ventas — {PERIOD_LABELS[period]}</h2>
+              <span className={styles.panelSubtitle}>
+                {period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
+                {' · '}ingresos de pedidos activos
+              </span>
+            </div>
+            {barData.every(d => d.value === 0) ? (
+              <p className={styles.noData}>Sin ventas en este período.</p>
+            ) : (
+              <BarChart data={barData} />
             )}
           </div>
-        )}
-      </div>
+
+          {/* Top productos + Distribución de estados */}
+          <div className={styles.twoCol}>
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <h2 className={styles.panelTitle}>🏆 Productos más vendidos</h2>
+                <span className={styles.panelSubtitle}>Por ingresos generados</span>
+              </div>
+              {topProducts.length === 0 ? (
+                <p className={styles.noData}>Sin datos en este período.</p>
+              ) : (
+                <ol className={styles.productRanking}>
+                  {topProducts.map((p, i) => (
+                    <li key={p.name} className={styles.productRankItem}>
+                      <div className={styles.productRankMeta}>
+                        <span className={styles.productRankPos}>{i + 1}</span>
+                        <div className={styles.productRankInfo}>
+                          <span className={styles.productRankName}>{p.name}</span>
+                          <div className={styles.productRankStats}>
+                            <span className={styles.productRankQty}>{p.qty} und.</span>
+                            <span className={styles.productRankRevenue}>{formatPrice(p.revenue)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className={styles.productBarWrap}>
+                        <div
+                          className={`${styles.productBar} ${i === 0 ? styles.productBarTop : ''}`}
+                          style={{ width: `${Math.max((p.revenue / maxProductRevenue) * 100, 4)}%` }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <h2 className={styles.panelTitle}>📦 Por estado de pedido</h2>
+                <span className={styles.panelSubtitle}>Todos los pedidos del período</span>
+              </div>
+              {periodOrders.length === 0 ? (
+                <p className={styles.noData}>Sin datos en este período.</p>
+              ) : (
+                <DonutChart slices={statusSlices} />
+              )}
+            </div>
+          </div>
+
+          {/* Tabla resumen */}
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
+              <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
+            </div>
+            {periodOrders.length === 0 ? (
+              <p className={styles.noData}>Sin pedidos en este período.</p>
+            ) : (
+              <div className={styles.summaryTableWrap}>
+                <table className={styles.summaryTable}>
+                  <thead>
+                    <tr>
+                      <th>N° Pedido</th>
+                      <th>Fecha</th>
+                      <th>Cliente</th>
+                      <th className={styles.tdRight}>Total</th>
+                      <th>Estado</th>
+                      <th>Pago</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...periodOrders]
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .slice(0, 10)
+                      .map(o => {
+                        const statusLabel =
+                          o.status === 'pendiente' ? 'Pendiente'
+                          : o.status === 'confirmado' ? 'Confirmado'
+                          : o.status === 'en-preparacion' ? 'En preparación'
+                          : o.status === 'enviado' ? 'Enviado'
+                          : o.status === 'entregado' ? 'Entregado'
+                          : 'Cancelado';
+                        const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
+                        return (
+                          <tr key={o.id}>
+                            <td className={styles.tblId}>#{o.id.slice(0, 8).toUpperCase()}</td>
+                            <td className={styles.tblDate}>
+                              {new Date(o.createdAt).toLocaleDateString('es-AR', {
+                                day: '2-digit', month: 'short', year: 'numeric',
+                              })}
+                            </td>
+                            <td>{o.customer.firstName} {o.customer.lastName}</td>
+                            <td className={`${styles.tblTotal} ${styles.tdRight}`}>
+                              {formatPrice(o.total)}
+                            </td>
+                            <td>
+                              <span className={`${styles.stBadge} ${stClass}`}>{statusLabel}</span>
+                            </td>
+                            <td>
+                              <span className={`${styles.payBadge} ${o.paymentStatus === 'abonado' ? styles.payAbonado : styles.payPending}`}>
+                                {o.paymentStatus === 'abonado' ? '✓ Abonado' : '○ Sin abonar'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+                {periodOrders.length > 10 && (
+                  <p className={styles.moreHint}>
+                    Mostrando 10 de {periodOrders.length}. Exportá el CSV para ver todos.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
