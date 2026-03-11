@@ -6,7 +6,7 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { FolderSearch, AlertCircle } from 'lucide-react';
 import { sanitizeString } from '../../../utils/security';
-import sectionStyles from './AdminSection.module.css';
+import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 
 const EMPTY = { name: '', description: '', image: '', itemCount: 0 };

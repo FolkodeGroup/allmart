@@ -18,7 +18,7 @@ import {
   mapApiProductToProduct,
   mapAdminProductToPayload,
   type ApiProduct,
-} from '../services/productsService';
+} from '../features/admin/products/productsService';
 
 // ─── Tipos exportados ─────────────────────────────────────────────────────────
 

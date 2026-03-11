@@ -8,8 +8,8 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { useNotification } from './NotificationContext';
-import * as variantsService from '../services/variantsService';
-import type { ApiVariant } from '../services/variantsService';
+import * as variantsService from '../features/admin/variants/variantsService';
+import type { ApiVariant } from '../features/admin/variants/variantsService';
 
 // ─── Tipos exportados ─────────────────────────────────────────────────────────
 
