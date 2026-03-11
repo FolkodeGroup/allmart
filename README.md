@@ -42,9 +42,10 @@ docker compose up --build
 
 ## Documentación
 
+- [Estructura del Proyecto y Arquitectura](ARCHITECTURE.md): Detalles sobre la comunicación frontend-backend y seguridad (JWT).
+- [Gestión de Entidades](frontend/docs/ENTITY_MANAGEMENT.md): Guía técnica y de usuario para Productos, Categorías, Variantes e Imágenes.
+- [DOCKER.md](DOCKER.md): Guía completa de Docker (instalación, uso, troubleshooting).
 - Consulta `frontend/README.md` y `backend/README.md` para instrucciones específicas de cada parte.
-- Consulta `ARCHITECTURE.md` para detalles sobre la arquitectura y la comunicación entre frontend y backend.
-- Consulta `DOCKER.md` para la guía completa de Docker (instalación, uso, troubleshooting).
 
 ## Calidad de Código y Git Hooks
 
