@@ -9,7 +9,42 @@
   margin-bottom: 18px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   animation: fadeIn 0.2s both;
+  flex-wrap: wrap;
 }
+
+@media (max-width: 900px) {
+  .bulkEditBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 14px 10px;
+  }
+  .input {
+    min-width: 0;
+    width: 100%;
+    font-size: 1.08rem;
+    padding: 10px 12px;
+  }
+  .applyBtn, .cancelBtn {
+    width: 100%;
+    font-size: 1.08rem;
+    padding: 12px 0;
+    min-height: 44px;
+    border-radius: 10px;
+  }
+  .label {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+  }
+  .error {
+    margin-left: 0;
+    margin-top: 4px;
+    font-size: 1rem;
+    word-break: break-word;
+    max-width: 95vw;
+  }
+}
+
 .label {
   font-family: var(--font-ui);
   font-size: var(--text-sm);

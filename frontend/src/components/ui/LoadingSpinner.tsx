@@ -6,10 +6,10 @@ interface LoadingSpinnerProps {
   fullPage?: boolean;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  message = 'Cargando...', 
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  message = 'Cargando...',
   size = 'md',
-  fullPage = false 
+  fullPage = false
 }) => {
   const sizeMap = {
     sm: '24px',
@@ -35,7 +35,9 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     padding: '2rem',
-    width: '100%'
+    width: '100%',
+    maxWidth: '100vw',
+    minHeight: '120px',
   };
 
   return (
@@ -46,12 +48,16 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         border: '4px solid #f3f3f3',
         borderTop: '4px solid var(--color-primary, #2563eb)',
         borderRadius: '50%',
-        animation: 'spin 1s linear infinite'
+        animation: 'spin 1s linear infinite',
+        minWidth: 32,
+        minHeight: 32,
+        maxWidth: '90vw',
+        boxSizing: 'border-box',
       }} />
       {message && (
-        <p style={{ 
-          marginTop: '1rem', 
-          color: '#666', 
+        <p style={{
+          marginTop: '1rem',
+          color: '#666',
           fontWeight: 500,
           fontSize: size === 'sm' ? '0.875rem' : '1rem'
         }}>
