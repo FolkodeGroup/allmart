@@ -40,7 +40,8 @@ export function AdminLogin() {
         toast.error(data.message || 'Credenciales inválidas');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error de red o servidor');
+      const errorMsg = err instanceof Error ? err.message : 'Error de red o servidor';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
