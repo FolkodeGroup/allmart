@@ -4,8 +4,10 @@
   "description": "Este proyecto está dividido en dos partes principales:",
   "main": "index.js",
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
     "bcryptjs": "^3.0.3",
     "buffer-equal-constant-time": "^1.0.1",
+    "dompurify": "^3.3.3",
     "dotenv": "^17.3.1",
     "ecdsa-sig-formatter": "^1.0.11",
     "jsonwebtoken": "^9.0.3",

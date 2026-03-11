@@ -3,6 +3,7 @@ import type { AdminProduct, VariantGroup } from '../../../context/AdminProductsC
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminImages } from '../../../context/AdminImagesContext';
+import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
 
@@ -196,16 +197,20 @@ export function AdminProductForm({ productId, onClose }: Props) {
     
     setError('');
     setSaving(true);
+
+    // Sanitización de inputs antes de enviar al servidor para prevenir XSS
+    const sanitizedForm = sanitizeObject(form);
+
     try {
       if (isEdit && productId) {
         // Al editar, las imágenes se gestionan vía la API de imágenes;
         // no incluimos el campo images en el update del producto
-        const { images: _omitted, ...formWithoutImages } = form;
+        const { images: _omitted, ...formWithoutImages } = sanitizedForm;
         void _omitted;
         await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
       } else {
         // Al crear, enviamos las URLs capturadas en el formulario
-        await addProduct(form);
+        await addProduct(sanitizedForm);
       }
       onClose();
     } catch (err) {

@@ -6,6 +6,21 @@
 import { handleResponse } from './apiErrorHandler';
 
 const STORAGE_KEY = 'allmart_admin_token';
+const CSRF_TOKEN_KEY = 'allmart_csrf_token';
+
+/**
+ * Obtiene el token CSRF almacenado en la sesión (si existe).
+ */
+export function getCsrfToken(): string | null {
+  return localStorage.getItem(CSRF_TOKEN_KEY);
+}
+
+/**
+ * Persiste el token CSRF obtenido del backend (ej. en el login).
+ */
+export function setCsrfToken(token: string): void {
+  localStorage.setItem(CSRF_TOKEN_KEY, token);
+}
 
 /**
  * Obtiene el token actual del localStorage.
@@ -20,12 +35,18 @@ export function getStoredToken(): string | null {
  */
 export function getAuthHeaders(token?: string | null): HeadersInit {
   const activeToken = token || getStoredToken();
-  const headers: HeadersInit = {
+  const csrfToken = getCsrfToken();
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
   if (activeToken) {
     headers['Authorization'] = `Bearer ${activeToken}`;
+  }
+
+  // Prevenir CSRF: Añadir token de cabecera si está disponible
+  if (csrfToken) {
+    headers['X-CSRF-Token'] = csrfToken;
   }
 
   return headers;
