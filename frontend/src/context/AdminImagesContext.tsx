@@ -8,7 +8,7 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import * as imagesService from '../services/productImagesService';
-import type { ApiProductImage, CreateImagePayload, UpdateImagePayload } from '../services/productImagesService';
+import type { ApiProductImage, CreateImagePayload, UpdateImagePayload, UpdateImageMetaPayload } from '../services/productImagesService';
 
 // ─── Tipos exportados ─────────────────────────────────────────────────────────
 
@@ -16,9 +16,15 @@ import type { ApiProductImage, CreateImagePayload, UpdateImagePayload } from '..
 export interface ProductImageItem {
   id: string;
   productId: string;
+  /** URL de la imagen completa: /api/images/products/:id */
   url: string;
-  altText?: string;
+  /** URL de la miniatura: /api/images/products/:id/thumb */
+  thumbUrl?: string;
+  altText?: string | null;
   position: number;
+  width?: number;
+  height?: number;
+  sizeBytes?: number;
 }
 
 interface AdminImagesContextType {
@@ -34,9 +40,13 @@ interface AdminImagesContextType {
   /** Limpia las imágenes del estado */
   clearImages: () => void;
 
-  /** Crea una imagen nueva */
+  /** Sube un archivo de imagen (lo convierte a WebP en el backend) */
+  uploadImage: (productId: string, file: File, altText?: string) => Promise<ProductImageItem>;
+  /** Crea una imagen nueva por URL (legacy) */
   addImage: (productId: string, payload: CreateImagePayload) => Promise<ProductImageItem>;
-  /** Actualiza url / altText / position de una imagen */
+  /** Actualiza altText / position de una imagen (sin reemplazar el binario) */
+  updateImageMeta: (productId: string, imageId: string, payload: UpdateImageMetaPayload) => Promise<void>;
+  /** Actualiza url / altText / position de una imagen (legacy) */
   updateImage: (productId: string, imageId: string, payload: UpdateImagePayload) => Promise<void>;
   /** Elimina una imagen */
   deleteImage: (productId: string, imageId: string) => Promise<void>;
@@ -53,8 +63,12 @@ function apiToImageItem(api: ApiProductImage): ProductImageItem {
     id: api.id,
     productId: api.productId,
     url: api.url,
+    thumbUrl: api.thumbUrl,
     altText: api.altText,
     position: api.position,
+    width: api.width,
+    height: api.height,
+    sizeBytes: api.sizeBytes,
   };
 }
 
@@ -118,6 +132,33 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const uploadImage = async (productId: string, file: File, altText?: string): Promise<ProductImageItem> => {
+    return withLoading(async () => {
+      const t = requireToken();
+      const position = images.length;
+      const created = await imagesService.uploadProductImage(t, productId, file, altText, position);
+      const item = apiToImageItem(created);
+      setImages(prev => [...prev, item].sort((a, b) => a.position - b.position));
+      return item;
+    });
+  };
+
+  const updateImageMeta = async (
+    _productId: string,
+    imageId: string,
+    payload: UpdateImageMetaPayload,
+  ): Promise<void> => {
+    await withLoading(async () => {
+      const t = requireToken();
+      const updated = await imagesService.updateProductImageMeta(t, _productId, imageId, payload);
+      setImages(prev =>
+        prev
+          .map(img => (img.id === imageId ? apiToImageItem(updated) : img))
+          .sort((a, b) => a.position - b.position),
+      );
+    });
+  };
+
   const updateImage = async (
     productId: string,
     imageId: string,
@@ -152,6 +193,8 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
         loadImages,
         clearImages,
         addImage,
+        uploadImage,
+        updateImageMeta,
         updateImage,
         deleteImage,
       }}

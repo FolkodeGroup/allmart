@@ -428,3 +428,107 @@
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }
+
+/* ── Size & dimensions badges ── */
+.sizeBadge {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+.cardDims {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--space-2);
+}
+
+/* ── Drag & Drop zone ── */
+.dropZone {
+  border: 2px dashed var(--color-border);
+  border-radius: 10px;
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 120px;
+  justify-content: center;
+  background: var(--color-bg-primary);
+}
+.dropZone:hover {
+  border-color: var(--color-primary);
+  background: rgba(118,146,130,0.04);
+}
+.dropZoneHasFile {
+  border-color: var(--color-primary);
+  background: rgba(118,146,130,0.06);
+  padding: var(--space-2);
+  min-height: 160px;
+}
+
+.dropIcon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.dropText {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.dropHint {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+.dropPreview {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+/* Input de archivo oculto */
+.hiddenFileInput {
+  display: none;
+}
+
+.fileName {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Estado del upload */
+.uploadStatus {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.uploadOk {
+  color: var(--color-success, #27ae60);
+}
+
+.uploadErr {
+  color: var(--color-error, #c0392b);
+}
