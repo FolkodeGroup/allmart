@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { Category } from '../types';
 import * as categoriesService from '../services/categoriesService';
 import { useAdminAuth } from './AdminAuthContext';
+import { useNotification } from './NotificationContext';
 
 interface AdminCategoriesContextType {
   categories: Category[];
@@ -23,6 +24,7 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { token } = useAdminAuth();
+  const { showNotification } = useNotification();
 
   const refreshCategories = useCallback(async () => {
     if (!token) return;
@@ -32,11 +34,13 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
       const data = await categoriesService.fetchAdminCategories(token);
       setCategories(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar categorías');
+      const msg = err instanceof Error ? err.message : 'Error al cargar categorías';
+      setError(msg);
+      showNotification('error', msg);
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token, showNotification]);
 
   useEffect(() => {
     refreshCategories();
@@ -48,11 +52,12 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     try {
       const newCat = await categoriesService.createAdminCategory(token, c);
       setCategories(prev => [...prev, newCat]);
+      showNotification('success', 'Categoría creada exitosamente');
       return newCat;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al crear categoría';
-      setError(msg);
-      throw new Error(msg);
+      showNotification('error', msg);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -64,10 +69,11 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     try {
       const updatedCat = await categoriesService.updateAdminCategory(token, id, data);
       setCategories(prev => prev.map(c => c.id === id ? updatedCat : c));
+      showNotification('success', 'Categoría actualizada exitosamente');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al actualizar categoría';
-      setError(msg);
-      throw new Error(msg);
+      showNotification('error', msg);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -79,10 +85,11 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     try {
       await categoriesService.deleteAdminCategory(token, id);
       setCategories(prev => prev.filter(c => c.id !== id));
+      showNotification('success', 'Categoría eliminada exitosamente');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al eliminar categoría';
-      setError(msg);
-      throw new Error(msg);
+      showNotification('error', msg);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +104,16 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
       setCategories(prev => prev.map(c => 
         c.id === id ? { ...c, image: imageUrl } : c
       ));
+      showNotification('success', 'Imagen de categoría actualizada');
       return imageUrl;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al subir imagen';
+      showNotification('error', msg);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al subir la imagen';
       setError(msg);

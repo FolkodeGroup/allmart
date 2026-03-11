@@ -7,6 +7,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
+import { useNotification } from './NotificationContext';
 import * as imagesService from '../services/productImagesService';
 import type { ApiProductImage, CreateImagePayload, UpdateImagePayload, UpdateImageMetaPayload } from '../services/productImagesService';
 
@@ -76,6 +77,7 @@ function apiToImageItem(api: ApiProductImage): ProductImageItem {
 
 export function AdminImagesProvider({ children }: { children: ReactNode }) {
   const { token } = useAdminAuth();
+  const { showNotification } = useNotification();
   const [images, setImages] = useState<ProductImageItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -96,7 +98,8 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error inesperado';
       setError(msg);
-      throw new Error(msg);
+      showNotification('error', msg);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +115,7 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
       setSelectedProductId(productId);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, showNotification]);
 
   const clearImages = useCallback(() => {
     setImages([]);
@@ -128,6 +131,7 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
       const created = await imagesService.createProductImage(t, productId, { ...payload, position });
       const item = apiToImageItem(created);
       setImages(prev => [...prev, item].sort((a, b) => a.position - b.position));
+      showNotification('success', 'Imagen añadida');
       return item;
     });
   };
@@ -139,6 +143,7 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
       const created = await imagesService.uploadProductImage(t, productId, file, altText, position);
       const item = apiToImageItem(created);
       setImages(prev => [...prev, item].sort((a, b) => a.position - b.position));
+      showNotification('success', 'Imagen subida exitosamente');
       return item;
     });
   };
@@ -156,6 +161,7 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
           .map(img => (img.id === imageId ? apiToImageItem(updated) : img))
           .sort((a, b) => a.position - b.position),
       );
+      showNotification('success', 'Metadatos actualizados');
     });
   };
 
@@ -172,6 +178,7 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
           .map(img => (img.id === imageId ? apiToImageItem(updated) : img))
           .sort((a, b) => a.position - b.position),
       );
+      showNotification('success', 'Imagen actualizada');
     });
   };
 
@@ -180,6 +187,7 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
       const t = requireToken();
       await imagesService.deleteProductImage(t, productId, imageId);
       setImages(prev => prev.filter(img => img.id !== imageId));
+      showNotification('success', 'Imagen eliminada');
     });
   };
 

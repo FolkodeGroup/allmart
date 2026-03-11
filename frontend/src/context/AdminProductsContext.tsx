@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
 import { useAdminCategories } from './AdminCategoriesContext';
+import { useNotification } from './NotificationContext';
 import {
   fetchAdminProducts,
   createAdminProduct,
@@ -68,6 +69,7 @@ const AdminProductsContext = createContext<AdminProductsContextType | undefined>
 export function AdminProductsProvider({ children }: { children: ReactNode }) {
   const { token } = useAdminAuth();
   const { categories } = useAdminCategories();
+  const { showNotification } = useNotification();
 
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(false);
@@ -82,11 +84,13 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       const apiProducts = await fetchAdminProducts(token);
       setProducts(apiProducts.map((p) => apiToAdminProduct(p, categories)));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar productos');
+      const msg = err instanceof Error ? err.message : 'Error al cargar productos';
+      setError(msg);
+      showNotification('error', msg);
     } finally {
       setLoading(false);
     }
-  }, [token, categories]);
+  }, [token, categories, showNotification]);
 
   /* Carga inicial cuando el token o las categorías están disponibles */
   useEffect(() => {
@@ -97,36 +101,56 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
   const addProduct = async (p: Omit<AdminProduct, 'id'>) => {
     if (!token) throw new Error('No autenticado');
-    const payload = mapAdminProductToPayload(p);
-    const created = await createAdminProduct(payload, token);
-    const newProduct = apiToAdminProduct(created, categories);
-    
-    setProducts((prev) => [newProduct, ...prev]);
+    try {
+      const payload = mapAdminProductToPayload(p);
+      const created = await createAdminProduct(payload, token);
+      const newProduct = apiToAdminProduct(created, categories);
+      
+      setProducts((prev) => [newProduct, ...prev]);
+      showNotification('success', 'Producto creado exitosamente');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al crear producto';
+      showNotification('error', msg);
+      throw err;
+    }
   };
 
   const updateProduct = async (id: string, data: Partial<AdminProduct>) => {
     if (!token) throw new Error('No autenticado');
 
-    const current = products.find((p) => p.id === id);
-    if (!current) return;
-    
-    const merged = { ...current, ...data };
-    const payload = mapAdminProductToPayload(merged);
-    
-    // Si hay datos que pertenecen a la API, actualizamos
-    const updated = await updateAdminProduct(id, payload, token);
-    
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === id ? apiToAdminProduct(updated, categories) : p
-      )
-    );
+    try {
+      const current = products.find((p) => p.id === id);
+      if (!current) return;
+      
+      const merged = { ...current, ...data };
+      const payload = mapAdminProductToPayload(merged);
+      
+      const updated = await updateAdminProduct(id, payload, token);
+      
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === id ? apiToAdminProduct(updated, categories) : p
+        )
+      );
+      showNotification('success', 'Producto actualizado exitosamente');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al actualizar producto';
+      showNotification('error', msg);
+      throw err;
+    }
   };
 
   const deleteProduct = async (id: string) => {
     if (!token) throw new Error('No autenticado');
-    await deleteAdminProduct(id, token);
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    try {
+      await deleteAdminProduct(id, token);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      showNotification('success', 'Producto eliminado exitosamente');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
+      showNotification('error', msg);
+      throw err;
+    }
   };
 
   const getProduct = (id: string) => products.find((p) => p.id === id);
