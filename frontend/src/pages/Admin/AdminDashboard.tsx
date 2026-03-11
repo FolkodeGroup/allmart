@@ -1,3 +1,18 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+// ── Función de saludo dinámico según la hora del día ──
+function getTimeBasedGreeting(): { greeting: string; emoji: string } {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 12) {
+    return { greeting: 'Buenos días', emoji: '🌅' };
+  } else if (hour >= 12 && hour < 20) {
+    return { greeting: 'Buenas tardes', emoji: '☀️' };
+  } else {
+    return { greeting: 'Buenas noches', emoji: '🌙' };
+  }
+}
+
 const sections = [
   {
     icon: '',
@@ -21,8 +36,6 @@ const sections = [
     color: 'warm',
   },
 ];
-import React from 'react';
-import { Link } from 'react-router-dom';
 // import { useAdminAuth } from '../../context/AdminAuthContext';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
@@ -41,6 +54,7 @@ import MetricCard from '../../components/ui/MetricCard';
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
   const { products } = useAdminProducts();
+  const { greeting, emoji } = getTimeBasedGreeting();
   const [dateRange, setDateRange] = React.useState(() => {
     // Por defecto: últimos 7 días
     const to = new Date();
@@ -225,6 +239,19 @@ export function AdminDashboard() {
 
   return (
     <div className={styles.page}>
+      {/* Welcome Banner */}
+      <div className={styles.welcomeBanner}>
+        <div className={styles.bannerContent}>
+          <h1 className={styles.bannerGreeting}>
+            {greeting}, administrador{emoji}
+          </h1>
+          <p className={styles.bannerSubtext}>
+            Continuemos gestionando tu tienda con éxito. Aquí encontrarás todas las herramientas que necesitas.
+          </p>
+        </div>
+        <div className={styles.bannerIllustration}>📦</div>
+      </div>
+
       {/* Header */}
       <div className={styles.header}>
         <div>
