@@ -69,6 +69,7 @@ interface AdminProductsContextType {
   deleteProduct: (id: string) => Promise<void>;
   getProduct: (id: string) => AdminProduct | undefined;
   loadProductVariants: (productId: string) => Promise<VariantGroup[]>;
+  getLowStockCount: () => number;
 }
 
 // ─── Contexto ─────────────────────────────────────────────────────────────────
@@ -240,6 +241,8 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
   const getProduct = (id: string) => products.find((p) => p.id === id);
 
+  const getLowStockCount = () => products.filter((p) => p.stock < 5).length;
+
   return (
     <AdminProductsContext.Provider
       value={{
@@ -255,6 +258,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         updateProduct,
         deleteProduct,
         getProduct,
+        getLowStockCount,
         loadProductVariants,
       }}
     >

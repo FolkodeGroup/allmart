@@ -359,6 +359,7 @@ interface AdminOrdersContextType {
   deleteOrder: (id: string) => void;
   getOrder: (id: string) => Order | undefined;
   markAsPaid: (id: string) => void;
+  getPendingOrdersCount: () => number;
 }
 
 const AdminOrdersContext = createContext<AdminOrdersContextType | undefined>(undefined);
@@ -431,9 +432,11 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const getPendingOrdersCount = () => orders.filter(o => o.status === 'pendiente').length;
+
   return (
     <AdminOrdersContext.Provider value={{
-      orders, addOrder, updateOrderStatus, updateOrder, deleteOrder, getOrder, markAsPaid,
+      orders, addOrder, updateOrderStatus, updateOrder, deleteOrder, getOrder, markAsPaid, getPendingOrdersCount,
     }}>
       {children}
     </AdminOrdersContext.Provider>
