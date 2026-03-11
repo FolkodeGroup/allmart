@@ -328,47 +328,34 @@ export function AdminDashboard() {
       </section>
 
       {/* Métricas mensuales */}
-      {can('reports.view') && (
-        <section className={styles.metricsSection}>
-          <div className={styles.metricsGrid}>
-          {isLoading ? (
-            <>
-              <MetricCardSkeleton />
-              <MetricCardSkeleton />
-              <MetricCardSkeleton />
-              <MetricCardSkeleton />
-            </>
-          ) : (
-            <>
-                <MetricCard
-                  title="Ingresos"
-                  icon={<span>💰</span>}
-                  value={ingresosActual.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-                  variation={ingresosVar}
-                />
-                <MetricCard
-                  title="Pedidos"
-                  icon={<span>🛒</span>}
-                  value={pedidosActual}
-                  variation={pedidosVar}
-                />
-                <MetricCard
-                  title="Nuevos Clientes"
-                  icon={<span>🧑‍💼</span>}
-                  value={clientesActual}
-                  variation={clientesVar}
-                />
-                <MetricCard
-                  title="Tasa de Conversión"
-                  icon={<span>📈</span>}
-                  value={conversionActual.toFixed(1) + '%'}
-                  variation={conversionVar}
-                />
-            </>
-          )}
-          </div>
-        </section>
-      )}
+      <section className={styles.metricsSection}>
+        <div className={styles.metricsGrid}>
+          <MetricCard
+            title="Ingresos"
+            icon={<span>💰</span>}
+            value={ingresosActual.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
+            variation={ingresosVar}
+          />
+          <MetricCard
+            title="Pedidos"
+            icon={<span>🛒</span>}
+            value={pedidosActual}
+            variation={pedidosVar}
+          />
+          <MetricCard
+            title="Nuevos Clientes"
+            icon={<span>🧑‍💼</span>}
+            value={clientesActual}
+            variation={clientesVar}
+          />
+          <MetricCard
+            title="Tasa de Conversión"
+            icon={<span>📈</span>}
+            value={conversionActual.toFixed(1) + '%'}
+            variation={conversionVar}
+          />
+        </div>
+      </section>
 
       {/* Gráficos: Ventas y Distribución por Categoría */}
       <section className={styles.section}>
