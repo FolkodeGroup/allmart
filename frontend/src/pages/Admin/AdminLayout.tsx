@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAdminAuth } from '../../context/AdminAuthContext';
@@ -9,6 +9,7 @@ import styles from './AdminLayout.module.css';
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠', permission: null },
   { label: 'Productos', to: '/admin/productos', icon: '📦', permission: null },
+  { label: 'Imágenes', to: '/admin/imagenes', icon: '🖼️', permission: null },
   { label: 'Variantes', to: '/admin/variantes', icon: '🎨', permission: null },
   { label: 'Categorías', to: '/admin/categorias', icon: '🗂️', permission: null },
   { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒', permission: null },
@@ -23,6 +24,7 @@ const ROLE_LABELS: Record<string, string> = {
 export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
   const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [isCollapsed, setIsCollapsed] = useState(() => {
       const saved = localStorage.getItem('admin-sidebar-collapsed');
@@ -30,10 +32,24 @@ export function AdminLayout() {
     });
   
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   useEffect(() => {
       localStorage.setItem('admin-sidebar-collapsed', JSON.stringify(isCollapsed));
     }, [isCollapsed]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isDropdownOpen]);
 
   const handleLogout = () => {
     logout();
@@ -111,14 +127,14 @@ export function AdminLayout() {
           {navItems.map(item => {
             const locked = item.permission !== null && !can(item.permission);
             const commonProps = {
-              key: item.to,
               title: isCollapsed ? item.label : '',
               'data-label': item.label,
               onClick: () => setIsMobileOpen(false) // Cierra drawer al clickear en mobile
-              };
+            };
             if (locked) {
               return (
                 <span
+                  key={item.to}
                   {...commonProps}
                   className={`${styles.navItem} ${styles.navItemLocked}`}
                 >
@@ -128,11 +144,9 @@ export function AdminLayout() {
                 </span>
               );
             }
-            
-            
-            
             return (
               <NavLink
+                key={item.to}
                 {...commonProps}
                 to={item.to}
                 className={({ isActive }) =>
@@ -146,9 +160,13 @@ export function AdminLayout() {
           })}
         </nav>
 
-        <div className={styles.sidebarFooter}>
-          <div className={styles.userInfo}>
-            <span className={styles.userIcon}>👤</span>
+        <div className={styles.sidebarFooter} ref={dropdownRef}>
+          <button
+            className={styles.profileBtn}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-label="Abrir menú de perfil"
+          >
+            <div className={styles.avatar}>👤</div>
             <div className={styles.userDetails}>
               <span className={styles.userName}>{user}</span>
               {role && !isCollapsed && (
@@ -157,10 +175,29 @@ export function AdminLayout() {
                 </span>
               )}
             </div>
-          </div>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            {isCollapsed ? '🚪' : 'Cerrar sesión'}
+            <span className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`}>
+              ▼
+            </span>
           </button>
+
+          {isDropdownOpen && (
+            <div className={styles.dropdown}>
+              <button className={styles.dropdownItem}>
+                <span className={styles.dropdownIcon}>⚙️</span>
+                <span>Configuración</span>
+              </button>
+              <button
+                className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  handleLogout();
+                }}
+              >
+                <span className={styles.dropdownIcon}>🚪</span>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 

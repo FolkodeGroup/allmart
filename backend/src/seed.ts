@@ -34,10 +34,13 @@ async function seed() {
     const hashedAdmin = await bcrypt.hash(adminPassword, 10);
     const hashedEditor = await bcrypt.hash(editorPassword, 10);
 
-    // ADMIN
+    // ADMIN — update: siempre sincroniza el hash con la variable de entorno
     await prisma.user.upsert({
       where: { email: 'admin@admin.com' },
-      update: {},
+      update: {
+        passwordHash: hashedAdmin,
+        isActive: true,
+      },
       create: {
         firstName: 'Admin',
         lastName: 'Principal',
@@ -48,10 +51,13 @@ async function seed() {
       },
     });
 
-    // EDITOR
+    // EDITOR — update: siempre sincroniza el hash con la variable de entorno
     await prisma.user.upsert({
       where: { email: 'editor@admin.com' },
-      update: {},
+      update: {
+        passwordHash: hashedEditor,
+        isActive: true,
+      },
       create: {
         firstName: 'Editor',
         lastName: 'Principal',
@@ -93,7 +99,17 @@ async function seed() {
       }
       await prisma.product.upsert({
         where: { slug: prod.slug },
-        update: {},
+        update: {
+          images: prod.images,
+          shortDescription: prod.shortDescription || null,
+          description: prod.description || null,
+          price: prod.price,
+          originalPrice: prod.originalPrice || null,
+          discount: prod.discount || null,
+          tags: prod.tags || [],
+          features: prod.features || [],
+          status: ProductStatus.ACTIVE,
+        },
         create: {
           name: prod.name,
           slug: prod.slug,

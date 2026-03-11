@@ -1,51 +1,61 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProducts } from '../../data/productsLocal';
-import { categories, sortOptions } from '../../data/mock';
+import type { Product, Category } from '../../types';
+import {
+  fetchPublicProducts,
+  mapApiProductToProduct,
+  type PublicProductsParams,
+} from '../../services/productsService';
+import { fetchPublicCategories } from '../../services/categoriesService';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductListPage.module.css';
 
+type SortOption = { label: string; value: string };
+
+const SORT_OPTIONS: SortOption[] = [
+  { label: 'Relevancia', value: 'relevance' },
+  { label: 'Menor precio', value: 'price_asc' },
+  { label: 'Mayor precio', value: 'price_desc' },
+  { label: 'Mejor puntuación', value: 'rating' },
+  { label: 'Más nuevos', value: 'newest' },
+];
+
 export function ProductListPage() {
   const [sortBy, setSortBy] = useState('relevance');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  /* Cargar categorías una sola vez */
+  useEffect(() => {
+    fetchPublicCategories()
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
+
+  /* Cargar productos cuando cambian los filtros */
+  useEffect(() => {
+    const params: PublicProductsParams = { limit: 48 };
+    if (selectedCategory) params.category = selectedCategory;
+    if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
+
+    setLoading(true);
+    setError(null);
+    fetchPublicProducts(params)
+      .then(({ data }) => {
+        setProducts(data.map((p) => mapApiProductToProduct(p, categories)));
+      })
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [sortBy, selectedCategory, categories]);
+
   const toggleCategory = (slug: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(slug) ? prev.filter((c) => c !== slug) : [...prev, slug]
-    );
+    setSelectedCategory((prev) => (prev === slug ? '' : slug));
   };
-
-  const sortedProducts = useMemo(() => {
-    let result = [...getProducts()];
-
-    // Filter
-    if (selectedCategories.length > 0) {
-      result = result.filter((p) =>
-        selectedCategories.includes(p.category.slug)
-      );
-    }
-
-    // Sort
-    switch (sortBy) {
-      case 'price-asc':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'newest':
-        result.reverse();
-        break;
-      default:
-        break;
-    }
-
-    return result;
-  }, [sortBy, selectedCategories]);
 
   return (
     <main className={styles.page}>
@@ -69,11 +79,13 @@ export function ProductListPage() {
                 <input
                   type="checkbox"
                   className={styles.filterCheckbox}
-                  checked={selectedCategories.includes(cat.slug)}
+                  checked={selectedCategory === cat.slug}
                   onChange={() => toggleCategory(cat.slug)}
                 />
                 <span className={styles.filterLabel}>{cat.name}</span>
-                <span className={styles.filterCount}>{cat.itemCount}</span>
+                {cat.itemCount !== undefined && (
+                  <span className={styles.filterCount}>{cat.itemCount}</span>
+                )}
               </label>
             ))}
           </div>
@@ -129,7 +141,7 @@ export function ProductListPage() {
               <span className={styles.resultCount}>
                 Mostrando{' '}
                 <span className={styles.resultCountBold}>
-                  {sortedProducts.length}
+                  {products.length}
                 </span>{' '}
                 productos
               </span>
@@ -145,7 +157,7 @@ export function ProductListPage() {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                {sortOptions.map((opt) => (
+                {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
@@ -154,13 +166,29 @@ export function ProductListPage() {
             </div>
           </div>
 
-          {sortedProducts.length > 0 ? (
+          {loading && (
+            <div className={styles.emptyState}>
+              <p className={styles.emptyText}>Cargando productos...</p>
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className={styles.emptyState}>
+              <span className={styles.emptyIcon}>⚠️</span>
+              <h3 className={styles.emptyTitle}>Error al cargar productos</h3>
+              <p className={styles.emptyText}>{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && products.length > 0 && (
             <div className={styles.productsGrid}>
-              {sortedProducts.map((product) => (
+              {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-          ) : (
+          )}
+
+          {!loading && !error && products.length === 0 && (
             <div className={styles.emptyState}>
               <span className={styles.emptyIcon}>🔍</span>
               <h3 className={styles.emptyTitle}>

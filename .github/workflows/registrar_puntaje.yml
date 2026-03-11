@@ -7,11 +7,14 @@ on:
 jobs:
   puntaje_y_movimiento:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Extraer puntaje y comentar
         id: puntaje
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const body = context.payload.issue.body || '';
             const match = body.match(/PUNTAJE\s*[:：]\s*(\d+)/i);

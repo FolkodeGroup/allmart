@@ -4,7 +4,7 @@
  */
 
 import { Decimal } from '@prisma/client/runtime/client';
-import { ProductStatus as PrismaProductStatus } from '@prisma/client';
+import { Prisma, ProductStatus as PrismaProductStatus } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { Product, CreateProductDTO, UpdateProductDTO } from '../models/Product';
 import { ProductStatus } from '../types';
@@ -18,33 +18,26 @@ function generateSlug(name: string): string {
 }
 
 // Mapea el resultado de Prisma al tipo Product del proyecto
-function toProduct(row: {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price: Decimal;
-  originalPrice: Decimal | null;
-  categoryId: string | null;
-  status: string;
-  sku: string | null;
-  stock: number;
-  rating: Decimal;
-  createdAt: Date;
-  updatedAt: Date;
-}): Product {
+function toProduct(row: any): Product {
   return {
     id: row.id,
     name: row.name,
     slug: row.slug,
     description: row.description ?? undefined,
+    shortDescription: row.shortDescription ?? undefined,
     price: row.price.toNumber(),
     compareAtPrice: row.originalPrice?.toNumber(),
+    discount: row.discount?.toNumber(),
+    images: Array.isArray(row.images) ? row.images : [],
     categoryId: row.categoryId ?? '',
-    status: row.status as ProductStatus,
-    sku: row.sku ?? undefined,
-    stock: row.stock,
+    tags: Array.isArray(row.tags) ? row.tags : [],
     rating: row.rating.toNumber(),
+    reviewCount: row.reviewCount,
+    inStock: row.inStock,
+    stock: row.stock,
+    sku: row.sku ?? undefined,
+    features: Array.isArray(row.features) ? row.features : [],
+    status: row.status as ProductStatus,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -79,13 +72,20 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       name: dto.name,
       slug,
       description: dto.description ?? null,
+      shortDescription: dto.shortDescription ?? null,
       price: dto.price,
       originalPrice: dto.compareAtPrice ?? null,
+      discount: dto.discount ?? null,
+      images: Array.isArray(dto.images) ? dto.images : [],
       categoryId: dto.categoryId,
-      status: (dto.status ?? ProductStatus.DRAFT) as unknown as PrismaProductStatus,
+      status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
       sku: dto.sku,
       stock: dto.stock ?? 0,
       rating: dto.rating ?? 0,
+      reviewCount: dto.reviewCount ?? 0,
+      inStock: dto.inStock ?? true,
+      tags: Array.isArray(dto.tags) ? dto.tags : [],
+      features: Array.isArray(dto.features) ? dto.features : [],
     },
   });
 
@@ -119,13 +119,20 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       name: dto.name ?? existing.name,
       slug,
       description: dto.description !== undefined ? dto.description : existing.description,
+      shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : existing.shortDescription,
       price: dto.price ?? existing.price,
       originalPrice: dto.compareAtPrice !== undefined ? dto.compareAtPrice : existing.originalPrice,
+      discount: dto.discount !== undefined ? dto.discount : existing.discount,
+      images: Array.isArray(dto.images) ? dto.images : (existing.images ?? Prisma.JsonNull),
       categoryId,
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
       sku: dto.sku !== undefined ? dto.sku : existing.sku,
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
       rating: dto.rating !== undefined ? dto.rating : existing.rating,
+      reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : existing.reviewCount,
+      inStock: dto.inStock !== undefined ? dto.inStock : existing.inStock,
+      tags: Array.isArray(dto.tags) ? dto.tags : (existing.tags ?? Prisma.JsonNull),
+      features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
     },
   });
 
@@ -136,6 +143,49 @@ export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
   await prisma.product.delete({ where: { id } });
+}
+
+// Función para obtener productos con búsqueda y paginación (Admin)
+export async function getAdminProducts(query: {
+  q?: string;
+  categoryId?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const { q, categoryId, page = 1, limit = 10 } = query;
+
+  const where: Record<string, any> = {};
+
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+
+  if (q) {
+    const search = q.toLowerCase();
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { sku: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  const [total, rows] = await Promise.all([
+    prisma.product.count({ where }),
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
+
+  return {
+    data: rows.map(toProduct),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
 // Función para obtener productos del catálogo (con filtros)

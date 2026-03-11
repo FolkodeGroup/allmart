@@ -8,16 +8,21 @@ import { CartPage } from './pages/Cart/CartPage';
 import { AdminLogin } from './pages/AdminLogin/AdminLogin';
 import { AdminLayout } from './pages/Admin/AdminLayout';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
-import { AdminProducts } from './pages/Admin/sections/AdminProducts';
-import { AdminOrders } from './pages/Admin/sections/AdminOrders';
-import { AdminReports } from './pages/Admin/sections/AdminReports';
+import { AdminProducts } from './features/admin/products/AdminProducts';
+import { AdminOrders } from './features/admin/orders/AdminOrders';
+import { AdminReports } from './features/admin/reports/AdminReports';
 import { AdminRoute } from './components/AdminRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import { AdminProductsProvider } from './context/AdminProductsContext';
 import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
 import { AdminOrdersProvider } from './context/AdminOrdersContext';
-import { AdminCategories } from './pages/Admin/sections/AdminCategories';
-import { AdminVariants } from './pages/Admin/sections/AdminVariants';
+import { AdminVariantsProvider } from './context/AdminVariantsContext';
+import { AdminImagesProvider } from './context/AdminImagesContext';
+import { AdminCategories } from './features/admin/categories/AdminCategories';
+import { AdminVariants } from './features/admin/variants/AdminVariants';
+import { AdminImages } from './features/admin/images/AdminImages';
+import { NotificationProvider } from './context/NotificationContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const router = createBrowserRouter([
   {
@@ -40,6 +45,7 @@ const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
       { path: 'productos', element: <AdminProducts /> },
+      { path: 'imagenes', element: <AdminImages /> },
       { path: 'variantes', element: <AdminVariants /> },
       { path: 'categorias', element: <AdminCategories /> },
       { path: 'pedidos', element: <AdminOrders /> },
@@ -50,17 +56,25 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AdminAuthProvider>
-      <AdminCategoriesProvider>
-        <AdminProductsProvider>
-          <AdminOrdersProvider>
-            <CartProvider>
-              <RouterProvider router={router} />
-            </CartProvider>
-          </AdminOrdersProvider>
-        </AdminProductsProvider>
-      </AdminCategoriesProvider>
-    </AdminAuthProvider>
+    <ErrorBoundary>
+      <NotificationProvider>
+        <AdminAuthProvider>
+          <AdminCategoriesProvider>
+            <AdminProductsProvider>
+              <AdminVariantsProvider>
+                <AdminImagesProvider>
+                  <AdminOrdersProvider>
+                    <CartProvider>
+                      <RouterProvider router={router} />
+                    </CartProvider>
+                  </AdminOrdersProvider>
+                </AdminImagesProvider>
+              </AdminVariantsProvider>
+            </AdminProductsProvider>
+          </AdminCategoriesProvider>
+        </AdminAuthProvider>
+      </NotificationProvider>
+    </ErrorBoundary>
   );
 }
 

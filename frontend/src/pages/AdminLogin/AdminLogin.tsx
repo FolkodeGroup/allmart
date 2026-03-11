@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { handleResponse } from '../../utils/apiErrorHandler';
 import type { Role } from '../../utils/permissions';
 import styles from './AdminLogin.module.css';
 
@@ -16,13 +17,20 @@ export function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/admin/auth/login', {
+      // Log para depuración
+      console.log('Login payload:', { user, password });
+      const res = await fetch('/api/admin/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user, password }),
       });
-      const data = await res.json();
-      if (res.ok && data.success && data.data.token) {
+      
+      const data = await handleResponse<{ success: boolean; data: { token: string; role: string }; message?: string }>(res);
+      
+      // Log para depuración
+      console.log('Login response:', data);
+      
+      if (data.success && data.data && data.data.token) {
         const { token, role: userRole } = data.data;
         const role: Role = userRole === 'editor' ? 'editor' : 'admin';
         login(user, token, role);
@@ -32,7 +40,7 @@ export function AdminLogin() {
         toast.error(data.message || 'Credenciales inválidas');
       }
     } catch (err) {
-      toast.error('Error de red o servidor');
+      setError(err instanceof Error ? err.message : 'Error de red o servidor');
     } finally {
       setLoading(false);
     }

@@ -39,6 +39,43 @@ export async function getAllCategories(): Promise<Category[]> {
   return rows.map(toCategory);
 }
 
+// Función para obtener categorías con búsqueda y paginación (Admin)
+export async function getAdminCategories(query: {
+  q?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const { q, page = 1, limit = 10 } = query;
+
+  const where: Record<string, any> = {};
+
+  if (q) {
+    const search = q.toLowerCase();
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  const [total, rows] = await Promise.all([
+    prisma.category.count({ where }),
+    prisma.category.findMany({
+      where,
+      orderBy: { name: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
+
+  return {
+    data: rows.map(toCategory),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
 export async function getAllActiveCategories(): Promise<Category[]> {
   const rows = await prisma.category.findMany({ orderBy: { name: 'asc' } });
   return rows.map(toCategory);

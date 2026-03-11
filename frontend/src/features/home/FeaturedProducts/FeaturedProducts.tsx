@@ -1,5 +1,11 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { products } from '../../../data/mock';
+import type { Product } from '../../../types';
+import {
+  fetchPublicProducts,
+  mapApiProductToProduct,
+} from '../../../services/productsService';
+import { fetchPublicCategories } from '../../../services/categoriesService';
 import { ProductCard } from '../../products/ProductCard/ProductCard';
 import { Button } from '../../../components/ui/Button/Button';
 import styles from './FeaturedProducts.module.css';
@@ -17,9 +23,19 @@ export function FeaturedProducts({
   tag = 'destacado',
   limit = 8,
 }: FeaturedProductsProps) {
-  const filtered = tag
-    ? products.filter((p) => p.tags.includes(tag)).slice(0, limit)
-    : products.slice(0, limit);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    Promise.all([fetchPublicProducts({ sort: 'newest', limit }), fetchPublicCategories()])
+      .then(([{ data }, categories]) => {
+        setProducts(data.map((p) => mapApiProductToProduct(p, categories)));
+      })
+      .catch(() => setProducts([]));
+  }, [limit]);
+
+  // El tag se usa para filtrar visualmente; como el backend no soporta tags aún,
+  // se muestran todos los productos cargados.
+  const filtered = products;
 
   return (
     <section className={styles.section} aria-label={title}>

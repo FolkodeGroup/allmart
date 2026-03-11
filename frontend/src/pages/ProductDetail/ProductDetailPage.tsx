@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { VariantGroup } from '../../context/AdminProductsContext';
 import { useParams, Link } from 'react-router-dom';
-import { getProducts } from '../../data/productsLocal';
+import type { Product } from '../../types';
+import {
+  fetchPublicProductBySlug,
+  fetchPublicProducts,
+  mapApiProductToProduct,
+} from '../../services/productsService';
+import { fetchPublicCategories } from '../../services/categoriesService';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
@@ -26,27 +32,69 @@ function renderStars(rating: number): string {
 export function ProductDetailPage() {
   const { addToCart } = useCart();
   const { slug } = useParams<{ slug: string }>();
-  const products = getProducts();
-  const product = products.find((p) => p.slug === slug);
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [addedFeedback, setAddedFeedback] = useState(false);
 
-  // Evitar hooks condicionales
+  /* Cargar producto por slug */
+  useEffect(() => {
+    if (!slug) return;
+    setLoading(true);
+    setError(null);
+    setSelectedImage(0);
+
+    Promise.all([fetchPublicProductBySlug(slug), fetchPublicCategories()])
+      .then(([apiProduct, categories]) => {
+        const mappedProduct = mapApiProductToProduct(apiProduct, categories);
+        setProduct(mappedProduct);
+
+        // Cargar productos relacionados de la misma categoría
+        const categorySlugs = categories.find((c) => c.id === apiProduct.categoryId)?.slug;
+        return fetchPublicProducts({ category: categorySlugs, limit: 5 }).then(({ data }) => {
+          const related = data
+            .map((p) => mapApiProductToProduct(p, categories))
+            .filter((p) => p.id !== apiProduct.id)
+            .slice(0, 4);
+          setRelatedProducts(related);
+        });
+      })
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
   const variantGroups: VariantGroup[] = product ? (product as any).variants ?? [] : [];
-  const relatedProducts = product ? products.filter(
-    (p) => p.category.id === product.category.id && p.id !== product.id
-  ).slice(0, 4) : [];
   const hasDiscount = product ? product.discount && product.discount > 0 : false;
   const isNew = product ? product.tags.includes('nuevo') : false;
 
-  if (!product) {
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart({ product, quantity });
+    setAddedFeedback(true);
+    setTimeout(() => setAddedFeedback(false), 2000);
+  };
+
+  if (loading) {
+    return (
+      <main className={styles.page}>
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <p>Cargando producto...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error || !product) {
     return (
       <main className={styles.page}>
         <div style={{ textAlign: 'center', padding: '4rem' }}>
           <h1>Producto no encontrado</h1>
-          <p>El producto que buscás no existe o fue removido.</p>
+          <p>{error ?? 'El producto que buscás no existe o fue removido.'}</p>
           <Link to="/productos">
             <Button variant="primary">Volver al catálogo</Button>
           </Link>
@@ -54,14 +102,6 @@ export function ProductDetailPage() {
       </main>
     );
   }
-
-  const handleAddToCart = () => {
-    if (!product) return;
-    // En el futuro: pasar variantes seleccionadas al carrito
-    addToCart({ product, quantity });
-    setAddedFeedback(true);
-    setTimeout(() => setAddedFeedback(false), 2000);
-  };
   
   return (
     <main className={styles.page}>

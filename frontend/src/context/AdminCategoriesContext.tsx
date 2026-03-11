@@ -1,76 +1,144 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Category } from '../types';
-import { categories as mockCategories } from '../data/mock';
-
-const STORAGE_KEY = 'allmart_admin_categories';
-
-function loadCategories(): Category[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch { /* ignore */ }
-  return mockCategories;
-}
-
-function saveCategories(cats: Category[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cats));
-}
+import * as categoriesService from '../features/admin/categories/categoriesService';
+import { useAdminAuth } from './AdminAuthContext';
+import { useNotification } from './NotificationContext';
 
 interface AdminCategoriesContextType {
   categories: Category[];
-  addCategory: (c: Omit<Category, 'id'>) => Category;
-  updateCategory: (id: string, data: Partial<Category>) => void;
-  deleteCategory: (id: string) => void;
+  isLoading: boolean;
+  total: number;
+  page: number;
+  totalPages: number;
+  error: string | null;
+  refreshCategories: (params?: categoriesService.AdminCategoriesParams) => Promise<void>;
+  addCategory: (c: Omit<Category, 'id'>) => Promise<Category>;
+  updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
+  uploadCategoryImage: (id: string, file: File) => Promise<string>;
   getCategory: (id: string) => Category | undefined;
 }
 
 const AdminCategoriesContext = createContext<AdminCategoriesContextType | undefined>(undefined);
 
 export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>(loadCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    totalPages: 1,
+  });
+  const { token } = useAdminAuth();
+  const { showNotification } = useNotification();
 
-  const addCategory = (c: Omit<Category, 'id'>): Category => {
-    const newCat: Category = {
-      ...c,
-      id: `cat-${Date.now()}`,
-      slug: c.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-    };
-    setCategories(prev => {
-      const next = [...prev, newCat];
-      saveCategories(next);
-      return next;
-    });
-    return newCat;
+  /** Carga (o recarga) las categorías desde el backend con paginación y búsqueda */
+  const refreshCategories = useCallback(async (params?: categoriesService.AdminCategoriesParams) => {
+    if (!token) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await categoriesService.fetchAdminCategories(token, params);
+      setCategories(response.data.map(categoriesService.mapApiCategoryToCategory));
+      setPagination({
+        total: response.total,
+        page: response.page,
+        totalPages: response.totalPages,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al cargar categorías';
+      setError(message);
+      showNotification('error', message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token, showNotification]);
+
+  /** Inicialmente carga el listado completo */
+  useEffect(() => {
+    if (token) refreshCategories();
+  }, [token, refreshCategories]);
+
+  const addCategory = async (category: Omit<Category, 'id'>) => {
+    if (!token) throw new Error('No autenticado');
+    try {
+      const newCategory = await categoriesService.createAdminCategory(token, category);
+      refreshCategories(); 
+      showNotification('success', 'Categoría creada exitosamente');
+      return newCategory;
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Error al crear categoría');
+      throw err;
+    }
   };
 
-  const updateCategory = (id: string, data: Partial<Category>) => {
-    setCategories(prev => {
-      const next = prev.map(c => c.id === id ? { ...c, ...data } : c);
-      saveCategories(next);
-      return next;
-    });
+  const updateCategory = async (id: string, data: Partial<Category>) => {
+    if (!token) throw new Error('No autenticado');
+    try {
+      await categoriesService.updateAdminCategory(token, id, data);
+      refreshCategories();
+      showNotification('success', 'Categoría actualizada exitosamente');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Error al actualizar categoría');
+      throw err;
+    }
   };
 
-  const deleteCategory = (id: string) => {
-    setCategories(prev => {
-      const next = prev.filter(c => c.id !== id);
-      saveCategories(next);
-      return next;
-    });
+  const deleteCategory = async (id: string) => {
+    if (!token) throw new Error('No autenticado');
+    try {
+      await categoriesService.deleteAdminCategory(token, id);
+      refreshCategories();
+      showNotification('success', 'Categoría eliminada exitosamente');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Error al eliminar categoría');
+      throw err;
+    }
+  };
+
+  const uploadCategoryImage = async (id: string, file: File) => {
+    if (!token) throw new Error('No autenticado');
+    try {
+      const url = await categoriesService.uploadAdminCategoryImage(token, id, file);
+      refreshCategories();
+      showNotification('success', 'Imagen de categoría subida');
+      return url;
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Error al subir imagen');
+      throw err;
+    }
   };
 
   const getCategory = (id: string) => categories.find(c => c.id === id);
 
   return (
-    <AdminCategoriesContext.Provider value={{ categories, addCategory, updateCategory, deleteCategory, getCategory }}>
+    <AdminCategoriesContext.Provider
+      value={{
+        categories,
+        isLoading,
+        total: pagination.total,
+        page: pagination.page,
+        totalPages: pagination.totalPages,
+        error,
+        refreshCategories,
+        addCategory,
+        updateCategory,
+        deleteCategory,
+        uploadCategoryImage,
+        getCategory
+      }}
+    >
       {children}
     </AdminCategoriesContext.Provider>
   );
 }
 
 export function useAdminCategories() {
-  const ctx = useContext(AdminCategoriesContext);
-  if (!ctx) throw new Error('useAdminCategories debe usarse dentro de AdminCategoriesProvider');
-  return ctx;
+  const context = useContext(AdminCategoriesContext);
+  if (context === undefined) {
+    throw new Error('useAdminCategories debe usarse dentro de un AdminCategoriesProvider');
+  }
+  return context;
 }

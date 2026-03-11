@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
-import sectionStyles from './AdminSection.module.css';
+import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
