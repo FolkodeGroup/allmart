@@ -114,14 +114,7 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al subir la imagen';
-      setError(msg);
-      throw new Error(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // ...existing code...
 
   const getCategory = (id: string) => categories.find(c => c.id === id);
 
