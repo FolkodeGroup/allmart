@@ -206,6 +206,7 @@ export function AdminImagesProvider({ children }: { children: ReactNode }) {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAdminImages() {
   const ctx = useContext(AdminImagesContext);
   if (!ctx) throw new Error('useAdminImages debe usarse dentro de AdminImagesProvider');
