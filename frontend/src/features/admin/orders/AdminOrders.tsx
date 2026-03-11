@@ -174,17 +174,19 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
               <span className={`${styles.statusBadge} ${statusClass(currentStatus)}`}>
                 {STATUS_LABELS[currentStatus]}
               </span>
-              <select
-                className={styles.statusSelect}
-                value={pendingStatus}
-                onChange={e => setPendingStatus(e.target.value as OrderStatus)}
-              >
-                {STATUS_OPTIONS.map(s => (
-                  <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                ))}
-              </select>
+              {can('orders.edit') && (
+                <select
+                  className={styles.statusSelect}
+                  value={pendingStatus}
+                  onChange={e => setPendingStatus(e.target.value as OrderStatus)}
+                >
+                  {STATUS_OPTIONS.map(s => (
+                    <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                  ))}
+                </select>
+              )}
             </div>
-            {hasStatusChange && (
+            {can('orders.edit') && hasStatusChange && (
               <div className={styles.statusChangeBox}>
                 <input
                   className={styles.statusNoteInput}
@@ -213,55 +215,57 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           </section>
 
           {/* Pago / Confirmación WhatsApp */}
-          <section className={styles.detailSection}>
-            <h3 className={styles.detailSectionTitle}>Pago</h3>
-            <div className={styles.paymentRow}>
-              <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus)}`}>
-                {isAbonado ? '✓' : '○'} {PAYMENT_LABELS[paymentStatus]}
-              </span>
-              {isAbonado && order.paidAt && (
-                <span className={styles.paidAt}>
-                  Confirmado el {formatDateTime(order.paidAt)}
+          {can('orders.markPaid') && (
+            <section className={styles.detailSection}>
+              <h3 className={styles.detailSectionTitle}>Pago</h3>
+              <div className={styles.paymentRow}>
+                <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus)}`}>
+                  {isAbonado ? '✓' : '○'} {PAYMENT_LABELS[paymentStatus]}
                 </span>
-              )}
-            </div>
-            {!isAbonado && (
-              <div className={styles.whatsappActions}>
-                {!confirmPaid ? (
-                  <button
-                    className={styles.whatsappBtn}
-                    type="button"
-                    onClick={() => setConfirmPaid(true)}
-                  >
-                    <span className={styles.whatsappIcon}>💬</span>
-                    Marcar como abonado
-                  </button>
-                ) : (
-                  <div className={styles.confirmPaidBox}>
-                    <span className={styles.confirmPaidText}>
-                      ¿Confirmar que el cliente abonó este pedido vía WhatsApp?
-                    </span>
-                    <div className={styles.confirmPaidActions}>
-                      <button
-                        className={styles.whatsappBtnConfirm}
-                        type="button"
-                        onClick={() => { markAsPaid(order.id); setConfirmPaid(false); }}
-                      >
-                        ✓ Sí, confirmar pago
-                      </button>
-                      <button
-                        className={styles.cancelBtn}
-                        type="button"
-                        onClick={() => setConfirmPaid(false)}
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
+                {isAbonado && order.paidAt && (
+                  <span className={styles.paidAt}>
+                    Confirmado el {formatDateTime(order.paidAt)}
+                  </span>
                 )}
               </div>
-            )}
-          </section>
+              {!isAbonado && (
+                <div className={styles.whatsappActions}>
+                  {!confirmPaid ? (
+                    <button
+                      className={styles.whatsappBtn}
+                      type="button"
+                      onClick={() => setConfirmPaid(true)}
+                    >
+                      <span className={styles.whatsappIcon}>💬</span>
+                      Marcar como abonado
+                    </button>
+                  ) : (
+                    <div className={styles.confirmPaidBox}>
+                      <span className={styles.confirmPaidText}>
+                        ¿Confirmar que el cliente abonó este pedido vía WhatsApp?
+                      </span>
+                      <div className={styles.confirmPaidActions}>
+                        <button
+                          className={styles.whatsappBtnConfirm}
+                          type="button"
+                          onClick={() => { markAsPaid(order.id); setConfirmPaid(false); }}
+                        >
+                          ✓ Sí, confirmar pago
+                        </button>
+                        <button
+                          className={styles.cancelBtn}
+                          type="button"
+                          onClick={() => setConfirmPaid(false)}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Datos del cliente */}
           <section className={styles.detailSection}>
@@ -311,19 +315,21 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           </section>
 
           {/* Notas */}
-          <section className={styles.detailSection}>
-            <h3 className={styles.detailSectionTitle}>Notas internas</h3>
-            <textarea
-              className={styles.notesInput}
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Agregá notas internas sobre este pedido..."
-            />
-            <button className={styles.saveNotesBtn} type="button" onClick={handleSaveNotes}>
-              Guardar notas
-            </button>
-          </section>
+          {can('orders.edit') && (
+            <section className={styles.detailSection}>
+              <h3 className={styles.detailSectionTitle}>Notas internas</h3>
+              <textarea
+                className={styles.notesInput}
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                rows={3}
+                placeholder="Agregá notas internas sobre este pedido..."
+              />
+              <button className={styles.saveNotesBtn} type="button" onClick={handleSaveNotes}>
+                Guardar notas
+              </button>
+            </section>
+          )}
 
           {/* Zona peligrosa */}
           {can('orders.delete') && (
