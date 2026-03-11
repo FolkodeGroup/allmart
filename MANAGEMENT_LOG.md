@@ -730,3 +730,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #493: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #495: He completado la implementación de los estados de carga y vacíos en e… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #497: He completado la implementación de validaciones robustas en los formu… | 2026-03-11 |
