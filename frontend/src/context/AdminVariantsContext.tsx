@@ -7,6 +7,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
+import { useNotification } from './NotificationContext';
 import * as variantsService from '../services/variantsService';
 import type { ApiVariant } from '../services/variantsService';
 
@@ -65,6 +66,7 @@ function apiToVariantGroup(api: ApiVariant): VariantGroup {
 
 export function AdminVariantsProvider({ children }: { children: ReactNode }) {
   const { token } = useAdminAuth();
+  const { showNotification } = useNotification();
   const [variants, setVariants] = useState<VariantGroup[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,14 +79,17 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     return token;
   }
 
-  async function withLoading<T>(fn: () => Promise<T>): Promise<T> {
+  async function withLoading<T>(fn: () => Promise<T>, successMsg?: string): Promise<T> {
     setIsLoading(true);
     setError(null);
     try {
-      return await fn();
+      const result = await fn();
+      if (successMsg) showNotification('success', successMsg);
+      return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error inesperado';
       setError(msg);
+      showNotification('error', msg);
       throw new Error(msg);
     } finally {
       setIsLoading(false);
@@ -116,7 +121,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
       const group = apiToVariantGroup(created);
       setVariants(prev => [...prev, group]);
       return group;
-    });
+    }, 'Grupo de variantes creado');
   };
 
   const updateVariant = async (
@@ -130,7 +135,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
       setVariants(prev =>
         prev.map(v => (v.id === variantId ? apiToVariantGroup(updated) : v)),
       );
-    });
+    }, 'Variantes actualizadas');
   };
 
   const deleteVariant = async (productId: string, variantId: string) => {
@@ -138,7 +143,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
       const t = requireToken();
       await variantsService.deleteVariant(t, productId, variantId);
       setVariants(prev => prev.filter(v => v.id !== variantId));
-    });
+    }, 'Grupo de variantes eliminado');
   };
 
   const addValueToVariant = async (productId: string, variantId: string, value: string) => {
