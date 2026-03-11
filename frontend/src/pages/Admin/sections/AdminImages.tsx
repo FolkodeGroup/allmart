@@ -31,16 +31,16 @@ export function AdminImages() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  // Enfocar el input de edición cuando se activa (sin autoFocus)
-  useEffect(() => {
-    if (editingId) editInputRef.current?.focus();
-  }, [editingId]);
-
   // ── Edición inline de altText ──────────────────────────────────────────────
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingAlt, setEditingAlt] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Enfocar el input de edición cuando se activa (sin autoFocus)
+  useEffect(() => {
+    if (editingId) editInputRef.current?.focus();
+  }, [editingId]);
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||

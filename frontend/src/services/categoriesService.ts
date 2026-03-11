@@ -124,3 +124,20 @@ export async function deleteAdminCategory(token: string, id: string): Promise<vo
   });
   await handleResponse<ApiSuccess<null>>(res);
 }
+
+/** POST /api/admin/categories/:id/image/upload — Sube imagen de categoría */
+export async function uploadAdminCategoryImage(token: string, id: string, file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch(`/api/admin/categories/${id}/image/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const body = await handleResponse<ApiSuccess<{ imageUrl: string }>>(res);
+  return body.data.imageUrl;
+}

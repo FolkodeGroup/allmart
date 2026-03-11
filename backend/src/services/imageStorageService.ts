@@ -323,7 +323,15 @@ export async function uploadCategoryImage(
     },
   });
 
-  return { ...row, url: `/api/images/categories/${row.id}`, thumbUrl: `/api/images/categories/${row.id}/thumb` };
+  const imageUrl = `/api/images/categories/${row.id}`;
+
+  // Actualizar la tabla Category con la URL de la imagen (legacy compat)
+  await prisma.category.update({
+    where: { id: categoryId },
+    data: { imageUrl },
+  });
+
+  return { ...row, url: imageUrl, thumbUrl: `/api/images/categories/${row.id}/thumb` };
 }
 
 /**
@@ -375,6 +383,12 @@ export async function deleteCategoryImage(categoryId: string): Promise<void> {
   const existing = await prisma.categoryImageStorage.findUnique({ where: { categoryId } });
   if (!existing) throw createError('La categoría no tiene imagen', 404);
   await prisma.categoryImageStorage.delete({ where: { categoryId } });
+
+  // Limpiar el campo imageUrl en Category (legacy compat)
+  await prisma.category.update({
+    where: { id: categoryId },
+    data: { imageUrl: null },
+  });
 }
 
 // ─── Helper interno ────────────────────────────────────────────────────────────
