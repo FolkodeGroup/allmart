@@ -5,6 +5,7 @@ import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { FolderSearch, AlertCircle } from 'lucide-react';
+import { sanitizeString } from '../../../utils/security';
 import sectionStyles from './AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 
@@ -119,15 +120,15 @@ export function AdminCategories() {
     try {
       if (editId) {
         await updateCategory(editId, {
-          name: form.name.trim(),
-          description: form.description.trim() || undefined,
+          name: sanitizeString(form.name.trim()),
+          description: sanitizeString(form.description.trim()) || undefined,
           image: form.image.trim() || undefined,
         });
       } else {
         await addCategory({
-          name: form.name.trim(),
+          name: sanitizeString(form.name.trim()),
           slug: '',
-          description: form.description.trim() || undefined,
+          description: sanitizeString(form.description.trim()) || undefined,
           image: form.image.trim() || undefined,
           itemCount: 0,
         });
