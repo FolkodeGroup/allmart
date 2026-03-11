@@ -26,6 +26,9 @@ export function AdminVariants() {
   const { can } = useAdminAuth();
 
   const [search, setSearch] = useState('');
+  // Para autocompletado
+  const [inputValue, setInputValue] = useState('');
+  const [autoOptions, setAutoOptions] = useState<any[]>([]);
   // Inputs de nuevo grupo y nuevos valores por grupo
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
@@ -40,6 +43,39 @@ export function AdminVariants() {
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     (p.sku ?? '').toLowerCase().includes(search.toLowerCase())
   );
+
+  // Combina productos y variantes para autocompletado
+  const combinedOptions = [
+    ...products.map(p => ({
+      type: 'product',
+      id: p.id,
+      name: p.name,
+      sku: p.sku || '',
+    })),
+    ...variants.flatMap(v => v.values.map(val => ({
+      type: 'variant',
+      group: v.name,
+      value: val,
+      productId: selectedProductId,
+      sku: '',
+    })))
+  ];
+
+  // Filtra opciones para autocompletado
+  const filteredOptions = combinedOptions.filter(opt => {
+    const q = inputValue.toLowerCase();
+    if (opt.type === 'product') {
+      return (
+        opt.name.toLowerCase().includes(q) ||
+        opt.sku.toLowerCase().includes(q)
+      );
+    } else {
+      return (
+        opt.value.toLowerCase().includes(q) ||
+        (opt.group?.toLowerCase().includes(q) ?? false)
+      );
+    }
+  });
 
   const selectedProduct: AdminProduct | undefined = selectedProductId
     ? products.find(p => p.id === selectedProductId)
@@ -137,12 +173,29 @@ export function AdminVariants() {
             <span className={styles.sidebarTitle}>Productos</span>
             <span className={styles.productCount}>{filtered.length}</span>
           </div>
-          <input
-            className={styles.searchInput}
-            type="text"
-            placeholder="Buscar por nombre o SKU..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+          {/* Autocomplete de MUI */}
+          <Autocomplete
+            freeSolo
+            options={filteredOptions}
+            getOptionLabel={opt =>
+              opt.type === 'product'
+                ? `${opt.name} (SKU: ${opt.sku})`
+                : `${opt.value} [${opt.group}]`
+            }
+            inputValue={inputValue}
+            onInputChange={(_, value) => setInputValue(value)}
+            onChange={(_, value) => {
+              if (value?.type === 'product') {
+                setSearch(value.name);
+                handleSelectProduct(value.id);
+              } else if (value?.type === 'variant' && value.productId) {
+                setSearch(value.value);
+                handleSelectProduct(value.productId);
+              }
+            }}
+            renderInput={params => (
+              <TextField {...params} label="Buscar por nombre o SKU..." variant="outlined" size="small" />
+            )}
           />
           <ul className={styles.productList}>
             {filtered.length === 0 ? (
