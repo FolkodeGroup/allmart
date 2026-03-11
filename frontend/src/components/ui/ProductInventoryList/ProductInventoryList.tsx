@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './ProductInventoryList.module.css';
 
 export type StockState = 'inStock' | 'lowStock' | 'outOfStock';
