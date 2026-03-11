@@ -31,12 +31,14 @@ export function AdminImages() {
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const [newAltText, setNewAltText] = useState('');
   const [uploadProgress, setUploadProgress] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle');
+  const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
 
   // ── Edición inline de altText ──────────────────────────────────────────────
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingAlt, setEditingAlt] = useState('');
+  const [editError, setEditError] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -59,6 +61,7 @@ export function AdminImages() {
   const handleSelectProduct = async (productId: string) => {
     if (productId === selectedProductId) return;
     setEditingId(null);
+    setEditError('');
     setIsAdding(false);
     resetUploadForm();
     await loadImages(productId);
@@ -71,13 +74,27 @@ export function AdminImages() {
     setUploadPreview(null);
     setNewAltText('');
     setUploadProgress('idle');
+    setUploadError('');
     setIsAdding(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    setUploadError('');
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setUploadError('El archivo debe ser una imagen');
+      return;
+    }
+    
+    // Validación de tamaño (ej: 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('La imagen no debe superar los 5MB');
+      return;
+    }
+
     setUploadFile(file);
     const objectUrl = URL.createObjectURL(file);
     setUploadPreview(objectUrl);
@@ -86,8 +103,20 @@ export function AdminImages() {
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setUploadError('');
     const file = e.dataTransfer.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setUploadError('El archivo debe ser una imagen');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('La imagen no debe superar los 5MB');
+      return;
+    }
+
     setUploadFile(file);
     const objectUrl = URL.createObjectURL(file);
     setUploadPreview(objectUrl);
@@ -97,12 +126,14 @@ export function AdminImages() {
   const handleUpload = async () => {
     if (!uploadFile || !selectedProductId) return;
     setUploadProgress('uploading');
+    setUploadError('');
     try {
       await uploadImage(selectedProductId, uploadFile, newAltText.trim() || undefined);
       setUploadProgress('done');
       setTimeout(resetUploadForm, 1200);
-    } catch {
+    } catch (err) {
       setUploadProgress('error');
+      setUploadError(err instanceof Error ? err.message : 'Error al subir imagen');
     }
   };
 
@@ -111,15 +142,17 @@ export function AdminImages() {
   const startEdit = (id: string, altText?: string | null) => {
     setEditingId(id);
     setEditingAlt(altText ?? '');
+    setEditError('');
   };
 
   const commitEdit = async (productId: string, imageId: string) => {
     setSavingId(imageId);
+    setEditError('');
     try {
       await updateImageMeta(productId, imageId, { altText: editingAlt.trim() || null });
       setEditingId(null);
-    } catch {
-      // error en contexto
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Error al actualizar');
     } finally {
       setSavingId(null);
     }
@@ -270,9 +303,12 @@ export function AdminImages() {
                       {editingId === img.id ? (
                         <div className={styles.cardEdit}>
                           <input
-                            className={styles.editInput}
+                            className={`${styles.editInput} ${editError ? styles.inputError : ''}`}
                             value={editingAlt}
-                            onChange={e => setEditingAlt(e.target.value)}
+                            onChange={e => {
+                                setEditingAlt(e.target.value);
+                                if (editError) setEditError('');
+                            }}
                             placeholder="Texto alternativo (alt)"
                             ref={editInputRef}
                             onKeyDown={e => {
@@ -280,6 +316,7 @@ export function AdminImages() {
                               if (e.key === 'Escape') setEditingId(null);
                             }}
                           />
+                          {editError && <span className={styles.errorText}>{editError}</span>}
                           <div className={styles.cardActions}>
                             <button
                               className={styles.saveBtn}
@@ -359,7 +396,7 @@ export function AdminImages() {
                       <div
                         role="button"
                         tabIndex={0}
-                        className={`${styles.dropZone} ${uploadPreview ? styles.dropZoneHasFile : ''}`}
+                        className={`${styles.dropZone} ${uploadPreview ? styles.dropZoneHasFile : ''} ${uploadError ? styles.dropZoneError : ''}`}
                         onDragOver={e => e.preventDefault()}
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
@@ -377,10 +414,11 @@ export function AdminImages() {
                             <p className={styles.dropText}>
                               Arrastrá una imagen aquí o hacé clic para seleccionarla
                             </p>
-                            <p className={styles.dropHint}>JPEG, PNG, WebP, GIF — máx. 8 MB</p>
+                            <p className={styles.dropHint}>JPEG, PNG, WebP, GIF — máx. 5 MB</p>
                           </>
                         )}
                       </div>
+                      {uploadError && <p className={styles.errorText}>{uploadError}</p>}
 
                       {/* Input oculto */}
                       <input

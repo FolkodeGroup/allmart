@@ -255,6 +255,17 @@
 }
 .closeBtn:hover { background: var(--color-bg-tertiary); }
 
+.inputError {
+  border-color: var(--color-error) !important;
+}
+
+.errorText {
+  color: var(--color-error);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
+}
+
 .form {
   display: flex;
   flex-direction: column;

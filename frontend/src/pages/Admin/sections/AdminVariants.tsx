@@ -29,9 +29,12 @@ export function AdminVariants() {
   // Inputs de nuevo grupo y nuevos valores por grupo
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   // Edición inline del nombre de grupo
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
+  const [editGroupError, setEditGroupError] = useState('');
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -47,33 +50,46 @@ export function AdminVariants() {
     if (productId === selectedProductId) return;
     setNewGroupName('');
     setNewValues({});
+    setErrors({});
     setEditingGroupId(null);
+    setEditGroupError('');
     await loadVariants(productId);
   };
 
   // ── CRUD de grupos ────────────────────────────────────────────────
   const addGroup = async () => {
     const name = newGroupName.trim();
-    if (!name || !selectedProductId) return;
+    setErrors(prev => ({ ...prev, group: '' }));
+    if (!selectedProductId) return;
+    if (!name) return setErrors(prev => ({ ...prev, group: 'El nombre del grupo es obligatorio' }));
+    
     const exists = variants.some(g => g.name.toLowerCase() === name.toLowerCase());
-    if (exists) return;
+    if (exists) return setErrors(prev => ({ ...prev, group: 'Ya existe un grupo con ese nombre' }));
+    
     await addVariant(selectedProductId, name);
     setNewGroupName('');
   };
 
   const deleteGroup = async (variantId: string) => {
-    if (!selectedProductId) return;
+    if (!selectedProductId || !window.confirm('¿Eliminar este grupo y todos sus valores?')) return;
     await deleteVariant(selectedProductId, variantId);
   };
 
   const startEditGroupName = (id: string, currentName: string) => {
     setEditingGroupId(id);
     setEditingGroupName(currentName);
+    setEditGroupError('');
   };
 
   const commitEditGroupName = async (variantId: string) => {
     const name = editingGroupName.trim();
-    if (name && selectedProductId) {
+    setEditGroupError('');
+    if (!name) return setEditGroupError('El nombre no puede estar vacío');
+    
+    const exists = variants.some(g => g.id !== variantId && g.name.toLowerCase() === name.toLowerCase());
+    if (exists) return setEditGroupError('Ya existe otro grupo con ese nombre');
+
+    if (selectedProductId) {
       await updateVariant(selectedProductId, variantId, { name });
     }
     setEditingGroupId(null);
@@ -83,7 +99,15 @@ export function AdminVariants() {
   // ── CRUD de valores ───────────────────────────────────────────────
   const addValue = async (variantId: string) => {
     const val = (newValues[variantId] ?? '').trim();
-    if (!val || !selectedProductId) return;
+    setErrors(prev => ({ ...prev, [`value-${variantId}`]: '' }));
+    if (!selectedProductId) return;
+    if (!val) return setErrors(prev => ({ ...prev, [`value-${variantId}`]: 'El valor es obligatorio' }));
+
+    const group = variants.find(v => v.id === variantId);
+    if (group?.values.some(v => v.toLowerCase() === val.toLowerCase())) {
+      return setErrors(prev => ({ ...prev, [`value-${variantId}`]: 'Este valor ya existe en el grupo' }));
+    }
+
     await addValueToVariant(selectedProductId, variantId, val);
     setNewValues(prev => ({ ...prev, [variantId]: '' }));
   };
@@ -189,18 +213,24 @@ export function AdminVariants() {
 
               {/* Formulario para nuevo grupo */}
               {can('variants.create') && (
-                <div className={styles.addGroupRow}>
-                  <input
-                    className={styles.groupInput}
-                    type="text"
-                    placeholder="Nombre del grupo, ej: Color, Tamaño, Material..."
-                    value={newGroupName}
-                    onChange={e => setNewGroupName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && addGroup()}
-                  />
-                  <button className={styles.addGroupBtn} onClick={addGroup} type="button">
-                    + Agregar grupo
-                  </button>
+                <div className={styles.addGroupSection}>
+                  <div className={styles.addGroupRow}>
+                    <input
+                      className={`${styles.groupInput} ${errors.group ? styles.inputError : ''}`}
+                      type="text"
+                      placeholder="Nombre del grupo, ej: Color, Tamaño, Material..."
+                      value={newGroupName}
+                      onChange={e => {
+                        setNewGroupName(e.target.value);
+                        if (errors.group) setErrors(prev => ({ ...prev, group: '' }));
+                      }}
+                      onKeyDown={e => e.key === 'Enter' && addGroup()}
+                    />
+                    <button className={styles.addGroupBtn} onClick={addGroup} type="button">
+                      + Agregar grupo
+                    </button>
+                  </div>
+                  {errors.group && <span className={styles.errorText}>{errors.group}</span>}
                 </div>
               )}
 
@@ -219,20 +249,26 @@ export function AdminVariants() {
                       {/* Header del grupo */}
                       <div className={styles.groupHeader}>
                         {editingGroupId === group.id ? (
-                          <input
-                            className={styles.groupNameEdit}
-                            value={editingGroupName}
-                            autoFocus
-                            onChange={e => setEditingGroupName(e.target.value)}
-                            onBlur={() => commitEditGroupName(group.id)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') commitEditGroupName(group.id);
-                              if (e.key === 'Escape') {
-                                setEditingGroupId(null);
-                                setEditingGroupName('');
-                              }
-                            }}
-                          />
+                          <div className={styles.editGroupNameWrapper}>
+                            <input
+                              className={`${styles.groupNameEdit} ${editGroupError ? styles.inputError : ''}`}
+                              value={editingGroupName}
+                              autoFocus
+                              onChange={e => {
+                                setEditingGroupName(e.target.value);
+                                if (editGroupError) setEditGroupError('');
+                              }}
+                              onBlur={() => commitEditGroupName(group.id)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') commitEditGroupName(group.id);
+                                if (e.key === 'Escape') {
+                                  setEditingGroupId(null);
+                                  setEditingGroupName('');
+                                }
+                              }}
+                            />
+                            {editGroupError && <div className={styles.errorText}>{editGroupError}</div>}
+                          </div>
                         ) : (
                           <button
                             className={styles.groupName}
@@ -281,22 +317,28 @@ export function AdminVariants() {
 
                       {/* Input para agregar valor */}
                       {can('variants.edit') && (
-                        <div className={styles.addValueRow}>
-                          <input
-                            className={styles.valueInput}
-                            type="text"
-                            placeholder={`Agregar valor a ${group.name}...`}
-                            value={newValues[group.id] ?? ''}
-                            onChange={e => setNewValues(prev => ({ ...prev, [group.id]: e.target.value }))}
-                            onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
-                          />
-                          <button
-                            className={styles.addValueBtn}
-                            type="button"
-                            onClick={() => addValue(group.id)}
-                          >
-                            ＋
-                          </button>
+                        <div className={styles.addValueSection}>
+                          <div className={styles.addValueRow}>
+                            <input
+                              className={`${styles.valueInput} ${errors[`value-${group.id}`] ? styles.inputError : ''}`}
+                              type="text"
+                              placeholder={`Agregar valor a ${group.name}...`}
+                              value={newValues[group.id] ?? ''}
+                              onChange={e => {
+                                setNewValues(prev => ({ ...prev, [group.id]: e.target.value }));
+                                if (errors[`value-${group.id}`]) setErrors(prev => ({ ...prev, [`value-${group.id}`]: '' }));
+                              }}
+                              onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
+                            />
+                            <button
+                              className={styles.addValueBtn}
+                              type="button"
+                              onClick={() => addValue(group.id)}
+                            >
+                              ＋
+                            </button>
+                          </div>
+                          {errors[`value-${group.id}`] && <span className={styles.errorText}>{errors[`value-${group.id}`]}</span>}
                         </div>
                       )}
                     </div>
