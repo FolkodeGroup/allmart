@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Palette, Box, Search, PackageSearch, AlertCircle } from 'lucide-react';
+import { Palette, Box, Search, AlertCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
@@ -125,7 +125,7 @@ export function AdminVariants() {
               <EmptyState 
                 icon={<Search size={32} />}
                 title="Sin resultados"
-                message="No se encontraron productos con esos términos."
+                description="No se encontraron productos con esos términos."
               />
             ) : filtered.map(p => {
               const groupCount = selectedProductId === p.id ? variants.length : 0;
@@ -165,7 +165,7 @@ export function AdminVariants() {
             <EmptyState
               icon={<Palette size={48} />}
               title="No hay producto seleccionado"
-              message="Seleccioná un producto del panel izquierdo para gestionar sus variantes."
+              description="Seleccioná un producto del panel izquierdo para gestionar sus variantes."
             />
           ) : (
             <>
@@ -209,99 +209,100 @@ export function AdminVariants() {
                 <EmptyState
                   icon={<Box size={40} />}
                   title="Sin variantes"
-                  message="Este producto no tiene variantes aún. Podés crear el primer grupo arriba."
+                  description="Este producto no tiene variantes aún. Podés crear el primer grupo arriba."
                 />
               ) : (
                 /* Lista de grupos */
                 <div className={styles.groupsGrid}>
                   {variants.map(group => (
-                  <div key={group.id} className={styles.groupCard}>
-                    {/* Header del grupo */}
-                    <div className={styles.groupHeader}>
-                      {editingGroupId === group.id ? (
-                        <input
-                          className={styles.groupNameEdit}
-                          value={editingGroupName}
-                          autoFocus
-                          onChange={e => setEditingGroupName(e.target.value)}
-                          onBlur={() => commitEditGroupName(group.id)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') commitEditGroupName(group.id);
-                            if (e.key === 'Escape') {
-                              setEditingGroupId(null);
-                              setEditingGroupName('');
-                            }
-                          }}
-                        />
-                      ) : (
-                        <button
-                          className={styles.groupName}
-                          onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
-                          type="button"
-                          title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
-                          style={can('variants.edit') ? undefined : { cursor: 'default' }}
-                        >
-                          {group.name}
-                          {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
-                        </button>
-                      )}
-                      {can('variants.delete') && (
-                        <button
-                          className={styles.deleteGroupBtn}
-                          onClick={() => deleteGroup(group.id)}
-                          type="button"
-                          title="Eliminar grupo"
-                        >
-                          🗑️
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Valores / chips */}
-                    <div className={styles.valuesContainer}>
-                      {group.values.length === 0 && (
-                        <span className={styles.noValues}>Sin valores aún</span>
-                      )}
-                      {group.values.map(val => (
-                        <span key={val} className={styles.valueChip}>
-                          {val}
-                          {can('variants.delete') && (
-                            <button
-                              type="button"
-                              className={styles.chipRemove}
-                              onClick={() => removeValue(group.id, val)}
-                              title={`Eliminar ${val}`}
-                            >
-                              ×
-                            </button>
-                          )}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Input para agregar valor */}
-                    {can('variants.edit') && (
-                      <div className={styles.addValueRow}>
-                        <input
-                          className={styles.valueInput}
-                          type="text"
-                          placeholder={`Agregar valor a ${group.name}...`}
-                          value={newValues[group.id] ?? ''}
-                          onChange={e => setNewValues(prev => ({ ...prev, [group.id]: e.target.value }))}
-                          onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
-                        />
-                        <button
-                          className={styles.addValueBtn}
-                          type="button"
-                          onClick={() => addValue(group.id)}
-                        >
-                          ＋
-                        </button>
+                    <div key={group.id} className={styles.groupCard}>
+                      {/* Header del grupo */}
+                      <div className={styles.groupHeader}>
+                        {editingGroupId === group.id ? (
+                          <input
+                            className={styles.groupNameEdit}
+                            value={editingGroupName}
+                            autoFocus
+                            onChange={e => setEditingGroupName(e.target.value)}
+                            onBlur={() => commitEditGroupName(group.id)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') commitEditGroupName(group.id);
+                              if (e.key === 'Escape') {
+                                setEditingGroupId(null);
+                                setEditingGroupName('');
+                              }
+                            }}
+                          />
+                        ) : (
+                          <button
+                            className={styles.groupName}
+                            onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
+                            type="button"
+                            title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
+                            style={can('variants.edit') ? undefined : { cursor: 'default' }}
+                          >
+                            {group.name}
+                            {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
+                          </button>
+                        )}
+                        {can('variants.delete') && (
+                          <button
+                            className={styles.deleteGroupBtn}
+                            onClick={() => deleteGroup(group.id)}
+                            type="button"
+                            title="Eliminar grupo"
+                          >
+                            🗑️
+                          </button>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+
+                      {/* Valores / chips */}
+                      <div className={styles.valuesContainer}>
+                        {group.values.length === 0 && (
+                          <span className={styles.noValues}>Sin valores aún</span>
+                        )}
+                        {group.values.map(val => (
+                          <span key={val} className={styles.valueChip}>
+                            {val}
+                            {can('variants.delete') && (
+                              <button
+                                type="button"
+                                className={styles.chipRemove}
+                                onClick={() => removeValue(group.id, val)}
+                                title={`Eliminar ${val}`}
+                              >\
+                                ×
+                              </button>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Input para agregar valor */}
+                      {can('variants.edit') && (
+                        <div className={styles.addValueRow}>
+                          <input
+                            className={styles.valueInput}
+                            type="text"
+                            placeholder={`Agregar valor a ${group.name}...`}
+                            value={newValues[group.id] ?? ''}
+                            onChange={e => setNewValues(prev => ({ ...prev, [group.id]: e.target.value }))}
+                            onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
+                          />
+                          <button
+                            className={styles.addValueBtn}
+                            type="button"
+                            onClick={() => addValue(group.id)}
+                          >
+                            ＋
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </main>
