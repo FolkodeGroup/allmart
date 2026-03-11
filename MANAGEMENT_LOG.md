@@ -715,24 +715,387 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #321: 🔄 Registrar puntaje de gestión | 2026-03-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #320: se refactoriza el sidebar para que sea colapsable y responsive | 2026-03-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #319: Se implementa tabla de 5 Mejores Clientes | 2026-03-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #331: 🔄 Registrar puntaje de gestión | 2026-03-08 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #329: 🔄 Actualización automática de puntajes semanal | 2026-03-08 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #330: se creo un header header fijo en la seccion admin y breadcrumbs gener… | 2026-03-08 |
-| GitHub Copilot | 20 | Resolución de Issue | Resolución de issue #339: Automatización de migraciones y seed en Docker (VPS) | 2026-03-09 |
-| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #434: Mejorar layout responsivo de pedidos con Grid/Flexbox | 2026-03-10 |
-| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #472: Agregar logs de actividad en frontend para acciones administrativas | 2026-03-10 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #474: Se refactoriza el buscador para productos en Productos | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #331: 🔄 Registrar puntaje de gestión | 2026-03-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #330: se creo un header header fijo en la seccion admin y breadcrumbs gener… | 2026-03-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #329: 🔄 Actualización automática de puntajes semanal | 2026-03-08 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #348: fix: deploy inteligente para preservar .env manual en vps | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #347: He agregado logs de depuración en el frontend para que puedas ver en … | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #346: l archivo docker-compose.prod.yml, el backend estaba intentando conec… | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #345: cmaio de puerto | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #344: ambios realizados | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #343: He actualizado el archivo ci-cd.yml para que el proceso de despliegue… | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #342: He actualizado el archivo ci-cd.yml para que el proceso de despliegue… | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #341: 339 migraciones | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #340: - [x] Investigar configuración de BD y migraciones en backend | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #338: Main merge fix | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #337: Merge fix main | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #336: 316 desplegar proeycto en vps cloud | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #335: 316 desplegar proeycto en vps cloud | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #334: 🔄 Registrar puntaje de gestión | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #333: feat: setup infrastructure and ci-cd for vps deployment | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #347: He agregado logs de depuración en el frontend para que puedas ver en … | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #346: l archivo docker-compose.prod.yml, el backend estaba intentando conec… | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #345: cmaio de puerto | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #344: ambios realizados | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #343: He actualizado el archivo ci-cd.yml para que el proceso de despliegue… | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #342: He actualizado el archivo ci-cd.yml para que el proceso de despliegue… | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #341: 339 migraciones | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #340: - [x] Investigar configuración de BD y migraciones en backend | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #338: Main merge fix | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #337: Merge fix main | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #336: 316 desplegar proeycto en vps cloud | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #335: 316 desplegar proeycto en vps cloud | 2026-03-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #333: feat: setup infrastructure and ci-cd for vps deployment | 2026-03-09 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #339: Migraciones | 2026-03-09 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #339: Migraciones | 2026-03-09 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #339: Migraciones | 2026-03-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #488: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #487: instalada dependencia tsc | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #486: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #485: 457 reemplazar mocks y localstorage por llamadas http al backend para variantes de producto | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #484: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #483: 456 reemplazar mocks y localstorage por llamadas http al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #482: 🔄 Registrar puntaje de gestión | 2026-03-10 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #481: El backend local está correctamente conectado a la base de datos del … | 2026-03-10 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #479: 198 sidebar sección de perfil de usuario integrada | 2026-03-10 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #483: 456 reemplazar mocks y localstorage por llamadas http al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #478: Cambios realizados | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #477: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #475: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #435: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #352: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #351: fix: corregir error TS en authService, seed actualiza password en ups… | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #350: fix: ajustar payload de token JWT y corregir nombres de variables en … | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #349: El error sed: unterminated s command ocurría porque tu JWT_SECRET tie… | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #488: 🔄 Registrar puntaje de gestión | 2026-03-10 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #487: instalada dependencia tsc | 2026-03-10 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #487: instalada dependencia tsc | 2026-03-10 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #493: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #495: He completado la implementación de los estados de carga y vacíos en e… | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #497: He completado la implementación de validaciones robustas en los formu… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #487: instalada dependencia tsc | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #486: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #485: 457 reemplazar mocks y localstorage por llamadas http al backend para variantes de producto | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #484: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #483: 456 reemplazar mocks y localstorage por llamadas http al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #482: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #481: El backend local está correctamente conectado a la base de datos del … | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #479: 198 sidebar sección de perfil de usuario integrada | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #478: Cambios realizados | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #477: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #476: Se implementa paginacion de productos en Productos, siendo de 8 por c… | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #475: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #474: Se refactoriza el buscador para productos en Productos | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #435: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #352: 🔄 Registrar puntaje de gestión | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #351: fix: corregir error TS en authService, seed actualiza password en ups… | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #350: fix: ajustar payload de token JWT y corregir nombres de variables en … | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #349: El error sed: unterminated s command ocurría porque tu JWT_SECRET tie… | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #348: fix: deploy inteligente para preservar .env manual en vps | 2026-03-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #332: se ajusta el ancho del header y se configura que el dashboard ocupe e… | 2026-03-10 |
+| dgimenezdeveloper | 5 | Creación de milestone | Milestone: ADMIN - PRODUCTOS VIEW | 2026-03-10 |
+| dgimenezdeveloper | 5 | Creación de milestone | Milestone: ADMIN - VARIANTES VIEW | 2026-03-10 |
+| dgimenezdeveloper | 5 | Creación de milestone | Milestone: ADMIN - CATEGORIAS VIEW | 2026-03-10 |
+| dgimenezdeveloper | 5 | Creación de milestone | Milestone: ADMIN - PEDIDOS VIEW | 2026-03-10 |
+| dgimenezdeveloper | 5 | Creación de milestone | Milestone: ADMIN - REPORTES | 2026-03-10 |
+| dgimenezdeveloper | 5 | Creación de milestone | Milestone: CONEXION FRONTEND BACKEND | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #480: Conectar backend local a base de datos PostgreSQL en VPS Donweb | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #473: Optimizar performance del frontend en vistas de administración | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #472: Agregar logs de actividad en frontend para acciones administrativas | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #471: Implementar manejo de relaciones entre entidades (productos, variantes, categorías, imágenes) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #470: Sincronizar estados entre frontend y backend tras operaciones CRUD | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #469: Implementar permisos granulares en frontend según roles de usuario | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #468: Integrar paginación y búsqueda en la gestión de productos y categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #467: Optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #466: Garantizar seguridad en el frontend: sanitización, prevención de XSS y CSRF | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #465: Mejorar la UX de administración con feedback instantáneo y navegación fluida | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #464: Actualizar documentación técnica y de usuario sobre la gestión real de entidades | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #463: Actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #462: Integrar manejo de tokens y autenticación en llamadas HTTP | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #461: Implementar validaciones de datos en formularios de administración | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #460: mplementar estados de loading y vacíos en componentes de administración | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #459: Implementar manejo de errores global en frontend para todas las entidades | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #458: Reemplazar mocks y localStorage por llamadas HTTP al backend para imágenes de producto | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #457: Reemplazar mocks y localStorage por llamadas HTTP al backend para variantes de producto | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #456: Reemplazar mocks y localStorage por llamadas HTTP al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #455: Reemplazar mocks y localStorage por llamadas HTTP al backend para productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #454: Añadir resumen descargable de reportes en PDF | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #453: Mejorar visualización de gráficos comparativos y tendencias | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #452: Documentar componentes y flujos de la vista de reportes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #451: Mejorar layout responsivo de reportes con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #450: Expandir vista de reportes a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #449: Implementar confirmación de cambios antes de salir de la vista de reportes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #448: Optimizar animaciones y transiciones en la UI de reportes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #447: Añadir filtros avanzados por estado de pedido, cliente y producto | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #446: Mejorar visualización de productos más vendidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #445: Refactorizar componentes de reportes para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #444: Añadir tooltips y ayuda contextual en métricas y gráficos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #443: Optimizar carga y visualización de gráficos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #442: Mejorar accesibilidad de la vista de reportes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #441: Adaptar la interfaz de reportes para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #440: Implementar exportación avanzada a CSV/Excel/PDF | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #439: Mejorar feedback de acciones de exportación | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #438: Añadir paginación y scroll en tablas de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #437: Optimizar visualización de métricas principales | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #436: Mejorar filtro de fechas y periodos en reportes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #434: Mejorar layout responsivo de pedidos con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #433: Expandir vista de pedidos a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #432: Implementar confirmación de cambios antes de salir de la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #431: Optimizar animaciones y transiciones en la UI de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #430: Añadir filtro avanzado por estado, fecha y total | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #429: Documentar componentes y flujos de la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #428: Añadir exportación de pedidos a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #427: Permitir edición rápida de datos de pedido (cliente, productos, total) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #426: Añadir indicadores de pedidos con problemas (cancelados, pendientes de pago) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #425: Mejorar la gestión de estados de pedidos (pendiente, confirmado, enviado, entregado, cancelado, abonado) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #424: Refactorizar componentes de pedidos para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #423: Añadir tooltips y ayuda contextual en acciones de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #422: Optimizar carga de datos y rendimiento en pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #421: Mejorar accesibilidad de la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #420: Adaptar la interfaz de pedidos para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #419: Implementar edición masiva de estado de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #418: Mejorar feedback de acciones de gestión de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #417: Añadir paginación a la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #416: Optimizar visualización de pedidos en tabla | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #415: Mejorar filtro de búsqueda por cliente, email y número de pedido | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #414: Mejorar layout responsivo de categorías con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #413: Expandir vista de categorías a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #412: Implementar confirmación de cambios antes de salir de la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #411: Optimizar animaciones y transiciones en la UI de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #410: Añadir filtro avanzado por cantidad de productos y estado | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #409: Documentar componentes y flujos de la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #408: Añadir exportación de categorías a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #407: Permitir edición rápida de descripción e imagen de categoría | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #406: Añadir indicadores de categorías sin productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #405: Mejorar la gestión de estados de categorías (visible/oculta) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #404: Refactorizar componentes de categorías para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #403: Añadir tooltips y ayuda contextual en acciones de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #402: Optimizar carga de imágenes de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #401: Mejorar accesibilidad de la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #400: Adaptar la interfaz de categorías para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #399: Implementar edición masiva de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #398: Mejorar feedback de acciones de edición y eliminación de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #397: Añadir paginación a la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #396: Optimizar visualización de categorías en tarjetas | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #395: Mejorar filtro de búsqueda por nombre y slug de categoría | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #394: Mejorar layout responsivo de variantes con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #393: Expandir vista de variantes a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #392: Implementar confirmación de cambios antes de salir de la vista de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #391: Optimizar animaciones y transiciones en la UI de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #390: Añadir filtro avanzado por tipo de variante y estado | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #389: Documentar componentes y flujos de la vista de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #388: Añadir exportación de variantes a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #387: Permitir edición rápida de valores de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #386: Añadir indicadores de variantes sin valores | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #385: Mejorar la gestión de estados de variantes (activo/inactivo) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #384: Refactorizar componentes de variantes para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #383: Añadir tooltips y ayuda contextual en acciones de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #382: Optimizar carga de imágenes de productos en variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #381: Mejorar accesibilidad de la vista de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #380: Adaptar la interfaz de variantes para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #379: Implementar edición masiva de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #378: Mejorar feedback de acciones de gestión de variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #377: Añadir paginación al panel de productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #376: Optimizar visualización de productos y variantes en panel lateral | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #375: Mejorar filtro de búsqueda por nombre y SKU en variantes | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #374: Mejorar layout responsivo con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #373: Expandir vista de productos a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #372: Permitir ordenamiento de productos por columnas | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #371: Mejorar la visualización de SKU y categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #370: Implementar confirmación de cambios antes de salir | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #369: Optimizar animaciones y transiciones en la UI | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #368: Añadir filtro avanzado por categoría, estado y stock | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #367: Documentar componentes y flujos de la vista de productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #366: Permitir exportación de productos a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #365: Mejorar visualización de precios y descuentos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #364: Añadir indicadores de stock bajo | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #363: Mejorar la gestión de estados (activo/inactivo) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #362: Refactorizar componentes para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #361: Añadir tooltips y ayuda contextual en acciones | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #360: Optimizar carga de imágenes de productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #359: Mejorar accesibilidad de la vista de productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #358: Adaptar la interfaz para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #357: Implementar edición masiva de productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #356: Mejorar feedback de acciones de edición y eliminación | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #355: Optimizar visualización de productos en tarjetas | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #354: Añadir paginación a la lista de productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #353: Mejorar filtro de búsqueda por nombre y SKU | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #480: Conectar backend local a base de datos PostgreSQL en VPS Donweb | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #480: Conectar backend local a base de datos PostgreSQL en VPS Donweb | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #473: Optimizar performance del frontend en vistas de administración | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #473: Optimizar performance del frontend en vistas de administración | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #472: Agregar logs de actividad en frontend para acciones administrativas | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #472: Agregar logs de actividad en frontend para acciones administrativas | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #471: Implementar manejo de relaciones entre entidades (productos, variantes, categorías, imágenes) | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #471: Implementar manejo de relaciones entre entidades (productos, variantes, categorías, imágenes) | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #470: Sincronizar estados entre frontend y backend tras operaciones CRUD | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #470: Sincronizar estados entre frontend y backend tras operaciones CRUD | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #469: Implementar permisos granulares en frontend según roles de usuario | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #469: Implementar permisos granulares en frontend según roles de usuario | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #468: Integrar paginación y búsqueda en la gestión de productos y categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #468: Integrar paginación y búsqueda en la gestión de productos y categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #467: Optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #467: Optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #466: Garantizar seguridad en el frontend: sanitización, prevención de XSS y CSRF | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #466: Garantizar seguridad en el frontend: sanitización, prevención de XSS y CSRF | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #465: Mejorar la UX de administración con feedback instantáneo y navegación fluida | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #465: Mejorar la UX de administración con feedback instantáneo y navegación fluida | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #464: Actualizar documentación técnica y de usuario sobre la gestión real de entidades | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #464: Actualizar documentación técnica y de usuario sobre la gestión real de entidades | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #463: Actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #463: Actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #462: Integrar manejo de tokens y autenticación en llamadas HTTP | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #462: Integrar manejo de tokens y autenticación en llamadas HTTP | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #461: Implementar validaciones de datos en formularios de administración | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #461: Implementar validaciones de datos en formularios de administración | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #460: mplementar estados de loading y vacíos en componentes de administración | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #460: mplementar estados de loading y vacíos en componentes de administración | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #459: Implementar manejo de errores global en frontend para todas las entidades | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #459: Implementar manejo de errores global en frontend para todas las entidades | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #458: Reemplazar mocks y localStorage por llamadas HTTP al backend para imágenes de producto | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #458: Reemplazar mocks y localStorage por llamadas HTTP al backend para imágenes de producto | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #457: Reemplazar mocks y localStorage por llamadas HTTP al backend para variantes de producto | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #457: Reemplazar mocks y localStorage por llamadas HTTP al backend para variantes de producto | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #456: Reemplazar mocks y localStorage por llamadas HTTP al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #456: Reemplazar mocks y localStorage por llamadas HTTP al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #455: Reemplazar mocks y localStorage por llamadas HTTP al backend para productos | 2026-03-10 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #455: Reemplazar mocks y localStorage por llamadas HTTP al backend para productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #454: Añadir resumen descargable de reportes en PDF | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #453: Mejorar visualización de gráficos comparativos y tendencias | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #452: Documentar componentes y flujos de la vista de reportes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #451: Mejorar layout responsivo de reportes con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #450: Expandir vista de reportes a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #449: Implementar confirmación de cambios antes de salir de la vista de reportes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #448: Optimizar animaciones y transiciones en la UI de reportes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #447: Añadir filtros avanzados por estado de pedido, cliente y producto | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #446: Mejorar visualización de productos más vendidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #445: Refactorizar componentes de reportes para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #444: Añadir tooltips y ayuda contextual en métricas y gráficos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #443: Optimizar carga y visualización de gráficos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #442: Mejorar accesibilidad de la vista de reportes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #441: Adaptar la interfaz de reportes para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #440: Implementar exportación avanzada a CSV/Excel/PDF | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #439: Mejorar feedback de acciones de exportación | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #438: Añadir paginación y scroll en tablas de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #437: Optimizar visualización de métricas principales | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #436: Mejorar filtro de fechas y periodos en reportes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #434: Mejorar layout responsivo de pedidos con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #433: Expandir vista de pedidos a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #432: Implementar confirmación de cambios antes de salir de la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #431: Optimizar animaciones y transiciones en la UI de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #430: Añadir filtro avanzado por estado, fecha y total | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #429: Documentar componentes y flujos de la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #428: Añadir exportación de pedidos a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #427: Permitir edición rápida de datos de pedido (cliente, productos, total) | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #426: Añadir indicadores de pedidos con problemas (cancelados, pendientes de pago) | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #425: Mejorar la gestión de estados de pedidos (pendiente, confirmado, enviado, entregado, cancelado, abonado) | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #424: Refactorizar componentes de pedidos para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #423: Añadir tooltips y ayuda contextual en acciones de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #422: Optimizar carga de datos y rendimiento en pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #421: Mejorar accesibilidad de la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #420: Adaptar la interfaz de pedidos para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #419: Implementar edición masiva de estado de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #418: Mejorar feedback de acciones de gestión de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #417: Añadir paginación a la vista de pedidos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #416: Optimizar visualización de pedidos en tabla | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #415: Mejorar filtro de búsqueda por cliente, email y número de pedido | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #414: Mejorar layout responsivo de categorías con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #413: Expandir vista de categorías a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #412: Implementar confirmación de cambios antes de salir de la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #411: Optimizar animaciones y transiciones en la UI de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #410: Añadir filtro avanzado por cantidad de productos y estado | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #409: Documentar componentes y flujos de la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #408: Añadir exportación de categorías a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #407: Permitir edición rápida de descripción e imagen de categoría | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #406: Añadir indicadores de categorías sin productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #405: Mejorar la gestión de estados de categorías (visible/oculta) | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #404: Refactorizar componentes de categorías para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #403: Añadir tooltips y ayuda contextual en acciones de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #402: Optimizar carga de imágenes de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #401: Mejorar accesibilidad de la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #400: Adaptar la interfaz de categorías para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #399: Implementar edición masiva de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #398: Mejorar feedback de acciones de edición y eliminación de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #397: Añadir paginación a la vista de categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #396: Optimizar visualización de categorías en tarjetas | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #395: Mejorar filtro de búsqueda por nombre y slug de categoría | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #394: Mejorar layout responsivo de variantes con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #393: Expandir vista de variantes a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #392: Implementar confirmación de cambios antes de salir de la vista de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #391: Optimizar animaciones y transiciones en la UI de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #390: Añadir filtro avanzado por tipo de variante y estado | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #389: Documentar componentes y flujos de la vista de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #388: Añadir exportación de variantes a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #387: Permitir edición rápida de valores de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #386: Añadir indicadores de variantes sin valores | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #385: Mejorar la gestión de estados de variantes (activo/inactivo) | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #384: Refactorizar componentes de variantes para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #383: Añadir tooltips y ayuda contextual en acciones de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #382: Optimizar carga de imágenes de productos en variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #381: Mejorar accesibilidad de la vista de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #380: Adaptar la interfaz de variantes para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #379: Implementar edición masiva de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #378: Mejorar feedback de acciones de gestión de variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #377: Añadir paginación al panel de productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #376: Optimizar visualización de productos y variantes en panel lateral | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #375: Mejorar filtro de búsqueda por nombre y SKU en variantes | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #374: Mejorar layout responsivo con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #373: Expandir vista de productos a toda la pantalla usando Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #372: Permitir ordenamiento de productos por columnas | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #371: Mejorar la visualización de SKU y categorías | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #370: Implementar confirmación de cambios antes de salir | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #369: Optimizar animaciones y transiciones en la UI | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #368: Añadir filtro avanzado por categoría, estado y stock | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #367: Documentar componentes y flujos de la vista de productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #366: Permitir exportación de productos a CSV/Excel | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #365: Mejorar visualización de precios y descuentos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #364: Añadir indicadores de stock bajo | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #363: Mejorar la gestión de estados (activo/inactivo) | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #362: Refactorizar componentes para mayor mantenibilidad | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #361: Añadir tooltips y ayuda contextual en acciones | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #360: Optimizar carga de imágenes de productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #359: Mejorar accesibilidad de la vista de productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #358: Adaptar la interfaz para dispositivos móviles | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #357: Implementar edición masiva de productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #356: Mejorar feedback de acciones de edición y eliminación | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #355: Optimizar visualización de productos en tarjetas | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #354: Añadir paginación a la lista de productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #353: Mejorar filtro de búsqueda por nombre y SKU | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #510: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #509: La refactorización modular está completamente funcional: | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #508: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #507: ¡Seguridad reforzada! He implementado una serie de medidas proactivas… | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #506: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #505: Mejoras implementadas: | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #504: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #503: Resumen de cambios en la documentación: | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #502: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #501: 463 actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #501: 463 actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #503: Resumen de cambios en la documentación: | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #505: Mejoras implementadas: | 2026-03-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #507: ¡Seguridad reforzada! He implementado una serie de medidas proactivas… | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #500: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #499: He integrado con éxito el manejo de tokens JWT y la autenticación en … | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #498: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #497: He completado la implementación de validaciones robustas en los formu… | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #496: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #495: He completado la implementación de los estados de carga y vacíos en e… | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #494: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #493: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #492: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #490: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #508: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #507: ¡Seguridad reforzada! He implementado una serie de medidas proactivas… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #506: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #505: Mejoras implementadas: | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #504: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #503: Resumen de cambios en la documentación: | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #502: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #501: 463 actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #500: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #499: He integrado con éxito el manejo de tokens JWT y la autenticación en … | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #498: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #497: He completado la implementación de validaciones robustas en los formu… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #496: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #495: He completado la implementación de los estados de carga y vacíos en e… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #494: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #493: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #492: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #490: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
