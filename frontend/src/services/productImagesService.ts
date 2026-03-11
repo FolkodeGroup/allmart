@@ -13,7 +13,7 @@
  *   GET    /api/images/products/:id/thumb                 → servir miniatura WebP (público)
  */
 
-import { handleResponse } from '../utils/apiErrorHandler';
+import { apiFetch } from '../utils/apiClient';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -67,18 +67,6 @@ interface ApiSuccess<T> {
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
-function authHeaders(token: string): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
-
-function authHeadersFormData(token: string): HeadersInit {
-  // NO incluir Content-Type — el browser lo fija con el boundary correcto para multipart
-  return { Authorization: `Bearer ${token}` };
-}
-
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 /**
@@ -100,12 +88,10 @@ export async function uploadProductImage(
   if (altText !== undefined) form.append('altText', altText);
   if (position !== undefined) form.append('position', String(position));
 
-  const res = await fetch(`/api/admin/products/${productId}/images/upload`, {
+  const body = await apiFetch<ApiSuccess<ApiProductImage>>(`/api/admin/products/${productId}/images/upload`, {
     method: 'POST',
-    headers: authHeadersFormData(token),
     body: form,
-  });
-  const body = await handleResponse<ApiSuccess<ApiProductImage>>(res);
+  }, token);
   return body.data;
 }
 
@@ -114,10 +100,7 @@ export async function fetchImagesByProduct(
   token: string,
   productId: string,
 ): Promise<ApiProductImage[]> {
-  const res = await fetch(`/api/admin/products/${productId}/images`, {
-    headers: authHeaders(token),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProductImage[]>>(res);
+  const body = await apiFetch<ApiSuccess<ApiProductImage[]>>(`/api/admin/products/${productId}/images`, {}, token);
   return body.data ?? [];
 }
 
@@ -127,10 +110,7 @@ export async function fetchImageById(
   productId: string,
   imageId: string,
 ): Promise<ApiProductImage> {
-  const res = await fetch(`/api/admin/products/${productId}/images/${imageId}`, {
-    headers: authHeaders(token),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProductImage>>(res);
+  const body = await apiFetch<ApiSuccess<ApiProductImage>>(`/api/admin/products/${productId}/images/${imageId}`, {}, token);
   return body.data;
 }
 
@@ -144,12 +124,10 @@ export async function updateProductImageMeta(
   imageId: string,
   payload: UpdateImageMetaPayload,
 ): Promise<ApiProductImage> {
-  const res = await fetch(`/api/admin/products/${productId}/images/${imageId}/meta`, {
+  const body = await apiFetch<ApiSuccess<ApiProductImage>>(`/api/admin/products/${productId}/images/${imageId}/meta`, {
     method: 'PATCH',
-    headers: authHeaders(token),
     body: JSON.stringify(payload),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProductImage>>(res);
+  }, token);
   return body.data;
 }
 
@@ -159,12 +137,10 @@ export async function createProductImage(
   productId: string,
   payload: CreateImagePayload,
 ): Promise<ApiProductImage> {
-  const res = await fetch(`/api/admin/products/${productId}/images`, {
+  const body = await apiFetch<ApiSuccess<ApiProductImage>>(`/api/admin/products/${productId}/images`, {
     method: 'POST',
-    headers: authHeaders(token),
     body: JSON.stringify(payload),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProductImage>>(res);
+  }, token);
   return body.data;
 }
 
@@ -175,12 +151,10 @@ export async function updateProductImage(
   imageId: string,
   payload: UpdateImagePayload,
 ): Promise<ApiProductImage> {
-  const res = await fetch(`/api/admin/products/${productId}/images/${imageId}`, {
+  const body = await apiFetch<ApiSuccess<ApiProductImage>>(`/api/admin/products/${productId}/images/${imageId}`, {
     method: 'PUT',
-    headers: authHeaders(token),
     body: JSON.stringify(payload),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProductImage>>(res);
+  }, token);
   return body.data;
 }
 
@@ -190,9 +164,7 @@ export async function deleteProductImage(
   productId: string,
   imageId: string,
 ): Promise<void> {
-  const res = await fetch(`/api/admin/products/${productId}/images/${imageId}`, {
+  await apiFetch<unknown>(`/api/admin/products/${productId}/images/${imageId}`, {
     method: 'DELETE',
-    headers: authHeaders(token),
-  });
-  await handleResponse<unknown>(res);
+  }, token);
 }

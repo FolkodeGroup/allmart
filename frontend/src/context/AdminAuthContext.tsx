@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { type Role, type Permission, hasPermission } from '../utils/permissions';
 
@@ -43,6 +43,16 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(ROLE_KEY);
   };
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      console.warn('Sesión expirada detectada por el API handler. Cerrando sesión.');
+      logout();
+    };
+    
+    window.addEventListener('unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('unauthorized', handleUnauthorized);
+  }, []);
 
   const can = (permission: Permission) => hasPermission(role, permission);
 

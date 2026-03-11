@@ -5,7 +5,7 @@
  * Endpoints: /api/admin/products/:productId/variants
  */
 
-import { handleResponse } from '../utils/apiErrorHandler';
+import { apiFetch } from '../utils/apiClient';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -40,21 +40,11 @@ interface ApiSuccess<T> {
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
-function authHeaders(token: string): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
-
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 /** GET /api/admin/products/:productId/variants */
 export async function fetchVariantsByProduct(token: string, productId: string): Promise<ApiVariant[]> {
-  const res = await fetch(`/api/admin/products/${productId}/variants`, {
-    headers: authHeaders(token),
-  });
-  const body = await handleResponse<ApiSuccess<ApiVariant[]>>(res);
+  const body = await apiFetch<ApiSuccess<ApiVariant[]>>(`/api/admin/products/${productId}/variants`, {}, token);
   return body.data ?? [];
 }
 
@@ -64,12 +54,10 @@ export async function createVariant(
   productId: string,
   payload: CreateVariantPayload,
 ): Promise<ApiVariant> {
-  const res = await fetch(`/api/admin/products/${productId}/variants`, {
+  const body = await apiFetch<ApiSuccess<ApiVariant>>(`/api/admin/products/${productId}/variants`, {
     method: 'POST',
-    headers: authHeaders(token),
     body: JSON.stringify(payload),
-  });
-  const body = await handleResponse<ApiSuccess<ApiVariant>>(res);
+  }, token);
   return body.data;
 }
 
@@ -80,12 +68,10 @@ export async function updateVariant(
   variantId: string,
   payload: UpdateVariantPayload,
 ): Promise<ApiVariant> {
-  const res = await fetch(`/api/admin/products/${productId}/variants/${variantId}`, {
+  const body = await apiFetch<ApiSuccess<ApiVariant>>(`/api/admin/products/${productId}/variants/${variantId}`, {
     method: 'PUT',
-    headers: authHeaders(token),
     body: JSON.stringify(payload),
-  });
-  const body = await handleResponse<ApiSuccess<ApiVariant>>(res);
+  }, token);
   return body.data;
 }
 
@@ -95,9 +81,7 @@ export async function deleteVariant(
   productId: string,
   variantId: string,
 ): Promise<void> {
-  const res = await fetch(`/api/admin/products/${productId}/variants/${variantId}`, {
+  await apiFetch<ApiSuccess<null>>(`/api/admin/products/${productId}/variants/${variantId}`, {
     method: 'DELETE',
-    headers: authHeaders(token),
-  });
-  await handleResponse<ApiSuccess<null>>(res);
+  }, token);
 }

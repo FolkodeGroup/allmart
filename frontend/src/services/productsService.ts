@@ -5,7 +5,7 @@
  */
 
 import type { Product, Category } from '../types';
-import { handleResponse } from '../utils/apiErrorHandler';
+import { apiFetch } from '../utils/apiClient';
 
 // ─── Tipos que retorna el backend ─────────────────────────────────────────────
 
@@ -90,14 +90,6 @@ export interface ProductPayload {
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
-/** Cabeceras con autenticación */
-function authHeaders(token: string): HeadersInit {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
-
 // ─── Mapeos entre tipos API y tipos frontend ──────────────────────────────────
 
 /** Convierte una ApiCategory del backend al tipo Category del frontend */
@@ -180,24 +172,19 @@ export async function fetchPublicProducts(
   if (params.limit)    qs.set('limit', String(params.limit));
 
   const url = `/api/products${qs.toString() ? `?${qs}` : ''}`;
-  const res = await fetch(url);
-  return handleResponse<PaginatedProducts>(res);
+  return apiFetch<PaginatedProducts>(url);
 }
 
 /** GET /api/products/:slug — Detalle de un producto por slug */
 export async function fetchPublicProductBySlug(slug: string): Promise<ApiProduct> {
-  const res = await fetch(`/api/products/${encodeURIComponent(slug)}`);
-  return handleResponse<ApiProduct>(res);
+  return apiFetch<ApiProduct>(`/api/products/${encodeURIComponent(slug)}`);
 }
 
 // ─── API admin (requieren token de autenticación) ─────────────────────────────
 
 /** GET /api/admin/products — Lista todos los productos para administración */
 export async function fetchAdminProducts(token: string): Promise<ApiProduct[]> {
-  const res = await fetch('/api/admin/products', {
-    headers: authHeaders(token),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProduct[]>>(res);
+  const body = await apiFetch<ApiSuccess<ApiProduct[]>>('/api/admin/products', {}, token);
   return body.data;
 }
 
@@ -206,12 +193,10 @@ export async function createAdminProduct(
   payload: ProductPayload,
   token: string,
 ): Promise<ApiProduct> {
-  const res = await fetch('/api/admin/products', {
+  const body = await apiFetch<ApiSuccess<ApiProduct>>('/api/admin/products', {
     method: 'POST',
-    headers: authHeaders(token),
     body: JSON.stringify(payload),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProduct>>(res);
+  }, token);
   return body.data;
 }
 
@@ -221,20 +206,16 @@ export async function updateAdminProduct(
   payload: Partial<ProductPayload>,
   token: string,
 ): Promise<ApiProduct> {
-  const res = await fetch(`/api/admin/products/${id}`, {
+  const body = await apiFetch<ApiSuccess<ApiProduct>>(`/api/admin/products/${id}`, {
     method: 'PUT',
-    headers: authHeaders(token),
     body: JSON.stringify(payload),
-  });
-  const body = await handleResponse<ApiSuccess<ApiProduct>>(res);
+  }, token);
   return body.data;
 }
 
 /** DELETE /api/admin/products/:id — Elimina un producto */
 export async function deleteAdminProduct(id: string, token: string): Promise<void> {
-  const res = await fetch(`/api/admin/products/${id}`, {
+  await apiFetch<unknown>(`/api/admin/products/${id}`, {
     method: 'DELETE',
-    headers: authHeaders(token),
-  });
-  await handleResponse<unknown>(res);
+  }, token);
 }
