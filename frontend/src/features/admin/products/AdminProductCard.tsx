@@ -15,9 +15,6 @@ interface AdminProductCardProps {
   onDelete?: (id: string) => void;
   canEdit?: boolean;
   canDelete?: boolean;
-  deleteConfirm?: boolean;
-  onCancelDelete?: () => void;
-  onConfirmDelete?: () => void;
 }
 
 export const AdminProductCard: React.FC<AdminProductCardProps> = ({
@@ -34,9 +31,6 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
   onDelete,
   canEdit,
   canDelete,
-  deleteConfirm,
-  onCancelDelete,
-  onConfirmDelete,
 }) => {
   const formatPrice = (n: number) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n);
@@ -83,16 +77,9 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
           </button>
         )}
         {canDelete && (
-          deleteConfirm ? (
-            <>
-              <button className={styles.confirmDeleteBtn} onClick={onConfirmDelete}>Confirmar</button>
-              <button className={styles.cancelDeleteBtn} onClick={onCancelDelete}>Cancelar</button>
-            </>
-          ) : (
-            <button className={styles.deleteBtn} onClick={() => onDelete && onDelete(id)} title="Eliminar">
-              🗑️
-            </button>
-          )
+          <button className={styles.deleteBtn} onClick={() => onDelete && onDelete(id)} title="Eliminar">
+            🗑️
+          </button>
         )}
         {!canEdit && !canDelete && (
           <span className={styles.readOnly}>Solo lectura</span>

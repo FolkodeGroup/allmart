@@ -7,6 +7,7 @@ import { AdminProductCard } from './AdminProductCard';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
@@ -54,7 +55,6 @@ export function AdminProducts() {
     }
     setDeleteConfirm(null);
   };
-
 
   return (
     <div className={sectionStyles.page}>
@@ -188,9 +188,6 @@ export function AdminProducts() {
               canDelete={can('products.delete')}
               onEdit={handleEdit}
               onDelete={() => setDeleteConfirm(p.id)}
-              deleteConfirm={deleteConfirm === p.id}
-              onCancelDelete={() => setDeleteConfirm(null)}
-              onConfirmDelete={() => handleDelete(p.id)}
             />
           ))}
         </div>
@@ -226,6 +223,17 @@ export function AdminProducts() {
           onClose={() => setShowForm(false)}
         />
       )}
+
+      {/* Modal de confirmación de eliminación */}
+      <ModalConfirm
+        open={!!deleteConfirm}
+        title="Eliminar producto"
+        message="¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }
