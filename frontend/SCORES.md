@@ -2,14 +2,16 @@
 |-----|-------------------|
 | dgimenezdeveloper | 10958 |
 | Nahuel-Dalesio | 1510 |
-| FedericoPaal | 750 |
-| agustin-ovejero | 400 |
+| FedericoPaal | 900 |
+| agustin-ovejero | 485 |
 | CelinaJP | 320 |
+| GitHub Copilot | 20 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 50 | Issue | Optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-11 |
 | dgimenezdeveloper | 80 | Issue | Garantizar seguridad en el frontend: sanitización, prevención de XSS y CSRF | 2026-03-11 |
 | dgimenezdeveloper | 60 | Issue | Mejorar la UX de administración con feedback instantáneo y navegación fluida | 2026-03-11 |
 | dgimenezdeveloper | 40 | Issue | Actualizar documentación técnica y de usuario sobre la gestión real de entidades | 2026-03-11 |
@@ -19,6 +21,37 @@
 | dgimenezdeveloper | 50 | Issue | mplementar estados de loading y vacíos en componentes de administración | 2026-03-11 |
 | dgimenezdeveloper | 60 | Issue | Implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
 | dgimenezdeveloper | 250 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para imágenes de producto | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #493: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #495: He completado la implementación de los estados de carga y vacíos en e… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #497: He completado la implementación de validaciones robustas en los formu… | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #501: 463 actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #501: 463 actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #503: Resumen de cambios en la documentación: | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #505: Mejoras implementadas: | 2026-03-11 |
+| agustin-ovejero | 25 | Issue | Sidebar: Sección de Perfil de Usuario Integrada | 2026-03-10 |
+| agustin-ovejero | 30 | Issue | Dashboard: Grid Adaptativo de Pantalla Completa | 2026-03-10 |
+| dgimenezdeveloper | 120 | Issue | Conectar backend local a base de datos PostgreSQL en VPS Donweb | 2026-03-10 |
+| dgimenezdeveloper | 70 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para variantes de producto | 2026-03-10 |
+| dgimenezdeveloper | 170 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 80 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para productos | 2026-03-10 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #434: Mejorar layout responsivo de pedidos con Grid/Flexbox | 2026-03-10 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #472: Agregar logs de actividad en frontend para acciones administrativas | 2026-03-10 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #474: Se refactoriza el buscador para productos en Productos | 2026-03-10 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #481: El backend local está correctamente conectado a la base de datos del … | 2026-03-10 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #479: 198 sidebar sección de perfil de usuario integrada | 2026-03-10 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #483: 456 reemplazar mocks y localstorage por llamadas http al backend para categorías | 2026-03-10 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #487: instalada dependencia tsc | 2026-03-10 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #487: instalada dependencia tsc | 2026-03-10 |
+| FedericoPaal | 70 | Issue | Añadir paginación a la lista de productos | 2026-03-10 |
+| FedericoPaal | 80 | Issue | Mejorar filtro de búsqueda por nombre y SKU | 2026-03-10 |
+| dgimenezdeveloper | 20 | Issue | Migraciones | 2026-03-09 |
+| dgimenezdeveloper | 250 | Issue | Desplegar proeycto en vps cloud | 2026-03-09 |
+| GitHub Copilot | 20 | Gestión | Resolución de Issue — Resolución de issue #339: Automatización de migraciones y seed en Docker (VPS) | 2026-03-09 |
+| agustin-ovejero | 30 | Issue | Layout: Sticky Header con Breadcrumbs Dinámicos | 2026-03-08 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #329: 🔄 Actualización automática de puntajes semanal | 2026-03-08 |
+| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #330: se creo un header header fijo en la seccion admin y breadcrumbs gener… | 2026-03-08 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #510: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #509: La refactorización modular está completamente funcional: | 2026-03-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #508: 🔄 Registrar puntaje de gestión | 2026-03-11 |
@@ -427,6 +460,7 @@
 | FedericoPaal | 80 | Issue | Dashboard: Filtro Global de Fecha para el Panel | 2026-03-07 |
 | FedericoPaal | 60 | Issue | Dashboard: Gráfico de Barras - Productos más Vendidos | 2026-03-07 |
 | FedericoPaal | 40 | Issue | Dashboard: Tarjeta de "Mejores Clientes" | 2026-03-07 |
+| dgimenezdeveloper | 40 | Issue | Reparar menú hamburguesa y navbar en frontend: versión móvil y escritorio | 2026-03-06 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #318: 🔄 Registrar puntaje de gestión | 2026-03-06 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #315: 🔄 Registrar puntaje de gestión | 2026-03-06 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #314: 🔄 Registrar puntaje de gestión | 2026-03-06 |
@@ -452,6 +486,7 @@
 | CelinaJP | 20 | Issue | Documentar proceso de generación de favicon | 2026-03-05 |
 | CelinaJP | 20 | Issue | Generar favicon en todos los tamaños requeridos | 2026-03-05 |
 | CelinaJP | 20 | Issue | Procesar y exportar el logo en formatos web | 2026-03-05 |
+| dgimenezdeveloper | 60 | Issue | Implementar Volúmenes en Docker para Hot Reload en Backend y Frontend | 2026-03-05 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #310: 🔄 Registrar puntaje de gestión | 2026-03-05 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #308: 🔄 Registrar puntaje de gestión | 2026-03-05 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #307: 🔄 Registrar puntaje de gestión | 2026-03-05 |
