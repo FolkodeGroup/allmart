@@ -20,6 +20,7 @@ export function AdminCategories() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [assignCatId, setAssignCatId] = useState<string | null>(null);
 
@@ -28,14 +29,45 @@ export function AdminCategories() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const openNew = () => { setEditId(null); setForm(EMPTY); setError(''); setShowForm(true); };
+  const openNew = () => {
+    setEditId(null);
+    setForm(EMPTY);
+    setError('');
+    setFieldErrors({});
+    setShowForm(true);
+  };
+
   const openEdit = (id: string) => {
     const c = categories.find(c => c.id === id);
     if (!c) return;
     setEditId(id);
     setForm({ name: c.name, description: c.description ?? '', image: c.image ?? '', itemCount: c.itemCount ?? 0 });
     setError('');
+    setFieldErrors({});
     setShowForm(true);
+  };
+
+  const setField = (field: keyof typeof form, value: string | number) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
+  const validate = () => {
+    const errors: Record<string, string> = {};
+    if (!form.name.trim()) {
+      errors.name = 'El nombre de la categoría es obligatorio';
+    } else if (form.name.trim().length < 3) {
+      errors.name = 'El nombre debe tener al menos 3 caracteres';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,6 +88,7 @@ export function AdminCategories() {
     // Si estamos editando, subimos de inmediato
     if (editId) {
       setIsUploading(true);
+      setError('');
       try {
         const url = await uploadCategoryImage(editId, file);
         setForm(f => ({ ...f, image: url }));
@@ -79,7 +112,8 @@ export function AdminCategories() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) return setError('El nombre es obligatorio');
+    if (!validate()) return;
+    
     setError('');
     setIsSubmitting(true);
     try {
@@ -253,21 +287,31 @@ export function AdminCategories() {
           tabIndex={0}
           onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && setShowForm(false)}
         >
-          <div className={styles.panel}>
+            <div className={styles.panel}>
             <div className={styles.panelHeader}>
               <h2 className={styles.panelTitle}>{editId ? 'Editar categoría' : 'Nueva categoría'}</h2>
-              <button className={styles.closeBtn} onClick={() => setShowForm(false)}>✕</button>
+              <button className={styles.closeBtn} onClick={() => setShowForm(false)} type="button">✕</button>
             </div>
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.field}>
                 <label className={styles.label}>Nombre *</label>
-                <input className={styles.input} value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                <input 
+                  className={`${styles.input} ${fieldErrors.name ? styles.inputError : ''}`} 
+                  value={form.name}
+                  onChange={e => setField('name', e.target.value)} 
+                  required 
+                />
+                {fieldErrors.name && <span className={styles.errorText}>{fieldErrors.name}</span>}
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="category-description">Descripción</label>
-                <input className={styles.input} id="category-description" value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+                <textarea 
+                  className={styles.textarea} 
+                  id="category-description" 
+                  rows={3}
+                  value={form.description}
+                  onChange={e => setField('description', e.target.value)} 
+                />
               </div>
               <div className={styles.field}>
                 <label className={styles.label}>Imagen de categoría</label>

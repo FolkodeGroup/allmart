@@ -288,6 +288,22 @@
 .editInput:focus { border-color: var(--color-primary); }
 .editInput::placeholder { color: var(--color-text-tertiary); }
 
+.inputError {
+  border-color: var(--color-error) !important;
+}
+
+.errorText {
+  color: var(--color-error);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
+}
+
+.dropZoneError {
+  border-color: var(--color-error) !important;
+  background-color: rgba(192, 57, 43, 0.05) !important;
+}
+
 /* ── Botones ── */
 .saveBtn {
   font-family: var(--font-ui);

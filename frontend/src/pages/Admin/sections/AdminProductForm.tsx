@@ -53,15 +53,18 @@ export function AdminProductForm({ productId, onClose }: Props) {
   // mapa groupId → valor del input para agregar un valor nuevo
   const [newGroupValues, setNewGroupValues] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   // ── Estado para gestión de imágenes via API (solo cuando se edita) ──────────
   const [imgNewUrl, setImgNewUrl] = useState('');
   const [imgNewAlt, setImgNewAlt] = useState('');
+  const [imgError, setImgError] = useState('');
   const [showAddImgForm, setShowAddImgForm] = useState(false);
   const [editingImgId, setEditingImgId] = useState<string | null>(null);
   const [editingImgUrl, setEditingImgUrl] = useState('');
   const [editingImgAlt, setEditingImgAlt] = useState('');
+  const [editingImgError, setEditingImgError] = useState('');
   const [savingImgId, setSavingImgId] = useState<string | null>(null);
   const [deletingImgId, setDeletingImgId] = useState<string | null>(null);
   const addImgUrlRef = useRef<HTMLInputElement>(null);
@@ -80,6 +83,8 @@ export function AdminProductForm({ productId, onClose }: Props) {
       setForm(EMPTY);
       clearImages();
     }
+    setError('');
+    setFieldErrors({});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
@@ -87,7 +92,11 @@ export function AdminProductForm({ productId, onClose }: Props) {
 
   const handleApiAddImage = async () => {
     const url = imgNewUrl.trim();
-    if (!url || !productId) return;
+    setImgError('');
+    if (!url) return setImgError('La URL es obligatoria');
+    if (!url.startsWith('http')) return setImgError('La URL debe ser válida (empezar con http)');
+    if (!productId) return;
+
     try {
       await addImage(productId, { url, altText: imgNewAlt.trim() || undefined });
       setImgNewUrl('');
@@ -102,11 +111,16 @@ export function AdminProductForm({ productId, onClose }: Props) {
     setEditingImgId(img.id);
     setEditingImgUrl(img.url);
     setEditingImgAlt(img.altText ?? '');
+    setEditingImgError('');
   };
 
   const handleApiCommitEdit = async (imageId: string) => {
     const url = editingImgUrl.trim();
-    if (!url || !productId) return;
+    setEditingImgError('');
+    if (!url) return setEditingImgError('La URL es obligatoria');
+    if (!url.startsWith('http')) return setEditingImgError('La URL debe ser válida');
+    if (!productId) return;
+
     setSavingImgId(imageId);
     try {
       await updateImage(productId, imageId, {
@@ -133,14 +147,53 @@ export function AdminProductForm({ productId, onClose }: Props) {
     }
   };
 
-  const set = <K extends keyof typeof form>(key: K, value: typeof form[K]) =>
+  const set = <K extends keyof typeof form>(key: K, value: typeof form[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
+    // Limpiar error del campo cuando cambia
+    if (fieldErrors[key]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
+    if (!form.price || form.price <= 0) errors.price = 'El precio debe ser mayor a 0';
+    if (!form.category.id) errors.category = 'Seleccioná una categoría';
+    
+    // Validaciones opcionales pero con formato
+    if (form.discount !== undefined && (form.discount < 0 || form.discount > 100)) {
+      errors.discount = 'El descuento debe estar entre 0 y 100';
+    }
+
+    if (form.originalPrice !== undefined && form.originalPrice <= 0) {
+      errors.originalPrice = 'El precio original debe ser mayor a 0';
+    }
+
+    if (form.stock < 0) {
+      errors.stock = 'El stock no puede ser negativo';
+    }
+
+    // Validar URLs de imágenes en modo creación
+    if (!isEdit) {
+      const invalidImgs = form.images.filter(url => url.trim() !== '' && !url.startsWith('http'));
+      if (invalidImgs.length > 0) {
+        errors.images = 'Todas las URLs de imágenes deben ser válidas (http/https)';
+      }
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) return setError('El nombre es obligatorio');
-    if (!form.price || form.price <= 0) return setError('El precio debe ser mayor a 0');
-    if (!form.category.id) return setError('Seleccioná una categoría');
+    if (!validateForm()) return;
+    
     setError('');
     setSaving(true);
     try {
@@ -240,8 +293,9 @@ export function AdminProductForm({ productId, onClose }: Props) {
             <div className={styles.row}>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-name">Nombre *</label>
-                <input className={styles.input} id="product-name" value={form.name}
+                <input className={`${styles.input} ${fieldErrors.name ? styles.inputError : ''}`} id="product-name" value={form.name}
                   onChange={e => set('name', e.target.value)} required />
+                {fieldErrors.name && <span className={styles.errorText}>{fieldErrors.name}</span>}
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-sku">SKU</label>
@@ -270,23 +324,27 @@ export function AdminProductForm({ productId, onClose }: Props) {
             <div className={styles.row}>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-price">Precio *</label>
-                <input className={styles.input} id="product-price" type="number" min={0} step={0.01}
+                <input className={`${styles.input} ${fieldErrors.price ? styles.inputError : ''}`} id="product-price" type="number" min={0} step={0.01}
                   value={form.price} onChange={e => set('price', Number(e.target.value))} required />
+                {fieldErrors.price && <span className={styles.errorText}>{fieldErrors.price}</span>}
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-original-price">Precio original</label>
-                <input className={styles.input} id="product-original-price" type="number" min={0} step={0.01}
+                <input className={`${styles.input} ${fieldErrors.originalPrice ? styles.inputError : ''}`} id="product-original-price" type="number" min={0} step={0.01}
                   value={form.originalPrice ?? ''} onChange={e => set('originalPrice', e.target.value ? Number(e.target.value) : undefined)} />
+                {fieldErrors.originalPrice && <span className={styles.errorText}>{fieldErrors.originalPrice}</span>}
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-discount">Descuento (%)</label>
-                <input className={styles.input} id="product-discount" type="number" min={0} max={100}
+                <input className={`${styles.input} ${fieldErrors.discount ? styles.inputError : ''}`} id="product-discount" type="number" min={0} max={100}
                   value={form.discount ?? ''} onChange={e => set('discount', e.target.value ? Number(e.target.value) : undefined)} />
+                {fieldErrors.discount && <span className={styles.errorText}>{fieldErrors.discount}</span>}
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-stock">Stock</label>
-                <input className={styles.input} id="product-stock" type="number" min={0}
+                <input className={`${styles.input} ${fieldErrors.stock ? styles.inputError : ''}`} id="product-stock" type="number" min={0}
                   value={form.stock} onChange={e => set('stock', Number(e.target.value))} />
+                {fieldErrors.stock && <span className={styles.errorText}>{fieldErrors.stock}</span>}
               </div>
             </div>
 
@@ -303,7 +361,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
 
             <div className={styles.field}>
               <label className={styles.label} htmlFor="product-category">Categoría *</label>
-              <select className={styles.input} id="product-category" value={form.category.id}
+              <select className={`${styles.input} ${fieldErrors.category ? styles.inputError : ''}`} id="product-category" value={form.category.id}
                 onChange={e => {
                   const cat = categories.find(c => c.id === e.target.value);
                   if (cat) set('category', cat);
@@ -313,6 +371,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
+              {fieldErrors.category && <span className={styles.errorText}>{fieldErrors.category}</span>}
             </div>
 
             <div className={styles.field}>
@@ -368,12 +427,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
                           /* Edición inline */
                           <div className={styles.imgEditInline}>
                             <input
-                              className={styles.input}
+                              className={`${styles.input} ${editingImgError ? styles.inputError : ''}`}
                               value={editingImgUrl}
                               onChange={e => setEditingImgUrl(e.target.value)}
                               placeholder="URL de la imagen *"
                               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiCommitEdit(img.id))}
                             />
+                            {editingImgError && <span className={styles.errorText}>{editingImgError}</span>}
                             <input
                               className={styles.input}
                               value={editingImgAlt}
@@ -427,12 +487,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
                   <div className={styles.imgAddForm}>
                     <input
                       ref={addImgUrlRef}
-                      className={styles.input}
+                      className={`${styles.input} ${imgError ? styles.inputError : ''}`}
                       value={imgNewUrl}
                       onChange={e => setImgNewUrl(e.target.value)}
                       placeholder="URL de la imagen *"
                       onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiAddImage())}
                     />
+                    {imgError && <span className={styles.errorText}>{imgError}</span>}
                     <input
                       className={styles.input}
                       value={imgNewAlt}
@@ -447,7 +508,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
                         {imagesLoading ? 'Agregando...' : 'Agregar'}
                       </button>
                       <button type="button" className={styles.imgCancelBtn}
-                        onClick={() => { setShowAddImgForm(false); setImgNewUrl(''); setImgNewAlt(''); }}>
+                        onClick={() => { setShowAddImgForm(false); setImgNewUrl(''); setImgNewAlt(''); setImgError(''); }}>
                         Cancelar
                       </button>
                     </div>
@@ -467,7 +528,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
               <>
                 {form.images.map((img, i) => (
                   <div key={i} className={styles.tagRow}>
-                    <input className={styles.input} value={img}
+                    <input className={`${styles.input} ${fieldErrors.images ? styles.inputError : ''}`} value={img}
                       onChange={e => setImage(i, e.target.value)}
                       placeholder="URL de la imagen" />
                     {form.images.length > 1 && (
@@ -475,6 +536,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
                     )}
                   </div>
                 ))}
+                {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
                 <button type="button" className={styles.addBtn} onClick={addImageSlot}>+ Agregar imagen</button>
               </>
             )}

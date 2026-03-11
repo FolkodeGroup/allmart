@@ -230,6 +230,23 @@
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   text-align: center;
+  margin-top: var(--space-2);
+}
+
+.inputError {
+  border-color: var(--color-error) !important;
+}
+
+.errorText {
+  color: var(--color-error);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
+}
+
+.imgError {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-2);
 }
 
 /* ── Form actions ── */
