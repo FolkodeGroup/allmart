@@ -15,6 +15,9 @@ interface AdminProductCardProps {
   onDelete?: (id: string) => void;
   canEdit?: boolean;
   canDelete?: boolean;
+  selected?: boolean;
+  onSelectChange?: (id: string, checked: boolean) => void;
+  showCheckbox?: boolean;
 }
 
 export const AdminProductCard: React.FC<AdminProductCardProps> = ({
@@ -31,12 +34,25 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
   onDelete,
   canEdit,
   canDelete,
+  selected = false,
+  onSelectChange,
+  showCheckbox = false,
 }) => {
   const formatPrice = (n: number) =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n);
 
   return (
     <div className={styles.card}>
+      {showCheckbox && (
+        <div className={styles.checkboxWrapper}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={e => onSelectChange && onSelectChange(id, e.target.checked)}
+            aria-label="Seleccionar producto"
+          />
+        </div>
+      )}
       <div className={styles.imageWrapper}>
         {image ? (
           <img

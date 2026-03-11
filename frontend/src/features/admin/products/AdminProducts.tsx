@@ -1,9 +1,41 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+
+// CheckboxGeneral: componente auxiliar para manejar indeterminate correctamente
+const CheckboxGeneral = ({ checked, indeterminate, onChange }: { checked: boolean; indeterminate: boolean; onChange: (checked: boolean) => void }) => {
+  const ref = React.useRef<HTMLInputElement>(null);
+  React.useEffect(() => {
+    if (ref.current) ref.current.indeterminate = indeterminate;
+  }, [indeterminate]);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+      <input
+        ref={ref}
+        type="checkbox"
+        checked={checked}
+        onChange={e => onChange(e.target.checked)}
+        aria-label="Seleccionar todos los productos visibles"
+        style={{ marginRight: 4 }}
+      />
+      <span style={{ fontSize: 14, color: '#555' }}>Seleccionar todos los productos visibles</span>
+    </div>
+  );
+};
+// Utilidad para mantener selección entre páginas
+function usePersistentSelection() {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const add = (ids: string[]) => setSelectedIds(prev => Array.from(new Set([...prev, ...ids])));
+  const remove = (ids: string[]) => setSelectedIds(prev => prev.filter(id => !ids.includes(id)));
+  const toggle = (id: string) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  const clear = () => setSelectedIds([]);
+  return { selectedIds, add, remove, toggle, clear, setSelectedIds };
+}
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { AdminProductForm } from './AdminProductForm';
 import { AdminProductCard } from './AdminProductCard';
+import { BulkEditBar } from './BulkEditBar';
+import * as productsService from './productsService';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
@@ -12,6 +44,49 @@ import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
 export function AdminProducts() {
+    // Edición masiva
+    const [bulkEditLoading, setBulkEditLoading] = useState(false);
+    const [bulkEditSuccess, setBulkEditSuccess] = useState<string | null>(null);
+    const [bulkEditError, setBulkEditError] = useState<string | null>(null);
+    const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+    const [bulkEditData, setBulkEditData] = useState<{ price?: number; stock?: number; inStock?: boolean } | null>(null);
+
+    // Simular obtención de token (ajustar según contexto real)
+    const token = localStorage.getItem('token') || '';
+
+    // Handler para aplicar edición masiva
+    const handleBulkEdit = (data: { price?: number; stock?: number; inStock?: boolean }) => {
+      setBulkEditData(data);
+      setShowBulkConfirm(true);
+    };
+
+    // Confirmar y ejecutar edición masiva
+    const confirmBulkEdit = async () => {
+      if (!bulkEditData) return;
+      setBulkEditLoading(true);
+      setBulkEditSuccess(null);
+      setBulkEditError(null);
+      try {
+        await Promise.all(selectedIds.map(id =>
+          productsService.updateAdminProduct(id, bulkEditData, token)
+        ));
+        setBulkEditSuccess('¡Productos actualizados correctamente!');
+        clear();
+        refreshProducts({ q: search, categoryId: categoryFilter, page: apiPage, limit: 10 });
+      } catch (err: any) {
+        setBulkEditError('Error al actualizar productos. Intenta nuevamente.');
+      } finally {
+        setBulkEditLoading(false);
+        setShowBulkConfirm(false);
+        setBulkEditData(null);
+      }
+    };
+
+    // Cancelar edición masiva
+    const cancelBulkEdit = () => {
+      setBulkEditData(null);
+      setShowBulkConfirm(false);
+    };
   const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
@@ -24,6 +99,37 @@ export function AdminProducts() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const { categories } = useAdminCategories();
+
+  // Selección múltiple
+  const {
+    selectedIds,
+    add,
+    remove,
+    clear
+  } = usePersistentSelection();
+
+  // Determinar si todos los productos visibles están seleccionados
+  const allVisibleSelected = products.length > 0 && products.every(p => selectedIds.includes(p.id));
+  const someVisibleSelected = products.some(p => selectedIds.includes(p.id));
+
+  // Handler para checkbox general
+  const handleSelectAllVisible = (checked: boolean) => {
+    const visibleIds = products.map(p => p.id);
+    if (checked) {
+      add(visibleIds);
+    } else {
+      remove(visibleIds);
+    }
+  };
+
+  // Handler para checkbox individual
+  const handleSelectProduct = (id: string, checked: boolean) => {
+    if (checked) {
+      add([id]);
+    } else {
+      remove([id]);
+    }
+  };
 
   // Debounce para búsqueda
   useEffect(() => {
@@ -148,7 +254,39 @@ export function AdminProducts() {
         </div>
       </div>
 
-      {/* Tabla */}
+      {/* Panel de edición masiva */}
+      {selectedIds.length > 0 && (
+        <BulkEditBar
+          selectedCount={selectedIds.length}
+          onBulkEdit={handleBulkEdit}
+          onCancel={clear}
+          loading={bulkEditLoading}
+        />
+      )}
+
+      {/* Mensajes de feedback */}
+      {bulkEditSuccess && <div style={{ color: '#22c55e', marginBottom: 8 }}>{bulkEditSuccess}</div>}
+      {bulkEditError && <div style={{ color: '#ef4444', marginBottom: 8 }}>{bulkEditError}</div>}
+
+      {/* Modal de confirmación de edición masiva */}
+      {showBulkConfirm && (
+        <ModalConfirm
+          open={showBulkConfirm}
+          title="Confirmar edición masiva"
+          message={`¿Aplicar los cambios a ${selectedIds.length} productos seleccionados? Esta acción no se puede deshacer.`}
+          confirmText="Aplicar cambios"
+          cancelText="Cancelar"
+          onConfirm={confirmBulkEdit}
+          onCancel={cancelBulkEdit}
+        />
+      )}
+      {products.length > 0 && (
+        <CheckboxGeneral
+          checked={allVisibleSelected}
+          indeterminate={someVisibleSelected && !allVisibleSelected}
+          onChange={handleSelectAllVisible}
+        />
+      )}
       {loading && <LoadingSpinner message="Cargando catálogo de productos..." size="lg" />}
 
       {!loading && error && (
@@ -188,6 +326,9 @@ export function AdminProducts() {
               canDelete={can('products.delete')}
               onEdit={handleEdit}
               onDelete={() => setDeleteConfirm(p.id)}
+              selected={selectedIds.includes(p.id)}
+              onSelectChange={handleSelectProduct}
+              showCheckbox={true}
             />
           ))}
         </div>
