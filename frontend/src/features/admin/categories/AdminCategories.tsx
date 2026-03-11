@@ -1,30 +1,20 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
-import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+// import { AdminCategoryForm } from './AdminCategoryForm'; // Temporalmente deshabilitado si no existe
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { FolderSearch, AlertCircle } from 'lucide-react';
-import { sanitizeString } from '../../../utils/security';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 
-const EMPTY = { name: '', description: '', image: '', itemCount: 0 };
-
 export function AdminCategories() {
-  const { categories, addCategory, updateCategory, deleteCategory, uploadCategoryImage, isLoading, error: apiError, refreshCategories, page: apiPage, totalPages: apiTotalPages, total } = useAdminCategories();
-  const { products, updateProduct } = useAdminProducts();
+  const { categories, deleteCategory, isLoading: loading, error, refreshCategories, page: apiPage, totalPages: apiTotalPages, total } = useAdminCategories();
   const { can } = useAdminAuth();
-
-  const [showForm, setShowForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState(EMPTY);
-  const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [assignCatId, setAssignCatId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [, setEditId] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   // Debounce para búsqueda
   useEffect(() => {
@@ -38,380 +28,165 @@ export function AdminCategories() {
     refreshCategories({ q: search, page: newPage, limit: 10 });
   };
 
-  // ── Gestión de imágenes ──
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const openNew = () => {
-    setEditId(null);
-    setForm(EMPTY);
-    setError('');
-    setFieldErrors({});
-    setShowForm(true);
-  };
-
-  const openEdit = (id: string) => {
-    const c = categories.find(c => c.id === id);
-    if (!c) return;
-    setEditId(id);
-    setForm({ name: c.name, description: c.description ?? '', image: c.image ?? '', itemCount: c.itemCount ?? 0 });
-    setError('');
-    setFieldErrors({});
-    setShowForm(true);
-  };
-
-  const setField = (field: keyof typeof form, value: string | number) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    if (fieldErrors[field]) {
-      setFieldErrors(prev => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  };
-
-  const validate = () => {
-    const errors: Record<string, string> = {};
-    if (!form.name.trim()) {
-      errors.name = 'El nombre de la categoría es obligatorio';
-    } else if (form.name.trim().length < 3) {
-      errors.name = 'El nombre debe tener al menos 3 caracteres';
-    }
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await processAndUploadImage(file);
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    await processAndUploadImage(file);
-  };
-
-  const processAndUploadImage = async (file: File) => {
-    // Si estamos editando, subimos de inmediato
-    if (editId) {
-      setIsUploading(true);
-      setError('');
-      try {
-        const url = await uploadCategoryImage(editId, file);
-        setForm(f => ({ ...f, image: url }));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al subir imagen');
-      } finally {
-        setIsUploading(false);
-      }
-    } else {
-      // Si es nueva categoría, solo previsualizamos (el backend requiere ID para guardar el BYTEA)
-      // OPCIÓN: Podríamos guardar el File en el estado y subirlo DESPUÉS de crear la categoría
-      // Pero para simplificar y mantener consistencia con Products, el backend requiere el ID.
-      // Así que usaremos una URL temporal o alertaremos que debe crearse primero.
-      setError('Primero creá la categoría y luego subí su imagen.');
-    }
-  };
-
-  const handleRemoveImage = () => {
-    setForm(f => ({ ...f, image: '' }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    
-    setError('');
-    setIsSubmitting(true);
-    try {
-      if (editId) {
-        await updateCategory(editId, {
-          name: sanitizeString(form.name.trim()),
-          description: sanitizeString(form.description.trim()) || undefined,
-          image: form.image.trim() || undefined,
-        });
-      } else {
-        await addCategory({
-          name: sanitizeString(form.name.trim()),
-          slug: '',
-          description: sanitizeString(form.description.trim()) || undefined,
-          image: form.image.trim() || undefined,
-          itemCount: 0,
-        });
-      }
-      setShowForm(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al procesar la categoría');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+  const handleNew = () => { setEditId(null); setShowForm(true); };
+  const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
   const handleDelete = async (id: string) => {
     try {
-      await deleteCategory(id);
-      setDeleteConfirm(null);
+      if (id) await deleteCategory(id);
     } catch (err) {
       console.error('Error al eliminar categoría:', err);
     }
-  };
-
-  // Productos de una categoría
-  const productsOfCat = (catId: string) => products.filter(p => p.category.id === catId);
-
-  // Reasignar producto a otra categoría
-  const reassignProduct = (productId: string, newCatId: string) => {
-    const newCat = categories.find(c => c.id === newCatId);
-    if (!newCat) return;
-    updateProduct(productId, { category: newCat }).catch((err) =>
-      console.error('Error al reasignar categoría:', err),
-    );
+    setDeleteConfirm(null);
   };
 
   return (
     <div className={sectionStyles.page}>
-
       {/* Header */}
       <div className={sectionStyles.header}>
         <div className={styles.headerTop}>
           <div>
             <span className={sectionStyles.label}>Administración</span>
             <h1 className={sectionStyles.title}>
-              <span className={sectionStyles.icon}>🗂️</span> Categorías
+              <span className={sectionStyles.icon}>📁</span> Categorías
             </h1>
             <p className={sectionStyles.subtitle}>
-              Creá, editá y eliminá categorías. Asigná productos a cada una.
+              Gestioná las categorías del catálogo para organizar tus productos.
             </p>
           </div>
-          {/* Barra de búsqueda */}
-          <div className={styles.searchBox} style={{ flex: 1, maxWidth: 400, margin: '0 20px' }}>
-            <input
-              type="search"
-              placeholder="Buscar categorías..."
-              className={styles.searchInput}
-              style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--color-border)' }}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
           {can('categories.create') && (
-            <button className={styles.newBtn} onClick={openNew}>+ Nueva categoría</button>
+            <button className={styles.newBtn} onClick={handleNew}>
+              + Nueva categoría
+            </button>
           )}
+        </div>
+
+        {/* Filtros */}
+        <div className={styles.filters}>
+          <input
+            className={styles.searchInput}
+            type="search"
+            placeholder="Buscar por nombre..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <span className={styles.count}>{total} categorías</span>
         </div>
       </div>
 
-      {/* Listado */}
-      {isLoading && !categories.length ? (
-        <LoadingSpinner message="Cargando categorías..." size="lg" />
-      ) : apiError ? (
+      {/* Tabla */}
+      {loading && <LoadingSpinner message="Cargando categorías..." size="lg" />}
+
+      {!loading && error && (
         <EmptyState 
           icon={<AlertCircle size={48} color="#ef4444" />}
           title="Error al cargar categorías"
-          description={apiError}
+          description={error}
           action={{ label: 'Reintentar', onClick: () => window.location.reload() }}
         />
-      ) : categories.length === 0 ? (
+      )}
+
+      {!loading && !error && (categories.length === 0 ? (
         <EmptyState 
           icon={<FolderSearch size={48} color="#94a3b8" />}
-          title="No hay categorías"
-          description="Todavía no creaste ninguna categoría para organizar tus productos. ¡Empezá ahora!"
-          action={can('categories.create') ? { label: 'Nueva Categoría', onClick: openNew } : undefined}
+          title="No se encontraron categorías"
+          description={search 
+            ? "No hay resultados para tu búsqueda. Probá con otro término."
+            : "Todavía no cargaste ninguna categoría al catálogo."
+          }
+          action={can('categories.create') ? { label: 'Nueva Categoría', onClick: handleNew } : undefined}
         />
       ) : (
-        <div className={styles.grid}>
-          {categories.map(cat => {
-            const catProducts = productsOfCat(cat.id);
-            return (
-              <div key={cat.id} className={styles.card}>
-                {/* Imagen preview */}
-                {cat.image ? (
-                  <img src={cat.image} alt={cat.name} className={styles.cardImg}
-                    onError={e => (e.currentTarget.style.display = 'none')} />
-                ) : (
-                  <div className={styles.cardImgPlaceholder}>🗂️</div>
-                )}
-
-                <div className={styles.cardBody}>
-                  <div className={styles.cardTop}>
-                    <div>
-                      <h3 className={styles.cardName}>{cat.name}</h3>
-                      <span className={styles.cardSlug}>/{cat.slug}</span>
-                    </div>
-                    <div className={styles.cardActions}>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.th}>Nombre</th>
+                <th className={styles.th}>Identificador</th>
+                <th className={styles.th}>Slug</th>
+                <th className={styles.th}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map(c => (
+                <tr key={c.id} className={styles.row}>
+                  <td className={styles.td}>
+                    <div className={styles.categoryName}>{c.name}</div>
+                  </td>
+                  <td className={styles.td}>
+                    <code>{c.id}</code>
+                  </td>
+                  <td className={styles.td}>
+                    <span className={styles.slugBadge}>{c.slug}</span>
+                  </td>
+                  <td className={styles.td}>
+                    <div className={styles.actions}>
                       {can('categories.edit') && (
-                        <button className={styles.editBtn} onClick={() => openEdit(cat.id)} title="Editar">✏️</button>
+                        <button
+                          className={styles.editBtn}
+                          onClick={() => handleEdit(c.id)}
+                          title="Editar"
+                        >
+                          ✏️
+                        </button>
                       )}
                       {can('categories.delete') && (
-                        deleteConfirm === cat.id ? (
+                        deleteConfirm === c.id ? (
                           <>
-                            <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(cat.id)}>Confirmar</button>
-                            <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>Cancelar</button>
+                            <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(c.id)}>
+                              Confirmar
+                            </button>
+                            <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>
+                              Cancelar
+                            </button>
                           </>
                         ) : (
-                          <button className={styles.deleteBtn} onClick={() => setDeleteConfirm(cat.id)} title="Eliminar">🗑️</button>
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => setDeleteConfirm(c.id)}
+                            title="Eliminar"
+                          >
+                            🗑️
+                          </button>
                         )
                       )}
                     </div>
-                  </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
 
-                  {cat.description && <p className={styles.cardDesc}>{cat.description}</p>}
-
-                  {/* Productos de esta categoría */}
-                  <div className={styles.productSection}>
-                    <button
-                      className={styles.toggleProductsBtn}
-                      onClick={() => setAssignCatId(assignCatId === cat.id ? null : cat.id)}
-                    >
-                      📦 {catProducts.length} producto{catProducts.length !== 1 ? 's' : ''}
-                      {assignCatId === cat.id ? ' ▲' : ' ▼'}
-                    </button>
-
-                    {assignCatId === cat.id && (
-                      <div className={styles.productList}>
-                        {catProducts.length === 0 ? (
-                          <p className={styles.noProducts}>Sin productos asignados.</p>
-                        ) : (
-                          catProducts.map(p => (
-                            <div key={p.id} className={styles.productRow}>
-                              <span className={styles.productName}>{p.name}</span>
-                              <select
-                                className={styles.reassignSelect}
-                                value={p.category.id}
-                                onChange={e => reassignProduct(p.id, e.target.value)}
-                              >
-                                {categories.map(c => (
-                                  <option key={c.id} value={c.id}>{c.name}</option>
-                                ))}
-                              </select>
-                            </div>
-                          ))
-          Controles de paginación */}
+      {/* Controles de paginación */}
       {total > 10 && (
         <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
           <button
             className={styles.pageBtn}
-            style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 4, background: 'var(--color-bg-primary)', cursor: apiPage === 1 ? 'not-allowed' : 'pointer', opacity: apiPage === 1 ? 0.5 : 1 }}
             disabled={apiPage === 1}
             onClick={() => handlePageChange(apiPage - 1)}
           >Anterior</button>
           {Array.from({ length: apiTotalPages }, (_, i) => (
             <button
               key={i + 1}
-              style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 4, background: apiPage === i + 1 ? 'var(--color-primary)' : 'var(--color-bg-primary)', color: apiPage === i + 1 ? 'white' : 'inherit', cursor: 'pointer' }}
+              className={styles.pageBtn + (apiPage === i + 1 ? ' ' + styles.pageActive : '')}
               onClick={() => handlePageChange(i + 1)}
             >{i + 1}</button>
           ))}
           <button
             className={styles.pageBtn}
-            style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 4, background: 'var(--color-bg-primary)', cursor: apiPage === apiTotalPages ? 'not-allowed' : 'pointer', opacity: apiPage === apiTotalPages ? 0.5 : 1 }}
             disabled={apiPage === apiTotalPages}
             onClick={() => handlePageChange(apiPage + 1)}
           >Siguiente</button>
         </div>
       )}
 
-      {/*               )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Modal formulario */}
+      {/* Modal de formulario - Deshabilitado por falta de componente */}
       {showForm && (
-        <div
-          className={styles.backdrop}
-          onClick={e => e.target === e.currentTarget && setShowForm(false)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && setShowForm(false)}
-        >
-            <div className={styles.panel}>
-            <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>{editId ? 'Editar categoría' : 'Nueva categoría'}</h2>
-              <button className={styles.closeBtn} onClick={() => setShowForm(false)} type="button">✕</button>
-            </div>
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <div className={styles.field}>
-                <label className={styles.label}>Nombre *</label>
-                <input 
-                  className={`${styles.input} ${fieldErrors.name ? styles.inputError : ''}`} 
-                  value={form.name}
-                  onChange={e => setField('name', e.target.value)} 
-                  required 
-                />
-                {fieldErrors.name && <span className={styles.errorText}>{fieldErrors.name}</span>}
-              </div>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="category-description">Descripción</label>
-                <textarea 
-                  className={styles.textarea} 
-                  id="category-description" 
-                  rows={3}
-                  value={form.description}
-                  onChange={e => setField('description', e.target.value)} 
-                />
-              </div>
-              <div className={styles.field}>
-                <label className={styles.label}>Imagen de categoría</label>
-                {form.image ? (
-                  <div className={styles.previewContainer}>
-                    <img src={form.image} alt="Vista previa" className={styles.previewImg} />
-                    <button type="button" className={styles.removeImgBtn} onClick={handleRemoveImage} title="Quitar imagen">✕</button>
-                    {isUploading && (
-                      <div className={styles.uploadingOverlay}>
-                        <div className={styles.spinner}></div>
-                        Subiendo...
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    className={`${styles.dropZone} ${isDragging ? styles.dropZoneActive : ''}`}
-                    onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-                    onDragLeave={() => setIsDragging(false)}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      style={{ display: 'none' }}
-                      accept="image/*"
-                      onChange={handleFileChange}
-                    />
-                    <span className={styles.dropZoneIcon}>📁</span>
-                    <span className={styles.dropZoneText}>
-                      Arrastrá una imagen o hacé clic <br /> para subir
-                    </span>
-                    <span className={styles.dropZoneHint}>
-                      Se convertirá a WebP automáticamente.
-                    </span>
-                    {!editId && <span className={styles.dropZoneHint} style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>Se habilitará al guardar</span>}
-                  </div>
-                )}
-              </div>
-              {error && <p className={styles.error}>{error}</p>}
-              <div className={styles.formActions}>
-                <button type="button" className={styles.cancelBtn} onClick={() => setShowForm(false)} disabled={isSubmitting}>Cancelar</button>
-                <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-                  {isSubmitting ? 'Procesando...' : (editId ? 'Guardar cambios' : 'Crear categoría')}
-                </button>
-              </div>
-            </form>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'white', padding: '2rem', borderRadius: '8px' }}>
+             <p>Componente Formulario no encontrado.</p>
+             <button onClick={() => setShowForm(false)}>Cerrar</button>
           </div>
         </div>
       )}

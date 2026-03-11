@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -124,9 +124,9 @@ export function AdminProducts() {
                     setSearch(s.name);
                     setShowSuggestions(false);
                     setHighlightedIndex(-1);
-                    setPage(1); // Reiniciar página al seleccionar sugerencia
                   }}
-                ><span style={{ fontWeight: 500 }}>{s.name}</span>
+                >
+                  <span style={{ fontWeight: 500 }}>{s.name}</span>
                   {s.sku && <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>SKU: {s.sku}</span>}
                 </li>
               ))}
@@ -138,9 +138,6 @@ export function AdminProducts() {
             value={categoryFilter}
             onChange={e => {
               setCategoryFilter(e.target.value);
-              setPage(1); // Reiniciar página al cambiar categoría
-            }}
-          >
             }}
           >
             <option value="">Todas las categorías</option>
@@ -148,7 +145,10 @@ export function AdminProducts() {
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          <span className={styles.count}>{total
+          <span className={styles.count}>{total} productos</span>
+        </div>
+      </div>
+
       {/* Tabla */}
       {loading && <LoadingSpinner message="Cargando catálogo de productos..." size="lg" />}
 
@@ -161,9 +161,7 @@ export function AdminProducts() {
         />
       )}
 
-      {!loading && !error && (filtered.length === 0 ? (
-        <EmptyState 
-          icon={<PackageSearchproducts.length === 0 ? (
+      {!loading && !error && (products.length === 0 ? (
         <EmptyState 
           icon={<PackageSearch size={48} color="#94a3b8" />}
           title="No se encontraron productos"
@@ -187,7 +185,9 @@ export function AdminProducts() {
               </tr>
             </thead>
             <tbody>
-              {productsassName={styles.td}>
+              {products.map(p => (
+                <tr key={p.id} className={styles.row}>
+                  <td className={styles.td}>
                     <div className={styles.productCell}>
                       {p.images[0] && (
                         <img
@@ -268,9 +268,7 @@ export function AdminProducts() {
       ))}
 
       {/* Controles de paginación */}
-      {filtered.length > PRODUCTS_PER_PAGE && (
-        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-       total > 10 && (
+      {total > 10 && (
         <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
           <button
             className={styles.pageBtn}
@@ -287,7 +285,9 @@ export function AdminProducts() {
           <button
             className={styles.pageBtn}
             disabled={apiPage === apiTotalPages}
-            onClick={() => handlePageChange(apiP
+            onClick={() => handlePageChange(apiPage + 1)}
+          >Siguiente</button>
+        </div>
       )}
 
       {/* Modal de formulario */}

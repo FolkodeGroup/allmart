@@ -108,8 +108,10 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
   /* Carga inicial cuando el token o las categorías están disponibles */
   useEffect(() => {
-    refreshProducts();
-  }, [refreshProducts]);
+    if (token && categories.length > 0) {
+      refreshProducts();
+    }
+  }, [token, categories.length, refreshProducts]);
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 
@@ -161,9 +163,9 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
       showNotification('success', 'Producto eliminado exitosamente');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
-      showNotification('error', msg);
-      throw err;
+       const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
+       showNotification('error', msg);
+       throw err;
     }
   };
 
@@ -191,10 +193,10 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
-
 export function useAdminProducts() {
-  const ctx = useContext(AdminProductsContext);
-  if (!ctx) throw new Error('useAdminProducts debe usarse dentro de AdminProductsProvider');
-  return ctx;
+  const context = useContext(AdminProductsContext);
+  if (context === undefined) {
+    throw new Error('useAdminProducts debe usarse dentro de un AdminProductsProvider');
+  }
+  return context;
 }

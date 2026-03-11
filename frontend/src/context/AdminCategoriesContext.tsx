@@ -48,112 +48,97 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
         totalPages: response.totalPages,
       });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al cargar categorías';
-      setError(msg);
-      showNotification('error', msg);
+      const message = err instanceof Error ? err.message : 'Error al cargar categorías';
+      setError(message);
+      showNotification('error', message);
     } finally {
       setIsLoading(false);
     }
   }, [token, showNotification]);
 
+  /** Inicialmente carga el listado completo */
   useEffect(() => {
-    refreshCategories();
-  }, [refreshCategories]);
+    if (token) refreshCategories();
+  }, [token, refreshCategories]);
 
-  const addCategory = async (c: Omit<Category, 'id'>): Promise<Category> => {
-    if (!token) throw new Error('No hay sesión activa');
-    setIsLoading(true);
+  const addCategory = async (category: Omit<Category, 'id'>) => {
+    if (!token) throw new Error('No autenticado');
     try {
-      const newCat = await categoriesService.createAdminCategory(token, c);
-      setCategories(prev => [...prev, newCat]);
+      const newCategory = await categoriesService.createAdminCategory(token, category);
+      refreshCategories(); 
       showNotification('success', 'Categoría creada exitosamente');
-      return newCat;
+      return newCategory;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al crear categoría';
-      showNotification('error', msg);
+      showNotification('error', err instanceof Error ? err.message : 'Error al crear categoría');
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const updateCategory = async (id: string, data: Partial<Category>) => {
-    if (!token) throw new Error('No hay sesión activa');
-    setIsLoading(true);
+    if (!token) throw new Error('No autenticado');
     try {
-      const updatedCat = await categoriesService.updateAdminCategory(token, id, data);
-      setCategories(prev => prev.map(c => c.id === id ? updatedCat : c));
+      await categoriesService.updateAdminCategory(token, id, data);
+      refreshCategories();
       showNotification('success', 'Categoría actualizada exitosamente');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al actualizar categoría';
-      showNotification('error', msg);
+      showNotification('error', err instanceof Error ? err.message : 'Error al actualizar categoría');
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const deleteCategory = async (id: string) => {
-    if (!token) throw new Error('No hay sesión activa');
-    setIsLoading(true);
+    if (!token) throw new Error('No autenticado');
     try {
       await categoriesService.deleteAdminCategory(token, id);
-      setCategories(prev => prev.filter(c => c.id !== id));
+      refreshCategories();
       showNotification('success', 'Categoría eliminada exitosamente');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al eliminar categoría';
-      showNotification('error', msg);
+      showNotification('error', err instanceof Error ? err.message : 'Error al eliminar categoría');
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const uploadCategoryImage = async (id: string, file: File): Promise<string> => {
-    if (!token) throw new Error('No hay sesión activa');
-    setIsLoading(true);
+  const uploadCategoryImage = async (id: string, file: File) => {
+    if (!token) throw new Error('No autenticado');
     try {
-      const imageUrl = await categoriesService.uploadAdminCategoryImage(token, id, file);
-      // Actualizamos localmente el estado de la categoría con la nueva imagen
-      setCategories(prev => prev.map(c => 
-        c.id === id ? { ...c, image: imageUrl } : c
-      ));
-      showNotification('success', 'Imagen de categoría actualizada');
-      return imageUrl;
+      const url = await categoriesService.uploadAdminCategoryImage(token, id, file);
+      refreshCategories();
+      showNotification('success', 'Imagen de categoría subida');
+      return url;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al subir imagen';
-      showNotification('error', msg);
+      showNotification('error', err instanceof Error ? err.message : 'Error al subir imagen');
       throw err;
-    } finally {
-      setIsLoading(false);
     }
   };
-  // ...existing code...
 
   const getCategory = (id: string) => categories.find(c => c.id === id);
 
   return (
-    <AdminCategoriesContext.Provider value={{ 
-      categories, 
-      isLoading, 
-      total: pagination.total,
-      page: pagination.page,
-      totalPages: pagination.totalPages,
-      error, 
-      refreshCategories,
-      addCategory, 
-      updateCategory, 
-      deleteCategory, 
-      uploadCategoryImage,
-      getCategory 
-    }}>
+    <AdminCategoriesContext.Provider
+      value={{
+        categories,
+        isLoading,
+        total: pagination.total,
+        page: pagination.page,
+        totalPages: pagination.totalPages,
+        error,
+        refreshCategories,
+        addCategory,
+        updateCategory,
+        deleteCategory,
+        uploadCategoryImage,
+        getCategory
+      }}
+    >
       {children}
     </AdminCategoriesContext.Provider>
   );
 }
 
 export function useAdminCategories() {
-  const ctx = useContext(AdminCategoriesContext);
-  if (!ctx) throw new Error('useAdminCategories debe usarse dentro de AdminCategoriesProvider');
-  return ctx;
+  const context = useContext(AdminCategoriesContext);
+  if (context === undefined) {
+    throw new Error('useAdminCategories debe usarse dentro de un AdminCategoriesProvider');
+  }
+  return context;
 }
