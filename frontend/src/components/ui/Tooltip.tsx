@@ -1,4 +1,5 @@
-import React, { ReactNode, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+import type { ReactNode } from 'react';
 import styles from './Tooltip.module.css';
 
 interface TooltipProps {
@@ -10,7 +11,7 @@ interface TooltipProps {
 
 export const Tooltip: React.FC<TooltipProps> = ({ content, children, placement = 'top', delay = 200 }) => {
   const [visible, setVisible] = useState(false);
-  const timeout = useRef<NodeJS.Timeout | null>(null);
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const show = () => {
     timeout.current = setTimeout(() => setVisible(true), delay);
