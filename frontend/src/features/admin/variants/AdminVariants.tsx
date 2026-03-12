@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { Palette, Box, Search, AlertCircle } from 'lucide-react';
@@ -43,6 +44,19 @@ export function AdminVariants() {
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     (p.sku ?? '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 10; // Puedes ajustar este valor para más/menos productos por página
+  const totalPages = Math.ceil(filtered.length / productsPerPage);
+  // Mantener filtros y búsqueda al cambiar de página
+  useEffect(() => {
+    setCurrentPage(1); // Reinicia a la primera página si cambia el filtro
+  }, [search]);
+  const paginatedProducts = filtered.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
   );
 
   // Combina productos y variantes para autocompletado
@@ -227,7 +241,7 @@ export function AdminVariants() {
                 title="Sin resultados"
                 description="No se encontraron productos con esos términos."
               />
-            ) : filtered.map(p => {
+            ) : paginatedProducts.map(p => {
               const groupCount = selectedProductId === p.id ? variants.length : 0;
               const valueCount = selectedProductId === p.id
                 ? variants.reduce((s, g) => s + g.values.length, 0)
@@ -253,6 +267,31 @@ export function AdminVariants() {
               );
             })}
           </ul>
+          {/* Paginación visualmente atractiva */}
+          {totalPages > 1 && (
+            <nav className={styles.pagination} aria-label="Paginación de productos">
+              <button
+                className={styles.pageBtn}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                title="Página anterior"
+              >⟨</button>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i+1}
+                  className={`${styles.pageBtn} ${currentPage === i+1 ? styles.activePage : ''}`}
+                  onClick={() => setCurrentPage(i+1)}
+                  title={`Ir a página ${i+1}`}
+                >{i+1}</button>
+              ))}
+              <button
+                className={styles.pageBtn}
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                title="Página siguiente"
+              >⟩</button>
+            </nav>
+          )}
         </aside>
 
         {/* ── Panel derecho: gestión de variantes ── */}
