@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { apiFetch, getAuthHeaders, getStoredToken } from '../utils/apiClient';
 import { server } from '../test/setup';
