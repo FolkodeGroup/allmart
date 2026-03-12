@@ -1108,3 +1108,7 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #513: 467 optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-11 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #515: He integrado la paginación y la búsqueda en la gestión de productos y… | 2026-03-11 |
 | dgimenezdeveloper | 3 | Asignación de issue a CelinaJP | Issue #378: Mejorar feedback de acciones de gestión de variantes | 2026-03-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #518: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #521: Se implementan cambios como modal de confirmacion para eliminar produ… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #523: Se implementa funcion para seleccionar multiples productos mediante c… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #525: Se refactorizan los componentes y sus css para que sean responsivos p… | 2026-03-11 |

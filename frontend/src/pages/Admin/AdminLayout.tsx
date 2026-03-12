@@ -8,11 +8,11 @@ import styles from './AdminLayout.module.css';
 
 const navItems = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠', permission: null },
-  { label: 'Productos', to: '/admin/productos', icon: '📦', permission: null },
-  { label: 'Imágenes', to: '/admin/imagenes', icon: '🖼️', permission: null },
-  { label: 'Variantes', to: '/admin/variantes', icon: '🎨', permission: null },
-  { label: 'Categorías', to: '/admin/categorias', icon: '🗂️', permission: null },
-  { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒', permission: null },
+  { label: 'Productos', to: '/admin/productos', icon: '📦', permission: 'products.view' as const },
+  { label: 'Imágenes', to: '/admin/imagenes', icon: '🖼️', permission: 'products.edit' as const },
+  { label: 'Variantes', to: '/admin/variantes', icon: '🎨', permission: 'variants.view' as const },
+  { label: 'Categorías', to: '/admin/categorias', icon: '🗂️', permission: 'categories.view' as const },
+  { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒', permission: 'orders.view' as const },
   { label: 'Reportes', to: '/admin/reportes', icon: '📊', permission: 'reports.view' as const },
 ];
 
