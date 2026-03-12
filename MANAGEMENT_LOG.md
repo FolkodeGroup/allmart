@@ -1116,3 +1116,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #529: Refactorice el componente de búsqueda para permitir filtrar productos… | 2026-03-12 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #534: Agregue mensajes de confirmación, éxito y error al crear, editar o el… | 2026-03-12 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #536: 470 sincronizar estados entre frontend y backend tras operaciones crud | 2026-03-12 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #538: He implementado el manejo completo de las relaciones entre entidades … | 2026-03-12 |
