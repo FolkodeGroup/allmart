@@ -132,20 +132,12 @@ export function AdminVariants() {
             ? { ...g, values: [...g.values, val] }
             : g
         ));
-        toast.success('Valor agregado con éxito');
+        toast.success(`Valor "${val}" agregado con éxito`);
+        setNewValues(prev => ({ ...prev, [groupId]: '' }));
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Error desconocido';
         toast.error(`Error al agregar valor: ${message}`);
       }
-          ? { ...g, values: [...g.values, val] }
-          : g
-      ));
-      toast.success(`Valor "${val}" agregado con éxito`);
-      setNewValues(prev => ({ ...prev, [groupId]: '' }));
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error al agregar valor: ${message}`);
-    }
   };
 
   const removeValue = (groupId: string, value: string) => {
