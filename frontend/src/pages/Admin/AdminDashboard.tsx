@@ -41,7 +41,7 @@ import MetricCard from '../../components/ui/MetricCard';
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
   const { products } = useAdminProducts();
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [isLoading] = React.useState<boolean>(false);
   const { can } = useAdminAuth();
   const [dateRange, setDateRange] = React.useState(() => {
     // Por defecto: últimos 7 días
@@ -444,7 +444,7 @@ export function AdminDashboard() {
           </div>
         </div>
         {/* Pedidos Recientes */}
-        {can('orders.view') && {!isLoading && <RecentOrdersWidget />}}
+        {can('orders.view') && !isLoading && <RecentOrdersWidget />}
       </section>
 
       {/* Status bar */}
