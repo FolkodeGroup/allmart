@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -130,20 +131,38 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const hasStatusChange = pendingStatus !== order.status;
 
   const handleStatusApply = () => {
-    updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
-    setStatusNote('');
+    try {
+      updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
+      toast.success('Estado del pedido actualizado con éxito');
+      setStatusNote('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`No se pudo actualizar el pedido: ${message}`);
+    }
   };
 
   // Sync local pendingStatus if order.status changes externally
   const currentStatus = order.status;
 
   const handleSaveNotes = () => {
-    updateOrder(order.id, { notes });
+    try {
+      updateOrder(order.id, { notes });
+      toast.success('Notas guardadas con éxito');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`No se pudieron guardar las notas: ${message}`);
+    }
   };
 
   const handleDelete = () => {
-    deleteOrder(order.id);
-    onClose();
+    try {
+      deleteOrder(order.id);
+      toast.success('Pedido eliminado con éxito');
+      onClose();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`No se pudo eliminar el pedido: ${message}`);
+    }
   };
 
   const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;

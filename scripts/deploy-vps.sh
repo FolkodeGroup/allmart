@@ -43,6 +43,15 @@ if [ ! -d "$DEPLOY_DIR" ]; then
 fi
 
 cd "$DEPLOY_DIR"
+log "Eliminando contenedor allmart-prod-db si existe..."
+if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-db$'; then
+  docker rm -f allmart-prod-db || warn "No se pudo eliminar el contenedor allmart-prod-db"
+fi
+
+log "Eliminando red allmart_allmart-prod-network si existe..."
+if docker network ls --format '{{.Name}}' | grep -q '^allmart_allmart-prod-network$'; then
+  docker network rm allmart_allmart-prod-network || warn "No se pudo eliminar la red allmart_allmart-prod-network"
+fi
 
 # ─── Verificar que existe el .env ─────────────────────────────────────────────
 if [ ! -f ".env" ]; then
