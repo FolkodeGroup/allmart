@@ -2,19 +2,21 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { useAdminOrders } from '../../context/AdminOrdersContext';
+import { useAdminProducts } from '../../context/AdminProductsContext';
 import { AdminHeader } from '../../components/layout/AdminHeader/AdminHeader';
 import styles from './AdminLayout.module.css';
 
 
 const navItems = [
-  { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠', permission: null },
-  { label: 'Productos', to: '/admin/productos', icon: '📦', permission: 'products.view' as const },
-  { label: 'Imágenes', to: '/admin/imagenes', icon: '🖼️', permission: 'products.edit' as const },
-  { label: 'Variantes', to: '/admin/variantes', icon: '🎨', permission: 'variants.view' as const },
-  { label: 'Categorías', to: '/admin/categorias', icon: '🗂️', permission: 'categories.view' as const },
-  { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒', permission: 'orders.view' as const },
-  { label: 'Reportes', to: '/admin/reportes', icon: '📊', permission: 'reports.view' as const },
-];
+  { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠', permission: null, badge: null },
+  { label: 'Productos', to: '/admin/productos', icon: '📦', permission: null, badge: 'lowStock' },
+  { label: 'Imágenes', to: '/admin/imagenes', icon: '🖼️', permission: null, badge: null },
+  { label: 'Variantes', to: '/admin/variantes', icon: '🎨', permission: null, badge: null },
+  { label: 'Categorías', to: '/admin/categorias', icon: '🗂️', permission: null, badge: null },
+  { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒', permission: null, badge: 'pending' },
+  { label: 'Reportes', to: '/admin/reportes', icon: '📊', permission: 'reports.view' as const, badge: null },
+] as const;
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
@@ -23,6 +25,8 @@ const ROLE_LABELS: Record<string, string> = {
 
 export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
+  const { getPendingOrdersCount } = useAdminOrders();
+  const { getLowStockCount } = useAdminProducts();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -126,6 +130,12 @@ export function AdminLayout() {
         <nav className={styles.nav}>
           {navItems.map(item => {
             const locked = item.permission !== null && !can(item.permission);
+            let badgeCount: number | null = null;
+            if (item.badge === 'pending') {
+              badgeCount = getPendingOrdersCount();
+            } else if (item.badge === 'lowStock') {
+              badgeCount = getLowStockCount();
+            }
             const commonProps = {
               title: isCollapsed ? item.label : '',
               'data-label': item.label,
@@ -155,6 +165,9 @@ export function AdminLayout() {
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 <span className={styles.navLabel}>{item.label}</span>
+                {badgeCount !== null && badgeCount > 0 && (
+                  <span className={styles.navBadge}>{badgeCount}</span>
+                )}
               </NavLink>
             );
           })}
