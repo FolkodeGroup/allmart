@@ -126,9 +126,17 @@ export function AdminVariants() {
   const addValue = (groupId: string) => {
     const val = (newValues[groupId] ?? '').trim();
     if (!val) return;
-    try {
-      saveVariants(variants.map(g =>
-        g.id === groupId && !g.values.includes(val)
+      try {
+        saveVariants(variants.map(g =>
+          g.id === groupId && !g.values.includes(val)
+            ? { ...g, values: [...g.values, val] }
+            : g
+        ));
+        toast.success('Valor agregado con éxito');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al agregar valor: ${message}`);
+      }
           ? { ...g, values: [...g.values, val] }
           : g
       ));
@@ -386,4 +394,4 @@ export function AdminVariants() {
       </div>
     </div>
   );
-}
+  }
