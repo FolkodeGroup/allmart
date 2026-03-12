@@ -138,6 +138,10 @@ export function AdminVariants() {
         const message = err instanceof Error ? err.message : 'Error desconocido';
         toast.error(`Error al agregar valor: ${message}`);
       }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al agregar valor: ${message}`);
+    }
   };
 
   const removeValue = (groupId: string, value: string) => {
