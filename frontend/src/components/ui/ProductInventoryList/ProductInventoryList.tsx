@@ -1,3 +1,5 @@
+
+// ...existing code...
 import styles from './ProductInventoryList.module.css';
 
 export type StockState = 'inStock' | 'lowStock' | 'outOfStock';
