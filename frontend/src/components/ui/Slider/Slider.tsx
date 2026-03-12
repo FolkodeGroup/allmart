@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ProductImage } from '../ProductImage';
 import type { Product } from '../../../types';
 import styles from './Slider.module.css';
 
@@ -31,7 +32,7 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
 
   return (
     <div className={styles.sliderContainer}>
-      {/* Wrapper: flecha izq + viewport + flecha der */} 
+      {/* Wrapper: flecha izq + viewport + flecha der */}
       <div className={styles.sliderWrapper}>
         <button
           className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
@@ -60,12 +61,13 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
                   return (
                     <div className={styles.sliderCard} key={product.id}>
                       <div className={styles.sliderImageWrapper}>
-                        <img
-                          className={styles.sliderImage}
+                        <ProductImage
                           src={product.images[0]}
                           alt={product.name}
-                          loading="lazy"
-                          decoding="async"
+                          className={styles.sliderImage}
+                          width={240}
+                          height={180}
+                          placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                         />
                         <div className={styles.sliderBadges}>
                           {hasDiscount && (

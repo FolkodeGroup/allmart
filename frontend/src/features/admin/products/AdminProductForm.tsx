@@ -6,6 +6,7 @@ import { useAdminImages } from '../../../context/AdminImagesContext';
 import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
+import { ProductImage } from '../../../components/ui/ProductImage';
 
 interface Props {
   productId?: string | null;
@@ -422,8 +423,14 @@ export function AdminProductForm({ productId, onClose }: Props) {
                         {/* Miniatura */}
                         <div className={styles.imgThumb}>
                           {img.url
-                            ? <img src={img.url} alt={img.altText ?? 'imagen'} className={styles.imgThumbImg}
-                                onError={e => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/60x45?text=?'; }} />
+                            ? <ProductImage
+                                src={img.url}
+                                alt={img.altText ?? 'imagen'}
+                                className={styles.imgThumbImg}
+                                width={60}
+                                height={45}
+                                placeholder={'data:image/svg+xml,%3Csvg width="60" height="45" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="60" height="45" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                              />
                             : <span className={styles.imgThumbEmpty}>?</span>
                           }
                         </div>

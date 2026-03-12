@@ -1,6 +1,7 @@
 
 // ...existing code...
 import styles from './ProductInventoryList.module.css';
+import { ProductImage } from '../ProductImage';
 
 export type StockState = 'inStock' | 'lowStock' | 'outOfStock';
 
@@ -69,7 +70,14 @@ export function ProductInventoryList({ products = exampleData }: ProductInventor
     <div className={styles.container}>
       {products.map((p) => (
         <div key={p.id} className={styles.card}>
-          <img src={p.imageUrl} alt={p.name} className={styles.image} />
+          <ProductImage
+            src={p.imageUrl}
+            alt={p.name}
+            className={styles.image}
+            width={64}
+            height={64}
+            placeholder={'data:image/svg+xml,%3Csvg width="64" height="64" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="64" height="64" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+          />
           <div className={styles.info}>
             <span className={styles.title}>{p.name}</span>
             <span className={styles.sku}>{p.sku}</span>

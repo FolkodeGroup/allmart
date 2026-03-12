@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ProductImage } from '../../components/ui/ProductImage';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
@@ -58,11 +59,13 @@ export function CartPage() {
           {items.map(({ product, quantity }) => (
             <li key={product.id} className={styles.item}>
               <Link to={`/productos/${product.slug}`}>
-                <img
-                  className={styles.itemImage}
+                <ProductImage
                   src={product.images[0]}
                   alt={product.name}
-                  loading="lazy"
+                  className={styles.itemImage}
+                  width={64}
+                  height={64}
+                  placeholder={'data:image/svg+xml,%3Csvg width="64" height="64" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="64" height="64" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                 />
               </Link>
 
