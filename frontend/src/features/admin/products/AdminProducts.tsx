@@ -187,30 +187,32 @@ export function AdminProducts() {
   };
 
   return (
-    <div className={sectionStyles.page}>
+    <main className={sectionStyles.page} aria-label="Gestión de productos">
       {/* Header */}
-      <div className={sectionStyles.header}>
+      <header className={sectionStyles.header}>
         <div className={styles.headerTop}>
           <div>
-            <span className={sectionStyles.label}>Administración</span>
-            <h1 className={sectionStyles.title}>
-              <span className={sectionStyles.icon}>📦</span> Productos
+            <span className={sectionStyles.label} id="admin-label">Administración</span>
+            <h1 className={sectionStyles.title} aria-labelledby="admin-label">
+              <span className={sectionStyles.icon} aria-hidden="true">📦</span> Productos
             </h1>
             <p className={sectionStyles.subtitle}>
               Gestioná el catálogo de productos, precios y disponibilidad.
             </p>
           </div>
           {can('products.create') && (
-            <button className={styles.newBtn} onClick={handleNew}>
+            <button className={styles.newBtn} onClick={handleNew} aria-label="Crear nuevo producto">
               + Nuevo producto
             </button>
           )}
         </div>
 
         {/* Filtros */}
-        <div className={styles.filters} style={{ position: 'relative' }}>
+        <nav className={styles.filters} style={{ position: 'relative' }} aria-label="Filtros de productos">
+          <label htmlFor="search-products" className="sr-only">Buscar productos</label>
           <input
             ref={inputRef}
+            id="search-products"
             className={styles.searchInput}
             type="search"
             placeholder="Buscar por nombre o SKU..."
@@ -231,7 +233,7 @@ export function AdminProducts() {
               } else if (e.key === 'ArrowUp') {
                 setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
                 e.preventDefault();
-              } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+              } else if ((e.key === 'Enter' || e.key === ' ') && highlightedIndex >= 0) {
                 setSearch(suggestions[highlightedIndex].name);
                 setShowSuggestions(false);
                 setHighlightedIndex(-1);
@@ -240,19 +242,41 @@ export function AdminProducts() {
                 e.preventDefault();
               }
             }}
+            aria-label="Buscar productos por nombre o SKU"
+            aria-autocomplete="list"
+            aria-controls="suggestions-list"
+            aria-activedescendant={highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined}
           />
           {/* Sugerencias de autocompletado */}
           {showSuggestions && suggestions.length > 0 && (
-            <ul className={styles.suggestionsList} style={{ position: 'absolute', top: '110%', left: 0, right: 0, zIndex: 10 }}>
+            <ul
+              id="suggestions-list"
+              className={styles.suggestionsList}
+              style={{ position: 'absolute', top: '110%', left: 0, right: 0, zIndex: 10 }}
+              role="listbox"
+              aria-label="Sugerencias de productos"
+            >
               {suggestions.map((s, idx) => (
                 <li
                   key={s.id}
+                  id={`suggestion-${idx}`}
                   className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
                   style={{ cursor: 'pointer', background: idx === highlightedIndex ? 'var(--color-bg-secondary)' : undefined }}
+                  role="option"
+                  aria-selected={idx === highlightedIndex}
+                  tabIndex={0}
                   onMouseDown={() => {
                     setSearch(s.name);
                     setShowSuggestions(false);
                     setHighlightedIndex(-1);
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setSearch(s.name);
+                      setShowSuggestions(false);
+                      setHighlightedIndex(-1);
+                      e.preventDefault();
+                    }
                   }}
                 >
                   <span style={{ fontWeight: 500 }}>{s.name}</span>
@@ -262,21 +286,24 @@ export function AdminProducts() {
             </ul>
           )}
 
+          <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
           <select
+            id="category-filter"
             className={styles.select}
             value={categoryFilter}
             onChange={e => {
               setCategoryFilter(e.target.value);
             }}
+            aria-label="Filtrar por categoría"
           >
             <option value="">Todas las categorías</option>
             {categories.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          <span className={styles.count}>{total} productos</span>
-        </div>
-      </div>
+          <span className={styles.count} aria-live="polite">{total} productos</span>
+        </nav>
+      </header>
 
       {/* Panel de edición masiva */}
       {selectedIds.length > 0 && can('products.edit') && (
@@ -289,8 +316,10 @@ export function AdminProducts() {
       )}
 
       {/* Mensajes de feedback */}
-      {bulkEditSuccess && <div style={{ color: '#22c55e', marginBottom: 8 }}>{bulkEditSuccess}</div>}
-      {bulkEditError && <div style={{ color: '#ef4444', marginBottom: 8 }}>{bulkEditError}</div>}
+      <section aria-live="polite" aria-atomic="true">
+        {bulkEditSuccess && <div style={{ color: '#22c55e', marginBottom: 8, fontWeight: 500 }}>{bulkEditSuccess}</div>}
+        {bulkEditError && <div style={{ color: '#ef4444', marginBottom: 8, fontWeight: 500 }}>{bulkEditError}</div>}
+      </section>
 
       {/* Modal de confirmación de edición masiva */}
       {showBulkConfirm && (
@@ -333,7 +362,7 @@ export function AdminProducts() {
           action={can('products.create') ? { label: 'Nuevo Producto', onClick: handleNew } : undefined}
         />
       ) : (
-        <div className={styles.cardsGrid}>
+        <section className={styles.cardsGrid} aria-label="Listado de productos">
           {products.map(p => (
             <AdminProductCard
               key={p.id}
@@ -355,30 +384,38 @@ export function AdminProducts() {
               showCheckbox={can('products.edit') || can('products.delete')}
             />
           ))}
-        </div>
+        </section>
       ))}
 
       {/* Controles de paginación */}
       {total > 10 && (
-        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+        <nav
+          className={styles.pagination}
+          style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+          aria-label="Paginación de productos"
+        >
           <button
             className={styles.pageBtn}
             disabled={apiPage === 1}
             onClick={() => handlePageChange(apiPage - 1)}
+            aria-label="Página anterior"
           >Anterior</button>
           {Array.from({ length: apiTotalPages }, (_, i) => (
             <button
               key={i + 1}
               className={styles.pageBtn + (apiPage === i + 1 ? ' ' + styles.pageActive : '')}
               onClick={() => handlePageChange(i + 1)}
+              aria-current={apiPage === i + 1 ? 'page' : undefined}
+              aria-label={`Ir a la página ${i + 1}`}
             >{i + 1}</button>
           ))}
           <button
             className={styles.pageBtn}
             disabled={apiPage === apiTotalPages}
             onClick={() => handlePageChange(apiPage + 1)}
+            aria-label="Página siguiente"
           >Siguiente</button>
-        </div>
+        </nav>
       )}
 
       {/* Modal de formulario */}
@@ -399,6 +436,6 @@ export function AdminProducts() {
         onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </main>
   );
 }

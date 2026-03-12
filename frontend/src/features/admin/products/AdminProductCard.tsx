@@ -42,27 +42,42 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n);
 
   return (
-    <div className={styles.card}>
+    <section
+      className={styles.card}
+      role="region"
+      aria-label={`Producto: ${name}${category ? ', categoría ' + category : ''}`}
+      tabIndex={0}
+    >
       {showCheckbox && (
         <div className={styles.checkboxWrapper}>
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={e => onSelectChange && onSelectChange(id, e.target.checked)}
-            aria-label="Seleccionar producto"
-          />
+          <label>
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={e => onSelectChange && onSelectChange(id, e.target.checked)}
+              aria-checked={selected}
+              aria-label={`Seleccionar producto ${name}`}
+              tabIndex={0}
+            />
+            <span className="sr-only">Seleccionar producto {name}</span>
+          </label>
         </div>
       )}
       <div className={styles.imageWrapper}>
         {image ? (
           <img
             src={image}
-            alt={name}
+            alt={`Imagen de ${name}${category ? ', categoría ' + category : ''}`}
             className={styles.image}
             onError={e => (e.currentTarget.style.display = 'none')}
           />
         ) : (
-          <div className={styles.noImage}>Sin imagen</div>
+          <div
+            className={styles.noImage}
+            role="img"
+            aria-label={`Sin imagen de ${name}`}
+            tabIndex={0}
+          >Sin imagen</div>
         )}
       </div>
       <div className={styles.info}>
@@ -88,19 +103,32 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
       </div>
       <div className={styles.actions}>
         {canEdit && (
-          <button className={styles.editBtn} onClick={() => onEdit && onEdit(id)} title="Editar">
-            ✏️
+          <button
+            className={styles.editBtn}
+            onClick={() => onEdit && onEdit(id)}
+            title={`Editar ${name}`}
+            aria-label={`Editar producto ${name}`}
+            tabIndex={0}
+          >
+            <span aria-hidden="true">✏️</span>
           </button>
         )}
         {canDelete && (
-          <button className={styles.deleteBtn} onClick={() => onDelete && onDelete(id)} title="Eliminar">
-            🗑️
+          <button
+            className={styles.deleteBtn}
+            onClick={() => onDelete && onDelete(id)}
+            title={`Eliminar ${name}`}
+            aria-label={`Eliminar producto ${name}`}
+            tabIndex={0}
+          >
+            <span aria-hidden="true">🗑️</span>
           </button>
         )}
         {!canEdit && !canDelete && (
           <span className={styles.readOnly}>Solo lectura</span>
         )}
       </div>
-    </div>
+    </section>
   );
 };
+

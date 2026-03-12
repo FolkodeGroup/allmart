@@ -41,7 +41,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} role="status" aria-live="polite">
       <div className="spinner" style={{
         width: sizeMap[size],
         height: sizeMap[size],

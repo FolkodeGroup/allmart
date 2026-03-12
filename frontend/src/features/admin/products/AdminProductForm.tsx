@@ -165,7 +165,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
     if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
     if (!form.price || form.price <= 0) errors.price = 'El precio debe ser mayor a 0';
     if (!form.category.id) errors.category = 'Seleccioná una categoría';
-    
+
     // Validaciones opcionales pero con formato
     if (form.discount !== undefined && (form.discount < 0 || form.discount > 100)) {
       errors.discount = 'El descuento debe estar entre 0 y 100';
@@ -194,7 +194,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     setError('');
     setSaving(true);
 
@@ -409,7 +409,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
               /* ── Modo edición: gestión via API ─────────────────────────── */
               <div className={styles.imgManager}>
                 {imagesError && (
-                  <p className={styles.imgError}>Error: {imagesError}</p>
+                  <p className={styles.imgError} aria-live="polite">Error: {imagesError}</p>
                 )}
                 {imagesLoading && apiImages.length === 0 ? (
                   <p className={styles.imgHint}>Cargando imágenes...</p>
@@ -490,7 +490,9 @@ export function AdminProductForm({ productId, onClose }: Props) {
                 {/* Formulario para agregar nueva imagen */}
                 {showAddImgForm ? (
                   <div className={styles.imgAddForm}>
+                    <label htmlFor="img-new-url" className="sr-only">URL de la imagen *</label>
                     <input
+                      id="img-new-url"
                       ref={addImgUrlRef}
                       className={`${styles.input} ${imgError ? styles.inputError : ''}`}
                       value={imgNewUrl}
@@ -498,8 +500,10 @@ export function AdminProductForm({ productId, onClose }: Props) {
                       placeholder="URL de la imagen *"
                       onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiAddImage())}
                     />
-                    {imgError && <span className={styles.errorText}>{imgError}</span>}
+                    {imgError && <span className={styles.errorText} aria-live="polite">{imgError}</span>}
+                    <label htmlFor="img-new-alt" className="sr-only">Texto alternativo (opcional)</label>
                     <input
+                      id="img-new-alt"
                       className={styles.input}
                       value={imgNewAlt}
                       onChange={e => setImgNewAlt(e.target.value)}
@@ -509,11 +513,15 @@ export function AdminProductForm({ productId, onClose }: Props) {
                     <div className={styles.imgEditActions}>
                       <button type="button" className={styles.imgSaveBtn}
                         onClick={handleApiAddImage}
-                        disabled={!imgNewUrl.trim() || imagesLoading}>
+                        disabled={!imgNewUrl.trim() || imagesLoading}
+                        aria-label="Agregar imagen"
+                      >
                         {imagesLoading ? 'Agregando...' : 'Agregar'}
                       </button>
                       <button type="button" className={styles.imgCancelBtn}
-                        onClick={() => { setShowAddImgForm(false); setImgNewUrl(''); setImgNewAlt(''); setImgError(''); }}>
+                        onClick={() => { setShowAddImgForm(false); setImgNewUrl(''); setImgNewAlt(''); setImgError(''); }}
+                        aria-label="Cancelar agregar imagen"
+                      >
                         Cancelar
                       </button>
                     </div>
@@ -523,7 +531,9 @@ export function AdminProductForm({ productId, onClose }: Props) {
                     onClick={() => {
                       setShowAddImgForm(true);
                       setTimeout(() => addImgUrlRef.current?.focus(), 50);
-                    }}>
+                    }}
+                    aria-label="Mostrar formulario para agregar imagen"
+                  >
                     + Agregar imagen
                   </button>
                 )}
@@ -533,16 +543,17 @@ export function AdminProductForm({ productId, onClose }: Props) {
               <>
                 {form.images.map((img, i) => (
                   <div key={i} className={styles.tagRow}>
-                    <input className={`${styles.input} ${fieldErrors.images ? styles.inputError : ''}`} value={img}
+                    <label htmlFor={`img-url-${i}`} className="sr-only">URL de la imagen</label>
+                    <input className={`${styles.input} ${fieldErrors.images ? styles.inputError : ''}`} id={`img-url-${i}`} value={img}
                       onChange={e => setImage(i, e.target.value)}
                       placeholder="URL de la imagen" />
                     {form.images.length > 1 && (
-                      <button type="button" className={styles.removeBtn} onClick={() => removeImageSlot(i)}>✕</button>
+                      <button type="button" className={styles.removeBtn} onClick={() => removeImageSlot(i)} aria-label={`Eliminar imagen ${i + 1}`}>✕</button>
                     )}
                   </div>
                 ))}
-                {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
-                <button type="button" className={styles.addBtn} onClick={addImageSlot}>+ Agregar imagen</button>
+                {fieldErrors.images && <span className={styles.errorText} aria-live="polite">{fieldErrors.images}</span>}
+                <button type="button" className={styles.addBtn} onClick={addImageSlot} aria-label="Agregar campo de imagen">+ Agregar imagen</button>
               </>
             )}
           </fieldset>
@@ -555,14 +566,14 @@ export function AdminProductForm({ productId, onClose }: Props) {
                 onChange={e => setFeatureInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addFeature())}
                 placeholder="Ej: Material: acero inoxidable" />
-              <button type="button" className={styles.addBtn} onClick={addFeature}>＋</button>
+              <button type="button" className={styles.addBtn} onClick={addFeature} aria-label="Agregar característica">＋</button>
             </div>
             {(form.features ?? []).length > 0 && (
               <ul className={styles.featureList}>
                 {(form.features ?? []).map((f, i) => (
                   <li key={i} className={styles.featureItem}>
                     <span>{f}</span>
-                    <button type="button" onClick={() => removeFeature(i)} className={styles.tagRemove}>✕</button>
+                    <button type="button" onClick={() => removeFeature(i)} className={styles.tagRemove} aria-label={`Eliminar característica ${f}`}>✕</button>
                   </li>
                 ))}
               </ul>
@@ -583,7 +594,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVariantGroup())}
                 placeholder="Nombre del grupo, ej: Color, Tamaño..."
               />
-              <button type="button" className={styles.addBtn} onClick={addVariantGroup}>+ Grupo</button>
+              <button type="button" className={styles.addBtn} onClick={addVariantGroup} aria-label="Agregar grupo de variantes">+ Grupo</button>
             </div>
 
             {/* Grupos existentes */}
@@ -591,13 +602,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
               <div key={group.id} className={styles.variantGroup}>
                 <div className={styles.variantGroupHeader}>
                   <span className={styles.variantGroupName}>{group.name}</span>
-                  <button type="button" className={styles.removeBtn} onClick={() => removeVariantGroup(group.id)}>✕</button>
+                  <button type="button" className={styles.removeBtn} onClick={() => removeVariantGroup(group.id)} aria-label={`Eliminar grupo ${group.name}`}>✕</button>
                 </div>
                 <div className={styles.tags}>
                   {group.values.map(val => (
                     <span key={val} className={styles.tag}>
                       {val}
-                      <button type="button" className={styles.tagRemove} onClick={() => removeVariantValue(group.id, val)}>✕</button>
+                      <button type="button" className={styles.tagRemove} onClick={() => removeVariantValue(group.id, val)} aria-label={`Eliminar variante ${val}`}>✕</button>
                     </span>
                   ))}
                 </div>
@@ -609,13 +620,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
                     onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVariantValue(group.id))}
                     placeholder={`Agregar valor a ${group.name}...`}
                   />
-                  <button type="button" className={styles.addBtn} onClick={() => addVariantValue(group.id)}>＋</button>
+                  <button type="button" className={styles.addBtn} onClick={() => addVariantValue(group.id)} aria-label={`Agregar valor a ${group.name}`}>＋</button>
                 </div>
               </div>
             ))}
           </fieldset>
 
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <div className={styles.error} aria-live="polite">{error}</div>}
 
           <div className={styles.actions}>
             <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={saving}>Cancelar</button>
