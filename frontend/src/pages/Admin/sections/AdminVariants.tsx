@@ -110,14 +110,15 @@ export function AdminVariants() {
     const exists = variants.some(g => g.id !== variantId && g.name.toLowerCase() === name.toLowerCase());
     if (exists) return setEditGroupError('Ya existe otro grupo con ese nombre');
 
-    if (selectedProductId) {
-      await updateVariant(selectedProductId, variantId, { name });
-        toast.success('Nombre actualizado con éxito');
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al actualizar: ${message}`);
+      if (selectedProductId) {
+        try {
+          await updateVariant(selectedProductId, variantId, { name });
+          toast.success('Nombre actualizado con éxito');
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Error desconocido';
+          toast.error(`Error al actualizar: ${message}`);
+        }
       }
-    }
     setEditingGroupId(null);
     setEditingGroupName('');
   };
