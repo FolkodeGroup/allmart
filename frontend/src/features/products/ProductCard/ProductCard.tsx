@@ -1,4 +1,5 @@
 import {useState, useEffect} from "react";
+import { ProductImage } from '../../../components/ui/ProductImage';
 import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
@@ -32,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
     const saved = localStorage.getItem(storageKey);
     return saved === "true";
   });
-  
+
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(isFavorito));
   }, [isFavorito, storageKey]);
@@ -49,12 +50,13 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className={styles.card} aria-label={product.name}>
       <div className={styles.imageWrapper}>
         <Link to={`/producto/${product.slug}`}>
-          <img
-            className={styles.image}
+          <ProductImage
             src={product.images[0]}
             alt={product.name}
-            loading="lazy"
-            decoding="async"
+            className={styles.image}
+            width={240}
+            height={180}
+            placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
           />
         </Link>
         <div className={styles.badges}>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ProductImage } from '../../../components/ui/ProductImage';
 import styles from './AdminProductCard.module.css';
 
 interface AdminProductCardProps {
@@ -65,11 +66,16 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
       )}
       <div className={styles.imageWrapper}>
         {image ? (
-          <img
+          <ProductImage
             src={image}
             alt={`Imagen de ${name}${category ? ', categoría ' + category : ''}`}
             className={styles.image}
-            onError={e => (e.currentTarget.style.display = 'none')}
+            width={240}
+            height={180}
+            placeholder={
+              // SVG blur placeholder o color
+              'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'
+            }
           />
         ) : (
           <div

@@ -6,6 +6,7 @@ import { useAdminImages } from '../../../context/AdminImagesContext';
 import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
+import { ProductImage } from '../../../components/ui/ProductImage';
 
 interface Props {
   productId?: string | null;
@@ -421,15 +422,20 @@ export function AdminProductForm({ productId, onClose }: Props) {
                 ) : (
                   <div className={styles.imgGrid}>
                     {apiImages.map(img => (
-                      <div key={img.id} className={styles.imgCard}>
-                        {/* Miniatura real */}
-                        <div className={styles.imgCardThumb}>
-                          <img 
-                            src={img.thumbUrl || img.url} 
-                            alt={img.altText ?? 'Imagen de producto'} 
-                            className={styles.imgCardImg}
-                            onError={e => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150x150?text=Error'; }} 
-                          />
+                      <div key={img.id} className={styles.imgRow}>
+                        {/* Miniatura */}
+                        <div className={styles.imgThumb}>
+                          {img.url
+                            ? <ProductImage
+                                src={img.url}
+                                alt={img.altText ?? 'imagen'}
+                                className={styles.imgThumbImg}
+                                width={60}
+                                height={45}
+                                placeholder={'data:image/svg+xml,%3Csvg width="60" height="45" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="60" height="45" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                              />
+                            : <span className={styles.imgThumbEmpty}>?</span>
+                          }
                         </div>
 
                         <div className={styles.imgCardContent}>
