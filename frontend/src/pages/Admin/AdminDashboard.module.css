@@ -130,13 +130,13 @@
   background: var(--color-bg-primary);
   text-decoration: none;
   color: var(--color-text-primary);
-  transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s;
-  animation: fadeIn 0.5s both;
+  transition: var(--transition-smooth);
+  /* animation: fadeIn 0.5s both; */
 }
 
 .card:hover {
-  box-shadow: 0 4px 24px rgba(118, 146, 130, 0.13);
-  transform: translateY(-2px);
+  transform: translateY(-6px)  !important;
+  box-shadow: var(--shadow-xl);
   border-color: var(--color-primary-light);
 }
 

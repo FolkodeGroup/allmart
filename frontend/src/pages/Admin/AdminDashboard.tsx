@@ -1,6 +1,6 @@
 const sections = [
   {
-    icon: '',
+    icon: '📦',
     title: 'Productos',
     description: 'Administrá el catálogo, precios y stock.',
     to: '/admin/productos',
@@ -256,7 +256,7 @@ export function AdminDashboard() {
                 <h3 className={styles.cardTitle}>{sec.title}</h3>
                 <p className={styles.cardDesc}>{sec.description}</p>
               </div>
-              <span className={styles.cardArrow}>→</span>
+              
             </Link>
           ))}
         </div>
