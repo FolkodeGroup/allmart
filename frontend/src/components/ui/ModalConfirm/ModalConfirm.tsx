@@ -62,10 +62,10 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
     >
       <div className={styles.panel}>
         {title && <h2 id="modal-confirm-title" className={styles.title}>{title}</h2>}
-        <div className={styles.message}>{message}</div>
+        <div className={styles.message} aria-live="polite">{message}</div>
         <div className={styles.actions}>
-          <button className={styles.confirmBtn} onClick={onConfirm}>{confirmText}</button>
-          <button className={styles.cancelBtn} onClick={onCancel}>{cancelText}</button>
+          <button className={styles.confirmBtn} onClick={onConfirm} aria-label={confirmText}>{confirmText}</button>
+          <button className={styles.cancelBtn} onClick={onCancel} aria-label={cancelText}>{cancelText}</button>
         </div>
       </div>
     </div>

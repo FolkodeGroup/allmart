@@ -37,9 +37,16 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
   };
 
   return (
-    <form className={styles.bulkEditBar} onSubmit={handleSubmit}>
-      <span className={styles.label}>{selectedCount} seleccionados</span>
+    <form
+      className={styles.bulkEditBar}
+      onSubmit={handleSubmit}
+      role="form"
+      aria-labelledby="bulk-edit-bar-label"
+    >
+      <span className={styles.label} id="bulk-edit-bar-label">{selectedCount} seleccionados</span>
+      <label htmlFor="bulk-edit-price" className="sr-only">Nuevo precio</label>
       <input
+        id="bulk-edit-price"
         className={styles.input}
         type="number"
         min="0"
@@ -48,8 +55,11 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
         value={price}
         onChange={e => setPrice(e.target.value)}
         disabled={loading}
+        aria-label="Nuevo precio"
       />
+      <label htmlFor="bulk-edit-stock" className="sr-only">Nuevo stock</label>
       <input
+        id="bulk-edit-stock"
         className={styles.input}
         type="number"
         min="0"
@@ -58,24 +68,28 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
         value={stock}
         onChange={e => setStock(e.target.value)}
         disabled={loading}
+        aria-label="Nuevo stock"
       />
+      <label htmlFor="bulk-edit-instock" className="sr-only">Estado</label>
       <select
+        id="bulk-edit-instock"
         className={styles.input}
         value={inStock}
         onChange={e => setInStock(e.target.value)}
         disabled={loading}
+        aria-label="Estado"
       >
         <option value="">Estado</option>
         <option value="true">Activo</option>
         <option value="false">Inactivo</option>
       </select>
-      <button className={styles.applyBtn} type="submit" disabled={loading}>
+      <button className={styles.applyBtn} type="submit" disabled={loading} aria-label="Aplicar cambios masivos">
         Aplicar cambios
       </button>
-      <button className={styles.cancelBtn} type="button" onClick={onCancel} disabled={loading}>
+      <button className={styles.cancelBtn} type="button" onClick={onCancel} disabled={loading} aria-label="Cancelar edición masiva">
         Cancelar
       </button>
-      {error && <span className={styles.error}>{error}</span>}
+      {error && <span className={styles.error} aria-live="polite">{error}</span>}
     </form>
   );
 };

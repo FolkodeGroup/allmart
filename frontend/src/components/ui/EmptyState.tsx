@@ -33,6 +33,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         margin: '1rem 0',
         maxWidth: '100vw',
       }}
+      aria-live="polite"
     >
       <div style={{ marginBottom: '1.5rem' }}>
         {icon}
@@ -54,6 +55,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             fontSize: '1.05rem',
             wordBreak: 'break-word',
           }}
+          aria-live="polite"
         >
           {description}
         </p>
@@ -72,6 +74,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               minHeight: 44,
               margin: '0 auto',
             }}
+            aria-label={action.label}
           >
             {action.label}
           </button>
