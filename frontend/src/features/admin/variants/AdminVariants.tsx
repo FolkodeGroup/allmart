@@ -11,8 +11,14 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminVariants.module.css';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm';
+import { Notification } from '../../../components/ui/Notification';
 
 export function AdminVariants() {
+    // Estados para feedback UX
+    const [notif, setNotif] = useState<{open:boolean,type:'success'|'error',message:string}>({open:false,type:'success',message:''});
+    const [modalOpen, setModalOpen] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string|null>(null);
   const { products } = useAdminProducts();
   const {
     variants,
@@ -132,17 +138,38 @@ export function AdminVariants() {
     setErrors(prev => ({ ...prev, group: '' }));
     if (!selectedProductId) return;
     if (!name) return setErrors(prev => ({ ...prev, group: 'El nombre del grupo es obligatorio' }));
-    
     const exists = variants.some(g => g.name.toLowerCase() === name.toLowerCase());
     if (exists) return setErrors(prev => ({ ...prev, group: 'Ya existe un grupo con ese nombre' }));
-    
-    await addVariant(selectedProductId, name);
-    setNewGroupName('');
+    try {
+      await addVariant(selectedProductId, name);
+      setNotif({open:true,type:'success',message:'Variante creada correctamente.'});
+      setNewGroupName('');
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al crear variante.'});
+    }
   };
 
   const deleteGroup = async (variantId: string) => {
-    if (!selectedProductId || !window.confirm('¿Eliminar este grupo y todos sus valores?')) return;
-    await deleteVariant(selectedProductId, variantId);
+    if (!selectedProductId) return;
+    setPendingDeleteId(variantId);
+    setModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedProductId || !pendingDeleteId) return;
+    setModalOpen(false);
+    try {
+      await deleteVariant(selectedProductId, pendingDeleteId);
+      setNotif({open:true,type:'success',message:'Variante eliminada correctamente.'});
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al eliminar variante.'});
+    }
+    setPendingDeleteId(null);
+  };
+
+  const cancelDelete = () => {
+    setModalOpen(false);
+    setPendingDeleteId(null);
   };
 
   const startEditGroupName = (id: string, currentName: string) => {
@@ -155,15 +182,18 @@ export function AdminVariants() {
     const name = editingGroupName.trim();
     setEditGroupError('');
     if (!name) return setEditGroupError('El nombre no puede estar vacío');
-    
     const exists = variants.some(g => g.id !== variantId && g.name.toLowerCase() === name.toLowerCase());
     if (exists) return setEditGroupError('Ya existe otro grupo con ese nombre');
-
-    if (selectedProductId) {
-      await updateVariant(selectedProductId, variantId, { name });
+    try {
+      if (selectedProductId) {
+        await updateVariant(selectedProductId, variantId, { name });
+        setNotif({open:true,type:'success',message:'Variante editada correctamente.'});
+      }
+      setEditingGroupId(null);
+      setEditingGroupName('');
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al editar variante.'});
     }
-    setEditingGroupId(null);
-    setEditingGroupName('');
   };
 
   // ── CRUD de valores ───────────────────────────────────────────────
@@ -190,6 +220,21 @@ export function AdminVariants() {
   // ── Render ────────────────────────────────────────────────────────
   return (
     <div className={sectionStyles.page}>
+      <ModalConfirm
+        open={modalOpen}
+        title="¿Eliminar variante?"
+        description="Esta acción no se puede deshacer. Se eliminarán todos los valores asociados."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+      <Notification
+        open={notif.open}
+        type={notif.type}
+        message={notif.message}
+        onClose={() => setNotif(prev => ({...prev,open:false}))}
+      />
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title}>
