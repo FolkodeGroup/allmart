@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { ProductImage } from '../../../components/ui/ProductImage';
+import { Tooltip } from '../../../components/ui/Tooltip';
 import styles from './AdminProductCard.module.css';
 
 interface AdminProductCardProps {
@@ -49,6 +51,7 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
       aria-label={`Producto: ${name}${category ? ', categoría ' + category : ''}`}
       tabIndex={0}
     >
+      <Tooltip content="Seleccionar producto">
       {showCheckbox && (
         <div className={styles.checkboxWrapper}>
           <label>
@@ -64,6 +67,7 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
           </label>
         </div>
       )}
+          </Tooltip>
       <div className={styles.imageWrapper}>
         {image ? (
           <ProductImage
@@ -90,12 +94,13 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
         <div className={styles.headerRow}>
           <span className={styles.name}>{name}</span>
           {sku && <span className={styles.sku}>SKU: {sku}</span>}
+
         </div>
         <div className={styles.category}>{category}</div>
         <div className={styles.priceRow}>
           <span className={styles.price}>{formatPrice(price)}</span>
           {discount && discount > 0 && (
-            <span className={styles.discount}>-{discount}%</span>
+            <span className={styles.discount}>-{discount}% OFF</span>
           )}
         </div>
         <div className={styles.metaRow}>
@@ -109,26 +114,30 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
       </div>
       <div className={styles.actions}>
         {canEdit && (
-          <button
-            className={styles.editBtn}
-            onClick={() => onEdit && onEdit(id)}
-            title={`Editar ${name}`}
-            aria-label={`Editar producto ${name}`}
-            tabIndex={0}
-          >
-            <span aria-hidden="true">✏️</span>
-          </button>
+          <Tooltip content="Editar producto">
+            <button
+              className={styles.editBtn}
+              onClick={() => onEdit && onEdit(id)}
+              aria-label={`Editar producto ${name}`}
+              tabIndex={0}
+              type="button"
+            >
+              <span aria-hidden="true">✏️</span>
+            </button>
+          </Tooltip>
         )}
         {canDelete && (
-          <button
-            className={styles.deleteBtn}
-            onClick={() => onDelete && onDelete(id)}
-            title={`Eliminar ${name}`}
-            aria-label={`Eliminar producto ${name}`}
-            tabIndex={0}
-          >
-            <span aria-hidden="true">🗑️</span>
-          </button>
+          <Tooltip content="Eliminar producto">
+            <button
+              className={styles.deleteBtn}
+              onClick={() => onDelete && onDelete(id)}
+              aria-label={`Eliminar producto ${name}`}
+              tabIndex={0}
+              type="button"
+            >
+              <span aria-hidden="true">🗑️</span>
+            </button>
+          </Tooltip>
         )}
         {!canEdit && !canDelete && (
           <span className={styles.readOnly}>Solo lectura</span>
