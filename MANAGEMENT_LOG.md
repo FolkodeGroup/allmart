@@ -1118,3 +1118,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #536: 470 sincronizar estados entre frontend y backend tras operaciones crud | 2026-03-12 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #538: He implementado el manejo completo de las relaciones entre entidades … | 2026-03-12 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #530: 199 UI sistema de notificaciones toast global | 2026-03-12 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #542: se implementa contadores al modulo pedidos cuando hay pedidos pendientes | 2026-03-12 |
