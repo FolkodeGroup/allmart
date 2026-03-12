@@ -51,14 +51,14 @@ export function AdminVariants() {
     try {
       if (productId === selectedProductId) return;
       setNewGroupName('');
-    setNewValues({});
-    setErrors({});
-    setEditingGroupId(null);
-    setEditGroupError('');
-    await loadVariants(productId);
+      setNewValues({});
+      setErrors({});
+      setEditingGroupId(null);
+      setEditGroupError('');
+      await loadVariants(productId);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error al guardar variantes: ${message}`);
+      toast.error(`Error al cargar variantes: ${message}`);
     }
   };
 
@@ -68,14 +68,13 @@ export function AdminVariants() {
     setErrors(prev => ({ ...prev, group: '' }));
     if (!selectedProductId) return;
     if (!name) return setErrors(prev => ({ ...prev, group: 'El nombre del grupo es obligatorio' }));
-    
     const exists = variants.some(g => g.name.toLowerCase() === name.toLowerCase());
     if (exists) {
       toast.error('Este grupo de variantes ya existe');
       return;
     }
     try {
-      saveVariants([...variants, { id: `g-${Date.now()}`, name, values: [] }]);
+      await addVariant(selectedProductId, name);
       toast.success(`Grupo "${name}" creado con éxito`);
       setNewGroupName('');
     } catch (err) {
@@ -87,8 +86,10 @@ export function AdminVariants() {
   const deleteGroup = (groupId: string) => {
     try {
       const groupName = variants.find(g => g.id === groupId)?.name;
-      saveVariants(variants.filter(g => g.id !== groupId));
-      toast.success(`Grupo "${groupName}" eliminado con éxito`);
+      if (selectedProductId) {
+        deleteVariant(selectedProductId, groupId);
+        toast.success(`Grupo "${groupName}" eliminado con éxito`);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al eliminar: ${message}`);
@@ -105,38 +106,29 @@ export function AdminVariants() {
     const name = editingGroupName.trim();
     setEditGroupError('');
     if (!name) return setEditGroupError('El nombre no puede estar vacío');
-      try {
-      
     const exists = variants.some(g => g.id !== variantId && g.name.toLowerCase() === name.toLowerCase());
     if (exists) return setEditGroupError('Ya existe otro grupo con ese nombre');
-
+    try {
       if (selectedProductId) {
-        try {
-          await updateVariant(selectedProductId, variantId, { name });
-          toast.success('Nombre actualizado con éxito');
-        } catch (err) {
-          const message = err instanceof Error ? err.message : 'Error desconocido';
-          toast.error(`Error al actualizar: ${message}`);
-        }
+        await updateVariant(selectedProductId, variantId, { name });
+        toast.success('Nombre actualizado con éxito');
       }
-    setEditingGroupId(null);
-    setEditingGroupName('');
+      setEditingGroupId(null);
+      setEditingGroupName('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al actualizar: ${message}`);
+    }
   };
 
   const addValue = (groupId: string) => {
     const val = (newValues[groupId] ?? '').trim();
     if (!val) return;
-      try {
-        saveVariants(variants.map(g =>
-          g.id === groupId && !g.values.includes(val)
-            ? { ...g, values: [...g.values, val] }
-            : g
-        ));
+    try {
+      if (selectedProductId) {
+        addValueToVariant(selectedProductId, groupId, val);
         toast.success(`Valor "${val}" agregado con éxito`);
         setNewValues(prev => ({ ...prev, [groupId]: '' }));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error desconocido';
-        toast.error(`Error al agregar valor: ${message}`);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
@@ -146,10 +138,10 @@ export function AdminVariants() {
 
   const removeValue = (groupId: string, value: string) => {
     try {
-      saveVariants(variants.map(g =>
-        g.id === groupId ? { ...g, values: g.values.filter(v => v !== value) } : g
-      ));
-      toast.success(`Valor "${value}" eliminado con éxito`);
+      if (selectedProductId) {
+        removeValueFromVariant(selectedProductId, groupId, value);
+        toast.success(`Valor "${value}" eliminado con éxito`);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al eliminar: ${message}`);
