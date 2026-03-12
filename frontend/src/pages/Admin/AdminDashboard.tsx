@@ -444,7 +444,7 @@ export function AdminDashboard() {
           </div>
         </div>
         {/* Pedidos Recientes */}
-        {can('orders.view') && <RecentOrdersWidget />}
+        {can('orders.view') && {!isLoading && <RecentOrdersWidget />}}
       </section>
 
       {/* Status bar */}
