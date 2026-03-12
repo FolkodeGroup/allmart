@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import { Palette, Box, Search, AlertCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
@@ -28,7 +30,6 @@ export function AdminVariants() {
   const [search, setSearch] = useState('');
   // Para autocompletado
   const [inputValue, setInputValue] = useState('');
-  const [autoOptions, setAutoOptions] = useState<any[]>([]);
   // Inputs de nuevo grupo y nuevos valores por grupo
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
@@ -45,18 +46,34 @@ export function AdminVariants() {
   );
 
   // Combina productos y variantes para autocompletado
-  const combinedOptions = [
+  type ProductOption = {
+    type: 'product';
+    id: string;
+    name: string;
+    sku: string;
+  };
+  type VariantOption = {
+    type: 'variant';
+    group: string;
+    value: string;
+    productId: string | null;
+    sku: string;
+  };
+  type Option = ProductOption | VariantOption;
+
+  // Para freeSolo, las opciones pueden ser string u Option
+  const combinedOptions: (Option | string)[] = [
     ...products.map(p => ({
-      type: 'product',
+      type: 'product' as const,
       id: p.id,
       name: p.name,
       sku: p.sku || '',
     })),
     ...variants.flatMap(v => v.values.map(val => ({
-      type: 'variant',
+      type: 'variant' as const,
       group: v.name,
       value: val,
-      productId: selectedProductId,
+      productId: selectedProductId ?? null,
       sku: '',
     })))
   ];
@@ -64,6 +81,9 @@ export function AdminVariants() {
   // Filtra opciones para autocompletado
   const filteredOptions = combinedOptions.filter(opt => {
     const q = inputValue.toLowerCase();
+    if (typeof opt === 'string') {
+      return opt.toLowerCase().includes(q);
+    }
     if (opt.type === 'product') {
       return (
         opt.name.toLowerCase().includes(q) ||
@@ -177,23 +197,26 @@ export function AdminVariants() {
           <Autocomplete
             freeSolo
             options={filteredOptions}
-            getOptionLabel={opt =>
-              opt.type === 'product'
-                ? `${opt.name} (SKU: ${opt.sku})`
-                : `${opt.value} [${opt.group}]`
-            }
+            getOptionLabel={(opt: string | Option) => {
+              if (typeof opt === 'string') return opt;
+              if (opt.type === 'product') return `${opt.name} (SKU: ${opt.sku})`;
+              return `${opt.value} [${opt.group}]`;
+            }}
             inputValue={inputValue}
-            onInputChange={(_, value) => setInputValue(value)}
-            onChange={(_, value) => {
-              if (value?.type === 'product') {
+            onInputChange={(_: any, value: string) => setInputValue(value)}
+            onChange={(_: any, value: string | Option | null) => {
+              if (!value) return;
+              if (typeof value === 'string') {
+                setSearch(value);
+              } else if (value.type === 'product') {
                 setSearch(value.name);
                 handleSelectProduct(value.id);
-              } else if (value?.type === 'variant' && value.productId) {
+              } else if (value.type === 'variant' && value.productId) {
                 setSearch(value.value);
                 handleSelectProduct(value.productId);
               }
             }}
-            renderInput={params => (
+            renderInput={(params: any) => (
               <TextField {...params} label="Buscar por nombre o SKU..." variant="outlined" size="small" />
             )}
           />
