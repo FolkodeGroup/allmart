@@ -165,17 +165,6 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
     }
   };
 
-  const handleMarkAsPaid = () => {
-    try {
-      markAsPaid(order.id);
-      toast.success('Pago confirmado con éxito');
-      setConfirmPaid(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`No se pudo confirmar el pago: ${message}`);
-    }
-  };
-
   const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
 
   return (
