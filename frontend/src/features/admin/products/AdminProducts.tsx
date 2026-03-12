@@ -53,6 +53,7 @@ function usePersistentSelection() {
   const clear = () => setSelectedIds([]);
   return { selectedIds, add, remove, toggle, clear, setSelectedIds };
 }
+import toast from 'react-hot-toast';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -177,13 +178,15 @@ export function AdminProducts() {
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     try {
-      await deleteProduct(id);
+      deleteProduct(id);
+      toast.success('Producto eliminado con éxito');
+      setDeleteConfirm(null);
     } catch (err) {
-      console.error('Error al eliminar producto:', err);
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al eliminar: ${message}`);
     }
-    setDeleteConfirm(null);
   };
 
   return (

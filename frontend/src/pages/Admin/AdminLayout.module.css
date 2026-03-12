@@ -561,3 +561,43 @@
     padding: var(--space-3) var(--space-4);
   }
 }
+
+/* ── Toast Notifications (react-hot-toast) ── */
+:global(.react-hot-toast) {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:global(.react-hot-toast[data-animated="true"]) {
+  animation: slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+:global(.react-hot-toast svg) {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+:global(.react-toaster-container) {
+  z-index: 10000;
+}
