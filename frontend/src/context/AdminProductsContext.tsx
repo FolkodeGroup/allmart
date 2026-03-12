@@ -20,6 +20,12 @@ import {
   type ApiProduct,
   type AdminProductsParams,
 } from '../features/admin/products/productsService';
+import {
+  fetchVariantsByProduct,
+  createVariant,
+  updateVariant,
+  deleteVariant,
+} from '../features/admin/variants/variantsService';
 
 // ─── Tipos exportados ─────────────────────────────────────────────────────────
 
@@ -62,6 +68,7 @@ interface AdminProductsContextType {
   updateProduct: (id: string, p: Partial<AdminProduct>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   getProduct: (id: string) => AdminProduct | undefined;
+  loadProductVariants: (productId: string) => Promise<VariantGroup[]>;
 }
 
 // ─── Contexto ─────────────────────────────────────────────────────────────────
@@ -118,8 +125,17 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   const addProduct = async (p: Omit<AdminProduct, 'id'>) => {
     if (!token) throw new Error('No autenticado');
     try {
-      const payload = mapAdminProductToPayload(p);
+      const { variants, ...productBase } = p;
+      const payload = mapAdminProductToPayload(productBase);
       const created = await createAdminProduct(payload, token);
+      
+      // Si tiene variantes, las creamos una por una (el backend actual parece crearlas por producto)
+      if (variants && variants.length > 0) {
+        for (const v of variants) {
+          await createVariant(token, created.id, { name: v.name, values: v.values });
+        }
+      }
+
       const newProduct = apiToAdminProduct(created, categories);
       setProducts((prev) => [newProduct, ...prev]);
       showNotification('success', 'Producto creado exitosamente');
@@ -137,9 +153,41 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     try {
       const current = products.find((p) => p.id === id);
       if (!current) return;
-      const merged = { ...current, ...data };
+      
+      const { variants, ...updateData } = data;
+      const merged = { ...current, ...updateData };
       const payload = mapAdminProductToPayload(merged);
       const updated = await updateAdminProduct(id, payload, token);
+
+      // Gestión de variantes si se proporcionan
+      if (variants) {
+        // En un enfoque simple, borramos las anteriores y creamos las nuevas
+        // O si el backend soporta update, lo usamos. 
+        // fetch actual para saber qué borrar
+        const existingVariants = await fetchVariantsByProduct(token, id);
+        
+        // 1. Identificar variantes a eliminar (las que están en DB pero no en el nuevo set)
+        // Nota: El form actual genera IDs temporales 'g-...' para nuevas, 
+        // y mantiene las existentes si vinieran de la DB.
+        for (const ev of existingVariants) {
+          const stillExists = variants.find(v => v.id === ev.id);
+          if (!stillExists) {
+            await deleteVariant(token, id, ev.id);
+          }
+        }
+
+        // 2. Crear o Actualizar
+        for (const v of variants) {
+          if (v.id.startsWith('g-')) {
+            // Es nueva
+            await createVariant(token, id, { name: v.name, values: v.values });
+          } else {
+            // Ya existe, actualizar
+            await updateVariant(token, id, v.id, { name: v.name, values: v.values });
+          }
+        }
+      }
+
       setProducts((prev) =>
         prev.map((p) =>
           p.id === id ? apiToAdminProduct(updated, categories) : p
@@ -168,6 +216,28 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loadProductVariants = async (productId: string): Promise<VariantGroup[]> => {
+    if (!token) return [];
+    try {
+      const apiVariants = await fetchVariantsByProduct(token, productId);
+      const variants: VariantGroup[] = apiVariants.map(v => ({
+        id: v.id,
+        name: v.name,
+        values: v.values,
+      }));
+      
+      // Actualizamos el producto en el estado local con sus variantes
+      setProducts(prev => prev.map(p => 
+        p.id === productId ? { ...p, variants } : p
+      ));
+      
+      return variants;
+    } catch (err) {
+      console.error('Error al cargar variantes:', err);
+      return [];
+    }
+  };
+
   const getProduct = (id: string) => products.find((p) => p.id === id);
 
   return (
@@ -185,6 +255,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         updateProduct,
         deleteProduct,
         getProduct,
+        loadProductVariants,
       }}
     >
       {children}
