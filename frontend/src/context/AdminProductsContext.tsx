@@ -121,9 +121,9 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       const payload = mapAdminProductToPayload(p);
       const created = await createAdminProduct(payload, token);
       const newProduct = apiToAdminProduct(created, categories);
-      
       setProducts((prev) => [newProduct, ...prev]);
       showNotification('success', 'Producto creado exitosamente');
+      await refreshProducts();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al crear producto';
       showNotification('error', msg);
@@ -137,18 +137,16 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     try {
       const current = products.find((p) => p.id === id);
       if (!current) return;
-      
       const merged = { ...current, ...data };
       const payload = mapAdminProductToPayload(merged);
-      
       const updated = await updateAdminProduct(id, payload, token);
-      
       setProducts((prev) =>
         prev.map((p) =>
           p.id === id ? apiToAdminProduct(updated, categories) : p
         )
       );
       showNotification('success', 'Producto actualizado exitosamente');
+      await refreshProducts();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al actualizar producto';
       showNotification('error', msg);
@@ -162,6 +160,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       await deleteAdminProduct(id, token);
       setProducts((prev) => prev.filter((p) => p.id !== id));
       showNotification('success', 'Producto eliminado exitosamente');
+      await refreshProducts();
     } catch (err) {
        const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
        showNotification('error', msg);
