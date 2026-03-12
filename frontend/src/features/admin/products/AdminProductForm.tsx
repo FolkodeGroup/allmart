@@ -64,7 +64,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const [showAddImgForm, setShowAddImgForm] = useState(false);
   const [editingImgId, setEditingImgId] = useState<string | null>(null);
   const [editingImgAlt, setEditingImgAlt] = useState('');
-  const [editingImgError, setEditingImgError] = useState('');
+  // const [editingImgError, setEditingImgError] = useState('');
   const [savingImgId, setSavingImgId] = useState<string | null>(null);
   const [deletingImgId, setDeletingImgId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -116,11 +116,10 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const handleApiStartEdit = (img: ProductImageItem) => {
     setEditingImgId(img.id);
     setEditingImgAlt(img.altText ?? '');
-    setEditingImgError('');
   };
 
   const handleApiCommitEdit = async (imageId: string) => {
-    setEditingImgError('');
+    // Eliminado: setEditingImgError('');
     if (!productId) return;
 
     setSavingImgId(imageId);
