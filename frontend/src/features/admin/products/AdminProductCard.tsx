@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { ProductCardCheckbox } from '../../../components/ui/ProductCardCheckbox';
 import { ProductCardImage } from '../../../components/ui/ProductCardImage';
@@ -7,6 +8,10 @@ import { ProductCardPrice } from '../../../components/ui/ProductCardPrice';
 import { ProductCardMeta } from '../../../components/ui/ProductCardMeta';
 import { ProductCardActions } from '../../../components/ui/ProductCardActions';
 import styles from './AdminProductCard.module.css';
+import { Badge } from '../../../components/ui/Badge/Badge';
+import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
+import { isLowStock } from '../../../utils/inventory';
+import { AlertTriangle } from 'lucide-react';
 
 interface AdminProductCardProps {
   id: string;
@@ -64,6 +69,13 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
         src={image}
         alt={`Imagen de ${name}${category ? ', categoría ' + category : ''}`}
       />
+      {typeof stock === 'number' && isLowStock(stock, LOW_STOCK_THRESHOLD) && (
+        <div style={{ position: 'absolute', top: 12, left: 45, zIndex: 2, alignItems: "flex-start", margin: 4 }}>
+          <Badge className={styles.lowStockBadge}>
+            <AlertTriangle size={16} style={{marginRight: 4}} /> Stock bajo
+          </Badge>
+        </div>
+      )}
       <div className={styles.info}>
         <ProductCardInfo name={name} sku={sku} category={category} />
         <ProductCardPrice price={price} discount={discount} />
