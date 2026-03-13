@@ -129,7 +129,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       const { variants, ...productBase } = p;
       const payload = mapAdminProductToPayload(productBase);
       const created = await createAdminProduct(payload, token);
-      
+
       // Si tiene variantes, las creamos una por una (el backend actual parece crearlas por producto)
       if (variants && variants.length > 0) {
         for (const v of variants) {
@@ -154,7 +154,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     try {
       const current = products.find((p) => p.id === id);
       if (!current) return;
-      
+
       const { variants, ...updateData } = data;
       const merged = { ...current, ...updateData };
       const payload = mapAdminProductToPayload(merged);
@@ -163,12 +163,12 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       // Gestión de variantes si se proporcionan
       if (variants) {
         // En un enfoque simple, borramos las anteriores y creamos las nuevas
-        // O si el backend soporta update, lo usamos. 
+        // O si el backend soporta update, lo usamos.
         // fetch actual para saber qué borrar
         const existingVariants = await fetchVariantsByProduct(token, id);
-        
+
         // 1. Identificar variantes a eliminar (las que están en DB pero no en el nuevo set)
-        // Nota: El form actual genera IDs temporales 'g-...' para nuevas, 
+        // Nota: El form actual genera IDs temporales 'g-...' para nuevas,
         // y mantiene las existentes si vinieran de la DB.
         for (const ev of existingVariants) {
           const stillExists = variants.find(v => v.id === ev.id);
@@ -226,12 +226,12 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         name: v.name,
         values: v.values,
       }));
-      
+
       // Actualizamos el producto en el estado local con sus variantes
-      setProducts(prev => prev.map(p => 
+      setProducts(prev => prev.map(p =>
         p.id === productId ? { ...p, variants } : p
       ));
-      
+
       return variants;
     } catch (err) {
       console.error('Error al cargar variantes:', err);

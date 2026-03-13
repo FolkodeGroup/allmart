@@ -76,6 +76,7 @@
   align-items: center;
   flex-wrap: wrap;
   margin-top: var(--space-4);
+  flex-direction: column;
 }
 
 .searchInput,
