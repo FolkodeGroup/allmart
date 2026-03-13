@@ -27,7 +27,10 @@ import { ProductCheckboxGeneral } from '../../../components/ui/ProductCheckboxGe
 import { ProductFeedbackSection } from '../../../components/ui/ProductFeedbackSection';
 import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
+
 import sectionStyles from '../shared/AdminSection.module.css';
+import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
+import type { ExportableProduct } from '../../../utils/exportProducts';
 
 export function AdminProducts() {
     // Edición masiva
@@ -151,10 +154,43 @@ export function AdminProducts() {
   };
 
 
+
+  // Mapeo de productos visibles a formato exportable
+  const exportableProducts: ExportableProduct[] = products.map(p => ({
+    id: p.id,
+    name: p.name,
+    category: p.category?.name || '',
+    price: p.price,
+    discount: p.discount,
+    stock: p.stock,
+    inStock: p.inStock,
+    createdAt: (p as any).createdAt || '',
+  }));
+
+  // Feedback para exportación vacía
+  const handleExportCSV = () => {
+    if (!exportableProducts.length) {
+      toast.error('No hay productos para exportar.');
+      return;
+    }
+    exportProductsToCSV(exportableProducts);
+  };
+  const handleExportExcel = () => {
+    if (!exportableProducts.length) {
+      toast.error('No hay productos para exportar.');
+      return;
+    }
+    exportProductsToExcel(exportableProducts);
+  };
+
   return (
     <main className={sectionStyles.page} aria-label="Gestión de productos">
-      {/* Header */}
-      <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
+      {/* Header + Exportación */}
+        <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
+          <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
+      </div>
       {/* Filtros */}
       <ProductFilters
         search={search}
