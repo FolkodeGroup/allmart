@@ -84,7 +84,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
           // Cargamos variantes por separado si es edición
           const variants = await loadProductVariants(productId);
           setForm({ ...rest, variants: variants || [] });
-          
+
           // Cargar imágenes vía API para modo edición
           loadImages(productId);
         }
@@ -567,7 +567,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
                 <p className={styles.fieldHint}>Podrás subir archivos de imagen reales una vez que el producto sea creado.</p>
                 {form.images.map((img, i) => (
                   <div key={i} className={styles.tagRow}>
-                    <input className={`${styles.input} ${fieldErrors.images ? styles.inputError : ''}`} 
+                    <input className={`${styles.input} ${fieldErrors.images ? styles.inputError : ''}`}
                       id={`img-url-${i}`} value={img}
                       onChange={e => setImage(i, e.target.value)}
                       placeholder="URL de imagen externa (opcional)" />
