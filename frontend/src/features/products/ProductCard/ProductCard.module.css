@@ -1,3 +1,10 @@
+.lowStockBadge {
+  background-color: #facc15;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .card {
   position: relative;
   display: flex;
