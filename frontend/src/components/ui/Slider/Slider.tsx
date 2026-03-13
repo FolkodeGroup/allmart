@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ProductImage } from '../ProductImage';
 import type { Product } from '../../../types';
 import styles from './Slider.module.css';
+import { ProductPrice } from '../ProductPrice/ProductPrice';
 
 /**
  * Componente Slider reutilizable para mostrar productos en formato carrousel horizontal.
@@ -89,14 +90,12 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
                           <span>({product.reviewCount})</span>
                         </div>
                         <div className={styles.sliderPriceRow}>
-                          <span className={styles.sliderPrice}>
-                            {product.price.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-                          </span>
-                          {hasDiscount && product.originalPrice && (
-                            <span className={styles.sliderOriginalPrice}>
-                              {product.originalPrice.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-                            </span>
-                          )}
+                          <ProductPrice
+                            price={product.price}
+                            originalPrice={product.originalPrice}
+                            discount={product.discount}
+                            size="sm"
+                          />
                         </div>
                       </div>
                     </div>
