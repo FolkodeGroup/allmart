@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 // import { AdminCategoryForm } from './AdminCategoryForm'; // Temporalmente deshabilitado si no existe
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -30,9 +31,21 @@ export function AdminCategories() {
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
+  const auth = useAdminAuth ? useAdminAuth() : null;
+  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
   const handleDelete = async (id: string) => {
     try {
-      if (id) await deleteCategory(id);
+      if (id) {
+        await deleteCategory(id);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: userEmail,
+          action: 'delete',
+          entity: 'category',
+          entityId: id,
+          details: {},
+        });
+      }
     } catch (err) {
       console.error('Error al eliminar categoría:', err);
     }
