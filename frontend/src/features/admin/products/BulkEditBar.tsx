@@ -79,7 +79,6 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
         disabled={loading}
         aria-label="Estado"
       >
-        <option value="">Estado</option>
         <option value="true">Activo</option>
         <option value="false">Inactivo</option>
       </select>
