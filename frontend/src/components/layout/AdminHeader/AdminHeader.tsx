@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { CommandPalette } from "./CommandPalette";
 import { useSearch } from "../../../hooks/useSearch";
 import type { ProductSearch, OrderSearch, UserSearch } from "../../../types";
-
+import { useAdminProducts } from "../../../context/AdminProductsContext";
+import { useAdminOrders } from "../../../context/AdminOrdersContext";
 
 interface Breadcrumb {
   label: string;
@@ -57,25 +58,23 @@ export function AdminHeader() {
   const currentSection =
     breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard";
   const [commandOpen, setCommandOpen] = useState(false);
+  const { products } = useAdminProducts();
 
-  const products: ProductSearch[] = [
-    { id: "1", name: "Auriculares Bluetooth", slug: "auriculares-bluetooth" },
-    { id: "2", name: "Mouse Logitech", slug: "mouse-logitech" },
-  ];
+  const { orders } = useAdminOrders();
 
-  const orders: OrderSearch[] = [{ id: "101" }, { id: "102" }];
+  const productSearch: ProductSearch[] = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+  }));
 
-  const users: UserSearch[] = [
-    {
-      id: "1",
-      firstName: "Juan",
-      lastName: "Perez",
-      email: "juan@mail.com",
-      isActive: true,
-    },
-  ];
+  const orderSearch: OrderSearch[] = orders.map((o) => ({
+    id: o.id,
+  }));
 
-  const items = useSearch(products, orders, users);
+  const userSearch: UserSearch[] = [];
+
+  const items = useSearch(productSearch, orderSearch, userSearch);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
