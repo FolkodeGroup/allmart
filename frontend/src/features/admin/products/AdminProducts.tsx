@@ -11,9 +11,8 @@ function usePersistentSelection() {
 }
 import toast from 'react-hot-toast';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
-import { useAdminAuth } from '../../../context/AdminAuthContext';
-import { logAdminActivity } from '../../../services/adminActivityLogService';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { AdminProductForm } from './AdminProductForm';
 import { AdminProductCard } from './AdminProductCard';
 import { BulkEditBar } from './BulkEditBar';
@@ -31,8 +30,6 @@ import { ProductPagination } from '../../../components/ui/ProductPagination';
 import sectionStyles from '../shared/AdminSection.module.css';
 
 export function AdminProducts() {
-  const auth = useAdminAuth ? useAdminAuth() : null;
-  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
     // Edición masiva
     const [bulkEditLoading, setBulkEditLoading] = useState(false);
     const [bulkEditSuccess, setBulkEditSuccess] = useState<string | null>(null);
@@ -145,14 +142,6 @@ export function AdminProducts() {
   const handleDelete = (id: string) => {
     try {
       deleteProduct(id);
-      logAdminActivity({
-        timestamp: new Date().toISOString(),
-        user: userEmail,
-        action: 'delete',
-        entity: 'product',
-        entityId: id,
-        details: {},
-      });
       toast.success('Producto eliminado con éxito');
       setDeleteConfirm(null);
     } catch (err) {
