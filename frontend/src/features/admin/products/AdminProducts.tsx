@@ -1,49 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// CheckboxGeneral: componente auxiliar para manejar indeterminate correctamente
-const CheckboxGeneral = ({ checked, indeterminate, onChange }: { checked: boolean; indeterminate: boolean; onChange: (checked: boolean) => void }) => {
-  const ref = React.useRef<HTMLInputElement>(null);
-  React.useEffect(() => {
-    if (ref.current) ref.current.indeterminate = indeterminate;
-  }, [indeterminate]);
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        marginBottom: 12,
-        width: '100%',
-        maxWidth: '100vw',
-      }}
-    >
-      <input
-        ref={ref}
-        type="checkbox"
-        checked={checked}
-        onChange={e => onChange(e.target.checked)}
-        aria-label="Seleccionar todos los productos visibles"
-        style={{
-          marginRight: 8,
-          width: 24,
-          height: 24,
-          accentColor: 'var(--color-primary, #2563eb)',
-        }}
-      />
-      <span
-        style={{
-          fontSize: 16,
-          color: '#555',
-          fontWeight: 500,
-          userSelect: 'none',
-          lineHeight: 1.2,
-        }}
-      >
-        Seleccionar todos los productos visibles
-      </span>
-    </div>
-  );
-};
 // Utilidad para mantener selección entre páginas
 function usePersistentSelection() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -65,8 +21,13 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { ProductHeader } from '../../../components/ui/ProductHeader';
+import { ProductFilters } from '../../../components/ui/ProductFilters';
+import { ProductCheckboxGeneral } from '../../../components/ui/ProductCheckboxGeneral';
+import { ProductFeedbackSection } from '../../../components/ui/ProductFeedbackSection';
+import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
+import { ProductPagination } from '../../../components/ui/ProductPagination';
 import sectionStyles from '../shared/AdminSection.module.css';
-import styles from './AdminProducts.module.css';
 
 export function AdminProducts() {
     // Edición masiva
@@ -189,124 +150,32 @@ export function AdminProducts() {
     }
   };
 
+
   return (
     <main className={sectionStyles.page} aria-label="Gestión de productos">
       {/* Header */}
-      <header className={sectionStyles.header}>
-        <div className={styles.headerTop}>
-          <div>
-            <span className={sectionStyles.label} id="admin-label">Administración</span>
-            <h1 className={sectionStyles.title} aria-labelledby="admin-label">
-              <span className={sectionStyles.icon} aria-hidden="true">📦</span> Productos
-            </h1>
-            <p className={sectionStyles.subtitle}>
-              Gestioná el catálogo de productos, precios y disponibilidad.
-            </p>
-          </div>
-          {can('products.create') && (
-            <button className={styles.newBtn} onClick={handleNew} aria-label="Crear nuevo producto">
-              + Nuevo producto
-            </button>
-          )}
-        </div>
+      <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
+      {/* Filtros */}
+      <ProductFilters
+        search={search}
+        setSearch={setSearch}
+        showSuggestions={showSuggestions}
+        setShowSuggestions={setShowSuggestions}
+        highlightedIndex={highlightedIndex}
+        setHighlightedIndex={setHighlightedIndex}
+        inputRef={inputRef as React.RefObject<HTMLInputElement>}
+        suggestions={suggestions}
+        onSelectSuggestion={name => {
+          setSearch(name);
+          setShowSuggestions(false);
+          setHighlightedIndex(-1);
+        }}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        categories={categories}
+        total={total}
+      />
 
-        {/* Filtros */}
-        <nav className={styles.filters} style={{ position: 'relative' }} aria-label="Filtros de productos">
-          <label htmlFor="search-products" className="sr-only">Buscar productos</label>
-          <input
-            ref={inputRef}
-            id="search-products"
-            className={styles.searchInput}
-            type="search"
-            placeholder="Buscar por nombre o SKU..."
-            value={search}
-            autoComplete="off"
-            onChange={e => {
-              setSearch(e.target.value);
-              setShowSuggestions(true);
-              setHighlightedIndex(-1);
-            }}
-            onFocus={() => search && setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-            onKeyDown={e => {
-              if (!showSuggestions || suggestions.length === 0) return;
-              if (e.key === 'ArrowDown') {
-                setHighlightedIndex(i => (i < suggestions.length - 1 ? i + 1 : 0));
-                e.preventDefault();
-              } else if (e.key === 'ArrowUp') {
-                setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
-                e.preventDefault();
-              } else if ((e.key === 'Enter' || e.key === ' ') && highlightedIndex >= 0) {
-                setSearch(suggestions[highlightedIndex].name);
-                setShowSuggestions(false);
-                setHighlightedIndex(-1);
-                inputRef.current?.blur();
-                setTimeout(() => inputRef.current?.focus(), 0);
-                e.preventDefault();
-              }
-            }}
-            aria-label="Buscar productos por nombre o SKU"
-            aria-autocomplete="list"
-            aria-controls="suggestions-list"
-            aria-activedescendant={highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined}
-          />
-          {/* Sugerencias de autocompletado */}
-          {showSuggestions && suggestions.length > 0 && (
-            <ul
-              id="suggestions-list"
-              className={styles.suggestionsList}
-              style={{ position: 'absolute', top: '110%', left: 0, right: 0, zIndex: 10 }}
-              role="listbox"
-              aria-label="Sugerencias de productos"
-            >
-              {suggestions.map((s, idx) => (
-                <li
-                  key={s.id}
-                  id={`suggestion-${idx}`}
-                  className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
-                  style={{ cursor: 'pointer', background: idx === highlightedIndex ? 'var(--color-bg-secondary)' : undefined }}
-                  role="option"
-                  aria-selected={idx === highlightedIndex}
-                  tabIndex={0}
-                  onMouseDown={() => {
-                    setSearch(s.name);
-                    setShowSuggestions(false);
-                    setHighlightedIndex(-1);
-                  }}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      setSearch(s.name);
-                      setShowSuggestions(false);
-                      setHighlightedIndex(-1);
-                      e.preventDefault();
-                    }
-                  }}
-                >
-                  <span style={{ fontWeight: 500 }}>{s.name}</span>
-                  {s.sku && <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>SKU: {s.sku}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
-          <select
-            id="category-filter"
-            className={styles.select}
-            value={categoryFilter}
-            onChange={e => {
-              setCategoryFilter(e.target.value);
-            }}
-            aria-label="Filtrar por categoría"
-          >
-            <option value="">Todas las categorías</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <span className={styles.count} aria-live="polite">{total} productos</span>
-        </nav>
-      </header>
 
       {/* Panel de edición masiva */}
       {selectedIds.length > 0 && can('products.edit') && (
@@ -319,10 +188,7 @@ export function AdminProducts() {
       )}
 
       {/* Mensajes de feedback */}
-      <section aria-live="polite" aria-atomic="true">
-        {bulkEditSuccess && <div style={{ color: '#22c55e', marginBottom: 8, fontWeight: 500 }}>{bulkEditSuccess}</div>}
-        {bulkEditError && <div style={{ color: '#ef4444', marginBottom: 8, fontWeight: 500 }}>{bulkEditError}</div>}
-      </section>
+      <ProductFeedbackSection success={bulkEditSuccess} error={bulkEditError} />
 
       {/* Modal de confirmación de edición masiva */}
       {showBulkConfirm && (
@@ -337,7 +203,7 @@ export function AdminProducts() {
         />
       )}
       {products.length > 0 && (can('products.edit') || can('products.delete')) && (
-        <CheckboxGeneral
+        <ProductCheckboxGeneral
           checked={allVisibleSelected}
           indeterminate={someVisibleSelected && !allVisibleSelected}
           onChange={handleSelectAllVisible}
@@ -365,7 +231,7 @@ export function AdminProducts() {
           action={can('products.create') ? { label: 'Nuevo Producto', onClick: handleNew } : undefined}
         />
       ) : (
-        <section className={styles.cardsGrid} aria-label="Listado de productos">
+        <ProductCardsGrid>
           {products.map(p => (
             <AdminProductCard
               key={p.id}
@@ -387,38 +253,16 @@ export function AdminProducts() {
               showCheckbox={can('products.edit') || can('products.delete')}
             />
           ))}
-        </section>
+        </ProductCardsGrid>
       ))}
 
       {/* Controles de paginación */}
       {total > 10 && (
-        <nav
-          className={styles.pagination}
-          style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
-          aria-label="Paginación de productos"
-        >
-          <button
-            className={styles.pageBtn}
-            disabled={apiPage === 1}
-            onClick={() => handlePageChange(apiPage - 1)}
-            aria-label="Página anterior"
-          >Anterior</button>
-          {Array.from({ length: apiTotalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={styles.pageBtn + (apiPage === i + 1 ? ' ' + styles.pageActive : '')}
-              onClick={() => handlePageChange(i + 1)}
-              aria-current={apiPage === i + 1 ? 'page' : undefined}
-              aria-label={`Ir a la página ${i + 1}`}
-            >{i + 1}</button>
-          ))}
-          <button
-            className={styles.pageBtn}
-            disabled={apiPage === apiTotalPages}
-            onClick={() => handlePageChange(apiPage + 1)}
-            aria-label="Página siguiente"
-          >Siguiente</button>
-        </nav>
+        <ProductPagination
+          page={apiPage}
+          totalPages={apiTotalPages}
+          onPageChange={handlePageChange}
+        />
       )}
 
       {/* Modal de formulario */}
