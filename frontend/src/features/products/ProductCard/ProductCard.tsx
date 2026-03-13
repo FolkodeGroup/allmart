@@ -4,6 +4,7 @@ import { ProductImage } from '../../../components/ui/ProductImage';
 import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
+import { ProductPrice } from '../../../components/ui/ProductPrice/ProductPrice';
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
@@ -22,13 +23,6 @@ function renderStars(rating: number): string {
   return "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 0,
-  }).format(price);
-}
 
 export function ProductCard({ product }: ProductCardProps) {
   const storageKey = `wishlist-${product.id}`;
@@ -99,12 +93,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-          <span className={styles.price}>{formatPrice(product.price)}</span>
-          {hasDiscount && product.originalPrice && (
-            <span className={styles.originalPrice}>
-              {formatPrice(product.originalPrice)}
-            </span>
-          )}
+            <ProductPrice
+              price={product.price}
+              originalPrice={product.originalPrice}
+              discount={product.discount}
+              size="md"
+            />
         </div>
       </div>
       <Link className={styles.exploreButton} to={`/productos?category=${product.category.slug}`}>
