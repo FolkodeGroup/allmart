@@ -1,5 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAdminAuth } from '../../context/AdminAuthContext';
+import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
+import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
+import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
+import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
+import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
+import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
+import { useAdminProducts } from '../../context/AdminProductsContext';
+import { useAdminOrders } from '../../context/AdminOrdersContext';
+import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
+import DateRangeCard from '../../components/ui/DateRangeCard';
+import styles from './AdminDashboard.module.css';
+import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
+import MetricCard from '../../components/ui/MetricCard';
 
 // ── Función de saludo dinámico según la hora del día ──
 function getTimeBasedGreeting(): { greeting: string; emoji: string } {
@@ -36,22 +50,7 @@ const sections = [
     color: 'warm',
   },
 ];
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAdminAuth } from '../../context/AdminAuthContext';
-import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
-import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
-import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
-import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
-import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
-import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
-import { useAdminProducts } from '../../context/AdminProductsContext';
-import { useAdminOrders } from '../../context/AdminOrdersContext';
-import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
-import DateRangeCard from '../../components/ui/DateRangeCard';
-import styles from './AdminDashboard.module.css';
-import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
-import MetricCard from '../../components/ui/MetricCard';
+
 
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
