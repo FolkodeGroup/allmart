@@ -1,15 +1,25 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import { Palette, Box, Search, AlertCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminVariants.module.css';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm';
+import { Notification } from '../../../components/ui/Notification';
 
 export function AdminVariants() {
+    // Estados para feedback UX
+    const [notif, setNotif] = useState<{open:boolean,type:'success'|'error',message:string}>({open:false,type:'success',message:''});
+    const [modalOpen, setModalOpen] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string|null>(null);
   const { products } = useAdminProducts();
   const {
     variants,
@@ -26,6 +36,8 @@ export function AdminVariants() {
   const { can } = useAdminAuth();
 
   const [search, setSearch] = useState('');
+  // Para autocompletado
+  const [inputValue, setInputValue] = useState('');
   // Inputs de nuevo grupo y nuevos valores por grupo
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
@@ -40,6 +52,71 @@ export function AdminVariants() {
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     (p.sku ?? '').toLowerCase().includes(search.toLowerCase())
   );
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 10; // Puedes ajustar este valor para más/menos productos por página
+  const totalPages = Math.ceil(filtered.length / productsPerPage);
+  // Mantener filtros y búsqueda al cambiar de página
+  useEffect(() => {
+    setCurrentPage(1); // Reinicia a la primera página si cambia el filtro
+  }, [search]);
+  const paginatedProducts = filtered.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
+
+  // Combina productos y variantes para autocompletado
+  type ProductOption = {
+    type: 'product';
+    id: string;
+    name: string;
+    sku: string;
+  };
+  type VariantOption = {
+    type: 'variant';
+    group: string;
+    value: string;
+    productId: string | null;
+    sku: string;
+  };
+  type Option = ProductOption | VariantOption;
+
+  // Para freeSolo, las opciones pueden ser string u Option
+  const combinedOptions: (Option | string)[] = [
+    ...products.map(p => ({
+      type: 'product' as const,
+      id: p.id,
+      name: p.name,
+      sku: p.sku || '',
+    })),
+    ...variants.flatMap(v => v.values.map(val => ({
+      type: 'variant' as const,
+      group: v.name,
+      value: val,
+      productId: selectedProductId ?? null,
+      sku: '',
+    })))
+  ];
+
+  // Filtra opciones para autocompletado
+  const filteredOptions = combinedOptions.filter(opt => {
+    const q = inputValue.toLowerCase();
+    if (typeof opt === 'string') {
+      return opt.toLowerCase().includes(q);
+    }
+    if (opt.type === 'product') {
+      return (
+        opt.name.toLowerCase().includes(q) ||
+        opt.sku.toLowerCase().includes(q)
+      );
+    } else {
+      return (
+        opt.value.toLowerCase().includes(q) ||
+        (opt.group?.toLowerCase().includes(q) ?? false)
+      );
+    }
+  });
 
   const selectedProduct: AdminProduct | undefined = selectedProductId
     ? products.find(p => p.id === selectedProductId)
@@ -62,17 +139,48 @@ export function AdminVariants() {
     setErrors(prev => ({ ...prev, group: '' }));
     if (!selectedProductId) return;
     if (!name) return setErrors(prev => ({ ...prev, group: 'El nombre del grupo es obligatorio' }));
-    
     const exists = variants.some(g => g.name.toLowerCase() === name.toLowerCase());
     if (exists) return setErrors(prev => ({ ...prev, group: 'Ya existe un grupo con ese nombre' }));
-    
-    await addVariant(selectedProductId, name);
-    setNewGroupName('');
+    try {
+      await addVariant(selectedProductId, name);
+      setNotif({open:true,type:'success',message:'Variante creada correctamente.'});
+      setNewGroupName('');
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al crear variante.'});
+    }
   };
 
   const deleteGroup = async (variantId: string) => {
-    if (!selectedProductId || !window.confirm('¿Eliminar este grupo y todos sus valores?')) return;
-    await deleteVariant(selectedProductId, variantId);
+    if (!selectedProductId) return;
+    setPendingDeleteId(variantId);
+    setModalOpen(true);
+  };
+
+  const auth = useAdminAuth ? useAdminAuth() : null;
+  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
+  const confirmDelete = async () => {
+    if (!selectedProductId || !pendingDeleteId) return;
+    setModalOpen(false);
+    try {
+      await deleteVariant(selectedProductId, pendingDeleteId);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'delete',
+        entity: 'variant',
+        entityId: pendingDeleteId,
+        details: { productId: selectedProductId },
+      });
+      setNotif({open:true,type:'success',message:'Variante eliminada correctamente.'});
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al eliminar variante.'});
+    }
+    setPendingDeleteId(null);
+  };
+
+  const cancelDelete = () => {
+    setModalOpen(false);
+    setPendingDeleteId(null);
   };
 
   const startEditGroupName = (id: string, currentName: string) => {
@@ -85,15 +193,18 @@ export function AdminVariants() {
     const name = editingGroupName.trim();
     setEditGroupError('');
     if (!name) return setEditGroupError('El nombre no puede estar vacío');
-    
     const exists = variants.some(g => g.id !== variantId && g.name.toLowerCase() === name.toLowerCase());
     if (exists) return setEditGroupError('Ya existe otro grupo con ese nombre');
-
-    if (selectedProductId) {
-      await updateVariant(selectedProductId, variantId, { name });
+    try {
+      if (selectedProductId) {
+        await updateVariant(selectedProductId, variantId, { name });
+        setNotif({open:true,type:'success',message:'Variante editada correctamente.'});
+      }
+      setEditingGroupId(null);
+      setEditingGroupName('');
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al editar variante.'});
     }
-    setEditingGroupId(null);
-    setEditingGroupName('');
   };
 
   // ── CRUD de valores ───────────────────────────────────────────────
@@ -120,6 +231,21 @@ export function AdminVariants() {
   // ── Render ────────────────────────────────────────────────────────
   return (
     <div className={sectionStyles.page}>
+      <ModalConfirm
+        open={modalOpen}
+        title="¿Eliminar variante?"
+        description="Esta acción no se puede deshacer. Se eliminarán todos los valores asociados."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+      <Notification
+        open={notif.open}
+        type={notif.type}
+        message={notif.message}
+        onClose={() => setNotif(prev => ({...prev,open:false}))}
+      />
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title}>
@@ -137,12 +263,32 @@ export function AdminVariants() {
             <span className={styles.sidebarTitle}>Productos</span>
             <span className={styles.productCount}>{filtered.length}</span>
           </div>
-          <input
-            className={styles.searchInput}
-            type="text"
-            placeholder="Buscar por nombre o SKU..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+          {/* Autocomplete de MUI */}
+          <Autocomplete
+            freeSolo
+            options={filteredOptions}
+            getOptionLabel={(opt: string | Option) => {
+              if (typeof opt === 'string') return opt;
+              if (opt.type === 'product') return `${opt.name} (SKU: ${opt.sku})`;
+              return `${opt.value} [${opt.group}]`;
+            }}
+            inputValue={inputValue}
+            onInputChange={(_: any, value: string) => setInputValue(value)}
+            onChange={(_: any, value: string | Option | null) => {
+              if (!value) return;
+              if (typeof value === 'string') {
+                setSearch(value);
+              } else if (value.type === 'product') {
+                setSearch(value.name);
+                handleSelectProduct(value.id);
+              } else if (value.type === 'variant' && value.productId) {
+                setSearch(value.value);
+                handleSelectProduct(value.productId);
+              }
+            }}
+            renderInput={(params: any) => (
+              <TextField {...params} label="Buscar por nombre o SKU..." variant="outlined" size="small" />
+            )}
           />
           <ul className={styles.productList}>
             {filtered.length === 0 ? (
@@ -151,7 +297,7 @@ export function AdminVariants() {
                 title="Sin resultados"
                 description="No se encontraron productos con esos términos."
               />
-            ) : filtered.map(p => {
+            ) : paginatedProducts.map(p => {
               const groupCount = selectedProductId === p.id ? variants.length : 0;
               const valueCount = selectedProductId === p.id
                 ? variants.reduce((s, g) => s + g.values.length, 0)
@@ -177,6 +323,31 @@ export function AdminVariants() {
               );
             })}
           </ul>
+          {/* Paginación visualmente atractiva */}
+          {totalPages > 1 && (
+            <nav className={styles.pagination} aria-label="Paginación de productos">
+              <button
+                className={styles.pageBtn}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                title="Página anterior"
+              >⟨</button>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i+1}
+                  className={`${styles.pageBtn} ${currentPage === i+1 ? styles.activePage : ''}`}
+                  onClick={() => setCurrentPage(i+1)}
+                  title={`Ir a página ${i+1}`}
+                >{i+1}</button>
+              ))}
+              <button
+                className={styles.pageBtn}
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                title="Página siguiente"
+              >⟩</button>
+            </nav>
+          )}
         </aside>
 
         {/* ── Panel derecho: gestión de variantes ── */}

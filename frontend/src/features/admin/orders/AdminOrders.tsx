@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -129,21 +131,57 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
   const hasStatusChange = pendingStatus !== order.status;
 
+  const auth = useAdminAuth ? useAdminAuth() : null;
+  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
   const handleStatusApply = () => {
-    updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
-    setStatusNote('');
+    try {
+      updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'update-status',
+        entity: 'order',
+        entityId: order.id,
+        details: { from: order.status, to: pendingStatus, note: statusNote },
+      });
+      toast.success('Estado del pedido actualizado con éxito');
+      setStatusNote('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`No se pudo actualizar el pedido: ${message}`);
+    }
   };
 
   // Sync local pendingStatus if order.status changes externally
   const currentStatus = order.status;
 
   const handleSaveNotes = () => {
-    updateOrder(order.id, { notes });
+    try {
+      updateOrder(order.id, { notes });
+      toast.success('Notas guardadas con éxito');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`No se pudieron guardar las notas: ${message}`);
+    }
   };
 
   const handleDelete = () => {
-    deleteOrder(order.id);
-    onClose();
+    try {
+      deleteOrder(order.id);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'delete',
+        entity: 'order',
+        entityId: order.id,
+        details: {},
+      });
+      toast.success('Pedido eliminado con éxito');
+      onClose();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`No se pudo eliminar el pedido: ${message}`);
+    }
   };
 
   const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
@@ -174,17 +212,19 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
               <span className={`${styles.statusBadge} ${statusClass(currentStatus)}`}>
                 {STATUS_LABELS[currentStatus]}
               </span>
-              <select
-                className={styles.statusSelect}
-                value={pendingStatus}
-                onChange={e => setPendingStatus(e.target.value as OrderStatus)}
-              >
-                {STATUS_OPTIONS.map(s => (
-                  <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                ))}
-              </select>
+              {can('orders.edit') && (
+                <select
+                  className={styles.statusSelect}
+                  value={pendingStatus}
+                  onChange={e => setPendingStatus(e.target.value as OrderStatus)}
+                >
+                  {STATUS_OPTIONS.map(s => (
+                    <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                  ))}
+                </select>
+              )}
             </div>
-            {hasStatusChange && (
+            {can('orders.edit') && hasStatusChange && (
               <div className={styles.statusChangeBox}>
                 <input
                   className={styles.statusNoteInput}
@@ -213,55 +253,57 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           </section>
 
           {/* Pago / Confirmación WhatsApp */}
-          <section className={styles.detailSection}>
-            <h3 className={styles.detailSectionTitle}>Pago</h3>
-            <div className={styles.paymentRow}>
-              <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus)}`}>
-                {isAbonado ? '✓' : '○'} {PAYMENT_LABELS[paymentStatus]}
-              </span>
-              {isAbonado && order.paidAt && (
-                <span className={styles.paidAt}>
-                  Confirmado el {formatDateTime(order.paidAt)}
+          {can('orders.markPaid') && (
+            <section className={styles.detailSection}>
+              <h3 className={styles.detailSectionTitle}>Pago</h3>
+              <div className={styles.paymentRow}>
+                <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus)}`}>
+                  {isAbonado ? '✓' : '○'} {PAYMENT_LABELS[paymentStatus]}
                 </span>
-              )}
-            </div>
-            {!isAbonado && (
-              <div className={styles.whatsappActions}>
-                {!confirmPaid ? (
-                  <button
-                    className={styles.whatsappBtn}
-                    type="button"
-                    onClick={() => setConfirmPaid(true)}
-                  >
-                    <span className={styles.whatsappIcon}>💬</span>
-                    Marcar como abonado
-                  </button>
-                ) : (
-                  <div className={styles.confirmPaidBox}>
-                    <span className={styles.confirmPaidText}>
-                      ¿Confirmar que el cliente abonó este pedido vía WhatsApp?
-                    </span>
-                    <div className={styles.confirmPaidActions}>
-                      <button
-                        className={styles.whatsappBtnConfirm}
-                        type="button"
-                        onClick={() => { markAsPaid(order.id); setConfirmPaid(false); }}
-                      >
-                        ✓ Sí, confirmar pago
-                      </button>
-                      <button
-                        className={styles.cancelBtn}
-                        type="button"
-                        onClick={() => setConfirmPaid(false)}
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
+                {isAbonado && order.paidAt && (
+                  <span className={styles.paidAt}>
+                    Confirmado el {formatDateTime(order.paidAt)}
+                  </span>
                 )}
               </div>
-            )}
-          </section>
+              {!isAbonado && (
+                <div className={styles.whatsappActions}>
+                  {!confirmPaid ? (
+                    <button
+                      className={styles.whatsappBtn}
+                      type="button"
+                      onClick={() => setConfirmPaid(true)}
+                    >
+                      <span className={styles.whatsappIcon}>💬</span>
+                      Marcar como abonado
+                    </button>
+                  ) : (
+                    <div className={styles.confirmPaidBox}>
+                      <span className={styles.confirmPaidText}>
+                        ¿Confirmar que el cliente abonó este pedido vía WhatsApp?
+                      </span>
+                      <div className={styles.confirmPaidActions}>
+                        <button
+                          className={styles.whatsappBtnConfirm}
+                          type="button"
+                          onClick={() => { markAsPaid(order.id); setConfirmPaid(false); }}
+                        >
+                          ✓ Sí, confirmar pago
+                        </button>
+                        <button
+                          className={styles.cancelBtn}
+                          type="button"
+                          onClick={() => setConfirmPaid(false)}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Datos del cliente */}
           <section className={styles.detailSection}>
@@ -311,19 +353,21 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           </section>
 
           {/* Notas */}
-          <section className={styles.detailSection}>
-            <h3 className={styles.detailSectionTitle}>Notas internas</h3>
-            <textarea
-              className={styles.notesInput}
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Agregá notas internas sobre este pedido..."
-            />
-            <button className={styles.saveNotesBtn} type="button" onClick={handleSaveNotes}>
-              Guardar notas
-            </button>
-          </section>
+          {can('orders.edit') && (
+            <section className={styles.detailSection}>
+              <h3 className={styles.detailSectionTitle}>Notas internas</h3>
+              <textarea
+                className={styles.notesInput}
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                rows={3}
+                placeholder="Agregá notas internas sobre este pedido..."
+              />
+              <button className={styles.saveNotesBtn} type="button" onClick={handleSaveNotes}>
+                Guardar notas
+              </button>
+            </section>
+          )}
 
           {/* Zona peligrosa */}
           {can('orders.delete') && (

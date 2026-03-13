@@ -1,15 +1,82 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+
+// Utilidad para mantener selección entre páginas
+function usePersistentSelection() {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const add = (ids: string[]) => setSelectedIds(prev => Array.from(new Set([...prev, ...ids])));
+  const remove = (ids: string[]) => setSelectedIds(prev => prev.filter(id => !ids.includes(id)));
+  const toggle = (id: string) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  const clear = () => setSelectedIds([]);
+  return { selectedIds, add, remove, toggle, clear, setSelectedIds };
+}
+import toast from 'react-hot-toast';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import type { StatusFilter, StockLevelFilter } from './productsService';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { AdminProductForm } from './AdminProductForm';
+import { AdminProductCard } from './AdminProductCard';
+import { BulkEditBar } from './BulkEditBar';
+import * as productsService from './productsService';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { ProductHeader } from '../../../components/ui/ProductHeader';
+import { ProductFilters } from '../../../components/ui/ProductFilters';
+import { ProductCheckboxGeneral } from '../../../components/ui/ProductCheckboxGeneral';
+import { ProductFeedbackSection } from '../../../components/ui/ProductFeedbackSection';
+import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
+import { ProductPagination } from '../../../components/ui/ProductPagination';
+
 import sectionStyles from '../shared/AdminSection.module.css';
-import styles from './AdminProducts.module.css';
+import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
+import type { ExportableProduct } from '../../../utils/exportProducts';
 
 export function AdminProducts() {
+    // Edición masiva
+    const [bulkEditLoading, setBulkEditLoading] = useState(false);
+    const [bulkEditSuccess, setBulkEditSuccess] = useState<string | null>(null);
+    const [bulkEditError, setBulkEditError] = useState<string | null>(null);
+    const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+    const [bulkEditData, setBulkEditData] = useState<{ price?: number; stock?: number; inStock?: boolean } | null>(null);
+
+    // Simular obtención de token (ajustar según contexto real)
+    const token = localStorage.getItem('token') || '';
+
+    // Handler para aplicar edición masiva
+    const handleBulkEdit = (data: { price?: number; stock?: number; inStock?: boolean }) => {
+      setBulkEditData(data);
+      setShowBulkConfirm(true);
+    };
+
+    // Confirmar y ejecutar edición masiva
+    const confirmBulkEdit = async () => {
+      if (!bulkEditData) return;
+      setBulkEditLoading(true);
+      setBulkEditSuccess(null);
+      setBulkEditError(null);
+      try {
+        await Promise.all(selectedIds.map(id =>
+          productsService.updateAdminProduct(id, bulkEditData, token)
+        ));
+        setBulkEditSuccess('¡Productos actualizados correctamente!');
+        clear();
+        refreshProducts({ q: search, categoryId: categoryFilter, page: apiPage, limit: 10 });
+      } catch (err: any) {
+        setBulkEditError('Error al actualizar productos. Intenta nuevamente.');
+      } finally {
+        setBulkEditLoading(false);
+        setShowBulkConfirm(false);
+        setBulkEditData(null);
+      }
+    };
+
+    // Cancelar edición masiva
+    const cancelBulkEdit = () => {
+      setBulkEditData(null);
+      setShowBulkConfirm(false);
+    };
   const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
@@ -17,22 +84,69 @@ export function AdminProducts() {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const { categories } = useAdminCategories();
 
+  // Selección múltiple
+  const {
+    selectedIds,
+    add,
+    remove,
+    clear
+  } = usePersistentSelection();
+
+  // Determinar si todos los productos visibles están seleccionados
+  const allVisibleSelected = products.length > 0 && products.every(p => selectedIds.includes(p.id));
+  const someVisibleSelected = products.some(p => selectedIds.includes(p.id));
+
+  // Handler para checkbox general
+  const handleSelectAllVisible = (checked: boolean) => {
+    const visibleIds = products.map(p => p.id);
+    if (checked) {
+      add(visibleIds);
+    } else {
+      remove(visibleIds);
+    }
+  };
+
+  // Handler para checkbox individual
+  const handleSelectProduct = (id: string, checked: boolean) => {
+    if (checked) {
+      add([id]);
+    } else {
+      remove([id]);
+    }
+  };
+
   // Debounce para búsqueda
   useEffect(() => {
     const timer = setTimeout(() => {
-      refreshProducts({ q: search, categoryId: categoryFilter, page: 1, limit: 10 });
+      refreshProducts({
+        q: search,
+        categoryId: categoryFilter,
+        status: statusFilter,
+        stockLevel: stockLevelFilter,
+        page: 1,
+        limit: 10
+      });
     }, 400);
     return () => clearTimeout(timer);
-  }, [search, categoryFilter, refreshProducts]);
+  }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
   const handlePageChange = (newPage: number) => {
-    refreshProducts({ q: search, categoryId: categoryFilter, page: newPage, limit: 10 });
+    refreshProducts({
+      q: search,
+      categoryId: categoryFilter,
+      status: statusFilter,
+      stockLevel: stockLevelFilter,
+      page: newPage,
+      limit: 10
+    });
   };
 
   // Sugerencias para autocompletado (usamos los productos ya cargados como base)
@@ -45,115 +159,117 @@ export function AdminProducts() {
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     try {
-      await deleteProduct(id);
+      deleteProduct(id);
+      toast.success('Producto eliminado con éxito');
+      setDeleteConfirm(null);
     } catch (err) {
-      console.error('Error al eliminar producto:', err);
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al eliminar: ${message}`);
     }
-    setDeleteConfirm(null);
   };
 
-  const formatPrice = (n: number) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n);
+
+
+  // Mapeo de productos visibles a formato exportable
+  const exportableProducts: ExportableProduct[] = products.map(p => ({
+    id: p.id,
+    name: p.name,
+    category: p.category?.name || '',
+    price: p.price,
+    discount: p.discount,
+    stock: p.stock,
+    inStock: p.inStock,
+    createdAt: (p as any).createdAt || '',
+  }));
+
+  // Feedback para exportación vacía
+  const handleExportCSV = () => {
+    if (!exportableProducts.length) {
+      toast.error('No hay productos para exportar.');
+      return;
+    }
+    exportProductsToCSV(exportableProducts);
+  };
+  const handleExportExcel = () => {
+    if (!exportableProducts.length) {
+      toast.error('No hay productos para exportar.');
+      return;
+    }
+    exportProductsToExcel(exportableProducts);
+  };
 
   return (
-    <div className={sectionStyles.page}>
-      {/* Header */}
-      <div className={sectionStyles.header}>
-        <div className={styles.headerTop}>
-          <div>
-            <span className={sectionStyles.label}>Administración</span>
-            <h1 className={sectionStyles.title}>
-              <span className={sectionStyles.icon}>📦</span> Productos
-            </h1>
-            <p className={sectionStyles.subtitle}>
-              Gestioná el catálogo de productos, precios y disponibilidad.
-            </p>
-          </div>
-          {can('products.create') && (
-            <button className={styles.newBtn} onClick={handleNew}>
-              + Nuevo producto
-            </button>
-          )}
-        </div>
-
-        {/* Filtros */}
-        <div className={styles.filters} style={{ position: 'relative' }}>
-          <input
-            ref={inputRef}
-            className={styles.searchInput}
-            type="search"
-            placeholder="Buscar por nombre o SKU..."
-            value={search}
-            autoComplete="off"
-            onChange={e => {
-              setSearch(e.target.value);
-              setShowSuggestions(true);
-              setHighlightedIndex(-1);
-            }}
-            onFocus={() => search && setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-            onKeyDown={e => {
-              if (!showSuggestions || suggestions.length === 0) return;
-              if (e.key === 'ArrowDown') {
-                setHighlightedIndex(i => (i < suggestions.length - 1 ? i + 1 : 0));
-                e.preventDefault();
-              } else if (e.key === 'ArrowUp') {
-                setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
-                e.preventDefault();
-              } else if (e.key === 'Enter' && highlightedIndex >= 0) {
-                setSearch(suggestions[highlightedIndex].name);
-                setShowSuggestions(false);
-                setHighlightedIndex(-1);
-                inputRef.current?.blur();
-                setTimeout(() => inputRef.current?.focus(), 0);
-                e.preventDefault();
-              }
-            }}
-          />
-          {/* Sugerencias de autocompletado */}
-          {showSuggestions && suggestions.length > 0 && (
-            <ul className={styles.suggestionsList} style={{ position: 'absolute', top: '110%', left: 0, right: 0, zIndex: 10 }}>
-              {suggestions.map((s, idx) => (
-                <li
-                  key={s.id}
-                  className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
-                  style={{ cursor: 'pointer', background: idx === highlightedIndex ? 'var(--color-bg-secondary)' : undefined }}
-                  onMouseDown={() => {
-                    setSearch(s.name);
-                    setShowSuggestions(false);
-                    setHighlightedIndex(-1);
-                  }}
-                >
-                  <span style={{ fontWeight: 500 }}>{s.name}</span>
-                  {s.sku && <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>SKU: {s.sku}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <select
-            className={styles.select}
-            value={categoryFilter}
-            onChange={e => {
-              setCategoryFilter(e.target.value);
-            }}
-          >
-            <option value="">Todas las categorías</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <span className={styles.count}>{total} productos</span>
-        </div>
+    <main className={sectionStyles.page} aria-label="Gestión de productos">
+      {/* Header + Exportación */}
+        <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
+          <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
       </div>
+      {/* Filtros */}
+      <ProductFilters
+        search={search}
+        setSearch={setSearch}
+        showSuggestions={showSuggestions}
+        setShowSuggestions={setShowSuggestions}
+        highlightedIndex={highlightedIndex}
+        setHighlightedIndex={setHighlightedIndex}
+        inputRef={inputRef as React.RefObject<HTMLInputElement>}
+        suggestions={suggestions}
+        onSelectSuggestion={name => {
+          setSearch(name);
+          setShowSuggestions(false);
+          setHighlightedIndex(-1);
+        }}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        categories={categories}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        stockLevelFilter={stockLevelFilter}
+        setStockLevelFilter={setStockLevelFilter}
+        total={total}
+      />
 
-      {/* Tabla */}
+
+      {/* Panel de edición masiva */}
+      {selectedIds.length > 0 && can('products.edit') && (
+        <BulkEditBar
+          selectedCount={selectedIds.length}
+          onBulkEdit={handleBulkEdit}
+          onCancel={clear}
+          loading={bulkEditLoading}
+        />
+      )}
+
+      {/* Mensajes de feedback */}
+      <ProductFeedbackSection success={bulkEditSuccess} error={bulkEditError} />
+
+      {/* Modal de confirmación de edición masiva */}
+      {showBulkConfirm && (
+        <ModalConfirm
+          open={showBulkConfirm}
+          title="Confirmar edición masiva"
+          message={`¿Aplicar los cambios a ${selectedIds.length} productos seleccionados? Esta acción no se puede deshacer.`}
+          confirmText="Aplicar cambios"
+          cancelText="Cancelar"
+          onConfirm={confirmBulkEdit}
+          onCancel={cancelBulkEdit}
+        />
+      )}
+      {products.length > 0 && (can('products.edit') || can('products.delete')) && (
+        <ProductCheckboxGeneral
+          checked={allVisibleSelected}
+          indeterminate={someVisibleSelected && !allVisibleSelected}
+          onChange={handleSelectAllVisible}
+        />
+      )}
       {loading && <LoadingSpinner message="Cargando catálogo de productos..." size="lg" />}
 
       {!loading && error && (
-        <EmptyState 
+        <EmptyState
           icon={<AlertCircle size={48} color="#ef4444" />}
           title="Error al cargar productos"
           description={error}
@@ -162,132 +278,48 @@ export function AdminProducts() {
       )}
 
       {!loading && !error && (products.length === 0 ? (
-        <EmptyState 
+        <EmptyState
           icon={<PackageSearch size={48} color="#94a3b8" />}
           title="No se encontraron productos"
-          description={search || categoryFilter 
+          description={search || categoryFilter
             ? "Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás."
             : "Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!"
           }
           action={can('products.create') ? { label: 'Nuevo Producto', onClick: handleNew } : undefined}
         />
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={styles.th}>Producto</th>
-                <th className={styles.th}>Categoría</th>
-                <th className={styles.th}>Precio</th>
-                <th className={styles.th}>Stock</th>
-                <th className={styles.th}>Estado</th>
-                <th className={styles.th}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map(p => (
-                <tr key={p.id} className={styles.row}>
-                  <td className={styles.td}>
-                    <div className={styles.productCell}>
-                      {p.images[0] && (
-                        <img
-                          src={p.images[0]}
-                          alt={p.name}
-                          className={styles.thumb}
-                          onError={e => (e.currentTarget.style.display = 'none')}
-                        />
-                      )}
-                      <div>
-                        <div className={styles.productName}>{p.name}</div>
-                        {p.sku && <div className={styles.productSku}>SKU: {p.sku}</div>}
-                      </div>
-                    </div>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={styles.badge}>{p.category.name}</span>
-                  </td>
-                  <td className={styles.td}>
-                    <div className={styles.priceCell}>
-                      <span className={styles.price}>{formatPrice(p.price)}</span>
-                      {p.discount && p.discount > 0 && (
-                        <span className={styles.discount}>-{p.discount}%</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={p.stock > 0 ? styles.stockOk : styles.stockOut}>
-                      {p.stock}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={p.inStock ? styles.statusActive : styles.statusInactive}>
-                      {p.inStock ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <div className={styles.actions}>
-                      {can('products.edit') && (
-                        <button
-                          className={styles.editBtn}
-                          onClick={() => handleEdit(p.id)}
-                          title="Editar"
-                        >
-                          ✏️
-                        </button>
-                      )}
-                      {can('products.delete') && (
-                        deleteConfirm === p.id ? (
-                          <>
-                            <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(p.id)}>
-                              Confirmar
-                            </button>
-                            <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>
-                              Cancelar
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            className={styles.deleteBtn}
-                            onClick={() => setDeleteConfirm(p.id)}
-                            title="Eliminar"
-                          >
-                            🗑️
-                          </button>
-                        )
-                      )}
-                      {!can('products.edit') && !can('products.delete') && (
-                        <span style={{ color: 'var(--color-text-muted, #aaa)', fontSize: '12px' }}>Solo lectura</span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ProductCardsGrid>
+          {products.map(p => (
+            <AdminProductCard
+              key={p.id}
+              id={p.id}
+              name={p.name}
+              sku={p.sku}
+              price={p.price}
+              discount={p.discount}
+              stock={p.stock}
+              inStock={p.inStock}
+              image={p.images && p.images[0]}
+              category={p.category?.name || ''}
+              canEdit={can('products.edit')}
+              canDelete={can('products.delete')}
+              onEdit={handleEdit}
+              onDelete={() => setDeleteConfirm(p.id)}
+              selected={selectedIds.includes(p.id)}
+              onSelectChange={handleSelectProduct}
+              showCheckbox={can('products.edit') || can('products.delete')}
+            />
+          ))}
+        </ProductCardsGrid>
       ))}
 
       {/* Controles de paginación */}
       {total > 10 && (
-        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-          <button
-            className={styles.pageBtn}
-            disabled={apiPage === 1}
-            onClick={() => handlePageChange(apiPage - 1)}
-          >Anterior</button>
-          {Array.from({ length: apiTotalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={styles.pageBtn + (apiPage === i + 1 ? ' ' + styles.pageActive : '')}
-              onClick={() => handlePageChange(i + 1)}
-            >{i + 1}</button>
-          ))}
-          <button
-            className={styles.pageBtn}
-            disabled={apiPage === apiTotalPages}
-            onClick={() => handlePageChange(apiPage + 1)}
-          >Siguiente</button>
-        </div>
+        <ProductPagination
+          page={apiPage}
+          totalPages={apiTotalPages}
+          onPageChange={handlePageChange}
+        />
       )}
 
       {/* Modal de formulario */}
@@ -297,6 +329,17 @@ export function AdminProducts() {
           onClose={() => setShowForm(false)}
         />
       )}
-    </div>
+
+      {/* Modal de confirmación de eliminación */}
+      <ModalConfirm
+        open={!!deleteConfirm}
+        title="Eliminar producto"
+        message="¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+        onCancel={() => setDeleteConfirm(null)}
+      />
+    </main>
   );
 }

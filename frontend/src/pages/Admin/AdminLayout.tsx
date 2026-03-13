@@ -1,19 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { useAdminOrders } from '../../context/AdminOrdersContext';
+import { useAdminProducts } from '../../context/AdminProductsContext';
 import { AdminHeader } from '../../components/layout/AdminHeader/AdminHeader';
 import styles from './AdminLayout.module.css';
 
 
 const navItems = [
-  { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠', permission: null },
-  { label: 'Productos', to: '/admin/productos', icon: '📦', permission: null },
-  { label: 'Imágenes', to: '/admin/imagenes', icon: '🖼️', permission: null },
-  { label: 'Variantes', to: '/admin/variantes', icon: '🎨', permission: null },
-  { label: 'Categorías', to: '/admin/categorias', icon: '🗂️', permission: null },
-  { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒', permission: null },
-  { label: 'Reportes', to: '/admin/reportes', icon: '📊', permission: 'reports.view' as const },
-];
+  { label: 'Dashboard', to: '/admin/dashboard', icon: '🏠', permission: null, badge: null },
+  { label: 'Productos', to: '/admin/productos', icon: '📦', permission: null, badge: 'lowStock' },
+  { label: 'Imágenes', to: '/admin/imagenes', icon: '🖼️', permission: null, badge: null },
+  { label: 'Variantes', to: '/admin/variantes', icon: '🎨', permission: null, badge: null },
+  { label: 'Categorías', to: '/admin/categorias', icon: '🗂️', permission: null, badge: null },
+  { label: 'Pedidos', to: '/admin/pedidos', icon: '🛒', permission: null, badge: 'pending' },
+  { label: 'Reportes', to: '/admin/reportes', icon: '📊', permission: 'reports.view' as const, badge: null },
+] as const;
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
@@ -22,6 +25,8 @@ const ROLE_LABELS: Record<string, string> = {
 
 export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
+  const { getPendingOrdersCount } = useAdminOrders();
+  const { getLowStockCount } = useAdminProducts();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   
@@ -57,6 +62,46 @@ export function AdminLayout() {
 
   return (
     <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''}`}>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        gutter={12}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'var(--color-neutral-dark)',
+            color: 'var(--color-neutral-light)',
+            borderRadius: 'var(--radius-lg, 8px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            padding: '16px',
+            fontFamily: 'var(--font-ui)',
+            fontSize: 'var(--text-sm)',
+            boxShadow: 'var(--shadow-lg)',
+          },
+          success: {
+            style: {
+              background: 'rgba(118, 146, 130, 0.15)',
+              borderColor: 'rgba(118, 146, 130, 0.4)',
+              color: 'var(--color-primary)',
+            },
+            iconTheme: {
+              primary: 'var(--color-primary)',
+              secondary: 'rgba(118, 146, 130, 0.15)',
+            },
+          },
+          error: {
+            style: {
+              background: 'rgba(220, 100, 100, 0.15)',
+              borderColor: 'rgba(220, 100, 100, 0.4)',
+              color: '#dc6464',
+            },
+            iconTheme: {
+              primary: '#dc6464',
+              secondary: 'rgba(220, 100, 100, 0.15)',
+            },
+          },
+        }}
+      />
       <button className={styles.mobileToggle} onClick={() => setIsMobileOpen(true)}>
         ☰
       </button>
@@ -85,6 +130,12 @@ export function AdminLayout() {
         <nav className={styles.nav}>
           {navItems.map(item => {
             const locked = item.permission !== null && !can(item.permission);
+            let badgeCount: number | null = null;
+            if (item.badge === 'pending') {
+              badgeCount = getPendingOrdersCount();
+            } else if (item.badge === 'lowStock') {
+              badgeCount = getLowStockCount();
+            }
             const commonProps = {
               title: isCollapsed ? item.label : '',
               'data-label': item.label,
@@ -114,6 +165,9 @@ export function AdminLayout() {
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 <span className={styles.navLabel}>{item.label}</span>
+                {badgeCount !== null && badgeCount > 0 && (
+                  <span className={styles.navBadge}>{badgeCount}</span>
+                )}
               </NavLink>
             );
           })}

@@ -149,15 +149,31 @@ export async function deleteProduct(id: string): Promise<void> {
 export async function getAdminProducts(query: {
   q?: string;
   categoryId?: string;
+  status?: string;
+  stockLevel?: string;
   page?: number;
   limit?: number;
 }) {
-  const { q, categoryId, page = 1, limit = 10 } = query;
+  const { q, categoryId, status, stockLevel, page = 1, limit = 10 } = query;
 
   const where: Record<string, any> = {};
 
   if (categoryId) {
     where.categoryId = categoryId;
+  }
+
+  if (status && status !== 'all') {
+    where.status = status;
+  }
+
+  if (stockLevel && stockLevel !== 'all') {
+    if (stockLevel === 'no_stock') {
+      where.stock = 0;
+    } else if (stockLevel === 'low_stock') {
+      where.stock = { gt: 0, lte: 5 };
+    } else if (stockLevel === 'in_stock') {
+      where.stock = { gt: 5 };
+    }
   }
 
   if (q) {

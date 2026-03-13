@@ -1,16 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import type { AdminProduct, VariantGroup } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminImages } from '../../../context/AdminImagesContext';
 import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
-
-interface Props {
-  productId?: string | null;
-  onClose: () => void;
-}
+import { ProductImage } from '../../../components/ui/ProductImage';
 
 const EMPTY: Omit<AdminProduct, 'id'> = {
   name: '',
@@ -32,16 +30,23 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
   variants: [],
 };
 
+interface Props {
+  productId?: string | null;
+  onClose: () => void;
+}
+
 export function AdminProductForm({ productId, onClose }: Props) {
-  const { addProduct, updateProduct, getProduct } = useAdminProducts();
+  const auth = useAdminAuth ? useAdminAuth() : null;
+  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
+  const { addProduct, updateProduct, getProduct, loadProductVariants } = useAdminProducts();
   const { categories } = useAdminCategories();
   const {
     images: apiImages,
     isLoading: imagesLoading,
     error: imagesError,
     loadImages,
-    addImage,
-    updateImage,
+    uploadImage,
+    updateImageMeta,
     deleteImage,
     clearImages,
   } = useAdminImages();
@@ -58,51 +63,56 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const [saving, setSaving] = useState(false);
 
   // ── Estado para gestión de imágenes via API (solo cuando se edita) ──────────
-  const [imgNewUrl, setImgNewUrl] = useState('');
+  const [imgFile, setImgFile] = useState<File | null>(null);
   const [imgNewAlt, setImgNewAlt] = useState('');
   const [imgError, setImgError] = useState('');
   const [showAddImgForm, setShowAddImgForm] = useState(false);
   const [editingImgId, setEditingImgId] = useState<string | null>(null);
-  const [editingImgUrl, setEditingImgUrl] = useState('');
   const [editingImgAlt, setEditingImgAlt] = useState('');
-  const [editingImgError, setEditingImgError] = useState('');
+  // const [editingImgError, setEditingImgError] = useState('');
   const [savingImgId, setSavingImgId] = useState<string | null>(null);
   const [deletingImgId, setDeletingImgId] = useState<string | null>(null);
-  const addImgUrlRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (productId) {
-      const p = getProduct(productId);
-      if (p) {
-        // Solo usar id si es necesario, eliminamos variable no usada
-        const { id, ...rest } = p;
-        setTimeout(() => setForm(rest), 0); // Evita render en cascada
+    const initForm = async () => {
+      if (productId) {
+        const p = getProduct(productId);
+        if (p) {
+          const { id, ...rest } = p;
+          void id;
+          // Cargamos variantes por separado si es edición
+          const variants = await loadProductVariants(productId);
+          setForm({ ...rest, variants: variants || [] });
+
+          // Cargar imágenes vía API para modo edición
+          loadImages(productId);
+        }
+      } else {
+        setForm(EMPTY);
+        clearImages();
       }
-      // Cargar imágenes vía API para modo edición
-      loadImages(productId);
-    } else {
-      setForm(EMPTY);
-      clearImages();
-    }
-    setError('');
-    setFieldErrors({});
+      setError('');
+      setFieldErrors({});
+    };
+
+    initForm();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   // ── Funciones de gestión de imágenes via API ────────────────────────────────
 
-  const handleApiAddImage = async () => {
-    const url = imgNewUrl.trim();
+  const handleApiUploadImage = async () => {
     setImgError('');
-    if (!url) return setImgError('La URL es obligatoria');
-    if (!url.startsWith('http')) return setImgError('La URL debe ser válida (empezar con http)');
+    if (!imgFile) return setImgError('Seleccioná un archivo');
     if (!productId) return;
 
     try {
-      await addImage(productId, { url, altText: imgNewAlt.trim() || undefined });
-      setImgNewUrl('');
+      await uploadImage(productId, imgFile, imgNewAlt.trim() || undefined);
+      setImgFile(null);
       setImgNewAlt('');
       setShowAddImgForm(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch {
       // error guardado en contexto
     }
@@ -110,23 +120,17 @@ export function AdminProductForm({ productId, onClose }: Props) {
 
   const handleApiStartEdit = (img: ProductImageItem) => {
     setEditingImgId(img.id);
-    setEditingImgUrl(img.url);
     setEditingImgAlt(img.altText ?? '');
-    setEditingImgError('');
   };
 
   const handleApiCommitEdit = async (imageId: string) => {
-    const url = editingImgUrl.trim();
-    setEditingImgError('');
-    if (!url) return setEditingImgError('La URL es obligatoria');
-    if (!url.startsWith('http')) return setEditingImgError('La URL debe ser válida');
+    // Eliminado: setEditingImgError('');
     if (!productId) return;
 
     setSavingImgId(imageId);
     try {
-      await updateImage(productId, imageId, {
-        url,
-        altText: editingImgAlt.trim() || undefined,
+      await updateImageMeta(productId, imageId, {
+        altText: editingImgAlt.trim() || null,
       });
       setEditingImgId(null);
     } catch {
@@ -141,6 +145,14 @@ export function AdminProductForm({ productId, onClose }: Props) {
     setDeletingImgId(imageId);
     try {
       await deleteImage(productId, imageId);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'delete',
+        entity: 'product-image',
+        entityId: imageId,
+        details: { productId },
+      });
     } catch {
       // error en contexto
     } finally {
@@ -165,7 +177,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
     if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
     if (!form.price || form.price <= 0) errors.price = 'El precio debe ser mayor a 0';
     if (!form.category.id) errors.category = 'Seleccioná una categoría';
-    
+
     // Validaciones opcionales pero con formato
     if (form.discount !== undefined && (form.discount < 0 || form.discount > 100)) {
       errors.discount = 'El descuento debe estar entre 0 y 100';
@@ -194,7 +206,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     setError('');
     setSaving(true);
 
@@ -208,9 +220,25 @@ export function AdminProductForm({ productId, onClose }: Props) {
         const { images: _omitted, ...formWithoutImages } = sanitizedForm;
         void _omitted;
         await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: userEmail,
+          action: 'edit',
+          entity: 'product',
+          entityId: productId,
+          details: { ...formWithoutImages },
+        });
       } else {
         // Al crear, enviamos las URLs capturadas en el formulario
-        await addProduct(sanitizedForm);
+        const created: any = await addProduct(sanitizedForm);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: userEmail,
+          action: 'create',
+          entity: 'product',
+          entityId: created && created.id ? created.id : undefined,
+          details: { ...sanitizedForm },
+        });
       }
       onClose();
     } catch (err) {
@@ -403,147 +431,154 @@ export function AdminProductForm({ productId, onClose }: Props) {
 
           {/* ── Imágenes ── */}
           <fieldset className={styles.fieldset}>
-            <legend className={styles.legend}>Imágenes</legend>
+            <legend className={styles.legend}>Galería de Imágenes</legend>
 
             {isEdit ? (
-              /* ── Modo edición: gestión via API ─────────────────────────── */
+              /* ── Modo edición: gestión via API (Subida de archivos) ─────── */
               <div className={styles.imgManager}>
                 {imagesError && (
-                  <p className={styles.imgError}>Error: {imagesError}</p>
+                  <p className={styles.imgError} aria-live="polite">Error: {imagesError}</p>
                 )}
                 {imagesLoading && apiImages.length === 0 ? (
-                  <p className={styles.imgHint}>Cargando imágenes...</p>
+                  <div className={styles.imgLoading}>
+                    <p>Cargando galería...</p>
+                  </div>
                 ) : apiImages.length === 0 ? (
-                  <p className={styles.imgHint}>Sin imágenes. Agregá la primera abajo.</p>
+                  <div className={styles.imgEmpty}>
+                    <p>No hay imágenes vinculadas. Subí una para mejorar la visualización.</p>
+                  </div>
                 ) : (
-                  <div className={styles.imgList}>
+                  <div className={styles.imgGrid}>
                     {apiImages.map(img => (
                       <div key={img.id} className={styles.imgRow}>
                         {/* Miniatura */}
                         <div className={styles.imgThumb}>
                           {img.url
-                            ? <img src={img.url} alt={img.altText ?? 'imagen'} className={styles.imgThumbImg}
-                                onError={e => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/60x45?text=?'; }} />
+                            ? <ProductImage
+                                src={img.url}
+                                alt={img.altText ?? 'imagen'}
+                                className={styles.imgThumbImg}
+                                width={60}
+                                height={45}
+                                placeholder={'data:image/svg+xml,%3Csvg width="60" height="45" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="60" height="45" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                              />
                             : <span className={styles.imgThumbEmpty}>?</span>
                           }
                         </div>
 
-                        {editingImgId === img.id ? (
-                          /* Edición inline */
-                          <div className={styles.imgEditInline}>
-                            <input
-                              className={`${styles.input} ${editingImgError ? styles.inputError : ''}`}
-                              value={editingImgUrl}
-                              onChange={e => setEditingImgUrl(e.target.value)}
-                              placeholder="URL de la imagen *"
-                              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiCommitEdit(img.id))}
-                            />
-                            {editingImgError && <span className={styles.errorText}>{editingImgError}</span>}
-                            <input
-                              className={styles.input}
-                              value={editingImgAlt}
-                              onChange={e => setEditingImgAlt(e.target.value)}
-                              placeholder="Texto alt (opcional)"
-                              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiCommitEdit(img.id))}
-                            />
-                            <div className={styles.imgEditActions}>
-                              <button type="button" className={styles.imgSaveBtn}
-                                onClick={() => handleApiCommitEdit(img.id)}
-                                disabled={savingImgId === img.id || !editingImgUrl.trim()}>
-                                {savingImgId === img.id ? '...' : 'Guardar'}
-                              </button>
-                              <button type="button" className={styles.imgCancelBtn}
-                                onClick={() => setEditingImgId(null)}>
-                                Cancelar
-                              </button>
+                        <div className={styles.imgCardContent}>
+                          {editingImgId === img.id ? (
+                            <div className={styles.imgCardEdit}>
+                              <input
+                                className={`${styles.input} ${styles.imgInputSmall}`}
+                                value={editingImgAlt}
+                                onChange={e => setEditingImgAlt(e.target.value)}
+                                placeholder="Texto alternativo"
+                                autoFocus
+                              />
+                              <div className={styles.imgCardActions}>
+                                <button type="button" className={styles.imgSaveMiniBtn}
+                                  onClick={() => handleApiCommitEdit(img.id)}
+                                  disabled={savingImgId === img.id}>
+                                  {savingImgId === img.id ? '...' : '✓'}
+                                </button>
+                                <button type="button" className={styles.imgCancelMiniBtn}
+                                  onClick={() => setEditingImgId(null)}>
+                                  ✕
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          /* Vista normal */
-                          <div className={styles.imgInfo}>
-                            <span className={styles.imgUrl} title={img.url}>{img.url}</span>
-                            {img.altText && <span className={styles.imgAlt}>{img.altText}</span>}
-                          </div>
-                        )}
-
-                        {/* Acciones (editar / eliminar) – solo si no está editando */}
-                        {editingImgId !== img.id && (
-                          <div className={styles.imgActions}>
-                            <button type="button" className={styles.imgEditBtn}
-                              onClick={() => handleApiStartEdit(img)}
-                              title="Editar URL">
-                              ✏️
-                            </button>
-                            <button type="button" className={styles.imgDeleteBtn}
-                              onClick={() => handleApiDeleteImage(img.id)}
-                              disabled={deletingImgId === img.id}
-                              title="Eliminar imagen">
-                              {deletingImgId === img.id ? '...' : '✕'}
-                            </button>
-                          </div>
-                        )}
+                          ) : (
+                            <div className={styles.imgCardMeta}>
+                              <span className={styles.imgCardAlt} title={img.altText || 'Sin texto alternativo'}>
+                                {img.altText || '(Sin texto alternativo)'}
+                              </span>
+                              <div className={styles.imgCardActions}>
+                                <button type="button" className={styles.imgIconBtn}
+                                  onClick={() => handleApiStartEdit(img)}
+                                  title="Editar descripción">
+                                  ✏️
+                                </button>
+                                <button type="button" className={`${styles.imgIconBtn} ${styles.imgIconDelete}`}
+                                  onClick={() => handleApiDeleteImage(img.id)}
+                                  disabled={deletingImgId === img.id}
+                                  title="Eliminar imagen">
+                                  {deletingImgId === img.id ? '...' : '🗑️'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Formulario para agregar nueva imagen */}
-                {showAddImgForm ? (
-                  <div className={styles.imgAddForm}>
-                    <input
-                      ref={addImgUrlRef}
-                      className={`${styles.input} ${imgError ? styles.inputError : ''}`}
-                      value={imgNewUrl}
-                      onChange={e => setImgNewUrl(e.target.value)}
-                      placeholder="URL de la imagen *"
-                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiAddImage())}
-                    />
-                    {imgError && <span className={styles.errorText}>{imgError}</span>}
-                    <input
-                      className={styles.input}
-                      value={imgNewAlt}
-                      onChange={e => setImgNewAlt(e.target.value)}
-                      placeholder="Texto alternativo (opcional)"
-                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleApiAddImage())}
-                    />
-                    <div className={styles.imgEditActions}>
-                      <button type="button" className={styles.imgSaveBtn}
-                        onClick={handleApiAddImage}
-                        disabled={!imgNewUrl.trim() || imagesLoading}>
-                        {imagesLoading ? 'Agregando...' : 'Agregar'}
-                      </button>
-                      <button type="button" className={styles.imgCancelBtn}
-                        onClick={() => { setShowAddImgForm(false); setImgNewUrl(''); setImgNewAlt(''); setImgError(''); }}>
-                        Cancelar
-                      </button>
+                {/* Formulario para subir nueva imagen */}
+                <div className={styles.uploadSection}>
+                  {showAddImgForm ? (
+                    <div className={styles.uploadBox}>
+                      <div className={styles.field}>
+                        <label className={styles.label}>Seleccionar archivo (WebP, JPG, PNG)</label>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          className={styles.fileInput}
+                          accept="image/*"
+                          onChange={e => setImgFile(e.target.files?.[0] || null)}
+                        />
+                      </div>
+                      <div className={styles.field}>
+                        <label className={styles.label}>Descripción (texto alternativo)</label>
+                        <input
+                          className={styles.input}
+                          value={imgNewAlt}
+                          onChange={e => setImgNewAlt(e.target.value)}
+                          placeholder="Ej: Vista frontal del producto"
+                        />
+                      </div>
+                      {imgError && <p className={styles.errorText} aria-live="polite">{imgError}</p>}
+                      <div className={styles.imgEditActions}>
+                        <button type="button" className={styles.imgSaveBtn}
+                          onClick={handleApiUploadImage}
+                          disabled={!imgFile || imagesLoading}
+                        >
+                          {imagesLoading ? 'Subiendo...' : 'Subir imagen'}
+                        </button>
+                        <button type="button" className={styles.imgCancelBtn}
+                          onClick={() => { setShowAddImgForm(false); setImgFile(null); setImgNewAlt(''); setImgError(''); }}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <button type="button" className={styles.addBtn}
-                    onClick={() => {
-                      setShowAddImgForm(true);
-                      setTimeout(() => addImgUrlRef.current?.focus(), 50);
-                    }}>
-                    + Agregar imagen
-                  </button>
-                )}
+                  ) : (
+                    <button type="button" className={styles.uploadTrigger}
+                      onClick={() => setShowAddImgForm(true)}
+                    >
+                      <span className={styles.uploadIcon}>☁️</span> Subir nueva imagen
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
-              /* ── Modo creación: URLs en estado local ─────────────────────── */
-              <>
+              /* ── Modo creación: URLs en estado local (se suben al crear) ─── */
+              <div className={styles.creationImgs}>
+                <p className={styles.fieldHint}>Podrás subir archivos de imagen reales una vez que el producto sea creado.</p>
                 {form.images.map((img, i) => (
                   <div key={i} className={styles.tagRow}>
-                    <input className={`${styles.input} ${fieldErrors.images ? styles.inputError : ''}`} value={img}
+                    <input className={`${styles.input} ${fieldErrors.images ? styles.inputError : ''}`}
+                      id={`img-url-${i}`} value={img}
                       onChange={e => setImage(i, e.target.value)}
-                      placeholder="URL de la imagen" />
+                      placeholder="URL de imagen externa (opcional)" />
                     {form.images.length > 1 && (
                       <button type="button" className={styles.removeBtn} onClick={() => removeImageSlot(i)}>✕</button>
                     )}
                   </div>
                 ))}
-                {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
-                <button type="button" className={styles.addBtn} onClick={addImageSlot}>+ Agregar imagen</button>
-              </>
+                {fieldErrors.images && <span className={styles.errorText} aria-live="polite">{fieldErrors.images}</span>}
+                <button type="button" className={styles.addBtn} onClick={addImageSlot}>+ Agregar URL</button>
+              </div>
             )}
           </fieldset>
 
@@ -555,14 +590,14 @@ export function AdminProductForm({ productId, onClose }: Props) {
                 onChange={e => setFeatureInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addFeature())}
                 placeholder="Ej: Material: acero inoxidable" />
-              <button type="button" className={styles.addBtn} onClick={addFeature}>＋</button>
+              <button type="button" className={styles.addBtn} onClick={addFeature} aria-label="Agregar característica">＋</button>
             </div>
             {(form.features ?? []).length > 0 && (
               <ul className={styles.featureList}>
                 {(form.features ?? []).map((f, i) => (
                   <li key={i} className={styles.featureItem}>
                     <span>{f}</span>
-                    <button type="button" onClick={() => removeFeature(i)} className={styles.tagRemove}>✕</button>
+                    <button type="button" onClick={() => removeFeature(i)} className={styles.tagRemove} aria-label={`Eliminar característica ${f}`}>✕</button>
                   </li>
                 ))}
               </ul>
@@ -583,7 +618,7 @@ export function AdminProductForm({ productId, onClose }: Props) {
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVariantGroup())}
                 placeholder="Nombre del grupo, ej: Color, Tamaño..."
               />
-              <button type="button" className={styles.addBtn} onClick={addVariantGroup}>+ Grupo</button>
+              <button type="button" className={styles.addBtn} onClick={addVariantGroup} aria-label="Agregar grupo de variantes">+ Grupo</button>
             </div>
 
             {/* Grupos existentes */}
@@ -591,13 +626,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
               <div key={group.id} className={styles.variantGroup}>
                 <div className={styles.variantGroupHeader}>
                   <span className={styles.variantGroupName}>{group.name}</span>
-                  <button type="button" className={styles.removeBtn} onClick={() => removeVariantGroup(group.id)}>✕</button>
+                  <button type="button" className={styles.removeBtn} onClick={() => removeVariantGroup(group.id)} aria-label={`Eliminar grupo ${group.name}`}>✕</button>
                 </div>
                 <div className={styles.tags}>
                   {group.values.map(val => (
                     <span key={val} className={styles.tag}>
                       {val}
-                      <button type="button" className={styles.tagRemove} onClick={() => removeVariantValue(group.id, val)}>✕</button>
+                      <button type="button" className={styles.tagRemove} onClick={() => removeVariantValue(group.id, val)} aria-label={`Eliminar variante ${val}`}>✕</button>
                     </span>
                   ))}
                 </div>
@@ -609,13 +644,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
                     onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVariantValue(group.id))}
                     placeholder={`Agregar valor a ${group.name}...`}
                   />
-                  <button type="button" className={styles.addBtn} onClick={() => addVariantValue(group.id)}>＋</button>
+                  <button type="button" className={styles.addBtn} onClick={() => addVariantValue(group.id)} aria-label={`Agregar valor a ${group.name}`}>＋</button>
                 </div>
               </div>
             ))}
           </fieldset>
 
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <div className={styles.error} aria-live="polite">{error}</div>}
 
           <div className={styles.actions}>
             <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={saving}>Cancelar</button>
@@ -628,3 +663,4 @@ export function AdminProductForm({ productId, onClose }: Props) {
     </div>
   );
 }
+

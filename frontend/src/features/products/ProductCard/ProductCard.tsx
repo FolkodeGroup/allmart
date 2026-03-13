@@ -1,13 +1,19 @@
-import {useState, useEffect} from "react";
+
+import { useState, useEffect } from "react";
+import { ProductImage } from '../../../components/ui/ProductImage';
 import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
+import { ProductPrice } from '../../../components/ui/ProductPrice/ProductPrice';
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
+import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
+import { isLowStock } from '../../../utils/inventory';
+import { AlertTriangle } from 'lucide-react';
 
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & { stock?: number };
 }
 
 function renderStars(rating: number): string {
@@ -17,13 +23,6 @@ function renderStars(rating: number): string {
   return "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 0,
-  }).format(price);
-}
 
 export function ProductCard({ product }: ProductCardProps) {
   const storageKey = `wishlist-${product.id}`;
@@ -32,7 +31,7 @@ export function ProductCard({ product }: ProductCardProps) {
     const saved = localStorage.getItem(storageKey);
     return saved === "true";
   });
-  
+
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(isFavorito));
   }, [isFavorito, storageKey]);
@@ -49,12 +48,13 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className={styles.card} aria-label={product.name}>
       <div className={styles.imageWrapper}>
         <Link to={`/producto/${product.slug}`}>
-          <img
-            className={styles.image}
+          <ProductImage
             src={product.images[0]}
             alt={product.name}
-            loading="lazy"
-            decoding="async"
+            className={styles.image}
+            width={240}
+            height={180}
+            placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
           />
         </Link>
         <div className={styles.badges}>
@@ -64,6 +64,11 @@ export function ProductCard({ product }: ProductCardProps) {
             </Badge>
           )}
           {isNew && <Badge variant="new">Nuevo</Badge>}
+          {typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
+            <Badge className={`${styles.badge} ${styles.lowStockBadge}`}>
+              <AlertTriangle size={16} style={{marginRight: 4}} /> Stock bajo
+            </Badge>
+          )}
         </div>
         <button
           className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
@@ -88,12 +93,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-          <span className={styles.price}>{formatPrice(product.price)}</span>
-          {hasDiscount && product.originalPrice && (
-            <span className={styles.originalPrice}>
-              {formatPrice(product.originalPrice)}
-            </span>
-          )}
+            <ProductPrice
+              price={product.price}
+              originalPrice={product.originalPrice}
+              discount={product.discount}
+              size="md"
+            />
         </div>
       </div>
       <Link className={styles.exploreButton} to={`/productos?category=${product.category.slug}`}>

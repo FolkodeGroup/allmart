@@ -15,7 +15,7 @@ function getTimeBasedGreeting(): { greeting: string; emoji: string } {
 
 const sections = [
   {
-    icon: '',
+    icon: '📦',
     title: 'Productos',
     description: 'Administrá el catálogo, precios y stock.',
     to: '/admin/productos',
@@ -36,7 +36,9 @@ const sections = [
     color: 'warm',
   },
 ];
-// import { useAdminAuth } from '../../context/AdminAuthContext';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
 import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
@@ -54,6 +56,7 @@ import MetricCard from '../../components/ui/MetricCard';
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
   const { products } = useAdminProducts();
+  const { can } = useAdminAuth();
   const { greeting, emoji } = getTimeBasedGreeting();
   const [dateRange, setDateRange] = React.useState(() => {
     // Por defecto: últimos 7 días
@@ -268,14 +271,21 @@ export function AdminDashboard() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Acceso rápido</h2>
         <div className={styles.grid}>
-          {sections.map(sec => (
+          {sections
+            .filter(sec => {
+              if (sec.to === '/admin/productos') return can('products.view');
+              if (sec.to === '/admin/pedidos') return can('orders.view');
+              if (sec.to === '/admin/reportes') return can('reports.view');
+              return true;
+            })
+            .map(sec => (
             <Link key={sec.to} to={sec.to} className={`${styles.card} ${styles[`card_${sec.color}`]}`}>
               <span className={styles.cardIcon}>{sec.icon}</span>
               <div>
                 <h3 className={styles.cardTitle}>{sec.title}</h3>
                 <p className={styles.cardDesc}>{sec.description}</p>
               </div>
-              <span className={styles.cardArrow}>→</span>
+              
             </Link>
           ))}
         </div>
@@ -296,77 +306,87 @@ export function AdminDashboard() {
       </section>
 
       {/* Métricas mensuales */}
-      <section className={styles.metricsSection}>
-        <div className={styles.metricsGrid}>
-          <MetricCard
-            title="Ingresos"
-            icon={<span>💰</span>}
-            value={ingresosActual.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-            variation={ingresosVar}
-          />
-          <MetricCard
-            title="Pedidos"
-            icon={<span>🛒</span>}
-            value={pedidosActual}
-            variation={pedidosVar}
-          />
-          <MetricCard
-            title="Nuevos Clientes"
-            icon={<span>🧑‍💼</span>}
-            value={clientesActual}
-            variation={clientesVar}
-          />
-          <MetricCard
-            title="Tasa de Conversión"
-            icon={<span>📈</span>}
-            value={conversionActual.toFixed(1) + '%'}
-            variation={conversionVar}
-          />
-        </div>
-      </section>
+      {can('reports.view') && (
+        <section className={styles.metricsSection}>
+          <div className={styles.metricsGrid}>
+            <MetricCard
+              title="Ingresos"
+              icon={<span>💰</span>}
+              value={ingresosActual.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
+              variation={ingresosVar}
+            />
+            <MetricCard
+              title="Pedidos"
+              icon={<span>🛒</span>}
+              value={pedidosActual}
+              variation={pedidosVar}
+            />
+            <MetricCard
+              title="Nuevos Clientes"
+              icon={<span>🧑‍💼</span>}
+              value={clientesActual}
+              variation={clientesVar}
+            />
+            <MetricCard
+              title="Tasa de Conversión"
+              icon={<span>📈</span>}
+              value={conversionActual.toFixed(1) + '%'}
+              variation={conversionVar}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Gráficos: Ventas y Distribución por Categoría */}
       <section className={styles.section}>
         <div className={styles.chartsGrid}>
           <div className={styles.chartLeft}>
-            <WeeklySalesWidget data={salesData} totalSales={totalSales} />
-            {/* Mapa de calor de ventas debajo del gráfico de líneas */}
-            <SalesActivityHeatmap
-              data={heatmapData}
-              dayLabels={weekDays}
-              hourLabels={hourLabels}
-            />
+            {can('reports.view') && (
+              <>
+                <WeeklySalesWidget data={salesData} totalSales={totalSales} />
+                {/* Mapa de calor de ventas debajo del gráfico de líneas */}
+                <SalesActivityHeatmap
+                  data={heatmapData}
+                  dayLabels={weekDays}
+                  hourLabels={hourLabels}
+                />
+              </>
+            )}
           </div>
           <div className={styles.chartRight}>
-            <CategoryDistributionChart data={categoryData} />
-            <div className={styles.goalAndClientsRow}>
-              <div className={styles.goalCard}>
-                <MonthlyGoalWidget ventasDelMes={ingresosActual} />
-              </div>
-              <div className={styles.metricCard}>
-                <h3 className={styles.cardTitle} style={{ marginBottom: '1rem' }}>Mejores Clientes</h3>
-                <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                  <li style={{ display: 'flex', fontWeight: 600, color: '#888', borderBottom: '1px solid #eee', paddingBottom: 4, marginBottom: 6 }}>
-                    <span style={{ flex: 2 }}>Cliente</span>
-                    <span style={{ flex: 1, textAlign: 'center' }}>Pedidos</span>
-                    <span style={{ flex: 1, textAlign: 'right' }}>Total</span>
-                  </li>
-                  {mejoresClientes.map((c, idx) => (
-                    <li key={c.email} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', borderBottom: idx < mejoresClientes.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
-                      <span style={{ flex: 2, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nombre}</span>
-                      <span style={{ flex: 1, textAlign: 'center' }}>{c.pedidos}</span>
-                      <span style={{ flex: 1, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{c.totalGastado.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-            {/* Gráfico de barras Top 10 productos más vendidos */}
-            <BarChartTopProducts data={topProducts} />
+            {can('reports.view') && (
+              <>
+                <CategoryDistributionChart data={categoryData} />
+                <div className={styles.goalAndClientsRow}>
+                  <div className={styles.goalCard}>
+                    <MonthlyGoalWidget ventasDelMes={ingresosActual} />
+                  </div>
+                  <div className={styles.metricCard}>
+                    <h3 className={styles.cardTitle} style={{ marginBottom: '1rem' }}>Mejores Clientes</h3>
+                    <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                      <li style={{ display: 'flex', fontWeight: 600, color: '#888', borderBottom: '1px solid #eee', paddingBottom: 4, marginBottom: 6 }}>
+                        <span style={{ flex: 2 }}>Cliente</span>
+                        <span style={{ flex: 1, textAlign: 'center' }}>Pedidos</span>
+                        <span style={{ flex: 1, textAlign: 'right' }}>Total</span>
+                      </li>
+                      {mejoresClientes.map((c, idx) => (
+                        <li key={c.email} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', borderBottom: idx < mejoresClientes.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                          <span style={{ flex: 2, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nombre}</span>
+                          <span style={{ flex: 1, textAlign: 'center' }}>{c.pedidos}</span>
+                          <span style={{ flex: 1, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{c.totalGastado.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+                {/* Gráfico de barras Top 10 productos más vendidos */}
+                <BarChartTopProducts data={topProducts} />
+              </>
+            )}
           </div>
         </div>
         {/* Pedidos Recientes */}
-        <RecentOrdersWidget />
+        {can('orders.view') && <RecentOrdersWidget />}
       </section>
 
       {/* Status bar */}

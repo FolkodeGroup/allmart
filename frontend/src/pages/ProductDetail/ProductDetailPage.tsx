@@ -10,17 +10,10 @@ import {
 import { fetchPublicCategories } from '../../services/categoriesService';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
+import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-  }).format(price);
-}
 
 function renderStars(rating: number): string {
   const full = Math.floor(rating);
@@ -102,7 +95,7 @@ export function ProductDetailPage() {
       </main>
     );
   }
-  
+
   return (
     <main className={styles.page}>
       {/* Breadcrumb */}
@@ -180,19 +173,12 @@ export function ProductDetailPage() {
 
           {/* Price */}
           <div className={styles.priceBlock}>
-            <span className={styles.currentPrice}>
-              {formatPrice(product.price)}
-            </span>
-            {hasDiscount && product.originalPrice && (
-              <>
-                <span className={styles.originalPrice}>
-                  {formatPrice(product.originalPrice)}
-                </span>
-                <span className={styles.discountBadge}>
-                  Ahorrás {formatPrice(product.originalPrice - product.price)}
-                </span>
-              </>
-            )}
+            <ProductPrice
+              price={product.price}
+              originalPrice={product.originalPrice}
+              discount={product.discount}
+              size="lg"
+            />
           </div>
 
 
