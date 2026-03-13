@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import type { AdminProduct, VariantGroup } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminImages } from '../../../context/AdminImagesContext';
 import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
 import { ProductImage } from '../../../components/ui/ProductImage';
-
-interface Props {
-  productId?: string | null;
-  onClose: () => void;
-}
 
 const EMPTY: Omit<AdminProduct, 'id'> = {
   name: '',
@@ -33,7 +30,14 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
   variants: [],
 };
 
+interface Props {
+  productId?: string | null;
+  onClose: () => void;
+}
+
 export function AdminProductForm({ productId, onClose }: Props) {
+  const auth = useAdminAuth ? useAdminAuth() : null;
+  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
   const { addProduct, updateProduct, getProduct, loadProductVariants } = useAdminProducts();
   const { categories } = useAdminCategories();
   const {
@@ -141,6 +145,14 @@ export function AdminProductForm({ productId, onClose }: Props) {
     setDeletingImgId(imageId);
     try {
       await deleteImage(productId, imageId);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'delete',
+        entity: 'product-image',
+        entityId: imageId,
+        details: { productId },
+      });
     } catch {
       // error en contexto
     } finally {
@@ -208,9 +220,25 @@ export function AdminProductForm({ productId, onClose }: Props) {
         const { images: _omitted, ...formWithoutImages } = sanitizedForm;
         void _omitted;
         await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: userEmail,
+          action: 'edit',
+          entity: 'product',
+          entityId: productId,
+          details: { ...formWithoutImages },
+        });
       } else {
         // Al crear, enviamos las URLs capturadas en el formulario
-        await addProduct(sanitizedForm);
+        const created: any = await addProduct(sanitizedForm);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: userEmail,
+          action: 'create',
+          entity: 'product',
+          entityId: created && created.id ? created.id : undefined,
+          details: { ...sanitizedForm },
+        });
       }
       onClose();
     } catch (err) {
@@ -635,3 +663,4 @@ export function AdminProductForm({ productId, onClose }: Props) {
     </div>
   );
 }
+

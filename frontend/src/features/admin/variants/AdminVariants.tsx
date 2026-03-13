@@ -7,6 +7,7 @@ import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -155,11 +156,21 @@ export function AdminVariants() {
     setModalOpen(true);
   };
 
+  const auth = useAdminAuth ? useAdminAuth() : null;
+  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
   const confirmDelete = async () => {
     if (!selectedProductId || !pendingDeleteId) return;
     setModalOpen(false);
     try {
       await deleteVariant(selectedProductId, pendingDeleteId);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'delete',
+        entity: 'variant',
+        entityId: pendingDeleteId,
+        details: { productId: selectedProductId },
+      });
       setNotif({open:true,type:'success',message:'Variante eliminada correctamente.'});
     } catch {
       setNotif({open:true,type:'error',message:'Error al eliminar variante.'});
