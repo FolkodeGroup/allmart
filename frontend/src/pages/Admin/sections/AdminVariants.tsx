@@ -12,6 +12,8 @@ import styles from './AdminVariants.module.css';
 
 export function AdminVariants() {
   const { products } = useAdminProducts();
+    // Estado de carga manual (usa el de contexto)
+    // Si quieres forzar skeletons, cambia el valor de isLoading en el contexto o usa una variable local diferente.
   const {
     variants,
     selectedProductId,
