@@ -74,7 +74,7 @@ export function AdminProducts() {
     const [bulkEditError, setBulkEditError] = useState<string | null>(null);
     const [showBulkConfirm, setShowBulkConfirm] = useState(false);
     const [bulkEditData, setBulkEditData] = useState<{ price?: number; stock?: number; inStock?: boolean } | null>(null);
-      const [isLoading, setIsLoading] = useState<boolean>(false);
+      const [isLoading] = useState<boolean>(false);
 
     // Simular obtención de token (ajustar según contexto real)
     const token = localStorage.getItem('token') || '';
