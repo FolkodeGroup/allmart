@@ -28,6 +28,7 @@ import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
 
 import sectionStyles from '../shared/AdminSection.module.css';
+import styles from './AdminProducts.module.css';
 import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
 import type { ExportableProduct } from '../../../utils/exportProducts';
 
