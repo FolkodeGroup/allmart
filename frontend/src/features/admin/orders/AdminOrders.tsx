@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -130,9 +131,19 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
   const hasStatusChange = pendingStatus !== order.status;
 
+  const auth = useAdminAuth ? useAdminAuth() : null;
+  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
   const handleStatusApply = () => {
     try {
       updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'update-status',
+        entity: 'order',
+        entityId: order.id,
+        details: { from: order.status, to: pendingStatus, note: statusNote },
+      });
       toast.success('Estado del pedido actualizado con éxito');
       setStatusNote('');
     } catch (err) {
@@ -157,6 +168,14 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const handleDelete = () => {
     try {
       deleteOrder(order.id);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'delete',
+        entity: 'order',
+        entityId: order.id,
+        details: {},
+      });
       toast.success('Pedido eliminado con éxito');
       onClose();
     } catch (err) {
