@@ -98,9 +98,14 @@ export interface PublicProductsParams {
 }
 
 /** Parámetros de filtro para administración */
+export type StockLevelFilter = 'all' | 'no_stock' | 'low_stock' | 'in_stock';
+export type StatusFilter = 'all' | 'active' | 'inactive';
+
 export interface AdminProductsParams {
   q?: string;
   categoryId?: string;
+  status?: StatusFilter;
+  stockLevel?: StockLevelFilter;
   page?: number;
   limit?: number;
 }
@@ -207,6 +212,8 @@ export async function fetchAdminProducts(
   const qs = new URLSearchParams();
   if (params.q)          qs.set('q', params.q);
   if (params.categoryId) qs.set('categoryId', params.categoryId);
+  if (params.status && params.status !== 'all') qs.set('status', params.status);
+  if (params.stockLevel && params.stockLevel !== 'all') qs.set('stockLevel', params.stockLevel);
   if (params.page)       qs.set('page', String(params.page));
   if (params.limit)      qs.set('limit', String(params.limit));
 

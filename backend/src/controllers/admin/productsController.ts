@@ -11,10 +11,12 @@ import { CreateProductDTO, UpdateProductDTO } from '../../models/Product';
 
 export async function index(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { q, categoryId, page, limit } = req.query;
+    const { q, categoryId, status, stockLevel, page, limit } = req.query;
     const result = await productsService.getAdminProducts({
       q: q as string,
       categoryId: categoryId as string,
+      status: status as string,
+      stockLevel: stockLevel as string,
       page: page ? parseInt(page as string) : undefined,
       limit: limit ? parseInt(limit as string) : undefined,
     });

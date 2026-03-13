@@ -42,6 +42,7 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
       onSubmit={handleSubmit}
       role="form"
       aria-labelledby="bulk-edit-bar-label"
+      style={{ backgroundColor: "white" }}
     >
       <span className={styles.label} id="bulk-edit-bar-label">{selectedCount} seleccionados</span>
       <label htmlFor="bulk-edit-price" className="sr-only">Nuevo precio</label>
