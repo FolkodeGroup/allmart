@@ -1,14 +1,18 @@
-import {useState, useEffect} from "react";
+
+import { useState, useEffect } from "react";
 import { ProductImage } from '../../../components/ui/ProductImage';
 import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
+import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
+import { isLowStock } from '../../../utils/inventory';
+import { AlertTriangle } from 'lucide-react';
 
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & { stock?: number };
 }
 
 function renderStars(rating: number): string {
@@ -66,6 +70,11 @@ export function ProductCard({ product }: ProductCardProps) {
             </Badge>
           )}
           {isNew && <Badge variant="new">Nuevo</Badge>}
+          {typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
+            <Badge className={`${styles.badge} ${styles.lowStockBadge}`}>
+              <AlertTriangle size={16} style={{marginRight: 4}} /> Stock bajo
+            </Badge>
+          )}
         </div>
         <button
           className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
