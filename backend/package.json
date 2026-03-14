@@ -1,7 +1,7 @@
 {
   "name": "allmart-backend",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

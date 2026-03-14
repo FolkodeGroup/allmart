@@ -230,15 +230,7 @@ jobs:
               update_env "SEED_EDITOR_PASSWORD" "Editor2026!"
             fi
 
-            # Construir DATABASE_URL dinámicamente (codificando credenciales para caracteres especiales)
-            DB_USER_VAL=$(grep "^DB_USER=" .env | cut -d'=' -f2-)
-            DB_PASS_VAL=$(grep "^DB_PASSWORD=" .env | cut -d'=' -f2-)
-            DB_NAME_VAL=$(grep "^DB_NAME=" .env | cut -d'=' -f2-)
-
-            DB_USER_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_USER_VAL")
-            DB_PASS_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_PASS_VAL")
-            DB_NAME_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_NAME_VAL")
-            update_env "DATABASE_URL" "postgresql://${DB_USER_ENC}:${DB_PASS_ENC}@db:5432/${DB_NAME_ENC}?schema=public"
+            # No construir DATABASE_URL en host VPS: backend usa DB_* directamente via Prisma adapter
 
             echo "Descargando imagenes actualizadas..."
             docker pull ${{ env.BACKEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
