@@ -73,16 +73,7 @@ if [ ! -f ".env" ]; then
   error "No se encontró .env en $DEPLOY_DIR. Crea uno a partir de .env.vps.example"
 fi
 
-if grep -q '^DB_USER=' .env && grep -q '^DB_PASSWORD=' .env && grep -q '^DB_NAME=' .env; then
-  DB_USER_VAL=$(grep '^DB_USER=' .env | cut -d'=' -f2-)
-  DB_PASS_VAL=$(grep '^DB_PASSWORD=' .env | cut -d'=' -f2-)
-  DB_NAME_VAL=$(grep '^DB_NAME=' .env | cut -d'=' -f2-)
-
-  DB_USER_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_USER_VAL")
-  DB_PASS_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_PASS_VAL")
-  DB_NAME_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_NAME_VAL")
-  update_env "DATABASE_URL" "postgresql://${DB_USER_ENC}:${DB_PASS_ENC}@db:5432/${DB_NAME_ENC}?schema=public"
-fi
+# No construir DATABASE_URL en host VPS: backend usa DB_* directamente via Prisma adapter
 
 # ─── Verificar que existe docker-compose.prod.yml ─────────────────────────────
 if [ ! -f "$COMPOSE_FILE" ]; then
