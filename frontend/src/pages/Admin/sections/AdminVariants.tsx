@@ -12,6 +12,8 @@ import styles from './AdminVariants.module.css';
 
 export function AdminVariants() {
   const { products } = useAdminProducts();
+    // Estado de carga manual (usa el de contexto)
+    // Si quieres forzar skeletons, cambia el valor de isLoading en el contexto o usa una variable local diferente.
   const {
     variants,
     selectedProductId,
@@ -31,11 +33,64 @@ export function AdminVariants() {
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+      // Estado para modal de edición masiva
+      const [showBulkEdit, setShowBulkEdit] = useState(false);
+      const [bulkEditName, setBulkEditName] = useState('');
+      const [bulkEditValues, setBulkEditValues] = useState('');
+      const [bulkEditStatus, setBulkEditStatus] = useState('');
+      const handleOpenBulkEdit = () => setShowBulkEdit(true);
+      const handleCloseBulkEdit = () => {
+        setShowBulkEdit(false);
+        setBulkEditName('');
+        setBulkEditValues('');
+        setBulkEditStatus('');
+      };
+      const handleBulkEditSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedProductId || selectedGroups.length === 0) {
+          toast.error('No hay grupos seleccionados');
+          return;
+        }
+        const confirm = window.confirm(`¿Estás seguro de aplicar los cambios a ${selectedGroups.length} variantes? Esta acción no se puede deshacer.`);
+        if (!confirm) return;
+        try {
+          // Preparar datos
+          const valuesArr = bulkEditValues
+            ? bulkEditValues.split(',').map(v => v.trim()).filter(Boolean)
+            : undefined;
+          // Actualizar cada grupo seleccionado
+          await Promise.all(selectedGroups.map(async groupId => {
+            await updateVariant(selectedProductId, groupId, {
+              name: bulkEditName || undefined,
+              values: valuesArr,
+              // Estado: si el backend lo soporta, agregar aquí
+            });
+          }));
+          setShowBulkEdit(false);
+          setBulkEditName('');
+          setBulkEditValues('');
+          setBulkEditStatus('');
+          setSelectedGroups([]);
+          toast.success('¡Edición masiva aplicada con éxito!');
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Error desconocido';
+          toast.error(`Error en edición masiva: ${message}`);
+        }
+      };
 
   // Edición inline del nombre de grupo
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
   const [editGroupError, setEditGroupError] = useState('');
+
+  // Selección múltiple de grupos
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+
+  const handleSelectGroup = (groupId: string, checked: boolean) => {
+    setSelectedGroups(prev =>
+      checked ? [...prev, groupId] : prev.filter(id => id !== groupId)
+    );
+  };
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -150,11 +205,11 @@ export function AdminVariants() {
 
   // ── Render ────────────────────────────────────────────────────────
   return (
-    <div className={sectionStyles.page}>
+    <div className={sectionStyles.page} role="main" aria-label="Gestión de variantes">
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
-          <span>🎨</span> Variantes
+        <h1 className={sectionStyles.title} tabIndex={0} aria-label="Variantes, administración de grupos y valores">
+          <span role="img" aria-label="Paleta de colores">🎨</span> Variantes
         </h1>
         <p className={sectionStyles.subtitle}>
           Definí grupos de variantes por producto (ej: Color, Tamaño) y gestioná sus valores.
@@ -163,7 +218,7 @@ export function AdminVariants() {
 
       <div className={styles.layout}>
         {/* ── Panel izquierdo: selector de producto ── */}
-        <aside className={styles.sidebar}>
+        <aside className={styles.sidebar} aria-label="Selector de productos">
           <div className={styles.sidebarHeader}>
             <span className={styles.sidebarTitle}>Productos</span>
             <span className={styles.productCount}>{filtered.length}</span>
@@ -175,7 +230,7 @@ export function AdminVariants() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <ul className={styles.productList}>
+          <ul className={styles.productList} role="listbox" aria-label="Lista de productos">
             {filtered.length === 0 ? (
               <EmptyState 
                 icon={<Search size={32} />}
@@ -192,6 +247,10 @@ export function AdminVariants() {
                   key={p.id}
                   className={`${styles.productItem} ${selectedProductId === p.id ? styles.selected : ''}`}
                   onClick={() => handleSelectProduct(p.id)}
+                  role="option"
+                  aria-selected={selectedProductId === p.id}
+                  tabIndex={0}
+                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleSelectProduct(p.id)}
                 >
                   <div className={styles.productName}>{p.name}</div>
                   {p.sku && <div className={styles.productSku}>{p.sku}</div>}
@@ -211,7 +270,7 @@ export function AdminVariants() {
         </aside>
 
         {/* ── Panel derecho: gestión de variantes ── */}
-        <main className={styles.content}>
+        <main className={styles.content} aria-label="Panel de gestión de variantes">
           {isLoading ? (
             <div className={sectionStyles.loadingContainer}>
               <LoadingSpinner size="lg" message="Cargando variantes..." />
@@ -228,6 +287,63 @@ export function AdminVariants() {
                 <div className={sectionStyles.errorState}>
                   <AlertCircle size={20} />
                   <p>Error: {apiError}</p>
+                      {/* Botón para edición masiva */}
+                      {selectedGroups.length > 0 && (
+                        <div style={{ marginBottom: '1rem', textAlign: 'right' }}>
+                          <button
+                            className={styles.bulkEditBtn}
+                            type="button"
+                            onClick={handleOpenBulkEdit}
+                            aria-label={`Editar ${selectedGroups.length} variantes seleccionadas`}
+                          >
+                            <span aria-hidden="true">✏️</span> Editar seleccionados ({selectedGroups.length})
+                          </button>
+                        </div>
+                      )}
+                      {/* Modal de edición masiva */}
+                      {showBulkEdit && (
+                        <div className={styles.bulkEditModalOverlay} role="dialog" aria-modal="true" aria-label="Edición masiva de variantes">
+                          <div className={styles.bulkEditModal}>
+                            <h3 tabIndex={0}>Edición masiva de variantes</h3>
+                            <form onSubmit={handleBulkEditSubmit}>
+                              <div className={styles.bulkEditField}>
+                                <label htmlFor="bulk-edit-name">Nombre (opcional):</label>
+                                <input
+                                  id="bulk-edit-name"
+                                  type="text"
+                                  value={bulkEditName}
+                                  onChange={e => setBulkEditName(e.target.value)}
+                                  placeholder="Nuevo nombre para todos"
+                                />
+                              </div>
+                              <div className={styles.bulkEditField}>
+                                <label htmlFor="bulk-edit-values">Valores (separados por coma):</label>
+                                <input
+                                  id="bulk-edit-values"
+                                  type="text"
+                                  value={bulkEditValues}
+                                  onChange={e => setBulkEditValues(e.target.value)}
+                                  placeholder="Ej: Rojo, Verde, Azul"
+                                />
+                              </div>
+                              <div className={styles.bulkEditField}>
+                                <label htmlFor="bulk-edit-status">Estado (opcional):</label>
+                                <input
+                                  id="bulk-edit-status"
+                                  type="text"
+                                  value={bulkEditStatus}
+                                  onChange={e => setBulkEditStatus(e.target.value)}
+                                  placeholder="Activo/Inactivo"
+                                />
+                              </div>
+                              <div className={styles.bulkEditActions}>
+                                <button type="submit" className={styles.bulkEditApplyBtn} aria-label="Aplicar cambios masivos">Aplicar cambios</button>
+                                <button type="button" className={styles.bulkEditCancelBtn} onClick={handleCloseBulkEdit} aria-label="Cancelar edición masiva">Cancelar</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      )}
                 </div>
               )}
               <div className={styles.contentHeader}>
@@ -274,11 +390,20 @@ export function AdminVariants() {
                 />
               ) : (
                 /* Lista de grupos */
-                <div className={styles.groupsGrid}>
+                <div className={styles.groupsGrid} role="list" aria-label="Grupos de variantes">
                   {variants.map(group => (
-                    <div key={group.id} className={styles.groupCard}>
+                    <div key={group.id} className={styles.groupCard} role="listitem" tabIndex={0} aria-label={`Grupo ${group.name}`}> 
                       {/* Header del grupo */}
                       <div className={styles.groupHeader}>
+                        {/* Checkbox para selección múltiple */}
+                        <input
+                          type="checkbox"
+                          checked={selectedGroups.includes(group.id)}
+                          onChange={e => handleSelectGroup(group.id, e.target.checked)}
+                          className={styles.groupCheckbox}
+                          title="Seleccionar para edición masiva"
+                          aria-label={`Seleccionar grupo ${group.name} para edición masiva`}
+                        />
                         {editingGroupId === group.id ? (
                           <div className={styles.editGroupNameWrapper}>
                             <input
@@ -307,9 +432,10 @@ export function AdminVariants() {
                             type="button"
                             title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
                             style={can('variants.edit') ? undefined : { cursor: 'default' }}
+                            aria-label={can('variants.edit') ? `Editar nombre del grupo ${group.name}` : undefined}
                           >
                             {group.name}
-                            {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
+                            {can('variants.edit') && <span className={styles.editHint} aria-hidden="true">✏️</span>}
                           </button>
                         )}
                         {can('variants.delete') && (
@@ -318,34 +444,34 @@ export function AdminVariants() {
                             onClick={() => deleteGroup(group.id)}
                             type="button"
                             title="Eliminar grupo"
+                            aria-label={`Eliminar grupo ${group.name}`}
                           >
-                            🗑️
+                            <span aria-hidden="true">🗑️</span>
                           </button>
                         )}
                       </div>
-
                       {/* Valores / chips */}
                       <div className={styles.valuesContainer}>
                         {group.values.length === 0 && (
                           <span className={styles.noValues}>Sin valores aún</span>
                         )}
                         {group.values.map(val => (
-                          <span key={val} className={styles.valueChip}>
+                          <span key={val} className={styles.valueChip} aria-label={`Valor ${val}`} tabIndex={0}>
                             {val}
                             {can('variants.delete') && (
                               <button
                                 type="button"
                                 className={styles.chipRemove}
                                 onClick={() => removeValue(group.id, val)}
-                                title={`Eliminar ${val}`}
-                              >\
-                                ×
+                                title={`Eliminar valor ${val}`}
+                                aria-label={`Eliminar valor ${val}`}
+                              >
+                                <span aria-hidden="true">×</span>
                               </button>
                             )}
                           </span>
                         ))}
                       </div>
-
                       {/* Input para agregar valor */}
                       {can('variants.edit') && (
                         <div className={styles.addValueSection}>
@@ -360,13 +486,15 @@ export function AdminVariants() {
                                 if (errors[`value-${group.id}`]) setErrors(prev => ({ ...prev, [`value-${group.id}`]: '' }));
                               }}
                               onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
+                              aria-label={`Agregar valor a ${group.name}`}
                             />
                             <button
                               className={styles.addValueBtn}
                               type="button"
                               onClick={() => addValue(group.id)}
+                              aria-label={`Agregar valor a ${group.name}`}
                             >
-                              ＋
+                              <span aria-hidden="true">＋</span>
                             </button>
                           </div>
                           {errors[`value-${group.id}`] && <span className={styles.errorText}>{errors[`value-${group.id}`]}</span>}

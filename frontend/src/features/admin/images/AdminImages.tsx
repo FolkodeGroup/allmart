@@ -11,6 +11,8 @@ import styles from './AdminImages.module.css';
 
 export function AdminImages() {
   const { products } = useAdminProducts();
+    // Estado de carga manual (usa el de contexto)
+    // Si quieres forzar skeletons, cambia el valor de isLoading en el contexto o usa una variable local diferente.
   const {
     images,
     selectedProductId,
@@ -36,6 +38,12 @@ export function AdminImages() {
   const editInputRef = useRef<HTMLInputElement>(null);
 
   // ── Edición inline de altText ──────────────────────────────────────────────
+  // Skeleton visual para cards
+
+  // Animación pulse
+  // Agrega esto al CSS global si no existe:
+  // @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingAlt, setEditingAlt] = useState('');
   const [editError, setEditError] = useState('');

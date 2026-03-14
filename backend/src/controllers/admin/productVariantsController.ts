@@ -1,3 +1,18 @@
+export async function bulkUpdate(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { variantIds, data } = req.body;
+    if (!Array.isArray(variantIds) || variantIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'Debe enviar un array de IDs de variantes.' });
+    }
+    // Actualizar cada variante
+    const results = await Promise.all(
+      variantIds.map(async (id: string) => {
+        return variantsService.updateVariant(req.params.productId, id, data);
+      })
+    );
+    sendSuccess(res, results, 200, 'Variantes actualizadas masivamente');
+  } catch (err) { next(err); }
+}
 /**
  * controllers/admin/productVariantsController.ts
  * Controlador CRUD para variantes de producto.

@@ -42,7 +42,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   setStockLevelFilter,
   total,
 }) => (
-  <nav className={styles.filters} style={{ position: 'relative', backgroundColor: "white", padding: "1rem", borderRadius: "16px", borderColor: "var(--color-border)", borderWidth: "1px", borderStyle: "solid"  }} aria-label="Filtros de productos">
+  <nav className={styles.filters} aria-label="Filtros de productos">
     <label htmlFor="search-products" className="sr-only">Buscar productos</label>
     <input
       ref={inputRef}

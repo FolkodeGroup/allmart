@@ -19,6 +19,8 @@ router.get('/',           requireRole(UserRole.ADMIN), ctrl.index);
 router.get('/:variantId',    requireRole(UserRole.ADMIN), ctrl.show);
 router.post('/',           requireRole(UserRole.ADMIN), ctrl.create);
 router.put('/:variantId',    requireRole(UserRole.ADMIN), ctrl.update);
+// Edición masiva
+router.patch('/bulk', requireRole(UserRole.ADMIN), ctrl.bulkUpdate);
 router.delete('/:variantId', requireRole(UserRole.ADMIN), ctrl.remove);
 
 export default router;

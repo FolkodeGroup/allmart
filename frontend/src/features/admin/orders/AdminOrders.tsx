@@ -400,6 +400,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 export function AdminOrders() {
   const { orders } = useAdminOrders();
 
+  const [isLoading, _setIsLoading] = useState<boolean>(false);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<OrderStatus | ''>('');
   const [filterDateFrom, setFilterDateFrom] = useState('');
@@ -436,6 +437,52 @@ export function AdminOrders() {
 
   const totalAbonados = useMemo(() => orders.filter(o => o.paymentStatus === 'abonado').length, [orders]);
 
+  const SummarySkeleton = () => (
+    <div className={styles.summaryCard}>
+      <div className={styles.skeletonSummaryIcon}></div>
+      <div className={styles.skeletonSummaryNum}></div>
+      <div className={styles.skeletonSummaryLabel}></div>
+    </div>
+  );
+
+  const TableRowSkeleton = () => (
+    <tr className={styles.row}>
+      <td className={styles.orderId}><div className={styles.skeletonOrderId}></div></td>
+      <td className={styles.orderDate}><div className={styles.skeletonOrderDate}></div></td>
+      <td>
+        <div className={styles.skeletonCustomerName}></div>
+        <div className={styles.skeletonCustomerEmail}></div>
+      </td>
+      <td className={styles.itemCount}><div className={styles.skeletonItemCount}></div></td>
+      <td className={styles.orderTotal}><div className={styles.skeletonOrderTotal}></div></td>
+      <td><div className={styles.skeletonStatusBadge}></div></td>
+      <td><div className={styles.skeletonButton}></div></td>
+    </tr>
+  );
+
+  const MobileCardSkeleton = () => (
+    <div className={styles.mobileCard}>
+      <div className={styles.mobileCardTop}>
+        <div className={styles.skeletonMobileCardId}></div>
+        <div className={styles.skeletonMobileBadge}></div>
+      </div>
+      <div className={styles.mobileCardMid}>
+        <div className={styles.mobileCardCustomer}>
+          <div className={styles.skeletonMobileAvatar}></div>
+          <div>
+            <div className={styles.skeletonMobileCardName}></div>
+            <div className={styles.skeletonMobileCardEmail}></div>
+          </div>
+        </div>
+      </div>
+      <div className={styles.mobileCardBottom}>
+        <div className={styles.skeletonMobileCardDate}></div>
+        <div className={styles.skeletonMobileCardItems}></div>
+        <div className={styles.skeletonMobileCardTotal}></div>
+      </div>
+    </div>
+  );
+
   return (
     <div className={sectionStyles.page}>
       {/* Header */}
@@ -451,36 +498,49 @@ export function AdminOrders() {
 
       {/* Resumen / Métricas rápidas */}
       <div className={styles.summary}>
-        <div className={`${styles.summaryCard} ${styles.cardTotal}`}>
-          <span className={styles.summaryIcon}>🛒</span>
-          <span className={styles.summaryNum}>{orders.length}</span>
-          <span className={styles.summaryLabel}>Total pedidos</span>
-        </div>
-        <div className={`${styles.summaryCard} ${styles.cardPendiente}`}>
-          <span className={styles.summaryIcon}>⏳</span>
-          <span className={`${styles.summaryNum} ${styles.numPendiente}`}>{summary.pendiente}</span>
-          <span className={styles.summaryLabel}>Pendientes</span>
-        </div>
-        <div className={`${styles.summaryCard} ${styles.cardPreparacion}`}>
-          <span className={styles.summaryIcon}>🔧</span>
-          <span className={`${styles.summaryNum} ${styles.numPreparacion}`}>{summary['en-preparacion']}</span>
-          <span className={styles.summaryLabel}>En preparación</span>
-        </div>
-        <div className={`${styles.summaryCard} ${styles.cardEnviado}`}>
-          <span className={styles.summaryIcon}>🚚</span>
-          <span className={`${styles.summaryNum} ${styles.numEnviado}`}>{summary.enviado}</span>
-          <span className={styles.summaryLabel}>Enviados</span>
-        </div>
-        <div className={`${styles.summaryCard} ${styles.cardEntregado}`}>
-          <span className={styles.summaryIcon}>✅</span>
-          <span className={`${styles.summaryNum} ${styles.numEntregado}`}>{summary.entregado}</span>
-          <span className={styles.summaryLabel}>Entregados</span>
-        </div>
-        <div className={`${styles.summaryCard} ${styles.cardAbonado}`}>
-          <span className={styles.summaryIcon}>💬</span>
-          <span className={`${styles.summaryNum} ${styles.numAbonado}`}>{totalAbonados}</span>
-          <span className={styles.summaryLabel}>Abonados</span>
-        </div>
+        {isLoading ? (
+          <>
+            <SummarySkeleton />
+            <SummarySkeleton />
+            <SummarySkeleton />
+            <SummarySkeleton />
+            <SummarySkeleton />
+            <SummarySkeleton />
+          </>
+        ) : (
+          <>
+            <div className={`${styles.summaryCard} ${styles.cardTotal}`}>
+              <span className={styles.summaryIcon}>🛒</span>
+              <span className={styles.summaryNum}>{orders.length}</span>
+              <span className={styles.summaryLabel}>Total pedidos</span>
+            </div>
+            <div className={`${styles.summaryCard} ${styles.cardPendiente}`}>
+              <span className={styles.summaryIcon}>⏳</span>
+              <span className={`${styles.summaryNum} ${styles.numPendiente}`}>{summary.pendiente}</span>
+              <span className={styles.summaryLabel}>Pendientes</span>
+            </div>
+            <div className={`${styles.summaryCard} ${styles.cardPreparacion}`}>
+              <span className={styles.summaryIcon}>🔧</span>
+              <span className={`${styles.summaryNum} ${styles.numPreparacion}`}>{summary['en-preparacion']}</span>
+              <span className={styles.summaryLabel}>En preparación</span>
+            </div>
+            <div className={`${styles.summaryCard} ${styles.cardEnviado}`}>
+              <span className={styles.summaryIcon}>🚚</span>
+              <span className={`${styles.summaryNum} ${styles.numEnviado}`}>{summary.enviado}</span>
+              <span className={styles.summaryLabel}>Enviados</span>
+            </div>
+            <div className={`${styles.summaryCard} ${styles.cardEntregado}`}>
+              <span className={styles.summaryIcon}>✅</span>
+              <span className={`${styles.summaryNum} ${styles.numEntregado}`}>{summary.entregado}</span>
+              <span className={styles.summaryLabel}>Entregados</span>
+            </div>
+            <div className={`${styles.summaryCard} ${styles.cardAbonado}`}>
+              <span className={styles.summaryIcon}>💬</span>
+              <span className={`${styles.summaryNum} ${styles.numAbonado}`}>{totalAbonados}</span>
+              <span className={styles.summaryLabel}>Abonados</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Filtros */}
@@ -493,12 +553,14 @@ export function AdminOrders() {
             placeholder="Buscar por cliente, email o N° de pedido..."
             value={search}
             onChange={e => setSearch(e.target.value)}
+            disabled={isLoading}
           />
         </div>
         <select
           className={styles.filterSelect}
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value as OrderStatus | '')}
+          disabled={isLoading}
         >
           <option value="">Todos los estados</option>
           {STATUS_OPTIONS.map(s => (
@@ -513,6 +575,7 @@ export function AdminOrders() {
             type="date"
             value={filterDateFrom}
             onChange={e => setFilterDateFrom(e.target.value)}
+            disabled={isLoading}
           />
           <label className={styles.dateLabel} htmlFor="order-date-to">Hasta</label>
           <input
@@ -521,9 +584,10 @@ export function AdminOrders() {
             type="date"
             value={filterDateTo}
             onChange={e => setFilterDateTo(e.target.value)}
+            disabled={isLoading}
           />
         </div>
-        {(search || filterStatus || filterDateFrom || filterDateTo) && (
+        {!isLoading && (search || filterStatus || filterDateFrom || filterDateTo) && (
           <button
             className={styles.clearBtn}
             type="button"
@@ -534,13 +598,44 @@ export function AdminOrders() {
         )}
       </div>
 
-      <p className={styles.resultsCount}>
-        {filtered.length} pedido{filtered.length !== 1 ? 's' : ''}
-        {filtered.length !== orders.length ? ` (de ${orders.length})` : ''}
-      </p>
+      {!isLoading && (
+        <p className={styles.resultsCount}>
+          {filtered.length} pedido{filtered.length !== 1 ? 's' : ''}
+          {filtered.length !== orders.length ? ` (de ${orders.length})` : ''}
+        </p>
+      )}
 
       {/* Lista de pedidos */}
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>N° Pedido</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Productos</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <TableRowSkeleton key={i} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.mobileList}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <MobileCardSkeleton key={i} />
+            ))}
+          </div>
+        </>
+      ) : filtered.length === 0 ? (
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>🛒</span>
           <p className={sectionStyles.emptyText}>No se encontraron pedidos con los filtros aplicados.</p>

@@ -1,3 +1,32 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAdminAuth } from '../../context/AdminAuthContext';
+import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
+import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
+import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
+import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
+import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
+import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
+import { useAdminProducts } from '../../context/AdminProductsContext';
+import { useAdminOrders } from '../../context/AdminOrdersContext';
+import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
+import DateRangeCard from '../../components/ui/DateRangeCard';
+import styles from './AdminDashboard.module.css';
+import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
+import MetricCard from '../../components/ui/MetricCard';
+
+// ── Función de saludo dinámico según la hora del día ──
+function getTimeBasedGreeting(): { greeting: string; emoji: string } {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 12) {
+    return { greeting: 'Buenos días', emoji: '🌅' };
+  } else if (hour >= 12 && hour < 20) {
+    return { greeting: 'Buenas tardes', emoji: '☀️' };
+  } else {
+    return { greeting: 'Buenas noches', emoji: '🌙' };
+  }
+}
+
 const sections = [
   {
     icon: '📦',
@@ -21,27 +50,14 @@ const sections = [
     color: 'warm',
   },
 ];
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAdminAuth } from '../../context/AdminAuthContext';
-import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
-import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
-import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
-import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
-import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
-import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
-import { useAdminProducts } from '../../context/AdminProductsContext';
-import { useAdminOrders } from '../../context/AdminOrdersContext';
-import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
-import DateRangeCard from '../../components/ui/DateRangeCard';
-import styles from './AdminDashboard.module.css';
-import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
-import MetricCard from '../../components/ui/MetricCard';
+
 
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
   const { products } = useAdminProducts();
+  const [isLoading] = React.useState<boolean>(false);
   const { can } = useAdminAuth();
+  const { greeting, emoji } = getTimeBasedGreeting();
   const [dateRange, setDateRange] = React.useState(() => {
     // Por defecto: últimos 7 días
     const to = new Date();
@@ -224,8 +240,61 @@ export function AdminDashboard() {
     .sort((a, b) => b.sales - a.sales)
     .slice(0, 10);
 
+  // Skeleton Components
+  const ChartSkeleton = () => (
+    <div className={styles.chartSkeleton}>
+      <div className={styles.skeletonChartBar}></div>
+      <div className={styles.skeletonChartBar}></div>
+      <div className={styles.skeletonChartBar}></div>
+    </div>
+  );
+
+  const HeatmapSkeleton = () => (
+    <div className={styles.heatmapSkeleton}>
+      {Array.from({ length: 168 }).map((_, i) => (
+        <div key={i} className={styles.skeletonHeatmapCell}></div>
+      ))}
+    </div>
+  );
+
+  const TopProductsSkeleton = () => (
+    <div className={styles.topProductsSkeleton}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className={styles.skeletonProductRow}>
+          <div className={styles.skeletonProductName}></div>
+          <div className={styles.skeletonProductValue}></div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const ClientesSkeleton = () => (
+    <div className={styles.clientesSkeleton}>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className={styles.skeletonClienteRow}>
+          <div className={styles.skeletonClienteName}></div>
+          <div className={styles.skeletonClienteValue}></div>
+          <div className={styles.skeletonClienteValue}></div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className={styles.page}>
+      {/* Welcome Banner */}
+      <div className={styles.welcomeBanner}>
+        <div className={styles.bannerContent}>
+          <h1 className={styles.bannerGreeting}>
+            {greeting}, administrador{emoji}
+          </h1>
+          <p className={styles.bannerSubtext}>
+            Continuemos gestionando tu tienda con éxito. Aquí encontrarás todas las herramientas que necesitas.
+          </p>
+        </div>
+        <div className={styles.bannerIllustration}>📦</div>
+      </div>
+
       {/* Header */}
       <div className={styles.header}>
         <div>
@@ -277,87 +346,110 @@ export function AdminDashboard() {
       </section>
 
       {/* Métricas mensuales */}
-      {can('reports.view') && (
-        <section className={styles.metricsSection}>
-          <div className={styles.metricsGrid}>
-            <MetricCard
-              title="Ingresos"
-              icon={<span>💰</span>}
-              value={ingresosActual.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-              variation={ingresosVar}
-            />
-            <MetricCard
-              title="Pedidos"
-              icon={<span>🛒</span>}
-              value={pedidosActual}
-              variation={pedidosVar}
-            />
-            <MetricCard
-              title="Nuevos Clientes"
-              icon={<span>🧑‍💼</span>}
-              value={clientesActual}
-              variation={clientesVar}
-            />
-            <MetricCard
-              title="Tasa de Conversión"
-              icon={<span>📈</span>}
-              value={conversionActual.toFixed(1) + '%'}
-              variation={conversionVar}
-            />
-          </div>
-        </section>
-      )}
+      <section className={styles.metricsSection}>
+        <div className={styles.metricsGrid}>
+          <MetricCard
+            title="Ingresos"
+            icon={<span>💰</span>}
+            value={ingresosActual.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
+            variation={ingresosVar}
+          />
+          <MetricCard
+            title="Pedidos"
+            icon={<span>🛒</span>}
+            value={pedidosActual}
+            variation={pedidosVar}
+          />
+          <MetricCard
+            title="Nuevos Clientes"
+            icon={<span>🧑‍💼</span>}
+            value={clientesActual}
+            variation={clientesVar}
+          />
+          <MetricCard
+            title="Tasa de Conversión"
+            icon={<span>📈</span>}
+            value={conversionActual.toFixed(1) + '%'}
+            variation={conversionVar}
+          />
+        </div>
+      </section>
 
       {/* Gráficos: Ventas y Distribución por Categoría */}
       <section className={styles.section}>
         <div className={styles.chartsGrid}>
           <div className={styles.chartLeft}>
-            {can('reports.view') && (
+            {isLoading ? (
+              <>
+                <ChartSkeleton />
+                <HeatmapSkeleton />
+              </>
+            ) : (
+              <>
+                {can('reports.view') && (
               <>
                 <WeeklySalesWidget data={salesData} totalSales={totalSales} />
-                {/* Mapa de calor de ventas debajo del gráfico de líneas */}
-                <SalesActivityHeatmap
-                  data={heatmapData}
-                  dayLabels={weekDays}
-                  hourLabels={hourLabels}
-                />
+                        <SalesActivityHeatmap
+                      data={heatmapData}
+                      dayLabels={weekDays}
+                      hourLabels={hourLabels}
+                    />
+              </>
+            )}
               </>
             )}
           </div>
           <div className={styles.chartRight}>
-            {can('reports.view') && (
+            {isLoading ? (
               <>
-                <CategoryDistributionChart data={categoryData} />
+                <ChartSkeleton />
                 <div className={styles.goalAndClientsRow}>
                   <div className={styles.goalCard}>
-                    <MonthlyGoalWidget ventasDelMes={ingresosActual} />
+                    <ChartSkeleton />
                   </div>
                   <div className={styles.metricCard}>
-                    <h3 className={styles.cardTitle} style={{ marginBottom: '1rem' }}>Mejores Clientes</h3>
-                    <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                      <li style={{ display: 'flex', fontWeight: 600, color: '#888', borderBottom: '1px solid #eee', paddingBottom: 4, marginBottom: 6 }}>
-                        <span style={{ flex: 2 }}>Cliente</span>
-                        <span style={{ flex: 1, textAlign: 'center' }}>Pedidos</span>
-                        <span style={{ flex: 1, textAlign: 'right' }}>Total</span>
-                      </li>
-                      {mejoresClientes.map((c, idx) => (
-                        <li key={c.email} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', borderBottom: idx < mejoresClientes.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
-                          <span style={{ flex: 2, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nombre}</span>
-                          <span style={{ flex: 1, textAlign: 'center' }}>{c.pedidos}</span>
-                          <span style={{ flex: 1, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{c.totalGastado.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
-                        </li>
-                      ))}
-                    </ol>
+                    <div className={styles.skeletonTitle} style={{ marginBottom: '1rem' }}></div>
+                    <ClientesSkeleton />
                   </div>
                 </div>
-                {/* Gráfico de barras Top 10 productos más vendidos */}
-                <BarChartTopProducts data={topProducts} />
+                <TopProductsSkeleton />
+              </>
+            ) : (
+              <>
+                {can('reports.view') && (
+              <>
+                <CategoryDistributionChart data={categoryData} />
+                    <div className={styles.goalAndClientsRow}>
+                      <div className={styles.goalCard}>
+                        <MonthlyGoalWidget ventasDelMes={ingresosActual} />
+                      </div>
+                      <div className={styles.metricCard}>
+                        <h3 className={styles.cardTitle} style={{ marginBottom: '1rem' }}>Mejores Clientes</h3>
+                        <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                          <li style={{ display: 'flex', fontWeight: 600, color: '#888', borderBottom: '1px solid #eee', paddingBottom: 4, marginBottom: 6 }}>
+                            <span style={{ flex: 2 }}>Cliente</span>
+                            <span style={{ flex: 1, textAlign: 'center' }}>Pedidos</span>
+                            <span style={{ flex: 1, textAlign: 'right' }}>Total</span>
+                          </li>
+                          {mejoresClientes.map((c, idx) => (
+                            <li key={c.email} style={{ display: 'flex', alignItems: 'center', padding: '4px 0', borderBottom: idx < mejoresClientes.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                              <span style={{ flex: 2, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.nombre}</span>
+                              <span style={{ flex: 1, textAlign: 'center' }}>{c.pedidos}</span>
+                              <span style={{ flex: 1, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{c.totalGastado.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    </div>
+                        <BarChartTopProducts data={topProducts} />
+              </>
+            )}
               </>
             )}
           </div>
         </div>
         {/* Pedidos Recientes */}
-        {can('orders.view') && <RecentOrdersWidget />}
+        {can('orders.view') && !isLoading && <RecentOrdersWidget />}
       </section>
 
       {/* Status bar */}
