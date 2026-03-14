@@ -11,6 +11,8 @@ import styles from './AdminImages.module.css';
 
 export function AdminImages() {
   const { products } = useAdminProducts();
+    // Estado de carga manual (usa el de contexto)
+    // Si quieres forzar skeletons, cambia el valor de isLoading en el contexto o usa una variable local diferente.
   const {
     images,
     selectedProductId,
@@ -36,6 +38,25 @@ export function AdminImages() {
   const editInputRef = useRef<HTMLInputElement>(null);
 
   // ── Edición inline de altText ──────────────────────────────────────────────
+  // Skeleton visual para cards
+  // Skeleton visual para cards
+  const SkeletonCard = () => (
+    <div className={styles.imageCard} style={{ minHeight: 220 }}>
+      <div className={styles.thumbnail}>
+        <div style={{ width: '100%', height: '100%', background: '#ececec', animation: 'pulse 1.2s infinite', borderRadius: 10 }} />
+      </div>
+      <div className={styles.cardInfo}>
+        <div style={{ width: '60%', height: 16, background: '#ececec', borderRadius: 4, marginBottom: 8, animation: 'pulse 1.2s infinite' }} />
+        <div style={{ width: '40%', height: 12, background: '#ececec', borderRadius: 4, marginBottom: 6, animation: 'pulse 1.2s infinite' }} />
+        <div style={{ width: '30%', height: 12, background: '#ececec', borderRadius: 4, animation: 'pulse 1.2s infinite' }} />
+      </div>
+    </div>
+  );
+
+  // Animación pulse
+  // Agrega esto al CSS global si no existe:
+  // @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingAlt, setEditingAlt] = useState('');
   const [editError, setEditError] = useState('');
