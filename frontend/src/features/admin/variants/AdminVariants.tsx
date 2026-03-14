@@ -230,7 +230,7 @@ export function AdminVariants() {
 
   // ── Render ────────────────────────────────────────────────────────
   return (
-    <div className={sectionStyles.page}>
+    <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       <ModalConfirm
         open={modalOpen}
         title="¿Eliminar variante?"

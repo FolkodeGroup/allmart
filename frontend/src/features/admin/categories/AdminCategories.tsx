@@ -53,7 +53,7 @@ export function AdminCategories() {
   };
 
   return (
-    <div className={sectionStyles.page}>
+    <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
       <div className={sectionStyles.header}>
         <div className={styles.headerTop}>

@@ -484,7 +484,7 @@ export function AdminOrders() {
   );
 
   return (
-    <div className={sectionStyles.page}>
+    <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>

@@ -303,13 +303,13 @@ export function AdminProductForm({ productId, onClose }: Props) {
 
   return (
     <div
-      className={styles.backdrop}
+      className={`${styles.backdrop} dark:bg-black/60`}
       onClick={e => e.target === e.currentTarget && onClose()}
       role="button"
       tabIndex={0}
       onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && onClose()}
     >
-      <div className={styles.panel}>
+      <div className={`${styles.panel} dark:bg-gray-800 dark:text-gray-100`}>
         <div className={styles.panelHeader}>
           <h2 className={styles.panelTitle}>
             {isEdit ? 'Editar producto' : 'Nuevo producto'}

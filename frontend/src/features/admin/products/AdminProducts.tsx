@@ -202,7 +202,7 @@ export function AdminProducts() {
   };
 
   return (
-    <main className={sectionStyles.page} aria-label="Gestión de productos">
+    <main className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`} aria-label="Gestión de productos">
       {/* Header + Exportación */}
         <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

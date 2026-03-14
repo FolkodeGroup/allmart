@@ -395,7 +395,7 @@ export function AdminReports() {
   );
 
   return (
-    <div className={`${sectionStyles.page} ${styles.reportsPage}`}>
+    <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>

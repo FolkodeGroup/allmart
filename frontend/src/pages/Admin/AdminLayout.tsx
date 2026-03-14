@@ -23,6 +23,8 @@ const ROLE_LABELS: Record<string, string> = {
   editor: 'Editor',
 };
 
+type Theme = 'light' | 'dark';
+
 export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
   const { getPendingOrdersCount } = useAdminOrders();
@@ -31,9 +33,24 @@ export function AdminLayout() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [isCollapsed, setIsCollapsed] = useState(() => {
-      const saved = localStorage.getItem('admin-sidebar-collapsed');
-      return saved ? JSON.parse(saved) : false;
-    });
+    const saved = localStorage.getItem('admin-sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Dark mode state
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem('admin-theme');
+    return stored === 'dark' ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('admin-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
   
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -127,6 +144,17 @@ export function AdminLayout() {
           </button>
         </div>
 
+        <nav className={styles.nav}>
+          {/* Dark mode toggle repositioned */}
+          <button
+            className={`${styles.darkToggle} ${isCollapsed ? styles.darkToggleCollapsed : styles.darkToggleExpanded}`}
+            aria-label="Cambiar modo oscuro"
+            type="button"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
+        </nav>
         <nav className={styles.nav}>
           {navItems.map(item => {
             const locked = item.permission !== null && !can(item.permission);
