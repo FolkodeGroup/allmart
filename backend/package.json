@@ -1,6 +1,7 @@
 {
   "name": "allmart-backend",
   "version": "1.0.0",
+  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
@@ -14,7 +15,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "seed": "ts-node-dev --transpile-only src/seed.ts",
-    "seed:prod": "node dist/seed.js"
+    "seed:prod": "node dist/seed.js",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
@@ -30,6 +32,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.17",
@@ -40,7 +43,12 @@
     "@types/pg": "^8.16.0",
     "@types/sharp": "^0.31.1",
     "@types/uuid": "^9.0.8",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
     "dotenv": "^17.3.1",
+    "eslint": "^10.0.3",
+    "globals": "^17.4.0",
+    "jiti": "^2.6.1",
     "prisma": "^7.4.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5"

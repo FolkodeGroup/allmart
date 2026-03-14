@@ -47,7 +47,7 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Escanear secretos con GitGuardian
         uses: GitGuardian/ggshield-action@v1
@@ -62,6 +62,8 @@ jobs:
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configurar Node.js 20
         uses: actions/setup-node@v4
@@ -81,6 +83,9 @@ jobs:
       - name: Instalar dependencias backend
         run: cd backend && npm ci
 
+      - name: Generar cliente Prisma backend
+        run: cd backend && npx prisma generate
+
       - name: Build backend
         run: cd backend && npm run build || echo "Build no configurado"
 
@@ -95,6 +100,8 @@ jobs:
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -144,6 +151,8 @@ jobs:
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Copiar archivos de configuración al VPS
         uses: appleboy/scp-action@v0.1.7
@@ -164,21 +173,28 @@ jobs:
           username: ${{ env.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            set -e
+            set -Eeuo pipefail
             cd ${{ env.DEPLOY_DIR }}
+
+            on_error() {
+              echo "ERROR: el despliegue falló. Estado y logs de diagnóstico:"
+              docker compose -f docker-compose.prod.yml ps || true
+              docker compose -f docker-compose.prod.yml logs --tail=200 db backend frontend || true
+            }
+            trap on_error ERR
 
             echo "Sincronizando .env de produccion..."
             
             # 1. Asegurar que .env exista
             touch .env
 
-            # 2. Función robusa para actualizar .env sin problemas de caracteres especiales
+            # 2. Función robusta para actualizar .env sin romper valores con saltos de línea
             update_env() {
               key=$1
-              value=$2
+              value=$(printf '%s' "$2" | tr -d '\r' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
               # Eliminar la línea si ya existe y añadirla limpia
               grep -v "^${key}=" .env > .env.tmp || true
-              echo "${key}=${value}" >> .env.tmp
+              printf '%s\n' "${key}=${value}" >> .env.tmp
               mv .env.tmp .env
             }
 
@@ -214,11 +230,7 @@ jobs:
               update_env "SEED_EDITOR_PASSWORD" "Editor2026!"
             fi
 
-            # Construir DATABASE_URL dinámicamente si falta
-            DB_USER_VAL=$(grep "^DB_USER=" .env | cut -d'=' -f2-)
-            DB_PASS_VAL=$(grep "^DB_PASSWORD=" .env | cut -d'=' -f2-)
-            DB_NAME_VAL=$(grep "^DB_NAME=" .env | cut -d'=' -f2-)
-            update_env "DATABASE_URL" "postgresql://${DB_USER_VAL}:${DB_PASS_VAL}@db:5432/${DB_NAME_VAL}?schema=public"
+            # No construir DATABASE_URL en host VPS: backend usa DB_* directamente via Prisma adapter
 
             echo "Descargando imagenes actualizadas..."
             docker pull ${{ env.BACKEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
@@ -226,7 +238,7 @@ jobs:
 
             echo "Reiniciando contenedores..."
             docker compose -f docker-compose.prod.yml down --remove-orphans || true
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 240
 
             echo "Estado final:"
             docker compose -f docker-compose.prod.yml ps
