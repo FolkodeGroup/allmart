@@ -28,34 +28,34 @@ import { CreateProductVariantDTO, UpdateProductVariantDTO } from '../../models/P
 export async function index(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const variants = await variantsService.getVariantsByProduct(req.params.productId);
-    sendSuccess(res, variants);
+    return sendSuccess(res, variants);
   } catch (err) { next(err); }
 }
 
 export async function show(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const variant = await variantsService.getVariantById(req.params.productId, req.params.variantId);
-    sendSuccess(res, variant);
+    return sendSuccess(res, variant);
   } catch (err) { next(err); }
 }
 
 export async function create(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const variant = await variantsService.createVariant(req.params.productId, req.body);
-    sendSuccess(res, variant, 201, 'Variante creada');
+    return sendSuccess(res, variant, 201, 'Variante creada');
   } catch (err) { next(err); }
 }
 
 export async function update(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const variant = await variantsService.updateVariant(req.params.productId, req.params.variantId, req.body as UpdateProductVariantDTO);
-    sendSuccess(res, variant, 200, 'Variante actualizada');
+    return sendSuccess(res, variant, 200, 'Variante actualizada');
   } catch (err) { next(err); }
 }
 
 export async function remove(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     await variantsService.deleteVariant(req.params.productId, req.params.variantId);
-    sendSuccess(res, null, 200, 'Variante eliminada');
+    return sendSuccess(res, null, 200, 'Variante eliminada');
   } catch (err) { next(err); }
 }

@@ -27,6 +27,10 @@ jobs:
           token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Setup Git Credentials
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Calcular puntaje y registrar actividad
         id: calcular
         uses: actions/github-script@v7
