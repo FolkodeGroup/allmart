@@ -387,6 +387,14 @@ export function AdminVariants() {
                     <div key={group.id} className={styles.groupCard}>
                       {/* Header del grupo */}
                       <div className={styles.groupHeader}>
+                        {/* Checkbox para selección múltiple */}
+                        <input
+                          type="checkbox"
+                          checked={selectedGroups.includes(group.id)}
+                          onChange={e => handleSelectGroup(group.id, e.target.checked)}
+                          className={styles.groupCheckbox}
+                          title="Seleccionar para edición masiva"
+                        />
                         {editingGroupId === group.id ? (
                           <div className={styles.editGroupNameWrapper}>
                             <input
@@ -420,62 +428,53 @@ export function AdminVariants() {
                             {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
                           </button>
                         )}
-                        {variants.map(group => (
-                          <div key={group.id} className={styles.groupCard}>
-                            {/* Header del grupo */}
-                            <div className={styles.groupHeader}>
-                              {/* Checkbox para selección múltiple */}
-                              <input
-                                type="checkbox"
-                                checked={selectedGroups.includes(group.id)}
-                                onChange={e => handleSelectGroup(group.id, e.target.checked)}
-                                className={styles.groupCheckbox}
-                                title="Seleccionar para edición masiva"
-                              />
-                              {editingGroupId === group.id ? (
-                                <div className={styles.editGroupNameWrapper}>
-                                  <input
-                                    className={`${styles.groupNameEdit} ${editGroupError ? styles.inputError : ''}`}
-                                    value={editingGroupName}
-                                    autoFocus
-                                    onChange={e => {
-                                      setEditingGroupName(e.target.value);
-                                      if (editGroupError) setEditGroupError('');
-                                    }}
-                                    onBlur={() => commitEditGroupName(group.id)}
-                                    onKeyDown={e => {
-                                      if (e.key === 'Enter') commitEditGroupName(group.id);
-                                      if (e.key === 'Escape') {
-                                        setEditingGroupId(null);
-                                        setEditingGroupName('');
-                                      }
-                                    }}
-                                  />
-                                  {editGroupError && <div className={styles.errorText}>{editGroupError}</div>}
-                                </div>
-                              ) : (
-                                <button
-                                  className={styles.groupName}
-                                  onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
-                                  type="button"
-                                  title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
-                                  style={can('variants.edit') ? undefined : { cursor: 'default' }}
-                                >
-                                  {group.name}
-                                  {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
-                                </button>
-                              )}
-                              {can('variants.delete') && (
-                                <button
-                                  className={styles.deleteGroupBtn}
-                                  onClick={() => deleteGroup(group.id)}
-                                  type="button"
-                                  title="Eliminar grupo"
-                                >
-                                  🗑️
-                                </button>
-                              )}
-                            </div>
+                        {can('variants.delete') && (
+                          <button
+                            className={styles.deleteGroupBtn}
+                            onClick={() => deleteGroup(group.id)}
+                            type="button"
+                            title="Eliminar grupo"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
+                      {/* Valores / chips */}
+                      <div className={styles.valuesContainer}>
+                        {group.values.length === 0 && (
+                          <span className={styles.noValues}>Sin valores aún</span>
+                        )}
+                        {group.values.map(val => (
+                          <span key={val} className={styles.valueChip}>
+                            {val}
+                            {can('variants.delete') && (
+                              <button
+                                type="button"
+                                className={styles.chipRemove}
+                                onClick={() => removeValue(group.id, val)}
+                                title={`Eliminar ${val}`}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                      {/* Input para agregar valor */}
+                      {can('variants.edit') && (
+                        <div className={styles.addValueSection}>
+                          <div className={styles.addValueRow}>
+                            <input
+                              className={`${styles.valueInput} ${errors[`value-${group.id}`] ? styles.inputError : ''}`}
+                              type="text"
+                              placeholder={`Agregar valor a ${group.name}...`}
+                              value={newValues[group.id] ?? ''}
+                              onChange={e => {
+                                setNewValues(prev => ({ ...prev, [group.id]: e.target.value }));
+                                if (errors[`value-${group.id}`]) setErrors(prev => ({ ...prev, [`value-${group.id}`]: '' }));
+                              }}
+                              onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
+                            />
                             <button
                               className={styles.addValueBtn}
                               type="button"
