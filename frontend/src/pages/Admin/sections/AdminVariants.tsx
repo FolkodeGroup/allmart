@@ -476,7 +476,6 @@ export function AdminVariants() {
                                 </button>
                               )}
                             </div>
-                            />
                             <button
                               className={styles.addValueBtn}
                               type="button"
