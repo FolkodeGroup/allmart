@@ -33,9 +33,11 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
 interface Props {
   productId?: string | null;
   onClose: () => void;
+  onUnsavedChanges?: (unsaved: boolean) => void;
+  resetUnsavedChanges?: () => void;
 }
 
-export function AdminProductForm({ productId, onClose }: Props) {
+export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUnsavedChanges }: Props) {
   const auth = useAdminAuth ? useAdminAuth() : null;
   const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
   const { addProduct, updateProduct, getProduct, loadProductVariants } = useAdminProducts();
@@ -53,6 +55,8 @@ export function AdminProductForm({ productId, onClose }: Props) {
   const isEdit = !!productId;
 
   const [form, setForm] = useState<Omit<AdminProduct, 'id'>>(EMPTY);
+  const [initialForm, setInitialForm] = useState<Omit<AdminProduct, 'id'>>(EMPTY);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [featureInput, setFeatureInput] = useState('');
   const [newGroupName, setNewGroupName] = useState('');
@@ -83,21 +87,24 @@ export function AdminProductForm({ productId, onClose }: Props) {
           void id;
           // Cargamos variantes por separado si es edición
           const variants = await loadProductVariants(productId);
-          setForm({ ...rest, variants: variants || [] });
-
+          const loadedForm = { ...rest, variants: variants || [] };
+          setForm(loadedForm);
+          setInitialForm(loadedForm);
           // Cargar imágenes vía API para modo edición
           loadImages(productId);
         }
       } else {
         setForm(EMPTY);
+        setInitialForm(EMPTY);
         clearImages();
       }
       setError('');
       setFieldErrors({});
+      setUnsavedChanges(false);
+      if (onUnsavedChanges) onUnsavedChanges(false);
     };
-
     initForm();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   // ── Funciones de gestión de imágenes via API ────────────────────────────────
@@ -172,6 +179,20 @@ export function AdminProductForm({ productId, onClose }: Props) {
     }
   };
 
+  // Detectar cambios pendientes
+  useEffect(() => {
+    const isChanged = JSON.stringify(form) !== JSON.stringify(initialForm);
+    setUnsavedChanges(isChanged);
+    if (onUnsavedChanges) onUnsavedChanges(isChanged);
+  }, [form, initialForm, onUnsavedChanges]);
+
+  // Permitir reset externo
+  useEffect(() => {
+    if (resetUnsavedChanges) {
+      setUnsavedChanges(false);
+    }
+  }, [resetUnsavedChanges]);
+
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
@@ -240,6 +261,8 @@ export function AdminProductForm({ productId, onClose }: Props) {
           details: { ...sanitizedForm },
         });
       }
+      setUnsavedChanges(false);
+      if (onUnsavedChanges) onUnsavedChanges(false);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar el producto');

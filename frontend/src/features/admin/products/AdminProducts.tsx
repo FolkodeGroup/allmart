@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
+// import { useNavigate } from 'react-router-dom';
 
 // Utilidad para mantener selección entre páginas
 function usePersistentSelection() {
@@ -90,6 +92,23 @@ export function AdminProducts() {
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const resetUnsavedChangesFn = () => {};
+  // Hook para advertencia de cambios sin guardar
+  const {
+    showWarning,
+    interceptNavigation,
+    confirmExit,
+    cancelExit,
+  } = useUnsavedChangesWarning({
+    active: unsavedChanges,
+    onConfirmExit: () => {
+      resetUnsavedChangesFn();
+      setUnsavedChanges(false);
+      setShowForm(false);
+      setEditId(null);
+    },
+  });
 
   const { categories } = useAdminCategories();
 
@@ -158,8 +177,29 @@ export function AdminProducts() {
       ).slice(0, 8)
     : [];
 
-  const handleNew = () => { setEditId(null); setShowForm(true); };
-  const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
+  const handleNew = () => {
+    if (unsavedChanges) {
+      interceptNavigation(() => {
+        setEditId(null);
+        setShowForm(true);
+      });
+    } else {
+      setEditId(null);
+      setShowForm(true);
+    }
+  };
+  const handleEdit = (id: string) => {
+    if (unsavedChanges) {
+      interceptNavigation(() => {
+        setEditId(id);
+        setShowForm(true);
+      });
+    } else {
+      setEditId(id);
+      setShowForm(true);
+    }
+  };
+    // Interceptar navegación por router v6
   const handleDelete = (id: string) => {
     try {
       deleteProduct(id);
@@ -333,7 +373,27 @@ export function AdminProducts() {
       {showForm && (
         <AdminProductForm
           productId={editId}
-          onClose={() => setShowForm(false)}
+          onClose={() => {
+            if (unsavedChanges) {
+              interceptNavigation(() => setShowForm(false));
+            } else {
+              setShowForm(false);
+            }
+          }}
+          onUnsavedChanges={setUnsavedChanges}
+          resetUnsavedChanges={resetUnsavedChangesFn}
+        />
+      )}
+      {/* Modal de advertencia de cambios sin guardar */}
+      {showWarning && (
+        <ModalConfirm
+          open={showWarning}
+          title="Tienes cambios sin guardar"
+          message="¿Seguro que deseas salir? Los cambios se perderán."
+          confirmText="Salir sin guardar"
+          cancelText="Cancelar"
+          onConfirm={confirmExit}
+          onCancel={cancelExit}
         />
       )}
 
