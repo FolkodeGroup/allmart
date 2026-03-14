@@ -7,14 +7,14 @@
 import { Response } from 'express';
 import { ApiResponse, PaginationMeta, PaginatedResponse } from '../types';
 
-export function sendSuccess<T>(res: Response, data: T, statusCode = 200, message?: string): void {
+export function sendSuccess<T>(res: Response, data: T, statusCode = 200, message?: string): any {
   const body: ApiResponse<T> = { success: true, data, ...(message ? { message } : {}) };
-  res.status(statusCode).json(body);
+  return res.status(statusCode).json(body);
 }
 
-export function sendError(res: Response, message: string, statusCode = 400, errors?: string[]): void {
+export function sendError(res: Response, message: string, statusCode = 400, errors?: string[]): any {
   const body: ApiResponse = { success: false, message, ...(errors ? { errors } : {}) };
-  res.status(statusCode).json(body);
+  return res.status(statusCode).json(body);
 }
 
 export function sendPaginated<T>(
