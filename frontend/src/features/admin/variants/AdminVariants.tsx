@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import { Palette, Box, Search, AlertCircle } from 'lucide-react';
+import Tooltip from '@mui/material/Tooltip';
+import { Palette, Box, Search, AlertCircle, HelpCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
@@ -250,6 +251,13 @@ export function AdminVariants() {
         <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title}>
           <span>🎨</span> Variantes
+          <Tooltip
+            title="Las variantes permiten definir atributos de productos como color, tamaño o material. Cada variante tiene un nombre (ej: 'Color') y valores asociados (ej: 'Rojo', 'Azul'). Los clientes pueden seleccionar combinaciones de variantes al comprar."
+            placement="right"
+            arrow
+          >
+            <HelpCircle size={20} className={styles.helpIcon} />
+          </Tooltip>
         </h1>
         <p className={sectionStyles.subtitle}>
           Definí grupos de variantes por producto (ej: Color, Tamaño) y gestioná sus valores.
@@ -397,9 +405,11 @@ export function AdminVariants() {
                       }}
                       onKeyDown={e => e.key === 'Enter' && addGroup()}
                     />
-                    <button className={styles.addGroupBtn} onClick={addGroup} type="button">
-                      + Agregar grupo
-                    </button>
+                    <Tooltip title="Crear un nuevo grupo de variantes para este producto (ej: Color, Tamaño, Material)" placement="top" arrow>
+                      <button className={styles.addGroupBtn} onClick={addGroup} type="button">
+                        + Agregar grupo
+                      </button>
+                    </Tooltip>
                   </div>
                   {errors.group && <span className={styles.errorText}>{errors.group}</span>}
                 </div>
@@ -441,26 +451,30 @@ export function AdminVariants() {
                             {editGroupError && <div className={styles.errorText}>{editGroupError}</div>}
                           </div>
                         ) : (
-                          <button
-                            className={styles.groupName}
-                            onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
-                            type="button"
-                            title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
-                            style={can('variants.edit') ? undefined : { cursor: 'default' }}
-                          >
-                            {group.name}
-                            {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
-                          </button>
+                          <Tooltip title={can('variants.edit') ? 'Hacer clic para editar el nombre del grupo de variantes' : 'No tienes permisos para editar'} placement="top" arrow>
+                            <button
+                              className={styles.groupName}
+                              onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
+                              type="button"
+                              title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
+                              style={can('variants.edit') ? undefined : { cursor: 'default' }}
+                            >
+                              {group.name}
+                              {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
+                            </button>
+                          </Tooltip>
                         )}
                         {can('variants.delete') && (
-                          <button
-                            className={styles.deleteGroupBtn}
-                            onClick={() => deleteGroup(group.id)}
-                            type="button"
-                            title="Eliminar grupo"
-                          >
-                            🗑️
-                          </button>
+                          <Tooltip title="Eliminar este grupo de variantes y todos sus valores asociados" placement="top" arrow>
+                            <button
+                              className={styles.deleteGroupBtn}
+                              onClick={() => deleteGroup(group.id)}
+                              type="button"
+                              title="Eliminar grupo"
+                            >
+                              🗑️
+                            </button>
+                          </Tooltip>
                         )}
                       </div>
 
@@ -473,14 +487,16 @@ export function AdminVariants() {
                           <span key={val} className={styles.valueChip}>
                             {val}
                             {can('variants.delete') && (
-                              <button
-                                type="button"
-                                className={styles.chipRemove}
-                                onClick={() => removeValue(group.id, val)}
-                                title={`Eliminar ${val}`}
-                              >\
-                                ×
-                              </button>
+                              <Tooltip title={`Eliminar el valor "${val}" de este grupo`} placement="top" arrow>
+                                <button
+                                  type="button"
+                                  className={styles.chipRemove}
+                                  onClick={() => removeValue(group.id, val)}
+                                  title={`Eliminar ${val}`}
+                                >
+                                  ×
+                                </button>
+                              </Tooltip>
                             )}
                           </span>
                         ))}
@@ -501,13 +517,15 @@ export function AdminVariants() {
                               }}
                               onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
                             />
-                            <button
-                              className={styles.addValueBtn}
-                              type="button"
-                              onClick={() => addValue(group.id)}
-                            >
-                              ＋
-                            </button>
+                            <Tooltip title={`Agregar un nuevo valor al grupo "${group.name}"`} placement="top" arrow>
+                              <button
+                                className={styles.addValueBtn}
+                                type="button"
+                                onClick={() => addValue(group.id)}
+                              >
+                                ＋
+                              </button>
+                            </Tooltip>
                           </div>
                           {errors[`value-${group.id}`] && <span className={styles.errorText}>{errors[`value-${group.id}`]}</span>}
                         </div>
