@@ -11,6 +11,7 @@ function usePersistentSelection() {
 }
 import toast from 'react-hot-toast';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
+import type { StatusFilter, StockLevelFilter } from './productsService';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { AdminProductForm } from './AdminProductForm';
@@ -84,6 +85,8 @@ export function AdminProducts() {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -124,13 +127,27 @@ export function AdminProducts() {
   // Debounce para búsqueda
   useEffect(() => {
     const timer = setTimeout(() => {
-      refreshProducts({ q: search, categoryId: categoryFilter, page: 1, limit: 10 });
+      refreshProducts({
+        q: search,
+        categoryId: categoryFilter,
+        status: statusFilter,
+        stockLevel: stockLevelFilter,
+        page: 1,
+        limit: 10
+      });
     }, 400);
     return () => clearTimeout(timer);
-  }, [search, categoryFilter, refreshProducts]);
+  }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
   const handlePageChange = (newPage: number) => {
-    refreshProducts({ q: search, categoryId: categoryFilter, page: newPage, limit: 10 });
+    refreshProducts({
+      q: search,
+      categoryId: categoryFilter,
+      status: statusFilter,
+      stockLevel: stockLevelFilter,
+      page: newPage,
+      limit: 10
+    });
   };
 
   // Sugerencias para autocompletado (usamos los productos ya cargados como base)
@@ -210,6 +227,10 @@ export function AdminProducts() {
         categoryFilter={categoryFilter}
         setCategoryFilter={setCategoryFilter}
         categories={categories}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        stockLevelFilter={stockLevelFilter}
+        setStockLevelFilter={setStockLevelFilter}
         total={total}
       />
 
