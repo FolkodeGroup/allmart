@@ -1122,3 +1122,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #544: issus 214 - Card Acceso Rápido modificada | 2026-03-12 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #564: issues 216 | 2026-03-14 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #572: 382 optimizar carga de imágenes de productos en variantes | 2026-03-14 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #573: issues 217 - se precisa npm install en el front | 2026-03-14 |
