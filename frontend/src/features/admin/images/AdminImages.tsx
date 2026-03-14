@@ -39,19 +39,6 @@ export function AdminImages() {
 
   // ── Edición inline de altText ──────────────────────────────────────────────
   // Skeleton visual para cards
-  // Skeleton visual para cards
-  const SkeletonCard = () => (
-    <div className={styles.imageCard} style={{ minHeight: 220 }}>
-      <div className={styles.thumbnail}>
-        <div style={{ width: '100%', height: '100%', background: '#ececec', animation: 'pulse 1.2s infinite', borderRadius: 10 }} />
-      </div>
-      <div className={styles.cardInfo}>
-        <div style={{ width: '60%', height: 16, background: '#ececec', borderRadius: 4, marginBottom: 8, animation: 'pulse 1.2s infinite' }} />
-        <div style={{ width: '40%', height: 12, background: '#ececec', borderRadius: 4, marginBottom: 6, animation: 'pulse 1.2s infinite' }} />
-        <div style={{ width: '30%', height: 12, background: '#ececec', borderRadius: 4, animation: 'pulse 1.2s infinite' }} />
-      </div>
-    </div>
-  );
 
   // Animación pulse
   // Agrega esto al CSS global si no existe:
