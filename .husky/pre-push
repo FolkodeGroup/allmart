@@ -1,0 +1,61 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# 1. Prisma generate (asegura que el cliente esté actualizado)
+cd backend && npx prisma generate
+PRISMA_STATUS=$?
+cd ..
+
+# 2. Lint backend
+cd backend && npm run lint
+LINT_BACKEND_STATUS=$?
+cd ..
+
+# 3. Lint frontend
+cd frontend && npm run lint
+LINT_FRONTEND_STATUS=$?
+cd ..
+
+# 4. Test backend
+cd backend && npm test -- --bail
+TEST_BACKEND_STATUS=$?
+cd ..
+
+# 5. Test frontend
+cd frontend && npm test -- --bail
+TEST_FRONTEND_STATUS=$?
+cd ..
+
+# 6. Build backend
+cd backend && npm run build
+BACKEND_STATUS=$?
+cd ..
+
+# 7. Build frontend
+cd frontend && npm run build
+FRONTEND_STATUS=$?
+cd ..
+
+if [ $PRISMA_STATUS -ne 0 ]; then
+  echo "${RED}ERROR: 'npx prisma generate' falló. Corrección requerida antes de hacer push.${NC}"
+  exit 1
+fi
+if [ $LINT_BACKEND_STATUS -ne 0 ] || [ $LINT_FRONTEND_STATUS -ne 0 ]; then
+  echo "${RED}ERROR: Lint falló en backend o frontend. Corrección requerida antes de hacer push.${NC}"
+  exit 1
+fi
+if [ $TEST_BACKEND_STATUS -ne 0 ] || [ $TEST_FRONTEND_STATUS -ne 0 ]; then
+  echo "${RED}ERROR: Tests fallaron en backend o frontend. Corrección requerida antes de hacer push.${NC}"
+  exit 1
+fi
+if [ $BACKEND_STATUS -ne 0 ] || [ $FRONTEND_STATUS -ne 0 ]; then
+  echo "${RED}ERROR: El build de backend o frontend falló. Corrige los errores antes de hacer push.${NC}"
+  exit 1
+fi
+
+echo "${GREEN}Build, lint y tests exitosos. Procediendo con el push.${NC}"
+exit 0
