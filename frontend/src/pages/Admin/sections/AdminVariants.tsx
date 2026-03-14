@@ -392,7 +392,26 @@ export function AdminVariants() {
                 /* Lista de grupos */
                 <div className={styles.groupsGrid} role="list" aria-label="Grupos de variantes">
                   {variants.map(group => (
-                    <div key={group.id} className={styles.groupCard} role="listitem" tabIndex={0} aria-label={`Grupo ${group.name}`}> 
+                    <div key={group.id} className={styles.groupCard}>
+                      {/* Imagen del producto */}
+                      <div className={styles.groupImageWrapper} style={{marginBottom: '8px'}}>
+                        {selectedProduct && selectedProduct.images && selectedProduct.images.length > 0 ? (
+                          <picture>
+                            <source srcSet={selectedProduct.images[0].replace(/\.(jpg|png)$/i, '.webp')} type="image/webp" />
+                            <img
+                              src={selectedProduct.images[0]}
+                              alt={`Imagen principal de ${selectedProduct.name}`}
+                              loading="lazy"
+                              className={styles.groupImage}
+                              style={{width: '100%', maxWidth: '120px', borderRadius: '8px', objectFit: 'cover', background: '#eee'}}
+                            />
+                          </picture>
+                        ) : (
+                          <div className={styles.groupImagePlaceholder} style={{width: '100%', maxWidth: '120px', height: '80px', borderRadius: '8px', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: '1.5rem'}}>
+                            <span aria-label="Sin imagen" role="img">🖼️</span>
+                          </div>
+                        )}
+                      </div>
                       {/* Header del grupo */}
                       <div className={styles.groupHeader}>
                         {/* Checkbox para selección múltiple */}
