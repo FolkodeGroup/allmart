@@ -50,7 +50,7 @@ const router = createBrowserRouter([
       { path: 'categorias', element: <AdminRoute requiredPermission="categories.view"><AdminCategories /></AdminRoute> },
       { path: 'pedidos', element: <AdminRoute requiredPermission="orders.view"><AdminOrders /></AdminRoute> },
       { path: 'reportes', element: <AdminRoute requiredPermission="reports.view"><AdminReports /></AdminRoute> },
-    ],;
+    ],
   },
 ]);
 
