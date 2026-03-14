@@ -1,54 +1,67 @@
 #!/bin/bash
 
-# Colores para la salida
 RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 NC='\033[0m' # Sin color
-
-echo -e "${YELLOW}Iniciando validaciones pre-push en Allmart (Beast Mode)... ${NC}"
-
-# Función para manejar errores de forma inmediata
-fail_on_error() {
-  local status=$1
-  local message=$2
-  if [ $status -ne 0 ]; then
-    echo -e "${RED}ERROR: $message${NC}"
-    exit 1
-  fi
-}
 
 ROOT_DIR=$(pwd)
 
+# Ejecuta un paso en silencio y muestra logs solo si falla.
+run_required_step() {
+  local dir=$1
+  local cmd=$2
+  local message=$3
+  local log_file
+
+  log_file=$(mktemp)
+  (cd "$dir" && eval "$cmd") >"$log_file" 2>&1
+  local status=$?
+
+  if [ $status -ne 0 ]; then
+    echo -e "${RED}ERROR: $message${NC}"
+    cat "$log_file"
+    rm -f "$log_file"
+    exit 1
+  fi
+
+  rm -f "$log_file"
+}
+
+# Ejecuta tests solo si el script existe. Si no existe, no hace nada.
+run_optional_test_step() {
+  local dir=$1
+  local message=$2
+  local log_file
+
+  log_file=$(mktemp)
+
+  if (cd "$dir" && node -e "const s=require('./package.json').scripts||{}; process.exit(s.test ? 0 : 1)") >"$log_file" 2>&1; then
+    (cd "$dir" && npm test -- --bail) >"$log_file" 2>&1
+    local status=$?
+
+    if [ $status -ne 0 ]; then
+      echo -e "${RED}ERROR: $message${NC}"
+      cat "$log_file"
+      rm -f "$log_file"
+      exit 1
+    fi
+  fi
+
+  rm -f "$log_file"
+}
+
 # 1. Prisma generate (Backend)
-echo -e "${YELLOW}Ejecutando prisma generate...${NC}"
-cd "$ROOT_DIR/backend" && npx prisma generate
-fail_on_error $? "Prisma generate falló en el backend."
+run_required_step "$ROOT_DIR/backend" "npx prisma generate" "Prisma generate falló en el backend."
 
 # 2. Lint (Backend & Frontend)
-echo -e "${YELLOW}Ejecutando lint en backend...${NC}"
-cd "$ROOT_DIR/backend" && npm run lint
-fail_on_error $? "Lint falló en el backend. Corrige los errores antes de empujar."
-
-echo -e "${YELLOW}Ejecutando lint en frontend...${NC}"
-cd "$ROOT_DIR/frontend" && npm run lint
-fail_on_error $? "Lint falló en el frontend (App.tsx u otro). Corrige el error antes de empujar."
+run_required_step "$ROOT_DIR/backend" "npm run lint" "Lint falló en el backend. Corrige los errores antes de empujar."
+run_required_step "$ROOT_DIR/frontend" "npm run lint" "Lint falló en el frontend (App.tsx u otro). Corrige el error antes de empujar."
 
 # 3. Tests (Backend & Frontend) - Opcional
-echo -e "${YELLOW}Ejecutando tests en backend (si están disponibles)...${NC}"
-cd "$ROOT_DIR/backend" && npm test -- --bail 2>/dev/null || echo -e "${YELLOW}⚠ Tests no configurados en backend, continuando...${NC}"
-
-echo -e "${YELLOW}Ejecutando tests en frontend (si están disponibles)...${NC}"
-cd "$ROOT_DIR/frontend" && npm test -- --bail 2>/dev/null || echo -e "${YELLOW}⚠ Tests no configurados en frontend, continuando...${NC}"
+run_optional_test_step "$ROOT_DIR/backend" "Los tests del backend fallaron."
+run_optional_test_step "$ROOT_DIR/frontend" "Los tests del frontend fallaron."
 
 # 4. Build (Backend & Frontend)
-echo -e "${YELLOW}Validando build de backend...${NC}"
-cd "$ROOT_DIR/backend" && npm run build
-fail_on_error $? "El build del backend falló."
+run_required_step "$ROOT_DIR/backend" "npm run build" "El build del backend falló."
+run_required_step "$ROOT_DIR/frontend" "npm run build" "El build del frontend falló."
 
-echo -e "${YELLOW}Validando build de frontend...${NC}"
-cd "$ROOT_DIR/frontend" && npm run build
-fail_on_error $? "El build del frontend falló."
-
-echo -e "${GREEN}¡Validaciones exitosas! Allmart está listo para el push.${NC}"
 exit 0
