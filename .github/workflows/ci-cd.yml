@@ -83,6 +83,9 @@ jobs:
       - name: Instalar dependencias backend
         run: cd backend && npm ci
 
+      - name: Generar cliente Prisma backend
+        run: cd backend && npx prisma generate
+
       - name: Build backend
         run: cd backend && npm run build || echo "Build no configurado"
 

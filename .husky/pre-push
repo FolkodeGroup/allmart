@@ -1,0 +1,67 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+NC='\033[0m' # Sin color
+
+ROOT_DIR=$(pwd)
+
+# Ejecuta un paso en silencio y muestra logs solo si falla.
+run_required_step() {
+  local dir=$1
+  local cmd=$2
+  local message=$3
+  local log_file
+
+  log_file=$(mktemp)
+  (cd "$dir" && eval "$cmd") >"$log_file" 2>&1
+  local status=$?
+
+  if [ $status -ne 0 ]; then
+    echo -e "${RED}ERROR: $message${NC}"
+    cat "$log_file"
+    rm -f "$log_file"
+    exit 1
+  fi
+
+  rm -f "$log_file"
+}
+
+# Ejecuta tests solo si el script existe. Si no existe, no hace nada.
+run_optional_test_step() {
+  local dir=$1
+  local message=$2
+  local log_file
+
+  log_file=$(mktemp)
+
+  if (cd "$dir" && node -e "const s=require('./package.json').scripts||{}; process.exit(s.test ? 0 : 1)") >"$log_file" 2>&1; then
+    (cd "$dir" && npm test -- --bail) >"$log_file" 2>&1
+    local status=$?
+
+    if [ $status -ne 0 ]; then
+      echo -e "${RED}ERROR: $message${NC}"
+      cat "$log_file"
+      rm -f "$log_file"
+      exit 1
+    fi
+  fi
+
+  rm -f "$log_file"
+}
+
+# 1. Prisma generate (Backend)
+run_required_step "$ROOT_DIR/backend" "npx prisma generate" "Prisma generate falló en el backend."
+
+# 2. Lint (Backend & Frontend)
+run_required_step "$ROOT_DIR/backend" "npm run lint" "Lint falló en el backend. Corrige los errores antes de empujar."
+run_required_step "$ROOT_DIR/frontend" "npm run lint" "Lint falló en el frontend (App.tsx u otro). Corrige el error antes de empujar."
+
+# 3. Tests (Backend & Frontend) - Opcional
+run_optional_test_step "$ROOT_DIR/backend" "Los tests del backend fallaron."
+run_optional_test_step "$ROOT_DIR/frontend" "Los tests del frontend fallaron."
+
+# 4. Build (Backend & Frontend)
+run_required_step "$ROOT_DIR/backend" "npm run build" "El build del backend falló."
+run_required_step "$ROOT_DIR/frontend" "npm run build" "El build del frontend falló."
+
+exit 0
