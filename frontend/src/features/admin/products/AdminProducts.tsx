@@ -18,7 +18,6 @@ import { AdminProductForm } from './AdminProductForm';
 import { AdminProductCard } from './AdminProductCard';
 import { BulkEditBar } from './BulkEditBar';
 import * as productsService from './productsService';
-import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -30,6 +29,7 @@ import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
 
 import sectionStyles from '../shared/AdminSection.module.css';
+import styles from './AdminProducts.module.css';
 import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
 import type { ExportableProduct } from '../../../utils/exportProducts';
 
@@ -40,6 +40,7 @@ export function AdminProducts() {
     const [bulkEditError, setBulkEditError] = useState<string | null>(null);
     const [showBulkConfirm, setShowBulkConfirm] = useState(false);
     const [bulkEditData, setBulkEditData] = useState<{ price?: number; stock?: number; inStock?: boolean } | null>(null);
+      const [isLoading] = useState<boolean>(false);
 
     // Simular obtención de token (ajustar según contexto real)
     const token = localStorage.getItem('token') || '';
@@ -266,9 +267,15 @@ export function AdminProducts() {
           onChange={handleSelectAllVisible}
         />
       )}
-      {loading && <LoadingSpinner message="Cargando catálogo de productos..." size="lg" />}
+      {(loading || isLoading) && (
+        <section className={styles.cardsGrid} aria-label="Listado de productos">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </section>
+      )}
 
-      {!loading && error && (
+      {!loading && !isLoading && error && (
         <EmptyState
           icon={<AlertCircle size={48} color="#ef4444" />}
           title="Error al cargar productos"
@@ -277,7 +284,7 @@ export function AdminProducts() {
         />
       )}
 
-      {!loading && !error && (products.length === 0 ? (
+      {!loading && !isLoading && !error && (products.length === 0 ? (
         <EmptyState
           icon={<PackageSearch size={48} color="#94a3b8" />}
           title="No se encontraron productos"
@@ -341,5 +348,24 @@ export function AdminProducts() {
         onCancel={() => setDeleteConfirm(null)}
       />
     </main>
+  );
+}
+
+// Skeleton visual para cards
+function SkeletonCard() {
+  return (
+    <div className={styles.card} style={{ minHeight: 220 }}>
+      <div className={styles.imageWrapper}>
+        <div style={{ width: '100%', height: '100%', background: '#ececec', animation: 'pulse 1.2s infinite', borderRadius: 10 }} />
+      </div>
+      <div className={styles.info}>
+        <div className={styles.headerRow}>
+          <div style={{ width: '60%', height: 16, background: '#ececec', borderRadius: 4, marginBottom: 8, animation: 'pulse 1.2s infinite' }} />
+          <div style={{ width: '40%', height: 12, background: '#ececec', borderRadius: 4, animation: 'pulse 1.2s infinite' }} />
+        </div>
+        <div style={{ width: '30%', height: 12, background: '#ececec', borderRadius: 4, marginBottom: 6, animation: 'pulse 1.2s infinite' }} />
+        <div style={{ width: '50%', height: 14, background: '#ececec', borderRadius: 4, animation: 'pulse 1.2s infinite' }} />
+      </div>
+    </div>
   );
 }

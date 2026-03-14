@@ -337,4 +337,176 @@
   .bannerIllustration {
     font-size: 5rem;
   }
+/* ── Skeleton / Loading Animations ── */
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeletonBase {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-card, #f5f5f5) 25%,
+    var(--color-bg-secondary, #efefef) 50%,
+    var(--color-bg-card, #f5f5f5) 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+/* Metric Card Skeleton */
+.metricCardSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--color-bg-card, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
+}
+
+.skeletonIcon {
+  composes: skeletonBase;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.skeletonTitle {
+  composes: skeletonBase;
+  height: 16px;
+  width: 60%;
+}
+
+.skeletonValue {
+  composes: skeletonBase;
+  height: 32px;
+  width: 80%;
+}
+
+/* Chart Skeleton */
+.chartSkeleton {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 1rem;
+  height: 300px;
+  padding: 2rem 1rem;
+  background: var(--color-bg-card, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
+}
+
+.skeletonChartBar {
+  composes: skeletonBase;
+  width: 100%;
+  max-width: 60px;
+  height: calc(100% - 2rem);
+  border-radius: 6px;
+}
+
+/* Heatmap Skeleton */
+.heatmapSkeleton {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 4px;
+  padding: 1.5rem;
+  background: var(--color-bg-card, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
+  margin-top: 1.5rem;
+}
+
+.skeletonHeatmapCell {
+  composes: skeletonBase;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  min-height: 30px;
+}
+
+/* Top Products Skeleton */
+.topProductsSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--color-bg-card, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
+  margin-top: 1.5rem;
+}
+
+.skeletonProductRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skeletonProductRow:last-child {
+  border-bottom: none;
+}
+
+.skeletonProductName {
+  composes: skeletonBase;
+  height: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.skeletonProductValue {
+  composes: skeletonBase;
+  height: 16px;
+  width: 80px;
+}
+
+/* Clientes Skeleton */
+.clientesSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.skeletonClienteRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skeletonClienteRow:last-child {
+  border-bottom: none;
+}
+
+.skeletonClienteName {
+  composes: skeletonBase;
+  height: 14px;
+  flex: 2;
+  min-width: 0;
+}
+
+.skeletonClienteValue {
+  composes: skeletonBase;
+  height: 14px;
+  flex: 1;
 }
