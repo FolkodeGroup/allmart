@@ -17,6 +17,13 @@
 
 set -euo pipefail
 
+on_error() {
+  warn "El despliegue falló. Estado y logs de diagnóstico:"
+  docker compose -f "$COMPOSE_FILE" ps || true
+  docker compose -f "$COMPOSE_FILE" logs --tail=200 db backend frontend || true
+}
+trap on_error ERR
+
 # ─── Configuración ────────────────────────────────────────────────────────────
 DEPLOY_DIR="/opt/allmart"
 COMPOSE_FILE="docker-compose.prod.yml"
@@ -53,9 +60,28 @@ if docker network ls --format '{{.Name}}' | grep -q '^allmart_allmart-prod-netwo
   docker network rm allmart_allmart-prod-network || warn "No se pudo eliminar la red allmart_allmart-prod-network"
 fi
 
+update_env() {
+  key=$1
+  value=$(printf '%s' "$2" | tr -d '\r' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+  grep -v "^${key}=" .env > .env.tmp || true
+  printf '%s\n' "${key}=${value}" >> .env.tmp
+  mv .env.tmp .env
+}
+
 # ─── Verificar que existe el .env ─────────────────────────────────────────────
 if [ ! -f ".env" ]; then
   error "No se encontró .env en $DEPLOY_DIR. Crea uno a partir de .env.vps.example"
+fi
+
+if grep -q '^DB_USER=' .env && grep -q '^DB_PASSWORD=' .env && grep -q '^DB_NAME=' .env; then
+  DB_USER_VAL=$(grep '^DB_USER=' .env | cut -d'=' -f2-)
+  DB_PASS_VAL=$(grep '^DB_PASSWORD=' .env | cut -d'=' -f2-)
+  DB_NAME_VAL=$(grep '^DB_NAME=' .env | cut -d'=' -f2-)
+
+  DB_USER_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_USER_VAL")
+  DB_PASS_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_PASS_VAL")
+  DB_NAME_ENC=$(node -e 'process.stdout.write(encodeURIComponent(process.argv[1]))' "$DB_NAME_VAL")
+  update_env "DATABASE_URL" "postgresql://${DB_USER_ENC}:${DB_PASS_ENC}@db:5432/${DB_NAME_ENC}?schema=public"
 fi
 
 # ─── Verificar que existe docker-compose.prod.yml ─────────────────────────────
@@ -75,7 +101,7 @@ docker compose -f "$COMPOSE_FILE" down --remove-orphans || warn "No había conte
 
 # ─── Levantar los nuevos contenedores ─────────────────────────────────────────
 log "Levantando contenedores de producción..."
-docker compose -f "$COMPOSE_FILE" up -d
+docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 240
 
 # ─── Verificar que los contenedores están corriendo ───────────────────────────
 log "Esperando que los servicios estén listos (30s)..."
