@@ -1,7 +1,28 @@
 /* ============================================
    ALLMART TYPE DEFINITIONS
    ============================================ */
+export type SearchItem =
+  | { id: string; label: string; type: "product"; slug: string }
+  | { id: string; label: string; type: "order" }
+  | { id: string; label: string; type: "user" };
 
+export interface ProductSearch {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface OrderSearch {
+  id: string;
+}
+
+export interface UserSearch {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  isActive: boolean;
+}
 export interface Product {
   id: string;
   name: string;
