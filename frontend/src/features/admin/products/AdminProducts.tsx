@@ -206,8 +206,8 @@ export function AdminProducts() {
       {/* Header + Exportación */}
         <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
-          <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
+          <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
+          <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
       </div>
       {/* Filtros */}
       <ProductFilters
