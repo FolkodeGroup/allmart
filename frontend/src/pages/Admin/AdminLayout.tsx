@@ -144,8 +144,8 @@ export function AdminLayout() {
           </button>
         </div>
 
-        <nav className={styles.nav}>
-          {/* Dark mode toggle repositioned */}
+        {/* Agrupación: Dark mode + navItems en un solo bloque */}
+        <div className={styles.navGroup}>
           <button
             className={`${styles.darkToggle} ${isCollapsed ? styles.darkToggleCollapsed : styles.darkToggleExpanded}`}
             aria-label="Cambiar modo oscuro"
@@ -154,52 +154,52 @@ export function AdminLayout() {
           >
             {theme === 'dark' ? '🌙' : '☀️'}
           </button>
-        </nav>
-        <nav className={styles.nav}>
-          {navItems.map(item => {
-            const locked = item.permission !== null && !can(item.permission);
-            let badgeCount: number | null = null;
-            if (item.badge === 'pending') {
-              badgeCount = getPendingOrdersCount();
-            } else if (item.badge === 'lowStock') {
-              badgeCount = getLowStockCount();
-            }
-            const commonProps = {
-              title: isCollapsed ? item.label : '',
-              'data-label': item.label,
-              onClick: () => setIsMobileOpen(false) // Cierra drawer al clickear en mobile
-            };
-            if (locked) {
+          <nav className={styles.nav}>
+            {navItems.map(item => {
+              const locked = item.permission !== null && !can(item.permission);
+              let badgeCount: number | null = null;
+              if (item.badge === 'pending') {
+                badgeCount = getPendingOrdersCount();
+              } else if (item.badge === 'lowStock') {
+                badgeCount = getLowStockCount();
+              }
+              const commonProps = {
+                title: isCollapsed ? item.label : '',
+                'data-label': item.label,
+                onClick: () => setIsMobileOpen(false)
+              };
+              if (locked) {
+                return (
+                  <span
+                    key={item.to}
+                    {...commonProps}
+                    className={`${styles.navItem} ${styles.navItemLocked}`}
+                  >
+                    <span className={styles.navIcon}>{item.icon}</span>
+                    <span className={styles.navLabel}>{item.label}</span>
+                    <span className={styles.navLockIcon}>🔒</span>
+                  </span>
+                );
+              }
               return (
-                <span
+                <NavLink
                   key={item.to}
                   {...commonProps}
-                  className={`${styles.navItem} ${styles.navItemLocked}`}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+                  }
                 >
                   <span className={styles.navIcon}>{item.icon}</span>
                   <span className={styles.navLabel}>{item.label}</span>
-                  <span className={styles.navLockIcon}>🔒</span>
-                </span>
+                  {badgeCount !== null && badgeCount > 0 && (
+                    <span className={styles.navBadge}>{badgeCount}</span>
+                  )}
+                </NavLink>
               );
-            }
-            return (
-              <NavLink
-                key={item.to}
-                {...commonProps}
-                to={item.to}
-                className={({ isActive }) =>
-                  `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
-                }
-              >
-                <span className={styles.navIcon}>{item.icon}</span>
-                <span className={styles.navLabel}>{item.label}</span>
-                {badgeCount !== null && badgeCount > 0 && (
-                  <span className={styles.navBadge}>{badgeCount}</span>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
+            })}
+          </nav>
+        </div>
 
         <div className={styles.sidebarFooter} ref={dropdownRef}>
           <button
