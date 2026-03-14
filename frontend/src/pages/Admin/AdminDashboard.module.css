@@ -281,7 +281,7 @@
 }
 
 .skeletonIcon {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   width: 40px;
   height: 40px;
   border-radius: 8px;
@@ -294,13 +294,13 @@
 }
 
 .skeletonTitle {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 60%;
 }
 
 .skeletonValue {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 32px;
   width: 80%;
 }
@@ -320,7 +320,7 @@
 }
 
 .skeletonChartBar {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   width: 100%;
   max-width: 60px;
   height: calc(100% - 2rem);
@@ -341,7 +341,7 @@
 }
 
 .skeletonHeatmapCell {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   aspect-ratio: 1;
   border-radius: 4px;
   min-height: 30px;
@@ -374,14 +374,14 @@
 }
 
 .skeletonProductName {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   flex: 1;
   min-width: 0;
 }
 
 .skeletonProductValue {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 80px;
 }
@@ -407,14 +407,14 @@
 }
 
 .skeletonClienteName {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 14px;
   flex: 2;
   min-width: 0;
 }
 
 .skeletonClienteValue {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 14px;
   flex: 1;
 }

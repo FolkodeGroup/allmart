@@ -241,16 +241,6 @@ export function AdminDashboard() {
     .slice(0, 10);
 
   // Skeleton Components
-  const MetricCardSkeleton = () => (
-    <div className={styles.metricCardSkeleton}>
-      <div className={styles.skeletonIcon}></div>
-      <div className={styles.skeletonContent}>
-        <div className={styles.skeletonTitle}></div>
-        <div className={styles.skeletonValue}></div>
-      </div>
-    </div>
-  );
-
   const ChartSkeleton = () => (
     <div className={styles.chartSkeleton}>
       <div className={styles.skeletonChartBar}></div>
