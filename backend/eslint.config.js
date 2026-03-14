@@ -24,12 +24,20 @@ export default defineConfig([
       "@typescript-eslint": tseslint
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off"
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+      "no-unused-vars": "off"
     }
   },
   {
-    ignores: ["dist/", "node_modules/"]
+    files: ["**/*.js", "**/*.cjs", "**/*.mjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.es2021
+      }
+    }
+  },
+  {
+    ignores: ["dist/", "node_modules/", "prisma.config.ts", "src/index.js"]
   }
 ]);
