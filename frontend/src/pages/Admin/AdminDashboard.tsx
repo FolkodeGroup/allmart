@@ -1,3 +1,32 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAdminAuth } from '../../context/AdminAuthContext';
+import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
+import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
+import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
+import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
+import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
+import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
+import { useAdminProducts } from '../../context/AdminProductsContext';
+import { useAdminOrders } from '../../context/AdminOrdersContext';
+import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
+import DateRangeCard from '../../components/ui/DateRangeCard';
+import styles from './AdminDashboard.module.css';
+import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
+import MetricCard from '../../components/ui/MetricCard';
+
+// ── Función de saludo dinámico según la hora del día ──
+function getTimeBasedGreeting(): { greeting: string; emoji: string } {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 12) {
+    return { greeting: 'Buenos días', emoji: '🌅' };
+  } else if (hour >= 12 && hour < 20) {
+    return { greeting: 'Buenas tardes', emoji: '☀️' };
+  } else {
+    return { greeting: 'Buenas noches', emoji: '🌙' };
+  }
+}
+
 const sections = [
   {
     icon: '📦',
@@ -21,28 +50,14 @@ const sections = [
     color: 'warm',
   },
 ];
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAdminAuth } from '../../context/AdminAuthContext';
-import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
-import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
-import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
-import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
-import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
-import MonthlyGoalWidget from '../../components/ui/MonthlyGoalWidget';
-import { useAdminProducts } from '../../context/AdminProductsContext';
-import { useAdminOrders } from '../../context/AdminOrdersContext';
-import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
-import DateRangeCard from '../../components/ui/DateRangeCard';
-import styles from './AdminDashboard.module.css';
-import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
-import MetricCard from '../../components/ui/MetricCard';
+
 
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
   const { products } = useAdminProducts();
   const [isLoading] = React.useState<boolean>(false);
   const { can } = useAdminAuth();
+  const { greeting, emoji } = getTimeBasedGreeting();
   const [dateRange, setDateRange] = React.useState(() => {
     // Por defecto: últimos 7 días
     const to = new Date();
@@ -226,16 +241,6 @@ export function AdminDashboard() {
     .slice(0, 10);
 
   // Skeleton Components
-  const MetricCardSkeleton = () => (
-    <div className={styles.metricCardSkeleton}>
-      <div className={styles.skeletonIcon}></div>
-      <div className={styles.skeletonContent}>
-        <div className={styles.skeletonTitle}></div>
-        <div className={styles.skeletonValue}></div>
-      </div>
-    </div>
-  );
-
   const ChartSkeleton = () => (
     <div className={styles.chartSkeleton}>
       <div className={styles.skeletonChartBar}></div>
@@ -277,6 +282,19 @@ export function AdminDashboard() {
 
   return (
     <div className={styles.page}>
+      {/* Welcome Banner */}
+      <div className={styles.welcomeBanner}>
+        <div className={styles.bannerContent}>
+          <h1 className={styles.bannerGreeting}>
+            {greeting}, administrador{emoji}
+          </h1>
+          <p className={styles.bannerSubtext}>
+            Continuemos gestionando tu tienda con éxito. Aquí encontrarás todas las herramientas que necesitas.
+          </p>
+        </div>
+        <div className={styles.bannerIllustration}>📦</div>
+      </div>
+
       {/* Header */}
       <div className={styles.header}>
         <div>
