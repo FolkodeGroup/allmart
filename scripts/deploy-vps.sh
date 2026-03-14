@@ -17,6 +17,13 @@
 
 set -euo pipefail
 
+on_error() {
+  warn "El despliegue falló. Estado y logs de diagnóstico:"
+  docker compose -f "$COMPOSE_FILE" ps || true
+  docker compose -f "$COMPOSE_FILE" logs --tail=200 db backend frontend || true
+}
+trap on_error ERR
+
 # ─── Configuración ────────────────────────────────────────────────────────────
 DEPLOY_DIR="/opt/allmart"
 COMPOSE_FILE="docker-compose.prod.yml"
@@ -53,10 +60,20 @@ if docker network ls --format '{{.Name}}' | grep -q '^allmart_allmart-prod-netwo
   docker network rm allmart_allmart-prod-network || warn "No se pudo eliminar la red allmart_allmart-prod-network"
 fi
 
+update_env() {
+  key=$1
+  value=$(printf '%s' "$2" | tr -d '\r' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+  grep -v "^${key}=" .env > .env.tmp || true
+  printf '%s\n' "${key}=${value}" >> .env.tmp
+  mv .env.tmp .env
+}
+
 # ─── Verificar que existe el .env ─────────────────────────────────────────────
 if [ ! -f ".env" ]; then
   error "No se encontró .env en $DEPLOY_DIR. Crea uno a partir de .env.vps.example"
 fi
+
+# No construir DATABASE_URL en host VPS: backend usa DB_* directamente via Prisma adapter
 
 # ─── Verificar que existe docker-compose.prod.yml ─────────────────────────────
 if [ ! -f "$COMPOSE_FILE" ]; then
@@ -75,7 +92,7 @@ docker compose -f "$COMPOSE_FILE" down --remove-orphans || warn "No había conte
 
 # ─── Levantar los nuevos contenedores ─────────────────────────────────────────
 log "Levantando contenedores de producción..."
-docker compose -f "$COMPOSE_FILE" up -d
+docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 240
 
 # ─── Verificar que los contenedores están corriendo ───────────────────────────
 log "Esperando que los servicios estén listos (30s)..."

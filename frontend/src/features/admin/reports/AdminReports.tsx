@@ -256,14 +256,15 @@ export function AdminReports() {
   const { orders } = useAdminOrders();
   const [isLoading, _setIsLoading] = useState<boolean>(false);
   const [period, setPeriod] = useState<Period>('30d');
+  const [now] = useState(() => Date.now());
 
   /* ── Ventana de fechas ── */
   const periodOrders = useMemo(() => {
     if (period === 'all') return orders;
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-    const cutoff = Date.now() - days * 86400000;
+    const cutoff = now - days * 86400000;
     return orders.filter(o => new Date(o.createdAt).getTime() >= cutoff);
-  }, [orders, period]);
+  }, [orders, period, now]);
 
   const activeOrders = useMemo(
     () => periodOrders.filter(o => o.status !== 'cancelado'),
@@ -343,13 +344,12 @@ export function AdminReports() {
   const prevPeriodRevenue = useMemo(() => {
     if (period === 'all') return null;
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-    const now = Date.now();
     const prevOrders = orders.filter(o => {
       const t = new Date(o.createdAt).getTime();
       return t >= now - days * 2 * 86400000 && t < now - days * 86400000 && o.status !== 'cancelado';
     });
     return prevOrders.reduce((s, o) => s + o.total, 0);
-  }, [orders, period]);
+  }, [orders, period, now]);
 
   const revenueChange = prevPeriodRevenue !== null && prevPeriodRevenue > 0
     ? ((kpis.totalRevenue - prevPeriodRevenue) / prevPeriodRevenue) * 100
