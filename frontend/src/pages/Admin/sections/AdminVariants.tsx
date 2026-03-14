@@ -33,11 +33,64 @@ export function AdminVariants() {
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+      // Estado para modal de edición masiva
+      const [showBulkEdit, setShowBulkEdit] = useState(false);
+      const [bulkEditName, setBulkEditName] = useState('');
+      const [bulkEditValues, setBulkEditValues] = useState('');
+      const [bulkEditStatus, setBulkEditStatus] = useState('');
+      const handleOpenBulkEdit = () => setShowBulkEdit(true);
+      const handleCloseBulkEdit = () => {
+        setShowBulkEdit(false);
+        setBulkEditName('');
+        setBulkEditValues('');
+        setBulkEditStatus('');
+      };
+      const handleBulkEditSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedProductId || selectedGroups.length === 0) {
+          toast.error('No hay grupos seleccionados');
+          return;
+        }
+        const confirm = window.confirm(`¿Estás seguro de aplicar los cambios a ${selectedGroups.length} variantes? Esta acción no se puede deshacer.`);
+        if (!confirm) return;
+        try {
+          // Preparar datos
+          const valuesArr = bulkEditValues
+            ? bulkEditValues.split(',').map(v => v.trim()).filter(Boolean)
+            : undefined;
+          // Actualizar cada grupo seleccionado
+          await Promise.all(selectedGroups.map(async groupId => {
+            await updateVariant(selectedProductId, groupId, {
+              name: bulkEditName || undefined,
+              values: valuesArr,
+              // Estado: si el backend lo soporta, agregar aquí
+            });
+          }));
+          setShowBulkEdit(false);
+          setBulkEditName('');
+          setBulkEditValues('');
+          setBulkEditStatus('');
+          setSelectedGroups([]);
+          toast.success('¡Edición masiva aplicada con éxito!');
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Error desconocido';
+          toast.error(`Error en edición masiva: ${message}`);
+        }
+      };
 
   // Edición inline del nombre de grupo
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
   const [editGroupError, setEditGroupError] = useState('');
+
+  // Selección múltiple de grupos
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+
+  const handleSelectGroup = (groupId: string, checked: boolean) => {
+    setSelectedGroups(prev =>
+      checked ? [...prev, groupId] : prev.filter(id => id !== groupId)
+    );
+  };
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -230,6 +283,59 @@ export function AdminVariants() {
                 <div className={sectionStyles.errorState}>
                   <AlertCircle size={20} />
                   <p>Error: {apiError}</p>
+                      {/* Botón para edición masiva */}
+                      {selectedGroups.length > 0 && (
+                        <div style={{ marginBottom: '1rem', textAlign: 'right' }}>
+                          <button
+                            className={styles.bulkEditBtn}
+                            type="button"
+                            onClick={handleOpenBulkEdit}
+                          >
+                            Editar seleccionados ({selectedGroups.length})
+                          </button>
+                        </div>
+                      )}
+                      {/* Modal de edición masiva */}
+                      {showBulkEdit && (
+                        <div className={styles.bulkEditModalOverlay}>
+                          <div className={styles.bulkEditModal}>
+                            <h3>Edición masiva de variantes</h3>
+                            <form onSubmit={handleBulkEditSubmit}>
+                              <div className={styles.bulkEditField}>
+                                <label>Nombre (opcional):</label>
+                                <input
+                                  type="text"
+                                  value={bulkEditName}
+                                  onChange={e => setBulkEditName(e.target.value)}
+                                  placeholder="Nuevo nombre para todos"
+                                />
+                              </div>
+                              <div className={styles.bulkEditField}>
+                                <label>Valores (separados por coma):</label>
+                                <input
+                                  type="text"
+                                  value={bulkEditValues}
+                                  onChange={e => setBulkEditValues(e.target.value)}
+                                  placeholder="Ej: Rojo, Verde, Azul"
+                                />
+                              </div>
+                              <div className={styles.bulkEditField}>
+                                <label>Estado (opcional):</label>
+                                <input
+                                  type="text"
+                                  value={bulkEditStatus}
+                                  onChange={e => setBulkEditStatus(e.target.value)}
+                                  placeholder="Activo/Inactivo"
+                                />
+                              </div>
+                              <div className={styles.bulkEditActions}>
+                                <button type="submit" className={styles.bulkEditApplyBtn}>Aplicar cambios</button>
+                                <button type="button" className={styles.bulkEditCancelBtn} onClick={handleCloseBulkEdit}>Cancelar</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      )}
                 </div>
               )}
               <div className={styles.contentHeader}>
@@ -314,54 +420,62 @@ export function AdminVariants() {
                             {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
                           </button>
                         )}
-                        {can('variants.delete') && (
-                          <button
-                            className={styles.deleteGroupBtn}
-                            onClick={() => deleteGroup(group.id)}
-                            type="button"
-                            title="Eliminar grupo"
-                          >
-                            🗑️
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Valores / chips */}
-                      <div className={styles.valuesContainer}>
-                        {group.values.length === 0 && (
-                          <span className={styles.noValues}>Sin valores aún</span>
-                        )}
-                        {group.values.map(val => (
-                          <span key={val} className={styles.valueChip}>
-                            {val}
-                            {can('variants.delete') && (
-                              <button
-                                type="button"
-                                className={styles.chipRemove}
-                                onClick={() => removeValue(group.id, val)}
-                                title={`Eliminar ${val}`}
-                              >\
-                                ×
-                              </button>
-                            )}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Input para agregar valor */}
-                      {can('variants.edit') && (
-                        <div className={styles.addValueSection}>
-                          <div className={styles.addValueRow}>
-                            <input
-                              className={`${styles.valueInput} ${errors[`value-${group.id}`] ? styles.inputError : ''}`}
-                              type="text"
-                              placeholder={`Agregar valor a ${group.name}...`}
-                              value={newValues[group.id] ?? ''}
-                              onChange={e => {
-                                setNewValues(prev => ({ ...prev, [group.id]: e.target.value }));
-                                if (errors[`value-${group.id}`]) setErrors(prev => ({ ...prev, [`value-${group.id}`]: '' }));
-                              }}
-                              onKeyDown={e => e.key === 'Enter' && addValue(group.id)}
+                        {variants.map(group => (
+                          <div key={group.id} className={styles.groupCard}>
+                            {/* Header del grupo */}
+                            <div className={styles.groupHeader}>
+                              {/* Checkbox para selección múltiple */}
+                              <input
+                                type="checkbox"
+                                checked={selectedGroups.includes(group.id)}
+                                onChange={e => handleSelectGroup(group.id, e.target.checked)}
+                                className={styles.groupCheckbox}
+                                title="Seleccionar para edición masiva"
+                              />
+                              {editingGroupId === group.id ? (
+                                <div className={styles.editGroupNameWrapper}>
+                                  <input
+                                    className={`${styles.groupNameEdit} ${editGroupError ? styles.inputError : ''}`}
+                                    value={editingGroupName}
+                                    autoFocus
+                                    onChange={e => {
+                                      setEditingGroupName(e.target.value);
+                                      if (editGroupError) setEditGroupError('');
+                                    }}
+                                    onBlur={() => commitEditGroupName(group.id)}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter') commitEditGroupName(group.id);
+                                      if (e.key === 'Escape') {
+                                        setEditingGroupId(null);
+                                        setEditingGroupName('');
+                                      }
+                                    }}
+                                  />
+                                  {editGroupError && <div className={styles.errorText}>{editGroupError}</div>}
+                                </div>
+                              ) : (
+                                <button
+                                  className={styles.groupName}
+                                  onClick={() => can('variants.edit') && startEditGroupName(group.id, group.name)}
+                                  type="button"
+                                  title={can('variants.edit') ? 'Hacé click para editar el nombre' : undefined}
+                                  style={can('variants.edit') ? undefined : { cursor: 'default' }}
+                                >
+                                  {group.name}
+                                  {can('variants.edit') && <span className={styles.editHint}>✏️</span>}
+                                </button>
+                              )}
+                              {can('variants.delete') && (
+                                <button
+                                  className={styles.deleteGroupBtn}
+                                  onClick={() => deleteGroup(group.id)}
+                                  type="button"
+                                  title="Eliminar grupo"
+                                >
+                                  🗑️
+                                </button>
+                              )}
+                            </div>
                             />
                             <button
                               className={styles.addValueBtn}
