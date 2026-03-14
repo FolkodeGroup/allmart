@@ -14,7 +14,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "seed": "ts-node-dev --transpile-only src/seed.ts",
-    "seed:prod": "node dist/seed.js"
+    "seed:prod": "node dist/seed.js",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
