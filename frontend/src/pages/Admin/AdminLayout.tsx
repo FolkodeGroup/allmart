@@ -45,11 +45,6 @@ export function AdminLayout() {
 
   useEffect(() => {
     localStorage.setItem('admin-theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
   }, [theme]);
   
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -78,7 +73,7 @@ export function AdminLayout() {
   };
 
   return (
-    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''}`}>
+    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'dark' : ''}`}>
       <Toaster
         position="top-right"
         reverseOrder={false}

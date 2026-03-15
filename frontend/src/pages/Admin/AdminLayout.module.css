@@ -23,7 +23,7 @@
 }
 
 /* ── Dark Mode Variables ── */
-:global(.dark) {
+.wrapper.dark {
   --color-bg-primary: #232a2f;
   --color-bg-secondary: #181c1f;
   --color-bg-card: #232a2f;
