@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Hook para bloquear navegación si hay cambios sin guardar.
@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
  * @param onBlock Callback para mostrar advertencia/modal.
  */
 export function useBlocker(shouldBlock: boolean, onBlock: (callback: () => void) => void) {
-  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,10 +22,6 @@ export function useBlocker(shouldBlock: boolean, onBlock: (callback: () => void)
 
   useEffect(() => {
     if (!shouldBlock) return;
-    const handleNavigate = (e: any) => {
-      e.preventDefault();
-      onBlock(() => navigate(e.target.href));
-    };
     // Aquí podrías interceptar clicks en enlaces, etc.
     // Para rutas internas, React Router v6 no expone un blocker nativo,
     // pero puedes interceptar cambios de location manualmente.
