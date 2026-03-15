@@ -496,6 +496,17 @@
   border-color: var(--color-primary);
 }
 
+/* ── Help Icon ── */
+.helpIcon {
+  margin-left: var(--space-2);
+  color: var(--color-text-tertiary);
+  cursor: help;
+  transition: color 0.15s;
+}
+.helpIcon:hover {
+  color: var(--color-primary);
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .layout {

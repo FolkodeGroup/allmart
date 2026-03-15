@@ -56,7 +56,7 @@
   font-family: var(--font-ui);
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 80px;
-  transition: all 0.3s ease;
+  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -463,10 +463,10 @@
 .content {
   flex: 1;
   padding: var(--space-8);
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  max-width: 100%;
+  position: relative; 
+  min-height: 0; 
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Nav locked (sin permiso) ── */
