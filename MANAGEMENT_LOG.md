@@ -1201,3 +1201,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #556: 202 dashboard banner de bienvenida personalizado | 2026-03-14 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #547: 201 layout esqueleto de carga skeletons para secciones | 2026-03-14 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #578: 🔄 Actualización automática de puntajes semanal | 2026-03-15 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #581: 370 implementar confirmación de cambios antes de salir | 2026-03-15 |
