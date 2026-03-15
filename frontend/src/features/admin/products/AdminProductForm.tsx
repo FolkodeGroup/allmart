@@ -56,7 +56,7 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
 
   const [form, setForm] = useState<Omit<AdminProduct, 'id'>>(EMPTY);
   const [initialForm, setInitialForm] = useState<Omit<AdminProduct, 'id'>>(EMPTY);
-  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [, setUnsavedChanges] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [featureInput, setFeatureInput] = useState('');
   const [newGroupName, setNewGroupName] = useState('');
