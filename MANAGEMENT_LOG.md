@@ -1057,6 +1057,19 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #355: Optimizar visualización de productos en tarjetas | 2026-03-10 |
 | dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #354: Añadir paginación a la lista de productos | 2026-03-10 |
 | dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #353: Mejorar filtro de búsqueda por nombre y SKU | 2026-03-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #528: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #527: Cambios realizados: | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #526: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #524: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #522: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #520: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #517: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #516: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #515: He integrado la paginación y la búsqueda en la gestión de productos y… | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #514: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #513: 467 optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #512: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #511: 🔄 Actualización automática de puntajes semanal | 2026-03-11 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #510: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #509: La refactorización modular está completamente funcional: | 2026-03-11 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #508: 🔄 Registrar puntaje de gestión | 2026-03-11 |
@@ -1079,6 +1092,25 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 5 | Apertura de PR | PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #490: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #527: Cambios realizados: | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #526: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #525: Se refactorizan los componentes y sus css para que sean responsivos p… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #524: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #523: Se implementa funcion para seleccionar multiples productos mediante c… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #522: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #521: Se implementan cambios como modal de confirmacion para eliminar produ… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #520: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #519: 376 optimizar visualización de productos y variantes en panel lateral | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #518: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #517: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #516: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #515: He integrado la paginación y la búsqueda en la gestión de productos y… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #514: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #513: 467 optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #512: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #511: 🔄 Actualización automática de puntajes semanal | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #510: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #509: La refactorización modular está completamente funcional: | 2026-03-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #508: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #507: ¡Seguridad reforzada! He implementado una serie de medidas proactivas… | 2026-03-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #506: 🔄 Registrar puntaje de gestión | 2026-03-11 |

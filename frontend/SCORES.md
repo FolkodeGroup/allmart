@@ -1,16 +1,117 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 10958 |
-| Nahuel-Dalesio | 1510 |
-| FedericoPaal | 900 |
-| agustin-ovejero | 485 |
-| CelinaJP | 320 |
-| GitHub Copilot | 20 |
+| dgimenezdeveloper | 13013 |
+| FedericoPaal | 1800 |
+| Nahuel-Dalesio | 1630 |
+| CelinaJP | 940 |
+| agustin-ovejero | 570 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| agustin-ovejero | 15 | Issue | Dashboard: Banner de Bienvenida Personalizado | 2026-03-14 |
+| agustin-ovejero | 25 | Issue | Layout: Esqueleto de Carga (Skeletons) para Secciones | 2026-03-14 |
+| CelinaJP | 40 | Issue | Añadir tooltips y ayuda contextual en acciones de variantes | 2026-03-14 |
+| CelinaJP | 60 | Issue | Optimizar carga de imágenes de productos en variantes | 2026-03-14 |
+| CelinaJP | 70 | Issue | Mejorar accesibilidad de la vista de variantes | 2026-03-14 |
+| CelinaJP | 90 | Issue | Adaptar la interfaz de variantes para dispositivos móviles | 2026-03-14 |
+| CelinaJP | 100 | Issue | Implementar edición masiva de variantes | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #576: 🔄 Registrar puntaje de gestión | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #574: 🔄 Registrar puntaje de gestión | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #572: 382 optimizar carga de imágenes de productos en variantes | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #571: Cambié backend a CommonJS para que coincida con lo que genera tsc: | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #570: Resultado | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #569: 🔄 Registrar puntaje de gestión | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #568: Fix ci | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #567: 🔄 Registrar puntaje de gestión | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #566: Errores corregidos: | 2026-03-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #565: Solcuionado problemas de cicd para github actions | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #576: 🔄 Registrar puntaje de gestión | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #575: Los tooltips aparecen al hacer hover sobre los botones, proporcionand… | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #573: issues 217 - se precisa npm install en el front | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #572: 382 optimizar carga de imágenes de productos en variantes | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #571: Cambié backend a CommonJS para que coincida con lo que genera tsc: | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #570: Resultado | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #569: 🔄 Registrar puntaje de gestión | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #568: Fix ci | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #567: 🔄 Registrar puntaje de gestión | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #566: Errores corregidos: | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #565: Solcuionado problemas de cicd para github actions | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #564: issues 216 | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #563: Optimización de carga de imágenes de productos en variantes | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #562: 369 optimizar animaciones y transiciones en la UI | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #561: variantes mas accesibles | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #560: la vista de variantes es mucho más responsiva y usable en móviles y t… | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #559: Selección de múltiples casillas de verificación, edición masiva efici… | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #558: nuevas dependencias instaladas | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #557: 215 ux barra de búsqueda global en el header | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #556: 202 dashboard banner de bienvenida personalizado | 2026-03-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #547: 201 layout esqueleto de carga skeletons para secciones | 2026-03-14 |
+| FedericoPaal | 40 | Issue | Optimizar animaciones y transiciones en la UI | 2026-03-14 |
+| Nahuel-Dalesio | 25 | Issue | UI: Refactorización de Modales (Transitions) | 2026-03-14 |
+| Nahuel-Dalesio | 15 | Issue | Dashboard: Widget de Estado del Sistema | 2026-03-14 |
+| Nahuel-Dalesio | 50 | Issue | UX: Barra de Búsqueda Global en el Header | 2026-03-14 |
+| dgimenezdeveloper | 60 | Issue | Agregar logs de actividad en frontend para acciones administrativas | 2026-03-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #548: ¡Los errores han sido solucionados con éxito! 🚀 El frontend ahora com… | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #555: Se añaden filtros avanzados por categoria, estado y stock (se hace ta… | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #554: Se hace documentacion de componentes y flujos de la vista Productos | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #553: 366 permitir exportación de productos a csvexcel | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #552: Se mejora visualizacion de precios y ofertas para mejor legibilidad e… | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #551: 364 añadir indicadores de stock bajo | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #550: Se ajusta cambios de estados de los productos (y se agregan estilos e… | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #549: Se refactorizan componentes a atomizados | 2026-03-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #548: ¡Los errores han sido solucionados con éxito! 🚀 El frontend ahora com… | 2026-03-13 |
+| FedericoPaal | 60 | Issue | Añadir filtro avanzado por categoría, estado y stock | 2026-03-13 |
+| FedericoPaal | 40 | Issue | Documentar componentes y flujos de la vista de productos | 2026-03-13 |
+| FedericoPaal | 70 | Issue | Permitir exportación de productos a CSV/Excel | 2026-03-13 |
+| FedericoPaal | 50 | Issue | Mejorar visualización de precios y descuentos | 2026-03-13 |
+| FedericoPaal | 40 | Issue | Añadir indicadores de stock bajo | 2026-03-13 |
+| FedericoPaal | 50 | Issue | Mejorar la gestión de estados (activo/inactivo) | 2026-03-13 |
+| FedericoPaal | 80 | Issue | Refactorizar componentes para mayor mantenibilidad | 2026-03-13 |
+| agustin-ovejero | 25 | Issue | Sidebar: Badges Dinámicos en Ítems de Menú | 2026-03-12 |
+| agustin-ovejero | 20 | Issue | UI: Sistema de Notificaciones "Toast" Global | 2026-03-12 |
+| CelinaJP | 50 | Issue | Mejorar feedback de acciones de gestión de variantes | 2026-03-12 |
+| CelinaJP | 70 | Issue | Añadir paginación al panel de productos | 2026-03-12 |
+| CelinaJP | 80 | Issue | Mejorar filtro de búsqueda por nombre y SKU en variantes | 2026-03-12 |
+| dgimenezdeveloper | 80 | Issue | Implementar manejo de relaciones entre entidades (productos, variantes, categorías, imágenes) | 2026-03-12 |
+| dgimenezdeveloper | 60 | Issue | Sincronizar estados entre frontend y backend tras operaciones CRUD | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #545: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #543: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #540: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #539: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #538: He implementado el manejo completo de las relaciones entre entidades … | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #537: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #536: 470 sincronizar estados entre frontend y backend tras operaciones crud | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #535: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #531: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #546: Se implementa componente Tooltip para ayudar contextualmente con las … | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #545: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #544: issus 214 - Card Acceso Rápido modificada | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #543: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #542: se implementa contadores al modulo pedidos cuando hay pedidos pendientes | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #541: Se optimiza la carga de imagenes de los productos en Productos | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #540: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #539: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #538: He implementado el manejo completo de las relaciones entre entidades … | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #537: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #536: 470 sincronizar estados entre frontend y backend tras operaciones crud | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #535: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #534: Agregue mensajes de confirmación, éxito y error al crear, editar o el… | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #533: Se implementan estandares WCAG en Productos | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #532: Implementación de paginación en el panel lateral de productos para ev… | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #532: Implementación de paginación en el panel lateral de productos para ev… | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #531: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #530: 199 UI sistema de notificaciones toast global | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #529: Refactorice el componente de búsqueda para permitir filtrar productos… | 2026-03-12 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #528: 🔄 Registrar puntaje de gestión | 2026-03-12 |
+| FedericoPaal | 40 | Issue | Añadir tooltips y ayuda contextual en acciones | 2026-03-12 |
+| FedericoPaal | 60 | Issue | Optimizar carga de imágenes de productos | 2026-03-12 |
+| FedericoPaal | 70 | Issue | Mejorar accesibilidad de la vista de productos | 2026-03-12 |
+| Nahuel-Dalesio | 30 | Issue | Dashboard: Panel de "Acciones Rápidas" Dinámico | 2026-03-12 |
+| CelinaJP | 60 | Issue | Optimizar visualización de productos y variantes en panel lateral | 2026-03-11 |
+| dgimenezdeveloper | 80 | Issue | Implementar permisos granulares en frontend según roles de usuario | 2026-03-11 |
+| dgimenezdeveloper | 70 | Issue | Integrar paginación y búsqueda en la gestión de productos y categorías | 2026-03-11 |
 | dgimenezdeveloper | 50 | Issue | Optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-11 |
 | dgimenezdeveloper | 80 | Issue | Garantizar seguridad en el frontend: sanitización, prevención de XSS y CSRF | 2026-03-11 |
 | dgimenezdeveloper | 60 | Issue | Mejorar la UX de administración con feedback instantáneo y navegación fluida | 2026-03-11 |
@@ -21,37 +122,19 @@
 | dgimenezdeveloper | 50 | Issue | mplementar estados de loading y vacíos en componentes de administración | 2026-03-11 |
 | dgimenezdeveloper | 60 | Issue | Implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
 | dgimenezdeveloper | 250 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para imágenes de producto | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #493: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #495: He completado la implementación de los estados de carga y vacíos en e… | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #497: He completado la implementación de validaciones robustas en los formu… | 2026-03-11 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #501: 463 actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #501: 463 actualizar tests unitarios y de integración para reflejar la nueva lógica conectada al backend | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #503: Resumen de cambios en la documentación: | 2026-03-11 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #505: Mejoras implementadas: | 2026-03-11 |
-| agustin-ovejero | 25 | Issue | Sidebar: Sección de Perfil de Usuario Integrada | 2026-03-10 |
-| agustin-ovejero | 30 | Issue | Dashboard: Grid Adaptativo de Pantalla Completa | 2026-03-10 |
-| dgimenezdeveloper | 120 | Issue | Conectar backend local a base de datos PostgreSQL en VPS Donweb | 2026-03-10 |
-| dgimenezdeveloper | 70 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para variantes de producto | 2026-03-10 |
-| dgimenezdeveloper | 170 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para categorías | 2026-03-10 |
-| dgimenezdeveloper | 80 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para productos | 2026-03-10 |
-| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #434: Mejorar layout responsivo de pedidos con Grid/Flexbox | 2026-03-10 |
-| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #472: Agregar logs de actividad en frontend para acciones administrativas | 2026-03-10 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #474: Se refactoriza el buscador para productos en Productos | 2026-03-10 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #481: El backend local está correctamente conectado a la base de datos del … | 2026-03-10 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #479: 198 sidebar sección de perfil de usuario integrada | 2026-03-10 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #483: 456 reemplazar mocks y localstorage por llamadas http al backend para categorías | 2026-03-10 |
-| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #487: instalada dependencia tsc | 2026-03-10 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #487: instalada dependencia tsc | 2026-03-10 |
-| FedericoPaal | 70 | Issue | Añadir paginación a la lista de productos | 2026-03-10 |
-| FedericoPaal | 80 | Issue | Mejorar filtro de búsqueda por nombre y SKU | 2026-03-10 |
-| dgimenezdeveloper | 20 | Issue | Migraciones | 2026-03-09 |
-| dgimenezdeveloper | 250 | Issue | Desplegar proeycto en vps cloud | 2026-03-09 |
-| GitHub Copilot | 20 | Gestión | Resolución de Issue — Resolución de issue #339: Automatización de migraciones y seed en Docker (VPS) | 2026-03-09 |
-| agustin-ovejero | 30 | Issue | Layout: Sticky Header con Breadcrumbs Dinámicos | 2026-03-08 |
-| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #329: 🔄 Actualización automática de puntajes semanal | 2026-03-08 |
-| dgimenezdeveloper | 15 | Gestión | Merge de PR — PR #330: se creo un header header fijo en la seccion admin y breadcrumbs gener… | 2026-03-08 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #528: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #527: Cambios realizados: | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #526: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #524: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #522: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #520: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #517: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #516: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #515: He integrado la paginación y la búsqueda en la gestión de productos y… | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #514: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #513: 467 optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #512: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #511: 🔄 Actualización automática de puntajes semanal | 2026-03-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #510: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #509: La refactorización modular está completamente funcional: | 2026-03-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #508: 🔄 Registrar puntaje de gestión | 2026-03-11 |
@@ -74,6 +157,25 @@
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #490: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #527: Cambios realizados: | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #526: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #525: Se refactorizan los componentes y sus css para que sean responsivos p… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #524: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #523: Se implementa funcion para seleccionar multiples productos mediante c… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #522: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #521: Se implementan cambios como modal de confirmacion para eliminar produ… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #520: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #519: 376 optimizar visualización de productos y variantes en panel lateral | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #518: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #517: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #516: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #515: He integrado la paginación y la búsqueda en la gestión de productos y… | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #514: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #513: 467 optimizar la estructura de carpetas y modularidad del frontend para facilitar mantenimiento | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #512: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #511: 🔄 Actualización automática de puntajes semanal | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #510: 🔄 Registrar puntaje de gestión | 2026-03-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #509: La refactorización modular está completamente funcional: | 2026-03-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #508: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #507: ¡Seguridad reforzada! He implementado una serie de medidas proactivas… | 2026-03-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #506: 🔄 Registrar puntaje de gestión | 2026-03-11 |
@@ -94,6 +196,13 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #491: 459 implementar manejo de errores global en frontend para todas las entidades | 2026-03-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #490: 🔄 Registrar puntaje de gestión | 2026-03-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #489: 458 reemplazar mocks y localstorage por llamadas http al backend para imágenes de producto | 2026-03-11 |
+| FedericoPaal | 90 | Issue | Adaptar la interfaz para dispositivos móviles | 2026-03-11 |
+| FedericoPaal | 100 | Issue | Implementar edición masiva de productos | 2026-03-11 |
+| FedericoPaal | 50 | Issue | Mejorar feedback de acciones de edición y eliminación | 2026-03-11 |
+| FedericoPaal | 60 | Issue | Optimizar visualización de productos en tarjetas | 2026-03-11 |
+| agustin-ovejero | 25 | Issue | Sidebar: Sección de Perfil de Usuario Integrada | 2026-03-10 |
+| agustin-ovejero | 30 | Issue | Dashboard: Grid Adaptativo de Pantalla Completa | 2026-03-10 |
+| dgimenezdeveloper | 120 | Issue | Conectar backend local a base de datos PostgreSQL en VPS Donweb | 2026-03-10 |
 | dgimenezdeveloper | 70 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para variantes de producto | 2026-03-10 |
 | dgimenezdeveloper | 170 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para categorías | 2026-03-10 |
 | dgimenezdeveloper | 80 | Issue | Reemplazar mocks y localStorage por llamadas HTTP al backend para productos | 2026-03-10 |
@@ -403,7 +512,10 @@
 | dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #355: Optimizar visualización de productos en tarjetas | 2026-03-10 |
 | dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #354: Añadir paginación a la lista de productos | 2026-03-10 |
 | dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #353: Mejorar filtro de búsqueda por nombre y SKU | 2026-03-10 |
+| FedericoPaal | 70 | Issue | Añadir paginación a la lista de productos | 2026-03-10 |
+| FedericoPaal | 80 | Issue | Mejorar filtro de búsqueda por nombre y SKU | 2026-03-10 |
 | dgimenezdeveloper | 20 | Issue | Migraciones | 2026-03-09 |
+| dgimenezdeveloper | 250 | Issue | Desplegar proeycto en vps cloud | 2026-03-09 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #348: fix: deploy inteligente para preservar .env manual en vps | 2026-03-09 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #347: He agregado logs de depuración en el frontend para que puedas ver en … | 2026-03-09 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #346: l archivo docker-compose.prod.yml, el backend estaba intentando conec… | 2026-03-09 |
@@ -435,6 +547,7 @@
 | dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #339: Migraciones | 2026-03-09 |
 | dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (BACKEND) — Issue #339: Migraciones | 2026-03-09 |
 | dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #339: Migraciones | 2026-03-09 |
+| agustin-ovejero | 30 | Issue | Layout: Sticky Header con Breadcrumbs Dinámicos | 2026-03-08 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #331: 🔄 Registrar puntaje de gestión | 2026-03-08 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #329: 🔄 Actualización automática de puntajes semanal | 2026-03-08 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #331: 🔄 Registrar puntaje de gestión | 2026-03-08 |
