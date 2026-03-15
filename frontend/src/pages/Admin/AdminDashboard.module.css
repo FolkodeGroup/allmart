@@ -1,3 +1,21 @@
+/* ── Dark Mode Variables ── */
+:global(.dark) {
+  --color-bg-primary: #232a2f;
+  --color-bg-secondary: #181c1f;
+  --color-bg-card: #232a2f;
+  --color-border: #2d3a3f;
+  --color-neutral-dark: #181c1f;
+  --color-neutral-light: #f3f3f3;
+  --color-primary: #a3c9a8;
+  --color-primary-light: #cbe7c9;
+  --color-accent: #ddb08c;
+  --color-warm-gray: #b6a68a;
+  --color-text-primary: #f3f3f3;
+  --color-text-secondary: #cbe7c9;
+  --color-text-tertiary: #b6a68a;
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.25);
+  --shadow-xl: 0 12px 48px rgba(0,0,0,0.35);
+}
 .goalAndClientsRow {
   display: flex;
   flex-direction: row;

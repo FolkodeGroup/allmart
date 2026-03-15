@@ -67,6 +67,8 @@ const ROLE_LABELS: Record<string, string> = {
   editor: "Editor",
 };
 
+type Theme = 'light' | 'dark';
+
 export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
   const { getPendingOrdersCount } = useAdminOrders();
@@ -76,10 +78,20 @@ export function AdminLayout() {
   const location = useLocation();
 
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    const saved = localStorage.getItem("admin-sidebar-collapsed");
+    const saved = localStorage.getItem('admin-sidebar-collapsed');
     return saved ? JSON.parse(saved) : false;
   });
 
+  // Dark mode state
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem('admin-theme');
+    return stored === 'dark' ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('admin-theme', theme);
+  }, [theme]);
+  
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -113,7 +125,7 @@ export function AdminLayout() {
   };
 
   return (
-    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ""}`}>
+    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'dark' : ''}`}>
       <Toaster
         position="top-right"
         reverseOrder={false}
@@ -186,51 +198,62 @@ export function AdminLayout() {
           </button>
         </div>
 
-        <nav className={styles.nav}>
-          {navItems.map((item) => {
-            const locked = item.permission !== null && !can(item.permission);
-            let badgeCount: number | null = null;
-            if (item.badge === "pending") {
-              badgeCount = getPendingOrdersCount();
-            } else if (item.badge === "lowStock") {
-              badgeCount = getLowStockCount();
-            }
-            const commonProps = {
-              title: isCollapsed ? item.label : "",
-              "data-label": item.label,
-              onClick: () => setIsMobileOpen(false), // Cierra drawer al clickear en mobile
-            };
-            if (locked) {
+        {/* Agrupación: Dark mode + navItems en un solo bloque */}
+        <div className={styles.navGroup}>
+          <button
+            className={`${styles.darkToggle} ${isCollapsed ? styles.darkToggleCollapsed : styles.darkToggleExpanded}`}
+            aria-label="Cambiar modo oscuro"
+            type="button"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
+          <nav className={styles.nav}>
+            {navItems.map(item => {
+              const locked = item.permission !== null && !can(item.permission);
+              let badgeCount: number | null = null;
+              if (item.badge === 'pending') {
+                badgeCount = getPendingOrdersCount();
+              } else if (item.badge === 'lowStock') {
+                badgeCount = getLowStockCount();
+              }
+              const commonProps = {
+                title: isCollapsed ? item.label : '',
+                'data-label': item.label,
+                onClick: () => setIsMobileOpen(false)
+              };
+              if (locked) {
+                return (
+                  <span
+                    key={item.to}
+                    {...commonProps}
+                    className={`${styles.navItem} ${styles.navItemLocked}`}
+                  >
+                    <span className={styles.navIcon}>{item.icon}</span>
+                    <span className={styles.navLabel}>{item.label}</span>
+                    <span className={styles.navLockIcon}>🔒</span>
+                  </span>
+                );
+              }
               return (
-                <span
+                <NavLink
                   key={item.to}
                   {...commonProps}
-                  className={`${styles.navItem} ${styles.navItemLocked}`}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+                  }
                 >
                   <span className={styles.navIcon}>{item.icon}</span>
                   <span className={styles.navLabel}>{item.label}</span>
-                  <span className={styles.navLockIcon}>🔒</span>
-                </span>
+                  {badgeCount !== null && badgeCount > 0 && (
+                    <span className={styles.navBadge}>{badgeCount}</span>
+                  )}
+                </NavLink>
               );
-            }
-            return (
-              <NavLink
-                key={item.to}
-                {...commonProps}
-                to={item.to}
-                className={({ isActive }) =>
-                  `${styles.navItem} ${isActive ? styles.navItemActive : ""}`
-                }
-              >
-                <span className={styles.navIcon}>{item.icon}</span>
-                <span className={styles.navLabel}>{item.label}</span>
-                {badgeCount !== null && badgeCount > 0 && (
-                  <span className={styles.navBadge}>{badgeCount}</span>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
+            })}
+          </nav>
+        </div>
 
         <div className={styles.sidebarFooter} ref={dropdownRef}>
           <button

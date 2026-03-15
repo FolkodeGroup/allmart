@@ -1,3 +1,45 @@
+/* ── Dark Mode Toggle ── */
+.darkToggle {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--color-neutral-light);
+  font-size: 1.2rem;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: var(--space-3);
+  margin-left: 0;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  text-align: left;
+}
+.darkToggle:hover {
+  background: rgba(221, 176, 140, 0.18);
+  color: var(--color-accent);
+}
+
+/* ── Dark Mode Variables ── */
+.wrapper.dark {
+  --color-bg-primary: #232a2f;
+  --color-bg-secondary: #181c1f;
+  --color-bg-card: #232a2f;
+  --color-border: #2d3a3f;
+  --color-neutral-dark: #181c1f;
+  --color-neutral-light: #f3f3f3;
+  --color-primary: #a3c9a8;
+  --color-primary-light: #cbe7c9;
+  --color-accent: #ddb08c;
+  --color-warm-gray: #b6a68a;
+  --color-text-primary: #f3f3f3;
+  --color-text-secondary: #cbe7c9;
+  --color-text-tertiary: #b6a68a;
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.25);
+  --shadow-xl: 0 12px 48px rgba(0,0,0,0.35);
+}
 /* ============================================
    ALLMART — ADMIN LAYOUT
    ============================================ */
@@ -86,8 +128,33 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-6) var(--space-3);
-  flex: 1;
+  /* Elimina flex-grow para evitar separación excesiva */
+  /* Nuevo contenedor para agrupar darkToggle y nav */
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: var(--space-6);
+  margin-bottom: 0;
+  margin-top: 20px; /* Espaciado compacto debajo del darkToggle */
 }
+.darkToggleExpanded {
+  width: 100%;
+  margin-bottom: var(--space-3);
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  text-align: left;
+}
+.darkToggleCollapsed {
+  width: auto;
+  margin-bottom: var(--space-3);
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 
 .navItem {
   display: flex;

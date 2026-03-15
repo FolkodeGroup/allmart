@@ -6,3 +6,4 @@ export { AdminVariants } from './variants';
 export { AdminImages } from './images';
 export { AdminOrders } from './orders';
 export { AdminReports } from './reports';
+export { AdminPanel } from './AdminPanel';

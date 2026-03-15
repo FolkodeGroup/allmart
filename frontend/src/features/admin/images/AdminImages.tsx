@@ -183,7 +183,7 @@ export function AdminImages() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className={`${sectionStyles.page} ${styles.widePage}`}>
+    <div className={`${sectionStyles.page} ${styles.widePage} dark:bg-gray-900 dark:text-gray-100`}>
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title}>
