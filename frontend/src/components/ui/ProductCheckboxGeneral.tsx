@@ -18,8 +18,9 @@ export const ProductCheckboxGeneral: React.FC<ProductCheckboxGeneralProps> = ({ 
         alignItems: 'center',
         gap: 12,
         marginBottom: 12,
-        width: '100%',
+        width: '90%',
         maxWidth: '100vw',
+        alignSelf: 'end',
       }}
     >
       <input
