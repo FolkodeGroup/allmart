@@ -1,26 +1,23 @@
 .bulkEditBar {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   align-items: center;
   gap: 12px;
+
+  width: 60%;
+  margin: 0 auto 18px auto; /* lo centra */
+
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-primary-light);
   border-radius: 10px;
   padding: 12px 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  animation: fadeIn 0.2s both;
-  flex-wrap: wrap;
-  align-self: center;
-  width: 65%;
 }
 
 @media (max-width: 900px) {
   .bulkEditBar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    padding: 14px 10px;
+    width: 100%;
+    grid-template-columns: 1fr;
+    padding: 14px;
   }
   .input {
     min-width: 0;
@@ -29,8 +26,8 @@
     padding: 10px 12px;
   }
   .applyBtn, .cancelBtn {
-    width: 100%;
-    font-size: 1.08rem;
+    width: 48%;
+    font-size: 0.875rem;
     padding: 12px 0;
     min-height: 44px;
     border-radius: 10px;
@@ -45,6 +42,9 @@
     font-size: 1rem;
     word-break: break-word;
     max-width: 95vw;
+  }
+  .actions {
+    justify-content: space-between;
   }
 }
 
@@ -68,8 +68,7 @@
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  align-self: end;
-  grid-column: 3 / -2;
+  grid-column: 1 / -1;
 }
 
 .applyBtn {
