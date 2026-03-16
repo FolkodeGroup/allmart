@@ -32,10 +32,17 @@ import { ProductPagination } from '../../../components/ui/ProductPagination';
 
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
+
 import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
 import type { ExportableProduct } from '../../../utils/exportProducts';
+import { sortProducts } from '../../../utils/sortProducts';
+import type { SortField, SortDirection } from '../../../utils/sortProducts';
 
 export function AdminProducts() {
+  // Estado de ordenamiento
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
     // Edición masiva
     const [bulkEditLoading, setBulkEditLoading] = useState(false);
     const [bulkEditSuccess, setBulkEditSuccess] = useState<string | null>(null);
@@ -214,7 +221,9 @@ export function AdminProducts() {
 
 
   // Mapeo de productos visibles a formato exportable
-  const exportableProducts: ExportableProduct[] = products.map(p => ({
+
+  // Incluimos sku e image para las cards
+  const exportableProducts: (ExportableProduct & { sku?: string; image?: string })[] = products.map(p => ({
     id: p.id,
     name: p.name,
     category: p.category?.name || '',
@@ -223,7 +232,12 @@ export function AdminProducts() {
     stock: p.stock,
     inStock: p.inStock,
     createdAt: (p as any).createdAt || '',
+    sku: p.sku,
+    image: p.images && p.images[0],
   }));
+
+  // Ordenar productos exportables para la vista
+  const sortedProducts = sortProducts(exportableProducts, sortField, sortDirection);
 
   // Feedback para exportación vacía
   const handleExportCSV = () => {
@@ -273,6 +287,41 @@ export function AdminProducts() {
         setStockLevelFilter={setStockLevelFilter}
         total={total}
       />
+
+      {/* Encabezados de columnas para ordenamiento */}
+      <div className={styles.tableWrapper} >
+        <div className={styles.table} >
+          {[
+            { label: 'Nombre', field: 'name' },
+            { label: 'Precio', field: 'price' },
+            { label: 'Stock', field: 'stock' },
+            { label: 'Estado', field: 'inStock' },
+            { label: 'Categoría', field: 'category' },
+          ].map(col => (
+            <button
+              key={col.field}
+              className={styles.th}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+              onClick={() => {
+                if (sortField === col.field) {
+                  setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                } else {
+                  setSortField(col.field as SortField);
+                  setSortDirection('asc');
+                }
+              }}
+              aria-label={`Ordenar por ${col.label}`}
+            >
+              {col.label}
+              {sortField === col.field && (
+                <span style={{ marginLeft: 2 }}>
+                  {sortDirection === 'asc' ? '▲' : '▼'}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
 
 
       {/* Panel de edición masiva */}
@@ -324,6 +373,7 @@ export function AdminProducts() {
         />
       )}
 
+
       {!loading && !isLoading && !error && (products.length === 0 ? (
         <EmptyState
           icon={<PackageSearch size={48} color="#94a3b8" />}
@@ -336,7 +386,7 @@ export function AdminProducts() {
         />
       ) : (
         <ProductCardsGrid>
-          {products.map(p => (
+          {sortedProducts.map(p => (
             <AdminProductCard
               key={p.id}
               id={p.id}
@@ -346,8 +396,8 @@ export function AdminProducts() {
               discount={p.discount}
               stock={p.stock}
               inStock={p.inStock}
-              image={p.images && p.images[0]}
-              category={p.category?.name || ''}
+              image={p.image}
+              category={p.category}
               canEdit={can('products.edit')}
               canDelete={can('products.delete')}
               onEdit={handleEdit}
