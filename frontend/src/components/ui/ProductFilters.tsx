@@ -115,7 +115,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         ))}
       </ul>
     )}
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 12 }}>
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 12, justifyContent: 'center' }}>
       <div>
         <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
         <select

@@ -84,12 +84,26 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
         <option value="true">Activo</option>
         <option value="false">Inactivo</option>
       </select>
-      <button className={styles.applyBtn} type="submit" disabled={loading} aria-label="Aplicar cambios masivos">
-        Aplicar cambios
-      </button>
-      <button className={styles.cancelBtn} type="button" onClick={onCancel} disabled={loading} aria-label="Cancelar edición masiva">
-        Cancelar
-      </button>
+      <div className={styles.actions}>
+          <button
+            className={styles.applyBtn}
+            type="submit"
+            disabled={loading}
+            aria-label="Aplicar cambios masivos"
+          >
+            Aplicar cambios
+          </button>
+
+          <button
+            className={styles.cancelBtn}
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            aria-label="Cancelar edición masiva"
+          >
+            Cancelar
+          </button>
+        </div>
       {error && <span className={styles.error} aria-live="polite">{error}</span>}
     </form>
   );
