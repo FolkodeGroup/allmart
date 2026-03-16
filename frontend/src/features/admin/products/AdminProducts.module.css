@@ -79,18 +79,17 @@
 /* ── Filtros ── */
 .filters {
   display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: var(--space-4);
   flex-direction: column;
+  gap: var(--space-3);
+
+  margin-top: var(--space-4);
   position: relative;
+
   background-color: white;
   padding: 1rem;
   border-radius: 16px;
-  border-color: var(--color-primary-light);
-  border-width: 1px;
-  border-style: solid;
+  border: 1px solid var(--color-primary-light);
+
   align-self: center;
   width: 75%;
 }
@@ -107,8 +106,15 @@
   outline: none;
   transition: border-color 0.15s;
   cursor: pointer;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-width: 220px;
+  flex: 1;
 }
-.searchInput { min-width: 220px; }
+.searchInput { min-width: 240px; max-width: 250px; align-self: center;}
+
 .searchInput:focus,
 .select:focus { border-color: var(--color-primary); }
 
@@ -380,6 +386,10 @@
     grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: auto;
     gap: 6px;
+  }
+
+  .filters {
+    width: 100%;
   }
 }
 
