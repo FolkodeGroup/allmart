@@ -15,6 +15,7 @@ import DateRangeCard from "../../components/ui/DateRangeCard";
 import styles from "./AdminDashboard.module.css";
 import type { WeeklySalesData } from "../../components/ui/WeeklySalesWidget";
 import MetricCard from "../../components/ui/MetricCard";
+import { ActivityFeed } from "../../components/ActivityFeed"
 
 // ── Función de saludo dinámico según la hora del día ──
 function getTimeBasedGreeting(): { greeting: string; emoji: string } {
@@ -448,7 +449,7 @@ export function AdminDashboard() {
             ))}
         </div>
       </section>
-
+      <ActivityFeed />
       {/* Alerta de Stock Crítico (Filtro Rápido) */}
       <CriticalStockAlert
         products={products.map((p) => ({
