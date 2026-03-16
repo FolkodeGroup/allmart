@@ -110,7 +110,7 @@
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
-  min-width: 220px;
+  min-width: 200px;
   flex: 1;
 }
 .searchInput { min-width: 240px; max-width: 250px; align-self: center;}
@@ -368,6 +368,9 @@
     gap: 6px;
   }
 
+  .filters {
+    width: 100%;
+  }
 
 }
 
