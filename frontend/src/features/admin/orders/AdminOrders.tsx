@@ -623,6 +623,47 @@ export function AdminOrders() {
       )}
 
 
+
+{/* Controles de paginación */}
+          <div className={styles.paginationWrap}>
+            <button
+              className={styles.paginationBtn}
+              type="button"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              ← Anterior
+            </button>
+            <div className={styles.paginationPages}>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i + 1}
+                  className={
+                    currentPage === i + 1
+                      ? `${styles.paginationPage} ${styles.paginationPageActive}`
+                      : styles.paginationPage
+                  }
+                  type="button"
+                  onClick={() => setCurrentPage(i + 1)}
+                  aria-current={currentPage === i + 1 ? 'page' : undefined}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              className={styles.paginationBtn}
+              type="button"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente →
+            </button>
+          </div>
+
+
+
+
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
@@ -768,43 +809,6 @@ export function AdminOrders() {
                 </div>
               );
             })}
-          </div>
-
-          {/* Controles de paginación */}
-          <div className={styles.paginationWrap}>
-            <button
-              className={styles.paginationBtn}
-              type="button"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              ← Anterior
-            </button>
-            <div className={styles.paginationPages}>
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i + 1}
-                  className={
-                    currentPage === i + 1
-                      ? `${styles.paginationPage} ${styles.paginationPageActive}`
-                      : styles.paginationPage
-                  }
-                  type="button"
-                  onClick={() => setCurrentPage(i + 1)}
-                  aria-current={currentPage === i + 1 ? 'page' : undefined}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              className={styles.paginationBtn}
-              type="button"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Siguiente →
-            </button>
           </div>
         </>
       )}
