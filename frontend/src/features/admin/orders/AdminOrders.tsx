@@ -810,6 +810,7 @@ export function AdminOrders() {
               );
             })}
           </div>
+          <div style={{ height: '100px'}} aria-hidden='true'/>
         </>
       )}
 
