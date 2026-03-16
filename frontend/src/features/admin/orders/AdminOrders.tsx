@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
@@ -398,6 +398,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
 /* ── Componente principal ───────────────────────────────────────── */
 export function AdminOrders() {
+
   const { orders } = useAdminOrders();
 
   const [isLoading, _setIsLoading] = useState<boolean>(false);
@@ -406,6 +407,15 @@ export function AdminOrders() {
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Paginación
+  const ITEMS_PER_PAGE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Resetear página al cambiar filtros
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus, filterDateFrom, filterDateTo]);
 
   const filtered = useMemo(() => {
     return orders.filter(o => {
@@ -426,6 +436,13 @@ export function AdminOrders() {
       return matchSearch && matchStatus && matchFrom && matchTo;
     });
   }, [orders, search, filterStatus, filterDateFrom, filterDateTo]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+
+  const paginatedOrders = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
 
   // Resumen por estado
   const summary = useMemo(() => {
@@ -605,6 +622,7 @@ export function AdminOrders() {
         </p>
       )}
 
+
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
@@ -657,7 +675,7 @@ export function AdminOrders() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(order => (
+                {paginatedOrders.map(order => (
                   <tr
                     key={order.id}
                     className={styles.row}
@@ -706,7 +724,7 @@ export function AdminOrders() {
 
           {/* Tarjetas — mobile */}
           <div className={styles.mobileList}>
-            {filtered.map(order => {
+            {paginatedOrders.map(order => {
               const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
               const totalQty = order.items.reduce((s, i) => s + i.quantity, 0);
               return (
@@ -750,6 +768,43 @@ export function AdminOrders() {
                 </div>
               );
             })}
+          </div>
+
+          {/* Controles de paginación */}
+          <div className={styles.paginationWrap}>
+            <button
+              className={styles.paginationBtn}
+              type="button"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              ← Anterior
+            </button>
+            <div className={styles.paginationPages}>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i + 1}
+                  className={
+                    currentPage === i + 1
+                      ? `${styles.paginationPage} ${styles.paginationPageActive}`
+                      : styles.paginationPage
+                  }
+                  type="button"
+                  onClick={() => setCurrentPage(i + 1)}
+                  aria-current={currentPage === i + 1 ? 'page' : undefined}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              className={styles.paginationBtn}
+              type="button"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente →
+            </button>
           </div>
         </>
       )}
