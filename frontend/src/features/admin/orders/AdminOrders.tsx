@@ -120,7 +120,7 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
   const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
-  const { can, user } = useAdminAuth();
+  const { can } = useAdminAuth();
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmPaid, setConfirmPaid] = useState(false);
@@ -521,12 +521,9 @@ export function AdminOrders() {
   }>({ open: false, type: null, order: null });
 
   const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
-  const { can, user } = useAdminAuth();
+  const { user } = useAdminAuth();
 
   // Controladores de acciones críticas
-  const handleOpenModal = (type: 'delete' | 'status' | 'paid', order: Order, payload?: any) => {
-    setModal({ open: true, type, order, payload, isLoading: false });
-  };
 
   const handleCloseModal = () => {
     setModal({ open: false, type: null, order: null });
