@@ -152,14 +152,12 @@ export function AdminVariants() {
     }
 
     // Crear cabecera
-    const headers = ['Grupo', 'Valores', 'Estado', 'Creado'];
+    const headers = ['Grupo', 'Valores'];
     
     // Crear filas
     const rows = variants.map(variant => [
       variant.name,
       variant.values.join('; '),
-      variant.isActive ? 'Activo' : 'Inactivo',
-      new Date(variant.createdAt).toLocaleDateString('es-ES'),
     ]);
 
     // Crear CSV
