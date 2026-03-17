@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Tooltip from '@mui/material/Tooltip';
+import { AlertTriangle } from 'lucide-react';
 import { VariantValueChip } from './VariantValueChip';
 import styles from '../AdminVariants.module.css';
 
@@ -116,6 +117,13 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               type="button"
               style={canEdit ? undefined : { cursor: 'default' }}
             >
+              {group.values.length === 0 && (
+                <Tooltip title="Esta variante no tiene valores definidos. Agrega valores para completarla." placement="top" arrow>
+                  <span className={styles.incompleteIndicator}>
+                    <AlertTriangle size={16} />
+                  </span>
+                </Tooltip>
+              )}
               {group.name}
               {canEdit && <span className={styles.editHint}>✏️</span>}
             </button>

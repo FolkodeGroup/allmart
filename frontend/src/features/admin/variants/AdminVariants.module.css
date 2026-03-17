@@ -461,6 +461,20 @@
 }
 .deleteGroupBtn:hover { opacity: 1; }
 
+/* Indicador de variante incompleta (sin valores) */
+.incompleteIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 /* Valores / chips */
 .valuesContainer {
   display: flex;
