@@ -7,12 +7,14 @@ interface VariantGroup {
   id: string;
   name: string;
   values: string[];
+  isActive: boolean;
 }
 
 interface VariantGroupCardProps {
   group: VariantGroup;
   onEditName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
+  onToggleStatus: (id: string, newStatus: boolean) => void;
   onAddValue: (groupId: string, value: string) => void;
   onRemoveValue: (groupId: string, value: string) => void;
   canEdit: boolean;
@@ -35,6 +37,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   group,
   onEditName,
   onDelete,
+  onToggleStatus,
   onAddValue,
   onRemoveValue,
   canEdit,
@@ -118,17 +121,29 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
             </button>
           </Tooltip>
         )}
-        {canDelete && (
-          <Tooltip title="Eliminar este grupo de variantes y todos sus valores asociados" placement="top" arrow>
+        <div className={styles.groupActions}>
+          <Tooltip title={group.isActive ? 'Desactivar variante' : 'Activar variante'} placement="top" arrow>
             <button
-              className={styles.deleteGroupBtn}
-              onClick={() => onDelete(group.id)}
+              className={`${styles.statusToggleBtn} ${group.isActive ? styles.statusActive : styles.statusInactive}`}
+              onClick={() => onToggleStatus(group.id, !group.isActive)}
               type="button"
+              title={group.isActive ? 'Desactivar variante' : 'Activar variante'}
             >
-              🗑️
+              {group.isActive ? '✓' : '✕'}
             </button>
           </Tooltip>
-        )}
+          {canDelete && (
+            <Tooltip title="Eliminar este grupo de variantes y todos sus valores asociados" placement="top" arrow>
+              <button
+                className={styles.deleteGroupBtn}
+                onClick={() => onDelete(group.id)}
+                type="button"
+              >
+                🗑️
+              </button>
+            </Tooltip>
+          )}
+        </div>
       </div>
 
       {/* Valores / chips */}
