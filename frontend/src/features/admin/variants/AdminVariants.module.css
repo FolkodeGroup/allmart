@@ -496,6 +496,37 @@
   border-color: var(--color-primary);
 }
 
+/* ── Sección de exportación ── */
+.exportSection {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--space-4) 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.exportButton {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.exportButton:hover {
+  background: #2563eb;
+}
+.exportButton:active {
+  opacity: 0.8;
+}
+
 /* ── Help Icon ── */
 .helpIcon {
   margin-left: var(--space-2);
