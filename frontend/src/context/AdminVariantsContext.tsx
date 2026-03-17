@@ -19,6 +19,7 @@ export interface VariantGroup {
   productId: string;
   name: string;
   values: string[];
+  isActive: boolean;
 }
 
 interface AdminVariantsContextType {
@@ -40,6 +41,8 @@ interface AdminVariantsContextType {
   updateVariant: (productId: string, variantId: string, data: { name?: string; values?: string[] }) => Promise<void>;
   /** Elimina un grupo completo */
   deleteVariant: (productId: string, variantId: string) => Promise<void>;
+  /** Cambia el estado activo/inactivo de una variante */
+  toggleVariantStatus: (productId: string, variantId: string, newStatus: boolean) => Promise<void>;
 
   /** Agrega un valor a un grupo existente */
   addValueToVariant: (productId: string, variantId: string, value: string) => Promise<void>;
@@ -59,6 +62,7 @@ function apiToVariantGroup(api: ApiVariant): VariantGroup {
     productId: api.productId,
     name: api.name,
     values: Array.isArray(api.values) ? api.values : [],
+    isActive: api.isActive,
   };
 }
 
@@ -146,6 +150,17 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     }, 'Grupo de variantes eliminado');
   };
 
+  const toggleVariantStatus = async (productId: string, variantId: string, newStatus: boolean) => {
+    const statusLabel = newStatus ? 'activada' : 'desactivada';
+    await withLoading(async () => {
+      const t = requireToken();
+      const updated = await variantsService.updateVariant(t, productId, variantId, { isActive: newStatus });
+      setVariants(prev =>
+        prev.map(v => (v.id === variantId ? apiToVariantGroup(updated) : v)),
+      );
+    }, `Variante ${statusLabel} correctamente`);
+  };
+
   const addValueToVariant = async (productId: string, variantId: string, value: string) => {
     const variant = variants.find(v => v.id === variantId);
     if (!variant) return;
@@ -173,6 +188,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
         addVariant,
         updateVariant,
         deleteVariant,
+        toggleVariantStatus,
         addValueToVariant,
         removeValueFromVariant,
       }}

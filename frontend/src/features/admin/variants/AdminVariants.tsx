@@ -35,6 +35,7 @@ export function AdminVariants() {
     addVariant,
     updateVariant,
     deleteVariant,
+    toggleVariantStatus,
     addValueToVariant,
     removeValueFromVariant,
   } = useAdminVariants();
@@ -137,6 +138,24 @@ export function AdminVariants() {
     await removeValueFromVariant(selectedProductId, variantId, value);
   };
 
+  const handleToggleStatus = async (variantId: string, newStatus: boolean) => {
+    if (!selectedProductId) return;
+    try {
+      await toggleVariantStatus(selectedProductId, variantId, newStatus);
+      const userEmail = user ?? 'desconocido';
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'update',
+        entity: 'variant',
+        entityId: variantId,
+        details: { productId: selectedProductId, isActive: newStatus },
+      });
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al cambiar estado de variante.'});
+    }
+  };
+
   const handleSetNewValue = (groupId: string, value: string) => {
     setNewValues(prev => ({ ...prev, [groupId]: value }));
     if (errors[`value-${groupId}`]) {
@@ -224,6 +243,7 @@ export function AdminVariants() {
                 groups={variants}
                 onEditName={handleEditGroupName}
                 onDelete={handleDeleteGroup}
+                onToggleStatus={handleToggleStatus}
                 onAddValue={handleAddValue}
                 onRemoveValue={handleRemoveValue}
                 canEdit={can('variants.edit')}
