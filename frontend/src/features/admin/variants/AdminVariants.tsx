@@ -163,6 +163,42 @@ export function AdminVariants() {
     }
   };
 
+  // ── Exportación ────────────────────────────────────────────────────
+  const handleExportCSV = () => {
+    if (!selectedProduct || variants.length === 0) {
+      setNotif({open:true,type:'error',message:'No hay variantes para exportar'});
+      return;
+    }
+
+    // Crear cabecera
+    const headers = ['Grupo', 'Valores'];
+    
+    // Crear filas
+    const rows = variants.map(variant => [
+      variant.name,
+      variant.values.join('; '),
+    ]);
+
+    // Crear CSV
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ].join('\n');
+
+    // Descargar
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `variantes-${selectedProduct.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setNotif({open:true,type:'success',message:'Variantes exportadas a CSV correctamente'});
+  };
+
   // ── Render ────────────────────────────────────────────────────────
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
@@ -238,6 +274,21 @@ export function AdminVariants() {
                 error={errors.group || ''}
                 canCreate={can('variants.create')}
               />
+
+              {/* Sección de exportación */}
+              {variants.length > 0 && (
+                <div className={styles.exportSection}>
+                  <Tooltip title="Descargar variantes y valores en formato CSV" placement="left" arrow>
+                    <button
+                      className={styles.exportButton}
+                      onClick={handleExportCSV}
+                      type="button"
+                    >
+                      📥 Exportar CSV
+                    </button>
+                  </Tooltip>
+                </div>
+              )}
 
               <VariantGroupsGrid
                 groups={variants}
