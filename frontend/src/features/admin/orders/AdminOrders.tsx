@@ -6,6 +6,7 @@ import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../..
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -118,8 +119,8 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
 
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
-  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
-  const { can } = useAdminAuth();
+  const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
+  const { can, user } = useAdminAuth();
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmPaid, setConfirmPaid] = useState(false);
@@ -157,7 +158,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
   const handleSaveNotes = () => {
     try {
-      updateOrder(order.id, { notes });
+      useAdminOrders().updateOrder(order.id, { notes });
       toast.success('Notas guardadas con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
@@ -181,6 +182,15 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`No se pudo eliminar el pedido: ${message}`);
+    }
+  };
+
+  const handleMarkAsPaid = async (orderId: string) => {
+    try {
+      await markAsPaid(orderId);
+      toast.success('Pedido marcado como abonado');
+    } catch (err) {
+      toast.error('Error al marcar como abonado');
     }
   };
 
@@ -286,7 +296,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
                         <button
                           className={styles.whatsappBtnConfirm}
                           type="button"
-                          onClick={() => { markAsPaid(order.id); setConfirmPaid(false); }}
+                          onClick={() => { handleMarkAsPaid(order.id); setConfirmPaid(false); }}
                         >
                           ✓ Sí, confirmar pago
                         </button>
@@ -499,6 +509,73 @@ export function AdminOrders() {
       </div>
     </div>
   );
+
+  // Estado para ModalConfirm
+  const [modal, setModal] = useState<{
+    open: boolean;
+    type: 'delete' | 'status' | 'paid' | null;
+    order: Order | null;
+    payload?: any;
+    isLoading?: boolean;
+    message?: string;
+  }>({ open: false, type: null, order: null });
+
+  const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
+  const { can, user } = useAdminAuth();
+
+  // Controladores de acciones críticas
+  const handleOpenModal = (type: 'delete' | 'status' | 'paid', order: Order, payload?: any) => {
+    setModal({ open: true, type, order, payload, isLoading: false });
+  };
+
+  const handleCloseModal = () => {
+    setModal({ open: false, type: null, order: null });
+  };
+
+  const handleConfirmModal = async () => {
+    if (!modal.order) return;
+    setModal(m => ({ ...m, isLoading: true }));
+    try {
+      if (modal.type === 'delete') {
+        await deleteOrder(modal.order.id);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: user || 'desconocido',
+          action: 'delete',
+          entity: 'order',
+          entityId: modal.order.id,
+        });
+        toast.success('Pedido eliminado con éxito');
+        setSelectedOrder(null);
+      } else if (modal.type === 'status') {
+        const { status, note } = modal.payload || {};
+        await updateOrderStatus(modal.order.id, status, note);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: user || 'desconocido',
+          action: 'update-status',
+          entity: 'order',
+          entityId: modal.order.id,
+          details: { from: modal.order.status, to: status, note },
+        });
+        toast.success('Estado del pedido actualizado con éxito');
+      } else if (modal.type === 'paid') {
+        await markAsPaid(modal.order.id);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: user || 'desconocido',
+          action: 'mark-paid',
+          entity: 'order',
+          entityId: modal.order.id,
+        });
+        toast.success('Pedido marcado como abonado');
+      }
+      handleCloseModal();
+    } catch (err: any) {
+      toast.error(err?.message || 'Error al procesar la acción');
+      setModal(m => ({ ...m, isLoading: false }));
+    }
+  };
 
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
@@ -821,6 +898,27 @@ export function AdminOrders() {
           onClose={() => setSelectedOrder(null)}
         />
       )}
+
+      {/* ModalConfirm global */}
+      <ModalConfirm
+        open={modal.open}
+        title={
+          modal.type === 'delete' ? 'Eliminar pedido' :
+          modal.type === 'status' ? 'Actualizar estado' :
+          modal.type === 'paid' ? 'Confirmar pago' :
+          'Confirmar acción'
+        }
+        message={
+          modal.type === 'delete' ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.' :
+          modal.type === 'status' && typeof modal.payload?.status === 'string' ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?` :
+          modal.type === 'paid' ? '¿Confirmar que el cliente abonó este pedido?' :
+          ''
+        }
+        confirmText={modal.isLoading ? 'Procesando...' : 'Confirmar'}
+        cancelText={'Cancelar'}
+        onConfirm={modal.isLoading ? () => {} : handleConfirmModal}
+        onCancel={modal.isLoading ? () => {} : handleCloseModal}
+      />
     </div>
   );
 }
