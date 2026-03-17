@@ -137,6 +137,33 @@ export function AdminVariants() {
     await removeValueFromVariant(selectedProductId, variantId, value);
   };
 
+  const handleEditValue = async (variantId: string, oldValue: string, newValue: string) => {
+    const newVal = newValue.trim();
+    if (!selectedProductId) return;
+    if (!newVal) {
+      setNotif({open:true,type:'error',message:'El valor no puede estar vacío'});
+      return;
+    }
+
+    const group = variants.find(v => v.id === variantId);
+    if (!group) return;
+
+    // Validar que no exista otro valor con el mismo nombre (case-insensitive)
+    if (group.values.some(v => v.toLowerCase() === newVal.toLowerCase() && v !== oldValue)) {
+      setNotif({open:true,type:'error',message:'Este valor ya existe en el grupo'});
+      return;
+    }
+
+    try {
+      // Crear nuevo array de valores reemplazando el antiguo
+      const newValues = group.values.map(v => v === oldValue ? newVal : v);
+      await updateVariant(selectedProductId, variantId, { values: newValues });
+      setNotif({open:true,type:'success',message:'Valor editado correctamente.'});
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al editar valor.'});
+    }
+  };
+
   const handleSetNewValue = (groupId: string, value: string) => {
     setNewValues(prev => ({ ...prev, [groupId]: value }));
     if (errors[`value-${groupId}`]) {
@@ -224,6 +251,7 @@ export function AdminVariants() {
                 groups={variants}
                 onEditName={handleEditGroupName}
                 onDelete={handleDeleteGroup}
+                onEditValue={handleEditValue}
                 onAddValue={handleAddValue}
                 onRemoveValue={handleRemoveValue}
                 canEdit={can('variants.edit')}

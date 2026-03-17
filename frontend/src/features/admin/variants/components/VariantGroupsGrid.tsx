@@ -14,6 +14,7 @@ interface VariantGroupsGridProps {
   groups: VariantGroup[];
   onEditName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
+  onEditValue: (groupId: string, oldValue: string, newValue: string) => void;
   onAddValue: (groupId: string, value: string) => void;
   onRemoveValue: (groupId: string, value: string) => void;
   canEdit: boolean;
@@ -35,6 +36,7 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
   groups,
   onEditName,
   onDelete,
+  onEditValue,
   onAddValue,
   onRemoveValue,
   canEdit,
@@ -61,6 +63,7 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
           group={group}
           onEditName={onEditName}
           onDelete={onDelete}
+          onEditValue={onEditValue}
           onAddValue={onAddValue}
           onRemoveValue={onRemoveValue}
           canEdit={canEdit}
