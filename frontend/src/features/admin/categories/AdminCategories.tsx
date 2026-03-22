@@ -8,22 +8,29 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { FolderSearch, AlertCircle } from 'lucide-react';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
+import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
+import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 
 export function AdminCategories() {
   const { categories, deleteCategory, isLoading: loading, error, refreshCategories, page: apiPage, totalPages: apiTotalPages, total } = useAdminCategories();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
+  // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
+  const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [, setEditId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  // Debounce para búsqueda
+
+  // Debounce para búsqueda instantánea
+  const debouncedSearch = useDebouncedValue(search, 350);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      refreshCategories({ q: search, page: 1, limit: 10 });
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [search, refreshCategories]);
+    // Si seleccionó sugerencia, buscar por ese valor exacto
+    refreshCategories({ q: selectedSuggestion || debouncedSearch, page: 1, limit: 10 });
+    // Limpiar selección tras buscar
+    if (selectedSuggestion) setSelectedSuggestion(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, selectedSuggestion, refreshCategories]);
 
   const handlePageChange = (newPage: number) => {
     refreshCategories({ q: search, page: newPage, limit: 10 });
@@ -54,43 +61,46 @@ export function AdminCategories() {
 
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
-      {/* Header */}
-      <div className={sectionStyles.header}>
-        <div className={styles.headerTop}>
-          <div>
-            <span className={sectionStyles.label}>Administración</span>
-            <h1 className={sectionStyles.title}>
-              <span className={sectionStyles.icon}>📁</span> Categorías
-            </h1>
-            <p className={sectionStyles.subtitle}>
-              Gestioná las categorías del catálogo para organizar tus productos.
-            </p>
+        {/* Header */}
+        <div className={sectionStyles.header}>
+          <div className={styles.headerTop}>
+            <div>
+              <span className={sectionStyles.label}>Administración</span>
+              <h1 className={sectionStyles.title}>
+                <span className={sectionStyles.icon}>📁</span> Categorías
+              </h1>
+              <p className={sectionStyles.subtitle}>
+                Gestioná las categorías del catálogo para organizar tus productos.
+              </p>
+            </div>
+            {can('categories.create') && (
+              <button className={styles.newBtn} onClick={handleNew}>
+                + Nueva categoría
+              </button>
+            )}
           </div>
-          {can('categories.create') && (
-            <button className={styles.newBtn} onClick={handleNew}>
-              + Nueva categoría
-            </button>
-          )}
         </div>
 
-        {/* Filtros */}
+        {/* Filtros fuera del header */}
         <div className={styles.filters}>
-          <input
-            className={styles.searchInput}
-            type="search"
-            placeholder="Buscar por nombre..."
+          <CategorySearchInput
+            categories={categories}
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={setSearch}
+            onSelectSuggestion={cat => {
+              setSearch(cat.name);
+              setSelectedSuggestion(cat.name);
+            }}
+            placeholder="Buscar por nombre o slug..."
           />
           <span className={styles.count}>{total} categorías</span>
         </div>
-      </div>
 
       {/* Tabla */}
       {loading && <LoadingSpinner message="Cargando categorías..." size="lg" />}
 
       {!loading && error && (
-        <EmptyState 
+        <EmptyState
           icon={<AlertCircle size={48} color="#ef4444" />}
           title="Error al cargar categorías"
           description={error}
@@ -99,10 +109,10 @@ export function AdminCategories() {
       )}
 
       {!loading && !error && (categories.length === 0 ? (
-        <EmptyState 
+        <EmptyState
           icon={<FolderSearch size={48} color="#94a3b8" />}
           title="No se encontraron categorías"
-          description={search 
+          description={search
             ? "No hay resultados para tu búsqueda. Probá con otro término."
             : "Todavía no cargaste ninguna categoría al catálogo."
           }
