@@ -66,11 +66,22 @@ export function CategorySearchInput({
             <li
               key={cat.id}
               className={styles.suggestion}
+              role="option"
+              aria-selected={false}
+              tabIndex={0}
               onMouseDown={e => {
                 e.preventDefault();
                 onChange(cat.name);
                 setShowSuggestions(false);
                 onSelectSuggestion?.(cat);
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onChange(cat.name);
+                  setShowSuggestions(false);
+                  onSelectSuggestion?.(cat);
+                }
               }}
             >
               <span className={styles.suggestionName}>{cat.name}</span>

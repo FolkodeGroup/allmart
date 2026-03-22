@@ -30,7 +30,7 @@ export function AdminCategories() {
     refreshCategories({ q: selectedSuggestion || debouncedSearch, page: 1, limit: 10 });
     // Limpiar selección tras buscar
     if (selectedSuggestion) setSelectedSuggestion(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [debouncedSearch, selectedSuggestion, refreshCategories]);
 
   const handlePageChange = (newPage: number) => {

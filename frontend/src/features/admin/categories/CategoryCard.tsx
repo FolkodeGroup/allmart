@@ -23,7 +23,7 @@ export const CategoryCard: FC<CategoryCardProps> = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <div className={styles.card} tabIndex={0} role="button" onClick={() => navigate(`/admin/categorias/${category.id}`)}>
+    <button type="button" className={styles.card} onClick={() => navigate(`/admin/categorias/${category.id}`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/admin/categorias/${category.id}`); } }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
       {category.image ? (
         <img src={category.image} alt={category.name} className={styles.cardImg} />
       ) : (
@@ -49,16 +49,16 @@ export const CategoryCard: FC<CategoryCardProps> = ({
           }}>{category.description}</span>
         )}
         {(canEdit || canDelete) && (
-          <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
+          <div className={styles.cardActions}>
             {canEdit && (
-              <button className={styles.editBtn} onClick={() => onEdit?.(category.id)} title="Editar">✏️</button>
+              <button className={styles.editBtn} onClick={(e) => { e.stopPropagation(); onEdit?.(category.id); }} title="Editar">✏️</button>
             )}
             {canDelete && (
-              <button className={styles.deleteBtn} onClick={() => onDelete?.(category.id)} title="Eliminar">🗑️</button>
+              <button className={styles.deleteBtn} onClick={(e) => { e.stopPropagation(); onDelete?.(category.id); }} title="Eliminar">🗑️</button>
             )}
           </div>
         )}
       </div>
-    </div>
+    </button>
   );
 };

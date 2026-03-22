@@ -162,13 +162,13 @@ export function OrderConfirmationForm({
     <div
       className={styles.backdrop}
       onClick={handleBackdropClick}
-      role="dialog"
-      tabIndex={0}
       onKeyDown={e => {
-        if (e.key === 'Escape' || e.key === 'Enter') {
+        if (e.key === 'Escape') {
           onCancel();
         }
       }}
+      role="dialog"
+      tabIndex={-1}
       aria-modal="true"
       aria-labelledby="order-form-title"
     >
