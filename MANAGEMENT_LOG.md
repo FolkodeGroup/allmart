@@ -1205,3 +1205,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #584: 372 permitir ordenamiento de productos por columnas | 2026-03-16 |
 | dgimenezdeveloper | 3 | Asignación de issue a agustin-ovejero | Issue #418: Mejorar feedback de acciones de gestión de pedidos | 2026-03-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #589: 374 mejorar layout responsivo con gridflexbox | 2026-03-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #596: 418 mejorar feedback de acciones de gestión de pedidos | 2026-03-17 |

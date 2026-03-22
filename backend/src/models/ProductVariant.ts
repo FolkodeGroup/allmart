@@ -9,6 +9,7 @@ export interface ProductVariant {
   productId: string;
   name: string; // Ej: "Color", "Talle"
   values: string[]; // Ej: ["Rojo", "Azul"]
+  isActive: boolean; // Estado activo/inactivo
   createdAt: Date;
   updatedAt: Date;
 }

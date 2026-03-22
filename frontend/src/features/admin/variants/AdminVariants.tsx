@@ -35,6 +35,7 @@ export function AdminVariants() {
     addVariant,
     updateVariant,
     deleteVariant,
+    toggleVariantStatus,
     addValueToVariant,
     removeValueFromVariant,
   } = useAdminVariants();
@@ -164,11 +165,65 @@ export function AdminVariants() {
     }
   };
 
+  const handleToggleStatus = async (variantId: string, newStatus: boolean) => {
+    if (!selectedProductId) return;
+    try {
+      await toggleVariantStatus(selectedProductId, variantId, newStatus);
+      const userEmail = user ?? 'desconocido';
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'update',
+        entity: 'variant',
+        entityId: variantId,
+        details: { productId: selectedProductId, isActive: newStatus },
+      });
+    } catch {
+      setNotif({open:true,type:'error',message:'Error al cambiar estado de variante.'});
+    }
+  };
+
   const handleSetNewValue = (groupId: string, value: string) => {
     setNewValues(prev => ({ ...prev, [groupId]: value }));
     if (errors[`value-${groupId}`]) {
       setErrors(prev => ({ ...prev, [`value-${groupId}`]: '' }));
     }
+  };
+
+  // ── Exportación ────────────────────────────────────────────────────
+  const handleExportCSV = () => {
+    if (!selectedProduct || variants.length === 0) {
+      setNotif({open:true,type:'error',message:'No hay variantes para exportar'});
+      return;
+    }
+
+    // Crear cabecera
+    const headers = ['Grupo', 'Valores'];
+    
+    // Crear filas
+    const rows = variants.map(variant => [
+      variant.name,
+      variant.values.join('; '),
+    ]);
+
+    // Crear CSV
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ].join('\n');
+
+    // Descargar
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `variantes-${selectedProduct.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setNotif({open:true,type:'success',message:'Variantes exportadas a CSV correctamente'});
   };
 
   // ── Render ────────────────────────────────────────────────────────
@@ -247,11 +302,27 @@ export function AdminVariants() {
                 canCreate={can('variants.create')}
               />
 
+              {/* Sección de exportación */}
+              {variants.length > 0 && (
+                <div className={styles.exportSection}>
+                  <Tooltip title="Descargar variantes y valores en formato CSV" placement="left" arrow>
+                    <button
+                      className={styles.exportButton}
+                      onClick={handleExportCSV}
+                      type="button"
+                    >
+                      📥 Exportar CSV
+                    </button>
+                  </Tooltip>
+                </div>
+              )}
+
               <VariantGroupsGrid
                 groups={variants}
                 onEditName={handleEditGroupName}
                 onDelete={handleDeleteGroup}
                 onEditValue={handleEditValue}
+                onToggleStatus={handleToggleStatus}
                 onAddValue={handleAddValue}
                 onRemoveValue={handleRemoveValue}
                 canEdit={can('variants.edit')}

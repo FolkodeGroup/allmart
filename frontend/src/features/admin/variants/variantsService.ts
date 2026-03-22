@@ -15,6 +15,7 @@ export interface ApiVariant {
   productId: string;
   name: string;
   values: string[];
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,12 +24,14 @@ export interface ApiVariant {
 export interface CreateVariantPayload {
   name: string;
   values: string[];
+  isActive?: boolean;
 }
 
 /** Payload para actualizar una variante */
 export interface UpdateVariantPayload {
   name?: string;
   values?: string[];
+  isActive?: boolean;
 }
 
 /** Envoltorio estándar de respuestas del admin */

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Tooltip from '@mui/material/Tooltip';
+import { AlertTriangle } from 'lucide-react';
 import { VariantValueChip } from './VariantValueChip';
 import styles from '../AdminVariants.module.css';
 
@@ -7,6 +8,7 @@ interface VariantGroup {
   id: string;
   name: string;
   values: string[];
+  isActive: boolean;
 }
 
 interface VariantGroupCardProps {
@@ -14,6 +16,7 @@ interface VariantGroupCardProps {
   onEditName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
   onEditValue: (groupId: string, oldValue: string, newValue: string) => void;
+  onToggleStatus: (id: string, newStatus: boolean) => void;
   onAddValue: (groupId: string, value: string) => void;
   onRemoveValue: (groupId: string, value: string) => void;
   canEdit: boolean;
@@ -37,6 +40,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   onEditName,
   onDelete,
   onEditValue,
+  onToggleStatus,
   onAddValue,
   onRemoveValue,
   canEdit,
@@ -115,22 +119,41 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               type="button"
               style={canEdit ? undefined : { cursor: 'default' }}
             >
+              {group.values.length === 0 && (
+                <Tooltip title="Esta variante no tiene valores definidos. Agrega valores para completarla." placement="top" arrow>
+                  <span className={styles.incompleteIndicator}>
+                    <AlertTriangle size={16} />
+                  </span>
+                </Tooltip>
+              )}
               {group.name}
               {canEdit && <span className={styles.editHint}>✏️</span>}
             </button>
           </Tooltip>
         )}
-        {canDelete && (
-          <Tooltip title="Eliminar este grupo de variantes y todos sus valores asociados" placement="top" arrow>
+        <div className={styles.groupActions}>
+          <Tooltip title={group.isActive ? 'Desactivar variante' : 'Activar variante'} placement="top" arrow>
             <button
-              className={styles.deleteGroupBtn}
-              onClick={() => onDelete(group.id)}
+              className={`${styles.statusToggleBtn} ${group.isActive ? styles.statusActive : styles.statusInactive}`}
+              onClick={() => onToggleStatus(group.id, !group.isActive)}
               type="button"
+              title={group.isActive ? 'Desactivar variante' : 'Activar variante'}
             >
-              🗑️
+              {group.isActive ? '✓' : '✕'}
             </button>
           </Tooltip>
-        )}
+          {canDelete && (
+            <Tooltip title="Eliminar este grupo de variantes y todos sus valores asociados" placement="top" arrow>
+              <button
+                className={styles.deleteGroupBtn}
+                onClick={() => onDelete(group.id)}
+                type="button"
+              >
+                🗑️
+              </button>
+            </Tooltip>
+          )}
+        </div>
       </div>
 
       {/* Valores / chips */}
