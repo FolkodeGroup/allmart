@@ -1235,3 +1235,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #600: 396 optimizar visualización de categorías en tarjetas | 2026-03-22 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #599: Se mejora filtro de busqueda por nombre y slug de categoria | 2026-03-22 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #593: edición rápida de valores | 2026-03-22 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #598: 🔄 Actualización automática de puntajes semanal | 2026-03-22 |
