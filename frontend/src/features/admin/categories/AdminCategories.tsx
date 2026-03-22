@@ -1,25 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-import { logAdminActivity } from '../../../services/adminActivityLogService';
+// import { logAdminActivity } from '../../../services/adminActivityLogService';
 // import { AdminCategoryForm } from './AdminCategoryForm'; // Temporalmente deshabilitado si no existe
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { FolderSearch, AlertCircle } from 'lucide-react';
+import { CategoriesGrid } from './CategoriesGrid';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 
 export function AdminCategories() {
-  const { categories, deleteCategory, isLoading: loading, error, refreshCategories, page: apiPage, totalPages: apiTotalPages, total } = useAdminCategories();
+  const { categories, isLoading: loading, error, refreshCategories, page: apiPage, totalPages: apiTotalPages, total } = useAdminCategories();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
   // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [, setEditId] = useState<string | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  // const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
 
   // Debounce para búsqueda instantánea
@@ -38,26 +39,26 @@ export function AdminCategories() {
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
-  const auth = useAdminAuth ? useAdminAuth() : null;
-  const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
-  const handleDelete = async (id: string) => {
-    try {
-      if (id) {
-        await deleteCategory(id);
-        logAdminActivity({
-          timestamp: new Date().toISOString(),
-          user: userEmail,
-          action: 'delete',
-          entity: 'category',
-          entityId: id,
-          details: {},
-        });
-      }
-    } catch (err) {
-      console.error('Error al eliminar categoría:', err);
-    }
-    setDeleteConfirm(null);
-  };
+  // const auth = useAdminAuth ? useAdminAuth() : null;
+  // const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
+  // const handleDelete = async (id: string) => {
+  //   try {
+  //     if (id) {
+  //       await deleteCategory(id);
+  //       logAdminActivity({
+  //         timestamp: new Date().toISOString(),
+  //         user: userEmail,
+  //         action: 'delete',
+  //         entity: 'category',
+  //         entityId: id,
+  //         details: {},
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.error('Error al eliminar categoría:', err);
+  //   }
+  //   setDeleteConfirm(null);
+  // };
 
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
@@ -119,66 +120,14 @@ export function AdminCategories() {
           action={can('categories.create') ? { label: 'Nueva Categoría', onClick: handleNew } : undefined}
         />
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={styles.th}>Nombre</th>
-                <th className={styles.th}>Identificador</th>
-                <th className={styles.th}>Slug</th>
-                <th className={styles.th}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categories.map(c => (
-                <tr key={c.id} className={styles.row}>
-                  <td className={styles.td}>
-                    <div className={styles.categoryName}>{c.name}</div>
-                  </td>
-                  <td className={styles.td}>
-                    <code>{c.id}</code>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={styles.slugBadge}>{c.slug}</span>
-                  </td>
-                  <td className={styles.td}>
-                    <div className={styles.actions}>
-                      {can('categories.edit') && (
-                        <button
-                          className={styles.editBtn}
-                          onClick={() => handleEdit(c.id)}
-                          title="Editar"
-                        >
-                          ✏️
-                        </button>
-                      )}
-                      {can('categories.delete') && (
-                        deleteConfirm === c.id ? (
-                          <>
-                            <button className={styles.confirmDeleteBtn} onClick={() => handleDelete(c.id)}>
-                              Confirmar
-                            </button>
-                            <button className={styles.cancelDeleteBtn} onClick={() => setDeleteConfirm(null)}>
-                              Cancelar
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            className={styles.deleteBtn}
-                            onClick={() => setDeleteConfirm(c.id)}
-                            title="Eliminar"
-                          >
-                            🗑️
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <CategoriesGrid
+          categories={categories}
+          onEdit={can('categories.edit') ? handleEdit : undefined}
+          // onDelete={can('categories.delete') ? (id => setDeleteConfirm(id)) : undefined}
+          canEdit={can('categories.edit')}
+          canDelete={can('categories.delete')}
+          getProductCount={cat => cat.itemCount}
+        />
       ))}
 
       {/* Controles de paginación */}
