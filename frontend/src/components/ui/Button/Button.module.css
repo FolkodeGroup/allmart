@@ -1,3 +1,26 @@
+/* Spinner dentro del botón */
+.spinner {
+  margin-right: 0.5em;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.loadingText {
+  opacity: 0.7;
+}
+
+.leftIcon {
+  margin-right: 0.5em;
+  display: inline-flex;
+  align-items: center;
+}
+
+.rightIcon {
+  margin-left: 0.5em;
+  display: inline-flex;
+  align-items: center;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
