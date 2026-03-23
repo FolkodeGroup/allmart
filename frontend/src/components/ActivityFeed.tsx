@@ -6,7 +6,7 @@ import {
 } from "../services/adminActivityLogService";
 import type { AdminActivityLog } from "../services/adminActivityLogService";
 import { ActivityItem } from "./ActivityItem";
-import "./ActivityFeed.css";
+import "./activityFeed.css";
 
 // ── Configuración visual por tipo de acción ───────────────────────────────────
 
