@@ -1237,3 +1237,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #593: edición rápida de valores | 2026-03-22 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #598: 🔄 Actualización automática de puntajes semanal | 2026-03-22 |
 | dgimenezdeveloper | 3 | Asignación de issue a Mau-bar-iva | Issue #393: Expandir vista de variantes a toda la pantalla usando Grid/Flexbox | 2026-03-22 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #605: 218 dashboard feed de actividad en vivo | 2026-03-23 |
