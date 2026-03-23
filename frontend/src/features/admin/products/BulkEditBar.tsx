@@ -22,9 +22,9 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    let priceVal: number | undefined = price ? Number(price) : undefined;
-    let stockVal: number | undefined = stock ? Number(stock) : undefined;
-    let inStockVal: boolean | undefined = inStock ? inStock === 'true' : undefined;
+    const priceVal: number | undefined = price ? Number(price) : undefined;
+    const stockVal: number | undefined = stock ? Number(stock) : undefined;
+    const inStockVal: boolean | undefined = inStock ? inStock === 'true' : undefined;
     if (price && (isNaN(priceVal!) || priceVal! < 0)) {
       setError('El precio debe ser un número mayor o igual a 0.');
       return;

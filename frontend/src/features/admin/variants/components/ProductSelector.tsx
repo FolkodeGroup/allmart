@@ -148,10 +148,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             ? variants.reduce((s, g) => s + g.values.length, 0)
             : 0;
           return (
-            <li
+            <button
               key={p.id}
               className={`${styles.productItem} ${selectedProductId === p.id ? styles.selected : ''}`}
               onClick={() => onSelectProduct(p.id)}
+              type="button"
+              style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', width: '100%' }}
             >
               <div className={styles.productName}>{p.name}</div>
               {p.sku && <div className={styles.productSku}>{p.sku}</div>}
@@ -164,7 +166,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                   <span className={styles.noVariants}>Seleccioná para ver</span>
                 )}
               </div>
-            </li>
+            </button>
           );
         })}
       </ul>

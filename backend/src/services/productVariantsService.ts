@@ -14,6 +14,7 @@ function toVariant(row: {
   productId: string;
   name: string;
   values: unknown;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }): ProductVariant {
@@ -22,6 +23,7 @@ function toVariant(row: {
     productId: row.productId,
     name: row.name,
     values: row.values as string[],
+    isActive: row.isActive,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -68,6 +70,7 @@ export async function updateVariant(
     data: {
       ...(dto.name !== undefined && { name: dto.name }),
       ...(dto.values !== undefined && { values: dto.values as never }),
+      ...(dto.isActive !== undefined && { isActive: dto.isActive }),
     } as never,
   });
   return toVariant(row);

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
  // @ts-ignore
-import { fetchAdminCategories } from '../categoriesService';
+import { _fetchAdminCategories } from '../categoriesService';
 
 describe('categoriesService', () => {
   it('fetchAdminCategories retorna datos paginados', async () => {
@@ -12,7 +12,7 @@ describe('categoriesService', () => {
       limit: 10,
       totalPages: 1
     };
-    
+
     expect(result.data[0].name).toBe('Cat 1');
   });
 });
