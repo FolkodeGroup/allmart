@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { logAdminActivity } from '../services/adminActivityLogService';
+//import { logAdminActivity } from '../services/adminActivityLogService';
 import { useActivityFeed } from '../hooks/useActivityFeed';
 
 // ── EJEMPLO 1: REGISTRAR CREACIÓN DE PRODUCTO ────────────────────────────────
