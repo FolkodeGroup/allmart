@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 // import { logAdminActivity } from '../../../services/adminActivityLogService';
@@ -13,7 +13,10 @@ import { CategorySearchInput } from '../../../components/ui/CategorySearchInput'
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 
 export function AdminCategories() {
-  const { categories, isLoading: loading, error, refreshCategories, page: apiPage, totalPages: apiTotalPages, total } = useAdminCategories();
+  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total } = useAdminCategories();
+  // Local state for pagination
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10); // Could be made configurable
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
   // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
@@ -24,18 +27,26 @@ export function AdminCategories() {
 
 
   // Debounce para búsqueda instantánea
-  const debouncedSearch = useDebouncedValue(search, 350);
-  useEffect(() => {
-    // Si seleccionó sugerencia, buscar por ese valor exacto
-    refreshCategories({ q: selectedSuggestion || debouncedSearch, page: 1, limit: 10 });
-    // Limpiar selección tras buscar
-    if (selectedSuggestion) setSelectedSuggestion(null);
-     
-  }, [debouncedSearch, selectedSuggestion, refreshCategories]);
 
-  const handlePageChange = (newPage: number) => {
-    refreshCategories({ q: search, page: newPage, limit: 10 });
-  };
+  // Debounce para búsqueda instantánea
+  const debouncedSearch = useDebouncedValue(search, 350);
+
+  // Fetch categories when page, limit, or search changes
+  useEffect(() => {
+    refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
+    if (selectedSuggestion) setSelectedSuggestion(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, selectedSuggestion, page, limit, refreshCategories]);
+
+  // Reset page to 1 when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
 
   const handleNew = () => { setEditId(null); setShowForm(true); };
   const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
@@ -131,24 +142,25 @@ export function AdminCategories() {
       ))}
 
       {/* Controles de paginación */}
-      {total > 10 && (
+      {total > limit && (
         <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
           <button
             className={styles.pageBtn}
-            disabled={apiPage === 1}
-            onClick={() => handlePageChange(apiPage - 1)}
+            disabled={page === 1 || loading}
+            onClick={() => handlePageChange(page - 1)}
           >Anterior</button>
           {Array.from({ length: apiTotalPages }, (_, i) => (
             <button
               key={i + 1}
-              className={styles.pageBtn + (apiPage === i + 1 ? ' ' + styles.pageActive : '')}
+              className={styles.pageBtn + (page === i + 1 ? ' ' + styles.pageActive : '')}
+              disabled={page === i + 1 || loading}
               onClick={() => handlePageChange(i + 1)}
             >{i + 1}</button>
           ))}
           <button
             className={styles.pageBtn}
-            disabled={apiPage === apiTotalPages}
-            onClick={() => handlePageChange(apiPage + 1)}
+            disabled={page === apiTotalPages || loading}
+            onClick={() => handlePageChange(page + 1)}
           >Siguiente</button>
         </div>
       )}
