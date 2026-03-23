@@ -15,7 +15,7 @@ import DateRangeCard from "../../components/ui/DateRangeCard";
 import styles from "./AdminDashboard.module.css";
 import type { WeeklySalesData } from "../../components/ui/WeeklySalesWidget";
 import MetricCard from "../../components/ui/MetricCard";
-import { ActivityFeed } from "../../components/ActivityFeed"
+import { ActivityFeed } from "../../components/ActivityFeed";
 
 // ── Función de saludo dinámico según la hora del día ──
 function getTimeBasedGreeting(): { greeting: string; emoji: string } {
@@ -125,7 +125,7 @@ export function AdminDashboard() {
   const rangeDays =
     Math.ceil(
       (new Date(dateRange.to).getTime() - new Date(dateRange.from).getTime()) /
-        (1000 * 60 * 60 * 24),
+      (1000 * 60 * 60 * 24),
     ) + 1;
   const prevFrom = new Date(dateRange.from);
   prevFrom.setDate(prevFrom.getDate() - rangeDays);

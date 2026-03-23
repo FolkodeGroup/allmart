@@ -1,10 +1,11 @@
-//src/components/activityFeed.tsx
+//src/components/ActivityFeed.tsx
 import { useState, useEffect } from "react";
 import {
   getAdminActivityLogs,
   clearAdminActivityLogs,
 } from "../services/adminActivityLogService";
 import type { AdminActivityLog } from "../services/adminActivityLogService";
+import { ActivityItem } from "./ActivityItem";
 import "./ActivityFeed.css";
 
 // ── Configuración visual por tipo de acción ───────────────────────────────────
@@ -68,22 +69,6 @@ function getConfig(action: string) {
   return ACTION_CONFIG[action?.toLowerCase()] ?? ACTION_CONFIG.default;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function timeAgo(timestamp: string): string {
-  const diff = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
-  if (diff < 60) return "ahora";
-  if (diff < 3600) return `hace ${Math.floor(diff / 60)} min`;
-  if (diff < 86400) return `hace ${Math.floor(diff / 3600)} h`;
-  return new Date(timestamp).toLocaleDateString("es-AR");
-}
-
-function buildDescription(log: AdminActivityLog): string {
-  return [log.action, log.entity, log.entityId ? `#${log.entityId}` : ""]
-    .filter(Boolean)
-    .join(" — ");
-}
-
 // ── Opciones de filtro ────────────────────────────────────────────────────────
 
 const FILTER_OPTIONS = [
@@ -95,6 +80,20 @@ const FILTER_OPTIONS = [
   { label: "Alertas", value: "alert" },
 ];
 
+// ── Skeleton Loader ──────────────────────────────────────────────────────────
+
+function ActivitySkeleton() {
+  return (
+    <div className="af-skeleton">
+      <div className="af-skeleton-icon" />
+      <div className="af-skeleton-card">
+        <div className="af-skeleton-line" style={{ width: '70%' }} />
+        <div className="af-skeleton-line short" />
+      </div>
+    </div>
+  );
+}
+
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface ActivityFeedProps {
@@ -102,6 +101,8 @@ interface ActivityFeedProps {
   pollInterval?: number;
   /** Máximo de eventos a mostrar. Default: 20 */
   maxEvents?: number;
+  /** Mostrar esqueleto al cargar. Default: true */
+  showSkeleton?: boolean;
 }
 
 // ── Componente ────────────────────────────────────────────────────────────────
@@ -109,18 +110,28 @@ interface ActivityFeedProps {
 export function ActivityFeed({
   pollInterval = 10000,
   maxEvents = 20,
+  showSkeleton = true,
 }: ActivityFeedProps) {
   const [logs, setLogs] = useState<AdminActivityLog[]>(() =>
     getAdminActivityLogs().slice(0, maxEvents),
   );
   const [pending, setPending] = useState<AdminActivityLog[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(showSkeleton);
 
   const handleClear = () => {
     clearAdminActivityLogs();
     setLogs([]);
     setPending([]);
   };
+
+  // Initial load
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => setIsLoading(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   // Polling: detecta nuevos logs comparando el timestamp del más reciente
   useEffect(() => {
@@ -153,10 +164,14 @@ export function ActivityFeed({
       <div className="af-header">
         <h3 className="af-title">Feed de actividad</h3>
         <div className="af-header-actions">
-          <button className="af-btn-clear" onClick={handleClear}>
+          <button
+            className="af-btn-clear"
+            onClick={handleClear}
+            aria-label="Limpiar historial de actividades"
+          >
             Limpiar
           </button>
-          <span className="af-live-badge">
+          <span className="af-live-badge" aria-live="polite">
             <span className="af-live-dot" />
             En vivo
           </span>
@@ -164,12 +179,13 @@ export function ActivityFeed({
       </div>
 
       {/* Filtros */}
-      <div className="af-filter-bar">
+      <div className="af-filter-bar" role="group" aria-label="Filtros de actividad">
         {FILTER_OPTIONS.map((f) => (
           <button
             key={f.value}
             className={`af-filter-btn${filter === f.value ? " active" : ""}`}
             onClick={() => setFilter(f.value)}
+            aria-pressed={filter === f.value}
           >
             {f.label}
           </button>
@@ -184,6 +200,7 @@ export function ActivityFeed({
           onKeyDown={(e) => e.key === "Enter" && loadPending()}
           role="button"
           tabIndex={0}
+          aria-label={`${pending.length} nuevo${pending.length > 1 ? "s" : ""} evento${pending.length > 1 ? "s" : ""}`}
         >
           + {pending.length} nuevo{pending.length > 1 ? "s" : ""} evento
           {pending.length > 1 ? "s" : ""} — click para cargar
@@ -194,40 +211,22 @@ export function ActivityFeed({
       <div className="af-timeline">
         <div className="af-timeline-line" />
 
-        {filtered.length === 0 ? (
+        {isLoading && showSkeleton ? (
+          <div className="af-loading">
+            {[...Array(3)].map((_, i) => (
+              <ActivitySkeleton key={`skeleton-${i}`} />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="af-empty">Sin actividad para este filtro.</div>
         ) : (
-          filtered.map((log, i) => {
-            const cfg = getConfig(log.action);
-            return (
-              <div key={i} className="af-event">
-                {/* bg inline: valor dinámico de ACTION_CONFIG */}
-                <div className="af-event-icon" style={{ background: cfg.bg }}>
-                  {cfg.icon}
-                </div>
-
-                <div className="af-event-body">
-                  <div className="af-card">
-                    <div className="af-card-top">
-                      <span className="af-card-name">{log.user}</span>
-                      <span className="af-card-time">
-                        {timeAgo(log.timestamp)}
-                      </span>
-                    </div>
-                    <div className="af-card-desc">{buildDescription(log)}</div>
-
-                    {/* colores inline: valores dinámicos de ACTION_CONFIG */}
-                    <span
-                      className="af-tag"
-                      style={{ background: cfg.tagBg, color: cfg.tagColor }}
-                    >
-                      {cfg.label}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })
+          filtered.map((log, i) => (
+            <ActivityItem
+              key={`${log.timestamp}-${i}`}
+              log={log}
+              config={getConfig(log.action)}
+            />
+          ))
         )}
       </div>
     </div>
