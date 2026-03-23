@@ -14,6 +14,7 @@ import { AdminReports } from './features/admin/reports/AdminReports';
 import { AdminRoute } from './components/AdminRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import { AdminProductsProvider } from './context/AdminProductsContext';
+import { DashboardLayoutProvider } from './context/DashboardLayoutContext';
 import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
 import { AdminOrdersProvider } from './context/AdminOrdersContext';
 import { AdminVariantsProvider } from './context/AdminVariantsContext';
@@ -59,19 +60,21 @@ function App() {
     <ErrorBoundary>
       <NotificationProvider>
         <AdminAuthProvider>
-          <AdminCategoriesProvider>
-            <AdminProductsProvider>
-              <AdminVariantsProvider>
-                <AdminImagesProvider>
-                  <AdminOrdersProvider>
-                    <CartProvider>
-                      <RouterProvider router={router} />
-                    </CartProvider>
-                  </AdminOrdersProvider>
-                </AdminImagesProvider>
-              </AdminVariantsProvider>
-            </AdminProductsProvider>
-          </AdminCategoriesProvider>
+          <DashboardLayoutProvider>
+            <AdminCategoriesProvider>
+              <AdminProductsProvider>
+                <AdminVariantsProvider>
+                  <AdminImagesProvider>
+                    <AdminOrdersProvider>
+                      <CartProvider>
+                        <RouterProvider router={router} />
+                      </CartProvider>
+                    </AdminOrdersProvider>
+                  </AdminImagesProvider>
+                </AdminVariantsProvider>
+              </AdminProductsProvider>
+            </AdminCategoriesProvider>
+          </DashboardLayoutProvider>
         </AdminAuthProvider>
       </NotificationProvider>
     </ErrorBoundary>
