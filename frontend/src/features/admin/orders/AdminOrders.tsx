@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
+import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -208,7 +209,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
         {/* Header */}
         <div className={styles.detailHeader}>
           <div className={styles.detailHeaderInfo}>
-            <h2 className={styles.detailTitle}>Pedido #{order.id.slice(0,8).toUpperCase()}</h2>
+            <h2 className={styles.detailTitle}>Pedido #{order.id.slice(0, 8).toUpperCase()}</h2>
             <span className={styles.detailDate}>{formatDateTime(order.createdAt)}</span>
           </div>
           <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="Cerrar">✕</button>
@@ -418,6 +419,10 @@ export function AdminOrders() {
   const [filterDateTo, setFilterDateTo] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // Ref for scroll preservation
+  const containerRef = useRef<HTMLElement>(null);
+  useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'orders-list', [search, filterStatus, filterDateFrom, filterDateTo]);
+
   // Paginación
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
@@ -515,7 +520,7 @@ export function AdminOrders() {
     open: boolean;
     type: 'delete' | 'status' | 'paid' | null;
     order: Order | null;
-    payload?: any;
+    payload?: Record<string, unknown>;
     isLoading?: boolean;
     message?: string;
   }>({ open: false, type: null, order: null });
@@ -546,7 +551,7 @@ export function AdminOrders() {
         setSelectedOrder(null);
       } else if (modal.type === 'status') {
         const { status, note } = modal.payload || {};
-        await updateOrderStatus(modal.order.id, status, note);
+        await updateOrderStatus(modal.order.id, status as OrderStatus, note as string | undefined);
         logAdminActivity({
           timestamp: new Date().toISOString(),
           user: user || 'desconocido',
@@ -568,14 +573,18 @@ export function AdminOrders() {
         toast.success('Pedido marcado como abonado');
       }
       handleCloseModal();
-    } catch (err: any) {
-      toast.error(err?.message || 'Error al procesar la acción');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Error al procesar la acción';
+      toast.error(errorMsg);
       setModal(m => ({ ...m, isLoading: false }));
     }
   };
 
   return (
-    <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
+    <div
+      ref={containerRef as unknown as React.RefObject<HTMLDivElement>}
+      className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
+    >
       {/* Header */}
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
@@ -698,42 +707,42 @@ export function AdminOrders() {
 
 
 
-{/* Controles de paginación */}
-          <div className={styles.paginationWrap}>
+      {/* Controles de paginación */}
+      <div className={styles.paginationWrap}>
+        <button
+          className={styles.paginationBtn}
+          type="button"
+          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          disabled={currentPage === 1}
+        >
+          ← Anterior
+        </button>
+        <div className={styles.paginationPages}>
+          {Array.from({ length: totalPages }).map((_, i) => (
             <button
-              className={styles.paginationBtn}
+              key={i + 1}
+              className={
+                currentPage === i + 1
+                  ? `${styles.paginationPage} ${styles.paginationPageActive}`
+                  : styles.paginationPage
+              }
               type="button"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(i + 1)}
+              aria-current={currentPage === i + 1 ? 'page' : undefined}
             >
-              ← Anterior
+              {i + 1}
             </button>
-            <div className={styles.paginationPages}>
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i + 1}
-                  className={
-                    currentPage === i + 1
-                      ? `${styles.paginationPage} ${styles.paginationPageActive}`
-                      : styles.paginationPage
-                  }
-                  type="button"
-                  onClick={() => setCurrentPage(i + 1)}
-                  aria-current={currentPage === i + 1 ? 'page' : undefined}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              className={styles.paginationBtn}
-              type="button"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Siguiente →
-            </button>
-          </div>
+          ))}
+        </div>
+        <button
+          className={styles.paginationBtn}
+          type="button"
+          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          disabled={currentPage === totalPages}
+        >
+          Siguiente →
+        </button>
+      </div>
 
 
 
@@ -799,7 +808,7 @@ export function AdminOrders() {
                     tabIndex={0}
                     onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
                   >
-                    <td className={styles.orderId}>#{order.id.slice(0,8).toUpperCase()}</td>
+                    <td className={styles.orderId}>#{order.id.slice(0, 8).toUpperCase()}</td>
                     <td className={styles.orderDate}>{formatDate(order.createdAt)}</td>
                     <td>
                       <div className={styles.customerName}>
@@ -852,7 +861,7 @@ export function AdminOrders() {
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
                 >
                   <div className={styles.mobileCardTop}>
-                    <span className={styles.mobileCardId}>#{order.id.slice(0,8).toUpperCase()}</span>
+                    <span className={styles.mobileCardId}>#{order.id.slice(0, 8).toUpperCase()}</span>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                       <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
                         {STATUS_LABELS[order.status]}
@@ -884,7 +893,7 @@ export function AdminOrders() {
               );
             })}
           </div>
-          <div style={{ height: '100px'}} aria-hidden='true'/>
+          <div style={{ height: '100px' }} aria-hidden='true' />
         </>
       )}
 
@@ -901,20 +910,20 @@ export function AdminOrders() {
         open={modal.open}
         title={
           modal.type === 'delete' ? 'Eliminar pedido' :
-          modal.type === 'status' ? 'Actualizar estado' :
-          modal.type === 'paid' ? 'Confirmar pago' :
-          'Confirmar acción'
+            modal.type === 'status' ? 'Actualizar estado' :
+              modal.type === 'paid' ? 'Confirmar pago' :
+                'Confirmar acción'
         }
         message={
           modal.type === 'delete' ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.' :
-          modal.type === 'status' && typeof modal.payload?.status === 'string' ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?` :
-          modal.type === 'paid' ? '¿Confirmar que el cliente abonó este pedido?' :
-          ''
+            modal.type === 'status' && typeof modal.payload?.status === 'string' ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?` :
+              modal.type === 'paid' ? '¿Confirmar que el cliente abonó este pedido?' :
+                ''
         }
         confirmText={modal.isLoading ? 'Procesando...' : 'Confirmar'}
         cancelText={'Cancelar'}
-        onConfirm={modal.isLoading ? () => {} : handleConfirmModal}
-        onCancel={modal.isLoading ? () => {} : handleCloseModal}
+        onConfirm={modal.isLoading ? () => { } : handleConfirmModal}
+        onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
 import { useAdminProducts } from "../../context/AdminProductsContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
+import { Button } from '../../components/ui/Button/Button';
 import styles from "./AdminLayout.module.css";
 
 const navItems = [
@@ -91,7 +92,7 @@ export function AdminLayout() {
   useEffect(() => {
     localStorage.setItem('admin-theme', theme);
   }, [theme]);
-  
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -166,12 +167,15 @@ export function AdminLayout() {
           },
         }}
       />
-      <button
+      <Button
         className={styles.mobileToggle}
         onClick={() => setIsMobileOpen(true)}
+        aria-label="Abrir menú móvil"
+        variant="ghost"
+        type="button"
       >
         ☰
-      </button>
+      </Button>
       {isMobileOpen && (
         <div
           className={styles.backdrop}
@@ -189,25 +193,28 @@ export function AdminLayout() {
         <div className={styles.brand}>
           <span className={styles.brandLogo}>allmart</span>
           {!isCollapsed && <span className={styles.brandTag}>Admin</span>}
-          <button
+          <Button
             className={styles.desktopToggle}
             onClick={() => setIsCollapsed(!isCollapsed)}
             aria-label="Colapsar/Expandir barra lateral"
+            variant="ghost"
+            type="button"
           >
             {isCollapsed ? "❯" : "❮"}
-          </button>
+          </Button>
         </div>
 
         {/* Agrupación: Dark mode + navItems en un solo bloque */}
         <div className={styles.navGroup}>
-          <button
+          <Button
             className={`${styles.darkToggle} ${isCollapsed ? styles.darkToggleCollapsed : styles.darkToggleExpanded}`}
             aria-label="Cambiar modo oscuro"
             type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            variant="ghost"
           >
             {theme === 'dark' ? '🌙' : '☀️'}
-          </button>
+          </Button>
           <nav className={styles.nav}>
             {navItems.map(item => {
               const locked = item.permission !== null && !can(item.permission);
@@ -256,10 +263,12 @@ export function AdminLayout() {
         </div>
 
         <div className={styles.sidebarFooter} ref={dropdownRef}>
-          <button
+          <Button
             className={styles.profileBtn}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             aria-label="Abrir menú de perfil"
+            variant="ghost"
+            type="button"
           >
             <div className={styles.avatar}>👤</div>
             <div className={styles.userDetails}>
@@ -277,16 +286,18 @@ export function AdminLayout() {
             >
               ▼
             </span>
-          </button>
+          </Button>
 
           {isDropdownOpen && (
             <div className={styles.dropdown}>
-              <button className={styles.dropdownItem}>
+              <Button className={styles.dropdownItem} variant="ghost" type="button">
                 <span className={styles.dropdownIcon}>⚙️</span>
                 <span>Configuración</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
+                variant="ghost"
+                type="button"
                 onClick={() => {
                   setIsDropdownOpen(false);
                   handleLogout();
@@ -294,7 +305,7 @@ export function AdminLayout() {
               >
                 <span className={styles.dropdownIcon}>🚪</span>
                 <span>Cerrar sesión</span>
-              </button>
+              </Button>
             </div>
           )}
         </div>
