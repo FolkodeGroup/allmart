@@ -1,23 +1,52 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 13438 |
-| FedericoPaal | 2200 |
+| dgimenezdeveloper | 13678 |
+| FedericoPaal | 2320 |
 | Nahuel-Dalesio | 1630 |
 | CelinaJP | 1280 |
 | agustin-ovejero | 740 |
+| Mau-bar-iva | 195 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #616: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #615: 🔄 Actualización automática de puntajes semanal | 2026-03-24 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #614: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #616: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #614: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #613: feat: add staff notes functionality with CRUD operations and integration in admin dashboard | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #613: feat: add staff notes functionality with CRUD operations and integration in admin dashboard | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #612: 222 ux validaciones de formulario en tiempo real | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #611: botón con spinners e inhabilitación creado e implementado | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #610: 220 dashboard personalización de widgets drag drop | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #608: 398 mejorar feedback de acciones de edición y eliminación de categorías | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #607: Se refactoriza implementacion de paginacion a la vista de Categorias | 2026-03-24 |
+| FedericoPaal | 50 | Issue | Mejorar feedback de acciones de edición y eliminación de categorías | 2026-03-24 |
+| FedericoPaal | 70 | Issue | Añadir paginación a la vista de categorías | 2026-03-24 |
+| Mau-bar-iva | 25 | Issue | Dashboard: Widget de "Notas del Staff" | 2026-03-24 |
+| Mau-bar-iva | 30 | Issue | UX: Validaciones de Formulario en Tiempo Real | 2026-03-24 |
+| Mau-bar-iva | 15 | Issue | UI: Botones de Acción con Estados de Carga (Spinners) | 2026-03-24 |
+| Mau-bar-iva | 60 | Issue | Dashboard: Personalización de Widgets (Drag & Drop) | 2026-03-24 |
+| Mau-bar-iva | 35 | Issue | UX: Scroll Infinito vs Paginación en Listas Admin | 2026-03-24 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #606: 🔄 Registrar puntaje de gestión | 2026-03-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #606: 🔄 Registrar puntaje de gestión | 2026-03-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #605: 218 dashboard feed de actividad en vivo | 2026-03-23 |
+| Mau-bar-iva | 30 | Issue | Dashboard: Feed de Actividad en Vivo | 2026-03-23 |
 | CelinaJP | 60 | Issue | Permitir edición rápida de valores de variantes | 2026-03-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #604: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #603: 🔄 Registrar puntaje de gestión | 2026-03-22 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #602: 🔄 Registrar puntaje de gestión | 2026-03-22 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #601: Actualicé check_missing_puntajes.cjs para usar exactamente los mismos… | 2026-03-22 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #598: 🔄 Actualización automática de puntajes semanal | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #604: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #603: 🔄 Registrar puntaje de gestión | 2026-03-22 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #602: 🔄 Registrar puntaje de gestión | 2026-03-22 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #601: Actualicé check_missing_puntajes.cjs para usar exactamente los mismos… | 2026-03-22 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #600: 396 optimizar visualización de categorías en tarjetas | 2026-03-22 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #599: Se mejora filtro de busqueda por nombre y slug de categoria | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #598: 🔄 Actualización automática de puntajes semanal | 2026-03-22 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #593: edición rápida de valores | 2026-03-22 |
 | FedericoPaal | 60 | Issue | Optimizar visualización de categorías en tarjetas | 2026-03-22 |
 | FedericoPaal | 80 | Issue | Mejorar filtro de búsqueda por nombre y slug de categoría | 2026-03-22 |
