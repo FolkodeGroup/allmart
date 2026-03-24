@@ -1239,3 +1239,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 3 | Asignación de issue a Mau-bar-iva | Issue #393: Expandir vista de variantes a toda la pantalla usando Grid/Flexbox | 2026-03-22 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #605: 218 dashboard feed de actividad en vivo | 2026-03-23 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #612: 222 ux validaciones de formulario en tiempo real | 2026-03-24 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #613: feat: add staff notes functionality with CRUD operations and integration in admin dashboard | 2026-03-24 |
