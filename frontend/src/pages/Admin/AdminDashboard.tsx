@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import WeeklySalesWidget from "../../components/ui/WeeklySalesWidget";
 import CategoryDistributionChart from "../../components/ui/CategoryDistributionChart";
+import type { CategoryDistributionData } from "../../components/ui/CategoryDistributionChart";
 import BarChartTopProducts from "../../components/ui/BarChartTopProducts";
 import RecentOrdersWidget from "../../components/ui/RecentOrdersWidget";
 import SalesActivityHeatmap from "../../components/ui/SalesActivityHeatmap";
@@ -16,6 +17,7 @@ import styles from "./AdminDashboard.module.css";
 import type { WeeklySalesData } from "../../components/ui/WeeklySalesWidget";
 import MetricCard from "../../components/ui/MetricCard";
 import { ActivityFeed } from "../../components/ActivityFeed";
+import StaffNotesWidget from "../../components/StaffNotes";
 
 // ── Función de saludo dinámico según la hora del día ──
 function getTimeBasedGreeting(): { greeting: string; emoji: string } {
@@ -79,8 +81,9 @@ export function AdminDashboard() {
     const getOS = () => {
       // 1. Intentar con la API moderna (Chrome, Edge, Brave)
       if ("userAgentData" in navigator) {
-        const data = (navigator as any).userAgentData;
-        return data.platform;
+        // TypeScript does not yet have userAgentData in Navigator type
+        const uaData = (navigator as unknown as { userAgentData: { platform: string } }).userAgentData;
+        return uaData.platform;
       }
       // 2. Fallback para Safari, Firefox y navegadores viejos
       return navigator.platform || "Sistema desconocido";
@@ -93,7 +96,6 @@ export function AdminDashboard() {
       setIsSyncing(true);
       const start = Date.now();
       try {
-        // Aquí harías un fetch real a tu API, ej: await fetch('/api/health')
         await new Promise((resolve) => setTimeout(resolve, 100)); // Simulación
         setLatency(Date.now() - start);
       } finally {
@@ -105,6 +107,7 @@ export function AdminDashboard() {
     const interval = setInterval(checkLatency, 30000); // Check cada 30s
     return () => clearInterval(interval);
   }, []);
+
 
   // Helper para filtrar por rango de fechas (inclusive)
   function isInRange(dateStr: string) {
@@ -119,7 +122,7 @@ export function AdminDashboard() {
 
   // Filtrar pedidos por rango
   const filteredOrders = orders.filter((o) => isInRange(o.createdAt));
-
+  const categoryData: CategoryDistributionData[] = [];
   // --- Métricas ---
   // Para comparación, calculamos el rango anterior de igual cantidad de días
   const rangeDays =
@@ -184,6 +187,112 @@ export function AdminDashboard() {
       ? 0
       : ((conversionActual - conversionPrevio) / conversionPrevio) * 100;
 
+  // Mejores clientes (top 5)
+  const clientesMap: Record<string, { nombre: string; email: string; pedidos: number; totalGastado: number }> = {};
+  filteredOrders.forEach((order) => {
+    const email = order.customer.email;
+    if (!clientesMap[email]) {
+      clientesMap[email] = {
+        nombre: `${order.customer.firstName} ${order.customer.lastName}`.trim() || email,
+        email,
+        pedidos: 0,
+        totalGastado: 0,
+      };
+    }
+    clientesMap[email].pedidos += 1;
+    clientesMap[email].totalGastado += order.total;
+  });
+  const mejoresClientes = Object.values(clientesMap)
+    .sort((a, b) => b.totalGastado - a.totalGastado)
+    .slice(0, 5);
+
+  // Top 10 productos más vendidos
+  const productSalesMap: Record<string, { name: string; sku: string; sales: number }> = {};
+  filteredOrders.forEach((order) => {
+    order.items.forEach((item: { productId: string; productName: string; quantity: number }) => {
+      if (!productSalesMap[item.productId]) {
+        const prod = products.find((p) => p.id === item.productId);
+        productSalesMap[item.productId] = {
+          name: item.productName,
+          sku: prod?.sku || '',
+          sales: 0,
+        };
+      }
+      productSalesMap[item.productId].sales += item.quantity;
+    });
+  });
+  const topProducts = Object.values(productSalesMap)
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 10);
+
+  // Distribución por categoría (dummy, reemplazar por lógica real si es necesario)
+  // ...existing code...
+
+  // Skeleton Components
+  const ChartSkeleton = () => (
+    <div className={styles.chartSkeleton}>
+      <div className={styles.skeletonChartBar}></div>
+      <div className={styles.skeletonChartBar}></div>
+      <div className={styles.skeletonChartBar}></div>
+    </div>
+  );
+  const HeatmapSkeleton = () => (
+    <div className={styles.heatmapSkeleton}>
+      {Array.from({ length: 168 }).map((_, i) => (
+        <div key={i} className={styles.skeletonHeatmapCell}></div>
+      ))}
+    </div>
+  );
+  const TopProductsSkeleton = () => (
+    <div className={styles.topProductsSkeleton}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className={styles.skeletonProductRow}>
+          <div className={styles.skeletonProductName}></div>
+          <div className={styles.skeletonProductValue}></div>
+        </div>
+      ))}
+    </div>
+  );
+  const ClientesSkeleton = () => (
+    <div className={styles.clientesSkeleton}>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className={styles.skeletonClienteRow}>
+          <div className={styles.skeletonClienteName}></div>
+          <div className={styles.skeletonClienteValue}></div>
+          <div className={styles.skeletonClienteValue}></div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Estado de conexión (status bar)
+  const statusConfig = {
+    online: {
+      color: 'bg-green-500',
+      ping: 'bg-green-400',
+      icon: '✅',
+      text: 'Online',
+    },
+    slow: {
+      color: 'bg-orange-500',
+      ping: 'bg-orange-400',
+      icon: '⚠️',
+      text: 'Lento',
+    },
+    offline: {
+      color: 'bg-red-500',
+      ping: 'bg-red-400',
+      icon: '❌',
+      text: 'Offline',
+    },
+  };
+  const currentStatus = !navigator.onLine
+    ? 'offline'
+    : latency > 500
+      ? 'slow'
+      : 'online';
+  const config = statusConfig[currentStatus];
+
   // --- Gráfico semanal (ahora: gráfico por días del rango seleccionado) ---
   const days: Date[] = [];
   const fromDate = new Date(dateRange.from);
@@ -232,168 +341,7 @@ export function AdminDashboard() {
   });
 
   // --- Distribución por categoría (ventas) ---
-  function getCategoryDistribution() {
-    // Colores por defecto
-    const COLORS = [
-      "#8884d8",
-      "#82ca9d",
-      "#ffc658",
-      "#ff8042",
-      "#a4de6c",
-      "#d0ed57",
-      "#8dd1e1",
-      "#83a6ed",
-      "#ea7e7e",
-      "#b47ae7",
-    ];
-    // Map productId -> category
-    const productCategoryMap = products.reduce(
-      (acc, p) => {
-        acc[p.id] = p.category?.name || "Sin categoría";
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-    // Agrupar ventas por categoría
-    const categoryTotals: Record<string, number> = {};
-    filteredOrders.forEach((order) => {
-      order.items.forEach((item) => {
-        const cat = productCategoryMap[item.productId] || "Sin categoría";
-        categoryTotals[cat] = (categoryTotals[cat] || 0) + item.quantity;
-      });
-    });
-    // Formatear para el gráfico
-    return Object.entries(categoryTotals)
-      .map(([category, value], idx) => ({
-        category,
-        value,
-        color: COLORS[idx % COLORS.length],
-      }))
-      .sort((a, b) => b.value - a.value);
-  }
 
-  const categoryData = getCategoryDistribution();
-
-  // --- Mejores Clientes (Top 5) ---
-  // Agrupar por email (o id si existe), sumar total gastado y contar pedidos
-  type ClienteStats = {
-    nombre: string;
-    email: string;
-    pedidos: number;
-    totalGastado: number;
-  };
-  const clientesMap: Record<string, ClienteStats> = {};
-  filteredOrders.forEach((order) => {
-    const email = order.customer.email;
-    if (!clientesMap[email]) {
-      clientesMap[email] = {
-        nombre:
-          `${order.customer.firstName} ${order.customer.lastName}`.trim() ||
-          email,
-        email,
-        pedidos: 0,
-        totalGastado: 0,
-      };
-    }
-    clientesMap[email].pedidos += 1;
-    clientesMap[email].totalGastado += order.total;
-  });
-  const mejoresClientes = Object.values(clientesMap)
-    .sort((a, b) => b.totalGastado - a.totalGastado)
-    .slice(0, 5);
-
-  // --- Top 10 productos más vendidos ---
-  // Agrupar ventas por productId
-  const productSalesMap: Record<
-    string,
-    { name: string; sku: string; sales: number }
-  > = {};
-  filteredOrders.forEach((order) => {
-    order.items.forEach((item) => {
-      if (!productSalesMap[item.productId]) {
-        // Buscar el producto para obtener el SKU
-        const prod = products.find((p) => p.id === item.productId);
-        productSalesMap[item.productId] = {
-          name: item.productName,
-          sku: prod?.sku || "",
-          sales: 0,
-        };
-      }
-      productSalesMap[item.productId].sales += item.quantity;
-    });
-  });
-  const topProducts = Object.values(productSalesMap)
-    .sort((a, b) => b.sales - a.sales)
-    .slice(0, 10);
-
-  // Skeleton Components
-  const ChartSkeleton = () => (
-    <div className={styles.chartSkeleton}>
-      <div className={styles.skeletonChartBar}></div>
-      <div className={styles.skeletonChartBar}></div>
-      <div className={styles.skeletonChartBar}></div>
-    </div>
-  );
-
-  const HeatmapSkeleton = () => (
-    <div className={styles.heatmapSkeleton}>
-      {Array.from({ length: 168 }).map((_, i) => (
-        <div key={i} className={styles.skeletonHeatmapCell}></div>
-      ))}
-    </div>
-  );
-
-  const TopProductsSkeleton = () => (
-    <div className={styles.topProductsSkeleton}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className={styles.skeletonProductRow}>
-          <div className={styles.skeletonProductName}></div>
-          <div className={styles.skeletonProductValue}></div>
-        </div>
-      ))}
-    </div>
-  );
-
-  const ClientesSkeleton = () => (
-    <div className={styles.clientesSkeleton}>
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className={styles.skeletonClienteRow}>
-          <div className={styles.skeletonClienteName}></div>
-          <div className={styles.skeletonClienteValue}></div>
-          <div className={styles.skeletonClienteValue}></div>
-        </div>
-      ))}
-    </div>
-  );
-  // 1. Definimos la configuración según el estado
-  const statusConfig = {
-    online: {
-      color: "bg-green-500",
-      ping: "bg-green-400",
-      icon: "✅",
-      text: "Online",
-    },
-    slow: {
-      color: "bg-orange-500",
-      ping: "bg-orange-400",
-      icon: "⚠️",
-      text: "Lento",
-    },
-    offline: {
-      color: "bg-red-500",
-      ping: "bg-red-400",
-      icon: "❌",
-      text: "Offline",
-    },
-  };
-
-  // 2. Elegimos el estado (puedes usar tu lógica de latencia)
-  const currentStatus = !navigator.onLine
-    ? "offline"
-    : latency > 500
-      ? "slow"
-      : "online";
-  const config = statusConfig[currentStatus];
 
   return (
     <div className={styles.page}>
@@ -450,6 +398,10 @@ export function AdminDashboard() {
         </div>
       </section>
       <ActivityFeed />
+      {/* Widget de Notas del Staff: ubicado aquí para máxima visibilidad, sin romper el layout ni la jerarquía visual. */}
+      <section className={styles.section}>
+        <StaffNotesWidget />
+      </section>
       {/* Alerta de Stock Crítico (Filtro Rápido) */}
       <CriticalStockAlert
         products={products.map((p) => ({
