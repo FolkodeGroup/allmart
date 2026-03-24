@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { orderConfirmationSchema, type OrderConfirmationSchema } from '../../../schemas/orderConfirmationSchema';
 import styles from './OrderConfirmationForm.module.css';
 
 /* ── Tipos ── */
@@ -8,11 +11,7 @@ export interface OrderFormData {
   email: string;
 }
 
-interface FormErrors {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-}
+
 
 import type { CartItem } from '../../../types';
 import { buildWhatsAppMessage, buildWhatsAppUrl } from '../../../utils/whatsapp';
@@ -37,9 +36,8 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
-function validateEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-}
+
+
 
 export function OrderConfirmationForm({
   totalPrice,
@@ -47,24 +45,27 @@ export function OrderConfirmationForm({
   onCartClear,
   onCancel,
 }: OrderConfirmationFormProps) {
-  const [form, setForm] = useState<OrderFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [submitted, setSubmitted] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
-  /* Foco inicial al montar */
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+    // no se usan reset ni getValues
+  } = useForm<OrderConfirmationSchema>({
+    resolver: zodResolver(orderConfirmationSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: { firstName: '', lastName: '', email: '' },
+  });
+
   useEffect(() => {
     firstInputRef.current?.focus();
   }, []);
 
-  /* Cerrar con Escape */
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCancel();
@@ -73,7 +74,6 @@ export function OrderConfirmationForm({
     return () => document.removeEventListener('keydown', handleKey);
   }, [onCancel]);
 
-  /* Bloquear scroll del body mientras el modal está abierto */
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -81,42 +81,13 @@ export function OrderConfirmationForm({
     };
   }, []);
 
-  function validate(data: OrderFormData): FormErrors {
-    const errs: FormErrors = {};
-    if (!data.firstName.trim()) errs.firstName = 'El nombre es obligatorio.';
-    if (!data.lastName.trim()) errs.lastName = 'El apellido es obligatorio.';
-    if (!data.email.trim()) {
-      errs.email = 'El email es obligatorio.';
-    } else if (!validateEmail(data.email)) {
-      errs.email = 'Ingresá un email válido.';
-    }
-    return errs;
-  }
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-    const updated = { ...form, [name]: value };
-    setForm(updated);
-    /* Limpiar error del campo en tiempo real si ya se intentó enviar */
-    if (submitted) {
-      setErrors(validate(updated));
-    }
-  }
-
-  function handleWhatsApp(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitted(true);
-    const errs = validate(form);
-    setErrors(errs);
-    if (Object.keys(errs).length > 0) return;
-
+  const onSubmit = (data: OrderConfirmationSchema) => {
     setProcessing(true);
-    // Simular procesamiento (mock)
     setTimeout(() => {
       setProcessing(false);
       setSuccess(true);
       // Guardar datos del formulario
-      try { localStorage.setItem(ORDER_FORM_STORAGE_KEY, JSON.stringify(form)); } catch {}
+      try { localStorage.setItem(ORDER_FORM_STORAGE_KEY, JSON.stringify(data)); } catch { /* ignore */ }
       // Guardar pedido en el panel de administración
       try {
         const existing: Order[] = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) ?? '[]');
@@ -124,9 +95,9 @@ export function OrderConfirmationForm({
           id: `ord-${Date.now()}`,
           createdAt: new Date().toISOString(),
           customer: {
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
           },
           items: cartItems.map(i => ({
             productId: i.product.id,
@@ -139,21 +110,21 @@ export function OrderConfirmationForm({
           status: 'pendiente',
         };
         localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([newOrder, ...existing]));
-      } catch {}
+      } catch { /* ignore */ }
       // Limpiar carrito
       onCartClear();
       // Mostrar feedback visual por 2 segundos, luego abrir WhatsApp y cerrar modal
       setTimeout(() => {
         // Construir mensaje y URL de WhatsApp
-        const whatsappMessage = buildWhatsAppMessage(form, cartItems, totalPrice);
+        const whatsappMessage = buildWhatsAppMessage(data, cartItems, totalPrice);
         const whatsappUrl = buildWhatsAppUrl(whatsappMessage);
         window.open(whatsappUrl, '_blank');
         onCancel();
       }, 2000);
     }, 1500);
-  }
+  };
 
-  /* Click fuera del panel cierra el modal */
+  // Click fuera del panel cierra el modal
   function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target === e.currentTarget) onCancel();
   }
@@ -162,15 +133,9 @@ export function OrderConfirmationForm({
     <div
       className={styles.backdrop}
       onClick={handleBackdropClick}
-      onKeyDown={e => {
-        if (e.key === 'Escape') {
-          onCancel();
-        }
-      }}
-      role="dialog"
+      role="presentation"
+      aria-hidden="true"
       tabIndex={-1}
-      aria-modal="true"
-      aria-labelledby="order-form-title"
     >
       <div className={styles.panel} ref={dialogRef}>
         {/* ── Cabecera ── */}
@@ -210,7 +175,7 @@ export function OrderConfirmationForm({
         {!processing && !success && (
           <form
             className={styles.form}
-            onSubmit={handleWhatsApp}
+            onSubmit={handleSubmit(onSubmit)}
             noValidate
             aria-label="Datos del comprador"
           >
@@ -220,22 +185,20 @@ export function OrderConfirmationForm({
                 Nombre <span aria-hidden="true" className={styles.required}>*</span>
               </label>
               <input
-                ref={firstInputRef}
                 id="firstName"
-                name="firstName"
                 type="text"
                 autoComplete="given-name"
                 className={`${styles.input} ${errors.firstName ? styles.inputError : ''}`}
-                value={form.firstName}
-                onChange={handleChange}
                 placeholder="Ej: María"
                 aria-required="true"
                 aria-describedby={errors.firstName ? 'firstName-error' : undefined}
                 aria-invalid={!!errors.firstName}
+                {...register('firstName', { setValueAs: v => typeof v === 'string' ? v.trim() : v })}
+                ref={firstInputRef}
               />
               {errors.firstName && (
                 <span id="firstName-error" className={styles.errorMsg} role="alert">
-                  {errors.firstName}
+                  {errors.firstName.message}
                 </span>
               )}
             </div>
@@ -247,20 +210,18 @@ export function OrderConfirmationForm({
               </label>
               <input
                 id="lastName"
-                name="lastName"
                 type="text"
                 autoComplete="family-name"
                 className={`${styles.input} ${errors.lastName ? styles.inputError : ''}`}
-                value={form.lastName}
-                onChange={handleChange}
                 placeholder="Ej: González"
                 aria-required="true"
                 aria-describedby={errors.lastName ? 'lastName-error' : undefined}
                 aria-invalid={!!errors.lastName}
+                {...register('lastName')}
               />
               {errors.lastName && (
                 <span id="lastName-error" className={styles.errorMsg} role="alert">
-                  {errors.lastName}
+                  {errors.lastName.message}
                 </span>
               )}
             </div>
@@ -272,20 +233,18 @@ export function OrderConfirmationForm({
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
                 className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
-                value={form.email}
-                onChange={handleChange}
                 placeholder="Ej: maria@correo.com"
                 aria-required="true"
                 aria-describedby={errors.email ? 'email-error' : undefined}
                 aria-invalid={!!errors.email}
+                {...register('email')}
               />
               {errors.email && (
                 <span id="email-error" className={styles.errorMsg} role="alert">
-                  {errors.email}
+                  {errors.email.message}
                 </span>
               )}
             </div>
@@ -299,7 +258,7 @@ export function OrderConfirmationForm({
               >
                 Volver al carrito
               </button>
-              <button type="submit" className={styles.confirmBtn} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#25d366' }}>
+              <button type="submit" className={styles.confirmBtn} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#25d366' }} disabled={!isValid || isSubmitting}>
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style={{ marginRight: 4 }}>
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
