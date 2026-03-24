@@ -1,0 +1,291 @@
+/**
+ * DashboardWidgetSettings.module.css
+ *
+ * Styles for the dashboard widget settings panel.
+ */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--color-bg-card, #fff);
+    border-left: 1px solid var(--color-border, #e0e0e0);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+
+    @media (max-width: 640px) {
+        max-width: 100%;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-border, #e0e0e0);
+    gap: 1rem;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #333);
+    flex: 1;
+}
+
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    color: var(--color-text-secondary, #666);
+    font-size: 1.5rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: var(--color-bg-primary, #f5f5f5);
+        color: var(--color-text-primary, #333);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-primary, #a3c9a8);
+        outline-offset: 2px;
+    }
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sectionTitle {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary, #666);
+}
+
+.widgetsList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.widgetItem {
+    display: flex;
+    align-items: center;
+}
+
+.toggleLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: var(--color-text-primary, #333);
+    }
+}
+
+.toggle {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    pointer-events: none;
+
+    &:focus-visible+.checkmark {
+        outline: 2px solid var(--color-primary, #a3c9a8);
+        outline-offset: 2px;
+    }
+
+    &:checked+.checkmark {
+        background-color: var(--color-primary, #a3c9a8);
+        border-color: var(--color-primary, #a3c9a8);
+
+        &::after {
+            opacity: 1;
+        }
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+.checkmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid var(--color-border, #ddd);
+    border-radius: 4px;
+    background-color: var(--color-bg-primary, #fff);
+    transition: all 0.2s ease;
+
+    &::after {
+        content: '✓';
+        color: var(--color-bg-card, #fff);
+        font-size: 0.875rem;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+}
+
+.label {
+    color: var(--color-text-primary, #333);
+    font-size: 0.9375rem;
+}
+
+.resetButton {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--color-bg-primary, #f5f5f5);
+    border: 1px solid var(--color-border, #ddd);
+    border-radius: 6px;
+    color: var(--color-text-primary, #333);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background-color: var(--color-bg-card, #fff);
+        border-color: var(--color-primary, #a3c9a8);
+        color: var(--color-primary, #a3c9a8);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-primary, #a3c9a8);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.resetHint {
+    margin: 0;
+    padding: 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary, #999);
+    line-height: 1.4;
+}
+
+.hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background-color: rgba(163, 201, 168, 0.05);
+    border-top: 1px solid var(--color-border, #e0e0e0);
+}
+
+.hintIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.hintText {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary, #666);
+    line-height: 1.4;
+}
+
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+    .content {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+    .panel {
+        animation: slideInMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideInMobile {
+        from {
+            transform: translateY(100%);
+        }
+
+        to {
+            transform: translateY(0);
+        }
+    }
+}
