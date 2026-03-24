@@ -22,7 +22,8 @@ export type WidgetId =
     | 'activity_feed'
     | 'critical_stock'
     | 'recent_orders'
-    | 'quick_access';
+    | 'quick_access'
+    | 'staff_notes';
 
 export interface Widget {
     id: WidgetId;
@@ -48,9 +49,10 @@ const DEFAULT_WIDGETS: Widget[] = [
     { id: 'quick_access', order: 0, enabled: true },
     { id: 'activity_feed', order: 1, enabled: true },
     { id: 'critical_stock', order: 2, enabled: true },
-    { id: 'metrics', order: 3, enabled: true },
-    { id: 'charts', order: 4, enabled: true },
-    { id: 'recent_orders', order: 5, enabled: true },
+    { id: 'staff_notes', order: 3, enabled: true },
+    { id: 'metrics', order: 4, enabled: true },
+    { id: 'charts', order: 5, enabled: true },
+    { id: 'recent_orders', order: 6, enabled: true },
 ];
 
 export function DashboardLayoutProvider({

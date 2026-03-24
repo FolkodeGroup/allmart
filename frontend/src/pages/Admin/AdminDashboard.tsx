@@ -19,6 +19,7 @@ import styles from "./AdminDashboard.module.css";
 import type { WeeklySalesData } from "../../components/ui/WeeklySalesWidget";
 import MetricCard from "../../components/ui/MetricCard";
 import { ActivityFeed } from "../../components/ActivityFeed";
+import StaffNotesWidget from "../../components/StaffNotes";
 
 // ── Función de saludo dinámico según la hora del día ──
 function getTimeBasedGreeting(): { greeting: string; emoji: string } {
@@ -404,6 +405,24 @@ export function AdminDashboard() {
                 className={styles.widgetContainer}
               >
                 <ActivityFeed />
+              </DraggableWidget>
+            );
+          case "staff_notes":
+            return (
+              <DraggableWidget
+                key={widget.id}
+                id={widget.id}
+                isDragging={!!dragState.isDragging}
+                isDraggedOver={dragState.dragOverId === widget.id}
+                isBeingDragged={dragState.draggedId === widget.id}
+                onDragStart={handlers.handleDragStart}
+                onDragOver={handlers.handleDragOver}
+                onDragLeave={handlers.handleDragLeave}
+                onDrop={handlers.handleDrop}
+                onDragEnd={handlers.handleDragEnd}
+                className={styles.widgetContainer}
+              >
+                <StaffNotesWidget />
               </DraggableWidget>
             );
           case "critical_stock":
