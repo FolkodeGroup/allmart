@@ -14,6 +14,8 @@ export default function StaffNotes() {
     const [editContent, setEditContent] = useState('');
     const [creating, setCreating] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
+    const [pinnedExpandedId, setPinnedExpandedId] = useState<string | null>(null);
 
     // Skeleton loading
     if (loading) {
@@ -88,16 +90,27 @@ export default function StaffNotes() {
                 </button>
             </form>
             <div className="notes-list" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 16 }}>
-                {notes.map((note) => (
+                {notes.map((note) => {
+                    const isExpanded = hoveredId === note.id || pinnedExpandedId === note.id;
+                    const toggleExpanded = () => {
+                        setPinnedExpandedId((current) => (current === note.id ? null : note.id));
+                    };
+
+                    return (
                     <div
                         key={note.id}
-                        className="sticky-note"
+                        className={`sticky-note ${isExpanded ? 'expanded' : ''}`}
+                        onMouseEnter={() => setHoveredId(note.id)}
+                        onMouseLeave={() => setHoveredId((current) => (current === note.id ? null : current))}
+                        onClick={() => {
+                            if (editingId !== note.id) toggleExpanded();
+                        }}
                         style={{
                             background: '#fffbe7',
                             border: '1px solid #f7e07e',
                             borderRadius: 8,
                             boxShadow: '0 2px 8px #0001',
-                            width: 220,
+                            width: isExpanded ? 320 : 220,
                             minHeight: 120,
                             padding: 12,
                             position: 'relative',
@@ -130,7 +143,17 @@ export default function StaffNotes() {
                             </form>
                         ) : (
                             <>
-                                <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', flex: 1 }}>{note.content}</div>
+                                <div className="note-content">{note.content}</div>
+                                <button
+                                    type="button"
+                                    className="expand-btn"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleExpanded();
+                                    }}
+                                >
+                                    {isExpanded ? 'Ver menos' : 'Ver mas'}
+                                </button>
                                 <div style={{ fontSize: 12, color: '#b59d2b', marginTop: 8 }}>
                                     <span>
                                         {note.user.firstName} {note.user.lastName} • {formatDate(note.updatedAt)}
@@ -140,7 +163,8 @@ export default function StaffNotes() {
                                     <button
                                         className="edit-btn"
                                         title="Editar"
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                            e.stopPropagation();
                                             setEditingId(note.id);
                                             setEditContent(note.content);
                                         }}
@@ -151,7 +175,8 @@ export default function StaffNotes() {
                                         className="delete-btn"
                                         title="Eliminar"
                                         disabled={deletingId === note.id}
-                                        onClick={async () => {
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
                                             setDeletingId(note.id);
                                             await deleteNote(note.id);
                                             setDeletingId(null);
@@ -163,14 +188,44 @@ export default function StaffNotes() {
                             </>
                         )}
                     </div>
-                ))}
+                                        );
+                                })}
             </div>
             <style>{`
         .staff-notes-widget { max-width: 100%; }
-        .sticky-note { transition: box-shadow 0.2s; }
+                .sticky-note {
+                    transition: box-shadow 0.2s ease, transform 0.2s ease;
+                    transform-origin: center;
+                    z-index: 1;
+                    cursor: pointer;
+                }
+                .sticky-note:hover,
+                .sticky-note.expanded {
+                    transform: translateY(-5px) scale(1.04);
+                    box-shadow: 0 10px 22px #0002;
+                    z-index: 5;
+                }
         .sticky-note.skeleton { background: #f7e07e33; animation: pulse 1.2s infinite alternate; }
+                .note-content {
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                    flex: 1;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                    max-height: 3.2em;
+                    transition: max-height 0.2s ease;
+                }
+                .sticky-note:hover .note-content,
+                .sticky-note.expanded .note-content {
+                    -webkit-line-clamp: unset;
+                    display: block;
+                    max-height: none;
+                    overflow: visible;
+                }
         @keyframes pulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
-        .add-btn, .save-btn, .cancel-btn, .edit-btn, .delete-btn {
+                .add-btn, .save-btn, .cancel-btn, .edit-btn, .delete-btn, .expand-btn {
           background: #f7e07e;
           border: none;
           border-radius: 4px;
@@ -184,6 +239,7 @@ export default function StaffNotes() {
         .cancel-btn { background: #eee; color: #888; }
         .edit-btn { background: #fffbe7; color: #b59d2b; }
         .delete-btn { background: #fffbe7; color: #b59d2b; }
+                .expand-btn { background: #fff7c6; color: #7c6f1c; font-size: 12px; align-self: flex-start; }
         .add-note-form { margin-bottom: 12px; }
         @media (max-width: 600px) {
           .notes-list { flex-direction: column; gap: 8px; }
