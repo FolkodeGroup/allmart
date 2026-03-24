@@ -1,9 +1,5 @@
 import { Request, Response } from 'express';
-
-// Extensión mínima para req.user (usada por middlewares de auth)
-interface AuthRequest extends Request {
-    user?: { id: string };
-}
+import { AuthenticatedRequest } from '../../types';
 import * as staffNotesService from '../../services/staffNotesService';
 
 function logStaffNotesError(action: string, err: unknown) {
@@ -38,7 +34,7 @@ export const create = async (req: Request, res: Response) => {
         if (!content || typeof content !== 'string') {
             return res.status(400).json({ error: 'Contenido requerido.' });
         }
-        const userId = (req as AuthRequest).user?.id;
+        const userId = (req as AuthenticatedRequest).user?.userId;
         if (!userId) return res.status(401).json({ error: 'Usuario no autenticado.' });
         const note = await staffNotesService.createStaffNote(content, userId);
         res.status(201).json(note);
