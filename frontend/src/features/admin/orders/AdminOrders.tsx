@@ -5,7 +5,6 @@ import React, { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
-import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -655,7 +654,7 @@ export function AdminOrders() {
       setModal(m => ({ ...m, isLoading: false }));
     }
   };
-  
+
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
