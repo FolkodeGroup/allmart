@@ -3,8 +3,8 @@ import { Modal } from '../../../components/ui/Modal';
 import { useNotification } from '../../../context/NotificationContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-// import { logAdminActivity } from '../../../services/adminActivityLogService';
-// import { AdminCategoryForm } from './AdminCategoryForm'; // Temporalmente deshabilitado si no existe
+import { usePersistentSelection } from '../../../hooks/usePersistentSelection';
+import { BulkEditCategoriesBar } from './BulkEditCategoriesBar';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { FolderSearch, AlertCircle } from 'lucide-react';
@@ -15,7 +15,7 @@ import { CategorySearchInput } from '../../../components/ui/CategorySearchInput'
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 
 export function AdminCategories() {
-  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total } = useAdminCategories();
+  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, updateCategory, deleteCategory } = useAdminCategories();
   // Local state for pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(10); // Could be made configurable
@@ -31,9 +31,42 @@ export function AdminCategories() {
 
 
   // Debounce para búsqueda instantánea
-
-  // Debounce para búsqueda instantánea
   const debouncedSearch = useDebouncedValue(search, 350);
+
+  // Selección múltiple
+  const {
+    selectedIds,
+    add,
+    remove,
+    clear: clearSelection
+  } = usePersistentSelection();
+
+  // Determinar si todas las categorías visibles están seleccionadas
+  const allVisibleSelected = categories.length > 0 && categories.every(cat => selectedIds.includes(cat.id));
+
+  // Handler para checkbox general
+  const handleSelectAllVisible = (checked: boolean) => {
+    const visibleIds = categories.map(cat => cat.id);
+    if (checked) {
+      add(visibleIds);
+    } else {
+      remove(visibleIds);
+    }
+  };
+
+  // Handler para checkbox individual
+  const handleSelectCategory = (id: string, checked: boolean) => {
+    if (checked) {
+      add([id]);
+    } else {
+      remove([id]);
+    }
+  };
+
+  // Estado y lógica para edición masiva
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
+  const [bulkEditLoading, setBulkEditLoading] = useState(false);
+  const [bulkEditData, setBulkEditData] = useState<{ name?: string; description?: string; image?: string }>({});
 
   // Fetch categories when page, limit, or search changes
   useEffect(() => {
@@ -58,7 +91,6 @@ export function AdminCategories() {
   // const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
 
   // Eliminar categoría con confirmación y feedback
-  const { deleteCategory } = useAdminCategories();
   const handleDelete = async (id: string) => {
     setDeleting(true);
     try {
@@ -72,6 +104,16 @@ export function AdminCategories() {
       setDeleting(false);
       setDeleteConfirm(null);
     }
+  };
+
+  const handleBulkEdit = (data: { name?: string; description?: string; image?: string }) => {
+    // Filtrar solo los campos realmente editados
+    const filteredData: { name?: string; description?: string; image?: string } = {};
+    if (data.name) filteredData.name = data.name;
+    if (data.description) filteredData.description = data.description;
+    if (data.image) filteredData.image = data.image;
+    setShowBulkEdit(true);
+    setBulkEditData(filteredData);
   };
 
   return (
@@ -141,6 +183,10 @@ export function AdminCategories() {
           canEdit={can('categories.edit')}
           canDelete={can('categories.delete')}
           getProductCount={cat => cat.itemCount}
+          selectedIds={selectedIds}
+          onSelect={handleSelectCategory}
+          allSelected={allVisibleSelected}
+          onSelectAll={handleSelectAllVisible}
         />
       ))}
 
@@ -213,6 +259,57 @@ export function AdminCategories() {
           </div>
         </div>
       )}
+
+      {/* Barra de acciones masivas */}
+      {!loading && !error && selectedIds.length > 0 && (
+        <BulkEditCategoriesBar
+          selectedCount={selectedIds.length}
+          loading={bulkEditLoading}
+          onBulkEdit={handleBulkEdit}
+          onCancel={() => clearSelection()}
+        />
+      )}
+
+      {/* Modal de confirmación de edición masiva */}
+      <Modal
+        open={showBulkEdit}
+        onClose={() => !bulkEditLoading && setShowBulkEdit(false)}
+        title="Confirmar edición masiva"
+        actions={
+          <>
+            <button
+              className={styles.deleteBtn}
+              onClick={async () => {
+                setBulkEditLoading(true);
+                try {
+                  await Promise.all(selectedIds.map(id => updateCategory(id, bulkEditData)));
+                  showNotification('success', 'Categorías actualizadas correctamente');
+                  clearSelection();
+                  refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
+                  setShowBulkEdit(false);
+                } catch (err: any) {
+                  showNotification('error', err?.message || 'Error al editar categorías');
+                } finally {
+                  setBulkEditLoading(false);
+                }
+              }}
+              disabled={bulkEditLoading}
+              style={{ minWidth: 100 }}
+            >
+              {bulkEditLoading ? 'Editando...' : 'Confirmar'}
+            </button>
+            <button
+              className={styles.cancelBtn}
+              onClick={() => setShowBulkEdit(false)}
+              disabled={bulkEditLoading}
+              style={{ minWidth: 100 }}
+            >Cancelar</button>
+          </>
+        }
+        disableClose={bulkEditLoading}
+      >
+        <p>¿Estás seguro de que querés editar {selectedIds.length} categorías?</p>
+      </Modal>
     </div>
   );
 }

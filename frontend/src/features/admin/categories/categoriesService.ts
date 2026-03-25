@@ -108,10 +108,10 @@ export async function createAdminCategory(token: string, category: Omit<Category
   return mapApiCategoryToCategory(body.data);
 }
 
-/** PATCH /api/admin/categories/:id — Actualiza una categoría existente */
+/** PUT /api/admin/categories/:id — Actualiza una categoría existente */
 export async function updateAdminCategory(token: string, id: string, category: Partial<Category>): Promise<Category> {
   const body = await apiFetch<ApiSuccess<ApiCategory>>(`/api/admin/categories/${id}`, {
-    method: 'PATCH',
+    method: 'PUT',
     body: JSON.stringify(mapCategoryToPayload(category)),
   }, token);
   return mapApiCategoryToCategory(body.data);
