@@ -37,7 +37,9 @@ export const BulkEditCategoriesBar: React.FC<BulkEditCategoriesBarProps> = ({
   return (
     <form className={styles.bulkEditBar} onSubmit={handleSubmit} role="form" aria-labelledby="bulk-edit-bar-label">
       <span className={styles.label} id="bulk-edit-bar-label">{selectedCount} seleccionadas</span>
+      <label style={{ display: 'none' }} htmlFor="bulk-edit-name">Nuevo nombre</label>
       <input
+        id="bulk-edit-name"
         className={styles.input}
         type="text"
         placeholder="Nuevo nombre"
@@ -46,7 +48,9 @@ export const BulkEditCategoriesBar: React.FC<BulkEditCategoriesBarProps> = ({
         disabled={loading}
         aria-label="Nuevo nombre"
       />
+      <label style={{ display: 'none' }} htmlFor="bulk-edit-description">Nueva descripción</label>
       <input
+        id="bulk-edit-description"
         className={styles.input}
         type="text"
         placeholder="Nueva descripción"
@@ -55,22 +59,20 @@ export const BulkEditCategoriesBar: React.FC<BulkEditCategoriesBarProps> = ({
         disabled={loading}
         aria-label="Nueva descripción"
       />
+      <label style={{ display: 'none' }} htmlFor="bulk-edit-image">Nueva imagen (URL)</label>
       <input
+        id="bulk-edit-image"
         className={styles.input}
         type="text"
-        placeholder="Nueva URL de imagen"
+        placeholder="Nueva imagen (URL)"
         value={image}
         onChange={e => setImage(e.target.value)}
         disabled={loading}
         aria-label="Nueva imagen"
       />
-      <button type="submit" className={styles.editBtn} disabled={loading}>
-        {loading ? 'Editando...' : 'Editar seleccionadas'}
-      </button>
-      <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={loading}>
-        Cancelar
-      </button>
-      {error && <span className={styles.error}>{error}</span>}
+      <button type="submit" className={styles.editBtn} disabled={loading}>Editar</button>
+      <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={loading}>Cancelar</button>
+      {error && <span className={styles.error} style={{ color: '#ef4444' }} aria-live="assertive">{error}</span>}
     </form>
   );
 };
