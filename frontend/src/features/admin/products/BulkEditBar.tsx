@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { bulkEditSchema, type BulkEditSchema } from '../../../schemas/bulkEditSchema';
 import styles from './BulkEditBar.module.css';
 
 interface BulkEditBarProps {
@@ -14,33 +17,30 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
   onCancel,
   loading = false,
 }) => {
-  const [price, setPrice] = useState<string>('');
-  const [stock, setStock] = useState<string>('');
-  const [inStock, setInStock] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+    reset,
+  } = useForm<BulkEditSchema>({
+    resolver: zodResolver(bulkEditSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: { price: '', stock: '', inStock: '' },
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    let priceVal: number | undefined = price ? Number(price) : undefined;
-    let stockVal: number | undefined = stock ? Number(stock) : undefined;
-    let inStockVal: boolean | undefined = inStock ? inStock === 'true' : undefined;
-    if (price && (isNaN(priceVal!) || priceVal! < 0)) {
-      setError('El precio debe ser un número mayor o igual a 0.');
-      return;
-    }
-    if (stock && (isNaN(stockVal!) || stockVal! < 0)) {
-      setError('El stock debe ser un número mayor o igual a 0.');
-      return;
-    }
+  const onSubmit = (data: BulkEditSchema) => {
+    const priceVal = data.price ? Number(data.price) : undefined;
+    const stockVal = data.stock ? Number(data.stock) : undefined;
+    const inStockVal = data.inStock ? data.inStock === 'true' : undefined;
     onBulkEdit({ price: priceVal, stock: stockVal, inStock: inStockVal });
+    reset();
   };
 
   return (
     <form
       className={styles.bulkEditBar}
-      onSubmit={handleSubmit}
-      role="form"
+      onSubmit={handleSubmit(onSubmit)}
       aria-labelledby="bulk-edit-bar-label"
       style={{ backgroundColor: "white" }}
     >
@@ -48,63 +48,49 @@ export const BulkEditBar: React.FC<BulkEditBarProps> = ({
       <label htmlFor="bulk-edit-price" className="sr-only">Nuevo precio</label>
       <input
         id="bulk-edit-price"
-        className={styles.input}
+        className={`${styles.input} ${errors.price ? styles.inputError : ''}`}
         type="number"
         min="0"
         step="0.01"
         placeholder="Nuevo precio"
-        value={price}
-        onChange={e => setPrice(e.target.value)}
-        disabled={loading}
         aria-label="Nuevo precio"
+        disabled={loading}
+        {...register('price')}
       />
+      {errors.price && <span className={styles.errorMsg}>{errors.price.message}</span>}
       <label htmlFor="bulk-edit-stock" className="sr-only">Nuevo stock</label>
       <input
         id="bulk-edit-stock"
-        className={styles.input}
+        className={`${styles.input} ${errors.stock ? styles.inputError : ''}`}
         type="number"
         min="0"
         step="1"
         placeholder="Nuevo stock"
-        value={stock}
-        onChange={e => setStock(e.target.value)}
-        disabled={loading}
         aria-label="Nuevo stock"
+        disabled={loading}
+        {...register('stock')}
       />
+      {errors.stock && <span className={styles.errorMsg}>{errors.stock.message}</span>}
       <label htmlFor="bulk-edit-instock" className="sr-only">Estado</label>
       <select
         id="bulk-edit-instock"
         className={styles.input}
-        value={inStock}
-        onChange={e => setInStock(e.target.value)}
-        disabled={loading}
         aria-label="Estado"
+        disabled={loading}
+        {...register('inStock')}
       >
-        <option value="true">Elija un estado</option>
+        <option value="">Elija un estado</option>
         <option value="true">Activo</option>
         <option value="false">Inactivo</option>
       </select>
       <div className={styles.actions}>
-          <button
-            className={styles.applyBtn}
-            type="submit"
-            disabled={loading}
-            aria-label="Aplicar cambios masivos"
-          >
-            Aplicar cambios
-          </button>
-
-          <button
-            className={styles.cancelBtn}
-            type="button"
-            onClick={onCancel}
-            disabled={loading}
-            aria-label="Cancelar edición masiva"
-          >
-            Cancelar
-          </button>
-        </div>
-      {error && <span className={styles.error} aria-live="polite">{error}</span>}
+        <button type="submit" className={styles.applyBtn} disabled={loading || !isValid || isSubmitting} aria-label="Aplicar cambios masivos">
+          Aplicar cambios
+        </button>
+        <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={loading} aria-label="Cancelar edición masiva">
+          Cancelar
+        </button>
+      </div>
     </form>
   );
 };

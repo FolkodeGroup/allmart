@@ -1,15 +1,95 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 13013 |
-| FedericoPaal | 1800 |
+| dgimenezdeveloper | 13678 |
+| FedericoPaal | 2320 |
 | Nahuel-Dalesio | 1630 |
-| CelinaJP | 940 |
-| agustin-ovejero | 570 |
+| CelinaJP | 1280 |
+| agustin-ovejero | 740 |
+| Mau-bar-iva | 195 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #616: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #615: 🔄 Actualización automática de puntajes semanal | 2026-03-24 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #614: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #616: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #614: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #613: feat: add staff notes functionality with CRUD operations and integration in admin dashboard | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #613: feat: add staff notes functionality with CRUD operations and integration in admin dashboard | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #612: 222 ux validaciones de formulario en tiempo real | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #611: botón con spinners e inhabilitación creado e implementado | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #610: 220 dashboard personalización de widgets drag drop | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #608: 398 mejorar feedback de acciones de edición y eliminación de categorías | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #607: Se refactoriza implementacion de paginacion a la vista de Categorias | 2026-03-24 |
+| FedericoPaal | 50 | Issue | Mejorar feedback de acciones de edición y eliminación de categorías | 2026-03-24 |
+| FedericoPaal | 70 | Issue | Añadir paginación a la vista de categorías | 2026-03-24 |
+| Mau-bar-iva | 25 | Issue | Dashboard: Widget de "Notas del Staff" | 2026-03-24 |
+| Mau-bar-iva | 30 | Issue | UX: Validaciones de Formulario en Tiempo Real | 2026-03-24 |
+| Mau-bar-iva | 15 | Issue | UI: Botones de Acción con Estados de Carga (Spinners) | 2026-03-24 |
+| Mau-bar-iva | 60 | Issue | Dashboard: Personalización de Widgets (Drag & Drop) | 2026-03-24 |
+| Mau-bar-iva | 35 | Issue | UX: Scroll Infinito vs Paginación en Listas Admin | 2026-03-24 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #606: 🔄 Registrar puntaje de gestión | 2026-03-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #606: 🔄 Registrar puntaje de gestión | 2026-03-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #605: 218 dashboard feed de actividad en vivo | 2026-03-23 |
+| Mau-bar-iva | 30 | Issue | Dashboard: Feed de Actividad en Vivo | 2026-03-23 |
+| CelinaJP | 60 | Issue | Permitir edición rápida de valores de variantes | 2026-03-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #604: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #603: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #602: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #601: Actualicé check_missing_puntajes.cjs para usar exactamente los mismos… | 2026-03-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #598: 🔄 Actualización automática de puntajes semanal | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #604: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #603: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #602: 🔄 Registrar puntaje de gestión | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #601: Actualicé check_missing_puntajes.cjs para usar exactamente los mismos… | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #600: 396 optimizar visualización de categorías en tarjetas | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #599: Se mejora filtro de busqueda por nombre y slug de categoria | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #598: 🔄 Actualización automática de puntajes semanal | 2026-03-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #593: edición rápida de valores | 2026-03-22 |
+| FedericoPaal | 60 | Issue | Optimizar visualización de categorías en tarjetas | 2026-03-22 |
+| FedericoPaal | 80 | Issue | Mejorar filtro de búsqueda por nombre y slug de categoría | 2026-03-22 |
+| agustin-ovejero | 50 | Issue | Mejorar feedback de acciones de gestión de pedidos | 2026-03-17 |
+| CelinaJP | 40 | Issue | Documentar componentes y flujos de la vista de variantes | 2026-03-17 |
+| CelinaJP | 70 | Issue | Añadir exportación de variantes a CSV/Excel | 2026-03-17 |
+| CelinaJP | 40 | Issue | Añadir indicadores de variantes sin valores | 2026-03-17 |
+| CelinaJP | 50 | Issue | Mejorar la gestión de estados de variantes (activo/inactivo) | 2026-03-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #597: 🔄 Registrar puntaje de gestión | 2026-03-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #597: 🔄 Registrar puntaje de gestión | 2026-03-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #596: 418 mejorar feedback de acciones de gestión de pedidos | 2026-03-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #595: Documentacion de componentes y flujos de la vista de variantes | 2026-03-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #594: 388 añadir exportación de variantes a csvexcel | 2026-03-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #592: Variantes sin valores: solo con amarillo pulsante y variantes complet… | 2026-03-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #591: 385 mejorar la gestión de estados de variantes activoinactivo | 2026-03-17 |
+| agustin-ovejero | 70 | Issue | Añadir paginación a la vista de pedidos | 2026-03-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #590: 🔄 Registrar puntaje de gestión | 2026-03-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #586: 🔄 Registrar puntaje de gestión | 2026-03-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #585: 🔄 Registrar puntaje de gestión | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #590: 🔄 Registrar puntaje de gestión | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #589: 374 mejorar layout responsivo con gridflexbox | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #588: 373 expandir vista de productos a toda la pantalla usando gridflexbox | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #587: 417 añadir paginación a la vista de pedidos | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #586: 🔄 Registrar puntaje de gestión | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #585: 🔄 Registrar puntaje de gestión | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #584: 372 permitir ordenamiento de productos por columnas | 2026-03-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #583: Se implementan los badges para SKU y Categorias de productos (Tambien… | 2026-03-16 |
+| FedericoPaal | 60 | Issue | Mejorar layout responsivo con Grid/Flexbox | 2026-03-16 |
+| FedericoPaal | 70 | Issue | Expandir vista de productos a toda la pantalla usando Grid/Flexbox | 2026-03-16 |
+| FedericoPaal | 50 | Issue | Permitir ordenamiento de productos por columnas | 2026-03-16 |
+| FedericoPaal | 30 | Issue | Mejorar la visualización de SKU y categorías | 2026-03-16 |
+| agustin-ovejero | 50 | Issue | UI: Tema Oscuro/Claro para el Panel Admin | 2026-03-15 |
+| CelinaJP | 80 | Issue | Refactorizar componentes de variantes para mayor mantenibilidad | 2026-03-15 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #582: 🔄 Registrar puntaje de gestión | 2026-03-15 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #579: 🔄 Registrar puntaje de gestión | 2026-03-15 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #578: 🔄 Actualización automática de puntajes semanal | 2026-03-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #582: 🔄 Registrar puntaje de gestión | 2026-03-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #581: 370 implementar confirmación de cambios antes de salir | 2026-03-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #580: 203 UI tema oscuroclaro para el panel admin | 2026-03-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #579: 🔄 Registrar puntaje de gestión | 2026-03-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #578: 🔄 Actualización automática de puntajes semanal | 2026-03-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #577: Componentes reutilizables y bien documentados. | 2026-03-15 |
+| FedericoPaal | 50 | Issue | Implementar confirmación de cambios antes de salir | 2026-03-15 |
 | agustin-ovejero | 15 | Issue | Dashboard: Banner de Bienvenida Personalizado | 2026-03-14 |
 | agustin-ovejero | 25 | Issue | Layout: Esqueleto de Carga (Skeletons) para Secciones | 2026-03-14 |
 | CelinaJP | 40 | Issue | Añadir tooltips y ayuda contextual en acciones de variantes | 2026-03-14 |

@@ -15,6 +15,7 @@ interface VariantGroupCardProps {
   group: VariantGroup;
   onEditName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
+  onEditValue: (groupId: string, oldValue: string, newValue: string) => void;
   onToggleStatus: (id: string, newStatus: boolean) => void;
   onAddValue: (groupId: string, value: string) => void;
   onRemoveValue: (groupId: string, value: string) => void;
@@ -38,6 +39,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   group,
   onEditName,
   onDelete,
+  onEditValue,
   onToggleStatus,
   onAddValue,
   onRemoveValue,
@@ -164,7 +166,9 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
             key={val}
             value={val}
             onRemove={() => onRemoveValue(group.id, val)}
+            onEdit={(oldVal, newVal) => onEditValue(group.id, oldVal, newVal)}
             canDelete={canDelete}
+            canEdit={canEdit}
           />
         ))}
       </div>

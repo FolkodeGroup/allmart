@@ -7,44 +7,46 @@
  */
 
 import { Router } from 'express';
-import authRouter                from './admin/auth';
-import productsRouter            from './admin/products';
-import categoriesRouter          from './admin/categories';
-import ordersRouter              from './admin/orders';
-import usersRouter               from './admin/users';
-import publicCategoriesRouter    from './public/categories';
+import authRouter from './admin/auth';
+import productsRouter from './admin/products';
+import categoriesRouter from './admin/categories';
+import ordersRouter from './admin/orders';
+import usersRouter from './admin/users';
+import staffNotesRouter from './admin/staffNotes';
+import publicCategoriesRouter from './public/categories';
 import publicProductsRouter from './public/products';
-import publicAuthRouter          from './public/auth';
+import publicAuthRouter from './public/auth';
 import publicOrdersRouter from './public/orders';
 import publicCartRouter from './public/cart';
 import publicImagesRouter from './public/images';
-import { adminMiddleware }        from '../middlewares/auth';
+import { adminMiddleware } from '../middlewares/auth';
 
 const adminRouter = Router();
 
 // Rutas públicas dentro de /admin
-adminRouter.use('/auth',       authRouter);
+adminRouter.use('/auth', authRouter);
 
 // A partir de aquí, todas las rutas requieren autenticación y rol de admin o editor
 adminRouter.use(adminMiddleware);
 
-adminRouter.use('/products',   productsRouter);
+adminRouter.use('/products', productsRouter);
 adminRouter.use('/categories', categoriesRouter);
-adminRouter.use('/orders',     ordersRouter);
-adminRouter.use('/users',      usersRouter);
+adminRouter.use('/orders', ordersRouter);
+adminRouter.use('/users', usersRouter);
+adminRouter.use('/staff-notes', staffNotesRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();
-publicRouter.use('/auth',       publicAuthRouter);
+publicRouter.use('/auth', publicAuthRouter);
 publicRouter.use('/categories', publicCategoriesRouter);
 publicRouter.use('/products', publicProductsRouter);
 publicRouter.use('/orders', publicOrdersRouter);
-publicRouter.use('/cart',   publicCartRouter);
+publicRouter.use('/cart', publicCartRouter);
 publicRouter.use('/images', publicImagesRouter);
 
 // Router principal de la API
 const apiRouter = Router();
-apiRouter.use('/admin',  adminRouter);
-apiRouter.use('/',       publicRouter);  // /api/categories, etc.
+apiRouter.use('/admin', adminRouter);
+apiRouter.use('/', publicRouter);  // /api/categories, etc.
 
 export default apiRouter;

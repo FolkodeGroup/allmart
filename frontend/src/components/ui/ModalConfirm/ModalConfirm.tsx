@@ -54,6 +54,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
     <div
       className={styles.backdrop}
       onClick={handleBackdropClick}
+      onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
       role="dialog"
       tabIndex={0}
       aria-modal="true"

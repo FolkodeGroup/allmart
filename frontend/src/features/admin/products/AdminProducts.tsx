@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
+import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 // import { useNavigate } from 'react-router-dom';
 
 // Utilidad para mantener selección entre páginas
@@ -43,50 +44,50 @@ export function AdminProducts() {
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-    // Edición masiva
-    const [bulkEditLoading, setBulkEditLoading] = useState(false);
-    const [bulkEditSuccess, setBulkEditSuccess] = useState<string | null>(null);
-    const [bulkEditError, setBulkEditError] = useState<string | null>(null);
-    const [showBulkConfirm, setShowBulkConfirm] = useState(false);
-    const [bulkEditData, setBulkEditData] = useState<{ price?: number; stock?: number; inStock?: boolean } | null>(null);
-      const [isLoading] = useState<boolean>(false);
+  // Edición masiva
+  const [bulkEditLoading, setBulkEditLoading] = useState(false);
+  const [bulkEditSuccess, setBulkEditSuccess] = useState<string | null>(null);
+  const [bulkEditError, setBulkEditError] = useState<string | null>(null);
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [bulkEditData, setBulkEditData] = useState<{ price?: number; stock?: number; inStock?: boolean } | null>(null);
+  const [isLoading] = useState<boolean>(false);
 
-    // Simular obtención de token (ajustar según contexto real)
-    const token = localStorage.getItem('token') || '';
+  // Simular obtención de token (ajustar según contexto real)
+  const token = localStorage.getItem('token') || '';
 
-    // Handler para aplicar edición masiva
-    const handleBulkEdit = (data: { price?: number; stock?: number; inStock?: boolean }) => {
-      setBulkEditData(data);
-      setShowBulkConfirm(true);
-    };
+  // Handler para aplicar edición masiva
+  const handleBulkEdit = (data: { price?: number; stock?: number; inStock?: boolean }) => {
+    setBulkEditData(data);
+    setShowBulkConfirm(true);
+  };
 
-    // Confirmar y ejecutar edición masiva
-    const confirmBulkEdit = async () => {
-      if (!bulkEditData) return;
-      setBulkEditLoading(true);
-      setBulkEditSuccess(null);
-      setBulkEditError(null);
-      try {
-        await Promise.all(selectedIds.map(id =>
-          productsService.updateAdminProduct(id, bulkEditData, token)
-        ));
-        setBulkEditSuccess('¡Productos actualizados correctamente!');
-        clear();
-        refreshProducts({ q: search, categoryId: categoryFilter, page: apiPage, limit: 10 });
-      } catch (err: any) {
-        setBulkEditError('Error al actualizar productos. Intenta nuevamente.');
-      } finally {
-        setBulkEditLoading(false);
-        setShowBulkConfirm(false);
-        setBulkEditData(null);
-      }
-    };
-
-    // Cancelar edición masiva
-    const cancelBulkEdit = () => {
-      setBulkEditData(null);
+  // Confirmar y ejecutar edición masiva
+  const confirmBulkEdit = async () => {
+    if (!bulkEditData) return;
+    setBulkEditLoading(true);
+    setBulkEditSuccess(null);
+    setBulkEditError(null);
+    try {
+      await Promise.all(selectedIds.map(id =>
+        productsService.updateAdminProduct(id, bulkEditData, token)
+      ));
+      setBulkEditSuccess('¡Productos actualizados correctamente!');
+      clear();
+      refreshProducts({ q: search, categoryId: categoryFilter, page: apiPage, limit: 10 });
+    } catch {
+      setBulkEditError('Error al actualizar productos. Intenta nuevamente.');
+    } finally {
+      setBulkEditLoading(false);
       setShowBulkConfirm(false);
-    };
+      setBulkEditData(null);
+    }
+  };
+
+  // Cancelar edición masiva
+  const cancelBulkEdit = () => {
+    setBulkEditData(null);
+    setShowBulkConfirm(false);
+  };
   const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
   const { can } = useAdminAuth();
   const [search, setSearch] = useState('');
@@ -100,7 +101,12 @@ export function AdminProducts() {
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
-  const resetUnsavedChangesFn = () => {};
+  const resetUnsavedChangesFn = () => { };
+
+  // Ref para preservar scroll en cambios de página
+  const containerRef = useRef<HTMLElement>(null);
+  useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'products-list', [apiPage, search, categoryFilter, statusFilter, stockLevelFilter]);
+
   // Hook para advertencia de cambios sin guardar
   const {
     showWarning,
@@ -179,9 +185,9 @@ export function AdminProducts() {
   // Sugerencias para autocompletado (usamos los productos ya cargados como base)
   const suggestions = search.length > 0
     ? products.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.sku.toLowerCase().includes(search.toLowerCase())
-      ).slice(0, 8)
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku.toLowerCase().includes(search.toLowerCase())
+    ).slice(0, 8)
     : [];
 
   const handleNew = () => {
@@ -206,7 +212,7 @@ export function AdminProducts() {
       setShowForm(true);
     }
   };
-    // Interceptar navegación por router v6
+  // Interceptar navegación por router v6
   const handleDelete = (id: string) => {
     try {
       deleteProduct(id);
@@ -231,7 +237,7 @@ export function AdminProducts() {
     discount: p.discount,
     stock: p.stock,
     inStock: p.inStock,
-    createdAt: (p as any).createdAt || '',
+    createdAt: (p as unknown as { createdAt: string }).createdAt || '',
     sku: p.sku,
     image: p.images && p.images[0],
   }));
@@ -256,12 +262,16 @@ export function AdminProducts() {
   };
 
   return (
-    <main className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`} aria-label="Gestión de productos">
+    <main
+      ref={containerRef}
+      className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
+      aria-label="Gestión de productos"
+    >
       {/* Header + Exportación */}
-        <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
+      <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
-          <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
+        <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
+        <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
       </div>
       {/* Filtros */}
       <ProductFilters

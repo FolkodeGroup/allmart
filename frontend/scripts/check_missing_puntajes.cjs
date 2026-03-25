@@ -34,10 +34,19 @@ const headers = {
 
 // Los mismos patrones que usa sumar_puntajes.cjs
 function extractScore(body) {
-  let match = body && body.match(/PUNTAJE\s*[:：]\s*(\d+)/i);
-  if (match) return parseInt(match[1], 10);
-  match = body && body.match(/\*\*PUNTAJE:\*\*\s*\n\s*(\d+)/i);
-  if (match) return parseInt(match[1], 10);
+  if (!body) return 0;
+  // Regex mejorada: busca "PUNTAJE" seguido de ":" o "：" y captura el número
+  // Ignora negritas (**), espacios extras y saltos de línea
+  const regexes = [
+    /PUNTAJE\s*[:：]\s*(\d+)/i,
+    /\*\*PUNTAJE\s*[:：]\*\*\s*(\d+)/i,
+    /PUNTAJE\s*[:：]\s*\n\s*(\d+)/i
+  ];
+
+  for (const regex of regexes) {
+    const match = body.match(regex);
+    if (match) return parseInt(match[1], 10);
+  }
   return 0;
 }
 

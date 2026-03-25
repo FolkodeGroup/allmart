@@ -56,10 +56,12 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   cart         Cart?
-
+  staffNotes   StaffNote[]
+  
   @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
   @@map("users")
+  
 }
 
 model Category {
@@ -295,4 +297,18 @@ model SchemaMigration {
   appliedAt DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
 
   @@map("schema_migrations")
+}
+
+// ─── Staff Notes ─────────────────────────────────────────────────────────────
+
+model StaffNote {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content     String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  userId      String   @map("user_id") @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "staff_notes_user_fk")
+
+  @@index([userId], map: "idx_staff_notes_user_id")
+  @@map("staff_notes")
 }
