@@ -478,7 +478,7 @@ export function AdminOrders() {
         fail++;
       }
     }
-    setBulkResult({success, fail});
+    
     toast.success(`Acción masiva: ${success} pedidos actualizados${fail ? `, ${fail} fallidos` : ''}`);
     setBulkLoading(false);
     setBulkModalOpen(false);
