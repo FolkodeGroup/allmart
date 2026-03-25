@@ -100,10 +100,18 @@ export default function StaffNotes() {
                     <div
                         key={note.id}
                         className={`sticky-note ${isExpanded ? 'expanded' : ''}`}
+                        role="button"
+                        tabIndex={0}
                         onMouseEnter={() => setHoveredId(note.id)}
                         onMouseLeave={() => setHoveredId((current) => (current === note.id ? null : current))}
                         onClick={() => {
                             if (editingId !== note.id) toggleExpanded();
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                if (editingId !== note.id) toggleExpanded();
+                            }
                         }}
                         style={{
                             background: '#fffbe7',
