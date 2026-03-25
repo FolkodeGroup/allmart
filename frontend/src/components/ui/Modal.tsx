@@ -92,7 +92,7 @@ export const Modal: FC<ModalProps> = ({
       <div
         className={styles.modal}
         onClick={(e) => e.stopPropagation()}
-        // role and aria-* moved to overlay for better semantics
+        role="document"
       >
         {title && (
           <h2 id="modal-title" className={styles.title}>
