@@ -83,7 +83,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
             objectFit: 'cover',
             opacity: loaded ? 1 : 0,
             transition: 'opacity 0.4s',
-            zIndex: 2,
+            zIndex: 1,
             position: 'relative',
           }}
           onLoad={() => setLoaded(true)}
