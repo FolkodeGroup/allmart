@@ -655,12 +655,9 @@ export function AdminOrders() {
       setModal(m => ({ ...m, isLoading: false }));
     }
   };
-
+  
   return (
-    <div
-      ref={containerRef as unknown as React.RefObject<HTMLDivElement>}
-      className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
-    >
+    <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
