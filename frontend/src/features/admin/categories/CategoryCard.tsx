@@ -4,6 +4,7 @@ import type { Category } from '../../../types';
 import styles from './AdminCategories.module.css';
 import { Image as ImageIcon } from 'lucide-react';
 import { ProductImage } from '../../../components/ui/ProductImage';
+import { Tooltip } from '../../../components/ui/Tooltip';
 
 
 interface CategoryCardProps {
@@ -32,16 +33,18 @@ export const CategoryCard: FC<CategoryCardProps> = ({
     <div className={styles.cardWrapper} style={{ position: 'relative' }}>
       {/* Checkbox de selección múltiple */}
       {onSelect && (
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={e => onSelect(category.id, e.target.checked)}
-          className={styles.cardCheckbox}
-          style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}
-          title={`Seleccionar categoría ${category.name}`}
-          aria-label={`Seleccionar categoría ${category.name}`}
-          onClick={e => e.stopPropagation()}
-        />
+        <Tooltip content={`Seleccionar categoría ${category.name}`}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={e => onSelect(category.id, e.target.checked)}
+            className={styles.cardCheckbox}
+            style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}
+            aria-label={`Seleccionar categoría ${category.name}`}
+            tabIndex={0}
+            onClick={e => e.stopPropagation()}
+          />
+        </Tooltip>
       )}
       <div
         className={styles.card}
@@ -86,10 +89,30 @@ export const CategoryCard: FC<CategoryCardProps> = ({
           {(canEdit || canDelete) && (
             <div className={styles.cardActions}>
               {canEdit && (
-                <button type="button" className={styles.editBtn} onClick={(e) => { e.stopPropagation(); onEdit?.(category.id); }} title="Editar">✏️</button>
+                <Tooltip content="Editar categoría" placement="top">
+                  <button
+                    type="button"
+                    className={styles.editBtn}
+                    onClick={e => { e.stopPropagation(); onEdit?.(category.id); }}
+                    aria-label={`Editar categoría ${category.name}`}
+                    tabIndex={0}
+                  >
+                    ✏️
+                  </button>
+                </Tooltip>
               )}
               {canDelete && (
-                <button type="button" className={styles.deleteBtn} onClick={(e) => { e.stopPropagation(); onDelete?.(category.id); }} title="Eliminar">🗑️</button>
+                <Tooltip content="Eliminar categoría" placement="top">
+                  <button
+                    type="button"
+                    className={styles.deleteBtn}
+                    onClick={e => { e.stopPropagation(); onDelete?.(category.id); }}
+                    aria-label={`Eliminar categoría ${category.name}`}
+                    tabIndex={0}
+                  >
+                    🗑️
+                  </button>
+                </Tooltip>
               )}
             </div>
           )}

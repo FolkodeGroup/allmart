@@ -3,6 +3,7 @@ import type { FC } from 'react';
 import type { Category } from '../../../types';
 import styles from './AdminCategories.module.css';
 import { CategoryCard } from './CategoryCard';
+import { Tooltip } from '../../../components/ui/Tooltip';
 
 interface CategoriesGridProps {
   categories: Category[];
@@ -30,15 +31,18 @@ export const CategoriesGrid: FC<CategoriesGridProps> = ({
   onSelectAll,
 }) => (
   <div>
-    {/* Header con checkbox general */}
+    {/* Header con checkbox general y ayuda contextual */}
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12, gap: 8 }}>
-      <input
-        type="checkbox"
-        checked={allSelected}
-        onChange={e => onSelectAll(e.target.checked)}
-        aria-label="Seleccionar todas las categorías visibles"
-      />
-      <span style={{ fontWeight: 500 }}>Seleccionar todas</span>
+      <Tooltip content="Seleccionar todas las categorías visibles (para acciones masivas)">
+        <input
+          type="checkbox"
+          checked={allSelected}
+          onChange={e => onSelectAll(e.target.checked)}
+          aria-label="Seleccionar todas las categorías visibles"
+          tabIndex={0}
+        />
+      </Tooltip>
+      <span style={{ fontWeight: 500 }}>Seleccionar todas las categorías</span>
     </div>
     <div className={styles.grid}>
       {categories.map(cat => (

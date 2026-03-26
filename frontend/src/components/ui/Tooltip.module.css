@@ -30,13 +30,14 @@
 .tooltip.top {
   bottom: 120%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-5%); /* antes era -50% */
   margin-bottom: 8px;
 }
+
 .tooltip.bottom {
   top: 120%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-5%); /* antes era -50% */
   margin-top: 8px;
 }
 .tooltip.left {
