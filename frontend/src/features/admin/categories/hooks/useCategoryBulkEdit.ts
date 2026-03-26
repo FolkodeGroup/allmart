@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Category } from '../../../types';
 
 export interface BulkEditData {
   name?: string;

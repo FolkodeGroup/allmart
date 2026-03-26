@@ -1,5 +1,5 @@
-import { usePersistentSelection } from '../../../hooks/usePersistentSelection';
-import { Category } from '../types/category';
+import { usePersistentSelection } from '../../../../hooks/usePersistentSelection';
+import type { Category } from '../types/category';
 
 /**
  * Hook para manejar la selección múltiple de categorías en la vista de admin.
