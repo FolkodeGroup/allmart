@@ -1,8 +1,10 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
+
+
+
 import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
-import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -120,7 +122,7 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
 
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
-  const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
+  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
   const { can } = useAdminAuth();
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -135,9 +137,9 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
   const auth = useAdminAuth ? useAdminAuth() : null;
   const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
-  const handleStatusApply = () => {
+  const handleStatusApply = async () => {
     try {
-      updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
+      await updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
       logAdminActivity({
         timestamp: new Date().toISOString(),
         user: userEmail,
@@ -157,9 +159,9 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   // Sync local pendingStatus if order.status changes externally
   const currentStatus = order.status;
 
-  const handleSaveNotes = () => {
+  const handleSaveNotes = async () => {
     try {
-      useAdminOrders().updateOrder(order.id, { notes });
+      await updateOrder(order.id, { notes });
       toast.success('Notas guardadas con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
@@ -167,9 +169,9 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
-      deleteOrder(order.id);
+      await deleteOrder(order.id);
       logAdminActivity({
         timestamp: new Date().toISOString(),
         user: userEmail,
@@ -297,7 +299,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
                         <button
                           className={styles.whatsappBtnConfirm}
                           type="button"
-                          onClick={() => { handleMarkAsPaid(order.id); setConfirmPaid(false); }}
+                          onClick={async () => { await handleMarkAsPaid(order.id); setConfirmPaid(false); }}
                         >
                           ✓ Sí, confirmar pago
                         </button>
@@ -410,18 +412,71 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 /* ── Componente principal ───────────────────────────────────────── */
 export function AdminOrders() {
 
-  const { orders } = useAdminOrders();
+  const { orders, isLoading, bulkUpdateOrderStatus, updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
 
-  const [isLoading, _setIsLoading] = useState<boolean>(false);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<OrderStatus | ''>('');
   const [filterDateFrom, setFilterDateFrom] = useState('');
   const [filterDateTo, setFilterDateTo] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  // Estado para selección múltiple
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Ref for scroll preservation
-  const containerRef = useRef<HTMLElement>(null);
-  useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'orders-list', [search, filterStatus, filterDateFrom, filterDateTo]);
+
+  // Helpers para selección múltiple (debe ir después de paginatedOrders)
+  // --- MOVER ESTO DESPUÉS DE LA DECLARACIÓN DE paginatedOrders ---
+
+  // Acciones masivas
+  type BulkAction = 'confirm' | 'ship' | 'cancel';
+  const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Validaciones de compatibilidad de acción
+  function canBulkAction(action: BulkAction, orders: Order[]): boolean {
+    if (action === 'confirm') return orders.every(o => o.status === 'pendiente');
+    if (action === 'ship') return orders.every(o => o.status === 'confirmado' || o.status === 'en-preparacion');
+    if (action === 'cancel') return orders.every(o => o.status !== 'enviado' && o.status !== 'entregado' && o.status !== 'cancelado');
+    return false;
+  }
+  function getBulkActionLabel(action: BulkAction): string {
+    if (action === 'confirm') return 'Confirmar';
+    if (action === 'ship') return 'Marcar como Enviado';
+    if (action === 'cancel') return 'Cancelar';
+    return '';
+  }
+
+  const handleBulkAction = (action: BulkAction) => {
+    setBulkAction(action);
+    setBulkModalOpen(true);
+  };
+
+  const executeBulkAction = async () => {
+    if (!bulkAction) return;
+    setBulkLoading(true);
+    const ordersToUpdate = orders.filter(o => selectedIds.includes(o.id));
+    const valid = canBulkAction(bulkAction, ordersToUpdate);
+    if (!valid) {
+      toast.error('Algunos pedidos seleccionados no permiten esta acción.');
+      setBulkLoading(false);
+      setBulkModalOpen(false);
+      return;
+    }
+    try {
+      const result = await bulkUpdateOrderStatus({
+        orderIds: selectedIds,
+        action: bulkAction,
+      });
+      toast.success(`Acción masiva: ${result.success} pedidos actualizados${result.failed ? `, ${result.failed} fallidos` : ''}`);
+      setBulkModalOpen(false);
+      clearSelection();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo ejecutar la acción masiva';
+      toast.error(message);
+    } finally {
+      setBulkLoading(false);
+    }
+  };
 
   // Paginación
   const ITEMS_PER_PAGE = 5;
@@ -454,10 +509,23 @@ export function AdminOrders() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
 
+
   const paginatedOrders = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filtered.slice(start, start + ITEMS_PER_PAGE);
   }, [filtered, currentPage]);
+
+  // Helpers para selección múltiple (debe ir después de paginatedOrders)
+  const isAllSelected = paginatedOrders.length > 0 && paginatedOrders.every(o => selectedIds.includes(o.id));
+  const isIndeterminate = selectedIds.length > 0 && !isAllSelected;
+  const handleSelectAll = () => {
+    if (isAllSelected) setSelectedIds([]);
+    else setSelectedIds(paginatedOrders.map(o => o.id));
+  };
+  const handleSelectOne = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+  const clearSelection = () => setSelectedIds([]);
 
   // Resumen por estado
   const summary = useMemo(() => {
@@ -525,7 +593,6 @@ export function AdminOrders() {
     message?: string;
   }>({ open: false, type: null, order: null });
 
-  const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
   const { user } = useAdminAuth();
 
   // Controladores de acciones críticas
@@ -581,10 +648,7 @@ export function AdminOrders() {
   };
 
   return (
-    <div
-      ref={containerRef as unknown as React.RefObject<HTMLDivElement>}
-      className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
-    >
+    <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
@@ -754,6 +818,15 @@ export function AdminOrders() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      aria-label="Seleccionar todos"
+                      checked={isAllSelected}
+                      ref={el => { if (el) el.indeterminate = isIndeterminate; }}
+                      onChange={handleSelectAll}
+                    />
+                  </th>
                   <th>N° Pedido</th>
                   <th>Fecha</th>
                   <th>Cliente</th>
@@ -795,7 +868,7 @@ export function AdminOrders() {
                   <th>Productos</th>
                   <th>Total</th>
                   <th>Estado</th>
-                  <th></th>
+                  <th>Opciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -808,7 +881,16 @@ export function AdminOrders() {
                     tabIndex={0}
                     onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
                   >
-                    <td className={styles.orderId}>#{order.id.slice(0, 8).toUpperCase()}</td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(order.id)}
+                        onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
+                        aria-label={`Seleccionar pedido ${order.id}`}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </td>
+                    <td className={styles.orderId}>#{order.id.slice(0,8).toUpperCase()}</td>
                     <td className={styles.orderDate}>{formatDate(order.createdAt)}</td>
                     <td>
                       <div className={styles.customerName}>
@@ -839,6 +921,7 @@ export function AdminOrders() {
                       >
                         Ver →
                       </button>
+                      
                     </td>
                   </tr>
                 ))}
@@ -861,7 +944,15 @@ export function AdminOrders() {
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
                 >
                   <div className={styles.mobileCardTop}>
-                    <span className={styles.mobileCardId}>#{order.id.slice(0, 8).toUpperCase()}</span>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(order.id)}
+                      onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
+                      aria-label={`Seleccionar pedido ${order.id}`}
+                      onClick={e => e.stopPropagation()}
+                      style={{ marginRight: 8 }}
+                    />
+                    <span className={styles.mobileCardId}>#{order.id.slice(0,8).toUpperCase()}</span>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                       <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
                         {STATUS_LABELS[order.status]}
@@ -893,7 +984,56 @@ export function AdminOrders() {
               );
             })}
           </div>
-          <div style={{ height: '100px' }} aria-hidden='true' />
+
+                {/* Acciones masivas */}
+                {selectedIds.length > 0 && (
+                  <div style={{
+                    position: 'fixed', bottom: 32, left: 0, right: 0, zIndex: 50, display: 'flex', justifyContent: 'center', pointerEvents: 'none'
+                  }}>
+                    <div style={{
+                      background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: 16, display: 'flex', gap: 16, alignItems: 'center', pointerEvents: 'auto'
+                    }}>
+                      <span style={{ fontWeight: 500 }}>{selectedIds.length} seleccionados</span>
+                      <button
+                        type="button"
+                        disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
+                        onClick={() => handleBulkAction('confirm')}
+                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#2563eb', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
+                      >Confirmar</button>
+                      <button
+                        type="button"
+                        disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
+                        onClick={() => handleBulkAction('ship')}
+                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#10b981', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
+                      >Marcar como Enviado</button>
+                      <button
+                        type="button"
+                        disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
+                        onClick={() => handleBulkAction('cancel')}
+                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
+                      >Cancelar</button>
+                      <button
+                        type="button"
+                        onClick={clearSelection}
+                        style={{ marginLeft: 8, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}
+                      >Limpiar</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Modal de confirmación de acción masiva */}
+                {bulkModalOpen && bulkAction && (
+                  <ModalConfirm
+                    open={bulkModalOpen}
+                    title={`Acción masiva: ${getBulkActionLabel(bulkAction)}`}
+                    message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
+                    confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
+                    cancelText={'Cancelar'}
+                    onConfirm={bulkLoading ? () => {} : executeBulkAction}
+                    onCancel={bulkLoading ? () => {} : () => setBulkModalOpen(false)}
+                  />
+                )}
+          <div style={{ height: '100px'}} aria-hidden='true'/>
         </>
       )}
 

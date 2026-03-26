@@ -1,67 +1,159 @@
 #!/bin/bash
 
+# Colores para terminal
 RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
 NC='\033[0m' # Sin color
 
 ROOT_DIR=$(pwd)
+ERRORS_FOUND=0
+
+# Separador visual
+print_separator() {
+  echo -e "${BLUE}════════════════════════════════════════════════════════════════${NC}"
+}
+
+# Encabezado
+print_header() {
+  echo ""
+  print_separator
+  echo -e "${BOLD}${BLUE}🔍 PRE-PUSH VALIDATION CHECKS${NC}${BOLD}"
+  echo -e "Validando cambios antes de empujar a la rama...${NC}"
+  print_separator
+  echo ""
+}
+
+# Mostrar inicio de paso
+print_step() {
+  local step_num=$1
+  local step_name=$2
+  echo -e "${YELLOW}[${step_num}] Ejecutando: ${step_name}${NC}"
+}
+
+# Mostrar éxito
+print_success() {
+  echo -e "${GREEN}✓ Completado exitosamente${NC}"
+  echo ""
+}
+
+# Mostrar error
+print_error() {
+  local message=$1
+  local log_file=$2
+  echo -e "${RED}✗ ERROR: ${message}${NC}"
+  echo -e "${RED}────────────────────────────────────────────────────────────────${NC}"
+  cat "$log_file"
+  echo -e "${RED}────────────────────────────────────────────────────────────────${NC}"
+  echo ""
+  ERRORS_FOUND=1
+}
 
 # Ejecuta un paso en silencio y muestra logs solo si falla.
 run_required_step() {
   local dir=$1
   local cmd=$2
   local message=$3
+  local step_name=$4
+  local step_num=$5
   local log_file
 
   log_file=$(mktemp)
+  
+  print_step "$step_num" "$step_name"
+  
   (cd "$dir" && eval "$cmd") >"$log_file" 2>&1
   local status=$?
 
   if [ $status -ne 0 ]; then
-    echo -e "${RED}ERROR: $message${NC}"
-    cat "$log_file"
+    print_error "$message" "$log_file"
     rm -f "$log_file"
-    exit 1
+    return 1
   fi
 
+  print_success
   rm -f "$log_file"
+  return 0
 }
 
 # Ejecuta tests solo si el script existe. Si no existe, no hace nada.
 run_optional_test_step() {
   local dir=$1
   local message=$2
+  local step_name=$3
+  local step_num=$4
   local log_file
 
   log_file=$(mktemp)
 
   if (cd "$dir" && node -e "const s=require('./package.json').scripts||{}; process.exit(s.test ? 0 : 1)") >"$log_file" 2>&1; then
+    print_step "$step_num" "$step_name"
+    
     (cd "$dir" && npm test -- --bail) >"$log_file" 2>&1
     local status=$?
 
     if [ $status -ne 0 ]; then
-      echo -e "${RED}ERROR: $message${NC}"
-      cat "$log_file"
+      print_error "$message" "$log_file"
       rm -f "$log_file"
-      exit 1
+      return 1
     fi
+
+    print_success
+  else
+    echo -e "${YELLOW}[${step_num}] ${step_name}: No encontrado (opcional)${NC}"
+    echo ""
   fi
 
   rm -f "$log_file"
+  return 0
 }
 
+# Mostrar final con resumen
+print_final_summary() {
+  print_separator
+  if [ $ERRORS_FOUND -eq 0 ]; then
+    echo -e "${GREEN}${BOLD}✓ ¡TODO VALIDADO CORRECTAMENTE!${NC}"
+    echo -e "${GREEN}Puedes empujar tu rama sin problemas.${NC}"
+  else
+    echo -e "${RED}${BOLD}✗ VALIDACIÓN FALLIDA${NC}"
+    echo -e "${RED}Debes corregir los errores mostrados arriba antes de empujar.${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 Consejos:${NC}"
+    echo -e "  • Lee los mensajes de error cuidadosamente"
+    echo -e "  • Ejecuta los comandos localmente para ver más detalles"
+    echo -e "  • En backend: ${BOLD}cd backend && npm run lint${NC}"
+    echo -e "  • En frontend: ${BOLD}cd frontend && npm run lint${NC}"
+    echo -e "  • O ejecútalos sin --fix para ver qué falta"
+  fi
+  print_separator
+  echo ""
+}
+
+# Inicio
+print_header
+
 # 1. Prisma generate (Backend)
-run_required_step "$ROOT_DIR/backend" "npx prisma generate" "Prisma generate falló en el backend."
+run_required_step "$ROOT_DIR/backend" "npx prisma generate" "Prisma generate falló en el backend. Verifica tu esquema." "1/6" "Prisma Generate" || exit 1
 
-# 2. Lint (Backend & Frontend)
-run_required_step "$ROOT_DIR/backend" "npm run lint" "Lint falló en el backend. Corrige los errores antes de empujar."
-run_required_step "$ROOT_DIR/frontend" "npm run lint" "Lint falló en el frontend (App.tsx u otro). Corrige el error antes de empujar."
+# 2. Lint (Backend)
+run_required_step "$ROOT_DIR/backend" "npm run lint" "Lint falló en el backend. Corrige los errores de estilo." "2/6" "Lint Backend" || exit 1
 
-# 3. Tests (Backend & Frontend) - Opcional
-run_optional_test_step "$ROOT_DIR/backend" "Los tests del backend fallaron."
-run_optional_test_step "$ROOT_DIR/frontend" "Los tests del frontend fallaron."
+# 3. Lint (Frontend)
+run_required_step "$ROOT_DIR/frontend" "npm run lint" "Lint falló en el frontend. Corrige los errores de estilo." "3/6" "Lint Frontend" || exit 1
 
-# 4. Build (Backend & Frontend)
-run_required_step "$ROOT_DIR/backend" "npm run build" "El build del backend falló."
-run_required_step "$ROOT_DIR/frontend" "npm run build" "El build del frontend falló."
+# 4. Tests Backend (Opcional)
+run_optional_test_step "$ROOT_DIR/backend" "Los tests del backend fallaron." "Tests Backend" "4/6" || exit 1
+
+# 5. Tests Frontend (Opcional)
+run_optional_test_step "$ROOT_DIR/frontend" "Los tests del frontend fallaron." "Tests Frontend" "5/6" || exit 1
+
+# 6. Build (Backend & Frontend)
+run_required_step "$ROOT_DIR/backend" "npm run build" "El build del backend falló. Verifica los errores." "6a/6" "Build Backend" || exit 1
+run_required_step "$ROOT_DIR/frontend" "npm run build" "El build del frontend falló. Verifica los errores." "6b/6" "Build Frontend" || exit 1
+
+# Resumen final
+print_final_summary
 
 exit 0

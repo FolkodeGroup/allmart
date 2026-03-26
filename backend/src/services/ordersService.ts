@@ -9,6 +9,12 @@ import { createError } from '../middlewares/errorHandler';
 import { PaginatedResponseDTO } from '../types/admin/pagination';
 import { AdminOrdersQueryDTO } from '../types/admin/order';
 import { AdminOrderDTO } from '../types/admin/order';
+import {
+  AdminBulkUpdateOrderStatusDTO,
+  AdminBulkUpdateOrderStatusResultDTO,
+  AdminBulkOrderAction,
+  AdminBulkUpdateOrderStatusItemResultDTO,
+} from '../types/admin/order';
 
 // ─── Conversiones de enums Prisma ↔ aplicación ────────────────────────────────
 // Prisma genera enum keys con underscore (en_preparacion, no_abonado)
@@ -56,6 +62,25 @@ function paymentStatusToPrismaStatus(s: PaymentStatus): string {
   return map[s] ?? s;
 }
 
+function canApplyBulkAction(action: AdminBulkOrderAction, currentStatus: OrderStatus): boolean {
+  if (action === 'confirm') return currentStatus === OrderStatus.PENDING;
+  if (action === 'ship') {
+    return currentStatus === OrderStatus.CONFIRMED || currentStatus === OrderStatus.PROCESSING;
+  }
+  if (action === 'cancel') {
+    return currentStatus !== OrderStatus.SHIPPED
+      && currentStatus !== OrderStatus.DELIVERED
+      && currentStatus !== OrderStatus.CANCELLED;
+  }
+  return false;
+}
+
+function bulkActionToTargetStatus(action: AdminBulkOrderAction): OrderStatus {
+  if (action === 'confirm') return OrderStatus.CONFIRMED;
+  if (action === 'ship') return OrderStatus.SHIPPED;
+  return OrderStatus.CANCELLED;
+}
+
 // Mapea Prisma Order al tipo Order de la app
 function toOrder(row: any): Order {
   return {
@@ -70,6 +95,15 @@ function toOrder(row: any): Order {
     paymentStatus: prismaPaymentToPaymentStatus(row.paymentStatus || row.payment_status),
     paidAt: row.paidAt || row.paid_at || undefined,
     notes: row.notes ?? undefined,
+    items: Array.isArray(row.orderItems)
+      ? row.orderItems.map((item: any) => ({
+        productId: item.productId || '',
+        productName: item.productName,
+        productImage: item.productImage || undefined,
+        unitPrice: Number(item.unitPrice),
+        quantity: item.quantity,
+      }))
+      : [],
     createdAt: row.createdAt || row.created_at,
     updatedAt: row.updatedAt || row.updated_at,
   };
@@ -115,6 +149,9 @@ export async function getAllOrders(
       where,
       skip,
       take: limitNumber,
+      include: {
+        orderItems: true,
+      },
       orderBy: { createdAt: 'desc' }
     }),
     prisma.order.count({ where })
@@ -324,4 +361,82 @@ export async function deleteOrder(id: string): Promise<void> {
   const existing = await prisma.order.findUnique({ where: { id } });
   if (!existing) throw createError('Pedido no encontrado', 404);
   await prisma.order.delete({ where: { id } });
+}
+
+export async function bulkUpdateOrderStatus(
+  dto: AdminBulkUpdateOrderStatusDTO
+): Promise<AdminBulkUpdateOrderStatusResultDTO> {
+  if (!dto || !Array.isArray(dto.orderIds) || dto.orderIds.length === 0) {
+    throw createError('orderIds es requerido y debe contener al menos un pedido', 400);
+  }
+
+  if (!dto.action || !['confirm', 'ship', 'cancel'].includes(dto.action)) {
+    throw createError('Accion masiva invalida', 400);
+  }
+
+  const uniqueOrderIds = Array.from(new Set(dto.orderIds.filter(Boolean)));
+  if (uniqueOrderIds.length === 0) {
+    throw createError('No hay IDs validos para procesar', 400);
+  }
+
+  const action = dto.action as AdminBulkOrderAction;
+  const targetStatus = bulkActionToTargetStatus(action);
+  const targetPrismaStatus = orderStatusToPrismaStatus(targetStatus) as any;
+
+  const results = await prisma.$transaction(async (tx) => {
+    const rows = await tx.order.findMany({
+      where: { id: { in: uniqueOrderIds } },
+      select: { id: true, status: true },
+    });
+
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const itemResults: AdminBulkUpdateOrderStatusItemResultDTO[] = [];
+
+    for (const orderId of uniqueOrderIds) {
+      const row = byId.get(orderId);
+      if (!row) {
+        itemResults.push({ id: orderId, success: false, reason: 'Pedido no encontrado' });
+        continue;
+      }
+
+      const currentStatus = prismaStatusToOrderStatus(row.status);
+      if (!canApplyBulkAction(action, currentStatus)) {
+        itemResults.push({
+          id: orderId,
+          success: false,
+          reason: `Transicion no permitida desde ${currentStatus}`,
+        });
+        continue;
+      }
+
+      await tx.order.update({
+        where: { id: orderId },
+        data: { status: targetPrismaStatus },
+      });
+
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId,
+          status: targetPrismaStatus,
+          note: dto.note ?? null,
+        },
+      });
+
+      itemResults.push({ id: orderId, success: true });
+    }
+
+    return itemResults;
+  });
+
+  const success = results.filter((r) => r.success).length;
+  const failed = results.length - success;
+
+  return {
+    action,
+    targetStatus,
+    total: results.length,
+    success,
+    failed,
+    results,
+  };
 }

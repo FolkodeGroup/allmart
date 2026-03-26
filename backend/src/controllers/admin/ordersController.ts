@@ -57,6 +57,15 @@ export async function updateStatus(req: AuthenticatedRequest, res: Response, nex
   }
 }
 
+export async function bulkUpdateStatus(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const result = await ordersService.bulkUpdateOrderStatus(req.body);
+    sendSuccess(res, result, 200, 'Actualizacion masiva completada');
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function updatePayment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const order = await ordersService.updateOrderPaymentStatus(
