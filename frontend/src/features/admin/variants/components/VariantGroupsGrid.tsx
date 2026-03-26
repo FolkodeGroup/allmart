@@ -61,21 +61,26 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
   return (
     <div className={styles.groupsGrid}>
       {groups.map(group => (
-        <VariantGroupCard
+        <div
           key={group.id}
-          group={group}
-          onEditName={onEditName}
-          onDelete={onDelete}
-          onEditValue={onEditValue}
-          onToggleStatus={onToggleStatus}
-          onAddValue={onAddValue}
-          onRemoveValue={onRemoveValue}
-          canEdit={canEdit}
-          canDelete={canDelete}
-          newValue={newValues[group.id] || ''}
-          setNewValue={(value) => setNewValue(group.id, value)}
-          error={errors[`value-${group.id}`] || ''}
-        />
+          className={`fadeIn slideUpIn microHover`}
+          style={{ willChange: 'opacity, transform' }}
+        >
+          <VariantGroupCard
+            group={group}
+            onEditName={onEditName}
+            onDelete={onDelete}
+            onEditValue={onEditValue}
+            onToggleStatus={onToggleStatus}
+            onAddValue={onAddValue}
+            onRemoveValue={onRemoveValue}
+            canEdit={canEdit}
+            canDelete={canDelete}
+            newValue={newValues[group.id] || ''}
+            setNewValue={(value) => setNewValue(group.id, value)}
+            error={errors[`value-${group.id}`] || ''}
+          />
+        </div>
       ))}
     </div>
   );

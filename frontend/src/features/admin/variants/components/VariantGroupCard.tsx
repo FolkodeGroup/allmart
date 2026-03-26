@@ -93,7 +93,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   };
 
   return (
-    <div className={styles.groupCard}>
+    <div className={`${styles.groupCard} fadeIn slideUpIn microHover`} style={{ willChange: 'opacity, transform' }}>
       {/* Header del grupo */}
       <div className={styles.groupHeader}>
         {isEditing ? (
