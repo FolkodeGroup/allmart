@@ -1261,3 +1261,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #624: 403 añadir tooltips y ayuda contextual en acciones de categorías | 2026-03-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #626: 404 refactorizar componentes de categorías para mayor mantenibilidad | 2026-03-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #628: Filtros dinámicos para variantes | 2026-03-26 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #632: 419 implementar edición masiva de estado de pedidos | 2026-03-26 |
