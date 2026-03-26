@@ -1,9 +1,11 @@
+import { CategoriesPagination } from './components/CategoriesPagination';
+// import type { Category } from './types/category';
 import { useState, useEffect, useCallback } from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { useNotification } from '../../../context/NotificationContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-import { usePersistentSelection } from '../../../hooks/usePersistentSelection';
+import { useCategorySelection } from './hooks/useCategorySelection';
 import { BulkEditCategoriesBar } from './BulkEditCategoriesBar';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -11,8 +13,11 @@ import { FolderSearch, AlertCircle } from 'lucide-react';
 import { CategoriesGrid } from './CategoriesGrid';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
-import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
+import { CategoriesHeader } from './components/CategoriesHeader';
+import { CategoriesFilters } from './components/CategoriesFilters';
+// import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
+import { useCategoryBulkEdit } from './hooks/useCategoryBulkEdit';
 
 export function AdminCategories() {
   const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, updateCategory, deleteCategory } = useAdminCategories();
@@ -33,40 +38,27 @@ export function AdminCategories() {
   // Debounce para búsqueda instantánea
   const debouncedSearch = useDebouncedValue(search, 350);
 
-  // Selección múltiple
+
+  // Selección múltiple (extraído a hook personalizado)
   const {
     selectedIds,
-    add,
-    remove,
-    clear: clearSelection
-  } = usePersistentSelection();
+    allVisibleSelected,
+    handleSelectAllVisible,
+    handleSelectCategory,
+    clearSelection
+  } = useCategorySelection(categories);
 
-  // Determinar si todas las categorías visibles están seleccionadas
-  const allVisibleSelected = categories.length > 0 && categories.every(cat => selectedIds.includes(cat.id));
 
-  // Handler para checkbox general
-  const handleSelectAllVisible = (checked: boolean) => {
-    const visibleIds = categories.map(cat => cat.id);
-    if (checked) {
-      add(visibleIds);
-    } else {
-      remove(visibleIds);
-    }
-  };
-
-  // Handler para checkbox individual
-  const handleSelectCategory = (id: string, checked: boolean) => {
-    if (checked) {
-      add([id]);
-    } else {
-      remove([id]);
-    }
-  };
-
-  // Estado y lógica para edición masiva
-  const [showBulkEdit, setShowBulkEdit] = useState(false);
-  const [bulkEditLoading, setBulkEditLoading] = useState(false);
-  const [bulkEditData, setBulkEditData] = useState<{ name?: string; description?: string; image?: string }>({});
+  // Estado y lógica para edición masiva (extraído a hook personalizado)
+  const {
+    showBulkEdit,
+    setShowBulkEdit,
+    bulkEditLoading,
+    setBulkEditLoading,
+    bulkEditData,
+    // setBulkEditData,
+    handleBulkEdit
+  } = useCategoryBulkEdit();
 
   // Fetch categories when page, limit, or search changes
   useEffect(() => {
@@ -106,52 +98,23 @@ export function AdminCategories() {
     }
   };
 
-  const handleBulkEdit = (data: { name?: string; description?: string; image?: string }) => {
-    // Filtrar solo los campos realmente editados
-    const filteredData: { name?: string; description?: string; image?: string } = {};
-    if (data.name) filteredData.name = data.name;
-    if (data.description) filteredData.description = data.description;
-    if (data.image) filteredData.image = data.image;
-    setShowBulkEdit(true);
-    setBulkEditData(filteredData);
-  };
+  // (Eliminado: handleBulkEdit inline, ahora se usa el del hook personalizado)
 
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
+
         {/* Header */}
-        <div className={sectionStyles.header}>
-          <div className={styles.headerTop}>
-            <div>
-              <span className={sectionStyles.label}>Administración</span>
-              <h1 className={sectionStyles.title}>
-                <span className={sectionStyles.icon}>📁</span> Categorías
-              </h1>
-              <p className={sectionStyles.subtitle}>
-                Gestioná las categorías del catálogo para organizar tus productos.
-              </p>
-            </div>
-            {can('categories.create') && (
-              <button className={styles.newBtn} onClick={handleNew}>
-                + Nueva categoría
-              </button>
-            )}
-          </div>
-        </div>
+        <CategoriesHeader canCreate={can('categories.create')} onNew={handleNew} />
+
 
         {/* Filtros fuera del header */}
-        <div className={styles.filters}>
-          <CategorySearchInput
-            categories={categories}
-            value={search}
-            onChange={setSearch}
-            onSelectSuggestion={cat => {
-              setSearch(cat.name);
-              setSelectedSuggestion(cat.name);
-            }}
-            placeholder="Buscar por nombre o slug..."
-          />
-          <span className={styles.count}>{total} categorías</span>
-        </div>
+        <CategoriesFilters
+          categories={categories}
+          search={search}
+          setSearch={setSearch}
+          setSelectedSuggestion={setSelectedSuggestion}
+          total={total}
+        />
 
       {/* Tabla */}
       {loading && <LoadingSpinner message="Cargando categorías..." size="lg" />}
@@ -190,29 +153,13 @@ export function AdminCategories() {
         />
       ))}
 
-      {/* Controles de paginación */}
-      {total > limit && (
-        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-          <button
-            className={styles.pageBtn}
-            disabled={page === 1 || loading}
-            onClick={() => handlePageChange(page - 1)}
-          >Anterior</button>
-          {Array.from({ length: apiTotalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={styles.pageBtn + (page === i + 1 ? ' ' + styles.pageActive : '')}
-              disabled={page === i + 1 || loading}
-              onClick={() => handlePageChange(i + 1)}
-            >{i + 1}</button>
-          ))}
-          <button
-            className={styles.pageBtn}
-            disabled={page === apiTotalPages || loading}
-            onClick={() => handlePageChange(page + 1)}
-          >Siguiente</button>
-        </div>
-      )}
+      {/* Controles de paginación extraídos a subcomponente */}
+      <CategoriesPagination
+        page={page}
+        totalPages={apiTotalPages}
+        loading={loading}
+        onPageChange={handlePageChange}
+      />
 
       {/* Modal de confirmación de eliminación */}
       <Modal
@@ -282,7 +229,7 @@ export function AdminCategories() {
               onClick={async () => {
                 setBulkEditLoading(true);
                 try {
-                  await Promise.all(selectedIds.map(id => updateCategory(id, bulkEditData)));
+                  await Promise.all(selectedIds.map((id: string) => updateCategory(id, bulkEditData)));
                   showNotification('success', 'Categorías actualizadas correctamente');
                   clearSelection();
                   refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });

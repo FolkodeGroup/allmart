@@ -1257,3 +1257,7 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #607: Se refactoriza implementacion de paginacion a la vista de Categorias | 2026-03-24 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #615: 🔄 Actualización automática de puntajes semanal | 2026-03-24 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #618: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-25 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #620: 400 adaptar la interfaz de categorías para dispositivos móviles | 2026-03-25 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #624: 403 añadir tooltips y ayuda contextual en acciones de categorías | 2026-03-26 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #626: 404 refactorizar componentes de categorías para mayor mantenibilidad | 2026-03-26 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #628: Filtros dinámicos para variantes | 2026-03-26 |

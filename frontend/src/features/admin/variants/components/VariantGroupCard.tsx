@@ -93,7 +93,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   };
 
   return (
-    <div className={styles.groupCard}>
+    <div className={`${styles.groupCard} fadeIn slideUpIn microHover`} style={{ willChange: 'opacity, transform' }}>
       {/* Header del grupo */}
       <div className={styles.groupHeader}>
         {isEditing ? (
@@ -137,7 +137,6 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               className={`${styles.statusToggleBtn} ${group.isActive ? styles.statusActive : styles.statusInactive}`}
               onClick={() => onToggleStatus(group.id, !group.isActive)}
               type="button"
-              title={group.isActive ? 'Desactivar variante' : 'Activar variante'}
             >
               {group.isActive ? '✓' : '✕'}
             </button>

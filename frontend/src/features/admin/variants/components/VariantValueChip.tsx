@@ -67,7 +67,7 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
 
   if (isEditing) {
     return (
-      <div className={styles.valueChipEdit}>
+      <div className={`${styles.valueChipEdit} fadeIn scaleIn`}>
         <input
           type="text"
           className={`${styles.valueChipInput} ${editError ? styles.inputError : ''}`}
@@ -107,7 +107,7 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
   }
 
   return (
-    <span className={styles.valueChip}>
+    <span className={`${styles.valueChip} fadeIn microHover`} style={{ willChange: 'opacity, transform' }}>
       {value}
       <div className={styles.chipActions}>
         {canEdit && (
