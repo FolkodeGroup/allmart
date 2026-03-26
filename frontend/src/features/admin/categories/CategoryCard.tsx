@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Category } from '../../../types';
 import styles from './AdminCategories.module.css';
 import { Image as ImageIcon } from 'lucide-react';
+import { ProductImage } from '../../../components/ui/ProductImage';
 
 
 interface CategoryCardProps {
@@ -52,7 +53,14 @@ export const CategoryCard: FC<CategoryCardProps> = ({
         style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', outline: 'none' }}
       >
         {category.image ? (
-          <img src={category.image} alt={category.name} className={styles.cardImg} />
+          <ProductImage
+            src={category.image}
+            alt={category.name}
+            className={styles.cardImg}
+            width={300}
+            height={140}
+            placeholder={'data:image/svg+xml,%3Csvg width="300" height="140" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="300" height="140" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+          />
         ) : (
           <div className={styles.cardImgPlaceholder}>
             <ImageIcon size={48} aria-hidden="true" focusable="false" />
