@@ -19,12 +19,13 @@ import {
   VariantForm,
   VariantGroupsGrid,
 } from './components';
+import { VariantsFilters } from './components/VariantFilters';
 
 export function AdminVariants() {
-    // Estados para feedback UX
-    const [notif, setNotif] = useState<{open:boolean,type:'success'|'error',message:string}>({open:false,type:'success',message:''});
-    const [modalOpen, setModalOpen] = useState(false);
-    const [pendingDeleteId, setPendingDeleteId] = useState<string|null>(null);
+  // Estados para feedback UX
+  const [notif, setNotif] = useState<{ open: boolean, type: 'success' | 'error', message: string }>({ open: false, type: 'success', message: '' });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const { products } = useAdminProducts();
   const {
     variants,
@@ -44,6 +45,21 @@ export function AdminVariants() {
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+
+  const dynamicFiltersConfig = variants.map((variant) => ({
+    name: variant.name,
+    values: variant.values,
+  }));
+  const [filters, setFilters] = useState<{
+    search: string;
+    status: "all" | "active" | "inactive";
+    dynamic: Record<string, string>;
+  }>({
+    search: "",
+    status: "all",
+    dynamic: {},
+  });
 
   const selectedProduct: AdminProduct | undefined = selectedProductId
     ? products.find(p => p.id === selectedProductId)
@@ -68,10 +84,10 @@ export function AdminVariants() {
     if (exists) return setErrors(prev => ({ ...prev, group: 'Ya existe un grupo con ese nombre' }));
     try {
       await addVariant(selectedProductId, name);
-      setNotif({open:true,type:'success',message:'Variante creada correctamente.'});
+      setNotif({ open: true, type: 'success', message: 'Variante creada correctamente.' });
       setNewGroupName('');
     } catch {
-      setNotif({open:true,type:'error',message:'Error al crear variante.'});
+      setNotif({ open: true, type: 'error', message: 'Error al crear variante.' });
     }
   };
 
@@ -99,9 +115,9 @@ export function AdminVariants() {
         entityId: pendingDeleteId,
         details: { productId: selectedProductId },
       });
-      setNotif({open:true,type:'success',message:'Variante eliminada correctamente.'});
+      setNotif({ open: true, type: 'success', message: 'Variante eliminada correctamente.' });
     } catch {
-      setNotif({open:true,type:'error',message:'Error al eliminar variante.'});
+      setNotif({ open: true, type: 'error', message: 'Error al eliminar variante.' });
     }
     setPendingDeleteId(null);
   };
@@ -110,10 +126,10 @@ export function AdminVariants() {
     try {
       if (selectedProductId) {
         await updateVariant(selectedProductId, variantId, { name: newName });
-        setNotif({open:true,type:'success',message:'Variante editada correctamente.'});
+        setNotif({ open: true, type: 'success', message: 'Variante editada correctamente.' });
       }
     } catch {
-      setNotif({open:true,type:'error',message:'Error al editar variante.'});
+      setNotif({ open: true, type: 'error', message: 'Error al editar variante.' });
     }
   };
 
@@ -142,7 +158,7 @@ export function AdminVariants() {
     const newVal = newValue.trim();
     if (!selectedProductId) return;
     if (!newVal) {
-      setNotif({open:true,type:'error',message:'El valor no puede estar vacío'});
+      setNotif({ open: true, type: 'error', message: 'El valor no puede estar vacío' });
       return;
     }
 
@@ -151,7 +167,7 @@ export function AdminVariants() {
 
     // Validar que no exista otro valor con el mismo nombre (case-insensitive)
     if (group.values.some(v => v.toLowerCase() === newVal.toLowerCase() && v !== oldValue)) {
-      setNotif({open:true,type:'error',message:'Este valor ya existe en el grupo'});
+      setNotif({ open: true, type: 'error', message: 'Este valor ya existe en el grupo' });
       return;
     }
 
@@ -159,9 +175,9 @@ export function AdminVariants() {
       // Crear nuevo array de valores reemplazando el antiguo
       const newValues = group.values.map(v => v === oldValue ? newVal : v);
       await updateVariant(selectedProductId, variantId, { values: newValues });
-      setNotif({open:true,type:'success',message:'Valor editado correctamente.'});
+      setNotif({ open: true, type: 'success', message: 'Valor editado correctamente.' });
     } catch {
-      setNotif({open:true,type:'error',message:'Error al editar valor.'});
+      setNotif({ open: true, type: 'error', message: 'Error al editar valor.' });
     }
   };
 
@@ -179,7 +195,7 @@ export function AdminVariants() {
         details: { productId: selectedProductId, isActive: newStatus },
       });
     } catch {
-      setNotif({open:true,type:'error',message:'Error al cambiar estado de variante.'});
+      setNotif({ open: true, type: 'error', message: 'Error al cambiar estado de variante.' });
     }
   };
 
@@ -193,13 +209,13 @@ export function AdminVariants() {
   // ── Exportación ────────────────────────────────────────────────────
   const handleExportCSV = () => {
     if (!selectedProduct || variants.length === 0) {
-      setNotif({open:true,type:'error',message:'No hay variantes para exportar'});
+      setNotif({ open: true, type: 'error', message: 'No hay variantes para exportar' });
       return;
     }
 
     // Crear cabecera
     const headers = ['Grupo', 'Valores'];
-    
+
     // Crear filas
     const rows = variants.map(variant => [
       variant.name,
@@ -222,9 +238,34 @@ export function AdminVariants() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    setNotif({open:true,type:'success',message:'Variantes exportadas a CSV correctamente'});
+
+    setNotif({ open: true, type: 'success', message: 'Variantes exportadas a CSV correctamente' });
   };
+
+  // Filtros para variantes
+  const filteredVariants = variants.filter((variant) => {
+    const matchesSearch = filters.search
+      ? variant.name.toLowerCase().includes(filters.search.toLowerCase())
+      : true;
+
+    const matchesStatus =
+      filters.status === "all"
+        ? true
+        : filters.status === "active"
+          ? variant.isActive
+          : !variant.isActive;
+
+    const matchesDynamic = Object.entries(filters.dynamic).every(
+      ([variantName, selectedValue]) => {
+        if (!selectedValue) return true;
+
+        const foundVariant = variants.find(v => v.name === variantName);
+        return foundVariant?.values.includes(selectedValue);
+      }
+    );
+
+    return matchesSearch && matchesStatus && matchesDynamic;
+  });
 
   // ── Render ────────────────────────────────────────────────────────
   return (
@@ -242,7 +283,7 @@ export function AdminVariants() {
         open={notif.open}
         type={notif.type}
         message={notif.message}
-        onClose={() => setNotif(prev => ({...prev,open:false}))}
+        onClose={() => setNotif(prev => ({ ...prev, open: false }))}
       />
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
@@ -291,7 +332,7 @@ export function AdminVariants() {
 
               <VariantHeader
                 selectedProduct={selectedProduct}
-                groupCount={variants.length}
+                groupCount={filteredVariants.length}
               />
 
               <VariantForm
@@ -302,35 +343,64 @@ export function AdminVariants() {
                 canCreate={can('variants.create')}
               />
 
-              {/* Sección de exportación */}
-              {variants.length > 0 && (
-                <div className={styles.exportSection}>
-                  <Tooltip title="Descargar variantes y valores en formato CSV" placement="left" arrow>
-                    <button
-                      className={styles.exportButton}
-                      onClick={handleExportCSV}
-                      type="button"
-                    >
-                      📥 Exportar CSV
-                    </button>
-                  </Tooltip>
-                </div>
-              )}
 
-              <VariantGroupsGrid
-                groups={variants}
-                onEditName={handleEditGroupName}
-                onDelete={handleDeleteGroup}
-                onEditValue={handleEditValue}
-                onToggleStatus={handleToggleStatus}
-                onAddValue={handleAddValue}
-                onRemoveValue={handleRemoveValue}
-                canEdit={can('variants.edit')}
-                canDelete={can('variants.delete')}
-                newValues={newValues}
-                setNewValue={handleSetNewValue}
-                errors={errors}
-              />
+              {/* Barra de acciones (filtros + export) */}
+              <div className={styles.filtersActionsBar}>
+                <VariantsFilters
+                  filters={filters}
+                  variantsConfig={dynamicFiltersConfig}
+                  onChange={setFilters}
+                  onReset={() =>
+                    setFilters({
+                      search: '',
+                      status: 'all',
+                      dynamic: {},
+                    })
+                  }
+                />
+
+                {/* Sección de exportación */}
+                {variants.length > 0 && (
+                  <div className={styles.exportSection}>
+                    <Tooltip
+                      title="Descargar variantes y valores en formato CSV"
+                      placement="left"
+                      arrow
+                    >
+                      <button
+                        className={styles.exportButton}
+                        onClick={handleExportCSV}
+                        type="button"
+                      >
+                        📥 Exportar CSV
+                      </button>
+                    </Tooltip>
+                  </div>
+                )}
+              </div>
+
+              {filteredVariants.length === 0 ? (
+                <EmptyState
+                  icon={<AlertCircle size={40} />}
+                  title="No hay resultados"
+                  description="No se encontraron variantes con los filtros aplicados."
+                />
+              ) : (
+                <VariantGroupsGrid
+                  groups={filteredVariants}
+                  onEditName={handleEditGroupName}
+                  onDelete={handleDeleteGroup}
+                  onEditValue={handleEditValue}
+                  onToggleStatus={handleToggleStatus}
+                  onAddValue={handleAddValue}
+                  onRemoveValue={handleRemoveValue}
+                  canEdit={can('variants.edit')}
+                  canDelete={can('variants.delete')}
+                  newValues={newValues}
+                  setNewValue={handleSetNewValue}
+                  errors={errors}
+                />
+              )}
             </>
           )}
         </main>

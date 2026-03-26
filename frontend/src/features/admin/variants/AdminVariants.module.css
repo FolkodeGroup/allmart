@@ -8,6 +8,7 @@
     gap: var(--space-3);
     padding: var(--space-2);
   }
+
   .sidebar {
     border-radius: 8px;
     max-height: 200px;
@@ -15,66 +16,94 @@
     font-size: var(--text-xs);
     margin-bottom: var(--space-3);
   }
+
   .sidebarHeader {
     padding: var(--space-3) var(--space-3) var(--space-2);
   }
+
   .searchInput {
     font-size: var(--text-xs);
     padding: var(--space-2);
   }
+
   .productItem {
     padding: var(--space-2);
     font-size: var(--text-xs);
     gap: 1px;
   }
+
   .content {
     border-radius: 8px;
     padding: var(--space-3);
     font-size: var(--text-xs);
   }
+
   .contentHeader {
     flex-direction: column;
     gap: var(--space-2);
     margin-bottom: var(--space-3);
     padding-bottom: var(--space-2);
   }
+
   .groupsGrid {
     grid-template-columns: 1fr;
     gap: var(--space-2);
   }
+
   .groupCard {
     border-radius: 8px;
     padding: var(--space-3);
     gap: var(--space-2);
   }
+
   .groupHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
   }
-  .groupName, .groupNameEdit {
+
+  .groupName,
+  .groupNameEdit {
     font-size: var(--text-base);
     padding: var(--space-1);
   }
-  .addGroupBtn, .addValueBtn {
+
+  .addGroupBtn,
+  .addValueBtn {
     font-size: var(--text-xs);
     padding: var(--space-2) var(--space-3);
   }
-  .valueInput, .groupInput {
+
+  .valueInput,
+  .groupInput {
     font-size: var(--text-xs);
     padding: var(--space-2);
   }
+
   .valueChip {
     font-size: var(--text-xs);
     padding: var(--space-1) var(--space-2);
   }
+
   .bulkEditModal {
     width: 95vw;
     min-width: unset;
     padding: var(--space-3);
     border-radius: 8px;
   }
+
+  .filtersContainer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterInput,
+  .filterSelect,
+  .filterResetBtn {
+    width: 100%;
+  }
 }
+
 /* ── Layout principal (split panel) ── */
 .layout {
   display: grid;
@@ -133,7 +162,10 @@
   outline: none;
   transition: border-color 0.15s;
 }
-.searchInput:focus { border-color: var(--color-primary); }
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+}
 
 .productList {
   list-style: none;
@@ -161,7 +193,11 @@
   transition: background 0.15s;
   border: 1px solid transparent;
 }
-.productItem:hover { background: var(--color-bg-secondary); }
+
+.productItem:hover {
+  background: var(--color-bg-secondary);
+}
+
 .productItem.selected {
   background: var(--color-bg-tertiary);
   border-color: var(--color-primary);
@@ -303,8 +339,15 @@
   outline: none;
   transition: border-color 0.15s;
 }
-.groupInput:focus { border-color: var(--color-primary); background: var(--color-bg-primary); }
-.groupInput::placeholder { color: var(--color-text-tertiary); }
+
+.groupInput:focus {
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
+}
+
+.groupInput::placeholder {
+  color: var(--color-text-tertiary);
+}
 
 .addGroupBtn {
   font-family: var(--font-ui);
@@ -319,7 +362,10 @@
   white-space: nowrap;
   transition: background 0.15s;
 }
-.addGroupBtn:hover { background: var(--color-primary-dark); }
+
+.addGroupBtn:hover {
+  background: var(--color-primary-dark);
+}
 
 /* ── Hint cuando no hay grupos ── */
 .noGroupsHint {
@@ -350,7 +396,10 @@
   padding: var(--space-4);
   transition: border-color 0.15s;
 }
-.groupCard:hover { border-color: var(--color-primary-light); }
+
+.groupCard:hover {
+  border-color: var(--color-primary-light);
+}
 
 /* Header del grupo */
 .groupHeader {
@@ -377,14 +426,20 @@
   border-radius: 4px;
   transition: color 0.15s;
 }
-.groupName:hover { color: var(--color-primary); }
+
+.groupName:hover {
+  color: var(--color-primary);
+}
 
 .editHint {
   font-size: var(--text-xs);
   opacity: 0;
   transition: opacity 0.15s;
 }
-.groupName:hover .editHint { opacity: 1; }
+
+.groupName:hover .editHint {
+  opacity: 1;
+}
 
 .groupNameEdit {
   flex: 1;
@@ -459,7 +514,10 @@
   transition: opacity 0.15s;
   flex-shrink: 0;
 }
-.deleteGroupBtn:hover { opacity: 1; }
+
+.deleteGroupBtn:hover {
+  opacity: 1;
+}
 
 /* Indicador de variante incompleta (sin valores) */
 .incompleteIndicator {
@@ -471,8 +529,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* Valores / chips */
@@ -524,7 +589,10 @@
   align-items: center;
   justify-content: center;
 }
-.chipEditBtn:hover { opacity: 1; }
+
+.chipEditBtn:hover {
+  opacity: 1;
+}
 
 .chipRemove {
   background: none;
@@ -537,7 +605,10 @@
   opacity: 0.7;
   transition: opacity 0.15s;
 }
-.chipRemove:hover { opacity: 1; }
+
+.chipRemove:hover {
+  opacity: 1;
+}
 
 /* Edición inline del chip */
 .valueChipEdit {
@@ -562,8 +633,14 @@
   outline: none;
   transition: border-color 0.15s;
 }
-.valueChipInput:focus { border-color: var(--color-primary); }
-.valueChipInput::placeholder { color: var(--color-text-tertiary); }
+
+.valueChipInput:focus {
+  border-color: var(--color-primary);
+}
+
+.valueChipInput::placeholder {
+  color: var(--color-text-tertiary);
+}
 
 .chipEditActions {
   display: flex;
@@ -585,7 +662,10 @@
   justify-content: center;
   gap: var(--space-1);
 }
-.chipConfirmBtn:hover { background: #16a34a; }
+
+.chipConfirmBtn:hover {
+  background: #16a34a;
+}
 
 .chipCancelBtn {
   flex: 1;
@@ -602,7 +682,10 @@
   justify-content: center;
   gap: var(--space-1);
 }
-.chipCancelBtn:hover { background: #dc2626; }
+
+.chipCancelBtn:hover {
+  background: #dc2626;
+}
 
 .chipErrorText {
   font-family: var(--font-ui);
@@ -632,8 +715,14 @@
   outline: none;
   transition: border-color 0.15s;
 }
-.valueInput:focus { border-color: var(--color-primary); }
-.valueInput::placeholder { color: var(--color-text-tertiary); }
+
+.valueInput:focus {
+  border-color: var(--color-primary);
+}
+
+.valueInput::placeholder {
+  color: var(--color-text-tertiary);
+}
 
 .addValueBtn {
   font-family: var(--font-ui);
@@ -648,19 +737,107 @@
   transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
 }
+
 .addValueBtn:hover {
   background: var(--color-primary);
   color: var(--color-neutral-light);
   border-color: var(--color-primary);
 }
 
+/* ── Filtros de variantes ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.filtersContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.filterInput {
+  flex: 1;
+  min-width: 180px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.filterInput:focus {
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
+}
+
+.filterSelect {
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.filterSelect:focus {
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
+}
+
+.filterResetBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filterResetBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
+/* ── Barra filtros + export ── */
+.filtersActionsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-top: var(--space-3);
+  ;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-border-light);
+}
+
 /* ── Sección de exportación ── */
 .exportSection {
   display: flex;
   justify-content: flex-end;
-  margin: var(--space-4) 0;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border-light);
 }
 
 .exportButton {
@@ -678,9 +855,11 @@
   align-items: center;
   gap: var(--space-2);
 }
+
 .exportButton:hover {
   background: #2563eb;
 }
+
 .exportButton:active {
   opacity: 0.8;
 }
@@ -692,6 +871,7 @@
   cursor: help;
   transition: color 0.15s;
 }
+
 .helpIcon:hover {
   color: var(--color-primary);
 }

@@ -137,7 +137,6 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               className={`${styles.statusToggleBtn} ${group.isActive ? styles.statusActive : styles.statusInactive}`}
               onClick={() => onToggleStatus(group.id, !group.isActive)}
               type="button"
-              title={group.isActive ? 'Desactivar variante' : 'Activar variante'}
             >
               {group.isActive ? '✓' : '✕'}
             </button>
