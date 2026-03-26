@@ -1,0 +1,14 @@
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  slug: string;
+  itemCount?: number;
+}
+
+export interface CategorySearchSuggestion {
+  id: string;
+  name: string;
+  slug: string;
+}
