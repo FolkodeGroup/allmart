@@ -46,7 +46,9 @@ export function CategorySearchInput({
 
   return (
     <div className={styles.wrapper}>
+      <label htmlFor="category-search-input" style={{ display: 'none' }}>Buscar categoría</label>
       <input
+        id="category-search-input"
         ref={inputRef}
         className={styles.input}
         type="search"
@@ -58,6 +60,9 @@ export function CategorySearchInput({
         }}
         onFocus={() => setShowSuggestions(true)}
         disabled={disabled}
+        aria-autocomplete="list"
+        aria-controls="category-search-suggestions"
+        aria-label="Buscar categoría"
         autoComplete="off"
       />
       {showSuggestions && suggestions.length > 0 && (

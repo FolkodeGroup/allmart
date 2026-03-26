@@ -192,11 +192,16 @@ export function AdminCategories() {
 
       {/* Controles de paginación */}
       {total > limit && (
-        <div className={styles.pagination} style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+        <nav
+          className={styles.pagination}
+          style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+          aria-label="Paginación de categorías"
+        >
           <button
             className={styles.pageBtn}
             disabled={page === 1 || loading}
             onClick={() => handlePageChange(page - 1)}
+            aria-label="Página anterior"
           >Anterior</button>
           {Array.from({ length: apiTotalPages }, (_, i) => (
             <button
@@ -204,14 +209,17 @@ export function AdminCategories() {
               className={styles.pageBtn + (page === i + 1 ? ' ' + styles.pageActive : '')}
               disabled={page === i + 1 || loading}
               onClick={() => handlePageChange(i + 1)}
+              aria-label={`Ir a la página ${i + 1}`}
+              aria-current={page === i + 1 ? 'page' : undefined}
             >{i + 1}</button>
           ))}
           <button
             className={styles.pageBtn}
             disabled={page === apiTotalPages || loading}
             onClick={() => handlePageChange(page + 1)}
+            aria-label="Página siguiente"
           >Siguiente</button>
-        </div>
+        </nav>
       )}
 
       {/* Modal de confirmación de eliminación */}

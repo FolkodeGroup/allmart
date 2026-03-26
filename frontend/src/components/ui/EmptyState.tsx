@@ -34,8 +34,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         maxWidth: '100vw',
       }}
       aria-live="polite"
+      role="status"
     >
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ marginBottom: '1.5rem' }} aria-hidden="true">
         {icon}
       </div>
       <h3 style={{

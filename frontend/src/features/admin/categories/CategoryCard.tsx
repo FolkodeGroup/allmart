@@ -37,7 +37,7 @@ export const CategoryCard: FC<CategoryCardProps> = ({
           onChange={e => onSelect(category.id, e.target.checked)}
           className={styles.cardCheckbox}
           style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}
-          title="Seleccionar categoría"
+          title={`Seleccionar categoría ${category.name}`}
           aria-label={`Seleccionar categoría ${category.name}`}
           onClick={e => e.stopPropagation()}
         />
@@ -48,13 +48,14 @@ export const CategoryCard: FC<CategoryCardProps> = ({
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/admin/categorias/${category.id}`); } }}
         role="button"
         tabIndex={0}
-        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+        aria-label={`Ver detalles de la categoría ${category.name}`}
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', outline: 'none' }}
       >
         {category.image ? (
           <img src={category.image} alt={category.name} className={styles.cardImg} />
         ) : (
           <div className={styles.cardImgPlaceholder}>
-            <ImageIcon size={48} />
+            <ImageIcon size={48} aria-hidden="true" focusable="false" />
           </div>
         )}
         <div className={styles.cardBody}>
