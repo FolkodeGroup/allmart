@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { RootLayout } from './components/layout/RootLayout/RootLayout';
 import { HomePage } from './pages/Home/HomePage';
 import { ProductListPage } from './pages/ProductList/ProductListPage';
@@ -8,22 +9,20 @@ import { CartPage } from './pages/Cart/CartPage';
 import { AdminLogin } from './pages/AdminLogin/AdminLogin';
 import { AdminLayout } from './pages/Admin/AdminLayout';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
-import { AdminProducts } from './features/admin/products/AdminProducts';
-import { AdminOrders } from './features/admin/orders/AdminOrders';
-import { AdminReports } from './features/admin/reports/AdminReports';
 import { AdminRoute } from './components/AdminRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
-import { AdminProductsProvider } from './context/AdminProductsContext';
-import { DashboardLayoutProvider } from './context/DashboardLayoutContext';
-import { AdminCategoriesProvider } from './context/AdminCategoriesContext';
-import { AdminOrdersProvider } from './context/AdminOrdersContext';
-import { AdminVariantsProvider } from './context/AdminVariantsContext';
-import { AdminImagesProvider } from './context/AdminImagesContext';
-import { AdminCategories } from './features/admin/categories/AdminCategories';
-import { AdminVariants } from './features/admin/variants/AdminVariants';
-import { AdminImages } from './features/admin/images/AdminImages';
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AdminLoadingFallback } from './components/ui/AdminLoadingFallback';
+import { AdminProvidersWrapper } from './components/AdminProvidersWrapper';
+
+// Lazy load admin feature components for better code splitting
+const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts').then(m => ({ default: m.AdminProducts })));
+const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders').then(m => ({ default: m.AdminOrders })));
+const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
+const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
+const AdminVariants = lazy(() => import('./features/admin/variants/AdminVariants').then(m => ({ default: m.AdminVariants })));
+const AdminImages = lazy(() => import('./features/admin/images/AdminImages').then(m => ({ default: m.AdminImages })));
 
 const router = createBrowserRouter([
   {
@@ -42,15 +41,69 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: <AdminRoute><AdminLayout /></AdminRoute>,
+    element: <AdminRoute><AdminProvidersWrapper><AdminLayout /></AdminProvidersWrapper></AdminRoute>,
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
-      { path: 'productos', element: <AdminRoute requiredPermission="products.view"><AdminProducts /></AdminRoute> },
-      { path: 'imagenes', element: <AdminRoute requiredPermission="products.edit"><AdminImages /></AdminRoute> },
-      { path: 'variantes', element: <AdminRoute requiredPermission="variants.view"><AdminVariants /></AdminRoute> },
-      { path: 'categorias', element: <AdminRoute requiredPermission="categories.view"><AdminCategories /></AdminRoute> },
-      { path: 'pedidos', element: <AdminRoute requiredPermission="orders.view"><AdminOrders /></AdminRoute> },
-      { path: 'reportes', element: <AdminRoute requiredPermission="reports.view"><AdminReports /></AdminRoute> },
+      { 
+        path: 'productos', 
+        element: (
+          <AdminRoute requiredPermission="products.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminProducts />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'imagenes', 
+        element: (
+          <AdminRoute requiredPermission="products.edit">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminImages />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'variantes', 
+        element: (
+          <AdminRoute requiredPermission="variants.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminVariants />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'categorias', 
+        element: (
+          <AdminRoute requiredPermission="categories.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCategories />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'pedidos', 
+        element: (
+          <AdminRoute requiredPermission="orders.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminOrders />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'reportes', 
+        element: (
+          <AdminRoute requiredPermission="reports.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminReports />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
     ],
   },
 ]);
@@ -60,21 +113,9 @@ function App() {
     <ErrorBoundary>
       <NotificationProvider>
         <AdminAuthProvider>
-          <DashboardLayoutProvider>
-            <AdminCategoriesProvider>
-              <AdminProductsProvider>
-                <AdminVariantsProvider>
-                  <AdminImagesProvider>
-                    <AdminOrdersProvider>
-                      <CartProvider>
-                        <RouterProvider router={router} />
-                      </CartProvider>
-                    </AdminOrdersProvider>
-                  </AdminImagesProvider>
-                </AdminVariantsProvider>
-              </AdminProductsProvider>
-            </AdminCategoriesProvider>
-          </DashboardLayoutProvider>
+          <CartProvider>
+            <RouterProvider router={router} />
+          </CartProvider>
         </AdminAuthProvider>
       </NotificationProvider>
     </ErrorBoundary>

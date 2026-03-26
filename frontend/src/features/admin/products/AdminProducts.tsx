@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 // import { useNavigate } from 'react-router-dom';
@@ -148,13 +148,13 @@ export function AdminProducts() {
   };
 
   // Handler para checkbox individual
-  const handleSelectProduct = (id: string, checked: boolean) => {
+  const handleSelectProduct = useCallback((id: string, checked: boolean) => {
     if (checked) {
       add([id]);
     } else {
       remove([id]);
     }
-  };
+  }, [add, remove]);
 
   // Debounce para búsqueda
   useEffect(() => {
@@ -171,7 +171,7 @@ export function AdminProducts() {
     return () => clearTimeout(timer);
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
-  const handlePageChange = (newPage: number) => {
+  const handlePageChange = useCallback((newPage: number) => {
     refreshProducts({
       q: search,
       categoryId: categoryFilter,
@@ -180,17 +180,17 @@ export function AdminProducts() {
       page: newPage,
       limit: 10
     });
-  };
+  }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
   // Sugerencias para autocompletado (usamos los productos ya cargados como base)
-  const suggestions = search.length > 0
+  const suggestions = useMemo(() => search.length > 0
     ? products.filter(p =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.sku.toLowerCase().includes(search.toLowerCase())
     ).slice(0, 8)
-    : [];
+    : [], [search, products]);
 
-  const handleNew = () => {
+  const handleNew = useCallback(() => {
     if (unsavedChanges) {
       interceptNavigation(() => {
         setEditId(null);
@@ -200,8 +200,9 @@ export function AdminProducts() {
       setEditId(null);
       setShowForm(true);
     }
-  };
-  const handleEdit = (id: string) => {
+  }, [unsavedChanges, interceptNavigation]);
+
+  const handleEdit = useCallback((id: string) => {
     if (unsavedChanges) {
       interceptNavigation(() => {
         setEditId(id);
@@ -211,9 +212,9 @@ export function AdminProducts() {
       setEditId(id);
       setShowForm(true);
     }
-  };
+  }, [unsavedChanges, interceptNavigation]);
   // Interceptar navegación por router v6
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     try {
       deleteProduct(id);
       toast.success('Producto eliminado con éxito');
@@ -222,44 +223,46 @@ export function AdminProducts() {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al eliminar: ${message}`);
     }
-  };
+  }, [deleteProduct]);
 
 
 
   // Mapeo de productos visibles a formato exportable
-
-  // Incluimos sku e image para las cards
-  const exportableProducts: (ExportableProduct & { sku?: string; image?: string })[] = products.map(p => ({
-    id: p.id,
-    name: p.name,
-    category: p.category?.name || '',
-    price: p.price,
-    discount: p.discount,
-    stock: p.stock,
-    inStock: p.inStock,
-    createdAt: (p as unknown as { createdAt: string }).createdAt || '',
-    sku: p.sku,
-    image: p.images && p.images[0],
-  }));
+  const exportableProducts: (ExportableProduct & { sku?: string; image?: string })[] = useMemo(() => 
+    products.map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category?.name || '',
+      price: p.price,
+      discount: p.discount,
+      stock: p.stock,
+      inStock: p.inStock,
+      createdAt: (p as unknown as { createdAt: string }).createdAt || '',
+      sku: p.sku,
+      image: p.images && p.images[0],
+    })), [products]);
 
   // Ordenar productos exportables para la vista
-  const sortedProducts = sortProducts(exportableProducts, sortField, sortDirection);
+  const sortedProducts = useMemo(() => 
+    sortProducts(exportableProducts, sortField, sortDirection),
+    [exportableProducts, sortField, sortDirection]);
 
   // Feedback para exportación vacía
-  const handleExportCSV = () => {
+  const handleExportCSV = useCallback(() => {
     if (!exportableProducts.length) {
       toast.error('No hay productos para exportar.');
       return;
     }
     exportProductsToCSV(exportableProducts);
-  };
-  const handleExportExcel = () => {
+  }, [exportableProducts]);
+
+  const handleExportExcel = useCallback(() => {
     if (!exportableProducts.length) {
       toast.error('No hay productos para exportar.');
       return;
     }
     exportProductsToExcel(exportableProducts);
-  };
+  }, [exportableProducts]);
 
   return (
     <main

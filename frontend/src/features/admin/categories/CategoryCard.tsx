@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Category } from '../../../types';
 import styles from './AdminCategories.module.css';
@@ -18,7 +19,7 @@ interface CategoryCardProps {
   onSelect?: (id: string, checked: boolean) => void;
 }
 
-export const CategoryCard: FC<CategoryCardProps> = ({
+export const CategoryCard: FC<CategoryCardProps> = memo(({
   category,
   onEdit,
   onDelete,
@@ -120,4 +121,6 @@ export const CategoryCard: FC<CategoryCardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+CategoryCard.displayName = 'CategoryCard';

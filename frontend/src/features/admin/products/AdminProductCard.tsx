@@ -1,6 +1,6 @@
 
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ProductCardCheckbox } from '../../../components/ui/ProductCardCheckbox';
 import { ProductCardImage } from '../../../components/ui/ProductCardImage';
 import { ProductCardInfo } from '../../../components/ui/ProductCardInfo';
@@ -32,7 +32,7 @@ interface AdminProductCardProps {
   showCheckbox?: boolean;
 }
 
-export const AdminProductCard: React.FC<AdminProductCardProps> = ({
+export const AdminProductCard: React.FC<AdminProductCardProps> = memo(({
   id,
   name,
   sku,
@@ -90,5 +90,7 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
       />
     </section>
   );
-};
+});
+
+AdminProductCard.displayName = 'AdminProductCard';
 
