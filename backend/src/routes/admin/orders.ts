@@ -23,6 +23,7 @@ router.put("/:id", requireRole(UserRole.ADMIN), ctrl.update);
 router.delete("/:id", requireRole(UserRole.ADMIN), ctrl.remove);
 
 router.patch("/:id/status", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.updateStatus);
+router.patch('/bulk-status', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.bulkUpdateStatus);
 router.patch("/:id/payment", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.updatePayment);
 router.post("/:id/shipment",requireRole(UserRole.ADMIN),shipmentCtrl.upsertShipment);
 

@@ -122,7 +122,7 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
 
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
-  const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
+  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
   const { can } = useAdminAuth();
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -137,9 +137,9 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
   const auth = useAdminAuth ? useAdminAuth() : null;
   const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
-  const handleStatusApply = () => {
+  const handleStatusApply = async () => {
     try {
-      updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
+      await updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
       logAdminActivity({
         timestamp: new Date().toISOString(),
         user: userEmail,
@@ -159,9 +159,9 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   // Sync local pendingStatus if order.status changes externally
   const currentStatus = order.status;
 
-  const handleSaveNotes = () => {
+  const handleSaveNotes = async () => {
     try {
-      useAdminOrders().updateOrder(order.id, { notes });
+      await updateOrder(order.id, { notes });
       toast.success('Notas guardadas con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
@@ -169,9 +169,9 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
-      deleteOrder(order.id);
+      await deleteOrder(order.id);
       logAdminActivity({
         timestamp: new Date().toISOString(),
         user: userEmail,
@@ -299,7 +299,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
                         <button
                           className={styles.whatsappBtnConfirm}
                           type="button"
-                          onClick={() => { handleMarkAsPaid(order.id); setConfirmPaid(false); }}
+                          onClick={async () => { await handleMarkAsPaid(order.id); setConfirmPaid(false); }}
                         >
                           ✓ Sí, confirmar pago
                         </button>
@@ -412,9 +412,8 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 /* ── Componente principal ───────────────────────────────────────── */
 export function AdminOrders() {
 
-  const { orders } = useAdminOrders();
+  const { orders, isLoading, bulkUpdateOrderStatus, updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
 
-  const [isLoading, _setIsLoading] = useState<boolean>(false);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<OrderStatus | ''>('');
   const [filterDateFrom, setFilterDateFrom] = useState('');
@@ -440,12 +439,6 @@ export function AdminOrders() {
     if (action === 'cancel') return orders.every(o => o.status !== 'enviado' && o.status !== 'entregado' && o.status !== 'cancelado');
     return false;
   }
-  function getBulkTargetStatus(action: BulkAction): OrderStatus {
-    if (action === 'confirm') return 'confirmado';
-    if (action === 'ship') return 'enviado';
-    if (action === 'cancel') return 'cancelado';
-    return 'pendiente';
-  }
   function getBulkActionLabel(action: BulkAction): string {
     if (action === 'confirm') return 'Confirmar';
     if (action === 'ship') return 'Marcar como Enviado';
@@ -469,20 +462,20 @@ export function AdminOrders() {
       setBulkModalOpen(false);
       return;
     }
-    let success = 0, fail = 0;
-    for (const o of ordersToUpdate) {
-      try {
-        updateOrderStatus(o.id, getBulkTargetStatus(bulkAction));
-        success++;
-      } catch {
-        fail++;
-      }
+    try {
+      const result = await bulkUpdateOrderStatus({
+        orderIds: selectedIds,
+        action: bulkAction,
+      });
+      toast.success(`Acción masiva: ${result.success} pedidos actualizados${result.failed ? `, ${result.failed} fallidos` : ''}`);
+      setBulkModalOpen(false);
+      clearSelection();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo ejecutar la acción masiva';
+      toast.error(message);
+    } finally {
+      setBulkLoading(false);
     }
-    
-    toast.success(`Acción masiva: ${success} pedidos actualizados${fail ? `, ${fail} fallidos` : ''}`);
-    setBulkLoading(false);
-    setBulkModalOpen(false);
-    clearSelection();
   };
 
   // Paginación
@@ -600,7 +593,6 @@ export function AdminOrders() {
     message?: string;
   }>({ open: false, type: null, order: null });
 
-  const { updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
   const { user } = useAdminAuth();
 
   // Controladores de acciones críticas

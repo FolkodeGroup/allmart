@@ -40,3 +40,26 @@ export interface AdminOrderDTO extends Order {
   items: AdminOrderItemDTO[];
   statusHistory: AdminOrderStatusHistoryDTO[];
 }
+
+export type AdminBulkOrderAction = 'confirm' | 'ship' | 'cancel';
+
+export interface AdminBulkUpdateOrderStatusDTO {
+  orderIds: string[];
+  action: AdminBulkOrderAction;
+  note?: string;
+}
+
+export interface AdminBulkUpdateOrderStatusItemResultDTO {
+  id: string;
+  success: boolean;
+  reason?: string;
+}
+
+export interface AdminBulkUpdateOrderStatusResultDTO {
+  action: AdminBulkOrderAction;
+  targetStatus: OrderStatus;
+  total: number;
+  success: number;
+  failed: number;
+  results: AdminBulkUpdateOrderStatusItemResultDTO[];
+}
