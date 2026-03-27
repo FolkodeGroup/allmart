@@ -1268,3 +1268,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 5 | Apertura de PR | PR #639: 636 refactorizar header para diseño moderno eliminar buscador general y aplicar colores de marca | 2026-03-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #639: 636 refactorizar header para diseño moderno eliminar buscador general y aplicar colores de marca | 2026-03-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #642: Cambios principales: | 2026-03-27 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #644: Redirigir a home de ecommerce al cerrar sesión desde el sidebar | 2026-03-27 |
