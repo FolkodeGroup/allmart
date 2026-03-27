@@ -3,6 +3,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { AlertTriangle } from 'lucide-react';
 import { VariantValueChip } from './VariantValueChip';
 import styles from '../AdminVariants.module.css';
+import { set } from 'zod';
 
 interface VariantGroup {
   id: string;
@@ -24,6 +25,8 @@ interface VariantGroupCardProps {
   newValue: string;
   setNewValue: (value: string) => void;
   error: string;
+  isPendingNavigation: boolean;
+  setIsDirty?: (value: boolean) => void;
 }
 
 /**
@@ -48,6 +51,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   newValue,
   setNewValue,
   error,
+  setIsDirty
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(group.name);
@@ -67,6 +71,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
       return;
     }
     onEditName(group.id, name);
+    setIsDirty?.(false);
     setIsEditing(false);
   };
 
@@ -104,9 +109,9 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               autoFocus
               onChange={e => {
                 setEditName(e.target.value);
+                setIsDirty?.(true);
                 if (editError) setEditError('');
               }}
-              onBlur={commitEdit}
               onKeyDown={handleKeyDown}
             />
             {editError && <div className={styles.errorText}>{editError}</div>}
@@ -183,6 +188,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               value={newValue}
               onChange={e => {
                 setNewValue(e.target.value);
+                setIsDirty?.(true);
                 // Limpiar error
               }}
               onKeyDown={handleValueKeyDown}

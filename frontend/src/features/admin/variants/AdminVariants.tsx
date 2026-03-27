@@ -20,6 +20,7 @@ import {
   VariantGroupsGrid,
 } from './components';
 import { VariantsFilters } from './components/VariantFilters';
+import { useUnsavedChanges } from '../../../context/useUnsavedChanges';
 
 export function AdminVariants() {
   // Estados para feedback UX
@@ -45,7 +46,13 @@ export function AdminVariants() {
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-
+  const {
+    isDirty,
+    setIsDirty,
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
+  } = useUnsavedChanges();
 
   const dynamicFiltersConfig = variants.map((variant) => ({
     name: variant.name,
@@ -399,6 +406,21 @@ export function AdminVariants() {
                   newValues={newValues}
                   setNewValue={handleSetNewValue}
                   errors={errors}
+                  isPendingNavigation={isDirty}
+                  setIsDirty={setIsDirty}
+                />
+
+              )}
+              {/* Renderizar aviso de cambios no guardados */}
+              {showWarning && (
+                <ModalConfirm
+                  title="Cambios no guardados"
+                  description="Tenés cambios sin guardar. ¿Querés salir sin guardar o cancelar para revisar los cambios?"
+                  confirmText="Salir sin guardar"
+                  cancelText="Cancelar"
+                  open={showWarning}
+                  onConfirm={confirmNavigation}
+                  onCancel={cancelNavigation}
                 />
               )}
             </>

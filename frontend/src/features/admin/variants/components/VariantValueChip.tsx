@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { Edit2, Check, X } from 'lucide-react';
 import styles from '../AdminVariants.module.css';
+import { useUnsavedChanges } from '../../../../context/useUnsavedChanges';
 
 interface VariantValueChipProps {
   value: string;
@@ -31,6 +32,7 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const [editError, setEditError] = useState('');
+  const { setIsDirty } = useUnsavedChanges();
 
   const enterEditMode = () => {
     if (!canEdit) return;
@@ -57,6 +59,7 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
     }
     // Validar que no exista el mismo valor (se valida en servidor)
     onEdit(value, newValue);
+    setIsDirty(true);
     setIsEditing(false);
   };
 
@@ -75,10 +78,12 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
           autoFocus
           onChange={e => {
             setEditValue(e.target.value);
+            if (e.target.value !== value) {
+              setIsDirty(true);
+            }
             if (editError) setEditError('');
           }}
           onKeyDown={handleKeyDown}
-          onBlur={commitEdit}
           placeholder="Valor..."
         />
         {editError && <span className={styles.chipErrorText}>{editError}</span>}

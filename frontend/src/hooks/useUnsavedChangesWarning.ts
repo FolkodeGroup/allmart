@@ -5,52 +5,72 @@ interface UseUnsavedChangesWarningOptions {
   onConfirmExit?: () => void;
 }
 
-export function useUnsavedChangesWarning({ active, onConfirmExit }: UseUnsavedChangesWarningOptions) {
+export function useUnsavedChangesWarning({ active }: UseUnsavedChangesWarningOptions) {
   const [showWarning, setShowWarning] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<null | (() => void)>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   // Handler for browser unload
   useEffect(() => {
-    if (!active) return;
+    if (!active || !isDirty) return;
+
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = '';
       return '';
     };
+
     window.addEventListener('beforeunload', handler);
+
     return () => {
       window.removeEventListener('beforeunload', handler);
     };
-  }, [active]);
+  }, [active, isDirty]);
 
   // Handler for router navigation
   const interceptNavigation = useCallback((callback: () => void) => {
-    if (active) {
-      setShowWarning(true);
-      setPendingNavigation(() => callback);
-    } else {
+    if (!active || !isDirty) {
       callback();
+      return;
     }
-  }, [active]);
 
-  // Confirm exit
-  const confirmExit = useCallback(() => {
+    setShowWarning(true);
+    setPendingNavigation(() => callback);
+  }, [active, isDirty]);
+
+  const confirmNavigation = () => {
+    setShowWarning(false);
+    if (pendingNavigation) {
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+  };
+
+  const cancelNavigation = () => {
     setShowWarning(false);
     setPendingNavigation(null);
-    if (onConfirmExit) onConfirmExit();
-    if (pendingNavigation) pendingNavigation();
-  }, [onConfirmExit, pendingNavigation]);
-
-  // Cancel exit
-  const cancelExit = useCallback(() => {
-    setShowWarning(false);
-    setPendingNavigation(null);
-  }, []);
-
+  };
+  /*
+    // Confirm exit
+    const confirmExit = useCallback(() => {
+      setShowWarning(false);
+      setPendingNavigation(null);
+      if (onConfirmExit) onConfirmExit();
+      if (pendingNavigation) pendingNavigation();
+    }, [onConfirmExit, pendingNavigation]);
+  
+    // Cancel exit
+    const cancelExit = useCallback(() => {
+      setShowWarning(false);
+      setPendingNavigation(null);
+    }, []);
+  */
   return {
+    isDirty,
+    setIsDirty,
     showWarning,
     interceptNavigation,
-    confirmExit,
-    cancelExit,
+    confirmNavigation,
+    cancelNavigation,
   };
 }
