@@ -119,23 +119,24 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         <span className={styles.productCount}>{filtered.length}</span>
       </div>
 
-      <Autocomplete
-        freeSolo
-        options={filteredOptions}
-        getOptionLabel={(opt: string | Option) => {
-          if (typeof opt === 'string') return opt;
-          if (opt.type === 'product') return `${opt.name} (SKU: ${opt.sku})`;
-          return `${opt.value} [${opt.group}]`;
-        }}
-        inputValue={inputValue}
-        onInputChange={(_: any, value: string) => setInputValue(value)}
-        onChange={handleSelect}
-        renderInput={(params: any) => (
-          <TextField {...params} label="Buscar por nombre o SKU..." variant="outlined" size="small" />
-        )}
-      />
-
-      <ul className={styles.productList}>
+      <div style={{ padding: 'var(--space-3) var(--space-3)' }}>
+        <Autocomplete
+          freeSolo
+          options={filteredOptions}
+          getOptionLabel={(opt: string | Option) => {
+            if (typeof opt === 'string') return opt;
+            if (opt.type === 'product') return `${opt.name} (SKU: ${opt.sku})`;
+            return `${opt.value} [${opt.group}]`;
+          }}
+          inputValue={inputValue}
+          onInputChange={(_: any, value: string) => setInputValue(value)}
+          onChange={handleSelect}
+          renderInput={(params: any) => (
+            <TextField {...params} label="Buscar por nombre o SKU..." variant="outlined" size="small" />
+          )}
+        />
+      </div>
+      <ul className={styles.productList} style={{ paddingInline: 'var(--space-2) var(--space-2)' }}>
         {filtered.length === 0 ? (
           <EmptyState
             icon={<Search size={32} />}
@@ -153,7 +154,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
               className={`${styles.productItem} ${selectedProductId === p.id ? styles.selected : ''}`}
               onClick={() => onSelectProduct(p.id)}
               type="button"
-              style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', width: '100%' }}
+              style={{ textAlign: 'left', cursor: 'pointer', width: '100%' }}
             >
               <div className={styles.productName}>{p.name}</div>
               {p.sku && <div className={styles.productSku}>{p.sku}</div>}
@@ -181,11 +182,11 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           >⟨</button>
           {Array.from({ length: totalPages }, (_, i) => (
             <button
-              key={i+1}
-              className={`${styles.pageBtn} ${currentPage === i+1 ? styles.activePage : ''}`}
-              onClick={() => setCurrentPage(i+1)}
-              title={`Ir a página ${i+1}`}
-            >{i+1}</button>
+              key={i + 1}
+              className={`${styles.pageBtn} ${currentPage === i + 1 ? styles.activePage : ''}`}
+              onClick={() => setCurrentPage(i + 1)}
+              title={`Ir a página ${i + 1}`}
+            >{i + 1}</button>
           ))}
           <button
             className={styles.pageBtn}
