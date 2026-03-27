@@ -68,7 +68,7 @@ export function AdminCategories() {
   useEffect(() => {
     refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
     if (selectedSuggestion) setSelectedSuggestion(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [debouncedSearch, selectedSuggestion, page, limit, refreshCategories]);
 
   // Reset page to 1 when search changes
