@@ -80,19 +80,17 @@
 .filters {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-
-  margin-top: var(--space-4);
+  gap: 16px;
+  margin-top: 24px;
   position: relative;
-
-  background-color: white;
-  padding: 1rem;
-  border-radius: 16px;
-  border: 1px solid var(--color-primary-light);
-
+  background-color: #fafaf8;
+  padding: 20px 24px;
+  border-radius: 12px;
+  border: 1px solid #ede9e3;
   align-self: center;
   width: 100%;
   max-width: 1200px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Desktop grande (≥1200px) */
@@ -136,31 +134,68 @@
 .select {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-primary-light);
-  border-radius: 8px;
-  background: var(--color-bg-primary);
+  padding: 12px 16px;
+  border: 2px solid #e5e2dd;
+  border-radius: 10px;
+  background: #fff;
   color: var(--color-text-primary);
   outline: none;
-  transition: border-color 0.15s;
-  cursor: pointer;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  min-width: 200px;
-  flex: 1;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: text;
 }
-.searchInput { min-width: 240px; max-width: 250px; align-self: center;}
 
-.searchInput:focus,
-.select:focus { border-color: var(--color-primary); }
+.searchInput {
+  flex: 1;
+  min-width: 280px;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+.searchInput::placeholder {
+  color: #999;
+  font-weight: 400;
+}
+
+.searchInput:hover {
+  border-color: #d0ccc7;
+  box-shadow: 0 2px 8px rgba(118, 146, 130, 0.08);
+}
+
+.searchInput:focus {
+  border-color: #769282;
+  box-shadow: 0 4px 12px rgba(118, 146, 130, 0.12);
+  padding: 12px 16px;
+}
+
+.select {
+  min-width: 150px;
+  padding: 12px 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.select:hover {
+  border-color: #d0ccc7;
+  box-shadow: 0 2px 8px rgba(118, 146, 130, 0.08);
+}
+
+.select:focus { 
+  border-color: #769282;
+  box-shadow: 0 4px 12px rgba(118, 146, 130, 0.12);
+}
 
 .count {
   font-family: var(--font-ui);
   font-size: var(--text-xs);
-  color: var(--color-text-tertiary);
+  color: #999;
   margin-left: auto;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 /* ── Tabla ── */
