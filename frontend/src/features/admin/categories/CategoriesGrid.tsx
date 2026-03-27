@@ -16,6 +16,7 @@ interface CategoriesGridProps {
   onSelect: (id: string, checked: boolean) => void;
   allSelected: boolean;
   onSelectAll: (checked: boolean) => void;
+  onToggleVisibility?: (id: string, newVisible: boolean) => void;
 }
 
 export const CategoriesGrid: FC<CategoriesGridProps> = ({
@@ -29,6 +30,7 @@ export const CategoriesGrid: FC<CategoriesGridProps> = ({
   onSelect,
   allSelected,
   onSelectAll,
+  onToggleVisibility,
 }) => (
   <div>
     {/* Header con checkbox general y ayuda contextual */}
@@ -56,6 +58,7 @@ export const CategoriesGrid: FC<CategoriesGridProps> = ({
           productCount={getProductCount?.(cat)}
           selected={selectedIds.includes(cat.id)}
           onSelect={onSelect}
+          onToggleVisibility={onToggleVisibility}
         />
       ))}
     </div>

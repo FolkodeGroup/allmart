@@ -99,6 +99,19 @@ public/
 !backend/src/routes/public/
 !backend/src/controllers/public/
 
+# AI/Agent documentation files
+*.agent.md
+ask.agent.md
+Ask.agent.md
+explore.agent.md
+Explore.agent.md
+plan.agent.md
+Plan.agent.md
+vscode.agent.md
+.copilot/
+.aider.conf*
+*.chat
+
 # Vuepress build
 .vuepress/dist/
 

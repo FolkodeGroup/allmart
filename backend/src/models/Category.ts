@@ -12,6 +12,7 @@ export interface Category {
   description: string | null;
   imageUrl:    string | null;
   itemCount:   number;
+  isVisible:   boolean;
   createdAt:   Date;
   updatedAt:   Date;
 }
@@ -32,6 +33,7 @@ export interface PublicCategoryDTO {
   description: string | null;
   image:       string | null;
   itemCount:   number;
+  isVisible:   boolean;
 }
 
 /** Mapea el modelo interno al DTO público */
@@ -43,5 +45,6 @@ export function toPublicDTO(c: Category): PublicCategoryDTO {
     description: c.description,
     image:       c.imageUrl,
     itemCount:   c.itemCount,
+    isVisible:   c.isVisible,
   };
 }

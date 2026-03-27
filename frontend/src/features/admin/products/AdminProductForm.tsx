@@ -19,7 +19,7 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
   originalPrice: undefined,
   discount: undefined,
   images: [''],
-  category: { id: '', name: '', slug: '' },
+  category: { id: '', name: '', slug: '', isVisible: true, },
   tags: [],
   rating: 0,
   reviewCount: 0,

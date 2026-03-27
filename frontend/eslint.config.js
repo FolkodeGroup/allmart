@@ -6,7 +6,25 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', '.vite', 'node_modules'] },
+  {
+    ignores: [
+      'dist',
+      '.vite',
+      'node_modules',
+      'build',
+      'coverage',
+      '.next',
+      'public/__tests__/**/*',
+      '*.agent.md',
+      'ask.agent.md',
+      'explore.agent.md',
+      'plan.agent.md',
+      'vscode.agent.md',
+      '.copilot/**/*',
+      '.aider*',
+      '**/*.chat'
+    ]
+  },
   {
     extends: [
       js.configs.recommended,

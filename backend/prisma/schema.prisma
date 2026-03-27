@@ -57,11 +57,11 @@ model User {
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   cart         Cart?
   staffNotes   StaffNote[]
-  
+
   @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
   @@map("users")
-  
+
 }
 
 model Category {
@@ -71,6 +71,7 @@ model Category {
   description String?
   imageUrl    String?   @map("image_url")
   itemCount   Int       @default(0) @map("item_count")
+  isVisible   Boolean   @default(true) @map("is_visible")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   products    Product[]

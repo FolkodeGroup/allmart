@@ -38,6 +38,24 @@ module.exports = defineConfig([
     }
   },
   {
-    ignores: ["dist/", "node_modules/", "prisma.config.ts", "src/index.js"]
+    ignores: [
+      "dist/",
+      "node_modules/",
+      "prisma.config.ts",
+      "src/index.js",
+      "prisma/**/*",
+      "migrations/**/*",
+      "docs/**/*",
+      ".vite/",
+      "build/",
+      "*.agent.md",
+      "ask.agent.md",
+      "explore.agent.md",
+      "plan.agent.md",
+      "vscode.agent.md",
+      ".copilot/**/*",
+      ".aider*",
+      "**/*.chat"
+    ]
   }
 ]);

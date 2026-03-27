@@ -5,6 +5,7 @@ export interface Category {
   image?: string;
   slug: string;
   itemCount?: number;
+  isVisible: boolean;
 }
 
 export interface CategorySearchSuggestion {
