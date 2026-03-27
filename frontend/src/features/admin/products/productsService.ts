@@ -123,6 +123,7 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
     description: api.description,
     image: api.imageUrl,
     itemCount: api.itemCount,
+    isVisible: true,
   };
 }
 
@@ -132,6 +133,7 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     id: api.categoryId,
     name: 'Sin categoría',
     slug: '',
+    isVisible: true,
   };
 
   return {
