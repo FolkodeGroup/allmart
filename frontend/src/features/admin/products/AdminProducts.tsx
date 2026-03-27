@@ -26,7 +26,6 @@ import { PackageSearch, AlertCircle } from 'lucide-react';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductHeader } from '../../../components/ui/ProductHeader';
 import { ProductFilters } from '../../../components/ui/ProductFilters';
-import { ProductCheckboxGeneral } from '../../../components/ui/ProductCheckboxGeneral';
 import { ProductFeedbackSection } from '../../../components/ui/ProductFeedbackSection';
 import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
@@ -282,55 +281,11 @@ export function AdminProducts() {
       className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
       aria-label="Gestión de productos"
     >
-      {/* Header + Exportación + Vista */}
+      {/* Header + Exportación */}
       <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
-          <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
-        </div>
-        <div style={{ display: 'flex', gap: 4, border: '1px solid #8fa99a', borderRadius: 8, padding: '4px', background: '#fff' }}>
-          <button
-            onClick={() => setViewMode('grid')}
-            style={{
-              padding: '6px 12px',
-              borderRadius: 6,
-              border: 'none',
-              background: viewMode === 'grid' ? '#769282' : 'transparent',
-              color: viewMode === 'grid' ? '#fff' : '#666',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              fontSize: 12,
-              fontWeight: viewMode === 'grid' ? 600 : 400,
-              transition: 'all 200ms'
-            }}
-            title="Vista en cuadrícula"
-          >
-            <Grid3x3 size={16} /> Grid
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            style={{
-              padding: '6px 12px',
-              borderRadius: 6,
-              border: 'none',
-              background: viewMode === 'list' ? '#769282' : 'transparent',
-              color: viewMode === 'list' ? '#fff' : '#666',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              fontSize: 12,
-              fontWeight: viewMode === 'list' ? 600 : 400,
-              transition: 'all 200ms'
-            }}
-            title="Vista en lista"
-          >
-            <List size={16} /> Lista
-          </button>
-        </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>Exportar CSV</button>
+        <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>Exportar Excel</button>
       </div>
       {/* Filtros */}
       <ProductFilters
@@ -382,13 +337,7 @@ export function AdminProducts() {
           onCancel={cancelBulkEdit}
         />
       )}
-      {products.length > 0 && (can('products.edit') || can('products.delete')) && (
-        <ProductCheckboxGeneral
-          checked={allVisibleSelected}
-          indeterminate={someVisibleSelected && !allVisibleSelected}
-          onChange={handleSelectAllVisible}
-        />
-      )}
+
       {(loading || isLoading) && (
         <section className={styles.cardsGrid} aria-label="Listado de productos">
           {Array.from({ length: 9 }).map((_, i) => (
@@ -407,19 +356,128 @@ export function AdminProducts() {
       )}
 
 
-      {!loading && !isLoading && !error && (products.length === 0 ? (
-        <EmptyState
-          icon={<PackageSearch size={48} color="#94a3b8" />}
-          title="No se encontraron productos"
-          description={search || categoryFilter
-            ? "Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás."
-            : "Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!"
-          }
-          action={can('products.create') ? { label: 'Nuevo Producto', onClick: handleNew } : undefined}
-        />
-      ) : viewMode === 'grid' ? (
-        <ProductCardsGrid>
-          {sortedProducts.map(p => (
+      {!loading && !isLoading && !error && 
+        products.length === 0 && (
+          <EmptyState
+            icon={<PackageSearch size={48} color="#94a3b8" />}
+            title="No se encontraron productos"
+            description={
+              search || categoryFilter
+                ? "Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás."
+                : "Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!"
+            }
+            action={
+              can('products.create')
+                ? { label: 'Nuevo Producto', onClick: handleNew }
+                : undefined
+            }
+          />
+        )}
+
+      {!loading && !isLoading && !error && 
+        products.length > 0 && 
+        viewMode === 'grid' && (
+        <>
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            marginTop: 20,
+            marginBottom: 16,
+            padding: '12px 16px',
+            background: '#fafaf8',
+            borderRadius: 10,
+            border: '1px solid #e5e2dd',
+          }}
+        >
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={(e) => handleSelectAllVisible(e.target.checked)}
+              ref={(el) => {
+                if (el) el.indeterminate = someVisibleSelected && !allVisibleSelected;
+              }}
+              style={{ width: 20, height: 20, cursor: 'pointer', accentColor: '#769282' }}
+            />
+            <span style={{ fontSize: 13, fontWeight: 500, color: '#333' }}>Seleccionar todos</span>
+          </div>
+          
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Ordenamiento */}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px', background: '#fff', borderRadius: 8, border: '1px solid #e5e2dd' }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ordenar:</label>
+              <select
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value as SortField)}
+                style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #e5e2dd', background: '#fff', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                <option value="name">Nombre</option>
+                <option value="price">Precio</option>
+                <option value="stock">Stock</option>
+                <option value="inStock">Estado</option>
+                <option value="category">Categoría</option>
+              </select>
+              <button
+                onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #e5e2dd', background: sortDirection === 'asc' ? '#769282' : '#fff', color: sortDirection === 'asc' ? '#fff' : '#666', cursor: 'pointer', fontWeight: 600, fontSize: 11, transition: 'all 0.2s', minWidth: 35 }}
+                title={`Ordenar ${sortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
+              >
+                {sortDirection === 'asc' ? '▲' : '▼'}
+              </button>
+            </div>
+
+            {/* Vista Grid/Lista */}
+            <div style={{ display: 'flex', gap: 4, border: '1px solid #e5e2dd', borderRadius: 8, padding: '4px', background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+              <button
+                onClick={() => setViewMode('grid')}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: '#769282',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  transition: 'all 200ms'
+                }}
+                title="Vista en cuadrícula"
+              >
+                <Grid3x3 size={16} /> Grid
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: '#769282',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 12,
+                  fontWeight: 400,
+                  transition: 'all 200ms'
+                }}
+                title="Vista en lista"
+              >
+                <List size={16} /> Lista
+              </button>
+            </div>
+          </div>
+        </div>
+          
+          <ProductCardsGrid>
+            {sortedProducts.map(p => (
             <AdminProductCard
               key={p.id}
               id={p.id}
@@ -440,10 +498,162 @@ export function AdminProducts() {
               showCheckbox={can('products.edit') || can('products.delete')}
             />
           ))}
-        </ProductCardsGrid>
-      ) : (
-        <div style={{ overflowX: 'auto', border: '1px solid #e5e2dd', borderRadius: 12, marginTop: 16 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+          </ProductCardsGrid>
+        </>
+      )}
+
+      {!loading && !isLoading && !error && 
+        products.length > 0 && 
+        viewMode === 'list' && (
+        <>
+            <div
+              style={{
+                display: 'flex',
+                gap: 12,
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                flexWrap: 'wrap',
+                marginTop: 20,
+                marginBottom: 12,
+                padding: '8px 12px',
+              }}
+            >
+              {/* Ordenamiento */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'center',
+                  padding: '8px 12px',
+                  background: '#fafaf8',
+                  borderRadius: 8,
+                  border: '1px solid #e5e2dd',
+                }}
+              >
+                <label
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#666',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Ordenar:
+                </label>
+                <select
+                  value={sortField}
+                  onChange={(e) => setSortField(e.target.value as SortField)}
+                  style={{
+                    padding: '6px 8px',
+                    borderRadius: 6,
+                    border: '1px solid #e5e2dd',
+                    background: '#fff',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <option value="name">Nombre</option>
+                  <option value="price">Precio</option>
+                  <option value="stock">Stock</option>
+                  <option value="inStock">Estado</option>
+                  <option value="category">Categoría</option>
+                </select>
+                <button
+                  onClick={() =>
+                    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+                  }
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 6,
+                    border: '1px solid #e5e2dd',
+                    background: sortDirection === 'asc' ? '#769282' : '#fff',
+                    color: sortDirection === 'asc' ? '#fff' : '#666',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: 11,
+                    transition: 'all 0.2s',
+                    minWidth: 35,
+                  }}
+                  title={`Ordenar ${
+                    sortDirection === 'asc' ? 'descendente' : 'ascendente'
+                  }`}
+                >
+                  {sortDirection === 'asc' ? '▲' : '▼'}
+                </button>
+              </div>
+
+              {/* Vista Grid/Lista */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 4,
+                  border: '1px solid #e5e2dd',
+                  borderRadius: 8,
+                  padding: '4px',
+                  background: '#fff',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <button
+                  onClick={() => setViewMode('grid')}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: '#769282',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    transition: 'all 200ms',
+                  }}
+                  title="Vista en cuadrícula"
+                >
+                  <Grid3x3 size={16} /> Grid
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: '#769282',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    fontSize: 12,
+                    fontWeight: 400,
+                    transition: 'all 200ms',
+                  }}
+                  title="Vista en lista"
+                >
+                  <List size={16} /> Lista
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                overflowX: 'auto',
+                border: '1px solid #e5e2dd',
+                borderRadius: 12,
+              }}
+            >
+              <table
+                style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  fontSize: 14,
+                }}
+              >
             <thead>
               <tr style={{ background: 'linear-gradient(135deg, #f8f6f3 0%, #faf8f5 100%)', borderBottom: '2px solid #e5e2dd' }}>
                 {(can('products.edit') || can('products.delete')) && (
@@ -658,7 +868,8 @@ export function AdminProducts() {
             </tbody>
           </table>
         </div>
-      ))}
+        </>
+      )}
 
       {/* Controles de paginación */}
       {total > 10 && (
