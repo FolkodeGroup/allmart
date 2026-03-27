@@ -26,6 +26,7 @@ function toCategory(row: {
   description: string | null;
   imageUrl: string | null;
   itemCount: number;
+  isVisible: boolean;
   createdAt: Date;
   updatedAt: Date;
 }): Category {
@@ -114,6 +115,7 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
       slug,
       description: dto.description ?? null,
       imageUrl: dto.imageUrl ?? null,
+      isVisible: dto.isVisible !== undefined ? dto.isVisible : true,
     },
   });
 
@@ -142,6 +144,7 @@ export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promis
       slug: newSlug,
       description: dto.description !== undefined ? dto.description : existing.description,
       imageUrl: dto.imageUrl !== undefined ? dto.imageUrl : existing.imageUrl,
+      isVisible: dto.isVisible !== undefined ? dto.isVisible : existing.isVisible,
     },
   });
 

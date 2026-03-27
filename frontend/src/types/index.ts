@@ -27,6 +27,7 @@ export interface Category {
   description?: string;
   image?: string;
   itemCount?: number;
+  isVisible: boolean;
 }
 
 export interface CartItem {

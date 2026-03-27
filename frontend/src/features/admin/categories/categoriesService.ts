@@ -17,6 +17,7 @@ export interface ApiCategory {
   description?: string;
   imageUrl?: string;
   itemCount: number;
+  isVisible: boolean;
 }
 
 /** Envoltorio estándar de respuestas del admin */
@@ -31,6 +32,7 @@ export interface CategoryPayload {
   name: string;
   description?: string;
   imageUrl?: string;
+  isVisible?: boolean;
 }
 
 /** Parámetros para búsqueda y paginación en el admin */
@@ -62,6 +64,7 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
     description: api.description,
     image: api.imageUrl,
     itemCount: api.itemCount,
+    isVisible: api.isVisible,
   };
 }
 
@@ -71,6 +74,7 @@ export function mapCategoryToPayload(category: Partial<Category>): CategoryPaylo
     name: category.name ?? '',
     description: category.description,
     imageUrl: category.image,
+    isVisible: category.isVisible,
   };
 }
 

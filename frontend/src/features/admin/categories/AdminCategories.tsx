@@ -32,6 +32,10 @@ export function AdminCategories() {
   const [, setEditId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // Estado para cambio de visibilidad
+  const [toggleConfirm, setToggleConfirm] = useState<{ id: string; newVisible: boolean } | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [optimisticVis, setOptimisticVis] = useState<Record<string, boolean>>({});
   const { showNotification } = useNotification();
 
 
@@ -100,6 +104,35 @@ export function AdminCategories() {
 
   // (Eliminado: handleBulkEdit inline, ahora se usa el del hook personalizado)
 
+  // Handler para toggle de visibilidad (abre modal de confirmación)
+  const handleToggleVisibility = (id: string, newVisible: boolean) => {
+    setToggleConfirm({ id, newVisible });
+  };
+
+  // Confirmar cambio de visibilidad
+  const confirmToggleVisibility = async () => {
+    if (!toggleConfirm) return;
+    const { id, newVisible } = toggleConfirm;
+    setTogglingId(id);
+    setOptimisticVis(prev => ({ ...prev, [id]: newVisible }));
+    try {
+      await updateCategory(id, { isVisible: newVisible });
+      showNotification('success', newVisible ? 'Categoría visible' : 'Categoría oculta');
+    } catch (err: any) {
+      setOptimisticVis(prev => ({ ...prev, [id]: !newVisible }));
+      showNotification('error', err?.message || 'Error al cambiar visibilidad');
+    } finally {
+      setTogglingId(null);
+      setToggleConfirm(null);
+      refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
+    }
+  };
+
+  // Pasar estado optimista a las categorías
+  const categoriesWithOptimism = categories.map(cat =>
+    optimisticVis[cat.id] !== undefined ? { ...cat, isVisible: optimisticVis[cat.id] } : cat
+  );
+
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
 
@@ -140,7 +173,7 @@ export function AdminCategories() {
         />
       ) : (
         <CategoriesGrid
-          categories={categories}
+          categories={categoriesWithOptimism}
           onEdit={can('categories.edit') ? handleEdit : undefined}
           onDelete={can('categories.delete') ? (id => setDeleteConfirm(id)) : undefined}
           canEdit={can('categories.edit')}
@@ -150,8 +183,41 @@ export function AdminCategories() {
           onSelect={handleSelectCategory}
           allSelected={allVisibleSelected}
           onSelectAll={handleSelectAllVisible}
+          onToggleVisibility={can('categories.edit') ? handleToggleVisibility : undefined}
         />
       ))}
+
+      {/* Modal de confirmación de visibilidad */}
+      <Modal
+        open={!!toggleConfirm}
+        onClose={() => (togglingId ? undefined : setToggleConfirm(null))}
+        title={toggleConfirm?.newVisible ? 'Mostrar categoría' : 'Ocultar categoría'}
+        actions={
+          <>
+            <button
+              className={styles.deleteBtn}
+              onClick={confirmToggleVisibility}
+              disabled={!!togglingId}
+              style={{ minWidth: 100 }}
+            >
+              {togglingId ? 'Guardando...' : 'Confirmar'}
+            </button>
+            <button
+              className={styles.cancelBtn}
+              onClick={() => setToggleConfirm(null)}
+              disabled={!!togglingId}
+              style={{ minWidth: 100 }}
+            >Cancelar</button>
+          </>
+        }
+        disableClose={!!togglingId}
+      >
+        <p>
+          {toggleConfirm?.newVisible
+            ? '¿Mostrar esta categoría? Será visible para los usuarios.'
+            : '¿Ocultar esta categoría? No será visible para los usuarios.'}
+        </p>
+      </Modal>
 
       {/* Controles de paginación extraídos a subcomponente */}
       <CategoriesPagination

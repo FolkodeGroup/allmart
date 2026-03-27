@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Category } from '../../../types';
 import styles from './AdminCategories.module.css';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 import { ProductImage } from '../../../components/ui/ProductImage';
 import { Tooltip } from '../../../components/ui/Tooltip';
 
@@ -17,6 +17,7 @@ interface CategoryCardProps {
   productCount?: number;
   selected?: boolean;
   onSelect?: (id: string, checked: boolean) => void;
+  onToggleVisibility?: (id: string, newVisible: boolean) => void;
 }
 
 export const CategoryCard: FC<CategoryCardProps> = memo(({
@@ -28,6 +29,7 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
   productCount,
   selected = false,
   onSelect,
+  onToggleVisibility,
 }) => {
   const navigate = useNavigate();
   return (
@@ -99,6 +101,30 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
                     tabIndex={0}
                   >
                     ✏️
+                  </button>
+                </Tooltip>
+              )}
+              {canEdit && onToggleVisibility && (
+                <Tooltip
+                  content={category.isVisible ? 'Ocultar categoría' : 'Mostrar categoría'}
+                  placement="top"
+                >
+                  <button
+                    type="button"
+                    className={styles.editBtn}
+                    onClick={e => {
+                      e.stopPropagation();
+                      onToggleVisibility(category.id, !category.isVisible);
+                    }}
+                    aria-label={`${category.isVisible ? 'Ocultar' : 'Mostrar'} categoría ${category.name}`}
+                    tabIndex={0}
+                    title={category.isVisible ? 'Ocultar' : 'Mostrar'}
+                  >
+                    {category.isVisible ? (
+                      <Eye size={16} style={{ display: 'inline' }} />
+                    ) : (
+                      <EyeOff size={16} style={{ display: 'inline' }} />
+                    )}
                   </button>
                 </Tooltip>
               )}
