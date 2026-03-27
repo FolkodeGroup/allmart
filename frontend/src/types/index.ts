@@ -18,6 +18,7 @@ export interface Product {
   inStock: boolean;
   sku: string;
   features?: string[];
+  isFeatured?: boolean;
 }
 
 export interface Category {

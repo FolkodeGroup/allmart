@@ -8,6 +8,7 @@ export interface ExportableProduct {
   discount?: number;
   stock: number;
   inStock: boolean;
+  isFeatured?: boolean;
   createdAt?: string;
 }
 

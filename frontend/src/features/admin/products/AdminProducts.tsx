@@ -30,6 +30,7 @@ import { ProductCheckboxGeneral } from '../../../components/ui/ProductCheckboxGe
 import { ProductFeedbackSection } from '../../../components/ui/ProductFeedbackSection';
 import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
+import { Grid3x3, List } from 'lucide-react';
 
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
@@ -43,6 +44,17 @@ export function AdminProducts() {
   // Estado de ordenamiento
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  
+  // Estado de vista (grid o lista)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('adminProductsViewMode');
+    return (saved as 'grid' | 'list') || 'grid';
+  });
+  
+  // Guardar preferencia de vista
+  useEffect(() => {
+    localStorage.setItem('adminProductsViewMode', viewMode);
+  }, [viewMode]);
 
   // Edición masiva
   const [bulkEditLoading, setBulkEditLoading] = useState(false);
@@ -270,11 +282,55 @@ export function AdminProducts() {
       className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
       aria-label="Gestión de productos"
     >
-      {/* Header + Exportación */}
+      {/* Header + Exportación + Vista */}
       <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
-        <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar CSV</button>
+          <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #8fa99a', background: '#fff', cursor: 'pointer' }}>Exportar Excel</button>
+        </div>
+        <div style={{ display: 'flex', gap: 4, border: '1px solid #8fa99a', borderRadius: 8, padding: '4px', background: '#fff' }}>
+          <button
+            onClick={() => setViewMode('grid')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: 'none',
+              background: viewMode === 'grid' ? '#769282' : 'transparent',
+              color: viewMode === 'grid' ? '#fff' : '#666',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 12,
+              fontWeight: viewMode === 'grid' ? 600 : 400,
+              transition: 'all 200ms'
+            }}
+            title="Vista en cuadrícula"
+          >
+            <Grid3x3 size={16} /> Grid
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            style={{
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: 'none',
+              background: viewMode === 'list' ? '#769282' : 'transparent',
+              color: viewMode === 'list' ? '#fff' : '#666',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 12,
+              fontWeight: viewMode === 'list' ? 600 : 400,
+              transition: 'all 200ms'
+            }}
+            title="Vista en lista"
+          >
+            <List size={16} /> Lista
+          </button>
+        </div>
       </div>
       {/* Filtros */}
       <ProductFilters
@@ -397,7 +453,7 @@ export function AdminProducts() {
           }
           action={can('products.create') ? { label: 'Nuevo Producto', onClick: handleNew } : undefined}
         />
-      ) : (
+      ) : viewMode === 'grid' ? (
         <ProductCardsGrid>
           {sortedProducts.map(p => (
             <AdminProductCard
@@ -421,6 +477,138 @@ export function AdminProducts() {
             />
           ))}
         </ProductCardsGrid>
+      ) : (
+        <div style={{ overflowX: 'auto', border: '1px solid #e5e2dd', borderRadius: 12, marginTop: 16 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+            <thead>
+              <tr style={{ background: '#f9f7f4', borderBottom: '1px solid #e5e2dd' }}>
+                {(can('products.edit') || can('products.delete')) && (
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#1a1a1a' }}>
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={(e) => handleSelectAllVisible(e.target.checked)}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someVisibleSelected && !allVisibleSelected;
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </th>
+                )}
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#1a1a1a' }}>Nombre</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#1a1a1a' }}>SKU</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#1a1a1a' }}>Categoría</th>
+                <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#1a1a1a' }}>Precio</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#1a1a1a' }}>Stock</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#1a1a1a' }}>Estado</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#1a1a1a' }}>Destacado</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#1a1a1a' }}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedProducts.map((p, idx) => (
+                <tr key={p.id} style={{ borderBottom: '1px solid #f0ede8', background: idx % 2 === 0 ? '#fff' : '#f9f7f4' }}>
+                  {(can('products.edit') || can('products.delete')) && (
+                    <td style={{ padding: '12px 16px' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(p.id)}
+                        onChange={(e) => handleSelectProduct(p.id, e.target.checked)}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </td>
+                  )}
+                  <td style={{ padding: '12px 16px', color: '#1a1a1a', fontWeight: 500 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {p.image && <img src={p.image} alt={p.name} style={{ width: 32, height: 32, borderRadius: 4, objectFit: 'cover' }} />}
+                      <span>{p.name}</span>
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px 16px', color: '#767676', fontSize: 12 }}>{p.sku}</td>
+                  <td style={{ padding: '12px 16px', color: '#767676' }}>{p.category}</td>
+                  <td style={{ padding: '12px 16px', textAlign: 'right', color: '#1a1a1a', fontWeight: 600 }}>
+                    ${p.price?.toFixed(2) || '0.00'}
+                    {p.discount && <span style={{ color: '#c75050', marginLeft: 4 }}>-{p.discount}%</span>}
+                  </td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: 4,
+                      background: p.stock > 0 ? '#d4edda' : '#f8d7da',
+                      color: p.stock > 0 ? '#155724' : '#721c24',
+                      fontSize: 12,
+                      fontWeight: 500
+                    }}>
+                      {p.stock}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: 4,
+                      background: p.inStock ? '#d4edda' : '#f8d7da',
+                      color: p.inStock ? '#155724' : '#721c24',
+                      fontSize: 12,
+                      fontWeight: 500
+                    }}>
+                      {p.inStock ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                    <span style={{
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background: p.isFeatured ? '#8fa99a' : '#e5e2dd',
+                      color: p.isFeatured ? '#fff' : '#767676',
+                      fontSize: 11,
+                      fontWeight: 500
+                    }}>
+                      {p.isFeatured ? '★' : '☆'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                      {can('products.edit') && (
+                        <button
+                          onClick={() => handleEdit(p.id)}
+                          style={{
+                            padding: '4px 8px',
+                            background: '#769282',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 4,
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            fontWeight: 500
+                          }}
+                        >
+                          Editar
+                        </button>
+                      )}
+                      {can('products.delete') && (
+                        <button
+                          onClick={() => setDeleteConfirm(p.id)}
+                          style={{
+                            padding: '4px 8px',
+                            background: '#c75050',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 4,
+                            cursor: 'pointer',
+                            fontSize: 12,
+                            fontWeight: 500
+                          }}
+                        >
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ))}
 
       {/* Controles de paginación */}

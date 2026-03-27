@@ -37,6 +37,7 @@ function toProduct(row: any): Product {
     stock: row.stock,
     sku: row.sku ?? undefined,
     features: Array.isArray(row.features) ? row.features : [],
+    isFeatured: row.isFeatured ?? false,
     status: row.status as ProductStatus,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -86,6 +87,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       inStock: dto.inStock ?? true,
       tags: Array.isArray(dto.tags) ? dto.tags : [],
       features: Array.isArray(dto.features) ? dto.features : [],
+      isFeatured: dto.isFeatured ?? false,
     },
   });
 
@@ -133,6 +135,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       inStock: dto.inStock !== undefined ? dto.inStock : existing.inStock,
       tags: Array.isArray(dto.tags) ? dto.tags : (existing.tags ?? Prisma.JsonNull),
       features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
+      isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : existing.isFeatured,
     },
   });
 
