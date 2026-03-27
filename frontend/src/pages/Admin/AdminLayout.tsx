@@ -2,7 +2,7 @@
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
@@ -74,7 +74,6 @@ export function AdminLayout() {
   const { user, role, logout, can } = useAdminAuth();
   const { getPendingOrdersCount } = useAdminOrders();
   const { getLowStockCount } = useAdminProducts();
-  const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -122,7 +121,7 @@ export function AdminLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate("/admin/login");
+    window.location.replace('/');
   };
 
   return (
