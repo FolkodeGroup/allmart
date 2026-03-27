@@ -12,6 +12,7 @@ import { AdminVariantsProvider } from '../context/AdminVariantsContext';
 import { AdminImagesProvider } from '../context/AdminImagesContext';
 import { AdminOrdersProvider } from '../context/AdminOrdersContext';
 import { DashboardLayoutProvider } from '../context/DashboardLayoutContext';
+import { UnsavedChangesProvider } from '../context/UnsavedChangesContext';
 
 interface Props {
   children: React.ReactNode;
@@ -23,18 +24,20 @@ interface Props {
  */
 export const AdminProvidersWrapper: React.FC<Props> = ({ children }) => {
   return (
-    <DashboardLayoutProvider>
-      <AdminCategoriesProvider>
-        <AdminProductsProvider>
-          <AdminVariantsProvider>
-            <AdminImagesProvider>
-              <AdminOrdersProvider>
-                {children}
-              </AdminOrdersProvider>
-            </AdminImagesProvider>
-          </AdminVariantsProvider>
-        </AdminProductsProvider>
-      </AdminCategoriesProvider>
-    </DashboardLayoutProvider>
+    <UnsavedChangesProvider>
+      <DashboardLayoutProvider>
+        <AdminCategoriesProvider>
+          <AdminProductsProvider>
+            <AdminVariantsProvider>
+              <AdminImagesProvider>
+                <AdminOrdersProvider>
+                  {children}
+                </AdminOrdersProvider>
+              </AdminImagesProvider>
+            </AdminVariantsProvider>
+          </AdminProductsProvider>
+        </AdminCategoriesProvider>
+      </DashboardLayoutProvider>
+    </UnsavedChangesProvider>
   );
 };
