@@ -35,10 +35,31 @@
   color: var(--color-text-primary);
 }
 
+.carouselViewport {
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  overflow: hidden;
+}
+
+.carouselTrack {
+  display: flex;
+  align-items: stretch;
+  will-change: transform;
+}
+
+.carouselSlide {
+  flex: 0 0 auto;
+  padding: 0 var(--space-3);
+  box-sizing: border-box;
+}
+
+.carouselSlide > * {
+  height: 100%;
+}
+
 .grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-6);
+  display: none;
   max-width: var(--container-2xl);
   margin: 0 auto;
   padding: 0 var(--space-6);
@@ -50,16 +71,22 @@
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
+  .carouselViewport {
+    padding: 0 var(--space-4);
+  }
+
+  .carouselSlide {
+    padding: 0 var(--space-2);
   }
 }
 
 @media (max-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
-    padding: 0 var(--space-4);
+  .carouselViewport {
+    padding: 0 var(--space-3);
+  }
+
+  .carouselSlide {
+    padding: 0 var(--space-1);
   }
 
   .section {
@@ -75,7 +102,7 @@
 }
 
 @media (max-width: 375px) {
-  .grid {
-    grid-template-columns: 1fr;
+  .carouselViewport {
+    padding: 0 var(--space-2);
   }
 }

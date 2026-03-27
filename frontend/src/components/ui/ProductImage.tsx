@@ -8,6 +8,9 @@ interface ProductImageProps {
   height?: number;
   placeholder?: string; // URL de imagen liviana o color
   style?: React.CSSProperties;
+  loading?: 'lazy' | 'eager';
+  fetchPriority?: 'high' | 'low' | 'auto';
+  sizes?: string;
 }
 
 /**
@@ -21,6 +24,9 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   height = 180,
   placeholder = 'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E',
   style,
+  loading = 'lazy',
+  fetchPriority = 'auto',
+  sizes,
 }) => {
   const [loaded, setLoaded] = useState(false);
   if (!src) {
@@ -72,8 +78,10 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         <img
           src={src}
           alt={alt}
-          loading="lazy"
+          loading={loading}
           decoding="async"
+          fetchPriority={fetchPriority}
+          sizes={sizes}
           width={width}
           height={height}
           style={{
