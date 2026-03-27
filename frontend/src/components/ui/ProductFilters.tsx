@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../../features/admin/products/AdminProducts.module.css';
-
+import { Search } from 'lucide-react';
 import type { StatusFilter, StockLevelFilter } from '../../features/admin/products/productsService';
 
 interface ProductFiltersProps {
@@ -43,124 +43,130 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   total,
 }) => (
   <nav className={styles.filters} aria-label="Filtros de productos">
-    <label htmlFor="search-products" className="sr-only">Buscar productos</label>
-    <input
-      ref={inputRef}
-      id="search-products"
-      className={styles.searchInput}
-      type="search"
-      placeholder="Buscar por nombre o SKU..."
-      value={search}
-      autoComplete="off"
-      onChange={e => {
-        setSearch(e.target.value);
-        setShowSuggestions(true);
-        setHighlightedIndex(() => -1);
-      }}
-      onFocus={() => search && setShowSuggestions(true)}
-      onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-      onKeyDown={e => {
-        if (!showSuggestions || suggestions.length === 0) return;
-        if (e.key === 'ArrowDown') {
-          setHighlightedIndex(i => (i < suggestions.length - 1 ? i + 1 : 0));
-          e.preventDefault();
-        } else if (e.key === 'ArrowUp') {
-          setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
-          e.preventDefault();
-        } else if ((e.key === 'Enter' || e.key === ' ') && highlightedIndex >= 0) {
-          onSelectSuggestion(suggestions[highlightedIndex].name);
-          setShowSuggestions(false);
-          setHighlightedIndex(() => -1);
-          inputRef.current?.blur();
-          setTimeout(() => inputRef.current?.focus(), 0);
-          e.preventDefault();
-        }
-      }}
-      aria-label="Buscar productos por nombre o SKU"
-      aria-autocomplete="list"
-      aria-controls="suggestions-list"
-      aria-activedescendant={highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined}
-    />
-    {/* Sugerencias de autocompletado */}
-    {showSuggestions && suggestions.length > 0 && (
-      <ul
-        id="suggestions-list"
-        className={styles.suggestionsList}
-        style={{ position: 'absolute', top: '110%', left: 0, right: 0, zIndex: 10 }}
-        role="listbox"
-        aria-label="Sugerencias de productos"
-      >
-        {suggestions.map((s, idx) => (
-          <li
-            key={s.id}
-            id={`suggestion-${idx}`}
-            className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
-            style={{ cursor: 'pointer', background: idx === highlightedIndex ? 'var(--color-bg-secondary)' : undefined }}
-            role="option"
-            aria-selected={idx === highlightedIndex}
-            tabIndex={0}
-            onMouseDown={() => onSelectSuggestion(s.name)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                onSelectSuggestion(s.name);
-                setShowSuggestions(false);
-                setHighlightedIndex(() => -1);
-                e.preventDefault();
-              }
-            }}
+    {/* Barra de búsqueda moderna */}
+    <div style={{ display: 'flex', gap: 12, alignItems: 'center', position: 'relative', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+      <div style={{ position: 'relative', flex: 1, minWidth: 280, display: 'flex', alignItems: 'center' }}>
+        <Search size={18} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#999', pointerEvents: 'none' }} />
+        <label htmlFor="search-products" className="sr-only">Buscar productos</label>
+        <input
+          ref={inputRef}
+          id="search-products"
+          className={styles.searchInput}
+          type="search"
+          placeholder="Buscar por nombre, SKU..."
+          value={search}
+          autoComplete="off"
+          onChange={e => {
+            setSearch(e.target.value);
+            setShowSuggestions(true);
+            setHighlightedIndex(() => -1);
+          }}
+          onFocus={() => search && setShowSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+          onKeyDown={e => {
+            if (!showSuggestions || suggestions.length === 0) return;
+            if (e.key === 'ArrowDown') {
+              setHighlightedIndex(i => (i < suggestions.length - 1 ? i + 1 : 0));
+              e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+              setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
+              e.preventDefault();
+            } else if ((e.key === 'Enter' || e.key === ' ') && highlightedIndex >= 0) {
+              onSelectSuggestion(suggestions[highlightedIndex].name);
+              setShowSuggestions(false);
+              setHighlightedIndex(() => -1);
+              inputRef.current?.blur();
+              setTimeout(() => inputRef.current?.focus(), 0);
+              e.preventDefault();
+            }
+          }}
+          aria-label="Buscar productos por nombre o SKU"
+          aria-autocomplete="list"
+          aria-controls="suggestions-list"
+          aria-activedescendant={highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined}
+          style={{ paddingLeft: 40, width: '100%' }}
+        />
+        {/* Sugerencias de autocompletado */}
+        {showSuggestions && suggestions.length > 0 && (
+          <ul
+            id="suggestions-list"
+            className={styles.suggestionsList}
+            style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, marginTop: 8 }}
+            role="listbox"
+            aria-label="Sugerencias de productos"
           >
-            <span style={{ fontWeight: 500 }}>{s.name}</span>
-            {s.sku && <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>SKU: {s.sku}</span>}
-          </li>
-        ))}
-      </ul>
-    )}
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 12, justifyContent: 'center' }}>
-      <div>
-        <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
-        <select
-          id="category-filter"
-          className={styles.select}
-          value={categoryFilter}
-          onChange={e => setCategoryFilter(e.target.value)}
-          aria-label="Filtrar por categoría"
-        >
-          <option value="">Todas las categorías</option>
-          {categories.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+            {suggestions.map((s, idx) => (
+              <li
+                key={s.id}
+                id={`suggestion-${idx}`}
+                className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
+                style={{ cursor: 'pointer', background: idx === highlightedIndex ? '#f0ede8' : undefined, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, borderRadius: 6, margin: '4px 4px' }}
+                role="option"
+                aria-selected={idx === highlightedIndex}
+                tabIndex={0}
+                onMouseDown={() => onSelectSuggestion(s.name)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    onSelectSuggestion(s.name);
+                    setShowSuggestions(false);
+                    setHighlightedIndex(() => -1);
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <Search size={14} color="#999" />
+                <span style={{ fontWeight: 500, flex: 1 }}>{s.name}</span>
+                {s.sku && <span style={{ color: '#999', fontSize: 12 }}>SKU: {s.sku}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-      <div>
-        <label htmlFor="status-filter" className="sr-only">Filtrar por estado</label>
-        <select
-          id="status-filter"
-          className={styles.select}
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value as StatusFilter)}
-          aria-label="Filtrar por estado"
-        >
-          <option value="all">Todos los estados</option>
-          <option value="active">Activos</option>
-          <option value="inactive">Inactivos</option>
-        </select>
-      </div>
-      <div>
-        <label htmlFor="stock-filter" className="sr-only">Filtrar por stock</label>
-        <select
-          id="stock-filter"
-          className={styles.select}
-          value={stockLevelFilter}
-          onChange={e => setStockLevelFilter(e.target.value as StockLevelFilter)}
-          aria-label="Filtrar por stock"
-        >
-          <option value="all">Todos los stocks</option>
-          <option value="no_stock">Sin stock</option>
-          <option value="low_stock">Stock bajo</option>
-          <option value="in_stock">Con stock</option>
-        </select>
-      </div>
+      <span className={styles.count} aria-live="polite">{total} productos</span>
     </div>
-    <span className={styles.count} aria-live="polite">{total} productos</span>
+
+    {/* Filtros */}
+    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+      <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
+      <select
+        id="category-filter"
+        className={styles.select}
+        value={categoryFilter}
+        onChange={e => setCategoryFilter(e.target.value)}
+        aria-label="Filtrar por categoría"
+      >
+        <option value="">Todas las categorías</option>
+        {categories.map(c => (
+          <option key={c.id} value={c.id}>{c.name}</option>
+        ))}
+      </select>
+
+      <label htmlFor="status-filter" className="sr-only">Filtrar por estado</label>
+      <select
+        id="status-filter"
+        className={styles.select}
+        value={statusFilter}
+        onChange={e => setStatusFilter(e.target.value as StatusFilter)}
+        aria-label="Filtrar por estado"
+      >
+        <option value="all">Todos los estados</option>
+        <option value="active">Activos</option>
+        <option value="inactive">Inactivos</option>
+      </select>
+
+      <label htmlFor="stock-filter" className="sr-only">Filtrar por stock</label>
+      <select
+        id="stock-filter"
+        className={styles.select}
+        value={stockLevelFilter}
+        onChange={e => setStockLevelFilter(e.target.value as StockLevelFilter)}
+        aria-label="Filtrar por stock"
+      >
+        <option value="all">Todos los stocks</option>
+        <option value="no_stock">Sin stock</option>
+        <option value="low_stock">Stock bajo</option>
+        <option value="in_stock">Con stock</option>
+      </select>
+    </div>
   </nav>
 );

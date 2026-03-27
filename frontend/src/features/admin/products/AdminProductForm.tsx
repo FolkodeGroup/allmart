@@ -24,6 +24,7 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
   rating: 0,
   reviewCount: 0,
   inStock: true,
+  isFeatured: false,
   sku: '',
   features: [],
   stock: 0,
@@ -408,6 +409,12 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
               <input type="checkbox" id="inStock" checked={form.inStock}
                 onChange={e => set('inStock', e.target.checked)} />
               <label htmlFor="inStock" className={styles.checkLabel}>Disponible en stock</label>
+            </div>
+
+            <div className={styles.checkRow}>
+              <input type="checkbox" id="isFeatured" checked={form.isFeatured || false}
+                onChange={e => set('isFeatured', e.target.checked)} />
+              <label htmlFor="isFeatured" className={styles.checkLabel}>Marcar como producto destacado</label>
             </div>
           </fieldset>
 

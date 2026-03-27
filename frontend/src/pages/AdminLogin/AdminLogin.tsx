@@ -34,7 +34,7 @@ export function AdminLogin() {
         const { token, role: userRole } = data.data;
         const role: Role = userRole === 'editor' ? 'editor' : 'admin';
         login(values.user, token, role);
-        toast.success(`¡Bienvenido, ${values.user}!`);
+        toast.success(`¡Bienvenido, ${values.user}!`, { duration: 3000 });
         navigate('/admin/dashboard');
       } else {
         toast.error(data.message || 'Credenciales inválidas');

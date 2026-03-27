@@ -100,6 +100,7 @@ model Product {
   stock            Int              @default(0)
   sku              String?          @unique(map: "products_sku_unique") @db.VarChar(100)
   features         Json             @default("[]")
+  isFeatured       Boolean          @default(false) @map("is_featured")
   status           ProductStatus    @default(active)
   createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -113,6 +114,7 @@ model Product {
   @@index([sku], map: "idx_products_sku")
   @@index([slug], map: "idx_products_slug")
   @@index([status], map: "idx_products_status")
+  @@index([isFeatured], map: "idx_products_is_featured")
   @@map("products")
 }
 

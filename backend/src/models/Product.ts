@@ -25,6 +25,7 @@ export interface Product {
   stock: number;
   sku?: string;
   features: string[];       // Json en DB
+  isFeatured: boolean;      // Nuevo campo
   status: ProductStatus;
   createdAt: Date;
   updatedAt: Date;
