@@ -1270,3 +1270,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #642: Cambios principales: | 2026-03-27 |
 | dgimenezdeveloper | 2 | Etiquetado de issue (BACKEND) | Issue #644: Redirigir a home de ecommerce al cerrar sesión desde el sidebar | 2026-03-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #646: Cambios: | 2026-03-27 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #648: 405 mejorar la gestión de estados de categorías visibleoculta | 2026-03-27 |
