@@ -1,12 +1,6 @@
 //src/components/layout/Admin/AdminHeader.tsx
 import { useLocation } from "react-router-dom";
 import styles from "./AdminHeader.module.css";
-import { useEffect, useState } from "react";
-import { CommandPalette } from "./CommandPalette";
-import { useSearch } from "../../../hooks/useSearch";
-import type { ProductSearch, OrderSearch, UserSearch } from "../../../types";
-import { useAdminProducts } from "../../../context/AdminProductsContext";
-import { useAdminOrders } from "../../../context/AdminOrdersContext";
 
 interface Breadcrumb {
   label: string;
@@ -31,20 +25,23 @@ function generateBreadcrumbs(pathname: string): Breadcrumb[] {
   const breadcrumbs: Breadcrumb[] = [
     {
       label: "Admin",
-      path: "/admin/dashboard",
+      path: "/admin",
       isActive: segments.length === 0,
     },
   ];
+
+  let currentPath = "/admin";
 
   segments.forEach((segment, index) => {
     const isActive = index === segments.length - 1;
     const label =
       ROUTE_NAMES[segment] ||
       segment.charAt(0).toUpperCase() + segment.slice(1);
+    currentPath += `/${segment}`;
 
     breadcrumbs.push({
       label,
-      path: `/admin/${segment}`,
+      path: currentPath,
       isActive,
     });
   });
@@ -57,58 +54,35 @@ export function AdminHeader() {
   const breadcrumbs = generateBreadcrumbs(location.pathname);
   const currentSection =
     breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard";
-  const [commandOpen, setCommandOpen] = useState(false);
-  const { products } = useAdminProducts();
+  const todayLabel = new Intl.DateTimeFormat("es-CO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
 
-  const { orders } = useAdminOrders();
-
-  const productSearch: ProductSearch[] = products.map((p) => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-  }));
-
-  const orderSearch: OrderSearch[] = orders.map((o) => ({
-    id: o.id,
-  }));
-
-  const userSearch: UserSearch[] = [];
-
-  const items = useSearch(productSearch, orderSearch, userSearch);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setCommandOpen(true);
-      }
-
-      if (e.key === "Escape") {
-        setCommandOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
   return (
     <header className={styles.header}>
       <div className={styles.container}>
+        <span className={styles.kicker}>Panel administrativo</span>
         <h1 className={styles.title}>{currentSection}</h1>
+        <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
+          {breadcrumbs.map((breadcrumb, index) => (
+            <span
+              key={breadcrumb.path}
+              className={breadcrumb.isActive ? styles.breadcrumbActive : ""}
+            >
+              {index > 0 && <span className={styles.separator}>/</span>}
+              {breadcrumb.label}
+            </span>
+          ))}
+        </nav>
       </div>
-      <button
-        className={styles.searchInput}
-        onClick={() => setCommandOpen(true)}
-        type="button"
-      >
-        Buscar prod, order o user....
-      </button>
-      <CommandPalette
-        open={commandOpen}
-        onClose={() => setCommandOpen(false)}
-        items={items}
-      />
+
+      <div className={styles.statusCard}>
+        <span className={styles.statusLabel}>Sesion activa</span>
+        <strong className={styles.statusValue}>Operacion en tiempo real</strong>
+        <span className={styles.statusDate}>{todayLabel}</span>
+      </div>
     </header>
   );
 }
