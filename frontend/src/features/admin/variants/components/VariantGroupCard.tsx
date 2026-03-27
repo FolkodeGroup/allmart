@@ -3,7 +3,6 @@ import Tooltip from '@mui/material/Tooltip';
 import { AlertTriangle } from 'lucide-react';
 import { VariantValueChip } from './VariantValueChip';
 import styles from '../AdminVariants.module.css';
-import { set } from 'zod';
 
 interface VariantGroup {
   id: string;
