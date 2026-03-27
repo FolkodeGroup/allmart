@@ -1,13 +1,13 @@
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { CircleUserRound, Menu, Search, ShoppingCart, X } from 'lucide-react';
 import { navigation } from '../../../data/mock';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
 
 export function Header() {
-  const { totalItems } = useCart()
+  const { totalItems } = useCart();
   const [scrolled, setScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -28,46 +28,39 @@ export function Header() {
       role="banner"
     >
       <div className={styles.inner}>
-        
-        
         <div className={styles.topRow}>
           <div className={styles.logo}>
             <Link to="/" className={styles.logoText} aria-label="Allmart - Inicio">
               allmart
             </Link>
           </div>
-          
+
           <div className={styles.searchBar}>
-            <div className={`${styles.searchWrapper} ${searchOpen ? styles.open : ''}`}>
+            <div className={styles.searchWrapper}>
               <input
                 type="search"
                 className={styles.searchInput}
                 placeholder="¿Qué producto estás buscando?"
                 aria-label="Buscar productos"
-                onBlur={() => setSearchOpen(false)}
               />
-              <button
-                className={styles.searchBtn}
-                onClick={() => setSearchOpen(!searchOpen)}
-                aria-label="Abrir búsqueda"
-                type="button"
-              >
-                🔍
-              </button>
+              <Search size={18} strokeWidth={2.25} className={styles.searchIcon} aria-hidden="true" />
             </div>
           </div>
+
           <div className={styles.userActions}>
-            <button className={styles.iconBtn} aria-label="Mi cuenta" type="button">
-              👤
-            </button>
-          
+            <Link to="/admin/login" className={styles.iconBtn} aria-label="Ingresar como administrador">
+              <CircleUserRound size={19} strokeWidth={2.1} aria-hidden="true" />
+              <span className={styles.actionLabel}>Ingresar</span>
+            </Link>
+
             <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
-              🛒
-              <span className={styles.cartCount}>{ totalItems > 0 ? totalItems : null }</span>
+              <ShoppingCart size={19} strokeWidth={2.1} aria-hidden="true" />
+              <span className={styles.actionLabel}>Carrito</span>
+              <span className={styles.cartCount}>{totalItems > 0 ? totalItems : 0}</span>
             </Link>
           </div>
+
           <div className={styles.mobileMenuTogle}>
-            {/* Mobile menu toggle */}
             <button
               className={styles.menuToggle}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -75,15 +68,18 @@ export function Header() {
               aria-expanded={mobileMenuOpen}
               type="button"
             >
-              {mobileMenuOpen ? '✕' : '☰'}
+              {mobileMenuOpen ? (
+                <X size={20} strokeWidth={2.2} aria-hidden="true" />
+              ) : (
+                <Menu size={20} strokeWidth={2.2} aria-hidden="true" />
+              )}
             </button>
           </div>
         </div>
       </div>
-      
+
       <div className={styles.navBarStrip}>
         <div className={styles.inner}>
-          {/* Desktop Nav */}
           <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
             {navigation.map((item) => (
               <div className={styles.navItem} key={item.label}>
@@ -122,10 +118,6 @@ export function Header() {
         </div>
       </div>
 
-        
-        
-
-      {/* Mobile Nav */}
       <nav
         className={`${styles.mobileNav} ${mobileMenuOpen ? styles.open : ''}`}
         role="navigation"
