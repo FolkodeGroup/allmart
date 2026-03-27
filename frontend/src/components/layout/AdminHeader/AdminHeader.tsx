@@ -25,20 +25,23 @@ function generateBreadcrumbs(pathname: string): Breadcrumb[] {
   const breadcrumbs: Breadcrumb[] = [
     {
       label: "Admin",
-      path: "/admin/dashboard",
+      path: "/admin",
       isActive: segments.length === 0,
     },
   ];
+
+  let currentPath = "/admin";
 
   segments.forEach((segment, index) => {
     const isActive = index === segments.length - 1;
     const label =
       ROUTE_NAMES[segment] ||
       segment.charAt(0).toUpperCase() + segment.slice(1);
+    currentPath += `/${segment}`;
 
     breadcrumbs.push({
       label,
-      path: `/admin/${segment}`,
+      path: currentPath,
       isActive,
     });
   });
