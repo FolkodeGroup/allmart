@@ -6,7 +6,9 @@ import styles from './AdminReports.module.css';
 import { ReportsFilters } from './components/ReportsFilters';
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
 import { ReportsMetrics } from './components/ReportsMetrics';
-
+import { OrdersTable } from './components/OrdersTable';
+import { Pagination } from './components/Pagination';
+//import { generateMockOrders } from './components/DatosMockeados';
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -273,14 +275,24 @@ function exportOrdersCSV(orders: Order[]) {
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
   const { orders } = useAdminOrders();
+  //const orders = generateMockOrders(50);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   const [now, setNow] = useState(() => Date.now());
+  // Estado de paginación
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
     return () => clearInterval(id);
   }, []);
+
+  // Resetear a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
 
   // Determinar periodo para lógica existente
   const period: Period =
@@ -505,6 +517,11 @@ export function AdminReports() {
     Array.from({ length: 20 }, () => 30 + Math.random() * 70)
   );
 
+  const paginatedOrders = periodOrders.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
@@ -662,62 +679,30 @@ export function AdminReports() {
             {periodOrders.length === 0 ? (
               <p className={styles.noData}>Sin pedidos en este período.</p>
             ) : (
-              <div className={styles.summaryTableWrap}>
-                <table className={styles.summaryTable}>
-                  <thead>
-                    <tr>
-                      <th>N° Pedido</th>
-                      <th>Fecha</th>
-                      <th>Cliente</th>
-                      <th className={styles.tdRight}>Total</th>
-                      <th>Estado</th>
-                      <th>Pago</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...periodOrders]
-                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      .slice(0, 10)
-                      .map(o => {
-                        const statusLabel =
-                          o.status === 'pendiente' ? 'Pendiente'
-                            : o.status === 'confirmado' ? 'Confirmado'
-                              : o.status === 'en-preparacion' ? 'En preparación'
-                                : o.status === 'enviado' ? 'Enviado'
-                                  : o.status === 'entregado' ? 'Entregado'
-                                    : 'Cancelado';
-                        const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
-                        return (
-                          <tr key={o.id}>
-                            <td className={styles.tblId}>#{o.id.slice(0, 8).toUpperCase()}</td>
-                            <td className={styles.tblDate}>
-                              {new Date(o.createdAt).toLocaleDateString('es-AR', {
-                                day: '2-digit', month: 'short', year: 'numeric',
-                              })}
-                            </td>
-                            <td>{o.customer.firstName} {o.customer.lastName}</td>
-                            <td className={`${styles.tblTotal} ${styles.tdRight}`}>
-                              {formatPrice(o.total)}
-                            </td>
-                            <td>
-                              <span className={`${styles.stBadge} ${stClass}`}>{statusLabel}</span>
-                            </td>
-                            <td>
-                              <span className={`${styles.payBadge} ${o.paymentStatus === 'abonado' ? styles.payAbonado : styles.payPending}`}>
-                                {o.paymentStatus === 'abonado' ? '✓ Abonado' : '○ Sin abonar'}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-                {periodOrders.length > 10 && (
+              <>
+
+                <OrdersTable
+                  orders={
+                    paginatedOrders
+                  }
+                  page={page}
+                  pageSize={pageSize}
+                  total={periodOrders.length}
+                />
+                {periodOrders.length > pageSize && (
                   <p className={styles.moreHint}>
-                    Mostrando 10 de {periodOrders.length}. Exportá el CSV para ver todos.
+                    Mostrando {Math.min(pageSize, periodOrders.length - (page - 1) * pageSize)} de {periodOrders.length}.
                   </p>
                 )}
-              </div>
+                <Pagination
+                  page={page}
+                  pageSize={pageSize}
+                  total={periodOrders.length}
+                  onPageChange={setPage}
+                  onPageSizeChange={setPageSize}
+                  pageSizeOptions={[5, 10, 20, 50, 100]}
+                />
+              </>
             )}
           </div>
         </>

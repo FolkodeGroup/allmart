@@ -1,28 +1,139 @@
-.metricCard {
-  background: var(--color-bg-primary);
-  border-radius: 14px;
-  box-shadow: var(--shadow-xs);
-  padding: 1.3rem 1.2rem 1.1rem 1.2rem;
+/* === Pagination styles === */
+.pagination {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.7rem;
-  min-width: 0;
-  border: 1.5px solid var(--color-border-light);
-  transition: box-shadow 0.15s, border-color 0.15s;
-  position: relative;
-  overflow: hidden;
-}
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  width: 100%;
 
-.metricCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
+  .paginationLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  .paginationCenter {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* === Pagination styles === */
+  .pagination {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 18px 0 8px 0;
+    font-size: 15px;
+    width: 100%;
+  }
+
+  .paginationLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .paginationCenter {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .pageBtn {
+    background: #fff;
+    border: 1.5px solid #e5e2dd;
+    border-radius: 6px;
+    padding: 4px 13px;
+    cursor: pointer;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 15px;
+    box-shadow: 0 1px 2px #0001;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    margin: 0 1px;
+    outline: none;
+  }
+
+  .pageBtn:focus {
+    border-color: #769282;
+  }
+
+  .pageBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pageBtnActive {
+    border-radius: 6px;
+    box-shadow: 0 1px 2px #0001;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    padding: 4px 13px;
+    background: #769282;
+    color: #fff;
+    border-color: #769282;
+    box-shadow: 0 2px 8px #76928222;
+  }
+
+  .pageBtnIcon {
+    font-size: 18px;
+    font-weight: bold;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .ellipsis {
+    padding: 0 6px;
+    color: #aea491;
+    font-size: 18px;
+  }
+
+  .pageSizeLabel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #767676;
+    font-weight: 500;
+  }
+
+  .pageSizeSelect {
+    margin: 0 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1.5px solid #e5e2dd;
+    background: #f8f8f8;
+    color: #1a1a1a;
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .pageSizeSelect:focus {
+    border-color: #769282;
+  }
+
+  .pageInfo {
+    color: #767676;
+    font-size: 13px;
+    font-weight: 500;
+    margin-left: 12px;
+    flex: 1;
+    text-align: right;
+  }
+
   border-radius: 14px 14px 0 0;
-  background: var(--color-primary);
   z-index: 1;
 }
 
@@ -278,8 +389,8 @@
 }
 
 /* ============================================
-   ALLMART — ADMIN REPORTS
-   ============================================ */
+ALLMART — ADMIN REPORTS
+============================================ */
 
 .reportsPage {
   max-width: 1100px !important;
@@ -676,8 +787,21 @@
 /* ── Tabla resumen ── */
 .summaryTableWrap {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 380px;
   border-radius: 10px;
   border: 1px solid var(--color-border);
+}
+
+@media (max-width: 900px) {
+  .summaryTable {
+    min-width: 520px;
+    font-size: 13px;
+  }
+
+  .summaryTableWrap {
+    max-height: 220px;
+  }
 }
 
 .summaryTable {
