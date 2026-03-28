@@ -4,9 +4,6 @@ import type { Order } from '../../../../context/AdminOrdersContext';
 
 export interface OrdersTableProps {
     orders: Order[];
-    page: number;
-    pageSize: number;
-    total: number;
 }
 
 export const OrdersTable: React.FC<OrdersTableProps> = ({ orders }) => {
