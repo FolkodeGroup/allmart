@@ -1,3 +1,16 @@
+// Helper puro para transformar pedidos a filas exportables
+export function mapOrdersToRows(orders: Order[]): (string | number)[][] {
+    return orders.map(o => [
+        o.id,
+        new Date(o.createdAt).toLocaleDateString('es-AR'),
+        `${o.customer.firstName} ${o.customer.lastName}`,
+        o.customer.email,
+        o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
+        o.total.toString().replace('.', ','),
+        o.status,
+        o.paymentStatus ?? 'no-abonado',
+    ]);
+}
 import type { Order } from '../context/AdminOrdersContext';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
@@ -14,18 +27,9 @@ export function getExportFileName(base: string, periodLabel: string, ext: string
 
 export function exportOrdersCSV(orders: Order[], fileName: string): void {
     const headers = ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'];
-    const rows = orders.map(o => [
-        o.id,
-        new Date(o.createdAt).toLocaleDateString('es-AR'),
-        `${o.customer.firstName} ${o.customer.lastName}`,
-        o.customer.email,
-        o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
-        o.total.toString().replace('.', ','),
-        o.status,
-        o.paymentStatus ?? 'no-abonado',
-    ]);
+    const rows = mapOrdersToRows(orders);
     const csv = [headers, ...rows]
-        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}` ).join(','))
         .join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     triggerDownload(blob, fileName);
@@ -34,16 +38,7 @@ export function exportOrdersCSV(orders: Order[], fileName: string): void {
 export function exportOrdersXLSX(orders: Order[], fileName: string) {
     const wsData = [
         ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'],
-        ...orders.map(o => [
-            o.id,
-            new Date(o.createdAt).toLocaleDateString('es-AR'),
-            `${o.customer.firstName} ${o.customer.lastName}`,
-            o.customer.email,
-            o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
-            o.total,
-            o.status,
-            o.paymentStatus ?? 'no-abonado',
-        ])
+        ...mapOrdersToRows(orders)
     ];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
@@ -58,16 +53,7 @@ export async function exportOrdersPDF(orders: Order[], fileName: string) {
 
     const doc = new jsPDF();
     const headers = [['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago']];
-    const rows = orders.map(o => [
-        o.id,
-        new Date(o.createdAt).toLocaleDateString('es-AR'),
-        `${o.customer.firstName} ${o.customer.lastName}`,
-        o.customer.email,
-        o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
-        o.total,
-        o.status,
-        o.paymentStatus ?? 'no-abonado',
-    ]);
+    const rows = mapOrdersToRows(orders);
     autoTable(doc, {
         head: headers,
         body: rows,
