@@ -24,6 +24,8 @@ interface VariantGroupsGridProps {
   newValues: Record<string, string>;
   setNewValue: (groupId: string, value: string) => void;
   errors: Record<string, string>;
+  isPendingNavigation: boolean;
+  setIsDirty?: (value: boolean) => void; // Se agrega setIsDirty para manejar estado de cambios no guardados
 }
 
 /**
@@ -47,7 +49,10 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
   newValues,
   setNewValue,
   errors,
+  isPendingNavigation,
+  setIsDirty,
 }) => {
+
   if (groups.length === 0) {
     return (
       <EmptyState
@@ -79,6 +84,8 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
             newValue={newValues[group.id] || ''}
             setNewValue={(value) => setNewValue(group.id, value)}
             error={errors[`value-${group.id}`] || ''}
+            isPendingNavigation={isPendingNavigation}
+            setIsDirty={setIsDirty}
           />
         </div>
       ))}
