@@ -8,6 +8,8 @@ import type { ReportsFiltersValue, PredefinedPeriod } from './components/Reports
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { Pagination } from './components/Pagination';
+import { Notification } from '../../../components/ui/Notification';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 //import { generateMockOrders } from './components/DatosMockeados';
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -248,28 +250,33 @@ function DonutChart({ slices }: { slices: { key: string; count: number }[] }) {
 }
 
 /* ── Exportar CSV ──────────────────────────────────────────────── */
-function exportOrdersCSV(orders: Order[]) {
-  const headers = ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'];
-  const rows = orders.map(o => [
-    o.id,
-    new Date(o.createdAt).toLocaleDateString('es-AR'),
-    `${o.customer.firstName} ${o.customer.lastName}`,
-    o.customer.email,
-    o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
-    o.total.toString().replace('.', ','),
-    o.status,
-    o.paymentStatus ?? 'no-abonado',
-  ]);
-  const csv = [headers, ...rows]
-    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `allmart-pedidos-${new Date().toISOString().slice(0, 10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+function exportOrdersCSV(orders: Order[], onSuccess: () => void, onError: () => void) {
+  try {
+    const headers = ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'];
+    const rows = orders.map(o => [
+      o.id,
+      new Date(o.createdAt).toLocaleDateString('es-AR'),
+      `${o.customer.firstName} ${o.customer.lastName}`,
+      o.customer.email,
+      o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
+      o.total.toString().replace('.', ','),
+      o.status,
+      o.paymentStatus ?? 'no-abonado',
+    ]);
+    const csv = [headers, ...rows]
+      .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `allmart-pedidos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    onSuccess();
+  } catch {
+    onError();
+  }
 }
 
 /* ── Componente principal ─────────────────────────────────────── */
@@ -282,6 +289,9 @@ export function AdminReports() {
   // Estado de paginación
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  // Feedback de exportación
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
 
 
   useEffect(() => {
@@ -546,11 +556,32 @@ export function AdminReports() {
         <button
           type="button"
           className={styles.exportBtn}
-          onClick={() => exportOrdersCSV(periodOrders)}
+          onClick={() => setShowExportModal(true)}
           title="Exportar pedidos del período como CSV"
         >
           ⬇ Exportar CSV
         </button>
+        <ConfirmModal
+          open={showExportModal}
+          title="Exportar pedidos"
+          message="¿Deseás exportar los pedidos del período como archivo CSV?"
+          confirmLabel="Exportar"
+          cancelLabel="Cancelar"
+          onConfirm={() => {
+            setShowExportModal(false);
+            exportOrdersCSV(periodOrders,
+              () => setNotif({ open: true, type: 'success', message: 'Exportación exitosa. Archivo CSV descargado.' }),
+              () => setNotif({ open: true, type: 'error', message: 'Ocurrió un error al exportar.' })
+            );
+          }}
+          onCancel={() => setShowExportModal(false)}
+        />
+        <Notification
+          open={notif.open}
+          type={notif.type}
+          message={notif.message}
+          onClose={() => setNotif(n => ({ ...n, open: false }))}
+        />
       </div>
 
       {/* KPI Cards */}
