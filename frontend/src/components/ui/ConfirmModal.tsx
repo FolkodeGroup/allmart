@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './ConfirmModal.module.css';
 
 export interface ConfirmModalProps {
@@ -23,12 +23,26 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     onCancel,
     loading = false,
 }) => {
+    const confirmRef = useRef<HTMLButtonElement>(null);
+
+    useEffect(() => {
+        if (open && confirmRef.current) {
+            confirmRef.current.focus();
+        }
+    }, [open]);
+
     if (!open) return null;
     return (
-        <div className={styles.overlay} role="dialog" aria-modal="true">
+        <div
+            className={styles.overlay}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? 'modal-title' : undefined}
+            aria-describedby="modal-desc"
+        >
             <div className={styles.modal}>
-                {title && <h3 className={styles.title}>{title}</h3>}
-                <div className={styles.message}>{message}</div>
+                {title && <h3 id="modal-title" className={styles.title}>{title}</h3>}
+                <div id="modal-desc" className={styles.message}>{message}</div>
                 <div className={styles.actions}>
                     <button
                         className={styles.cancelBtn}
@@ -39,6 +53,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                         {cancelLabel}
                     </button>
                     <button
+                        ref={confirmRef}
                         className={styles.confirmBtn}
                         onClick={onConfirm}
                         disabled={loading}

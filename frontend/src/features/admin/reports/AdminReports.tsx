@@ -1,3 +1,4 @@
+ 
 import { useMemo, useState, useEffect } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
@@ -12,6 +13,8 @@ import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
 //import { generateMockOrders } from './components/DatosMockeados';
+
+
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -256,6 +259,7 @@ export interface OrdersTableProps {
 
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
+  
   const { orders } = useAdminOrders();
   //const orders = generateMockOrders(50);
   const [isLoading] = useState(false);
@@ -579,15 +583,15 @@ export function AdminReports() {
             const fileName = getExportFileName('pedidos', periodLabel, exportFormat === 'xlsx' ? 'xlsx' : exportFormat);
             try {
               if (exportFormat === 'csv') {
-                exportOrdersCSV(periodOrders, fileName);
-              } else if (exportFormat === 'xlsx') {
-                exportOrdersXLSX(periodOrders, fileName);
-              } else if (exportFormat === 'pdf') {
-                await exportOrdersPDF(periodOrders, fileName);
-              }
+                  exportOrdersCSV(periodOrders, fileName);
+                } else if (exportFormat === 'xlsx') {
+                  exportOrdersXLSX(periodOrders, fileName);
+                } else if (exportFormat === 'pdf') {
+                  await exportOrdersPDF(periodOrders, fileName);
+                }
               setNotif({ open: true, type: 'success', message: `Exportación exitosa. Archivo ${exportFormat.toUpperCase()} descargado.` });
             } catch {
-              setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}).` });
+              setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}). Por favor, intentá nuevamente.` });
             } finally {
               setExportLoading(null);
             }
