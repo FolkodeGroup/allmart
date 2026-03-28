@@ -10,6 +10,7 @@ import { useAdminProducts } from "../../context/AdminProductsContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
 import { Button } from '../../components/ui/Button/Button';
 import styles from "./AdminLayout.module.css";
+import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 
 const navItems = [
   {
@@ -76,6 +77,10 @@ export function AdminLayout() {
   const { getLowStockCount } = useAdminProducts();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const {
+    isDirty,
+    interceptNavigation,
+  } = useUnsavedChanges();
 
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem('admin-sidebar-collapsed');
@@ -246,6 +251,17 @@ export function AdminLayout() {
                   key={item.to}
                   {...commonProps}
                   to={item.to}
+                  onClick={(e) => {
+                    if (isDirty) {
+                      e.preventDefault();
+
+                      interceptNavigation(() => {
+                        window.location.href = item.to;
+                      });
+                    } else {
+                      setIsMobileOpen(false);
+                    }
+                  }}
                   className={({ isActive }) =>
                     `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
                   }
