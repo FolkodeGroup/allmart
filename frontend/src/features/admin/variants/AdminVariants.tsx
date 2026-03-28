@@ -294,7 +294,7 @@ export function AdminVariants() {
       />
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
+        <h1 className={sectionStyles.title + ' ' + styles.sectionContentTitle}>
           <span>🎨</span> Variantes
           <Tooltip
             title="Las variantes permiten definir atributos de productos como color, tamaño o material. Cada variante tiene un nombre (ej: 'Color') y valores asociados (ej: 'Rojo', 'Azul'). Los clientes pueden seleccionar combinaciones de variantes al comprar."
