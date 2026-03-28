@@ -1,3 +1,89 @@
+/* === ReportsFilters styles moved here === */
+.filtersBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.periodTabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.periodTab {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.4em 1.1em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.periodTabActive {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.customRangeWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rangeLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.dateInput {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.3em 0.7em;
+  margin-top: 0.1em;
+}
+
+.rangeSeparator {
+  color: var(--color-text-tertiary);
+  font-size: 1.2em;
+  margin: 0 0.2em;
+}
+
+.clearBtn {
+  font-size: var(--text-xs);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.3em 0.9em;
+  margin-left: 0.5em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.clearBtn:enabled:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.clearBtnDisabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* ============================================
    ALLMART — ADMIN REPORTS
    ============================================ */
@@ -36,10 +122,12 @@
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
+
 .periodTab:hover {
   color: var(--color-text-primary);
   background: color-mix(in srgb, var(--color-bg-primary) 60%, transparent);
 }
+
 .periodTabActive {
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
@@ -59,16 +147,29 @@
   transition: background 0.15s, color 0.15s, transform 0.1s;
   white-space: nowrap;
 }
+
 .exportBtn:hover {
   background: color-mix(in srgb, var(--color-primary) 10%, transparent);
   transform: translateY(-1px);
 }
-.exportBtn:active { transform: translateY(0); }
+
+.exportBtn:active {
+  transform: translateY(0);
+}
 
 @media (max-width: 639px) {
-  .toolbar { flex-direction: column; align-items: stretch; }
-  .periodTabs { flex-wrap: wrap; }
-  .exportBtn { text-align: center; }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .periodTabs {
+    flex-wrap: wrap;
+  }
+
+  .exportBtn {
+    text-align: center;
+  }
 }
 
 /* ── KPI Grid ── */
@@ -78,8 +179,17 @@
   gap: var(--space-3);
 }
 
-@media (max-width: 1023px) { .kpiGrid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 639px)  { .kpiGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1023px) {
+  .kpiGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
 .kpiCard {
   background: var(--color-bg-primary);
@@ -93,14 +203,18 @@
   overflow: hidden;
   transition: box-shadow 0.15s, transform 0.15s;
 }
+
 .kpiCard:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
+
 .kpiCard::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
   background: var(--color-primary);
   border-radius: 14px 14px 0 0;
@@ -141,8 +255,14 @@
   font-weight: var(--font-semibold);
   margin-top: var(--space-1);
 }
-.kpiChangePos { color: #16a34a; }
-.kpiChangeNeg { color: var(--color-error); }
+
+.kpiChangePos {
+  color: #16a34a;
+}
+
+.kpiChangeNeg {
+  color: var(--color-error);
+}
 
 /* ── Panel genérico ── */
 .panel {
@@ -207,7 +327,9 @@
 }
 
 @media (max-width: 767px) {
-  .twoCol { grid-template-columns: 1fr; }
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Donut chart ── */
@@ -392,8 +514,14 @@
   border-bottom: 1px solid var(--color-border-light);
   transition: background 0.12s;
 }
-.summaryTable tbody tr:last-child { border-bottom: none; }
-.summaryTable tbody tr:hover { background: var(--color-bg-secondary); }
+
+.summaryTable tbody tr:last-child {
+  border-bottom: none;
+}
+
+.summaryTable tbody tr:hover {
+  background: var(--color-bg-secondary);
+}
 
 .summaryTable td {
   padding: var(--space-3) var(--space-4);
@@ -401,10 +529,26 @@
   vertical-align: middle;
 }
 
-.tdRight { text-align: right; }
-.tblId { font-weight: var(--font-bold); color: var(--color-text-secondary); font-size: var(--text-xs); }
-.tblDate { color: var(--color-text-tertiary); font-size: var(--text-xs); white-space: nowrap; }
-.tblTotal { font-weight: var(--font-bold); white-space: nowrap; }
+.tdRight {
+  text-align: right;
+}
+
+.tblId {
+  font-weight: var(--font-bold);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+
+.tblDate {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.tblTotal {
+  font-weight: var(--font-bold);
+  white-space: nowrap;
+}
 
 /* ── Status badges (tabla) ── */
 .stBadge {
@@ -416,12 +560,36 @@
   padding: 3px 10px;
   white-space: nowrap;
 }
-.st_pendiente     { background: #fef3c7; color: #92400e; }
-.st_confirmado    { background: #dbeafe; color: #1e40af; }
-.st_en_preparacion { background: #ede9fe; color: #5b21b6; }
-.st_enviado       { background: #d1fae5; color: #065f46; }
-.st_entregado     { background: #dcfce7; color: #166534; }
-.st_cancelado     { background: #fee2e2; color: #991b1b; }
+
+.st_pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.st_confirmado {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.st_en_preparacion {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.st_enviado {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.st_entregado {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.st_cancelado {
+  background: #fee2e2;
+  color: #991b1b;
+}
 
 /* ── Payment badges ── */
 .payBadge {
@@ -433,8 +601,16 @@
   padding: 3px 10px;
   white-space: nowrap;
 }
-.payAbonado { background: #dcfce7; color: #128C48; }
-.payPending { background: #f3f4f6; color: #6b7280; }
+
+.payAbonado {
+  background: #dcfce7;
+  color: #128C48;
+}
+
+.payPending {
+  background: #f3f4f6;
+  color: #6b7280;
+}
 
 /* ── More hint ── */
 .moreHint {
@@ -449,17 +625,20 @@
 /* ── Skeleton Loading Animations ── */
 
 @keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
 }
 
 .skeletonBase {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
