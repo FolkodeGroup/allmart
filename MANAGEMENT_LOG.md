@@ -1279,3 +1279,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #657: Add ReportsFilters component for enhanced report filtering options | 2026-03-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #658: 437 optimizar visualización de métricas principales | 2026-03-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #659: 438 añadir paginación y scroll en tablas de pedidos | 2026-03-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #660: 439 mejorar feedback de acciones de exportación | 2026-03-28 |
