@@ -5,6 +5,7 @@ import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
 import { ReportsFilters } from './components/ReportsFilters';
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
+import { ReportsMetrics } from './components/ReportsMetrics';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -305,6 +306,41 @@ export function AdminReports() {
     return { totalRevenue, orderCount, avgTicket, completionRate, paid };
   }, [activeOrders, periodOrders]);
 
+  // Métricas para ReportsMetrics
+  const metrics = [
+    {
+      key: 'revenue',
+      icon: '💰',
+      label: 'Ingresos totales',
+      value: formatPrice(kpis.totalRevenue),
+      highlight: true,
+    },
+    {
+      key: 'orders',
+      icon: '🛒',
+      label: 'Pedidos activos',
+      value: kpis.orderCount,
+    },
+    {
+      key: 'avgTicket',
+      icon: '🎯',
+      label: 'Ticket promedio',
+      value: formatPrice(kpis.avgTicket),
+    },
+    {
+      key: 'completion',
+      icon: '✅',
+      label: 'Tasa de entrega',
+      value: `${kpis.completionRate}%`,
+    },
+    {
+      key: 'paid',
+      icon: '💬',
+      label: 'Abonados (WhatsApp)',
+      value: kpis.paid,
+    },
+  ];
+
   /* ── Datos para BarChart ── */
   const barData = useMemo(() => {
     if (period === 'all') {
@@ -449,60 +485,7 @@ export function AdminReports() {
       </div>
 
       {/* KPI Cards */}
-      <div className={styles.kpiGrid}>
-        {isLoading ? (
-          <>
-            <KPISkeleton />
-            <KPISkeleton />
-            <KPISkeleton />
-            <KPISkeleton />
-            <KPISkeleton />
-          </>
-        ) : (
-          <>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>💰</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{formatPrice(kpis.totalRevenue)}</span>
-                <span className={styles.kpiLabel}>Ingresos totales</span>
-                {revenueChange !== null && (
-                  <span className={`${styles.kpiChange} ${revenueChange >= 0 ? styles.kpiChangePos : styles.kpiChangeNeg}`}>
-                    {revenueChange >= 0 ? '▲' : '▼'} {Math.abs(revenueChange).toFixed(1)}% vs período anterior
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>🛒</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{kpis.orderCount}</span>
-                <span className={styles.kpiLabel}>Pedidos activos</span>
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>🎯</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{formatPrice(kpis.avgTicket)}</span>
-                <span className={styles.kpiLabel}>Ticket promedio</span>
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>✅</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{kpis.completionRate}%</span>
-                <span className={styles.kpiLabel}>Tasa de entrega</span>
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>💬</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{kpis.paid}</span>
-                <span className={styles.kpiLabel}>Abonados (WhatsApp)</span>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+      <ReportsMetrics metrics={metrics} />
 
       {isLoading ? (
         <>

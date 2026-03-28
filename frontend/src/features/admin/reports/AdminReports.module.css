@@ -1,3 +1,174 @@
+.metricCard {
+  background: var(--color-bg-primary);
+  border-radius: 14px;
+  box-shadow: var(--shadow-xs);
+  padding: 1.3rem 1.2rem 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+  min-width: 0;
+  border: 1.5px solid var(--color-border-light);
+  transition: box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.metricCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 14px 14px 0 0;
+  background: var(--color-primary);
+  z-index: 1;
+}
+
+.metricCardRevenue::before {
+  background: #6366f1;
+}
+
+.metricCardOrders::before {
+  background: #059669;
+}
+
+.metricCardAvgTicket::before {
+  background: #eab308;
+}
+
+.metricCardCompletion::before {
+  background: #6122c5;
+}
+
+.metricCardPaid::before {
+  background: #ef4444;
+}
+
+.metricCardRevenue .metricValue {
+  color: #6366f1;
+}
+
+.metricCardOrders .metricValue {
+  color: #059669;
+}
+
+.metricCardAvgTicket .metricValue {
+  color: #eab308;
+}
+
+.metricCardCompletion .metricValue {
+  color: #6122c5;
+}
+
+.metricCardPaid .metricValue {
+  color: #ef4444;
+}
+
+/* === Métricas (cards) === */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 1100px) {
+  .metricsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.metricCard {
+  background: var(--color-bg-primary);
+  border-radius: 14px;
+  box-shadow: var(--shadow-xs);
+  padding: 1.3rem 1.2rem 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+  min-width: 0;
+  border: 1.5px solid var(--color-border-light);
+  transition: box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+}
+
+.metricCardRevenue {
+  background: linear-gradient(120deg, #f7fafc 70%, #e0e7ff 100%);
+}
+
+.metricCardOrders {
+  background: linear-gradient(120deg, #f7fafc 70%, #d1fae5 100%);
+}
+
+.metricCardAvgTicket {
+  background: linear-gradient(120deg, #f7fafc 70%, #fef9c3 100%);
+}
+
+.metricCardCompletion {
+  background: linear-gradient(120deg, #f7fafc 70%, #ece2fe 100%);
+}
+
+.metricCardPaid {
+  background: linear-gradient(120deg, #f7fafc 70%, #fee2e2 100%);
+}
+
+.metricCardRevenue .metricIcon {
+  color: #6366f1;
+}
+
+.metricCardOrders .metricIcon {
+  color: #059669;
+}
+
+.metricCardAvgTicket .metricIcon {
+  color: #eab308;
+}
+
+.metricCardCompletion .metricIcon {
+  color: #5622c5;
+}
+
+.metricCardPaid .metricIcon {
+  color: #ef4444;
+}
+
+.metricIcon {
+  font-size: 2.1rem;
+  color: var(--color-primary);
+  margin-bottom: 0.2rem;
+}
+
+.metricValue {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+  word-break: break-all;
+}
+
+.metricLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
 /* === ReportsFilters styles moved here === */
 .filtersBar {
   display: flex;
