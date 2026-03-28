@@ -1,0 +1,60 @@
+.notification {
+    min-width: 220px;
+    max-width: 340px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 24px #0002;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: fadeIn 0.3s forwards;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.success {
+    background: #dcfce7;
+    color: #128C48;
+    border: 1.5px solid #128C48;
+}
+
+.error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1.5px solid #b91c1c;
+}
+
+.info {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #a3a3a3;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    color: inherit;
+    cursor: pointer;
+    margin-left: auto;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+
+.closeBtn:hover {
+    opacity: 1;
+}
