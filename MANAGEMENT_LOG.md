@@ -1274,3 +1274,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 2 | Etiquetado de issue (FRONTEND) | Issue #650: Mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #652: 650 mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #654: 392 implementar confirmación de cambios antes de salir de la vista de variantes | 2026-03-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #655: improved padding productSelector variant component | 2026-03-28 |
