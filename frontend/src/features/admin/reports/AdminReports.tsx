@@ -3,6 +3,8 @@ import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
+import { ReportsFilters } from './components/ReportsFilters';
+import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -38,13 +40,14 @@ function orderDateKey(iso: string) {
 }
 
 /* ── Tipos internos ─────────────────────────────────────────────── */
-type Period = '7d' | '30d' | '90d' | 'all';
+type Period = PredefinedPeriod | 'custom';
 
 const PERIOD_LABELS: Record<Period, string> = {
   '7d': 'Últimos 7 días',
   '30d': 'Últimos 30 días',
   '90d': 'Últimos 90 días',
   'all': 'Todo el tiempo',
+  'custom': 'Rango personalizado',
 };
 
 /* ── Gráfica de barras SVG ─────────────────────────────────────── */
@@ -98,8 +101,8 @@ function BarChart({ data }: { data: { label: string; value: number; dateKey: str
           const showLabel = data.length <= 15
             ? true
             : data.length <= 31
-            ? i % 5 === 0 || i === data.length - 1
-            : i % 15 === 0 || i === data.length - 1;
+              ? i % 5 === 0 || i === data.length - 1
+              : i % 15 === 0 || i === data.length - 1;
 
           return (
             <g key={d.dateKey}
@@ -255,16 +258,36 @@ function exportOrdersCSV(orders: Order[]) {
 export function AdminReports() {
   const { orders } = useAdminOrders();
   const [isLoading, _setIsLoading] = useState<boolean>(false);
-  const [period, setPeriod] = useState<Period>('30d');
+  const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   const [now] = useState(() => Date.now());
 
-  /* ── Ventana de fechas ── */
+  // Determinar periodo para lógica existente
+  const period: Period =
+    filters.type === 'predefined' ? filters.period : 'custom';
+
+  // Calcular min/max fechas para inputs
+  const allDates = orders.map(o => o.createdAt.slice(0, 10));
+  const minDate = allDates.length ? allDates.reduce((a, b) => (a < b ? a : b)) : undefined;
+  const maxDate = allDates.length ? allDates.reduce((a, b) => (a > b ? a : b)) : undefined;
+
+  // Filtrado extendido
   const periodOrders = useMemo(() => {
-    if (period === 'all') return orders;
-    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-    const cutoff = now - days * 86400000;
-    return orders.filter(o => new Date(o.createdAt).getTime() >= cutoff);
-  }, [orders, period, now]);
+    if (filters.type === 'predefined') {
+      if (filters.period === 'all') return orders;
+      const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
+      const cutoff = now - days * 86400000;
+      return orders.filter(o => new Date(o.createdAt).getTime() >= cutoff);
+    } else {
+      const { from, to } = filters.range;
+      if (!from || !to) return [];
+      const fromTime = new Date(from).setHours(0, 0, 0, 0);
+      const toTime = new Date(to).setHours(23, 59, 59, 999);
+      return orders.filter(o => {
+        const t = new Date(o.createdAt).getTime();
+        return t >= fromTime && t <= toTime;
+      });
+    }
+  }, [orders, filters, now]);
 
   const activeOrders = useMemo(
     () => periodOrders.filter(o => o.status !== 'cancelado'),
@@ -409,18 +432,12 @@ export function AdminReports() {
 
       {/* Toolbar: filtro periodo + exportar */}
       <div className={styles.toolbar}>
-        <div className={styles.periodTabs}>
-          {(Object.keys(PERIOD_LABELS) as Period[]).map(p => (
-            <button
-              key={p}
-              type="button"
-              className={`${styles.periodTab} ${period === p ? styles.periodTabActive : ''}`}
-              onClick={() => setPeriod(p)}
-            >
-              {PERIOD_LABELS[p]}
-            </button>
-          ))}
-        </div>
+        <ReportsFilters
+          value={filters}
+          onChange={setFilters}
+          minDate={minDate}
+          maxDate={maxDate}
+        />
         <button
           type="button"
           className={styles.exportBtn}
@@ -532,9 +549,9 @@ export function AdminReports() {
           {/* Gráfica de ventas */}
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>📈 Ventas — {PERIOD_LABELS[period]}</h2>
+              <h2 className={styles.panelTitle}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
               <span className={styles.panelSubtitle}>
-                {period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
+                {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
@@ -621,11 +638,11 @@ export function AdminReports() {
                       .map(o => {
                         const statusLabel =
                           o.status === 'pendiente' ? 'Pendiente'
-                          : o.status === 'confirmado' ? 'Confirmado'
-                          : o.status === 'en-preparacion' ? 'En preparación'
-                          : o.status === 'enviado' ? 'Enviado'
-                          : o.status === 'entregado' ? 'Entregado'
-                          : 'Cancelado';
+                            : o.status === 'confirmado' ? 'Confirmado'
+                              : o.status === 'en-preparacion' ? 'En preparación'
+                                : o.status === 'enviado' ? 'Enviado'
+                                  : o.status === 'entregado' ? 'Entregado'
+                                    : 'Cancelado';
                         const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
                         return (
                           <tr key={o.id}>
