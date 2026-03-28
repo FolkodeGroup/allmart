@@ -8,7 +8,7 @@ import type { ReportsFiltersValue, PredefinedPeriod } from './components/Reports
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { Pagination } from './components/Pagination';
-import { generateMockOrders } from './components/DatosMockeados';
+//import { generateMockOrders } from './components/DatosMockeados';
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
   return new Intl.NumberFormat('es-AR', {
@@ -274,8 +274,8 @@ function exportOrdersCSV(orders: Order[]) {
 
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
-  //const { orders } = useAdminOrders();
-  const orders = generateMockOrders(50);
+  const { orders } = useAdminOrders();
+  //const orders = generateMockOrders(50);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   const [now, setNow] = useState(() => Date.now());

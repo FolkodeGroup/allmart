@@ -9,7 +9,8 @@ export interface OrdersTableProps {
     total: number;
 }
 
-export const OrdersTable: React.FC<OrdersTableProps> = ({ orders, page, pageSize, total }) => {
+export const OrdersTable: React.FC<OrdersTableProps> = ({ orders }) => {
+
     return (
         <div className={styles.summaryTableWrap}>
             <table className={styles.summaryTable}>
