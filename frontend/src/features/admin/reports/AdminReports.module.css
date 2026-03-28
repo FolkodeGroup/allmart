@@ -66,6 +66,28 @@
   color: #ef4444;
 }
 
+.trend {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+}
+
+.trendUp {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.trendDown {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.trendNeutral {
+  color: #767676;
+}
+
 /* === Métricas (cards) === */
 .metricsGrid {
   display: grid;
