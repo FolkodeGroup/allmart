@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
 import { ReportsFilters } from './components/ReportsFilters';
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
+import { ReportsMetrics } from './components/ReportsMetrics';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -26,12 +27,15 @@ function isoDateLabel(iso: string) {
 
 /* Genera array de fechas [YYYY-MM-DD] de los últimos N días */
 function lastNDayKeys(n: number): string[] {
+  const today = new Date();
   const keys: string[] = [];
+
   for (let i = n - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
     keys.push(d.toISOString().slice(0, 10));
   }
+
   return keys;
 }
 
@@ -54,7 +58,14 @@ const PERIOD_LABELS: Record<Period, string> = {
 function BarChart({ data }: { data: { label: string; value: number; dateKey: string }[] }) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const maxVal = Math.max(...data.map(d => d.value), 1);
+  const { maxVal, yTicks } = useMemo(() => {
+    const maxVal = Math.max(...data.map(d => d.value), 1);
+    const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({
+      pct: t,
+      val: maxVal * t
+    }));
+    return { maxVal, yTicks };
+  }, [data]);
   const W = 600;
   const H = 190;
   const padLeft = 60;
@@ -65,7 +76,8 @@ function BarChart({ data }: { data: { label: string; value: number; dateKey: str
   const chartH = H - padBottom - padTop;
 
   const barW = Math.max(4, chartW / data.length - (data.length > 30 ? 1 : 3));
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({ pct: t, val: maxVal * t }));
+
+  if (!data.length) return null;
 
   return (
     <div className={styles.chartWrap}>
@@ -181,6 +193,10 @@ function DonutChart({ slices }: { slices: { key: string; count: number }[] }) {
   const cy = 80;
   let cumAngle = -Math.PI / 2;
 
+  if (total === 0) {
+    return <p className={styles.noData}>Sin datos</p>;
+  }
+
   interface Arc { key: string; count: number; d: string; color: string }
   const arcs: Arc[] = slices
     .filter(s => s.count > 0)
@@ -238,7 +254,7 @@ function exportOrdersCSV(orders: Order[]) {
     `${o.customer.firstName} ${o.customer.lastName}`,
     o.customer.email,
     o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
-    o.total,
+    o.total.toString().replace('.', ','),
     o.status,
     o.paymentStatus ?? 'no-abonado',
   ]);
@@ -257,9 +273,14 @@ function exportOrdersCSV(orders: Order[]) {
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
   const { orders } = useAdminOrders();
-  const [isLoading, _setIsLoading] = useState<boolean>(false);
+  const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
-  const [now] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
 
   // Determinar periodo para lógica existente
   const period: Period =
@@ -270,24 +291,34 @@ export function AdminReports() {
   const minDate = allDates.length ? allDates.reduce((a, b) => (a < b ? a : b)) : undefined;
   const maxDate = allDates.length ? allDates.reduce((a, b) => (a > b ? a : b)) : undefined;
 
+  const ordersWithTime = useMemo(() =>
+    orders.map(o => ({
+      ...o,
+      createdAtMs: new Date(o.createdAt).getTime()
+    })),
+    [orders]);
+
   // Filtrado extendido
   const periodOrders = useMemo(() => {
     if (filters.type === 'predefined') {
-      if (filters.period === 'all') return orders;
+      if (filters.period === 'all') return ordersWithTime;
+
       const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
       const cutoff = now - days * 86400000;
-      return orders.filter(o => new Date(o.createdAt).getTime() >= cutoff);
+
+      return ordersWithTime.filter(o => o.createdAtMs >= cutoff);
     } else {
       const { from, to } = filters.range;
       if (!from || !to) return [];
+
       const fromTime = new Date(from).setHours(0, 0, 0, 0);
       const toTime = new Date(to).setHours(23, 59, 59, 999);
-      return orders.filter(o => {
-        const t = new Date(o.createdAt).getTime();
-        return t >= fromTime && t <= toTime;
-      });
+
+      return ordersWithTime.filter(o =>
+        o.createdAtMs >= fromTime && o.createdAtMs <= toTime
+      );
     }
-  }, [orders, filters, now]);
+  }, [ordersWithTime, filters, now]);
 
   const activeOrders = useMemo(
     () => periodOrders.filter(o => o.status !== 'cancelado'),
@@ -305,11 +336,77 @@ export function AdminReports() {
     return { totalRevenue, orderCount, avgTicket, completionRate, paid };
   }, [activeOrders, periodOrders]);
 
+  /* ── Comparativa período anterior ── */
+  const prevPeriodRevenue = useMemo(() => {
+    if (period === 'all') return null;
+
+    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+
+    const prevOrders = ordersWithTime.filter(o =>
+      o.createdAtMs >= now - days * 2 * 86400000 &&
+      o.createdAtMs < now - days * 86400000 &&
+      o.status !== 'cancelado'
+    );
+
+    return prevOrders.reduce((s, o) => s + o.total, 0);
+  }, [ordersWithTime, period, now]);
+
+
+
+  const KPISkeleton = () => (
+    <div className={styles.kpiCard}>
+      <div className={styles.skeletonKPIIcon}></div>
+      <div className={styles.kpiBody}>
+        <div className={styles.skeletonKPIValue}></div>
+        <div className={styles.skeletonKPILabel}></div>
+      </div>
+    </div>
+  );
+
+  const revenueChange = prevPeriodRevenue !== null && prevPeriodRevenue > 0
+    ? ((kpis.totalRevenue - prevPeriodRevenue) / prevPeriodRevenue) * 100
+    : null;
+
+  // Métricas para ReportsMetrics
+  const metrics = [
+    {
+      key: 'revenue',
+      icon: '💰',
+      label: 'Ingresos totales',
+      value: formatPrice(kpis.totalRevenue),
+      trend: revenueChange ?? undefined,
+    },
+    {
+      key: 'orders',
+      icon: '🛒',
+      label: 'Pedidos activos',
+      value: kpis.orderCount,
+    },
+    {
+      key: 'avgTicket',
+      icon: '🎯',
+      label: 'Ticket promedio',
+      value: formatPrice(kpis.avgTicket),
+    },
+    {
+      key: 'completion',
+      icon: '✅',
+      label: 'Tasa de entrega',
+      value: `${kpis.completionRate}%`,
+    },
+    {
+      key: 'paid',
+      icon: '💬',
+      label: 'Abonados (WhatsApp)',
+      value: kpis.paid,
+    },
+  ];
+
   /* ── Datos para BarChart ── */
   const barData = useMemo(() => {
     if (period === 'all') {
       const map = new Map<string, number>();
-      orders.forEach(o => {
+      ordersWithTime.forEach(o => {
         if (o.status === 'cancelado') return;
         const k = o.createdAt.slice(0, 7);
         map.set(k, (map.get(k) ?? 0) + o.total);
@@ -334,15 +431,16 @@ export function AdminReports() {
       label: isoDateLabel(k + 'T12:00:00'),
       value: map.get(k) ?? 0,
     }));
-  }, [orders, activeOrders, period]);
+  }, [ordersWithTime, activeOrders, period]);
 
   /* ── Top productos ── */
   const topProducts = useMemo(() => {
-    const map = new Map<string, { name: string; qty: number; revenue: number }>();
+    const map = new Map<string, { id: string; name: string; qty: number; revenue: number }>();
     activeOrders.forEach(o =>
       o.items.forEach(it => {
-        const prev = map.get(it.productId) ?? { name: it.productName, qty: 0, revenue: 0 };
+        const prev = map.get(it.productId) ?? { id: it.productId, name: it.productName, qty: 0, revenue: 0 };
         map.set(it.productId, {
+          id: it.productId,
           name: it.productName,
           qty: prev.qty + it.quantity,
           revenue: prev.revenue + it.unitPrice * it.quantity,
@@ -356,44 +454,30 @@ export function AdminReports() {
 
   /* ── Distribución por estado ── */
   const statusSlices = useMemo(() => {
+    const map = new Map<string, number>();
+
+    periodOrders.forEach(o => {
+      map.set(o.status, (map.get(o.status) ?? 0) + 1);
+    });
+
     const keys = ['pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado'];
+
     return keys.map(k => ({
       key: k,
-      count: periodOrders.filter(o => o.status === k).length,
+      count: map.get(k) ?? 0,
     }));
   }, [periodOrders]);
 
-  /* ── Comparativa período anterior ── */
-  const prevPeriodRevenue = useMemo(() => {
-    if (period === 'all') return null;
-    const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-    const prevOrders = orders.filter(o => {
-      const t = new Date(o.createdAt).getTime();
-      return t >= now - days * 2 * 86400000 && t < now - days * 86400000 && o.status !== 'cancelado';
-    });
-    return prevOrders.reduce((s, o) => s + o.total, 0);
-  }, [orders, period, now]);
 
-  const revenueChange = prevPeriodRevenue !== null && prevPeriodRevenue > 0
-    ? ((kpis.totalRevenue - prevPeriodRevenue) / prevPeriodRevenue) * 100
-    : null;
-
-  const KPISkeleton = () => (
-    <div className={styles.kpiCard}>
-      <div className={styles.skeletonKPIIcon}></div>
-      <div className={styles.kpiBody}>
-        <div className={styles.skeletonKPIValue}></div>
-        <div className={styles.skeletonKPILabel}></div>
-      </div>
-    </div>
-  );
 
   const BarChartSkeleton = () => (
     <div className={styles.skeletonChartContainer}>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', width: '100%' }}>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className={styles.skeletonChartBar} style={{ height: `${30 + Math.random() * 70}%` }}></div>
-        ))}
+        {
+          skeletonHeights.map((h, i) => (
+            <div key={i} className={styles.skeletonChartBar} style={{ height: `${h}%` }}></div>
+          ))
+        }
       </div>
     </div>
   );
@@ -415,6 +499,10 @@ export function AdminReports() {
         <div key={i} className={styles.skeletonProductRankItem}></div>
       ))}
     </div>
+  );
+
+  const [skeletonHeights] = useState(() =>
+    Array.from({ length: 20 }, () => 30 + Math.random() * 70)
   );
 
   return (
@@ -449,60 +537,15 @@ export function AdminReports() {
       </div>
 
       {/* KPI Cards */}
-      <div className={styles.kpiGrid}>
-        {isLoading ? (
-          <>
-            <KPISkeleton />
-            <KPISkeleton />
-            <KPISkeleton />
-            <KPISkeleton />
-            <KPISkeleton />
-          </>
-        ) : (
-          <>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>💰</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{formatPrice(kpis.totalRevenue)}</span>
-                <span className={styles.kpiLabel}>Ingresos totales</span>
-                {revenueChange !== null && (
-                  <span className={`${styles.kpiChange} ${revenueChange >= 0 ? styles.kpiChangePos : styles.kpiChangeNeg}`}>
-                    {revenueChange >= 0 ? '▲' : '▼'} {Math.abs(revenueChange).toFixed(1)}% vs período anterior
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>🛒</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{kpis.orderCount}</span>
-                <span className={styles.kpiLabel}>Pedidos activos</span>
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>🎯</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{formatPrice(kpis.avgTicket)}</span>
-                <span className={styles.kpiLabel}>Ticket promedio</span>
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>✅</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{kpis.completionRate}%</span>
-                <span className={styles.kpiLabel}>Tasa de entrega</span>
-              </div>
-            </div>
-            <div className={styles.kpiCard}>
-              <span className={styles.kpiIcon}>💬</span>
-              <div className={styles.kpiBody}>
-                <span className={styles.kpiValue}>{kpis.paid}</span>
-                <span className={styles.kpiLabel}>Abonados (WhatsApp)</span>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+      {isLoading ? (
+        <div className={styles.metricsGrid}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <KPISkeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <ReportsMetrics metrics={metrics} />
+      )}
 
       {isLoading ? (
         <>
@@ -574,7 +617,7 @@ export function AdminReports() {
               ) : (
                 <ol className={styles.productRanking}>
                   {topProducts.map((p, i) => (
-                    <li key={p.name} className={styles.productRankItem}>
+                    <li key={p.id} className={styles.productRankItem}>
                       <div className={styles.productRankMeta}>
                         <span className={styles.productRankPos}>{i + 1}</span>
                         <div className={styles.productRankInfo}>
