@@ -1277,3 +1277,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #655: improved padding productSelector variant component | 2026-03-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #656: 394 mejorar layout responsivo de variantes con gridflexbox | 2026-03-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #657: Add ReportsFilters component for enhanced report filtering options | 2026-03-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #658: 437 optimizar visualización de métricas principales | 2026-03-28 |
