@@ -438,13 +438,34 @@ ALLMART — ADMIN REPORTS
   box-shadow: var(--shadow-sm);
 }
 
+.exportSelectWrap {
+  position: relative;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 10px;
+}
+
+.exportSelect {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  background: none;
+  padding: var(--space-2) var(--space-5);
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.exportSelect:focus {
+  border: 0;
+  outline: none;
+}
+
 .exportBtn {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   background: none;
-  border: 1.5px solid var(--color-primary);
-  border-radius: 10px;
   padding: var(--space-2) var(--space-5);
   color: var(--color-primary-dark);
   cursor: pointer;
@@ -454,7 +475,6 @@ ALLMART — ADMIN REPORTS
 
 .exportBtn:hover {
   background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-  transform: translateY(-1px);
 }
 
 .exportBtn:active {

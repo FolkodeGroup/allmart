@@ -10,6 +10,7 @@ import { OrdersTable } from './components/OrdersTable';
 import { Pagination } from './components/Pagination';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
+import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
 //import { generateMockOrders } from './components/DatosMockeados';
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -249,34 +250,8 @@ function DonutChart({ slices }: { slices: { key: string; count: number }[] }) {
   );
 }
 
-/* ── Exportar CSV ──────────────────────────────────────────────── */
-function exportOrdersCSV(orders: Order[], onSuccess: () => void, onError: () => void) {
-  try {
-    const headers = ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'];
-    const rows = orders.map(o => [
-      o.id,
-      new Date(o.createdAt).toLocaleDateString('es-AR'),
-      `${o.customer.firstName} ${o.customer.lastName}`,
-      o.customer.email,
-      o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
-      o.total.toString().replace('.', ','),
-      o.status,
-      o.paymentStatus ?? 'no-abonado',
-    ]);
-    const csv = [headers, ...rows]
-      .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `allmart-pedidos-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    onSuccess();
-  } catch {
-    onError();
-  }
+export interface OrdersTableProps {
+  orders: Order[];
 }
 
 /* ── Componente principal ─────────────────────────────────────── */
@@ -292,6 +267,8 @@ export function AdminReports() {
   // Feedback de exportación
   const [showExportModal, setShowExportModal] = useState(false);
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
+  const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
+  const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf'>('csv');
 
 
   useEffect(() => {
@@ -302,7 +279,7 @@ export function AdminReports() {
   // Resetear a página 1 cuando cambian los filtros
   useEffect(() => {
     setPage(1);
-  }, [filters]);
+  }, [pageSize, filters]);
 
   // Determinar periodo para lógica existente
   const period: Period =
@@ -527,10 +504,15 @@ export function AdminReports() {
     Array.from({ length: 20 }, () => 30 + Math.random() * 70)
   );
 
-  const paginatedOrders = periodOrders.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const paginatedOrders = useMemo(() => {
+    return periodOrders.slice(
+      (page - 1) * pageSize,
+      page * pageSize
+    );
+  }, [periodOrders, page, pageSize]);
+
+  const from = periodOrders.length === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, periodOrders.length);
 
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`}>
@@ -553,26 +535,62 @@ export function AdminReports() {
           minDate={minDate}
           maxDate={maxDate}
         />
-        <button
-          type="button"
-          className={styles.exportBtn}
-          onClick={() => setShowExportModal(true)}
-          title="Exportar pedidos del período como CSV"
-        >
-          ⬇ Exportar CSV
-        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>Exportar como:</span>
+
+          <div className={styles.exportSelectWrap}>
+            <select
+              className={styles.exportSelect}
+              value={exportFormat}
+              onChange={e => setExportFormat(e.target.value as 'csv' | 'xlsx' | 'pdf')}
+              disabled={exportLoading !== null}
+              aria-label="Formato de exportación"
+            >
+              <option value="csv">CSV</option>
+              <option value="xlsx">Excel</option>
+              <option value="pdf">PDF</option>
+            </select>
+            <button
+              type="button"
+              className={styles.exportBtn}
+              onClick={() => setShowExportModal(true)}
+              title={`Exportar pedidos del período como ${exportFormat.toUpperCase()}`}
+              disabled={exportLoading !== null}
+            >
+              ⬇ Exportar
+            </button>
+          </div>
+        </div>
         <ConfirmModal
           open={showExportModal}
           title="Exportar pedidos"
-          message="¿Deseás exportar los pedidos del período como archivo CSV?"
-          confirmLabel="Exportar"
+          message={`¿Deseás exportar los pedidos del período como archivo ${exportFormat.toUpperCase()}?`}
+          confirmLabel={exportLoading ? 'Exportando...' : 'Exportar'}
           cancelLabel="Cancelar"
-          onConfirm={() => {
+          loading={!!exportLoading}
+          onConfirm={async () => {
+            setExportLoading(exportFormat);
             setShowExportModal(false);
-            exportOrdersCSV(periodOrders,
-              () => setNotif({ open: true, type: 'success', message: 'Exportación exitosa. Archivo CSV descargado.' }),
-              () => setNotif({ open: true, type: 'error', message: 'Ocurrió un error al exportar.' })
-            );
+            const periodLabel =
+              filters.type === 'predefined'
+                ? filters.period
+                : 'custom';
+            const fileName = getExportFileName('pedidos', periodLabel, exportFormat === 'xlsx' ? 'xlsx' : exportFormat);
+            try {
+              if (exportFormat === 'csv') {
+                exportOrdersCSV(periodOrders, fileName);
+              } else if (exportFormat === 'xlsx') {
+                exportOrdersXLSX(periodOrders, fileName);
+              } else if (exportFormat === 'pdf') {
+                await exportOrdersPDF(periodOrders, fileName);
+              }
+              setNotif({ open: true, type: 'success', message: `Exportación exitosa. Archivo ${exportFormat.toUpperCase()} descargado.` });
+            } catch {
+              setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}).` });
+            } finally {
+              setExportLoading(null);
+            }
           }}
           onCancel={() => setShowExportModal(false)}
         />
@@ -716,13 +734,10 @@ export function AdminReports() {
                   orders={
                     paginatedOrders
                   }
-                  page={page}
-                  pageSize={pageSize}
-                  total={periodOrders.length}
                 />
                 {periodOrders.length > pageSize && (
                   <p className={styles.moreHint}>
-                    Mostrando {Math.min(pageSize, periodOrders.length - (page - 1) * pageSize)} de {periodOrders.length}.
+                    Mostrando {from}-{to} de {periodOrders.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
                   </p>
                 )}
                 <Pagination
