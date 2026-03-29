@@ -701,14 +701,14 @@ ALLMART — ADMIN REPORTS
 /* ── Donut chart ── */
 .donutWrap {
   display: flex;
-  gap: var(--space-5);
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .donutSvg {
-  width: 160px;
-  height: 160px;
+  width: 350px;
+  height: 350px;
   flex-shrink: 0;
 }
 

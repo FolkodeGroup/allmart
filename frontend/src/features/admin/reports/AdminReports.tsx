@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { useAdminOrders } from '../../../context/AdminOrdersContext';
+//import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
@@ -13,7 +13,7 @@ import { Suspense, lazy } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
-//import { generateMockOrders } from './components/DatosMockeados';
+import { generateMockOrders } from './components/DatosMockeados';
 
 
 /* ── Helpers ──────────────────────────────────────────────────── */
@@ -81,8 +81,8 @@ export interface OrdersTableProps {
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
 
-  const { orders } = useAdminOrders();
-  //const orders = generateMockOrders(50);
+  //const { orders } = useAdminOrders();
+  const orders = generateMockOrders(50);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   const [now, setNow] = useState(() => Date.now());
