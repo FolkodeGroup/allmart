@@ -1,20 +1,173 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 13678 |
-| FedericoPaal | 2320 |
+| dgimenezdeveloper | 15299 |
+| FedericoPaal | 2910 |
 | Nahuel-Dalesio | 1630 |
 | CelinaJP | 1280 |
-| agustin-ovejero | 740 |
-| Mau-bar-iva | 195 |
+| Mau-bar-iva | 1235 |
+| agustin-ovejero | 840 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #686: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #685: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #684: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #683: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #677: 🔄 Actualización automática de puntajes semanal | 2026-03-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #675: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #686: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #685: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #684: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #683: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #681: 449 implementar confirmación de cambios antes de salir de la vista de reportes | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #680: 447 añadir filtros avanzados por estado de pedido cliente y producto | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #679: 446 mejorar visualización de productos más vendidos | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #678: 445 refactorizar componentes de reportes para mayor mantenibilidad | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #676: feat: enhance DonutChart with tooltip functionality and CSS adjustments | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #675: 🔄 Registrar puntaje de gestión | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #674: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #673: feat: add reusable skeleton animations and optimize chart componentswith lazy loading | 2026-03-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #672: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-29 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #682: Implementar Sistema de Ofertas y Promociones Dinámico para Ecommerce | 2026-03-29 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FULLSTACK) — Issue #682: Implementar Sistema de Ofertas y Promociones Dinámico para Ecommerce | 2026-03-29 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #682: Implementar Sistema de Ofertas y Promociones Dinámico para Ecommerce | 2026-03-29 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (BACKEND) — Issue #682: Implementar Sistema de Ofertas y Promociones Dinámico para Ecommerce | 2026-03-29 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #682: Implementar Sistema de Ofertas y Promociones Dinámico para Ecommerce | 2026-03-29 |
+| FedericoPaal | 60 | Issue | Permitir edición rápida de descripción e imagen de categoría | 2026-03-29 |
+| FedericoPaal | 40 | Issue | Añadir indicadores de categorías sin productos | 2026-03-29 |
+| Mau-bar-iva | 50 | Issue | Implementar confirmación de cambios antes de salir de la vista de reportes | 2026-03-29 |
+| Mau-bar-iva | 60 | Issue | Añadir filtros avanzados por estado de pedido, cliente y producto | 2026-03-29 |
+| Mau-bar-iva | 50 | Issue | Mejorar visualización de productos más vendidos | 2026-03-29 |
+| Mau-bar-iva | 80 | Issue | Refactorizar componentes de reportes para mayor mantenibilidad | 2026-03-29 |
+| Mau-bar-iva | 40 | Issue | Añadir tooltips y ayuda contextual en métricas y gráficos | 2026-03-29 |
+| Mau-bar-iva | 60 | Issue | Optimizar carga y visualización de gráficos | 2026-03-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #671: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #670: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #669: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #668: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #667: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #666: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #665: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #664: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #663: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #671: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #670: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #669: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #668: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #667: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #666: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #665: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #664: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #663: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #662: 442 mejorar accesibilidad de la vista de reportes | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #661: 440 implementar exportación avanzada a csvexcelpdf | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #660: 439 mejorar feedback de acciones de exportación | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #659: 438 añadir paginación y scroll en tablas de pedidos | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #658: 437 optimizar visualización de métricas principales | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #657: Add ReportsFilters component for enhanced report filtering options | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #656: 394 mejorar layout responsivo de variantes con gridflexbox | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #655: improved padding productSelector variant component | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #654: 392 implementar confirmación de cambios antes de salir de la vista de variantes | 2026-03-28 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #653: 🔄 Registrar puntaje de gestión | 2026-03-28 |
+| Mau-bar-iva | 70 | Issue | Mejorar accesibilidad de la vista de reportes | 2026-03-28 |
+| Mau-bar-iva | 90 | Issue | Implementar exportación avanzada a CSV/Excel/PDF | 2026-03-28 |
+| Mau-bar-iva | 50 | Issue | Mejorar feedback de acciones de exportación | 2026-03-28 |
+| Mau-bar-iva | 70 | Issue | Añadir paginación y scroll en tablas de pedidos | 2026-03-28 |
+| Mau-bar-iva | 60 | Issue | Optimizar visualización de métricas principales | 2026-03-28 |
+| Mau-bar-iva | 80 | Issue | Mejorar filtro de fechas y periodos en reportes | 2026-03-28 |
+| Mau-bar-iva | 60 | Issue | Mejorar layout responsivo de variantes con Grid/Flexbox | 2026-03-28 |
+| Mau-bar-iva | 70 | Issue | Expandir vista de variantes a toda la pantalla usando Grid/Flexbox | 2026-03-28 |
+| Mau-bar-iva | 50 | Issue | Implementar confirmación de cambios antes de salir de la vista de variantes | 2026-03-28 |
+| dgimenezdeveloper | 190 | Issue | Mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
+| dgimenezdeveloper | 30 | Issue | Redirigir a home de ecommerce al cerrar sesión desde el sidebar | 2026-03-27 |
+| dgimenezdeveloper | 70 | Issue | Refactorizar header para diseño profesional, moderno y atractivo | 2026-03-27 |
+| dgimenezdeveloper | 60 | Issue | Refactorizar header para diseño moderno, eliminar buscador general y aplicar colores de marca | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #653: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #652: 650 mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #651: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #649: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #647: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #646: Cambios: | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #645: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #643: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #642: Cambios principales: | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #641: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #640: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #639: 636 refactorizar header para diseño moderno eliminar buscador general y aplicar colores de marca | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #652: 650 mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #651: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #649: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #648: 405 mejorar la gestión de estados de categorías visibleoculta | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #647: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #646: Cambios: | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #645: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #643: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #642: Cambios principales: | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #641: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #640: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #637: 🔄 Registrar puntaje de gestión | 2026-03-27 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #650: Mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #644: Redirigir a home de ecommerce al cerrar sesión desde el sidebar | 2026-03-27 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #650: Mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #650: Mejorar la visualización y usabilidad de la card de productos destacados | 2026-03-27 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #644: Redirigir a home de ecommerce al cerrar sesión desde el sidebar | 2026-03-27 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (BACKEND) — Issue #644: Redirigir a home de ecommerce al cerrar sesión desde el sidebar | 2026-03-27 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #644: Redirigir a home de ecommerce al cerrar sesión desde el sidebar | 2026-03-27 |
+| FedericoPaal | 50 | Issue | Mejorar la gestión de estados de categorías (visible/oculta) | 2026-03-27 |
+| agustin-ovejero | 100 | Issue | Implementar edición masiva de estado de pedidos | 2026-03-26 |
+| dgimenezdeveloper | 70 | Issue | Optimizar performance del frontend en vistas de administración | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #637: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #635: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #634: Optimizaciones Implementadas | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #633: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #632: 419 implementar edición masiva de estado de pedidos | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #631: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #630: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #627: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #625: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #635: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #634: Optimizaciones Implementadas | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #633: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #632: 419 implementar edición masiva de estado de pedidos | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #631: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #630: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #629: 391 optimizar animaciones y transiciones en la UI de variantes | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #628: Filtros dinámicos para variantes | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #627: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #626: 404 refactorizar componentes de categorías para mayor mantenibilidad | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #625: 🔄 Registrar puntaje de gestión | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #624: 403 añadir tooltips y ayuda contextual en acciones de categorías | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #623: 402 optimizar carga de imágenes de categorías | 2026-03-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #622: 401 mejorar accesibilidad de la vista de categorías | 2026-03-26 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #638: Refactorizar header para diseño profesional, moderno y atractivo | 2026-03-26 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #636: Refactorizar header para diseño moderno, eliminar buscador general y aplicar colores de marca | 2026-03-26 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #638: Refactorizar header para diseño profesional, moderno y atractivo | 2026-03-26 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #638: Refactorizar header para diseño profesional, moderno y atractivo | 2026-03-26 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FRONTEND) — Issue #636: Refactorizar header para diseño moderno, eliminar buscador general y aplicar colores de marca | 2026-03-26 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #636: Refactorizar header para diseño moderno, eliminar buscador general y aplicar colores de marca | 2026-03-26 |
+| FedericoPaal | 80 | Issue | Refactorizar componentes de categorías para mayor mantenibilidad | 2026-03-26 |
+| FedericoPaal | 40 | Issue | Añadir tooltips y ayuda contextual en acciones de categorías | 2026-03-26 |
+| FedericoPaal | 60 | Issue | Optimizar carga de imágenes de categorías | 2026-03-26 |
+| FedericoPaal | 70 | Issue | Mejorar accesibilidad de la vista de categorías | 2026-03-26 |
+| Mau-bar-iva | 40 | Issue | Optimizar animaciones y transiciones en la UI de variantes | 2026-03-26 |
+| Mau-bar-iva | 60 | Issue | Añadir filtro avanzado por tipo de variante y estado | 2026-03-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #621: 🔄 Registrar puntaje de gestión | 2026-03-25 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #619: 🔄 Registrar puntaje de gestión | 2026-03-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #621: 🔄 Registrar puntaje de gestión | 2026-03-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #620: 400 adaptar la interfaz de categorías para dispositivos móviles | 2026-03-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #619: 🔄 Registrar puntaje de gestión | 2026-03-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #618: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-25 |
+| FedericoPaal | 90 | Issue | Adaptar la interfaz de categorías para dispositivos móviles | 2026-03-25 |
+| FedericoPaal | 100 | Issue | Implementar edición masiva de categorías | 2026-03-25 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #617: 🔄 Registrar puntaje de gestión | 2026-03-24 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #616: 🔄 Registrar puntaje de gestión | 2026-03-24 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #615: 🔄 Actualización automática de puntajes semanal | 2026-03-24 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #614: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #617: 🔄 Registrar puntaje de gestión | 2026-03-24 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #616: 🔄 Registrar puntaje de gestión | 2026-03-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #615: 🔄 Actualización automática de puntajes semanal | 2026-03-24 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #614: 🔄 Registrar puntaje de gestión | 2026-03-24 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #613: feat: add staff notes functionality with CRUD operations and integration in admin dashboard | 2026-03-24 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #613: feat: add staff notes functionality with CRUD operations and integration in admin dashboard | 2026-03-24 |

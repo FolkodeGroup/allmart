@@ -3,6 +3,8 @@ import type { FC } from 'react';
 import type { Category } from '../../../types';
 import styles from './AdminCategories.module.css';
 import { CategoryCard } from './CategoryCard';
+import { motion, AnimatePresence } from 'framer-motion';
+import { fadeSlideIn } from './animationConfig';
 import { Tooltip } from '../../../components/ui/Tooltip';
 
 interface CategoriesGridProps {
@@ -47,20 +49,31 @@ export const CategoriesGrid: FC<CategoriesGridProps> = ({
       <span style={{ fontWeight: 500 }}>Seleccionar todas las categorías</span>
     </div>
     <div className={styles.grid}>
-      {categories.map(cat => (
-        <CategoryCard
-          key={cat.id}
-          category={cat}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          canEdit={canEdit}
-          canDelete={canDelete}
-          productCount={getProductCount?.(cat)}
-          selected={selectedIds.includes(cat.id)}
-          onSelect={onSelect}
-          onToggleVisibility={onToggleVisibility}
-        />
-      ))}
+      <AnimatePresence>
+        {categories.map(cat => (
+          <motion.div
+            key={cat.id}
+            variants={fadeSlideIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+            style={{ willChange: 'opacity, transform' }}
+          >
+            <CategoryCard
+              category={cat}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              productCount={getProductCount?.(cat)}
+              selected={selectedIds.includes(cat.id)}
+              onSelect={onSelect}
+              onToggleVisibility={onToggleVisibility}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   </div>
 );

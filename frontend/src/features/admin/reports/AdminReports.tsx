@@ -1,19 +1,22 @@
- 
-import { useMemo, useState, useEffect } from 'react';
-import { useAdminOrders } from '../../../context/AdminOrdersContext';
+
+import React, { useMemo, useState, useEffect } from 'react';
+//import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
 import { ReportsFilters } from './components/ReportsFilters';
+import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { Pagination } from './components/Pagination';
+import { Suspense, lazy } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
-//import { generateMockOrders } from './components/DatosMockeados';
-
+import { generateMockOrders } from './components/DatosMockeados';
+import { ProductRanking } from './components/ReportsProductRanking';
+import { OrdersFilters } from './components/OrdersFilters';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -62,196 +65,16 @@ const PERIOD_LABELS: Record<Period, string> = {
   'custom': 'Rango personalizado',
 };
 
-/* ── Gráfica de barras SVG ─────────────────────────────────────── */
-function BarChart({ data }: { data: { label: string; value: number; dateKey: string }[] }) {
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-
-  const { maxVal, yTicks } = useMemo(() => {
-    const maxVal = Math.max(...data.map(d => d.value), 1);
-    const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({
-      pct: t,
-      val: maxVal * t
-    }));
-    return { maxVal, yTicks };
-  }, [data]);
-  const W = 600;
-  const H = 190;
-  const padLeft = 60;
-  const padBottom = 36;
-  const padTop = 16;
-  const padRight = 12;
-  const chartW = W - padLeft - padRight;
-  const chartH = H - padBottom - padTop;
-
-  const barW = Math.max(4, chartW / data.length - (data.length > 30 ? 1 : 3));
-
-  if (!data.length) return null;
-
-  return (
-    <div className={styles.chartWrap}>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className={styles.barChartSvg}
-        role="img"
-        aria-label="Gráfica de ventas por día"
-      >
-        {/* Grid lines + Y labels */}
-        {yTicks.map(t => {
-          const y = padTop + chartH - t.pct * chartH;
-          return (
-            <g key={t.pct}>
-              <line x1={padLeft} x2={W - padRight} y1={y} y2={y}
-                stroke="#E5E2DD" strokeWidth={t.pct === 0 ? 1.5 : 1} />
-              <text x={padLeft - 6} y={y + 4} textAnchor="end"
-                fontSize={9} fill="#767676" fontFamily="Montserrat, sans-serif">
-                {formatPriceShort(t.val)}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Bars */}
-        {data.map((d, i) => {
-          const barH = (d.value / maxVal) * chartH;
-          const x = padLeft + i * (chartW / data.length) + (chartW / data.length - barW) / 2;
-          const y = padTop + chartH - barH;
-          const isHovered = hoveredIdx === i;
-          const hasValue = d.value > 0;
-
-          const showLabel = data.length <= 15
-            ? true
-            : data.length <= 31
-              ? i % 5 === 0 || i === data.length - 1
-              : i % 15 === 0 || i === data.length - 1;
-
-          return (
-            <g key={d.dateKey}
-              onMouseEnter={() => setHoveredIdx(i)}
-              onMouseLeave={() => setHoveredIdx(null)}
-              style={{ cursor: hasValue ? 'pointer' : 'default' }}
-            >
-              <rect
-                x={x} y={hasValue ? y : padTop + chartH - 2}
-                width={barW}
-                height={hasValue ? Math.max(barH, 2) : 2}
-                rx={data.length <= 31 ? 4 : 2}
-                fill={isHovered ? '#5d7568' : hasValue ? '#769282' : '#F2EFEB'}
-                style={{ transition: 'fill 0.15s' }}
-              />
-              {showLabel && (
-                <text
-                  x={x + barW / 2} y={H - 8}
-                  textAnchor="middle"
-                  fontSize={data.length > 30 ? 7 : 9}
-                  fill="#767676"
-                  fontFamily="Montserrat, sans-serif"
-                >
-                  {d.label}
-                </text>
-              )}
-              {isHovered && hasValue && (
-                <>
-                  <rect
-                    x={Math.min(x + barW / 2 - 44, W - 90)}
-                    y={y - 32} width={88} height={24}
-                    rx={5} fill="#1A1A1A" opacity={0.88}
-                  />
-                  <text
-                    x={Math.min(x + barW / 2, W - 45)} y={y - 15}
-                    textAnchor="middle"
-                    fontSize={9.5} fill="#fff"
-                    fontFamily="Montserrat, sans-serif" fontWeight="600"
-                  >
-                    {formatPrice(d.value)}
-                  </text>
-                </>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
+// Lazy loading de gráficos optimizado (cada chunk por separado, no se recrea en cada render)
+const BarChart = lazy(initBarChart);
+const DonutChart = lazy(initDonutChart);
+function initBarChart() {
+  return import('./components/BarChart').then(m => ({ default: m.BarChart }));
+}
+function initDonutChart() {
+  return import('./components/DonutChart').then(m => ({ default: m.DonutChart }));
 }
 
-/* ── Gráfica de dona SVG ───────────────────────────────────────── */
-const DONUT_COLORS: Record<string, string> = {
-  pendiente: '#f59e0b',
-  confirmado: '#3b82f6',
-  'en-preparacion': '#8b5cf6',
-  enviado: '#769282',
-  entregado: '#22c55e',
-  cancelado: '#ef4444',
-};
-
-const DONUT_LABELS: Record<string, string> = {
-  pendiente: 'Pendiente',
-  confirmado: 'Confirmado',
-  'en-preparacion': 'En preparación',
-  enviado: 'Enviado',
-  entregado: 'Entregado',
-  cancelado: 'Cancelado',
-};
-
-function DonutChart({ slices }: { slices: { key: string; count: number }[] }) {
-  const total = slices.reduce((s, x) => s + x.count, 0);
-  const R = 56;
-  const r = 36;
-  const cx = 80;
-  const cy = 80;
-  let cumAngle = -Math.PI / 2;
-
-  if (total === 0) {
-    return <p className={styles.noData}>Sin datos</p>;
-  }
-
-  interface Arc { key: string; count: number; d: string; color: string }
-  const arcs: Arc[] = slices
-    .filter(s => s.count > 0)
-    .map(s => {
-      const angle = (s.count / total) * 2 * Math.PI;
-      const x1o = cx + R * Math.cos(cumAngle);
-      const y1o = cy + R * Math.sin(cumAngle);
-      const x2o = cx + R * Math.cos(cumAngle + angle);
-      const y2o = cy + R * Math.sin(cumAngle + angle);
-      const x1i = cx + r * Math.cos(cumAngle + angle);
-      const y1i = cy + r * Math.sin(cumAngle + angle);
-      const x2i = cx + r * Math.cos(cumAngle);
-      const y2i = cy + r * Math.sin(cumAngle);
-      const large = angle > Math.PI ? 1 : 0;
-      const d = `M${x1o},${y1o} A${R},${R} 0 ${large},1 ${x2o},${y2o} L${x1i},${y1i} A${r},${r} 0 ${large},0 ${x2i},${y2i} Z`;
-      cumAngle += angle;
-      return { key: s.key, count: s.count, d, color: DONUT_COLORS[s.key] ?? '#AEA491' };
-    });
-
-  return (
-    <div className={styles.donutWrap}>
-      <svg viewBox="0 0 160 160" className={styles.donutSvg} aria-label="Distribución de pedidos por estado">
-        {arcs.map(arc => (
-          <path key={arc.key} d={arc.d} fill={arc.color} stroke="#fff" strokeWidth={2.5}>
-            <title>{DONUT_LABELS[arc.key]}: {arc.count}</title>
-          </path>
-        ))}
-        <text x={cx} y={cy - 5} textAnchor="middle" fontSize={18} fontWeight="700"
-          fill="#1A1A1A" fontFamily="Montserrat, sans-serif">{total}</text>
-        <text x={cx} y={cy + 13} textAnchor="middle" fontSize={9} fill="#767676"
-          fontFamily="Montserrat, sans-serif">pedidos</text>
-      </svg>
-      <ul className={styles.donutLegend}>
-        {arcs.map(arc => (
-          <li key={arc.key} className={styles.donutLegendItem}>
-            <span className={styles.donutLegendDot} style={{ background: arc.color }} />
-            <span className={styles.donutLegendLabel}>{DONUT_LABELS[arc.key]}</span>
-            <span className={styles.donutLegendCount}>{arc.count}</span>
-            <span className={styles.donutLegendPct}>
-              ({Math.round((arc.count / total) * 100)}%)
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export interface OrdersTableProps {
   orders: Order[];
@@ -259,20 +82,35 @@ export interface OrdersTableProps {
 
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
-  
-  const { orders } = useAdminOrders();
-  //const orders = generateMockOrders(50);
+
+  //const { orders } = useAdminOrders();
+  const orders = generateMockOrders(50);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
+  // Unsaved changes detection
+  const {
+    setIsDirty,
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
+  } = useUnsavedChangesWarning({ active: true });
+  // Eliminado: showUnsavedModal, setShowUnsavedModal (no se usan más)
+  // Filtros avanzados SOLO para la tabla de pedidos
+  const [ordersTableFilters, setOrdersTableFilters] = useState<{ status: string[]; clientQuery: string; productQuery: string }>({ status: [], clientQuery: '', productQuery: '' });
   const [now, setNow] = useState(() => Date.now());
   // Estado de paginación
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+
   // Feedback de exportación
   const [showExportModal, setShowExportModal] = useState(false);
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
   const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf'>('csv');
+  // Estados para alternar la vista del top de productos (lista vs tarjetas)
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+
 
 
   useEffect(() => {
@@ -284,6 +122,15 @@ export function AdminReports() {
   useEffect(() => {
     setPage(1);
   }, [pageSize, filters]);
+
+  // Detectar cambios en filtros generales o de pedidos
+  useEffect(() => {
+    setIsDirty(true);
+  }, [filters, setIsDirty]);
+
+  // Bloquear navegación interna (react-router-dom v6+)
+  // Si usas react-router, puedes usar useBlocker o usePrompt aquí
+  // Eliminado: efectos y handlers de navegación SPA y confirmación/cancelación de modal de cambios no guardados
 
   // Determinar periodo para lógica existente
   const period: Period =
@@ -302,26 +149,71 @@ export function AdminReports() {
     [orders]);
 
   // Filtrado extendido
+  // periodOrders: solo filtra por período (filtros generales)
   const periodOrders = useMemo(() => {
+    let filtered = [] as typeof ordersWithTime;
     if (filters.type === 'predefined') {
-      if (filters.period === 'all') return ordersWithTime;
-
-      const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
-      const cutoff = now - days * 86400000;
-
-      return ordersWithTime.filter(o => o.createdAtMs >= cutoff);
+      if (filters.period === 'all') {
+        filtered = ordersWithTime;
+      } else {
+        const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
+        const cutoff = now - days * 86400000;
+        filtered = ordersWithTime.filter(o => o.createdAtMs >= cutoff);
+      }
     } else {
       const { from, to } = filters.range;
       if (!from || !to) return [];
-
       const fromTime = new Date(from).setHours(0, 0, 0, 0);
       const toTime = new Date(to).setHours(23, 59, 59, 999);
+      filtered = ordersWithTime.filter(o => o.createdAtMs >= fromTime && o.createdAtMs <= toTime);
+    }
+    return filtered;
+  }, [ordersWithTime, filters, now]);
 
-      return ordersWithTime.filter(o =>
-        o.createdAtMs >= fromTime && o.createdAtMs <= toTime
+
+
+  // Filtros avanzados SOLO para la tabla de pedidos
+  const filteredOrdersTable = useMemo(() => {
+    let filtered = periodOrders;
+    // 1. Filtro por estado (multi-select)
+    if (ordersTableFilters.status && ordersTableFilters.status.length > 0) {
+      filtered = filtered.filter(o => ordersTableFilters.status.includes(o.status));
+    }
+    // 2. Filtro por cliente (nombre, email)
+    if (ordersTableFilters.clientQuery && ordersTableFilters.clientQuery.trim() !== '') {
+      const q = ordersTableFilters.clientQuery.trim().toLowerCase();
+      filtered = filtered.filter(o => {
+        const c = o.customer;
+        return (
+          (c.firstName && c.firstName.toLowerCase().includes(q)) ||
+          (c.lastName && c.lastName.toLowerCase().includes(q)) ||
+          (c.email && c.email.toLowerCase().includes(q))
+        );
+      });
+    }
+
+
+    // 3. Filtro por producto (nombre parcial)
+    if (ordersTableFilters.productQuery && ordersTableFilters.productQuery.trim() !== '') {
+      const pq = ordersTableFilters.productQuery.trim().toLowerCase();
+      filtered = filtered.filter(o =>
+        o.items && o.items.some(it => it.productName && it.productName.toLowerCase().includes(pq))
       );
     }
-  }, [ordersWithTime, filters, now]);
+    return filtered;
+  }, [periodOrders, ordersTableFilters]);
+
+  // Corrige la página si los filtros dejan menos elementos de los que la página actual puede mostrar
+  useEffect(() => {
+    const totalFiltered = filteredOrdersTable.length;
+    const maxPage = Math.max(1, Math.ceil(totalFiltered / pageSize));
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [filteredOrdersTable.length, pageSize, page]);
+
+  const from = filteredOrdersTable.length === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, filteredOrdersTable.length);
 
   const activeOrders = useMemo(
     () => periodOrders.filter(o => o.status !== 'cancelado'),
@@ -473,28 +365,34 @@ export function AdminReports() {
 
 
 
-  const BarChartSkeleton = () => (
-    <div className={styles.skeletonChartContainer}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', width: '100%' }}>
-        {
-          skeletonHeights.map((h, i) => (
-            <div key={i} className={styles.skeletonChartBar} style={{ height: `${h}%` }}></div>
-          ))
-        }
-      </div>
-    </div>
-  );
 
-  const DonutChartSkeleton = () => (
-    <div className={styles.donutWrap}>
-      <div className={styles.skeletonDonut}></div>
-      <div className={styles.skeletonLegend}>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className={styles.skeletonLegendItem}></div>
-        ))}
+  // Skeletons memoizados y reutilizables
+  const BarChartSkeleton = React.memo(function BarChartSkeleton() {
+    return (
+      <div className={styles.skeletonChartContainer}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', width: '100%' }}>
+          {
+            skeletonHeights.map((h, i) => (
+              <div key={i} className={styles.skeletonChartBar + ' skeleton'} style={{ height: `${h}%` }}></div>
+            ))
+          }
+        </div>
       </div>
-    </div>
-  );
+    );
+  });
+
+  const DonutChartSkeleton = React.memo(function DonutChartSkeleton() {
+    return (
+      <div className={styles.donutWrap}>
+        <div className={styles.skeletonDonut + ' skeleton'}></div>
+        <div className={styles.skeletonLegend}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className={styles.skeletonLegendItem + ' skeleton'}></div>
+          ))}
+        </div>
+      </div>
+    );
+  });
 
   const ProductRankingSkeleton = () => (
     <div className={styles.skeletonProductRanking}>
@@ -509,14 +407,13 @@ export function AdminReports() {
   );
 
   const paginatedOrders = useMemo(() => {
-    return periodOrders.slice(
+    return filteredOrdersTable.slice(
       (page - 1) * pageSize,
       page * pageSize
     );
-  }, [periodOrders, page, pageSize]);
+  }, [filteredOrdersTable, page, pageSize]);
 
-  const from = periodOrders.length === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to = Math.min(page * pageSize, periodOrders.length);
+
 
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`}>
@@ -530,6 +427,17 @@ export function AdminReports() {
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
         </p>
       </div>
+
+      {/* Modal de confirmación de cambios no guardados */}
+      <ConfirmModal
+        open={showWarning}
+        title="Tienes cambios sin guardar"
+        message="¿Seguro que quieres salir? Se perderán los cambios no guardados."
+        confirmLabel="Salir y descartar cambios"
+        cancelLabel="Cancelar"
+        onConfirm={confirmNavigation}
+        onCancel={cancelNavigation}
+      />
 
       {/* Toolbar: filtro periodo + exportar */}
       <div className={styles.toolbar}>
@@ -583,12 +491,12 @@ export function AdminReports() {
             const fileName = getExportFileName('pedidos', periodLabel, exportFormat === 'xlsx' ? 'xlsx' : exportFormat);
             try {
               if (exportFormat === 'csv') {
-                  exportOrdersCSV(periodOrders, fileName);
-                } else if (exportFormat === 'xlsx') {
-                  exportOrdersXLSX(periodOrders, fileName);
-                } else if (exportFormat === 'pdf') {
-                  await exportOrdersPDF(periodOrders, fileName);
-                }
+                exportOrdersCSV(periodOrders, fileName);
+              } else if (exportFormat === 'xlsx') {
+                exportOrdersXLSX(periodOrders, fileName);
+              } else if (exportFormat === 'pdf') {
+                await exportOrdersPDF(periodOrders, fileName);
+              }
               setNotif({ open: true, type: 'success', message: `Exportación exitosa. Archivo ${exportFormat.toUpperCase()} descargado.` });
             } catch {
               setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}). Por favor, intentá nuevamente.` });
@@ -671,7 +579,11 @@ export function AdminReports() {
             {barData.every(d => d.value === 0) ? (
               <p className={styles.noData}>Sin ventas en este período.</p>
             ) : (
-              <BarChart data={barData} />
+              <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
+                <div className={styles.fadeIn}>
+                  <BarChart data={barData} formatValue={(n) => formatPriceShort(n)} />
+                </div>
+              </Suspense>
             )}
           </div>
 
@@ -680,33 +592,34 @@ export function AdminReports() {
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
                 <h2 className={styles.panelTitle}>🏆 Productos más vendidos</h2>
-                <span className={styles.panelSubtitle}>Por ingresos generados</span>
+                <p className={styles.panelSubtitle}>Por ingresos generados</p>
+
+              </div>
+              <div className={styles.viewToggle}>
+                <span className={styles.viewToggleLabel}>Cambiar vista:</span>
+                <button
+                  className={`${styles.toggleBtn} ${viewMode === 'list' ? styles.active : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  📊 Lista
+                </button>
+
+                <button
+                  className={`${styles.toggleBtn} ${viewMode === 'cards' ? styles.active : ''}`}
+                  onClick={() => setViewMode('cards')}
+                >
+                  🧾 Cards
+                </button>
               </div>
               {topProducts.length === 0 ? (
                 <p className={styles.noData}>Sin datos en este período.</p>
               ) : (
-                <ol className={styles.productRanking}>
-                  {topProducts.map((p, i) => (
-                    <li key={p.id} className={styles.productRankItem}>
-                      <div className={styles.productRankMeta}>
-                        <span className={styles.productRankPos}>{i + 1}</span>
-                        <div className={styles.productRankInfo}>
-                          <span className={styles.productRankName}>{p.name}</span>
-                          <div className={styles.productRankStats}>
-                            <span className={styles.productRankQty}>{p.qty} und.</span>
-                            <span className={styles.productRankRevenue}>{formatPrice(p.revenue)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.productBarWrap}>
-                        <div
-                          className={`${styles.productBar} ${i === 0 ? styles.productBarTop : ''}`}
-                          style={{ width: `${Math.max((p.revenue / maxProductRevenue) * 100, 4)}%` }}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+                <ProductRanking
+                  products={topProducts}
+                  maxRevenue={maxProductRevenue}
+                  formatPrice={formatPrice}
+                  viewMode={viewMode}
+                />
               )}
             </div>
 
@@ -718,7 +631,11 @@ export function AdminReports() {
               {periodOrders.length === 0 ? (
                 <p className={styles.noData}>Sin datos en este período.</p>
               ) : (
-                <DonutChart slices={statusSlices} />
+                <Suspense fallback={<DonutChartSkeleton aria-busy="true" />}>
+                  <div className={styles.fadeIn}>
+                    <DonutChart slices={statusSlices} />
+                  </div>
+                </Suspense>
               )}
             </div>
           </div>
@@ -729,15 +646,58 @@ export function AdminReports() {
               <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
               <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
             </div>
+            {/* Filtros rápidos para la tabla de pedidos */}
+            <div className={styles.advancedFiltersWrap} style={{ marginBottom: 16 }}>
+
+              <label className={styles.advancedLabel}>
+                Cliente
+                <input
+                  type="text"
+                  value={ordersTableFilters.clientQuery}
+                  onChange={e => {
+                    e.preventDefault();
+                    setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
+                  }}
+                  placeholder="Nombre o email"
+                  className={styles.advancedInput}
+                />
+              </label>
+              <label className={styles.advancedLabel}>
+                Producto
+                <input
+                  type="text"
+                  value={ordersTableFilters.productQuery}
+                  onChange={e => {
+                    e.preventDefault();
+                    setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
+                  }}
+                  placeholder="Nombre de producto"
+                  className={styles.advancedInput}
+                />
+              </label>
+              <OrdersFilters
+                ordersTableFilters={ordersTableFilters}
+                setOrdersTableFilters={setOrdersTableFilters} />
+              <div className={styles.advancedActions}>
+                <button
+                  type="button"
+                  className={styles.clearBtn}
+                  onClick={() => setOrdersTableFilters({ status: [], clientQuery: '', productQuery: '' })}
+                  disabled={
+                    !(ordersTableFilters.status.length || ordersTableFilters.clientQuery || ordersTableFilters.productQuery)
+                  }
+                  title="Limpiar filtros avanzados"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
             {periodOrders.length === 0 ? (
               <p className={styles.noData}>Sin pedidos en este período.</p>
             ) : (
               <>
-
                 <OrdersTable
-                  orders={
-                    paginatedOrders
-                  }
+                  orders={paginatedOrders}
                 />
                 {periodOrders.length > pageSize && (
                   <p className={styles.moreHint}>
@@ -747,7 +707,7 @@ export function AdminReports() {
                 <Pagination
                   page={page}
                   pageSize={pageSize}
-                  total={periodOrders.length}
+                  total={filteredOrdersTable.length}
                   onPageChange={setPage}
                   onPageSizeChange={setPageSize}
                   pageSizeOptions={[5, 10, 20, 50, 100]}
