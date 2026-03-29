@@ -1282,3 +1282,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #660: 439 mejorar feedback de acciones de exportación | 2026-03-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #661: 440 implementar exportación avanzada a csvexcelpdf | 2026-03-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #662: 442 mejorar accesibilidad de la vista de reportes | 2026-03-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #674: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-03-29 |
