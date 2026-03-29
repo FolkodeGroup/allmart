@@ -11,18 +11,28 @@ import { CreateCategoryDTO, UpdateCategoryDTO } from '../../models/Category';
 
 export async function index(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { q, page, limit } = req.query;
+    const { q, page, limit, minProducts, maxProducts, isVisible } = req.query;
 
     const parsePositiveInt = (value: any): number | undefined => {
-      if (!value) return undefined;
+      if (value === undefined || value === null || value === '') return undefined;
       const parsed = Number.parseInt(value as string, 10);
-      return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+    };
+
+    const parseBoolean = (value: any): boolean | undefined => {
+      if (value === undefined || value === null || value === '') return undefined;
+      if (value === 'true' || value === true) return true;
+      if (value === 'false' || value === false) return false;
+      return undefined;
     };
 
     const result = await categoriesService.getAdminCategories({
       q: q as string,
       page: parsePositiveInt(page),
       limit: parsePositiveInt(limit),
+      minProducts: parsePositiveInt(minProducts),
+      maxProducts: parsePositiveInt(maxProducts),
+      isVisible: parseBoolean(isVisible),
     });
     sendSuccess(res, result);
   } catch (err) { next(err); }

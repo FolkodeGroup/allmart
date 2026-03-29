@@ -20,6 +20,7 @@ import { CategoriesFilters } from './components/CategoriesFilters';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { useCategoryBulkEdit } from './hooks/useCategoryBulkEdit';
 
+
 export function AdminCategories() {
   const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, updateCategory, deleteCategory } = useAdminCategories();
   // Local state for pagination
@@ -39,10 +40,13 @@ export function AdminCategories() {
   const [optimisticVis, setOptimisticVis] = useState<Record<string, boolean>>({});
   const { showNotification } = useNotification();
 
+  // Filtros avanzados
+  const [minProducts, setMinProducts] = useState<number | ''>('');
+  const [maxProducts, setMaxProducts] = useState<number | ''>('');
+  const [isVisible, setIsVisible] = useState<'all' | 'visible' | 'hidden'>('all');
 
   // Debounce para búsqueda instantánea
   const debouncedSearch = useDebouncedValue(search, 350);
-
 
   // Selección múltiple (extraído a hook personalizado)
   const {
@@ -52,7 +56,6 @@ export function AdminCategories() {
     handleSelectCategory,
     clearSelection
   } = useCategorySelection(categories);
-
 
   // Estado y lógica para edición masiva (extraído a hook personalizado)
   const {
@@ -65,17 +68,23 @@ export function AdminCategories() {
     handleBulkEdit
   } = useCategoryBulkEdit();
 
-  // Fetch categories when page, limit, or search changes
+  // Fetch categories when filtros cambian
   useEffect(() => {
-    refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
+    refreshCategories({
+      q: selectedSuggestion || debouncedSearch,
+      page,
+      limit,
+      minProducts: minProducts === '' ? undefined : minProducts,
+      maxProducts: maxProducts === '' ? undefined : maxProducts,
+      isVisible: isVisible === 'all' ? undefined : isVisible === 'visible' ? true : false,
+    });
     if (selectedSuggestion) setSelectedSuggestion(null);
+  }, [debouncedSearch, selectedSuggestion, page, limit, minProducts, maxProducts, isVisible, refreshCategories]);
 
-  }, [debouncedSearch, selectedSuggestion, page, limit, refreshCategories]);
-
-  // Reset page to 1 when search changes
+  // Reset page to 1 cuando cambia búsqueda o filtros
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, minProducts, maxProducts, isVisible]);
 
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -178,6 +187,12 @@ export function AdminCategories() {
           setSearch={setSearch}
           setSelectedSuggestion={setSelectedSuggestion}
           total={total}
+          minProducts={minProducts}
+          setMinProducts={setMinProducts}
+          maxProducts={maxProducts}
+          setMaxProducts={setMaxProducts}
+          isVisible={isVisible}
+          setIsVisible={setIsVisible}
         />
 
       {/* Tabla */}

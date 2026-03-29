@@ -34,7 +34,7 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
   const { token } = useAdminAuth();
   const { showNotification } = useNotification();
 
-  /** Carga (o recarga) las categorías desde el backend con paginación y búsqueda */
+  /** Carga (o recarga) las categorías desde el backend con paginación, búsqueda y filtros avanzados */
   const refreshCategories = useCallback(async (params?: categoriesService.AdminCategoriesParams) => {
     if (!token) return;
     setIsLoading(true);
@@ -65,7 +65,7 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     if (!token) throw new Error('No autenticado');
     try {
       const newCategory = await categoriesService.createAdminCategory(token, category);
-      refreshCategories(); 
+      refreshCategories();
       showNotification('success', 'Categoría creada exitosamente');
       return newCategory;
     } catch (err) {
