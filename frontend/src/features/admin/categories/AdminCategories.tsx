@@ -1,4 +1,6 @@
 import { CategoriesPagination } from './components/CategoriesPagination';
+import { motion, AnimatePresence } from 'framer-motion';
+import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
 import { useState, useEffect, useCallback } from 'react';
 import { Modal } from '../../../components/ui/Modal';
@@ -181,57 +183,93 @@ export function AdminCategories() {
 
 
         {/* Filtros fuera del header */}
-        <CategoriesFilters
-          categories={categories}
-          search={search}
-          setSearch={setSearch}
-          setSelectedSuggestion={setSelectedSuggestion}
-          total={total}
-          minProducts={minProducts}
-          setMinProducts={setMinProducts}
-          maxProducts={maxProducts}
-          setMaxProducts={setMaxProducts}
-          isVisible={isVisible}
-          setIsVisible={setIsVisible}
-        />
+        <motion.div
+          variants={fadeSlideIn}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          layout
+        >
+          <CategoriesFilters
+            categories={categories}
+            search={search}
+            setSearch={setSearch}
+            setSelectedSuggestion={setSelectedSuggestion}
+            total={total}
+            minProducts={minProducts}
+            setMinProducts={setMinProducts}
+            maxProducts={maxProducts}
+            setMaxProducts={setMaxProducts}
+            isVisible={isVisible}
+            setIsVisible={setIsVisible}
+          />
+        </motion.div>
 
-      {/* Tabla */}
-      {loading && <LoadingSpinner message="Cargando categorías..." size="lg" />}
-
-      {!loading && error && (
-        <EmptyState
-          icon={<AlertCircle size={48} color="#ef4444" />}
-          title="Error al cargar categorías"
-          description={error}
-          action={{ label: 'Reintentar', onClick: () => window.location.reload() }}
-        />
-      )}
-
-      {!loading && !error && (categories.length === 0 ? (
-        <EmptyState
-          icon={<FolderSearch size={48} color="#94a3b8" />}
-          title="No se encontraron categorías"
-          description={search
-            ? "No hay resultados para tu búsqueda. Probá con otro término."
-            : "Todavía no cargaste ninguna categoría al catálogo."
-          }
-          action={can('categories.create') ? { label: 'Nueva Categoría', onClick: handleNew } : undefined}
-        />
-      ) : (
-        <CategoriesGrid
-          categories={categoriesWithOptimism}
-          onEdit={can('categories.edit') ? handleEdit : undefined}
-          onDelete={can('categories.delete') ? (id => setDeleteConfirm(id)) : undefined}
-          canEdit={can('categories.edit')}
-          canDelete={can('categories.delete')}
-          getProductCount={cat => cat.itemCount}
-          selectedIds={selectedIds}
-          onSelect={handleSelectCategory}
-          allSelected={allVisibleSelected}
-          onSelectAll={handleSelectAllVisible}
-          onToggleVisibility={can('categories.edit') ? handleToggleVisibility : undefined}
-        />
-      ))}
+      {/* Tabla y feedback */}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="loading"
+            variants={fadeSlideIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+          >
+            <LoadingSpinner message="Cargando categorías..." size="lg" />
+          </motion.div>
+        ) : error ? (
+          <motion.div
+            key="error"
+            variants={fadeSlideIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+          >
+            <EmptyState
+              icon={<AlertCircle size={48} color="#ef4444" />}
+              title="Error al cargar categorías"
+              description={error}
+              action={{ label: 'Reintentar', onClick: () => window.location.reload() }}
+            />
+          </motion.div>
+        ) : categories.length === 0 ? (
+          <motion.div
+            key="empty"
+            variants={fadeSlideIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+          >
+            <EmptyState
+              icon={<FolderSearch size={48} color="#94a3b8" />}
+              title="No se encontraron categorías"
+              description={search
+                ? "No hay resultados para tu búsqueda. Probá con otro término."
+                : "Todavía no cargaste ninguna categoría al catálogo."
+              }
+              action={can('categories.create') ? { label: 'Nueva Categoría', onClick: handleNew } : undefined}
+            />
+          </motion.div>
+        ) : (
+          <CategoriesGrid
+            key="grid"
+            categories={categoriesWithOptimism}
+            onEdit={can('categories.edit') ? handleEdit : undefined}
+            onDelete={can('categories.delete') ? (id => setDeleteConfirm(id)) : undefined}
+            canEdit={can('categories.edit')}
+            canDelete={can('categories.delete')}
+            getProductCount={cat => cat.itemCount}
+            selectedIds={selectedIds}
+            onSelect={handleSelectCategory}
+            allSelected={allVisibleSelected}
+            onSelectAll={handleSelectAllVisible}
+            onToggleVisibility={can('categories.edit') ? handleToggleVisibility : undefined}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Modal de confirmación de visibilidad */}
       <Modal
@@ -266,12 +304,20 @@ export function AdminCategories() {
       </Modal>
 
       {/* Controles de paginación extraídos a subcomponente */}
-      <CategoriesPagination
-        page={page}
-        totalPages={apiTotalPages}
-        loading={loading}
-        onPageChange={handlePageChange}
-      />
+      <motion.div
+        variants={fadeSlideIn}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        layout
+      >
+        <CategoriesPagination
+          page={page}
+          totalPages={apiTotalPages}
+          loading={loading}
+          onPageChange={handlePageChange}
+        />
+      </motion.div>
 
       {/* Modal de confirmación de eliminación */}
       <Modal
