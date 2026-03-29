@@ -1286,3 +1286,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #676: feat: enhance DonutChart with tooltip functionality and CSS adjustments | 2026-03-29 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #679: 446 mejorar visualización de productos más vendidos | 2026-03-29 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #680: 447 añadir filtros avanzados por estado de pedido cliente y producto | 2026-03-29 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #681: 449 implementar confirmación de cambios antes de salir de la vista de reportes | 2026-03-29 |
