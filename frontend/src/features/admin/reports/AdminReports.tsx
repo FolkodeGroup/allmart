@@ -14,6 +14,7 @@ import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
 import { generateMockOrders } from './components/DatosMockeados';
+import { ProductRanking } from './components/ReportsProductRanking';
 
 
 /* ── Helpers ──────────────────────────────────────────────────── */
@@ -94,7 +95,8 @@ export function AdminReports() {
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
   const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf'>('csv');
-
+  // Estados para alternar la vista del top de productos (lista vs tarjetas)
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
@@ -511,33 +513,34 @@ export function AdminReports() {
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
                 <h2 className={styles.panelTitle}>🏆 Productos más vendidos</h2>
-                <span className={styles.panelSubtitle}>Por ingresos generados</span>
+                <p className={styles.panelSubtitle}>Por ingresos generados</p>
+
+              </div>
+              <div className={styles.viewToggle}>
+                <span className={styles.viewToggleLabel}>Cambiar vista:</span>
+                <button
+                  className={`${styles.toggleBtn} ${viewMode === 'list' ? styles.active : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  📊 Lista
+                </button>
+
+                <button
+                  className={`${styles.toggleBtn} ${viewMode === 'cards' ? styles.active : ''}`}
+                  onClick={() => setViewMode('cards')}
+                >
+                  🧾 Cards
+                </button>
               </div>
               {topProducts.length === 0 ? (
                 <p className={styles.noData}>Sin datos en este período.</p>
               ) : (
-                <ol className={styles.productRanking}>
-                  {topProducts.map((p, i) => (
-                    <li key={p.id} className={styles.productRankItem}>
-                      <div className={styles.productRankMeta}>
-                        <span className={styles.productRankPos}>{i + 1}</span>
-                        <div className={styles.productRankInfo}>
-                          <span className={styles.productRankName}>{p.name}</span>
-                          <div className={styles.productRankStats}>
-                            <span className={styles.productRankQty}>{p.qty} und.</span>
-                            <span className={styles.productRankRevenue}>{formatPrice(p.revenue)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.productBarWrap}>
-                        <div
-                          className={`${styles.productBar} ${i === 0 ? styles.productBarTop : ''}`}
-                          style={{ width: `${Math.max((p.revenue / maxProductRevenue) * 100, 4)}%` }}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+                <ProductRanking
+                  products={topProducts}
+                  maxRevenue={maxProductRevenue}
+                  formatPrice={formatPrice}
+                  viewMode={viewMode}
+                />
               )}
             </div>
 
