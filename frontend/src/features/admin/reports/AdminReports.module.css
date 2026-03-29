@@ -1,3 +1,45 @@
+/* === Animaciones reutilizables === */
+.skeleton {
+  background: linear-gradient(90deg, #f5f5f5 25%, #efefef 50%, #f5f5f5 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
+.fadeIn {
+  animation: fadeInAnim 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fadeInAnim {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pulse {
+  animation: pulseAnim 1.2s infinite;
+}
+
+@keyframes pulseAnim {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
 /* === Pagination styles === */
 .pagination {
   display: flex;
@@ -393,7 +435,7 @@ ALLMART — ADMIN REPORTS
 ============================================ */
 
 .reportsPage {
-  max-width: 1100px !important;
+  margin: 0;
 }
 
 /* ── Toolbar ── */
@@ -633,11 +675,11 @@ ALLMART — ADMIN REPORTS
 /* ── Bar Chart ── */
 .chartWrap {
   width: 100%;
-  overflow: hidden;
 }
 
 .barChartSvg {
   width: 100%;
+  min-width: 700px;
   height: auto;
   display: block;
   overflow: visible;
@@ -659,14 +701,14 @@ ALLMART — ADMIN REPORTS
 /* ── Donut chart ── */
 .donutWrap {
   display: flex;
-  gap: var(--space-5);
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .donutSvg {
-  width: 160px;
-  height: 160px;
+  width: 350px;
+  height: 350px;
   flex-shrink: 0;
 }
 

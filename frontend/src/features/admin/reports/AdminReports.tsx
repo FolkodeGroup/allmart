@@ -1,6 +1,6 @@
- 
-import { useMemo, useState, useEffect } from 'react';
-import { useAdminOrders } from '../../../context/AdminOrdersContext';
+
+import React, { useMemo, useState, useEffect } from 'react';
+//import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
@@ -9,10 +9,11 @@ import type { ReportsFiltersValue, PredefinedPeriod } from './components/Reports
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { Pagination } from './components/Pagination';
+import { Suspense, lazy } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
-//import { generateMockOrders } from './components/DatosMockeados';
+import { generateMockOrders } from './components/DatosMockeados';
 
 
 /* ── Helpers ──────────────────────────────────────────────────── */
@@ -62,196 +63,16 @@ const PERIOD_LABELS: Record<Period, string> = {
   'custom': 'Rango personalizado',
 };
 
-/* ── Gráfica de barras SVG ─────────────────────────────────────── */
-function BarChart({ data }: { data: { label: string; value: number; dateKey: string }[] }) {
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-
-  const { maxVal, yTicks } = useMemo(() => {
-    const maxVal = Math.max(...data.map(d => d.value), 1);
-    const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({
-      pct: t,
-      val: maxVal * t
-    }));
-    return { maxVal, yTicks };
-  }, [data]);
-  const W = 600;
-  const H = 190;
-  const padLeft = 60;
-  const padBottom = 36;
-  const padTop = 16;
-  const padRight = 12;
-  const chartW = W - padLeft - padRight;
-  const chartH = H - padBottom - padTop;
-
-  const barW = Math.max(4, chartW / data.length - (data.length > 30 ? 1 : 3));
-
-  if (!data.length) return null;
-
-  return (
-    <div className={styles.chartWrap}>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className={styles.barChartSvg}
-        role="img"
-        aria-label="Gráfica de ventas por día"
-      >
-        {/* Grid lines + Y labels */}
-        {yTicks.map(t => {
-          const y = padTop + chartH - t.pct * chartH;
-          return (
-            <g key={t.pct}>
-              <line x1={padLeft} x2={W - padRight} y1={y} y2={y}
-                stroke="#E5E2DD" strokeWidth={t.pct === 0 ? 1.5 : 1} />
-              <text x={padLeft - 6} y={y + 4} textAnchor="end"
-                fontSize={9} fill="#767676" fontFamily="Montserrat, sans-serif">
-                {formatPriceShort(t.val)}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Bars */}
-        {data.map((d, i) => {
-          const barH = (d.value / maxVal) * chartH;
-          const x = padLeft + i * (chartW / data.length) + (chartW / data.length - barW) / 2;
-          const y = padTop + chartH - barH;
-          const isHovered = hoveredIdx === i;
-          const hasValue = d.value > 0;
-
-          const showLabel = data.length <= 15
-            ? true
-            : data.length <= 31
-              ? i % 5 === 0 || i === data.length - 1
-              : i % 15 === 0 || i === data.length - 1;
-
-          return (
-            <g key={d.dateKey}
-              onMouseEnter={() => setHoveredIdx(i)}
-              onMouseLeave={() => setHoveredIdx(null)}
-              style={{ cursor: hasValue ? 'pointer' : 'default' }}
-            >
-              <rect
-                x={x} y={hasValue ? y : padTop + chartH - 2}
-                width={barW}
-                height={hasValue ? Math.max(barH, 2) : 2}
-                rx={data.length <= 31 ? 4 : 2}
-                fill={isHovered ? '#5d7568' : hasValue ? '#769282' : '#F2EFEB'}
-                style={{ transition: 'fill 0.15s' }}
-              />
-              {showLabel && (
-                <text
-                  x={x + barW / 2} y={H - 8}
-                  textAnchor="middle"
-                  fontSize={data.length > 30 ? 7 : 9}
-                  fill="#767676"
-                  fontFamily="Montserrat, sans-serif"
-                >
-                  {d.label}
-                </text>
-              )}
-              {isHovered && hasValue && (
-                <>
-                  <rect
-                    x={Math.min(x + barW / 2 - 44, W - 90)}
-                    y={y - 32} width={88} height={24}
-                    rx={5} fill="#1A1A1A" opacity={0.88}
-                  />
-                  <text
-                    x={Math.min(x + barW / 2, W - 45)} y={y - 15}
-                    textAnchor="middle"
-                    fontSize={9.5} fill="#fff"
-                    fontFamily="Montserrat, sans-serif" fontWeight="600"
-                  >
-                    {formatPrice(d.value)}
-                  </text>
-                </>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
+// Lazy loading de gráficos optimizado (cada chunk por separado, no se recrea en cada render)
+const BarChart = lazy(initBarChart);
+const DonutChart = lazy(initDonutChart);
+function initBarChart() {
+  return import('./components/BarChart').then(m => ({ default: m.BarChart }));
+}
+function initDonutChart() {
+  return import('./components/DonutChart').then(m => ({ default: m.DonutChart }));
 }
 
-/* ── Gráfica de dona SVG ───────────────────────────────────────── */
-const DONUT_COLORS: Record<string, string> = {
-  pendiente: '#f59e0b',
-  confirmado: '#3b82f6',
-  'en-preparacion': '#8b5cf6',
-  enviado: '#769282',
-  entregado: '#22c55e',
-  cancelado: '#ef4444',
-};
-
-const DONUT_LABELS: Record<string, string> = {
-  pendiente: 'Pendiente',
-  confirmado: 'Confirmado',
-  'en-preparacion': 'En preparación',
-  enviado: 'Enviado',
-  entregado: 'Entregado',
-  cancelado: 'Cancelado',
-};
-
-function DonutChart({ slices }: { slices: { key: string; count: number }[] }) {
-  const total = slices.reduce((s, x) => s + x.count, 0);
-  const R = 56;
-  const r = 36;
-  const cx = 80;
-  const cy = 80;
-  let cumAngle = -Math.PI / 2;
-
-  if (total === 0) {
-    return <p className={styles.noData}>Sin datos</p>;
-  }
-
-  interface Arc { key: string; count: number; d: string; color: string }
-  const arcs: Arc[] = slices
-    .filter(s => s.count > 0)
-    .map(s => {
-      const angle = (s.count / total) * 2 * Math.PI;
-      const x1o = cx + R * Math.cos(cumAngle);
-      const y1o = cy + R * Math.sin(cumAngle);
-      const x2o = cx + R * Math.cos(cumAngle + angle);
-      const y2o = cy + R * Math.sin(cumAngle + angle);
-      const x1i = cx + r * Math.cos(cumAngle + angle);
-      const y1i = cy + r * Math.sin(cumAngle + angle);
-      const x2i = cx + r * Math.cos(cumAngle);
-      const y2i = cy + r * Math.sin(cumAngle);
-      const large = angle > Math.PI ? 1 : 0;
-      const d = `M${x1o},${y1o} A${R},${R} 0 ${large},1 ${x2o},${y2o} L${x1i},${y1i} A${r},${r} 0 ${large},0 ${x2i},${y2i} Z`;
-      cumAngle += angle;
-      return { key: s.key, count: s.count, d, color: DONUT_COLORS[s.key] ?? '#AEA491' };
-    });
-
-  return (
-    <div className={styles.donutWrap}>
-      <svg viewBox="0 0 160 160" className={styles.donutSvg} aria-label="Distribución de pedidos por estado">
-        {arcs.map(arc => (
-          <path key={arc.key} d={arc.d} fill={arc.color} stroke="#fff" strokeWidth={2.5}>
-            <title>{DONUT_LABELS[arc.key]}: {arc.count}</title>
-          </path>
-        ))}
-        <text x={cx} y={cy - 5} textAnchor="middle" fontSize={18} fontWeight="700"
-          fill="#1A1A1A" fontFamily="Montserrat, sans-serif">{total}</text>
-        <text x={cx} y={cy + 13} textAnchor="middle" fontSize={9} fill="#767676"
-          fontFamily="Montserrat, sans-serif">pedidos</text>
-      </svg>
-      <ul className={styles.donutLegend}>
-        {arcs.map(arc => (
-          <li key={arc.key} className={styles.donutLegendItem}>
-            <span className={styles.donutLegendDot} style={{ background: arc.color }} />
-            <span className={styles.donutLegendLabel}>{DONUT_LABELS[arc.key]}</span>
-            <span className={styles.donutLegendCount}>{arc.count}</span>
-            <span className={styles.donutLegendPct}>
-              ({Math.round((arc.count / total) * 100)}%)
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export interface OrdersTableProps {
   orders: Order[];
@@ -259,9 +80,9 @@ export interface OrdersTableProps {
 
 /* ── Componente principal ─────────────────────────────────────── */
 export function AdminReports() {
-  
-  const { orders } = useAdminOrders();
-  //const orders = generateMockOrders(50);
+
+  //const { orders } = useAdminOrders();
+  const orders = generateMockOrders(50);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   const [now, setNow] = useState(() => Date.now());
@@ -473,28 +294,34 @@ export function AdminReports() {
 
 
 
-  const BarChartSkeleton = () => (
-    <div className={styles.skeletonChartContainer}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', width: '100%' }}>
-        {
-          skeletonHeights.map((h, i) => (
-            <div key={i} className={styles.skeletonChartBar} style={{ height: `${h}%` }}></div>
-          ))
-        }
-      </div>
-    </div>
-  );
 
-  const DonutChartSkeleton = () => (
-    <div className={styles.donutWrap}>
-      <div className={styles.skeletonDonut}></div>
-      <div className={styles.skeletonLegend}>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className={styles.skeletonLegendItem}></div>
-        ))}
+  // Skeletons memoizados y reutilizables
+  const BarChartSkeleton = React.memo(function BarChartSkeleton() {
+    return (
+      <div className={styles.skeletonChartContainer}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '200px', width: '100%' }}>
+          {
+            skeletonHeights.map((h, i) => (
+              <div key={i} className={styles.skeletonChartBar + ' skeleton'} style={{ height: `${h}%` }}></div>
+            ))
+          }
+        </div>
       </div>
-    </div>
-  );
+    );
+  });
+
+  const DonutChartSkeleton = React.memo(function DonutChartSkeleton() {
+    return (
+      <div className={styles.donutWrap}>
+        <div className={styles.skeletonDonut + ' skeleton'}></div>
+        <div className={styles.skeletonLegend}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className={styles.skeletonLegendItem + ' skeleton'}></div>
+          ))}
+        </div>
+      </div>
+    );
+  });
 
   const ProductRankingSkeleton = () => (
     <div className={styles.skeletonProductRanking}>
@@ -583,12 +410,12 @@ export function AdminReports() {
             const fileName = getExportFileName('pedidos', periodLabel, exportFormat === 'xlsx' ? 'xlsx' : exportFormat);
             try {
               if (exportFormat === 'csv') {
-                  exportOrdersCSV(periodOrders, fileName);
-                } else if (exportFormat === 'xlsx') {
-                  exportOrdersXLSX(periodOrders, fileName);
-                } else if (exportFormat === 'pdf') {
-                  await exportOrdersPDF(periodOrders, fileName);
-                }
+                exportOrdersCSV(periodOrders, fileName);
+              } else if (exportFormat === 'xlsx') {
+                exportOrdersXLSX(periodOrders, fileName);
+              } else if (exportFormat === 'pdf') {
+                await exportOrdersPDF(periodOrders, fileName);
+              }
               setNotif({ open: true, type: 'success', message: `Exportación exitosa. Archivo ${exportFormat.toUpperCase()} descargado.` });
             } catch {
               setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}). Por favor, intentá nuevamente.` });
@@ -671,7 +498,11 @@ export function AdminReports() {
             {barData.every(d => d.value === 0) ? (
               <p className={styles.noData}>Sin ventas en este período.</p>
             ) : (
-              <BarChart data={barData} />
+              <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
+                <div className={styles.fadeIn}>
+                  <BarChart data={barData} formatValue={(n) => formatPriceShort(n)} />
+                </div>
+              </Suspense>
             )}
           </div>
 
@@ -718,7 +549,11 @@ export function AdminReports() {
               {periodOrders.length === 0 ? (
                 <p className={styles.noData}>Sin datos en este período.</p>
               ) : (
-                <DonutChart slices={statusSlices} />
+                <Suspense fallback={<DonutChartSkeleton aria-busy="true" />}>
+                  <div className={styles.fadeIn}>
+                    <DonutChart slices={statusSlices} />
+                  </div>
+                </Suspense>
               )}
             </div>
           </div>
