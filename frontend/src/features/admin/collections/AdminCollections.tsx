@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collectionsService, Collection } from './collectionsService';
+import type { Collection } from './collectionsService';
+import { collectionsService } from './collectionsService';
 import AdminCollectionForm from './AdminCollectionForm';
 import styles from './AdminCollections.module.css';
 
@@ -18,7 +19,6 @@ const AdminCollections: React.FC = () => {
   const [filterActive, setFilterActive] = useState<boolean | undefined>();
   const [displayPosition, setDisplayPosition] = useState<string>('');
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,6 @@ const AdminCollections: React.FC = () => {
         filterActive
       );
       setCollections(result.data);
-      setTotal(result.pagination.total);
       setPages(result.pagination.pages);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error cargando colecciones');

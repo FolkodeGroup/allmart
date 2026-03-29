@@ -4,7 +4,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { publicCollectionsService, PublicPromotion, PublicCollection } from '../../services/publicCollectionsService';
+import type { PublicPromotion, PublicCollection } from '../../services/publicCollectionsService';
+import { publicCollectionsService } from '../../services/publicCollectionsService';
 import CollectionSlider from '../../components/CollectionSlider';
 import styles from './Offers.module.css';
 

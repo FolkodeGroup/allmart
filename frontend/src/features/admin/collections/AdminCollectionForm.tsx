@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collectionsService, Collection } from './collectionsService';
+import type { Collection } from './collectionsService';
+import { collectionsService } from './collectionsService';
 import styles from './AdminCollections.module.css';
 
 interface Props {
@@ -14,15 +15,24 @@ interface Props {
 }
 
 const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    slug: string;
+    description: string;
+    displayPosition: 'home' | 'category';
+    displayOrder: number;
+    imageUrl: string;
+    isActive: boolean;
+    productIds: string[];
+  }>({
     name: '',
     slug: '',
     description: '',
-    displayPosition: 'home' as const,
+    displayPosition: 'home',
     displayOrder: 0,
     imageUrl: '',
     isActive: true,
-    productIds: [] as string[],
+    productIds: [],
   });
 
   const [error, setError] = useState<string | null>(null);

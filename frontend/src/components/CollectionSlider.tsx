@@ -3,7 +3,7 @@
  * Componente reutilizable para mostrar colecciones de productos con carrusel.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './CollectionSlider.module.css';
 
 export interface CollectionProduct {

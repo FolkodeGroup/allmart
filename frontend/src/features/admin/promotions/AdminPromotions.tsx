@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { promotionsService, Promotion, PaginatedPromotions } from './promotionsService';
+import type { Promotion } from './promotionsService';
+import { promotionsService } from './promotionsService';
 import AdminPromotionForm from './AdminPromotionForm';
 import styles from './AdminPromotions.module.css';
 
@@ -17,7 +18,6 @@ const AdminPromotions: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filterActive, setFilterActive] = useState<boolean | undefined>();
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,6 @@ const AdminPromotions: React.FC = () => {
     try {
       const result = await promotionsService.getAll(page, limit, search, filterActive);
       setPromotions(result.data);
-      setTotal(result.pagination.total);
       setPages(result.pagination.pages);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error cargando promociones');

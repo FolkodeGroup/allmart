@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { promotionsService, Promotion } from './promotionsService';
+import type { Promotion } from './promotionsService';
+import { promotionsService } from './promotionsService';
 import styles from './AdminPromotions.module.css';
 
 interface Props {
@@ -14,10 +15,22 @@ interface Props {
 }
 
 const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    type: 'percentage' | 'fixed' | 'bogo';
+    value: number;
+    startDate: string;
+    endDate: string;
+    minPurchaseAmount: string;
+    maxDiscount: string;
+    isActive: boolean;
+    priority: number;
+    rules: { productIds: string[]; categoryIds: string[] };
+  }>({
     name: '',
     description: '',
-    type: 'percentage' as const,
+    type: 'percentage',
     value: 0,
     startDate: '',
     endDate: '',
@@ -25,7 +38,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     maxDiscount: '',
     isActive: true,
     priority: 0,
-    rules: { productIds: [] as string[], categoryIds: [] as string[] },
+    rules: { productIds: [], categoryIds: [] },
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +84,8 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         value: Number(formData.value),
         minPurchaseAmount: formData.minPurchaseAmount ? Number(formData.minPurchaseAmount) : undefined,
         maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : undefined,
-        startDate: new Date(formData.startDate),
-        endDate: new Date(formData.endDate),
+        startDate: formData.startDate,
+        endDate: formData.endDate,
       };
 
       if (promotion) {

@@ -100,7 +100,11 @@ export const publicCollectionsService = {
       price: String(price),
       ...(categoryId && { categoryId }),
     });
-    const result = await apiFetch(`/promotions/product-discount/${productId}?${params}`);
-    return result?.message ? null : result;
+    try {
+      const result = await apiFetch(`/promotions/product-discount/${productId}?${params}`) as ProductDiscount | null;
+      return result;
+    } catch (error) {
+      return null;
+    }
   },
 };
