@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
 import { ProductPrice } from '../../../components/ui/ProductPrice/ProductPrice';
+import DiscountBadge from '../../../components/DiscountBadge';
+import { publicCollectionsService } from '../../../services/publicCollectionsService';
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
@@ -30,14 +32,34 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   const galleryImages = product.images?.length ? product.images : [undefined];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorito, setIsFavorito] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false; // Seguridad por si usas SSR (Next.js)
+    if (typeof window === "undefined") return false;
     const saved = localStorage.getItem(storageKey);
     return saved === "true";
   });
+  const [dynamicDiscount, setDynamicDiscount] = useState<any>(null);
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(isFavorito));
   }, [isFavorito, storageKey]);
+
+  // Cargar descuento dinámico desde API
+  useEffect(() => {
+    const loadDiscount = async () => {
+      try {
+        const discount = await publicCollectionsService.getProductDiscount(
+          product.id,
+          product.price,
+          product.category?.id
+        );
+        setDynamicDiscount(discount);
+      } catch (error) {
+        // Silent error - fallback a descuento estático
+        console.error('Error loading discount:', error);
+      }
+    };
+    
+    loadDiscount();
+  }, [product.id, product.price, product.category?.id]);
 
   const hasDiscount = product.discount && product.discount > 0;
   const isNew = product.tags.includes("nuevo");
@@ -95,6 +117,15 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           />
         </Link>
 
+        {/* Mostrar DiscountBadge si hay descuento dinámico o estático */}
+        {(dynamicDiscount || (product.discount && product.discount > 0)) && (
+          <DiscountBadge
+            discountPercentage={dynamicDiscount?.discountPercentage || product.discount}
+            originalPrice={dynamicDiscount?.originalPrice || product.originalPrice || product.price}
+            finalPrice={dynamicDiscount?.finalPrice || (product.price * (1 - (product.discount || 0) / 100))}
+            promotionType={dynamicDiscount?.promotionType || (product.discount ? 'percentage' : undefined)}
+          />
+        )}
         {hasGallery && (
           <>
             <button
@@ -173,12 +204,21 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-            <ProductPrice
-              price={product.price}
-              originalPrice={product.originalPrice}
-              discount={product.discount}
-              size="md"
-            />
+            {dynamicDiscount ? (
+              <ProductPrice
+                price={dynamicDiscount.finalPrice}
+                originalPrice={dynamicDiscount.originalPrice}
+                discount={dynamicDiscount.discountPercentage}
+                size="md"
+              />
+            ) : (
+              <ProductPrice
+                price={product.price}
+                originalPrice={product.originalPrice}
+                discount={product.discount}
+                size="md"
+              />
+            )}
         </div>
       </div>
       <Link

@@ -7,6 +7,7 @@ import {
   type PublicProductsParams,
 } from '../../services/productsService';
 import { fetchPublicCategories } from '../../services/categoriesService';
+import { publicCollectionsService } from '../../services/publicCollectionsService';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductListPage.module.css';
 
@@ -23,18 +24,38 @@ const SORT_OPTIONS: SortOption[] = [
 export function ProductListPage() {
   const [sortBy, setSortBy] = useState('relevance');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [showOnlyOnSale, setShowOnlyOnSale] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeDiscounts, setActiveDiscounts] = useState<Set<string>>(new Set());
 
   /* Cargar categorías una sola vez */
   useEffect(() => {
     fetchPublicCategories()
       .then(setCategories)
       .catch(() => setCategories([]));
+  }, []);
+
+  /* Cargar descuentos activos para filtro "En Oferta" */
+  useEffect(() => {
+    const loadActiveDiscounts = async () => {
+      try {
+        const discounts = await publicCollectionsService.getActiveDiscounts();
+        const productIds = new Set(
+          discounts.map((item: any) => item.productId)
+        );
+        setActiveDiscounts(productIds);
+      } catch (error) {
+        console.error('Error loading active discounts:', error);
+        setActiveDiscounts(new Set());
+      }
+    };
+
+    loadActiveDiscounts();
   }, []);
 
   /* Cargar productos cuando cambian los filtros */
@@ -47,11 +68,18 @@ export function ProductListPage() {
     setError(null);
     fetchPublicProducts(params)
       .then(({ data }) => {
-        setProducts(data.map((p) => mapApiProductToProduct(p, categories)));
+        let mappedProducts = data.map((p) => mapApiProductToProduct(p, categories));
+        
+        // Filtrar por "En Oferta" si está habilitado
+        if (showOnlyOnSale) {
+          mappedProducts = mappedProducts.filter((p) => activeDiscounts.has(p.id));
+        }
+        
+        setProducts(mappedProducts);
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [sortBy, selectedCategory, categories]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, activeDiscounts, categories]);
 
   const toggleCategory = (slug: string) => {
     setSelectedCategory((prev) => (prev === slug ? '' : slug));
@@ -113,7 +141,12 @@ export function ProductListPage() {
           <div className={styles.filterGroup}>
             <h3 className={styles.filterTitle}>Etiquetas</h3>
             <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
+              <input
+                type="checkbox"
+                className={styles.filterCheckbox}
+                checked={showOnlyOnSale}
+                onChange={(e) => setShowOnlyOnSale(e.target.checked)}
+              />
               <span className={styles.filterLabel}>En oferta</span>
             </label>
             <label className={styles.filterOption}>

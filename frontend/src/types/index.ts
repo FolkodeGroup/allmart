@@ -12,6 +12,7 @@ export interface Product {
   discount?: number;
   images: string[];
   category: Category;
+  categoryId?: string; // Helper property for convenience
   tags: string[];
   rating: number;
   reviewCount: number;
