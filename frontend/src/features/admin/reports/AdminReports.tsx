@@ -5,6 +5,7 @@ import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
 import { ReportsFilters } from './components/ReportsFilters';
+import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
@@ -85,6 +86,14 @@ export function AdminReports() {
   const orders = generateMockOrders(50);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
+  // Unsaved changes detection
+  const {
+    setIsDirty,
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
+  } = useUnsavedChangesWarning({ active: true });
+  // Eliminado: showUnsavedModal, setShowUnsavedModal (no se usan más)
   const [now, setNow] = useState(() => Date.now());
   // Estado de paginación
   const [page, setPage] = useState(1);
@@ -105,6 +114,15 @@ export function AdminReports() {
   useEffect(() => {
     setPage(1);
   }, [pageSize, filters]);
+
+  // Detectar cambios en filtros generales o de pedidos
+  useEffect(() => {
+    setIsDirty(true);
+  }, [filters, setIsDirty]);
+
+  // Bloquear navegación interna (react-router-dom v6+)
+  // Si usas react-router, puedes usar useBlocker o usePrompt aquí
+  // Eliminado: efectos y handlers de navegación SPA y confirmación/cancelación de modal de cambios no guardados
 
   // Determinar periodo para lógica existente
   const period: Period =
@@ -357,6 +375,17 @@ export function AdminReports() {
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
         </p>
       </div>
+
+      {/* Modal de confirmación de cambios no guardados */}
+      <ConfirmModal
+        open={showWarning}
+        title="Tienes cambios sin guardar"
+        message="¿Seguro que quieres salir? Se perderán los cambios no guardados."
+        confirmLabel="Salir y descartar cambios"
+        cancelLabel="Cancelar"
+        onConfirm={confirmNavigation}
+        onCancel={cancelNavigation}
+      />
 
       {/* Toolbar: filtro periodo + exportar */}
       <div className={styles.toolbar}>
