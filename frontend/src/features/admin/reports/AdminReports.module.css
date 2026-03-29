@@ -704,12 +704,16 @@ ALLMART — ADMIN REPORTS
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
+  position: relative;
+  overflow: visible !important;
 }
 
 .donutSvg {
   width: 350px;
   height: 350px;
   flex-shrink: 0;
+  overflow: visible;
+  z-index: 9999;
 }
 
 .donutLegend {
@@ -753,6 +757,7 @@ ALLMART — ADMIN REPORTS
 .donutLegendPct {
   color: var(--color-text-tertiary);
 }
+
 
 /* ── Top productos ── */
 .productRanking {
