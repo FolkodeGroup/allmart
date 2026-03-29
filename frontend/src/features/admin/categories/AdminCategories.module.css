@@ -152,11 +152,28 @@
   color: var(--color-text-primary);
 }
 
-.cardSlug {
-  font-family: var(--font-ui);
+.cardSlug {  font-family: var(--font-ui);
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);
 }
+
+.emptyCard {  border-color: #f59e0b;
+  border-width: 2px;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25), 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.emptyCard:hover {
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 8px 24px rgba(245, 158, 11, 0.2);
+}
+
+.emptyIcon {
+  color: #d97706;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+}
+
+.emptyCount {color: #b45309;
+  font-weight: 600;}
 
 .cardDesc {
   font-family: var(--font-body);
