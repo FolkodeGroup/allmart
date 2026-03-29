@@ -1158,89 +1158,89 @@
 }
 
 .skeletonSummaryIcon {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   width: 28px;
   height: 28px;
 }
 
 .skeletonSummaryNum {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 24px;
   width: 60%;
 }
 
 .skeletonSummaryLabel {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 12px;
   width: 50%;
 }
 
 .skeletonOrderId {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 80px;
 }
 
 .skeletonOrderDate {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 100px;
 }
 
 .skeletonCustomerName {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 150px;
   margin-bottom: 4px;
 }
 
 .skeletonCustomerEmail {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 12px;
   width: 180px;
 }
 
 .skeletonItemCount {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 80px;
 }
 
 .skeletonOrderTotal {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 120px;
 }
 
 .skeletonStatusBadge {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 28px;
   width: 100px;
   border-radius: 6px;
 }
 
 .skeletonButton {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 32px;
   width: 60px;
   border-radius: 6px;
 }
 
 .skeletonMobileCardId {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 100px;
 }
 
 .skeletonMobileBadge {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 28px;
   width: 100px;
   border-radius: 6px;
 }
 
 .skeletonMobileAvatar {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1248,32 +1248,32 @@
 }
 
 .skeletonMobileCardName {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 16px;
   width: 150px;
   margin-bottom: 4px;
 }
 
 .skeletonMobileCardEmail {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 12px;
   width: 180px;
 }
 
 .skeletonMobileCardDate {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 14px;
   width: 100px;
 }
 
 .skeletonMobileCardItems {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 14px;
   width: 80px;
 }
 
 .skeletonMobileCardTotal {
-  composes: skeletonBase;
+  /* composes: skeletonBase; */
   height: 14px;
   width: 120px;
 }
