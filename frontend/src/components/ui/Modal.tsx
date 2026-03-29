@@ -1,6 +1,8 @@
 import type { FC, ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import styles from './Modal.module.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { modalVariants } from '../../features/admin/categories/animationConfig';
 
 export interface ModalProps {
   open: boolean;
@@ -77,33 +79,39 @@ export const Modal: FC<ModalProps> = ({
     };
   }, [open, onClose, disableClose]);
 
-  if (!open) return null;
-
   return (
-    <div
-      className={styles.overlay}
-      onClick={() => !disableClose && onClose()}
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby={title ? 'modal-title' : undefined}
-      tabIndex={-1}
-      ref={modalRef}
-    >
-      <div
-        className={styles.modal}
-        onClick={(e) => e.stopPropagation()}
-        role="document"
-      >
-        {title && (
-          <h2 id="modal-title" className={styles.title}>
-            {title}
-          </h2>
-        )}
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className={styles.overlay}
+          onClick={() => !disableClose && onClose()}
+          aria-modal="true"
+          role="dialog"
+          aria-labelledby={title ? 'modal-title' : undefined}
+          tabIndex={-1}
+          ref={modalRef}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={modalVariants}
+        >
+          <div
+            className={styles.modal}
+            onClick={(e) => e.stopPropagation()}
+            role="document"
+          >
+            {title && (
+              <h2 id="modal-title" className={styles.title}>
+                {title}
+              </h2>
+            )}
 
-        <div className={styles.body}>{children}</div>
+            <div className={styles.body}>{children}</div>
 
-        {actions && <div className={styles.actions}>{actions}</div>}
-      </div>
-    </div>
+            {actions && <div className={styles.actions}>{actions}</div>}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
