@@ -425,11 +425,11 @@ const MOCK_ORDERS: Order[] = [
       email: 'juan.perez@email.com',
     },
     items: [
-      { id: '1', name: 'Camiseta Allmart', quantity: 2, price: 3500 },
-      { id: '2', name: 'Gorra', quantity: 1, price: 1800 },
+      { productId: 'p1', productName: 'Camiseta Allmart', quantity: 2, unitPrice: 3500 },
+      { productId: 'p2', productName: 'Gorra', quantity: 1, unitPrice: 1800 },
     ],
     total: 8800,
-    history: [
+    statusHistory: [
       { status: 'pendiente', changedAt: '2026-03-28T10:15:00Z', note: '' },
     ],
   },
@@ -445,11 +445,11 @@ const MOCK_ORDERS: Order[] = [
       email: 'maria.gomez@email.com',
     },
     items: [
-      { id: '3', name: 'Remera', quantity: 1, price: 4200 },
-      { id: '4', name: 'Pantalón', quantity: 1, price: 6900 },
+      { productId: 'p3', productName: 'Remera', quantity: 1, unitPrice: 4200 },
+      { productId: 'p4', productName: 'Pantalón', quantity: 1, unitPrice: 6900 },
     ],
     total: 11100,
-    history: [
+    statusHistory: [
       { status: 'pendiente', changedAt: '2026-03-27T14:30:00Z', note: '' },
       { status: 'confirmado', changedAt: '2026-03-27T15:00:00Z', note: '' },
     ],
@@ -466,10 +466,10 @@ const MOCK_ORDERS: Order[] = [
       email: 'carlos.lopez@email.com',
     },
     items: [
-      { id: '5', name: 'Zapatillas', quantity: 1, price: 15000 },
+      { productId: 'p5', productName: 'Zapatillas', quantity: 1, unitPrice: 15000 },
     ],
     total: 15000,
-    history: [
+    statusHistory: [
       { status: 'pendiente', changedAt: '2026-03-25T09:00:00Z', note: '' },
       { status: 'confirmado', changedAt: '2026-03-25T09:30:00Z', note: '' },
       { status: 'en-preparacion', changedAt: '2026-03-25T10:00:00Z', note: '' },
@@ -488,11 +488,11 @@ const MOCK_ORDERS: Order[] = [
       email: 'lucia.martinez@email.com',
     },
     items: [
-      { id: '6', name: 'Bolso', quantity: 1, price: 8000 },
-      { id: '7', name: 'Llavero', quantity: 3, price: 500 },
+      { productId: 'p6', productName: 'Bolso', quantity: 1, unitPrice: 8000 },
+      { productId: 'p7', productName: 'Llavero', quantity: 3, unitPrice: 500 },
     ],
     total: 9500,
-    history: [
+    statusHistory: [
       { status: 'pendiente', changedAt: '2026-03-20T16:45:00Z', note: '' },
       { status: 'confirmado', changedAt: '2026-03-20T17:00:00Z', note: '' },
       { status: 'en-preparacion', changedAt: '2026-03-20T17:30:00Z', note: '' },
@@ -512,10 +512,10 @@ const MOCK_ORDERS: Order[] = [
       email: 'ana.ruiz@email.com',
     },
     items: [
-      { id: '8', name: 'Mochila', quantity: 1, price: 12000 },
+      { productId: 'p8', productName: 'Mochila', quantity: 1, unitPrice: 12000 },
     ],
     total: 12000,
-    history: [
+    statusHistory: [
       { status: 'pendiente', changedAt: '2026-03-18T11:20:00Z', note: '' },
       { status: 'cancelado', changedAt: '2026-03-18T12:00:00Z', note: 'Cancelado por el cliente' },
     ],
@@ -530,10 +530,11 @@ export function AdminOrders() {
   const orders = MOCK_ORDERS;
   const isLoading = false;
   // Las siguientes funciones pueden dejarse como mocks vacíos o comentarios si se usan en la UI
-  const bulkUpdateOrderStatus = () => Promise.resolve({ success: 0, failed: 0 });
-  const updateOrderStatus = () => Promise.resolve();
-  const deleteOrder = () => Promise.resolve();
-  const markAsPaid = () => Promise.resolve();
+  // Se aceptan argumentos para evitar errores de cantidad de argumentos
+  const bulkUpdateOrderStatus = (..._args: any[]) => Promise.resolve({ success: 0, failed: 0 });
+  const updateOrderStatus = (..._args: any[]) => Promise.resolve();
+  const deleteOrder = (..._args: any[]) => Promise.resolve();
+  const markAsPaid = (..._args: any[]) => Promise.resolve();
 
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<OrderStatus | ''>('');
@@ -637,12 +638,6 @@ export function AdminOrders() {
   }, [filtered, currentPage]);
 
   // Helpers para selección múltiple (debe ir después de paginatedOrders)
-  const isAllSelected = paginatedOrders.length > 0 && paginatedOrders.every(o => selectedIds.includes(o.id));
-  const isIndeterminate = selectedIds.length > 0 && !isAllSelected;
-  const handleSelectAll = () => {
-    if (isAllSelected) setSelectedIds([]);
-    else setSelectedIds(paginatedOrders.map(o => o.id));
-  };
   const handleSelectOne = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
