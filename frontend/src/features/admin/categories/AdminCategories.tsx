@@ -14,6 +14,7 @@ import { CategoriesGrid } from './CategoriesGrid';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 import { CategoriesHeader } from './components/CategoriesHeader';
+import { exportCategoriesToCSV, exportCategoriesToExcel } from './utils/exportCategories';
 import { CategoriesFilters } from './components/CategoriesFilters';
 // import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
@@ -68,7 +69,7 @@ export function AdminCategories() {
   useEffect(() => {
     refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
     if (selectedSuggestion) setSelectedSuggestion(null);
-     
+
   }, [debouncedSearch, selectedSuggestion, page, limit, refreshCategories]);
 
   // Reset page to 1 when search changes
@@ -133,11 +134,41 @@ export function AdminCategories() {
     optimisticVis[cat.id] !== undefined ? { ...cat, isVisible: optimisticVis[cat.id] } : cat
   );
 
+  // Export handlers
+  const handleExportCSV = () => {
+    if (!categoriesWithOptimism.length) {
+      showNotification('info', 'No hay categorías para exportar.');
+      return;
+    }
+    exportCategoriesToCSV(categoriesWithOptimism);
+  };
+  const handleExportExcel = () => {
+    if (!categoriesWithOptimism.length) {
+      showNotification('info', 'No hay categorías para exportar.');
+      return;
+    }
+    exportCategoriesToExcel(categoriesWithOptimism);
+  };
+
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
 
         {/* Header */}
-        <CategoriesHeader canCreate={can('categories.create')} onNew={handleNew} />
+
+        <CategoriesHeader
+          canCreate={can('categories.create')}
+          onNew={handleNew}
+        />
+
+        {/* Botones de exportación debajo del header */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center'}}>
+          <button className={styles.exportBtn} onClick={handleExportCSV} type="button" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>
+            Exportar CSV
+          </button>
+          <button className={styles.exportBtn} onClick={handleExportExcel} type="button" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>
+            Exportar Excel
+          </button>
+        </div>
 
 
         {/* Filtros fuera del header */}
