@@ -1380,3 +1380,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #682: Implementar Sistema de Ofertas y Promociones Dinámico para Ecommerce | 2026-03-29 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #677: 🔄 Actualización automática de puntajes semanal | 2026-03-29 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #688: Se implementan botones de exportacion Excel y CSV de Categorias | 2026-03-29 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #692: 411 optimizar animaciones y transiciones en la UI de categorías | 2026-03-29 |
