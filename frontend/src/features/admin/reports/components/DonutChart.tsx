@@ -25,6 +25,8 @@ const STATUS_LABELS: Record<string, string> = {
     cancelado: 'Cancelado',
 };
 
+
+
 export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
     const [hovered, setHovered] = useState<number | null>(null);
 
@@ -87,7 +89,6 @@ export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                 aria-label="Distribución de pedidos"
             >
                 {arcs.map((arc) => {
-                    const pct = Math.round((arc.count / total) * 100);
 
                     return (
                         <path
@@ -100,11 +101,7 @@ export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                             onMouseLeave={() => setHovered(null)}
                             opacity={hovered === null || hovered === arc.index ? 1 : 0.4}
                             style={{ transition: 'all 0.2s ease' }}
-                        >
-                            <title>
-                                {STATUS_LABELS[arc.key]}: {arc.count} ({pct}%)
-                            </title>
-                        </path>
+                        />
                     );
                 })}
 
@@ -129,7 +126,56 @@ export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                 >
                     pedidos
                 </text>
+
+                {/* ✅ TOOLTIP DENTRO DEL SVG */}
+                {hovered !== null && (() => {
+                    const arc = arcs[hovered];
+                    const pct = Math.round((arc.count / total) * 100);
+
+                    const startAngle = arcs
+                        .slice(0, hovered)
+                        .reduce((acc, a) => acc + (a.count / total) * 2 * Math.PI, -Math.PI / 2);
+
+                    const sliceAngle = (arc.count / total) * 2 * Math.PI;
+                    const midAngle = startAngle + sliceAngle / 2;
+
+                    const tooltipX = cx + (R + 12) * Math.cos(midAngle);
+                    const tooltipY = cy + (R + 12) * Math.sin(midAngle);
+
+                    return (
+                        <g pointerEvents="none">
+                            <rect
+                                x={tooltipX - 45}
+                                y={tooltipY - 20}
+                                width={90}
+                                height={32}
+                                rx={6}
+                                fill={arc.color}
+                            />
+                            <text
+                                x={tooltipX}
+                                y={tooltipY - 6}
+                                textAnchor="middle"
+                                fontSize={10}
+                                fill="#fff"
+                                fontWeight="600"
+                            >
+                                {STATUS_LABELS[arc.key]}
+                            </text>
+                            <text
+                                x={tooltipX}
+                                y={tooltipY + 8}
+                                textAnchor="middle"
+                                fontSize={9}
+                                fill="#fff"
+                            >
+                                {arc.count} ({pct}%)
+                            </text>
+                        </g>
+                    );
+                })()}
             </svg>
+
 
             {/* 📊 Leyenda */}
             <ul className={styles.donutLegend}>

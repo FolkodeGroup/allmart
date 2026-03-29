@@ -15,7 +15,8 @@ import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
 import { generateMockOrders } from './components/DatosMockeados';
-
+import { ProductRanking } from './components/ReportsProductRanking';
+import { OrdersFilters } from './components/OrdersFilters';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -94,15 +95,22 @@ export function AdminReports() {
     cancelNavigation,
   } = useUnsavedChangesWarning({ active: true });
   // Eliminado: showUnsavedModal, setShowUnsavedModal (no se usan más)
+  // Filtros avanzados SOLO para la tabla de pedidos
+  const [ordersTableFilters, setOrdersTableFilters] = useState<{ status: string[]; clientQuery: string; productQuery: string }>({ status: [], clientQuery: '', productQuery: '' });
   const [now, setNow] = useState(() => Date.now());
   // Estado de paginación
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+
   // Feedback de exportación
   const [showExportModal, setShowExportModal] = useState(false);
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
   const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf'>('csv');
+  // Estados para alternar la vista del top de productos (lista vs tarjetas)
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+
 
 
   useEffect(() => {
@@ -141,26 +149,71 @@ export function AdminReports() {
     [orders]);
 
   // Filtrado extendido
+  // periodOrders: solo filtra por período (filtros generales)
   const periodOrders = useMemo(() => {
+    let filtered = [] as typeof ordersWithTime;
     if (filters.type === 'predefined') {
-      if (filters.period === 'all') return ordersWithTime;
-
-      const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
-      const cutoff = now - days * 86400000;
-
-      return ordersWithTime.filter(o => o.createdAtMs >= cutoff);
+      if (filters.period === 'all') {
+        filtered = ordersWithTime;
+      } else {
+        const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
+        const cutoff = now - days * 86400000;
+        filtered = ordersWithTime.filter(o => o.createdAtMs >= cutoff);
+      }
     } else {
       const { from, to } = filters.range;
       if (!from || !to) return [];
-
       const fromTime = new Date(from).setHours(0, 0, 0, 0);
       const toTime = new Date(to).setHours(23, 59, 59, 999);
+      filtered = ordersWithTime.filter(o => o.createdAtMs >= fromTime && o.createdAtMs <= toTime);
+    }
+    return filtered;
+  }, [ordersWithTime, filters, now]);
 
-      return ordersWithTime.filter(o =>
-        o.createdAtMs >= fromTime && o.createdAtMs <= toTime
+
+
+  // Filtros avanzados SOLO para la tabla de pedidos
+  const filteredOrdersTable = useMemo(() => {
+    let filtered = periodOrders;
+    // 1. Filtro por estado (multi-select)
+    if (ordersTableFilters.status && ordersTableFilters.status.length > 0) {
+      filtered = filtered.filter(o => ordersTableFilters.status.includes(o.status));
+    }
+    // 2. Filtro por cliente (nombre, email)
+    if (ordersTableFilters.clientQuery && ordersTableFilters.clientQuery.trim() !== '') {
+      const q = ordersTableFilters.clientQuery.trim().toLowerCase();
+      filtered = filtered.filter(o => {
+        const c = o.customer;
+        return (
+          (c.firstName && c.firstName.toLowerCase().includes(q)) ||
+          (c.lastName && c.lastName.toLowerCase().includes(q)) ||
+          (c.email && c.email.toLowerCase().includes(q))
+        );
+      });
+    }
+
+
+    // 3. Filtro por producto (nombre parcial)
+    if (ordersTableFilters.productQuery && ordersTableFilters.productQuery.trim() !== '') {
+      const pq = ordersTableFilters.productQuery.trim().toLowerCase();
+      filtered = filtered.filter(o =>
+        o.items && o.items.some(it => it.productName && it.productName.toLowerCase().includes(pq))
       );
     }
-  }, [ordersWithTime, filters, now]);
+    return filtered;
+  }, [periodOrders, ordersTableFilters]);
+
+  // Corrige la página si los filtros dejan menos elementos de los que la página actual puede mostrar
+  useEffect(() => {
+    const totalFiltered = filteredOrdersTable.length;
+    const maxPage = Math.max(1, Math.ceil(totalFiltered / pageSize));
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [filteredOrdersTable.length, pageSize, page]);
+
+  const from = filteredOrdersTable.length === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, filteredOrdersTable.length);
 
   const activeOrders = useMemo(
     () => periodOrders.filter(o => o.status !== 'cancelado'),
@@ -354,14 +407,13 @@ export function AdminReports() {
   );
 
   const paginatedOrders = useMemo(() => {
-    return periodOrders.slice(
+    return filteredOrdersTable.slice(
       (page - 1) * pageSize,
       page * pageSize
     );
-  }, [periodOrders, page, pageSize]);
+  }, [filteredOrdersTable, page, pageSize]);
 
-  const from = periodOrders.length === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to = Math.min(page * pageSize, periodOrders.length);
+
 
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`}>
@@ -540,33 +592,34 @@ export function AdminReports() {
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
                 <h2 className={styles.panelTitle}>🏆 Productos más vendidos</h2>
-                <span className={styles.panelSubtitle}>Por ingresos generados</span>
+                <p className={styles.panelSubtitle}>Por ingresos generados</p>
+
+              </div>
+              <div className={styles.viewToggle}>
+                <span className={styles.viewToggleLabel}>Cambiar vista:</span>
+                <button
+                  className={`${styles.toggleBtn} ${viewMode === 'list' ? styles.active : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  📊 Lista
+                </button>
+
+                <button
+                  className={`${styles.toggleBtn} ${viewMode === 'cards' ? styles.active : ''}`}
+                  onClick={() => setViewMode('cards')}
+                >
+                  🧾 Cards
+                </button>
               </div>
               {topProducts.length === 0 ? (
                 <p className={styles.noData}>Sin datos en este período.</p>
               ) : (
-                <ol className={styles.productRanking}>
-                  {topProducts.map((p, i) => (
-                    <li key={p.id} className={styles.productRankItem}>
-                      <div className={styles.productRankMeta}>
-                        <span className={styles.productRankPos}>{i + 1}</span>
-                        <div className={styles.productRankInfo}>
-                          <span className={styles.productRankName}>{p.name}</span>
-                          <div className={styles.productRankStats}>
-                            <span className={styles.productRankQty}>{p.qty} und.</span>
-                            <span className={styles.productRankRevenue}>{formatPrice(p.revenue)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.productBarWrap}>
-                        <div
-                          className={`${styles.productBar} ${i === 0 ? styles.productBarTop : ''}`}
-                          style={{ width: `${Math.max((p.revenue / maxProductRevenue) * 100, 4)}%` }}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+                <ProductRanking
+                  products={topProducts}
+                  maxRevenue={maxProductRevenue}
+                  formatPrice={formatPrice}
+                  viewMode={viewMode}
+                />
               )}
             </div>
 
@@ -593,15 +646,58 @@ export function AdminReports() {
               <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
               <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
             </div>
+            {/* Filtros rápidos para la tabla de pedidos */}
+            <div className={styles.advancedFiltersWrap} style={{ marginBottom: 16 }}>
+
+              <label className={styles.advancedLabel}>
+                Cliente
+                <input
+                  type="text"
+                  value={ordersTableFilters.clientQuery}
+                  onChange={e => {
+                    e.preventDefault();
+                    setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
+                  }}
+                  placeholder="Nombre o email"
+                  className={styles.advancedInput}
+                />
+              </label>
+              <label className={styles.advancedLabel}>
+                Producto
+                <input
+                  type="text"
+                  value={ordersTableFilters.productQuery}
+                  onChange={e => {
+                    e.preventDefault();
+                    setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
+                  }}
+                  placeholder="Nombre de producto"
+                  className={styles.advancedInput}
+                />
+              </label>
+              <OrdersFilters
+                ordersTableFilters={ordersTableFilters}
+                setOrdersTableFilters={setOrdersTableFilters} />
+              <div className={styles.advancedActions}>
+                <button
+                  type="button"
+                  className={styles.clearBtn}
+                  onClick={() => setOrdersTableFilters({ status: [], clientQuery: '', productQuery: '' })}
+                  disabled={
+                    !(ordersTableFilters.status.length || ordersTableFilters.clientQuery || ordersTableFilters.productQuery)
+                  }
+                  title="Limpiar filtros avanzados"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
             {periodOrders.length === 0 ? (
               <p className={styles.noData}>Sin pedidos en este período.</p>
             ) : (
               <>
-
                 <OrdersTable
-                  orders={
-                    paginatedOrders
-                  }
+                  orders={paginatedOrders}
                 />
                 {periodOrders.length > pageSize && (
                   <p className={styles.moreHint}>
@@ -611,7 +707,7 @@ export function AdminReports() {
                 <Pagination
                   page={page}
                   pageSize={pageSize}
-                  total={periodOrders.length}
+                  total={filteredOrdersTable.length}
                   onPageChange={setPage}
                   onPageSizeChange={setPageSize}
                   pageSizeOptions={[5, 10, 20, 50, 100]}

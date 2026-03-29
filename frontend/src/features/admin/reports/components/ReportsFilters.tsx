@@ -9,8 +9,12 @@ export interface DateRange {
 }
 
 export type ReportsFiltersValue =
-    | { type: 'predefined'; period: PredefinedPeriod }
-    | { type: 'custom'; range: DateRange };
+    | ({ type: 'predefined'; period: PredefinedPeriod }
+        | { type: 'custom'; range: DateRange }) & {
+            status?: string[];
+            clientQuery?: string;
+            productQuery?: string;
+        };
 
 interface ReportsFiltersProps {
     value: ReportsFiltersValue;
@@ -96,7 +100,7 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                 <button
                     type="button"
                     className={isCustom ? styles.clearBtn : styles.clearBtnDisabled}
-                    onClick={() => onChange({ type: 'predefined', period: '30d' })}
+                    onClick={() => onChange({ ...value, type: 'predefined', period: '30d' })}
                     disabled={!isCustom}
                     title="Limpiar filtro personalizado"
                 >
@@ -104,5 +108,6 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                 </button>
             </div>
         </div>
+
     );
 };
