@@ -13,12 +13,16 @@ import categoriesRouter from './admin/categories';
 import ordersRouter from './admin/orders';
 import usersRouter from './admin/users';
 import staffNotesRouter from './admin/staffNotes';
+import promotionsRouter from './admin/promotions';
+import collectionsRouter from './admin/collections';
 import publicCategoriesRouter from './public/categories';
 import publicProductsRouter from './public/products';
 import publicAuthRouter from './public/auth';
 import publicOrdersRouter from './public/orders';
 import publicCartRouter from './public/cart';
 import publicImagesRouter from './public/images';
+import publicCollectionsRouter from './public/collections';
+import publicPromotionsRouter from './public/promotions';
 import { adminMiddleware } from '../middlewares/auth';
 
 const adminRouter = Router();
@@ -34,6 +38,8 @@ adminRouter.use('/categories', categoriesRouter);
 adminRouter.use('/orders', ordersRouter);
 adminRouter.use('/users', usersRouter);
 adminRouter.use('/staff-notes', staffNotesRouter);
+adminRouter.use('/promotions', promotionsRouter);
+adminRouter.use('/collections', collectionsRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();
@@ -43,6 +49,8 @@ publicRouter.use('/products', publicProductsRouter);
 publicRouter.use('/orders', publicOrdersRouter);
 publicRouter.use('/cart', publicCartRouter);
 publicRouter.use('/images', publicImagesRouter);
+publicRouter.use('/collections', publicCollectionsRouter);
+publicRouter.use('/promotions', publicPromotionsRouter);
 
 // Router principal de la API
 const apiRouter = Router();

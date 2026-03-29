@@ -1,0 +1,38 @@
+/* DiscountBadge.module.css */
+
+.badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  z-index: 5;
+}
+
+.badgeText {
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+@media (max-width: 640px) {
+  .badge {
+    width: 48px;
+    height: 48px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .badgeText {
+    font-size: 11px;
+  }
+}

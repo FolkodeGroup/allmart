@@ -43,6 +43,21 @@ enum ProductStatus {
   @@map("product_status")
 }
 
+enum PromotionType {
+  percentage
+  fixed
+  bogo
+
+  @@map("promotion_type")
+}
+
+enum CollectionDisplayPosition {
+  home
+  category
+
+  @@map("collection_display_position")
+}
+
 // ─── Modelos ──────────────────────────────────────────────────────────────────
 
 model User {
@@ -75,6 +90,7 @@ model Category {
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   products    Product[]
+  promotionRules PromotionRule[]
   categoryImage CategoryImageStorage?
 
   @@index([slug], map: "idx_categories_slug")
@@ -108,6 +124,8 @@ model Product {
   orderItems       OrderItem[]
   productVariants  ProductVariant[]
   productImages    ProductImageStorage[]
+  collectionItems  CollectionItem[]
+  promotionRules   PromotionRule[]
   category         Category?        @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "products_category_fk")
 
   @@index([categoryId], map: "idx_products_category_id")
@@ -314,4 +332,80 @@ model StaffNote {
 
   @@index([userId], map: "idx_staff_notes_user_id")
   @@map("staff_notes")
+}
+
+// ─── Promociones y Colecciones ──────────────────────────────────────────────
+
+model Promotion {
+  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String          @db.VarChar(255)
+  description        String?         @db.Text
+  type               PromotionType
+  value              Decimal         @db.Decimal(12, 2)
+  startDate          DateTime        @map("start_date") @db.Timestamptz(6)
+  endDate            DateTime        @map("end_date") @db.Timestamptz(6)
+  minPurchaseAmount  Decimal?        @map("min_purchase_amount") @db.Decimal(12, 2)
+  maxDiscount        Decimal?        @map("max_discount") @db.Decimal(12, 2)
+  isActive           Boolean         @default(true) @map("is_active")
+  priority           Int             @default(0)
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  promotionRules     PromotionRule[]
+
+  @@index([isActive], map: "idx_promotions_is_active")
+  @@index([startDate, endDate], map: "idx_promotions_dates")
+  @@index([priority], map: "idx_promotions_priority")
+  @@map("promotions")
+}
+
+model PromotionRule {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  promotionId   String    @map("promotion_id") @db.Uuid
+  productId     String?   @map("product_id") @db.Uuid
+  categoryId    String?   @map("category_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  promotion     Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_rules_promotion_fk")
+  product       Product?  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_rules_product_fk")
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_rules_category_fk")
+
+  @@unique([promotionId, productId, categoryId], map: "promotion_rules_unique")
+  @@index([promotionId], map: "idx_promotion_rules_promotion_id")
+  @@index([productId], map: "idx_promotion_rules_product_id")
+  @@index([categoryId], map: "idx_promotion_rules_category_id")
+  @@map("promotion_rules")
+}
+
+model Collection {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String            @db.VarChar(255)
+  slug            String            @unique(map: "collections_slug_unique") @db.VarChar(255)
+  description     String?           @db.Text
+  displayOrder    Int               @default(0) @map("display_order")
+  displayPosition CollectionDisplayPosition @map("display_position")
+  imageUrl        String?           @map("image_url")
+  isActive        Boolean           @default(true) @map("is_active")
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  collectionItems CollectionItem[]
+
+  @@index([slug], map: "idx_collections_slug")
+  @@index([isActive], map: "idx_collections_is_active")
+  @@index([displayPosition], map: "idx_collections_display_position")
+  @@map("collections")
+}
+
+model CollectionItem {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  collectionId String     @map("collection_id") @db.Uuid
+  productId    String     @map("product_id") @db.Uuid
+  position     Int        @default(0)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "collection_items_collection_fk")
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "collection_items_product_fk")
+
+  @@unique([collectionId, productId], map: "collection_items_unique")
+  @@index([collectionId], map: "idx_collection_items_collection_id")
+  @@index([productId], map: "idx_collection_items_product_id")
+  @@map("collection_items")
 }
