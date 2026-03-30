@@ -59,28 +59,28 @@ export const publicCollectionsService = {
    * Obtiene colecciones para mostrar en home
    */
   async getHomeCollections(): Promise<PublicCollection[]> {
-    return apiFetch('/collections');
+    return apiFetch('/api/collections');
   },
 
   /**
    * Obtiene colecciones por posición de display
    */
   async getCollectionsByPosition(position: 'home' | 'category'): Promise<PublicCollection[]> {
-    return apiFetch(`/collections/position/${position}`);
+    return apiFetch(`/api/collections/position/${position}`);
   },
 
   /**
    * Obtiene una colección específica por slug
    */
   async getCollectionBySlug(slug: string): Promise<PublicCollection> {
-    return apiFetch(`/collections/${slug}`);
+    return apiFetch(`/api/collections/${slug}`);
   },
 
   /**
    * Obtiene todas las promociones activas
    */
   async getActivePromotions(): Promise<PublicPromotion[]> {
-    return apiFetch('/promotions/active');
+    return apiFetch('/api/promotions/active');
   },
 
   /**
@@ -89,7 +89,7 @@ export const publicCollectionsService = {
   async getActiveDiscounts(): Promise<
     { productId: string; discount: ProductDiscount }[]
   > {
-    return apiFetch('/promotions/discounts/active');
+    return apiFetch('/api/promotions/discounts/active');
   },
 
   /**
@@ -101,7 +101,7 @@ export const publicCollectionsService = {
       ...(categoryId && { categoryId }),
     });
     try {
-      const result = await apiFetch(`/promotions/product-discount/${productId}?${params}`) as ProductDiscount | null;
+      const result = await apiFetch(`/api/promotions/product-discount/${productId}?${params}`) as ProductDiscount | null;
       return result;
     } catch (error) {
       return null;

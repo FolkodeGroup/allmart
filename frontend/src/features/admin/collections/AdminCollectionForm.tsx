@@ -41,6 +41,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
 
   useEffect(() => {
     if (collection) {
+      const initialProductIds = collection.products?.map((p) => p.id) || [];
       setFormData({
         name: collection.name,
         slug: collection.slug,
@@ -49,7 +50,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         displayOrder: collection.displayOrder,
         imageUrl: collection.imageUrl || '',
         isActive: collection.isActive,
-        productIds: collection.products?.map((p) => p.id) || [],
+        productIds: initialProductIds,
       });
     }
   }, [collection]);
@@ -75,7 +76,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       } else {
         await collectionsService.create(payload);
       }
-
       onSubmit();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error guardando colección');
