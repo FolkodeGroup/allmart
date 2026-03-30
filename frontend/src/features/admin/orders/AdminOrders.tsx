@@ -995,6 +995,8 @@ export function AdminOrders() {
                     onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
                     onMouseOver={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
                     onMouseOut={e => (e.currentTarget.style.background = '#fff')}
+                    onFocus={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
+                    onBlur={e => (e.currentTarget.style.background = '#fff')}
                   >
                     <td style={{padding: '16px 12px'}}>
                       <input
@@ -1073,6 +1075,8 @@ export function AdminOrders() {
                         style={{background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s'}}
                         onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
                         onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
+                        onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
+                        onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
                       >
                         Ver →
                       </button>
