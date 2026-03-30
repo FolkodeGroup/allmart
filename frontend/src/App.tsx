@@ -25,6 +25,7 @@ const AdminVariants = lazy(() => import('./features/admin/variants/AdminVariants
 const AdminImages = lazy(() => import('./features/admin/images/AdminImages').then(m => ({ default: m.AdminImages })));
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
+const LowStockAlerts = lazy(() => import('./features/admin/lowStockAlerts').then(m => ({ default: m.default })));
 
 const router = createBrowserRouter([
   {
@@ -92,6 +93,16 @@ const router = createBrowserRouter([
           <AdminRoute requiredPermission="orders.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminOrders />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'alertas-stock', 
+        element: (
+          <AdminRoute requiredPermission="orders.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <LowStockAlerts />
             </Suspense>
           </AdminRoute>
         ) 

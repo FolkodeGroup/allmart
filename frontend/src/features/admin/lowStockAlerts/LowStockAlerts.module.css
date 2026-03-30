@@ -1,0 +1,209 @@
+/**
+ * frontend/src/features/admin/lowStockAlerts/LowStockAlerts.module.css
+ * Estilos para el componente de alertas de stock bajo
+ */
+
+.container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ffb3b3;
+  padding-bottom: 10px;
+}
+
+.header h2 {
+  margin: 0;
+  color: #d32f2f;
+  font-size: 1.5rem;
+}
+
+.badge {
+  background: #ffebee;
+  color: #c62828;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 1rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  color: #999;
+  font-size: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.table thead {
+  background: #f5f5f5;
+  border-bottom: 2px solid #ddd;
+}
+
+.table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.875rem;
+}
+
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.table tbody tr.warning {
+  background: #fff8f0;
+}
+
+.table tbody tr.critical {
+  background: #ffebee;
+}
+
+.productName {
+  font-weight: 500;
+  color: #333;
+  max-width: 200px;
+  word-break: break-word;
+}
+
+.email {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.number {
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+}
+
+.number.negative {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+.date {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.pageBtn {
+  padding: 8px 12px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: #1976d2;
+}
+
+.pageBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  color: #666;
+  font-size: 0.875rem;
+  min-width: 100px;
+  text-align: center;
+}
+
+.refreshBtn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.975rem;
+  transition: background 0.2s ease;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.refreshBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .table {
+    font-size: 0.75rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 8px;
+  }
+
+  .pagination {
+    gap: 5px;
+  }
+
+  .pageBtn {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
+}

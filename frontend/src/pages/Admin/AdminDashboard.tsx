@@ -49,6 +49,13 @@ const sections = [
     color: "accent",
   },
   {
+    icon: "⚠️ Stock",
+    title: "Alertas de Stock",
+    description: "Monitoreá las ventas sin stock y reabastecé rápido.",
+    to: "/admin/alertas-stock",
+    color: "warm",
+  },
+  {
     icon: "📊",
     title: "Reportes",
     description: "Consultá métricas y estadísticas del negocio.",
@@ -369,6 +376,7 @@ export function AdminDashboard() {
                       .filter((sec) => {
                         if (sec.to === "/admin/productos") return can("products.view");
                         if (sec.to === "/admin/pedidos") return can("orders.view");
+                        if (sec.to === "/admin/alertas-stock") return can("orders.view");
                         if (sec.to === "/admin/reportes") return can("reports.view");
                         return true;
                       })

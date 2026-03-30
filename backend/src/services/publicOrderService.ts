@@ -49,7 +49,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       },
     });
 
-    // 2. Crear los items del pedido
+    // 2. Crear los items del pedido y decrementar stock
     await tx.orderItem.createMany({
       data: items.map((item) => ({
         orderId:      order.id,
@@ -61,7 +61,40 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       })),
     });
 
-    // 3. Registrar el historial de estado inicial
+    // 3. Decrementar stock y registrar alertas lowStockAlert si es necesario
+    for (const item of items) {
+      const product = await tx.product.findUnique({
+        where: { id: item.productId },
+        select: { id: true, name: true, stock: true },
+      });
+
+      if (product) {
+        const stockBefore = product.stock;
+        const stockAfter = stockBefore - item.quantity;
+
+        // Actualizar stock (permitiendo valores negativos)
+        await tx.product.update({
+          where: { id: product.id },
+          data: { stock: stockAfter },
+        });
+
+        // Registrar alerta si el stock quedó en 0 o en negativo
+        if (stockAfter <= 0) {
+          await tx.lowStockAlert.create({
+            data: {
+              orderId:      order.id,
+              productId:    product.id,
+              productName:  product.name,
+              quantitySold: item.quantity,
+              stockBefore:  stockBefore,
+              stockAfter:   stockAfter,
+            },
+          });
+        }
+      }
+    }
+
+    // 4. Registrar el historial de estado inicial
     // (El trigger en BD también lo hace, pero lo hacemos explícito para Prisma)
     await tx.orderStatusHistory.create({
       data: {

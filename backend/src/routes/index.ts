@@ -15,6 +15,7 @@ import usersRouter from './admin/users';
 import staffNotesRouter from './admin/staffNotes';
 import promotionsRouter from './admin/promotions';
 import collectionsRouter from './admin/collections';
+import lowStockAlertsRouter from './admin/lowStockAlerts';
 import publicCategoriesRouter from './public/categories';
 import publicProductsRouter from './public/products';
 import publicAuthRouter from './public/auth';
@@ -40,6 +41,7 @@ adminRouter.use('/users', usersRouter);
 adminRouter.use('/staff-notes', staffNotesRouter);
 adminRouter.use('/promotions', promotionsRouter);
 adminRouter.use('/collections', collectionsRouter);
+adminRouter.use('/low-stock-alerts', lowStockAlertsRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();

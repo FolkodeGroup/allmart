@@ -126,6 +126,7 @@ model Product {
   productImages    ProductImageStorage[]
   collectionItems  CollectionItem[]
   promotionRules   PromotionRule[]
+  lowStockAlerts   LowStockAlert[]
   category         Category?        @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "products_category_fk")
 
   @@index([categoryId], map: "idx_products_category_id")
@@ -214,6 +215,7 @@ model Order {
   orderStatusHistory  OrderStatusHistory[]
   sale                Sale?
   shipment            Shipment?
+  lowStockAlerts      LowStockAlert[]
 
   @@index([createdAt], map: "idx_orders_created_at")
   @@index([customerEmail], map: "idx_orders_customer_email")
@@ -408,4 +410,24 @@ model CollectionItem {
   @@index([collectionId], map: "idx_collection_items_collection_id")
   @@index([productId], map: "idx_collection_items_product_id")
   @@map("collection_items")
+}
+
+// ─── Stock Alerts ───────────────────────────────────────────────────────────
+
+model LowStockAlert {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId       String   @map("order_id") @db.Uuid
+  productId     String   @map("product_id") @db.Uuid
+  productName   String   @map("product_name") @db.VarChar(255)
+  quantitySold  Int      @map("quantity_sold")
+  stockBefore   Int      @map("stock_before")
+  stockAfter    Int      @map("stock_after")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "low_stock_alerts_order_fk")
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "low_stock_alerts_product_fk")
+
+  @@index([orderId], map: "idx_low_stock_alerts_order_id")
+  @@index([productId], map: "idx_low_stock_alerts_product_id")
+  @@index([createdAt], map: "idx_low_stock_alerts_created_at")
+  @@map("low_stock_alerts")
 }
