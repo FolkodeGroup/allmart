@@ -409,9 +409,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   );
 }
 
-/* ── Componente principal ───────────────────────────────────────── */
 export function AdminOrders() {
-
   const { orders, isLoading, refreshOrders, bulkUpdateOrderStatus, updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
 
   const [search, setSearch] = useState('');
@@ -539,12 +537,6 @@ export function AdminOrders() {
   }, [filtered, currentPage]);
 
   // Helpers para selección múltiple (debe ir después de paginatedOrders)
-  const isAllSelected = paginatedOrders.length > 0 && paginatedOrders.every(o => selectedIds.includes(o.id));
-  const isIndeterminate = selectedIds.length > 0 && !isAllSelected;
-  const handleSelectAll = () => {
-    if (isAllSelected) setSelectedIds([]);
-    else setSelectedIds(paginatedOrders.map(o => o.id));
-  };
   const handleSelectOne = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
@@ -845,26 +837,18 @@ export function AdminOrders() {
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
+          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
+            <table className={styles.table} style={{minWidth: 900}}>
               <thead>
                 <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      aria-label="Seleccionar todos"
-                      checked={isAllSelected}
-                      ref={el => { if (el) el.indeterminate = isIndeterminate; }}
-                      onChange={handleSelectAll}
-                    />
-                  </th>
-                  <th>N° Pedido</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Productos</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                  <th></th>
+                  <th style={{width: 48}}></th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
+                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
+                  <th style={{width: 80}}></th>
                 </tr>
               </thead>
               <tbody>
@@ -874,7 +858,6 @@ export function AdminOrders() {
               </tbody>
             </table>
           </div>
-
           <div className={styles.mobileList}>
             {Array.from({ length: 5 }).map((_, i) => (
               <MobileCardSkeleton key={i} />
@@ -889,17 +872,18 @@ export function AdminOrders() {
       ) : (
         <>
           {/* Tabla — tablet y desktop */}
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
+          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
+            <table className={styles.table} style={{minWidth: 900}}>
               <thead>
                 <tr>
-                  <th>N° Pedido</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Productos</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                  <th>Opciones</th>
+                  <th style={{width: 48}}></th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
+                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
+                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
+                  <th style={{width: 80}}></th>
                 </tr>
               </thead>
               <tbody>
@@ -907,12 +891,21 @@ export function AdminOrders() {
                   <tr
                     key={order.id}
                     className={styles.row}
+                    style={{
+                      cursor: 'pointer',
+                      background: '#fff',
+                      transition: 'background 0.15s',
+                    }}
                     onClick={() => setSelectedOrder(order)}
                     role="button"
                     tabIndex={0}
                     onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
+                    onMouseOver={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
+                    onMouseOut={e => (e.currentTarget.style.background = '#fff')}
+                    onFocus={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
+                    onBlur={e => (e.currentTarget.style.background = '#fff')}
                   >
-                    <td>
+                    <td style={{padding: '16px 12px'}}>
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(order.id)}
@@ -921,38 +914,79 @@ export function AdminOrders() {
                         onClick={e => e.stopPropagation()}
                       />
                     </td>
-                    <td className={styles.orderId}>#{order.id.slice(0,8).toUpperCase()}</td>
-                    <td className={styles.orderDate}>{formatDate(order.createdAt)}</td>
-                    <td>
-                      <div className={styles.customerName}>
-                        {order.customer.firstName} {order.customer.lastName}
-                      </div>
-                      <div className={styles.customerEmail}>{order.customer.email}</div>
+                    <td style={{padding: '16px 20px', fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5}}>
+                      #{order.id.slice(0,8).toUpperCase()}
                     </td>
-                    <td className={styles.itemCount}>
+                    <td style={{padding: '16px 20px', color: '#64748b', fontSize: 15}}>{formatDate(order.createdAt)}</td>
+                    <td style={{padding: '16px 20px'}}>
+                      <div style={{fontWeight: 600, fontSize: 16, color: '#111827'}}>{order.customer.firstName} {order.customer.lastName}</div>
+                      <div style={{color: '#64748b', fontSize: 14}}>{order.customer.email}</div>
+                    </td>
+                    <td style={{padding: '16px 20px', color: '#334155', fontSize: 15}}>
                       {order.items.reduce((s, i) => s + i.quantity, 0)} ítem{order.items.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
                     </td>
-                    <td className={styles.orderTotal}>{formatPrice(order.total)}</td>
-                    <td>
-                      <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
+                    <td style={{padding: '16px 20px', textAlign: 'right', fontWeight: 700, fontSize: 16, color: '#059669'}}>
+                      {formatPrice(order.total)}
+                    </td>
+                    <td style={{padding: '16px 20px'}}>
+                      <span style={{
+                        display: 'inline-block',
+                        borderRadius: 8,
+                        padding: '4px 14px',
+                        fontWeight: 600,
+                        fontSize: 14,
+                        background:
+                          order.status === 'entregado' ? 'rgba(34,197,94,0.13)' :
+                          order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
+                          order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
+                          order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
+                          order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
+                          order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
+                          '#f3f4f6',
+                        color:
+                          order.status === 'entregado' ? '#22c55e' :
+                          order.status === 'pendiente' ? '#d97706' :
+                          order.status === 'cancelado' ? '#ef4444' :
+                          order.status === 'enviado' ? '#10b981' :
+                          order.status === 'confirmado' ? '#2563eb' :
+                          order.status === 'en-preparacion' ? '#8b5cf6' :
+                          '#6b7280',
+                        border: 'none',
+                        marginRight: order.paymentStatus === 'abonado' ? 8 : 0,
+                        minWidth: 90,
+                        textAlign: 'center',
+                      }}>
                         {STATUS_LABELS[order.status]}
                       </span>
                       {order.paymentStatus === 'abonado' && (
-                        <span className={`${styles.paymentBadge} ${styles.paymentAbonado} ${styles.paymentBadgeInline}`}>
+                        <span style={{
+                          display: 'inline-block',
+                          borderRadius: 8,
+                          padding: '4px 12px',
+                          fontWeight: 600,
+                          fontSize: 13,
+                          background: 'rgba(16,185,129,0.10)',
+                          color: '#128C48',
+                          marginLeft: 2,
+                        }}>
                           ✓ Abonado
                         </span>
                       )}
                     </td>
-                    <td>
+                    <td style={{padding: '16px 8px', textAlign: 'center'}}>
                       <button
                         className={styles.detailBtn}
                         type="button"
                         onClick={e => { e.stopPropagation(); setSelectedOrder(order); }}
                         title="Ver detalle"
+                        style={{background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s'}}
+                        onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
+                        onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
+                        onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
+                        onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
                       >
                         Ver →
                       </button>
-                      
                     </td>
                   </tr>
                 ))}
@@ -973,8 +1007,9 @@ export function AdminOrders() {
                   role="button"
                   tabIndex={0}
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
+                  style={{boxShadow: '0 2px 8px rgba(0,0,0,0.04)', borderRadius: 14, marginBottom: 16, background: '#fff'}}
                 >
-                  <div className={styles.mobileCardTop}>
+                  <div className={styles.mobileCardTop} style={{display: 'flex', alignItems: 'center', gap: 8, padding: '14px 16px 0 16px'}}>
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(order.id)}
@@ -983,33 +1018,69 @@ export function AdminOrders() {
                       onClick={e => e.stopPropagation()}
                       style={{ marginRight: 8 }}
                     />
-                    <span className={styles.mobileCardId}>#{order.id.slice(0,8).toUpperCase()}</span>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                      <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>
+                    <span style={{fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5}}>
+                      #{order.id.slice(0,8).toUpperCase()}
+                    </span>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', marginLeft: 'auto' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        borderRadius: 8,
+                        padding: '4px 14px',
+                        fontWeight: 600,
+                        fontSize: 14,
+                        background:
+                          order.status === 'entregado' ? 'rgba(34,197,94,0.13)' :
+                          order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
+                          order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
+                          order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
+                          order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
+                          order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
+                          '#f3f4f6',
+                        color:
+                          order.status === 'entregado' ? '#22c55e' :
+                          order.status === 'pendiente' ? '#d97706' :
+                          order.status === 'cancelado' ? '#ef4444' :
+                          order.status === 'enviado' ? '#10b981' :
+                          order.status === 'confirmado' ? '#2563eb' :
+                          order.status === 'en-preparacion' ? '#8b5cf6' :
+                          '#6b7280',
+                        border: 'none',
+                        minWidth: 90,
+                        textAlign: 'center',
+                      }}>
                         {STATUS_LABELS[order.status]}
                       </span>
                       {order.paymentStatus === 'abonado' && (
-                        <span className={`${styles.paymentBadge} ${styles.paymentAbonado}`}>
+                        <span style={{
+                          display: 'inline-block',
+                          borderRadius: 8,
+                          padding: '4px 12px',
+                          fontWeight: 600,
+                          fontSize: 13,
+                          background: 'rgba(16,185,129,0.10)',
+                          color: '#128C48',
+                          marginLeft: 2,
+                        }}>
                           ✓ Abonado
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className={styles.mobileCardMid}>
+                  <div className={styles.mobileCardMid} style={{padding: '0 16px'}}>
                     <div className={styles.mobileCardCustomer}>
-                      <div className={styles.mobileCardAvatar}>{initials}</div>
+                      <div className={styles.mobileCardAvatar} style={{background: '#f3f4f6', color: '#2563eb', fontWeight: 700, fontSize: 16}}>{initials}</div>
                       <div>
-                        <div className={styles.mobileCardName}>
+                        <div className={styles.mobileCardName} style={{fontWeight: 600, fontSize: 16, color: '#111827'}}>
                           {order.customer.firstName} {order.customer.lastName}
                         </div>
-                        <div className={styles.mobileCardEmail}>{order.customer.email}</div>
+                        <div className={styles.mobileCardEmail} style={{color: '#64748b', fontSize: 14}}>{order.customer.email}</div>
                       </div>
                     </div>
                   </div>
-                  <div className={styles.mobileCardBottom}>
-                    <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
-                    <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
-                    <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
+                  <div className={styles.mobileCardBottom} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px 14px 16px'}}>
+                    <span className={styles.mobileCardDate} style={{color: '#64748b', fontSize: 14}}>{formatDate(order.createdAt)}</span>
+                    <span className={styles.mobileCardItems} style={{color: '#334155', fontSize: 15}}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
+                    <span className={styles.mobileCardTotal} style={{fontWeight: 700, fontSize: 16, color: '#059669'}}>{formatPrice(order.total)}</span>
                   </div>
                 </div>
               );

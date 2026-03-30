@@ -40,6 +40,9 @@ export interface AdminCategoriesParams {
   q?: string;
   page?: number;
   limit?: number;
+  minProducts?: number;
+  maxProducts?: number;
+  isVisible?: boolean | null;
 }
 
 /** Respuesta paginada de categorías */
@@ -97,6 +100,9 @@ export async function fetchAdminCategories(
   if (params.q)     qs.set('q', params.q);
   if (params.page)  qs.set('page', String(params.page));
   if (params.limit) qs.set('limit', String(params.limit));
+  if (typeof params.minProducts === 'number') qs.set('minProducts', String(params.minProducts));
+  if (typeof params.maxProducts === 'number') qs.set('maxProducts', String(params.maxProducts));
+  if (params.isVisible !== undefined && params.isVisible !== null) qs.set('isVisible', String(params.isVisible));
 
   const url = `/api/admin/categories${qs.toString() ? `?${qs}` : ''}`;
   const body = await apiFetch<ApiSuccess<PaginatedCategories>>(url, {}, token);

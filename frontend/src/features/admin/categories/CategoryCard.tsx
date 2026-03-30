@@ -42,7 +42,7 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
   const isEmpty = isEmptyCategory(productCount);
 
   return (
-    <div className={styles.cardWrapper} style={{ position: 'relative' }}>
+    <div className={styles.cardWrapper} style={{ position: 'relative', willChange: 'opacity, transform' }}>
 
       {/* Checkbox de selección múltiple */}
       {onSelect && (

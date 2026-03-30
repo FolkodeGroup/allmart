@@ -9,8 +9,12 @@ export interface DateRange {
 }
 
 export type ReportsFiltersValue =
-    | { type: 'predefined'; period: PredefinedPeriod }
-    | { type: 'custom'; range: DateRange };
+    | ({ type: 'predefined'; period: PredefinedPeriod }
+        | { type: 'custom'; range: DateRange }) & {
+            status?: string[];
+            clientQuery?: string;
+            productQuery?: string;
+        };
 
 interface ReportsFiltersProps {
     value: ReportsFiltersValue;
@@ -26,6 +30,16 @@ const PERIOD_LABELS: Record<PredefinedPeriod, string> = {
     'all': 'Todo el tiempo',
 };
 
+/**
+ * Componente de filtros avanzados para reportes.
+ *
+ * Permite seleccionar periodo, rango de fechas y aplicar filtros por estado, cliente y producto.
+ *
+ * @param value Estado actual de los filtros
+ * @param onChange Callback para actualizar filtros
+ * @param minDate Fecha mínima permitida
+ * @param maxDate Fecha máxima permitida
+ */
 export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
     value,
     onChange,
@@ -96,7 +110,7 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                 <button
                     type="button"
                     className={isCustom ? styles.clearBtn : styles.clearBtnDisabled}
-                    onClick={() => onChange({ type: 'predefined', period: '30d' })}
+                    onClick={() => onChange({ ...value, type: 'predefined', period: '30d' })}
                     disabled={!isCustom}
                     title="Limpiar filtro personalizado"
                 >
@@ -104,5 +118,6 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                 </button>
             </div>
         </div>
+
     );
 };

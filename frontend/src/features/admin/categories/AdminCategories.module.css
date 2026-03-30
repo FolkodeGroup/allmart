@@ -111,7 +111,11 @@
   box-shadow: 0 0 0 3px var(--color-primary-light);
   z-index: 2;
 }
-.card:hover { box-shadow: 0 4px 20px rgba(118,146,130,0.12); }
+.card:hover {
+  box-shadow: 0 4px 20px rgba(118,146,130,0.12);
+  transform: translateY(-4px) scale(1.025);
+  transition: box-shadow 0.15s, transform 0.18s cubic-bezier(0.22,1,0.36,1);
+}
 
 .cardImg {
   width: 100%;
@@ -196,7 +200,10 @@
   font-size: var(--text-base);
   padding: var(--space-1) var(--space-2);
   border-radius: 6px;
-  transition: background 0.13s;
+  transition: background 0.13s, transform 0.15s cubic-bezier(0.22,1,0.36,1);
+}
+.editBtn:hover, .deleteBtn:hover {
+  transform: scale(1.08);
 }
 .editBtn:hover { background: var(--color-bg-tertiary); }
 .deleteBtn:hover { background: rgba(199,80,80,0.1); }
@@ -370,7 +377,7 @@
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-primary-light);
   border-radius: 8px;
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
@@ -645,6 +652,30 @@
   }
 }
 
+.filters{
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background-color: white;
+  border: 1px solid var(--color-border);
+  padding: 8px 4px;
+  width: 100%;
+  font-family: var(--font-ui);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-primary-light);
+  border-radius: 8px;
+  background: var(--color-neutral-light);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.count {
+    margin-left: 0;
+    margin-top: 4px;
+    font-size: smaller;
+  }
+
 /* ===== MOBILE-FIRST RESPONSIVE ADAPTATIONS ===== */
 @media (max-width: 700px) {
   .grid {
@@ -708,7 +739,11 @@
   transition: background 0.15s;
   flex-shrink: 0;
 }
-.newBtn:hover { background: var(--color-primary-dark); }
+.newBtn:hover {
+  background: var(--color-primary-dark);
+  transform: scale(1.04);
+  transition: background 0.15s, transform 0.15s cubic-bezier(0.22,1,0.36,1);
+}
   .filters {
     flex-direction: column;
     gap: 10px;

@@ -45,8 +45,11 @@ export async function getAdminCategories(query: {
   q?: string;
   page?: number;
   limit?: number;
+  minProducts?: number;
+  maxProducts?: number;
+  isVisible?: boolean;
 }) {
-  const { q, page = 1, limit = 10 } = query;
+  const { q, page = 1, limit = 10, minProducts, maxProducts, isVisible } = query;
 
   const where: Record<string, any> = {};
 
@@ -57,7 +60,12 @@ export async function getAdminCategories(query: {
       { description: { contains: search, mode: 'insensitive' } },
     ];
   }
+  if (typeof isVisible === 'boolean') {
+    where.isVisible = isVisible;
+  }
 
+  // Usar include: { _count: { select: { products: true } } } para contar productos
+  // Filtrar por cantidad de productos después de obtener los resultados
   const [total, rows] = await Promise.all([
     prisma.category.count({ where }),
     prisma.category.findMany({
@@ -65,15 +73,38 @@ export async function getAdminCategories(query: {
       orderBy: { name: 'asc' },
       skip: (page - 1) * limit,
       take: limit,
+      include: {
+        _count: { select: { products: true } },
+      },
     }),
   ]);
 
+  // Filtrar por minProducts y maxProducts en memoria (paginación ya aplicada)
+  let filteredRows = rows;
+  if (typeof minProducts === 'number') {
+    filteredRows = filteredRows.filter(row => row._count.products >= minProducts);
+  }
+  if (typeof maxProducts === 'number') {
+    filteredRows = filteredRows.filter(row => row._count.products <= maxProducts);
+  }
+
+  // Mapear para incluir el conteo real de productos
+  const data = filteredRows.map(row =>
+    toCategory({
+      ...row,
+      itemCount: row._count.products,
+    })
+  );
+
+  // El total debe reflejar el filtro de cantidad de productos
+  const filteredTotal = data.length;
+
   return {
-    data: rows.map(toCategory),
-    total,
+    data,
+    total: filteredTotal,
     page,
     limit,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(filteredTotal / limit),
   };
 }
 
