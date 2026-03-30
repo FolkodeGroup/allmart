@@ -30,6 +30,16 @@ const PERIOD_LABELS: Record<PredefinedPeriod, string> = {
     'all': 'Todo el tiempo',
 };
 
+/**
+ * Componente de filtros avanzados para reportes.
+ *
+ * Permite seleccionar periodo, rango de fechas y aplicar filtros por estado, cliente y producto.
+ *
+ * @param value Estado actual de los filtros
+ * @param onChange Callback para actualizar filtros
+ * @param minDate Fecha mínima permitida
+ * @param maxDate Fecha máxima permitida
+ */
 export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
     value,
     onChange,
