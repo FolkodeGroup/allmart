@@ -412,7 +412,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 /* ── Componente principal ───────────────────────────────────────── */
 export function AdminOrders() {
 
-  const { orders, isLoading, bulkUpdateOrderStatus, updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
+  const { orders, isLoading, refreshOrders, bulkUpdateOrderStatus, updateOrderStatus, deleteOrder, markAsPaid } = useAdminOrders();
 
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<OrderStatus | ''>('');
@@ -486,6 +486,29 @@ export function AdminOrders() {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [search, filterStatus, filterDateFrom, filterDateTo]);
+
+  React.useEffect(() => {
+    const refreshData = () => {
+      void refreshOrders();
+    };
+
+    const intervalId = window.setInterval(refreshData, 15000);
+    const handleFocus = () => refreshData();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshData();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshOrders]);
 
   const filtered = useMemo(() => {
     return orders.filter(o => {
@@ -751,6 +774,14 @@ export function AdminOrders() {
             disabled={isLoading}
           />
         </div>
+        <button
+          className={styles.clearBtn}
+          type="button"
+          onClick={() => void refreshOrders()}
+          disabled={isLoading}
+        >
+          ↻ Actualizar
+        </button>
         {!isLoading && (search || filterStatus || filterDateFrom || filterDateTo) && (
           <button
             className={styles.clearBtn}

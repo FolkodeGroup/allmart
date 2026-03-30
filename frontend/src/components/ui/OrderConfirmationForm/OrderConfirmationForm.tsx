@@ -15,8 +15,7 @@ export interface OrderFormData {
 
 import type { CartItem } from '../../../types';
 import { buildWhatsAppMessage, buildWhatsAppUrl } from '../../../utils/whatsapp';
-import { ORDERS_STORAGE_KEY } from '../../../context/AdminOrdersContext';
-import type { Order } from '../../../context/AdminOrdersContext';
+import { createPublicOrder } from '../../../services/publicOrdersService';
 
 interface OrderConfirmationFormProps {
   totalPrice: number;
@@ -47,6 +46,7 @@ export function OrderConfirmationForm({
 }: OrderConfirmationFormProps) {
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -80,47 +80,52 @@ export function OrderConfirmationForm({
     };
   }, []);
 
-  const onSubmit = (data: OrderConfirmationSchema) => {
+  const onSubmit = async (data: OrderConfirmationSchema) => {
+    setSubmitError(null);
     setProcessing(true);
-    setTimeout(() => {
+
+    try {
+      // Guardar datos del formulario para reutilizar en próximas compras.
+      try {
+        localStorage.setItem(ORDER_FORM_STORAGE_KEY, JSON.stringify(data));
+      } catch {
+        // ignore
+      }
+
+      const { orderId } = await createPublicOrder({
+        customer: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+        },
+        items: cartItems.map((item) => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          productImage: item.product.images?.[0],
+          quantity: item.quantity,
+          unitPrice: item.product.price,
+        })),
+        total: totalPrice,
+      });
+
       setProcessing(false);
       setSuccess(true);
-      // Guardar datos del formulario
-      try { localStorage.setItem(ORDER_FORM_STORAGE_KEY, JSON.stringify(data)); } catch { /* ignore */ }
-      // Guardar pedido en el panel de administración
-      try {
-        const existing: Order[] = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) ?? '[]');
-        const newOrder: Order = {
-          id: `ord-${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          customer: {
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-          },
-          items: cartItems.map(i => ({
-            productId: i.product.id,
-            productName: i.product.name,
-            productImage: i.product.images?.[0],
-            quantity: i.quantity,
-            unitPrice: i.product.price,
-          })),
-          total: totalPrice,
-          status: 'pendiente',
-        };
-        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([newOrder, ...existing]));
-      } catch { /* ignore */ }
-      // Limpiar carrito
+
+      // Limpiar carrito luego de confirmar persistencia.
       onCartClear();
-      // Mostrar feedback visual por 2 segundos, luego abrir WhatsApp y cerrar modal
+
+      // Mostrar feedback y abrir WhatsApp con el ID del pedido generado.
       setTimeout(() => {
-        // Construir mensaje y URL de WhatsApp
-        const whatsappMessage = buildWhatsAppMessage(data, cartItems, totalPrice);
+        const whatsappMessage = `${buildWhatsAppMessage(data, cartItems, totalPrice)}\n\nID de pedido: ${orderId}`;
         const whatsappUrl = buildWhatsAppUrl(whatsappMessage);
         window.open(whatsappUrl, '_blank');
         onCancel();
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      setProcessing(false);
+      setSuccess(false);
+      setSubmitError(error instanceof Error ? error.message : 'No pudimos procesar tu pedido. Intentá nuevamente.');
+    }
   };
 
   // Click fuera del panel cierra el modal
@@ -178,6 +183,12 @@ export function OrderConfirmationForm({
             noValidate
             aria-label="Datos del comprador"
           >
+            {submitError && (
+              <div className={styles.errorMsg} role="alert" style={{ marginBottom: 12 }}>
+                {submitError}
+              </div>
+            )}
+
             {/* Nombre */}
             <div className={styles.fieldGroup}>
               <label htmlFor="firstName" className={styles.label}>
