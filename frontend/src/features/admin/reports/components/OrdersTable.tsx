@@ -6,6 +6,11 @@ export interface OrdersTableProps {
     orders: Order[];
 }
 
+/**
+ * Tabla de pedidos filtrados y paginados.
+ *
+ * @param orders Array de pedidos a mostrar
+ */
 export const OrdersTable: React.FC<OrdersTableProps> = ({ orders }) => {
 
     return (

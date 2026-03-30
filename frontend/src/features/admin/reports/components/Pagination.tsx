@@ -10,6 +10,16 @@ export interface PaginationProps {
     pageSizeOptions?: number[];
 }
 
+/**
+ * Componente de paginación para tablas de datos.
+ *
+ * @param page Página actual
+ * @param pageSize Tamaño de página
+ * @param total Total de elementos
+ * @param onPageChange Callback para cambiar de página
+ * @param onPageSizeChange Callback para cambiar tamaño de página
+ * @param pageSizeOptions Opciones de tamaño de página
+ */
 export const Pagination: React.FC<PaginationProps> = ({
     page,
     pageSize,

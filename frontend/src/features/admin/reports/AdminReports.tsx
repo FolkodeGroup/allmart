@@ -81,6 +81,16 @@ export interface OrdersTableProps {
 }
 
 /* ── Componente principal ─────────────────────────────────────── */
+/**
+ * Vista principal de reportes administrativos.
+ *
+ * Orquesta filtros, métricas, gráficos y tabla de pedidos.
+ * - Maneja estado de filtros, paginación y exportación.
+ * - Conecta los datos filtrados con los componentes visuales.
+ * - Implementa protección ante cambios no guardados.
+ *
+ * @module AdminReports
+ */
 export function AdminReports() {
 
   //const { orders } = useAdminOrders();

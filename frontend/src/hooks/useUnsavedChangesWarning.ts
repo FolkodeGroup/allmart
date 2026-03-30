@@ -5,6 +5,16 @@ interface UseUnsavedChangesWarningOptions {
   onConfirmExit?: () => void;
 }
 
+/**
+ * Hook para detectar cambios no guardados y bloquear navegación accidental.
+ *
+ * @param options.active Si la protección está activa
+ * @param options.onConfirmExit Callback opcional al confirmar salida
+ * @returns {Object} isDirty, setIsDirty, showWarning, interceptNavigation, confirmNavigation, cancelNavigation
+ *
+ * Uso típico:
+ * const { setIsDirty, showWarning, confirmNavigation, cancelNavigation } = useUnsavedChangesWarning({ active: true });
+ */
 export function useUnsavedChangesWarning({ active }: UseUnsavedChangesWarningOptions) {
   const [showWarning, setShowWarning] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<null | (() => void)>(null);

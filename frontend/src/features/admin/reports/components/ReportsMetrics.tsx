@@ -38,6 +38,11 @@ const metricColorMap: Record<string, string> = {
     paid: 'metricCardPaid',
 };
 
+/**
+ * Muestra los KPIs principales de los reportes (ingresos, pedidos, ticket promedio, etc).
+ *
+ * @param metrics Array de métricas a mostrar (cada una con key, label, valor, icono y tendencia opcional)
+ */
 export const ReportsMetrics: React.FC<ReportsMetricsProps> = ({ metrics }) => (
     <div className={styles.metricsGrid}>
         {metrics.map(({ key, ...rest }) => (
