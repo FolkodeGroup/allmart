@@ -762,6 +762,14 @@ ALLMART — ADMIN REPORTS
   box-shadow: var(--shadow-sm);
 }
 
+.printableReportRoot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  page-break-inside: avoid;
+}
+
 .exportSelectWrap {
   position: relative;
   border: 1.5px solid var(--color-primary);
@@ -785,6 +793,20 @@ ALLMART — ADMIN REPORTS
   outline: none;
 }
 
+.exportResumeBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  background: none;
+  padding: var(--space-2) var(--space-5);
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  white-space: nowrap;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 10px;
+}
+
 .exportBtn {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
@@ -797,11 +819,13 @@ ALLMART — ADMIN REPORTS
   white-space: nowrap;
 }
 
-.exportBtn:hover {
+.exportBtn:hover,
+.exportResumeBtn:hover {
   background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
-.exportBtn:active {
+.exportBtn:active,
+.exportResumeBtn:hover {
   transform: translateY(0);
 }
 
@@ -815,7 +839,7 @@ ALLMART — ADMIN REPORTS
     flex-wrap: wrap;
   }
 
-  .exportBtn {
+  .exportBtn .exportResumeBtn {
     text-align: center;
   }
 }
@@ -929,6 +953,11 @@ ALLMART — ADMIN REPORTS
   justify-content: space-between;
   gap: var(--space-4);
   flex-wrap: wrap;
+}
+
+.panelHeaderLeft {
+  display: flex;
+  gap: 0.2em;
 }
 
 .panelTitle {
