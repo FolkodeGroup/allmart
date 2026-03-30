@@ -39,7 +39,7 @@ export async function index(
         total: result.total,
         pages: Math.ceil(result.total / limitNum),
       },
-    });
+    } as any);
   } catch (err) {
     next(err);
   }

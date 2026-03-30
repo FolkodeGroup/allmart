@@ -62,6 +62,20 @@ const navItems = [
     permission: "reports.view" as const,
     badge: null,
   },
+  {
+    label: "Promociones",
+    to: "/admin/promociones",
+    icon: "🎉",
+    permission: null,
+    badge: null,
+  },
+  {
+    label: "Colecciones",
+    to: "/admin/colecciones",
+    icon: "📚",
+    permission: null,
+    badge: null,
+  },
 ] as const;
 
 const ROLE_LABELS: Record<string, string> = {

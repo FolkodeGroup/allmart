@@ -40,34 +40,41 @@ export const promotionsService = {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (search) params.append('q', search);
     if (isActive !== undefined) params.append('isActive', String(isActive));
-    return apiFetch(`/admin/promotions?${params}`);
+    const response = await apiFetch<any>(`/api/admin/promotions?${params}`);
+    // El servidor devuelve { success: true, data: { data: [...], pagination: {...} } }
+    // Extraemos el contenido de data
+    return response.data;
   },
 
   async getById(id: string): Promise<Promotion> {
-    return apiFetch(`/admin/promotions/${id}`);
+    const response = await apiFetch<any>(`/api/admin/promotions/${id}`);
+    return response.data;
   },
 
   async create(data: Partial<Promotion>): Promise<Promotion> {
-    return apiFetch('/admin/promotions', {
+    const response = await apiFetch<any>('/api/admin/promotions', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
     });
+    return response.data;
   },
 
   async update(id: string, data: Partial<Promotion>): Promise<Promotion> {
-    return apiFetch(`/admin/promotions/${id}`, {
+    const response = await apiFetch<any>(`/api/admin/promotions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
     });
+    return response.data;
   },
 
   async delete(id: string): Promise<void> {
-    return apiFetch(`/admin/promotions/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/admin/promotions/${id}`, { method: 'DELETE' });
   },
 
   async duplicate(id: string): Promise<Promotion> {
-    return apiFetch(`/admin/promotions/${id}/duplicate`, { method: 'POST' });
+    const response = await apiFetch<any>(`/api/admin/promotions/${id}/duplicate`, { method: 'POST' });
+    return response.data;
   },
 };

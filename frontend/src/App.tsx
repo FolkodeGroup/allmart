@@ -23,6 +23,8 @@ const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
 const AdminVariants = lazy(() => import('./features/admin/variants/AdminVariants').then(m => ({ default: m.AdminVariants })));
 const AdminImages = lazy(() => import('./features/admin/images/AdminImages').then(m => ({ default: m.AdminImages })));
+const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
+const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
 
 const router = createBrowserRouter([
   {
@@ -100,6 +102,26 @@ const router = createBrowserRouter([
           <AdminRoute requiredPermission="reports.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminReports />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'promociones', 
+        element: (
+          <AdminRoute requiredPermission="products.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminPromotions />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'colecciones', 
+        element: (
+          <AdminRoute requiredPermission="products.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCollections />
             </Suspense>
           </AdminRoute>
         ) 
