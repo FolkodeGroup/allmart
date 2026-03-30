@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Collection } from './collectionsService';
 import { collectionsService } from './collectionsService';
+import { ProductSelector } from './ProductSelector';
 import styles from './AdminCollections.module.css';
 
 interface Props {
@@ -178,6 +179,13 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
             placeholder="https://..."
           />
         </div>
+
+        <ProductSelector
+          selectedIds={formData.productIds}
+          onProductsChange={(productIds) =>
+            setFormData({ ...formData, productIds })
+          }
+        />
 
         <div className={styles.formGroup}>
           <label>
