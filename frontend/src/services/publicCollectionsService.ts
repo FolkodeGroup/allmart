@@ -54,6 +54,25 @@ export interface ProductDiscount {
   priority: number;
 }
 
+function isValidProductDiscount(value: unknown): value is ProductDiscount {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const discount = value as Partial<ProductDiscount>;
+
+  return (
+    typeof discount.promotionId === 'string' &&
+    typeof discount.promotionName === 'string' &&
+    Number.isFinite(discount.originalPrice) &&
+    Number.isFinite(discount.discountAmount) &&
+    Number.isFinite(discount.finalPrice) &&
+    Number.isFinite(discount.discountPercentage) &&
+    typeof discount.promotionType === 'string' &&
+    Number.isFinite(discount.priority)
+  );
+}
+
 export const publicCollectionsService = {
   /**
    * Obtiene colecciones para mostrar en home
@@ -101,8 +120,8 @@ export const publicCollectionsService = {
       ...(categoryId && { categoryId }),
     });
     try {
-      const result = await apiFetch(`/api/promotions/product-discount/${productId}?${params}`) as ProductDiscount | null;
-      return result;
+      const result = await apiFetch(`/api/promotions/product-discount/${productId}?${params}`) as unknown;
+      return isValidProductDiscount(result) ? result : null;
     } catch (error) {
       return null;
     }

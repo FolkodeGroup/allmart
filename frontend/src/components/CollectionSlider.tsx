@@ -13,7 +13,7 @@ export interface CollectionProduct {
   id: string;
   name: string;
   slug: string;
-  price: number;
+  price: number | string;
   imageUrl?: string;
   position: number;
 }
@@ -92,6 +92,13 @@ const CollectionSlider: React.FC<Props> = ({
     return null;
   }
 
+  // DEBUG: Ver exactamente qué precios están llegando
+  console.log('CollectionSlider products:', products);
+  if (products[0]) {
+    console.log('First product:', products[0]);
+    console.log('First product price:', products[0].price, typeof products[0].price);
+  }
+
   return (
     <div className={styles.container}>
       {bannerUrl && (
@@ -156,7 +163,7 @@ const CollectionSlider: React.FC<Props> = ({
               <div className={styles.productInfo}>
                 <h3>{product.name}</h3>
                 <p className={styles.price}>
-                  ${typeof product.price === 'number' ? product.price.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : product.price}
+                  ${product.price}
                 </p>
               </div>
             </div>
