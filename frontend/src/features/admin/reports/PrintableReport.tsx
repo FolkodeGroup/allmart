@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { createRoot } from 'react-dom/client';
 import type { ReportsFiltersValue } from './components/ReportsFilters';
 import type { OrdersTableProps } from './AdminReports';
 import { BarChart } from './components/BarChart';
 import { DonutChart } from './components/DonutChart';
 import { OrdersTable } from './components/OrdersTable';
-import styles from './AdminReports.module.css';
 // import { flushSync } from 'react-dom';
 
 export interface PrintableReportProps {
@@ -36,7 +34,7 @@ import { chunkOrdersForPDF } from "./components/chunkOrdersForPDF";
 export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportProps>(
     (
         {
-            filters,
+            filters: _filters,
             metrics,
             barData,
             statusSlices,
