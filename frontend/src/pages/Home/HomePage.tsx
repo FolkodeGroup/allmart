@@ -47,31 +47,40 @@ export function HomePage() {
       />
       <AboutSection />
       
-      {/* Sección Ofertas del Mes - Dinámico */}
-      {!error && (collections.length > 0 || loading) && (
-        <section style={{ background: 'var(--color-primary-light)', padding: '60px 0' }} aria-label="Ofertas del mes">
+      {/* Secciones de Colecciones - Dinámicas con colores alternados */}
+      {loading && (
+        <section style={{ background: 'var(--color-primary-light)', padding: '60px 0' }}>
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 48px' }}>
-            <span style={{ color: '#a67c52', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, fontSize: 14 }}>Ahorrá</span>
-            <h2 style={{ fontSize: 32, fontWeight: 800, margin: '8px 0 24px 0' }}>Ofertas del mes</h2>
+            <p style={{ color: '#666' }}>Cargando colecciones especiales...</p>
+          </div>
+        </section>
+      )}
+      
+      {!loading && !error && collections.length > 0 && (
+        <div>
+          {collections.map((collection, index) => {
+            const isEvenIndex = index % 2 === 0;
+            const backgroundColor = isEvenIndex ? 'var(--color-primary-light)' : '#f9fafb';
             
-            {loading && <p style={{ color: '#666' }}>Cargando colecciones especiales...</p>}
-            
-            {!loading && collections.length > 0 && (
-              <div>
-                {collections.map((collection) => (
+            return (
+              <section
+                key={collection.id}
+                style={{ background: backgroundColor, padding: '60px 0' }}
+                aria-label={collection.name}
+              >
+                <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 48px' }}>
                   <CollectionSlider
-                    key={collection.id}
                     title={collection.name}
                     description={collection.description}
                     products={collection.products || []}
                     bannerUrl={collection.imageUrl}
                     onProductClick={handleProductClick}
                   />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
+                </div>
+              </section>
+            );
+          })}
+        </div>
       )}
       
       <Benefits />
