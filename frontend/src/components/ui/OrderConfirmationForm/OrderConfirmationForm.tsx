@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { orderConfirmationSchema, type OrderConfirmationSchema } from '../../../schemas/orderConfirmationSchema';
@@ -47,12 +47,11 @@ export function OrderConfirmationForm({
 }: OrderConfirmationFormProps) {
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const firstInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors, isValid, isSubmitting },
     // no se usan reset ni getValues
   } = useForm<OrderConfirmationSchema>({
@@ -63,8 +62,8 @@ export function OrderConfirmationForm({
   });
 
   useEffect(() => {
-    firstInputRef.current?.focus();
-  }, []);
+    setFocus('firstName');
+  }, [setFocus]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -137,7 +136,7 @@ export function OrderConfirmationForm({
       aria-hidden="true"
       tabIndex={-1}
     >
-      <div className={styles.panel} ref={dialogRef}>
+      <div className={styles.panel}>
         {/* ── Cabecera ── */}
         <div className={styles.header}>
           <h2 id="order-form-title" className={styles.title}>
@@ -194,7 +193,6 @@ export function OrderConfirmationForm({
                 aria-describedby={errors.firstName ? 'firstName-error' : undefined}
                 aria-invalid={!!errors.firstName}
                 {...register('firstName', { setValueAs: v => typeof v === 'string' ? v.trim() : v })}
-                ref={firstInputRef}
               />
               {errors.firstName && (
                 <span id="firstName-error" className={styles.errorMsg} role="alert">

@@ -41,27 +41,56 @@ export function ProductDetailPage() {
   /* Cargar producto por slug */
   useEffect(() => {
     if (!slug) return;
+
+    let cancelled = false;
+
     setLoading(true);
     setError(null);
     setSelectedImage(0);
+    setRelatedProducts([]);
 
-    Promise.all([fetchPublicProductBySlug(slug), fetchPublicCategories()])
-      .then(([apiProduct, categories]) => {
+    const loadProduct = async () => {
+      try {
+        const [apiProduct, categories] = await Promise.all([
+          fetchPublicProductBySlug(slug),
+          fetchPublicCategories(),
+        ]);
+
+        if (cancelled) return;
+
         const mappedProduct = mapApiProductToProduct(apiProduct, categories);
         setProduct(mappedProduct);
+        setLoading(false);
 
-        // Cargar productos relacionados de la misma categoría
-        const categorySlugs = categories.find((c) => c.id === apiProduct.categoryId)?.slug;
-        return fetchPublicProducts({ category: categorySlugs, limit: 5 }).then(({ data }) => {
+        // Cargar relacionados luego del render inicial.
+        const categorySlug = categories.find((c) => c.id === apiProduct.categoryId)?.slug;
+        try {
+          const { data } = await fetchPublicProducts({ category: categorySlug, limit: 5 });
+          if (cancelled) return;
+
           const related = data
             .map((p) => mapApiProductToProduct(p, categories))
             .filter((p) => p.id !== apiProduct.id)
             .slice(0, 4);
+
           setRelatedProducts(related);
-        });
-      })
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
+        } catch {
+          if (!cancelled) {
+            setRelatedProducts([]);
+          }
+        }
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : 'Error al cargar el producto');
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   /* Cargar descuento dinámico desde API */
