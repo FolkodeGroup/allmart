@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface ProductImageProps {
-  src?: string;
+  src?: string | null;
   alt: string;
   className?: string;
   width?: number;
@@ -29,7 +29,9 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   sizes,
 }) => {
   const [loaded, setLoaded] = useState(false);
-  if (!src) {
+  const safeSrc = typeof src === 'string' ? src : '';
+
+  if (!safeSrc) {
     // Si no hay imagen, mostrar placeholder
     return (
       <img
@@ -44,10 +46,10 @@ export const ProductImage: React.FC<ProductImageProps> = ({
     );
   }
   // Derivar WebP si es posible
-  const webpSrc = src.endsWith('.jpg') || src.endsWith('.jpeg')
-    ? src.replace(/\.(jpg|jpeg)$/i, '.webp')
-    : src.endsWith('.png')
-      ? src.replace(/\.png$/i, '.webp')
+  const webpSrc = safeSrc.endsWith('.jpg') || safeSrc.endsWith('.jpeg')
+    ? safeSrc.replace(/\.(jpg|jpeg)$/i, '.webp')
+    : safeSrc.endsWith('.png')
+      ? safeSrc.replace(/\.png$/i, '.webp')
       : undefined;
   return (
     <div style={{ position: 'relative', width, height, ...style }} className={className}>
@@ -76,7 +78,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
           <source srcSet={webpSrc} type="image/webp" />
         )}
         <img
-          src={src}
+          src={safeSrc}
           alt={alt}
           loading={loading}
           decoding="async"

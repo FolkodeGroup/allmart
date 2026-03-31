@@ -19,7 +19,7 @@ export interface ApiProduct {
   price: number;
   compareAtPrice?: number;
   discount?: number;
-  images: string[];
+  images: Array<string | { url?: string } | null>;
   categoryId: string;
   tags: string[];
   status: string;
@@ -136,6 +136,16 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     isVisible: true,
   };
 
+  const normalizedImages = Array.isArray(api.images)
+    ? api.images
+        .map((img) => {
+          if (typeof img === 'string') return img;
+          if (img && typeof img === 'object' && typeof img.url === 'string') return img.url;
+          return '';
+        })
+        .filter(Boolean)
+    : [];
+
   return {
     id: api.id,
     name: api.name,
@@ -149,7 +159,7 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
         ? Math.round(((api.compareAtPrice - api.price) / api.compareAtPrice) * 100)
         : undefined
     ),
-    images: Array.isArray(api.images) ? api.images : [],
+    images: normalizedImages,
     category,
     tags: Array.isArray(api.tags) ? api.tags : [],
     rating: api.rating,

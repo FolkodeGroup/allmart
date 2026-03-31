@@ -64,12 +64,33 @@ export interface ProcessedImage {
   originalFilename: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers internos ─────────────────────────────────────────────────────────
 
 /**
- * Valida el archivo cargado.
- * @throws 400 si el tipo no es imagen o supera el tamaño máximo.
+ * Sincroniza el campo `images` del producto con las imágenes almacenadas en productImageStorage.
+ * Esto asegura que las imágenes aparezcan en las tarjetas del catálogo.
  */
+async function syncProductImages(productId: string): Promise<void> {
+  const allStorageImages = await prisma.productImageStorage.findMany({
+    where: { productId },
+    orderBy: { position: 'asc' },
+    select: {
+      id: true,
+      altText: true,
+      position: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  const syncedImages = allStorageImages.map((img) => `/api/images/products/${img.id}`);
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: { images: syncedImages as any },
+  });
+}
+
 function validateFile(file: UploadedImageFile): void {
   if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
     throw createError(
@@ -131,6 +152,7 @@ async function processImage(buffer: Buffer, originalname: string): Promise<Proce
 /**
  * Sube y persiste una imagen de producto.
  * Convierte a WebP automáticamente y genera miniatura.
+ * También sincroniza el campo `images` del producto para que aparezca en las tarjetas.
  */
 export async function uploadProductImage(
   productId: string,
@@ -168,6 +190,9 @@ export async function uploadProductImage(
       position,
     },
   });
+
+  // Sincronizar el campo `images` del producto para que aparezca en las tarjetas
+  await syncProductImages(productId);
 
   return toImageMeta(created);
 }
@@ -231,6 +256,10 @@ export async function updateProductImageMeta(
       position: true, createdAt: true, updatedAt: true,
     },
   });
+
+  // Sincronizar el campo `images` del producto
+  await syncProductImages(existing.productId);
+
   return { ...updated, url: `/api/images/products/${updated.id}`, thumbUrl: `/api/images/products/${updated.id}/thumb` };
 }
 
@@ -240,7 +269,11 @@ export async function updateProductImageMeta(
 export async function deleteProductImage(id: string): Promise<void> {
   const existing = await prisma.productImageStorage.findUnique({ where: { id } });
   if (!existing) throw createError('Imagen no encontrada', 404);
+  
   await prisma.productImageStorage.delete({ where: { id } });
+  
+  // Sincronizar el campo `images` del producto después de eliminar
+  await syncProductImages(existing.productId);
 }
 
 /**
