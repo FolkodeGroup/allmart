@@ -666,10 +666,9 @@ export function AdminOrders() {
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
       <div className={sectionStyles.header}>
-        <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
+        {/* <h1 className={sectionStyles.title}>
           <span className={sectionStyles.icon}>🛒</span> Pedidos
-        </h1>
+        </h1> */}
         <p className={sectionStyles.subtitle}>
           Revisá, procesá y gestioná los pedidos de clientes.
         </p>

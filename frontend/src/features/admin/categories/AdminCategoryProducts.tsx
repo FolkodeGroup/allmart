@@ -227,7 +227,6 @@ export function AdminCategoryProducts() {
               <ArrowLeft size={14} /> Volver a categorías
             </button>
 
-            <span className={sectionStyles.label}>Administración</span>
             <h1 className={sectionStyles.title}>Productos de {category?.name ?? 'categoría'}</h1>
             <p className={sectionStyles.subtitle}>
               {category

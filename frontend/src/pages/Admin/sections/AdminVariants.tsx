@@ -208,7 +208,6 @@ export function AdminVariants() {
   return (
     <div className={sectionStyles.page} role="main" aria-label="Gestión de variantes">
       <div className={sectionStyles.header}>
-        <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title} tabIndex={0} aria-label="Variantes, administración de grupos y valores">
           <span role="img" aria-label="Paleta de colores">🎨</span> Variantes
         </h1>

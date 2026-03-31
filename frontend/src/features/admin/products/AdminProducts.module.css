@@ -531,6 +531,19 @@
   }
 }
 
+/* ── Header Layout ── */
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.headerTop > div {
+  flex: 1;
+}
+
 /* Header y filtros responsive */
 @media (max-width: 700px) {
   .headerTop {

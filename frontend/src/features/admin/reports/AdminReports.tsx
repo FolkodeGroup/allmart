@@ -499,10 +499,9 @@ export function AdminReports() {
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
       {/* Header */}
       <div className={sectionStyles.header}>
-        <span className={sectionStyles.label + ' fadeInFast'}>Administración</span>
-        <h1 className={styles.panelTitle + ' fadeIn'}>
+        {/* <h1 className={styles.panelTitle + ' fadeIn'}>
           <span className={sectionStyles.icon}>📊</span> Reportes y estadísticas
-        </h1>
+        </h1> */}
         <p className={sectionStyles.subtitle + ' fadeInFast'}>
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
         </p>

@@ -340,7 +340,7 @@ export function AdminDashboard() {
       </div>
 
       {/* Header */}
-      <div className={styles.header}>
+      {/* <div className={styles.header}>
         <div>
           <span className={styles.label}>Panel de administración</span>
           <h1 className={styles.title}>¡Bienvenido!</h1>
@@ -349,7 +349,7 @@ export function AdminDashboard() {
           </p>
         </div>
         <div className={styles.brandMark}>allmart</div>
-      </div>
+      </div> */}
 
       {/* Widgets Drag & Drop Dashboard */}
       {enabledWidgets.map((widget) => {

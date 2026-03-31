@@ -184,15 +184,14 @@ export function AdminImages() {
 
   return (
     <div className={`${sectionStyles.page} ${styles.widePage} dark:bg-gray-900 dark:text-gray-100`}>
-      <div className={sectionStyles.header}>
-        <span className={sectionStyles.label}>Administración</span>
+      {/* <div className={sectionStyles.header}>
         <h1 className={sectionStyles.title}>
           <span>🖼️</span> Imágenes de producto
         </h1>
+        </div> */}
         <p className={sectionStyles.subtitle}>
           Subí imágenes desde tu dispositivo — el backend las convierte a WebP y genera miniatura automáticamente.
         </p>
-      </div>
 
       <div className={styles.layout}>
         {/* ── Panel izquierdo: selector de producto ── */}
