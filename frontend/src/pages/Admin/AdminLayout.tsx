@@ -1,6 +1,5 @@
 // src/pages/Admin/AdminLayout.tsx
 import { useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
@@ -347,25 +346,17 @@ export function AdminLayout() {
           className={styles.content}
           style={{ display: "flex", flexDirection: "column" }}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {" "}
-            {/* initial={false} evita el parpadeo al cargar la primera vez */}
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }} // Muy rápido para evitar que el ojo note el cambio
-              style={{
-                flex: 1,
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+          <div
+            key={location.pathname}
+            style={{
+              flex: 1,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>
