@@ -20,7 +20,6 @@ import { generateMockOrders } from './components/DatosMockeados';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
 import { SalesTableView } from './components/SalesTableView';
-import { Bar } from 'recharts';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
