@@ -211,9 +211,9 @@
   cursor: pointer;
   color: #2c4135;
   font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  letter-spacing: var(--tracking-wide);
+  font-size: 0.82rem;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   transition: color var(--transition-base), background var(--transition-base);
 }
