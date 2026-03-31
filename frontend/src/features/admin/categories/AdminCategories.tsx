@@ -24,7 +24,7 @@ import { useCategoryBulkEdit } from './hooks/useCategoryBulkEdit';
 
 
 export function AdminCategories() {
-  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, updateCategory, deleteCategory } = useAdminCategories();
+  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory } = useAdminCategories();
   // Local state for pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(10); // Could be made configurable
@@ -33,9 +33,17 @@ export function AdminCategories() {
   // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [, setEditId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    image: '',
+    isVisible: true,
+  });
   // Estado para cambio de visibilidad
   const [toggleConfirm, setToggleConfirm] = useState<{ id: string; newVisible: boolean } | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -93,8 +101,102 @@ export function AdminCategories() {
     setPage(newPage);
   }, []);
 
-  const handleNew = () => { setEditId(null); setShowForm(true); };
-  const handleEdit = (id: string) => { setEditId(id); setShowForm(true); };
+  const resetFormState = () => {
+    setFormError(null);
+    setFormSubmitting(false);
+    setFormData({
+      name: '',
+      description: '',
+      image: '',
+      isVisible: true,
+    });
+  };
+
+  const closeForm = () => {
+    if (formSubmitting) return;
+    setShowForm(false);
+    setEditId(null);
+    resetFormState();
+  };
+
+  const handleNew = () => {
+    setEditId(null);
+    resetFormState();
+    setShowForm(true);
+  };
+
+  const handleEdit = (id: string) => {
+    const category = categories.find((cat) => cat.id === id);
+    setEditId(id);
+    setFormError(null);
+    setFormSubmitting(false);
+    setFormData({
+      name: category?.name ?? '',
+      description: category?.description ?? '',
+      image: category?.image ?? '',
+      isVisible: category?.isVisible ?? true,
+    });
+    setShowForm(true);
+  };
+
+  const slugifyCategoryName = (name: string) =>
+    name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+  const handleSubmitCategoryForm = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (formSubmitting) return;
+
+    const trimmedName = formData.name.trim();
+    if (!trimmedName) {
+      setFormError('El nombre es obligatorio.');
+      showNotification('error', 'El nombre es obligatorio.');
+      return;
+    }
+
+    const payload = {
+      name: trimmedName,
+      description: formData.description.trim() || undefined,
+      image: formData.image.trim() || undefined,
+      isVisible: formData.isVisible,
+    };
+
+    try {
+      setFormSubmitting(true);
+      setFormError(null);
+
+      if (editId) {
+        await updateCategory(editId, payload);
+      } else {
+        await addCategory({
+          ...payload,
+          slug: slugifyCategoryName(trimmedName),
+          itemCount: 0,
+        });
+      }
+
+      setShowForm(false);
+      setEditId(null);
+      resetFormState();
+      refreshCategories({
+        q: selectedSuggestion || debouncedSearch,
+        page,
+        limit,
+        minProducts: minProducts === '' ? undefined : minProducts,
+        maxProducts: maxProducts === '' ? undefined : maxProducts,
+        isVisible: isVisible === 'all' ? undefined : isVisible === 'visible' ? true : false,
+      });
+    } catch (err: any) {
+      setFormError(err?.message || 'No se pudo guardar la categoría.');
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
   // const auth = useAdminAuth ? useAdminAuth() : null;
   // const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
 
@@ -347,23 +449,88 @@ export function AdminCategories() {
         <p>¿Estás seguro de que querés eliminar esta categoría?</p>
       </Modal>
 
-      {/* Modal de formulario - Deshabilitado por falta de componente */}
-      {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', maxWidth: 400 }}>
-             <p><b>Componente Formulario no encontrado.</b></p>
-             <p style={{ fontSize: '0.95em', color: '#666', marginTop: 8 }}>
-               Cuando se implemente el formulario de edición/creación de categoría, debe incluir:<br />
-               <ul style={{ margin: '8px 0 0 18px', padding: 0 }}>
-                 <li>Feedback visual de loading en el botón/inputs</li>
-                 <li>Notificaciones de éxito y error usando <code>useNotification</code></li>
-                 <li>Evitar submits múltiples y validar errores</li>
-               </ul>
-             </p>
-             <button onClick={() => setShowForm(false)} style={{ marginTop: 16 }}>Cerrar</button>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={showForm}
+        onClose={closeForm}
+        title={editId ? 'Editar categoría' : 'Nueva categoría'}
+        actions={
+          <>
+            <button
+              className={styles.deleteBtn}
+              type="submit"
+              form="admin-category-form"
+              disabled={formSubmitting}
+              style={{ minWidth: 120 }}
+            >
+              {formSubmitting ? 'Guardando...' : editId ? 'Actualizar' : 'Crear'}
+            </button>
+            <button
+              className={styles.cancelBtn}
+              type="button"
+              onClick={closeForm}
+              disabled={formSubmitting}
+              style={{ minWidth: 120 }}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+        disableClose={formSubmitting}
+      >
+        <form id="admin-category-form" onSubmit={handleSubmitCategoryForm} style={{ display: 'grid', gap: 12 }}>
+          {formError && (
+            <p style={{ margin: 0, color: '#b91c1c', fontSize: '0.92rem' }} role="alert">
+              {formError}
+            </p>
+          )}
+
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span style={{ fontWeight: 600 }}>Nombre *</span>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              placeholder="Ej: Herramientas"
+              disabled={formSubmitting}
+              required
+              maxLength={80}
+            />
+          </label>
+
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span style={{ fontWeight: 600 }}>Descripción</span>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+              placeholder="Descripción corta para la categoría"
+              disabled={formSubmitting}
+              rows={3}
+              maxLength={280}
+            />
+          </label>
+
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span style={{ fontWeight: 600 }}>URL de imagen</span>
+            <input
+              type="url"
+              value={formData.image}
+              onChange={(e) => setFormData((prev) => ({ ...prev, image: e.target.value }))}
+              placeholder="https://..."
+              disabled={formSubmitting}
+            />
+          </label>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={formData.isVisible}
+              onChange={(e) => setFormData((prev) => ({ ...prev, isVisible: e.target.checked }))}
+              disabled={formSubmitting}
+            />
+            Visible en tienda
+          </label>
+        </form>
+      </Modal>
 
       {/* Barra de acciones masivas */}
       {!loading && !error && selectedIds.length > 0 && (
