@@ -48,7 +48,9 @@ export function CategoryGrid() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const featured = categories.slice(0, 6);
+  const featured = [...categories]
+    .sort((a, b) => (b.itemCount ?? 0) - (a.itemCount ?? 0))
+    .slice(0, 6);
 
   return (
     <section className={styles.section} aria-label="Categorías destacadas">
