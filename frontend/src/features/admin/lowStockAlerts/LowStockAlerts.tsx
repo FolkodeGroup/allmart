@@ -59,6 +59,8 @@ export const LowStockAlerts: React.FC = () => {
     return <div className={styles.loading}>Cargando alertas...</div>;
   }
 
+  const alertsData = Array.isArray(alerts.data) ? alerts.data : [];
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -68,7 +70,7 @@ export const LowStockAlerts: React.FC = () => {
         </div>
       </div>
 
-      {alerts.data.length === 0 ? (
+      {alertsData.length === 0 ? (
         <div className={styles.empty}>
           <p>No hay alertas de stock bajo.</p>
         </div>
@@ -86,14 +88,14 @@ export const LowStockAlerts: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {alerts.data.map((alert) => (
+              {alertsData.map((alert) => (
                 <tr key={alert.id} className={alert.stockAfter < 0 ? styles.critical : styles.warning}>
                   <td className={styles.productName}>{alert.productName}</td>
                   <td>
                     <small>
-                      {alert.order.customerFirstName} {alert.order.customerLastName}
+                      {alert.order?.customerFirstName ?? 'Cliente'} {alert.order?.customerLastName ?? ''}
                       <br />
-                      <span className={styles.email}>{alert.order.customerEmail}</span>
+                      <span className={styles.email}>{alert.order?.customerEmail ?? 'Sin email'}</span>
                     </small>
                   </td>
                   <td className={styles.number}>{alert.quantitySold}</td>
