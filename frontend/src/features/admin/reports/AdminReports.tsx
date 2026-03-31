@@ -436,11 +436,11 @@ export function AdminReports() {
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
       {/* Header */}
       <div className={sectionStyles.header}>
-        <span className={sectionStyles.label}>Administración</span>
-        <h1 className={styles.title}>
+        <span className={sectionStyles.label + ' fadeInFast'}>Administración</span>
+        <h1 className={styles.panelTitle + ' fadeIn'}>
           <span className={sectionStyles.icon}>📊</span> Reportes y estadísticas
         </h1>
-        <p className={sectionStyles.subtitle}>
+        <p className={sectionStyles.subtitle + ' fadeInFast'}>
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
         </p>
       </div>
@@ -513,18 +513,20 @@ export function AdminReports() {
 
       {/* KPI Cards */}
       {isLoading ? (
-        <div className={styles.metricsGrid}>
+        <>
           {Array.from({ length: 5 }).map((_, i) => (
             <KPISkeleton key={i} />
           ))}
-        </div>
+        </>
       ) : (
-        <ReportsMetrics metrics={metrics} />
+        <div className={styles.fadeIn}>
+          <ReportsMetrics metrics={metrics} />
+        </div>
       )}
 
       {isLoading ? (
         <>
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.skeletonPanelTitle}></div>
               <div className={styles.skeletonPanelSubtitle}></div>
@@ -532,8 +534,8 @@ export function AdminReports() {
             <BarChartSkeleton />
           </div>
 
-          <div className={styles.twoCol}>
-            <div className={styles.panel}>
+          <div className={styles.twoCol + ' fadeIn'}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
                 <div className={styles.skeletonPanelTitle}></div>
                 <div className={styles.skeletonPanelSubtitle}></div>
@@ -541,7 +543,7 @@ export function AdminReports() {
               <ProductRankingSkeleton />
             </div>
 
-            <div className={styles.panel}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
                 <div className={styles.skeletonPanelTitle}></div>
                 <div className={styles.skeletonPanelSubtitle}></div>
@@ -550,7 +552,7 @@ export function AdminReports() {
             </div>
           </div>
 
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.skeletonPanelTitle}></div>
               <div className={styles.skeletonPanelSubtitle}></div>
@@ -565,16 +567,16 @@ export function AdminReports() {
       ) : (
         <>
           {/* Gráfica de ventas */}
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
-              <span className={styles.panelSubtitle}>
+              <h2 className={styles.panelTitle + ' fadeInFast'}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
+              <span className={styles.panelSubtitle + ' fadeInFast'}>
                 {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
             {barData.every(d => d.value === 0) ? (
-              <p className={styles.noData}>Sin ventas en este período.</p>
+              <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>
             ) : (
               <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
                 <div className={styles.fadeIn}>
@@ -585,14 +587,14 @@ export function AdminReports() {
           </div>
 
           {/* Top productos + Distribución de estados */}
-          <div className={styles.twoCol}>
-            <div className={styles.panel}>
+          <div className={styles.twoCol + ' fadeIn'}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle}>🏆 Productos más vendidos</h2>
-                <p className={styles.panelSubtitle}>Por ingresos generados</p>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>🏆 Productos más vendidos</h2>
+                <p className={styles.panelSubtitle + ' fadeInFast'}>Por ingresos generados</p>
 
               </div>
-              <div className={styles.viewToggle}>
+              <div className={styles.viewToggle + ' fadeInFast'}>
                 <span className={styles.viewToggleLabel}>Cambiar vista:</span>
                 <button
                   className={`${styles.toggleBtn} ${viewMode === 'list' ? styles.active : ''}`}
@@ -609,7 +611,7 @@ export function AdminReports() {
                 </button>
               </div>
               {topProducts.length === 0 ? (
-                <p className={styles.noData}>Sin datos en este período.</p>
+                <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
               ) : (
                 <ProductRanking
                   products={topProducts}
@@ -620,13 +622,13 @@ export function AdminReports() {
               )}
             </div>
 
-            <div className={styles.panel}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle}>📦 Por estado de pedido</h2>
-                <span className={styles.panelSubtitle}>Todos los pedidos del período</span>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>📦 Por estado de pedido</h2>
+                <span className={styles.panelSubtitle + ' fadeInFast'}>Todos los pedidos del período</span>
               </div>
               {periodOrders.length === 0 ? (
-                <p className={styles.noData}>Sin datos en este período.</p>
+                <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
               ) : (
                 <Suspense fallback={<DonutChartSkeleton aria-busy="true" />}>
                   <div className={styles.fadeIn}>
@@ -638,14 +640,14 @@ export function AdminReports() {
           </div>
 
           {/* Tabla resumen */}
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.panelHeaderLeft}>
-                <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
-                <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>📋 Últimos pedidos del período</h2>
+                <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={styles.exportWrap}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={styles.exportWrap + ' fadeInFast'}>
                 <span>Exportar como:</span>
 
                 <div className={styles.exportSelectWrap}>
@@ -712,7 +714,7 @@ export function AdminReports() {
             </div>
 
             {/* Filtros rápidos para la tabla de pedidos */}
-            <div className={styles.advancedFiltersWrap} style={{ marginBottom: 16 }}>
+            <div className={styles.advancedFiltersWrap + ' fadeInFast'} style={{ marginBottom: 16 }}>
 
               <label className={styles.advancedLabel}>
                 Cliente
@@ -758,14 +760,14 @@ export function AdminReports() {
               </div>
             </div>
             {periodOrders.length === 0 ? (
-              <p className={styles.noData}>Sin pedidos en este período.</p>
+              <p className={styles.noData + ' fadeCross'}>Sin pedidos en este período.</p>
             ) : (
               <>
                 <OrdersTable
                   orders={paginatedOrders}
                 />
                 {periodOrders.length > pageSize && (
-                  <p className={styles.moreHint}>
+                  <p className={styles.moreHint + ' fadeInFast'}>
                     Mostrando {from}-{to} de {periodOrders.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
                   </p>
                 )}
