@@ -139,7 +139,7 @@ export async function uploadAdminCategoryImage(token: string, id: string, file: 
   const formData = new FormData();
   formData.append('image', file);
 
-  const body = await apiFetch<ApiSuccess<{ imageUrl: string }>>(`/api/admin/categories/${id}/image`, {
+  const body = await apiFetch<ApiSuccess<{ imageUrl: string }>>(`/api/admin/categories/${id}/image/upload`, {
     method: 'POST',
     body: formData,
   }, token);
