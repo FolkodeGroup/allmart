@@ -21,7 +21,7 @@ import { exportCategoriesToCSV, exportCategoriesToExcel } from './utils/exportCa
 import { CategoriesFilters } from './components/CategoriesFilters';
 // import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
-import { useCategoryBulkEdit } from './hooks/useCategoryBulkEdit';
+import { useCategoryBulkActions } from './hooks/useCategoryBulkActions';
 
 
 export function AdminCategories() {
@@ -69,16 +69,16 @@ export function AdminCategories() {
     clearSelection
   } = useCategorySelection(categories);
 
-  // Estado y lógica para edición masiva (extraído a hook personalizado)
+  // Estado y lógica para acciones masivas (extraído a hook personalizado)
   const {
-    showBulkEdit,
-    setShowBulkEdit,
-    bulkEditLoading,
-    setBulkEditLoading,
-    bulkEditData,
-    // setBulkEditData,
-    handleBulkEdit
-  } = useCategoryBulkEdit();
+    bulkActionLoading,
+    setBulkActionLoading,
+    bulkAction,
+    setBulkAction,
+    handleDeleteBulk,
+    handleToggleVisibilityBulk,
+    closeBulkAction
+  } = useCategoryBulkActions();
 
   // Fetch categories when filtros cambian
   useEffect(() => {
@@ -609,51 +609,98 @@ export function AdminCategories() {
       {!loading && !error && selectedIds.length > 0 && (
         <BulkEditCategoriesBar
           selectedCount={selectedIds.length}
-          loading={bulkEditLoading}
-          onBulkEdit={handleBulkEdit}
+          loading={bulkActionLoading}
+          onToggleVisibility={handleToggleVisibilityBulk}
+          onDelete={handleDeleteBulk}
           onCancel={() => clearSelection()}
         />
       )}
 
-      {/* Modal de confirmación de edición masiva */}
+      {/* Modal de confirmación para eliminar masivamente */}
       <Modal
-        open={showBulkEdit}
-        onClose={() => !bulkEditLoading && setShowBulkEdit(false)}
-        title="Confirmar edición masiva"
+        open={bulkAction.type === 'delete'}
+        onClose={() => !bulkActionLoading && closeBulkAction()}
+        title="Eliminar categorías"
         actions={
           <>
             <button
               className={styles.deleteBtn}
               onClick={async () => {
-                setBulkEditLoading(true);
+                setBulkActionLoading(true);
                 try {
-                  await Promise.all(selectedIds.map((id: string) => updateCategory(id, bulkEditData)));
-                  showNotification('success', 'Categorías actualizadas correctamente');
+                  await Promise.all(selectedIds.map((id: string) => deleteCategory(id)));
+                  showNotification('success', `${selectedIds.length} categoría${selectedIds.length !== 1 ? 's' : ''} eliminada${selectedIds.length !== 1 ? 's' : ''} correctamente`);
                   clearSelection();
                   refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
-                  setShowBulkEdit(false);
+                  setBulkAction({ type: null });
                 } catch (err: any) {
-                  showNotification('error', err?.message || 'Error al editar categorías');
+                  showNotification('error', err?.message || 'Error al eliminar categorías');
                 } finally {
-                  setBulkEditLoading(false);
+                  setBulkActionLoading(false);
                 }
               }}
-              disabled={bulkEditLoading}
+              disabled={bulkActionLoading}
               style={{ minWidth: 100 }}
             >
-              {bulkEditLoading ? 'Editando...' : 'Confirmar'}
+              {bulkActionLoading ? 'Eliminando...' : 'Eliminar'}
             </button>
             <button
               className={styles.cancelBtn}
-              onClick={() => setShowBulkEdit(false)}
-              disabled={bulkEditLoading}
+              onClick={() => closeBulkAction()}
+              disabled={bulkActionLoading}
               style={{ minWidth: 100 }}
             >Cancelar</button>
           </>
         }
-        disableClose={bulkEditLoading}
+        disableClose={bulkActionLoading}
       >
-        <p>¿Estás seguro de que querés editar {selectedIds.length} categorías?</p>
+        <p>¿Estás seguro de que querés eliminar {selectedIds.length} categoría{selectedIds.length !== 1 ? 's' : ''}? Esta acción no se puede deshacer.</p>
+      </Modal>
+
+      {/* Modal de confirmación para cambiar visibilidad masivamente */}
+      <Modal
+        open={bulkAction.type === 'visibility'}
+        onClose={() => !bulkActionLoading && closeBulkAction()}
+        title={bulkAction.visibilityValue ? 'Mostrar categorías' : 'Ocultar categorías'}
+        actions={
+          <>
+            <button
+              className={styles.deleteBtn}
+              onClick={async () => {
+                setBulkActionLoading(true);
+                try {
+                  await Promise.all(selectedIds.map((id: string) => updateCategory(id, { isVisible: bulkAction.visibilityValue })));
+                  const action = bulkAction.visibilityValue ? 'mostrada' : 'oculta';
+                  showNotification('success', `${selectedIds.length} categoría${selectedIds.length !== 1 ? 's' : ''} ${action}${selectedIds.length !== 1 ? 's' : ''} correctamente`);
+                  clearSelection();
+                  refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
+                  setBulkAction({ type: null });
+                } catch (err: any) {
+                  showNotification('error', err?.message || 'Error al cambiar visibilidad de categorías');
+                } finally {
+                  setBulkActionLoading(false);
+                }
+              }}
+              disabled={bulkActionLoading}
+              style={{ minWidth: 100 }}
+            >
+              {bulkActionLoading ? 'Guardando...' : 'Confirmar'}
+            </button>
+            <button
+              className={styles.cancelBtn}
+              onClick={() => closeBulkAction()}
+              disabled={bulkActionLoading}
+              style={{ minWidth: 100 }}
+            >Cancelar</button>
+          </>
+        }
+        disableClose={bulkActionLoading}
+      >
+        <p>
+          {bulkAction.visibilityValue
+            ? `¿Mostrar ${selectedIds.length} categoría${selectedIds.length !== 1 ? 's' : ''}? Serán visibles para los usuarios.`
+            : `¿Ocultar ${selectedIds.length} categoría${selectedIds.length !== 1 ? 's' : ''}? No serán visibles para los usuarios.`}
+        </p>
       </Modal>
     </div>
   );
