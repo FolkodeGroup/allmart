@@ -7,6 +7,27 @@ import { handleResponse } from './apiErrorHandler';
 
 const STORAGE_KEY = 'allmart_admin_token';
 const CSRF_TOKEN_KEY = 'allmart_csrf_token';
+const DEFAULT_TIMEOUT_MS = 8000;
+const RETRY_DELAY_MS = 300;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function shouldRetry(method: string, error: unknown, attempt: number, maxRetries: number): boolean {
+  if (attempt >= maxRetries) return false;
+  if (method !== 'GET') return false;
+
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    return true;
+  }
+
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  return false;
+}
 
 /**
  * Obtiene el token CSRF almacenado en la sesión (si existe).
@@ -60,6 +81,15 @@ export async function apiFetch<T>(
   options: RequestInit = {},
   token?: string | null
 ): Promise<T> {
+  const method = (options.method || 'GET').toUpperCase();
+  const maxRetries = method === 'GET' ? 1 : 0;
+  let attempt = 0;
+
+  while (true) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+
+    try {
   const headers = {
     ...getAuthHeaders(token),
     ...(options.headers || {}),
@@ -70,10 +100,25 @@ export async function apiFetch<T>(
     delete (headers as Record<string, string>)['Content-Type'];
   }
 
-  const res = await fetch(url, {
-    ...options,
-    headers,
-  });
+      const res = await fetch(url, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
 
-  return handleResponse<T>(res);
+      window.clearTimeout(timeoutId);
+
+      return handleResponse<T>(res);
+    } catch (error) {
+      window.clearTimeout(timeoutId);
+
+      if (shouldRetry(method, error, attempt, maxRetries)) {
+        attempt += 1;
+        await delay(RETRY_DELAY_MS * attempt);
+        continue;
+      }
+
+      throw error;
+    }
+  }
 }

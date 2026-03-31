@@ -1,6 +1,6 @@
 // src/pages/Admin/AdminLayout.tsx
 import { useLocation } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAdminAuth } from "../../context/AdminAuthContext";
@@ -8,6 +8,7 @@ import { useAdminOrders } from "../../context/AdminOrdersContext";
 import { useAdminProducts } from "../../context/AdminProductsContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
 import { Button } from '../../components/ui/Button/Button';
+import { AdminLoadingFallback } from '../../components/ui/AdminLoadingFallback';
 import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 
@@ -355,7 +356,9 @@ export function AdminLayout() {
               flexDirection: "column",
             }}
           >
-            <Outlet />
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <Outlet />
+            </Suspense>
           </div>
         </div>
       </main>
