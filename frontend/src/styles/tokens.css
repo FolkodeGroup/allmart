@@ -31,9 +31,9 @@
   --color-overlay: rgba(0, 0, 0, 0.4);
 
   /* ── Typography ── */
-  --font-heading: 'Montserrat', sans-serif;
-  --font-body: 'Merriweather', serif;
-  --font-ui: 'Montserrat', sans-serif;
+   --font-heading: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+   --font-body: 'Merriweather', Georgia, 'Times New Roman', serif;
+   --font-ui: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 
   /* ── Font Sizes ── */
   --text-xs: 0.75rem;     /* 12px */

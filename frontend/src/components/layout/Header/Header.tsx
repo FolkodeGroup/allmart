@@ -6,29 +6,26 @@ import { fetchPublicCategories } from '../../../services/categoriesService';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
 
-const baseNavigation: NavigationItem[] = [
-  { label: 'Ofertas', href: '/productos?tag=oferta' },
-  { label: 'Novedades', href: '/productos?tag=nuevo' },
-];
-
 const fallbackNavigation: NavigationItem[] = [
-  ...baseNavigation,
   { label: 'Ver todo el catalogo', href: '/productos' },
 ];
 
 function buildNavigationFromCategories(categories: Category[]): NavigationItem[] {
-  const categoryItems: NavigationItem[] = categories.map((category) => ({
+  const visibleCategories = categories
+    .filter((category) => category.isVisible)
+    .filter((category, index, array) => array.findIndex((item) => item.slug === category.slug) === index);
+
+  const categoryItems: NavigationItem[] = visibleCategories.map((category) => ({
     label: category.name,
     href: `/productos?category=${encodeURIComponent(category.slug)}`,
   }));
 
-  const catalogChildren: NavigationItem[] = categories.map((category) => ({
+  const catalogChildren: NavigationItem[] = visibleCategories.map((category) => ({
     label: category.name,
     href: `/productos?category=${encodeURIComponent(category.slug)}`,
   }));
 
   return [
-    ...baseNavigation,
     ...categoryItems,
     {
       label: 'Ver todo el catalogo',
@@ -137,7 +134,7 @@ export function Header() {
         <div className={styles.inner}>
           <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
             {navigationItems.map((item) => (
-              <div className={styles.navItem} key={item.label}>
+              <div className={styles.navItem} key={item.href}>
                 {item.children ? (
                   <>
                     <button
@@ -179,7 +176,7 @@ export function Header() {
         aria-label="Navegación móvil"
       >
         {navigationItems.map((item) => (
-          <div key={item.label}>
+          <div key={item.href}>
             <Link
               to={item.href}
               className={styles.mobileNavLink}

@@ -132,9 +132,9 @@
 
 .actionLabel {
   font-family: var(--font-ui);
-  font-size: 0.74rem;
-  letter-spacing: 0.03em;
-  font-weight: var(--font-semibold);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  font-weight: var(--font-medium);
   text-transform: uppercase;
 }
 
@@ -211,9 +211,9 @@
   cursor: pointer;
   color: #2c4135;
   font-family: var(--font-ui);
-  font-size: 0.82rem;
-  font-weight: var(--font-semibold);
-  letter-spacing: 0.03em;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   transition: color var(--transition-base), background var(--transition-base);
 }
@@ -294,10 +294,10 @@
   text-decoration: none;
   color: #20362a;
   font-family: var(--font-ui);
-  font-weight: var(--font-semibold);
-  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  font-size: var(--text-sm);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--tracking-wide);
 }
 
 .mobileSubLinks {
