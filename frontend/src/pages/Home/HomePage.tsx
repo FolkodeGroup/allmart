@@ -4,17 +4,22 @@ import { CategoryGrid } from '../../features/home/CategoryGrid/CategoryGrid';
 import { FeaturedProducts } from '../../features/home/FeaturedProducts/FeaturedProducts';
 import type { PublicCollection } from '../../services/publicCollectionsService';
 import { publicCollectionsService } from '../../services/publicCollectionsService';
+import type { PublicBanner } from '../../services/publicBannersService';
+import { publicBannersService } from '../../services/publicBannersService';
 import CollectionSlider from '../../components/CollectionSlider';
+import BannerSlider from '../../components/BannerSlider';
 import { Benefits } from '../../features/home/Benefits/Benefits';
 import { AboutSection } from '../../features/home/AboutSection/AboutSection';
 
 export function HomePage() {
   const [collections, setCollections] = useState<PublicCollection[]>([]);
+  const [banners, setBanners] = useState<PublicBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadCollections();
+    loadBanners();
   }, []);
 
   async function loadCollections() {
@@ -31,6 +36,16 @@ export function HomePage() {
     }
   }
 
+  async function loadBanners() {
+    try {
+      const data = await publicBannersService.getActiveBanners();
+      setBanners(data.sort((a, b) => a.displayOrder - b.displayOrder));
+    } catch (err) {
+      console.error('Error loading banners:', err);
+      // No mostrar error al usuario - los banners son opcionales
+    }
+  }
+
   const handleProductClick = (productSlug: string) => {
     window.location.href = `/producto/${productSlug}`;
   };
@@ -38,6 +53,7 @@ export function HomePage() {
   return (
     <main>
       <Hero />
+      {banners.length > 0 && <BannerSlider banners={banners} />}
       <CategoryGrid />
       <FeaturedProducts
         title="Productos destacados"

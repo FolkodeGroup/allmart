@@ -27,6 +27,7 @@ const AdminVariants = lazy(() => import('./features/admin/variants/AdminVariants
 const AdminImages = lazy(() => import('./features/admin/images/AdminImages').then(m => ({ default: m.AdminImages })));
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
+const BannersAdmin = lazy(() => import('./features/admin/banners/BannersAdmin').then(m => ({ default: m.BannersAdmin })));
 const LowStockAlerts = lazy(() => import('./features/admin/lowStockAlerts').then(m => ({ default: m.default })));
 
 const router = createBrowserRouter([
@@ -148,6 +149,16 @@ const router = createBrowserRouter([
           <AdminRoute requiredPermission="products.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminCollections />
+            </Suspense>
+          </AdminRoute>
+        ) 
+      },
+      { 
+        path: 'banners', 
+        element: (
+          <AdminRoute requiredPermission="products.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <BannersAdmin />
             </Suspense>
           </AdminRoute>
         ) 

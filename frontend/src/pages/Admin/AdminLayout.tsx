@@ -76,6 +76,13 @@ const navItems = [
     permission: null,
     badge: null,
   },
+  {
+    label: "Banners",
+    to: "/admin/banners",
+    icon: "🎨",
+    permission: null,
+    badge: null,
+  },
 ] as const;
 
 const ROLE_LABELS: Record<string, string> = {

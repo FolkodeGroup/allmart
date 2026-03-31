@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Palette, AlertCircle, HelpCircle } from 'lucide-react';
+import { Palette, AlertCircle, } from 'lucide-react';
 import Tooltip from '@mui/material/Tooltip';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';

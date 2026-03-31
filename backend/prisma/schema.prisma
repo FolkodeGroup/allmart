@@ -431,3 +431,21 @@ model LowStockAlert {
   @@index([createdAt], map: "idx_low_stock_alerts_created_at")
   @@map("low_stock_alerts")
 }
+
+// ─── Banners ────────────────────────────────────────────────────────────────
+
+model Banner {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String   @db.VarChar(255)
+  description    String?  @db.Text
+  imageUrl       String   @map("image_url")
+  link           String?  @db.VarChar(500)
+  displayOrder   Int      @default(0) @map("display_order")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([isActive], map: "idx_banners_is_active")
+  @@index([displayOrder], map: "idx_banners_display_order")
+  @@map("banners")
+}
