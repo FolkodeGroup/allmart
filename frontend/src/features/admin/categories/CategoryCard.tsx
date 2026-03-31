@@ -62,11 +62,11 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
 
       <div
         className={`${styles.card}${isEmpty ? ` ${styles.emptyCard}` : ''}`}
-        onClick={() => navigate(`/admin/categorias/${category.id}`)}
+        onClick={() => navigate(`/admin/categorias/${category.slug || category.id}`)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            navigate(`/admin/categorias/${category.id}`);
+            navigate(`/admin/categorias/${category.slug || category.id}`);
           }
         }}
         role="button"
