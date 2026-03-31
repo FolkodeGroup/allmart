@@ -444,12 +444,161 @@
   }
 }
 
+
 /* === Animaciones reutilizables === */
-.skeleton {
-  background: linear-gradient(90deg, #f5f5f5 25%, #efefef 50%, #f5f5f5 75%);
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-  border-radius: 8px;
+.fadeIn {
+  opacity: 0;
+  transform: translateY(16px) scale(0.98);
+  animation: fadeInCard 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.fadeInFast {
+  opacity: 0;
+  transform: translateY(8px) scale(0.99);
+  animation: fadeInCard 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.fadeCross {
+  opacity: 0;
+  animation: fadeCross 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeCross {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .fadeIn,
+  .fadeInFast,
+  .fadeCross {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Botones: transiciones suaves */
+.pageBtn,
+.pageBtnActive,
+.clearBtn,
+.exportBtn,
+.exportResumeBtn,
+.toggleBtn {
+  transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s, transform 0.13s;
+  will-change: background, border-color, color, box-shadow, transform;
+}
+
+.pageBtn:active,
+.pageBtnActive:active,
+.clearBtn:active,
+.exportBtn:active,
+.exportResumeBtn:active,
+.toggleBtn:active {
+  transform: scale(0.97);
+}
+
+.pageBtn:focus-visible,
+.clearBtn:focus-visible,
+.exportBtn:focus-visible,
+.exportResumeBtn:focus-visible,
+.toggleBtn:focus-visible {
+  box-shadow: 0 0 0 2px #76928233;
+}
+
+/* Inputs y selects: transiciones suaves */
+.advancedInput,
+.advancedMultiSelect,
+.filtersSelectMobile,
+.dateInputMobile,
+.pageSizeSelect,
+.exportSelect {
+  transition: border-color 0.18s, box-shadow 0.18s;
+  will-change: border-color, box-shadow;
+}
+
+.advancedInput:focus,
+.advancedMultiSelect:focus,
+.filtersSelectMobile:focus,
+.dateInputMobile:focus,
+.pageSizeSelect:focus,
+.exportSelect:focus {
+  box-shadow: 0 0 0 2px #76928233;
+}
+
+/* Cards: animación de aparición */
+.orderCard,
+.reportCard,
+.reportCardModern,
+.metricCard {
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  animation: fadeInCard 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .orderCard,
+  .reportCard,
+  .reportCardModern,
+  .metricCard {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Chips: animación de activación */
+.periodTab,
+.periodTabActive,
+.chip,
+.chipActive {
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.13s;
+  will-change: background, color, border-color, box-shadow, transform;
+}
+
+.chipActive,
+.periodTabActive {
+  box-shadow: 0 2px 8px #76928222;
+  transform: scale(1.04);
+}
+
+/* Paginación: feedback visual */
+.pagination {
+  transition: background 0.18s;
+}
+
+/* Animación de cambio de página (fade) */
+.fadePage {
+  opacity: 0;
+  animation: fadeCross 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fadePage {
+    animation: none !important;
+    opacity: 1 !important;
+  }
 }
 
 .pagination {
