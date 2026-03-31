@@ -1400,11 +1400,12 @@ ALLMART — ADMIN REPORTS
 
 .barChartSvg {
   width: 100%;
-  min-width: 700px;
   height: auto;
   display: block;
   overflow: visible;
 }
+
+@media (max-width: 600px) {}
 
 /* ── Two-column layout ── */
 .twoCol {
