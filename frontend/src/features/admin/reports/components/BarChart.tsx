@@ -1,5 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import styles from '../AdminReports.module.css';
+
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth <= 600 : false
+    );
+    useEffect(() => {
+        const handler = () => setIsMobile(window.innerWidth <= 600);
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+    return isMobile;
+}
 
 type Props = {
     data: { label: string; value: number; dateKey: string }[];
@@ -14,22 +26,55 @@ type Props = {
  */
 export function BarChart({ data, formatValue }: Props) {
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+    const isMobile = useIsMobile();
 
     const format = formatValue ?? ((n: number) => n.toString());
 
     const { maxVal, yTicks } = useMemo(() => {
         const maxVal = Math.max(...data.map(d => d.value), 1);
-
         const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({
             pct: t,
             val: maxVal * t
         }));
-
         return { maxVal, yTicks };
     }, [data]);
 
-    const W = 600;
+    // Ajuste de ancho mínimo en mobile
+    const W = isMobile ? 420 : 600;
     const H = 220;
+
+    const getRange = (length: number) => {
+        if (length <= 7) return 7;
+        if (length <= 30) return 30;
+        if (length <= 90) return 90;
+        return 'all';
+    };
+
+    const range = getRange(data.length);
+
+    const minWidth = useMemo(() => {
+        if (isMobile) {
+            switch (range) {
+                case 7:
+                case 30:
+                    return 700;
+                case 90:
+                    return 4500;
+                default:
+                    return 700;
+            }
+        } else {
+            switch (range) {
+                case 7:
+                case 30:
+                    return 700;
+                case 90:
+                    return 4000;
+                default:
+                    return 700;
+            }
+        }
+    }, [isMobile, range]);
 
     const padLeft = 50;
     const padBottom = 36;
@@ -40,9 +85,12 @@ export function BarChart({ data, formatValue }: Props) {
 
     const minBarWidth = 14;
     const gap = 15;
+    const calculatedW =
+        data.length * (minBarWidth + gap) + padLeft + padRight;
+
     const dynamicW = Math.max(
-        W,
-        data.length * (minBarWidth + gap) + padLeft + padRight
+        minWidth,
+        calculatedW
     );
 
     const step = (dynamicW - padLeft - padRight) / data.length;
@@ -56,10 +104,14 @@ export function BarChart({ data, formatValue }: Props) {
     if (!data.length) return null;
 
     return (
-        <div className={styles.chartWrap}>
+        <div
+            className={styles.chartWrap}
+            style={isMobile ? { overflowX: dynamicW > W ? 'auto' : 'hidden', WebkitOverflowScrolling: 'touch' } : {}}
+        >
             <svg
                 viewBox={`0 0 ${dynamicW} ${H}`}
                 className={styles.barChartSvg}
+                style={{ minWidth: dynamicW }}
             >
                 {/* GRID */}
                 {yTicks.map(t => {
@@ -132,7 +184,7 @@ export function BarChart({ data, formatValue }: Props) {
 
                             {/* LABEL */}
 
-                            {(showAllLabels || i % 2 === 0) && (
+                            {showAllLabels && (
                                 <text
                                     x={x + barW / 2}
                                     y={padTop + chartH + 16}

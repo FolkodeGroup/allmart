@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import styles from '../AdminReports.module.css';
 
+function useIsMobile() {
+    const [isMobile, setIsMobile] = React.useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth <= 600 : false
+    );
+    React.useEffect(() => {
+        const handler = () => setIsMobile(window.innerWidth <= 600);
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+    return isMobile;
+}
+
 interface DonutChartProps {
     slices: Array<{ key: string; count: number }>;
 }
@@ -34,13 +46,15 @@ const STATUS_LABELS: Record<string, string> = {
  */
 export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
     const [hovered, setHovered] = useState<number | null>(null);
+    const isMobile = useIsMobile();
 
     const total = slices.reduce((sum, s) => sum + s.count, 0);
 
-    const R = 56; // radio externo
-    const r = 36; // radio interno
-    const cx = 80;
-    const cy = 80;
+    // Ajustar tamaño en mobile
+    const R = isMobile ? 44 : 56;
+    const r = isMobile ? 28 : 36;
+    const cx = isMobile ? 60 : 80;
+    const cy = isMobile ? 60 : 80;
 
     let currentAngle = -Math.PI / 2;
 
@@ -87,10 +101,14 @@ export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
         });
 
     return (
-        <div className={styles.donutWrap}>
+        <div
+            className={styles.donutWrap}
+            style={isMobile ? { flexDirection: 'column', alignItems: 'center', gap: 12 } : {}}
+        >
             <svg
-                viewBox="0 0 160 160"
+                viewBox={isMobile ? '0 0 120 120' : '0 0 160 160'}
                 className={styles.donutSvg}
+                style={isMobile ? { width: 180, height: 180, margin: '0 auto' } : {}}
                 aria-label="Distribución de pedidos"
             >
                 {arcs.map((arc) => {

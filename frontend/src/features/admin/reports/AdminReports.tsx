@@ -19,6 +19,7 @@ import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName }
 import { generateMockOrders } from './components/DatosMockeados';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
+import { SalesTableView } from './components/SalesTableView';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -128,6 +129,8 @@ export function AdminReports() {
   const { generatePdf, loading: pdfLoading } = useReportsPdfExport();
   // Estado para mostrar/ocultar el contenedor offscreen
   const [showHiddenPdf, setShowHiddenPdf] = useState(false);
+  // Estado para cambiar vista de gráfico barchart
+  const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
 
   useEffect(() => {
@@ -147,7 +150,6 @@ export function AdminReports() {
 
   // Bloquear navegación interna (react-router-dom v6+)
   // Si usas react-router, puedes usar useBlocker o usePrompt aquí
-  // Eliminado: efectos y handlers de navegación SPA y confirmación/cancelación de modal de cambios no guardados
 
   // Determinar periodo para lógica existente
   const period: Period =
@@ -208,7 +210,6 @@ export function AdminReports() {
         );
       });
     }
-
 
     // 3. Filtro por producto (nombre parcial)
     if (ordersTableFilters.productQuery && ordersTableFilters.productQuery.trim() !== '') {
@@ -430,17 +431,79 @@ export function AdminReports() {
     );
   }, [filteredOrdersTable, page, pageSize]);
 
+  const dayKeys = useMemo(() => {
+    if (filters.type === 'predefined') {
+      if (filters.period === 'all') return [];
+
+      const days =
+        filters.period === '7d' ? 7 :
+          filters.period === '30d' ? 30 : 90;
+
+      return lastNDayKeys(days);
+    }
+
+    // custom range
+    if (filters.type === 'custom') {
+      const { from, to } = filters.range;
+      if (!from || !to) return [];
+
+      const result: string[] = [];
+      const current = new Date(from);
+      const end = new Date(to);
+
+      current.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      while (current <= end) {
+        result.push(current.toISOString().slice(0, 10));
+        current.setDate(current.getDate() + 1);
+      }
+
+      return result;
+    }
+
+    return [];
+  }, [filters]);
+
+  const salesContent = useMemo(() => {
+    if (barData.every(d => d.value === 0)) {
+      return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
+    }
+
+    if (salesViewMode === 'chart') {
+      return (
+        <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
+          <div className={styles.fadeIn}>
+            <BarChart data={barData} formatValue={(n) => formatPriceShort(n)} />
+          </div>
+        </Suspense>
+      );
+    }
+
+
+
+    return (
+      <div className={styles.fadeIn}>
+        <SalesTableView
+          orders={activeOrders}
+          formatPrice={formatPrice}
+          dayKeys={dayKeys}
+        />
+      </div>
+    );
+
+  }, [barData, salesViewMode, activeOrders, BarChartSkeleton, dayKeys]);
 
 
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
       {/* Header */}
       <div className={sectionStyles.header}>
-        <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
+        <span className={sectionStyles.label + ' fadeInFast'}>Administración</span>
+        <h1 className={styles.panelTitle + ' fadeIn'}>
           <span className={sectionStyles.icon}>📊</span> Reportes y estadísticas
         </h1>
-        <p className={sectionStyles.subtitle}>
+        <p className={sectionStyles.subtitle + ' fadeInFast'}>
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
         </p>
       </div>
@@ -464,63 +527,69 @@ export function AdminReports() {
           minDate={minDate}
           maxDate={maxDate}
         />
-        <button
-          type="button"
-          className={styles.exportResumeBtn}
-          style={{ marginLeft: 8 }}
-          onClick={async () => {
-            setShowHiddenPdf(true);
-            // Esperar a que el PrintableReport se monte
-            setTimeout(async () => {
-              try {
-                await generatePdf({
-                  rootRef: hiddenPdfRef,
-                  fileName: 'reporte-resumen.pdf',
-                });
-                setNotif({ open: true, type: 'success', message: 'PDF generado y descargado correctamente.' });
-              } catch {
-                setNotif({ open: true, type: 'error', message: 'Ocurrió un error al generar el PDF.' });
-              } finally {
-                setShowHiddenPdf(false);
-              }
-            }, 300); // da tiempo a renderizar offscreen
-          }}
-          disabled={pdfLoading}
-        >
-          {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
-        </button>
-      {/* Contenedor invisible para exportación PDF fiel */}
-      {showHiddenPdf && (
-        <div style={{ position: 'absolute', left: -9999, top: 0, width: 900, pointerEvents: 'none', zIndex: -1 }}>
-          <PrintableReport
-            ref={hiddenPdfRef}
-            filters={filters}
-            metrics={metrics}
-            barData={barData}
-            statusSlices={statusSlices}
-            periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
-            ordersTableProps={{ orders: filteredOrdersTable }}
-            ordersTableFilters={ordersTableFilters}
-          />
+        <div>
+
+          <span className={styles.exportLabel}>Descargar resumen:</span>
+          <button
+            type="button"
+            className={styles.exportResumeBtn}
+            style={{ marginLeft: 8 }}
+            onClick={async () => {
+              setShowHiddenPdf(true);
+              // Esperar a que el PrintableReport se monte
+              setTimeout(async () => {
+                try {
+                  await generatePdf({
+                    rootRef: hiddenPdfRef,
+                    fileName: 'reporte-resumen.pdf',
+                  });
+                  setNotif({ open: true, type: 'success', message: 'PDF generado y descargado correctamente.' });
+                } catch {
+                  setNotif({ open: true, type: 'error', message: 'Ocurrió un error al generar el PDF.' });
+                } finally {
+                  setShowHiddenPdf(false);
+                }
+              }, 300); // da tiempo a renderizar offscreen
+            }}
+            disabled={pdfLoading}
+          >
+            {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
+          </button>
         </div>
-      )}
+        {/* Contenedor invisible para exportación PDF fiel */}
+        {showHiddenPdf && (
+          <div style={{ position: 'absolute', left: -9999, top: 0, width: 900, pointerEvents: 'none', zIndex: -1 }}>
+            <PrintableReport
+              ref={hiddenPdfRef}
+              filters={filters}
+              metrics={metrics}
+              barData={barData}
+              statusSlices={statusSlices}
+              periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
+              ordersTableProps={{ orders: filteredOrdersTable }}
+              ordersTableFilters={ordersTableFilters}
+            />
+          </div>
+        )}
 
       </div>
 
       {/* KPI Cards */}
       {isLoading ? (
-        <div className={styles.metricsGrid}>
+        <>
           {Array.from({ length: 5 }).map((_, i) => (
             <KPISkeleton key={i} />
           ))}
-        </div>
+        </>
       ) : (
-        <ReportsMetrics metrics={metrics} />
+        <div className={styles.fadeIn}>
+          <ReportsMetrics metrics={metrics} />
+        </div>
       )}
 
       {isLoading ? (
         <>
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.skeletonPanelTitle}></div>
               <div className={styles.skeletonPanelSubtitle}></div>
@@ -528,8 +597,8 @@ export function AdminReports() {
             <BarChartSkeleton />
           </div>
 
-          <div className={styles.twoCol}>
-            <div className={styles.panel}>
+          <div className={styles.twoCol + ' fadeIn'}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
                 <div className={styles.skeletonPanelTitle}></div>
                 <div className={styles.skeletonPanelSubtitle}></div>
@@ -537,7 +606,7 @@ export function AdminReports() {
               <ProductRankingSkeleton />
             </div>
 
-            <div className={styles.panel}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
                 <div className={styles.skeletonPanelTitle}></div>
                 <div className={styles.skeletonPanelSubtitle}></div>
@@ -546,7 +615,7 @@ export function AdminReports() {
             </div>
           </div>
 
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.skeletonPanelTitle}></div>
               <div className={styles.skeletonPanelSubtitle}></div>
@@ -561,34 +630,43 @@ export function AdminReports() {
       ) : (
         <>
           {/* Gráfica de ventas */}
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
-              <span className={styles.panelSubtitle}>
+              <h2 className={styles.panelTitle + ' fadeInFast'}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
+              <span className={styles.panelSubtitle + ' fadeInFast'}>
                 {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
-            {barData.every(d => d.value === 0) ? (
-              <p className={styles.noData}>Sin ventas en este período.</p>
-            ) : (
-              <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
-                <div className={styles.fadeIn}>
-                  <BarChart data={barData} formatValue={(n) => formatPriceShort(n)} />
-                </div>
-              </Suspense>
-            )}
+            <div className={styles.viewToggle}>
+              <span className={styles.viewToggleLabel}>Vista:</span>
+
+              <button
+                className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
+                onClick={() => setSalesViewMode('chart')}
+              >
+                📊 Gráfico
+              </button>
+
+              <button
+                className={`${styles.toggleBtn} ${salesViewMode === 'table' ? styles.active : ''}`}
+                onClick={() => setSalesViewMode('table')}
+              >
+                📋 Tabla
+              </button>
+            </div>
+            {salesContent}
           </div>
 
           {/* Top productos + Distribución de estados */}
-          <div className={styles.twoCol}>
-            <div className={styles.panel}>
+          <div className={styles.twoCol + ' fadeIn'}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle}>🏆 Productos más vendidos</h2>
-                <p className={styles.panelSubtitle}>Por ingresos generados</p>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>🏆 Productos más vendidos</h2>
+                <p className={styles.panelSubtitle + ' fadeInFast'}>Por ingresos generados</p>
 
               </div>
-              <div className={styles.viewToggle}>
+              <div className={styles.viewToggle + ' fadeInFast'}>
                 <span className={styles.viewToggleLabel}>Cambiar vista:</span>
                 <button
                   className={`${styles.toggleBtn} ${viewMode === 'list' ? styles.active : ''}`}
@@ -605,7 +683,7 @@ export function AdminReports() {
                 </button>
               </div>
               {topProducts.length === 0 ? (
-                <p className={styles.noData}>Sin datos en este período.</p>
+                <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
               ) : (
                 <ProductRanking
                   products={topProducts}
@@ -616,13 +694,13 @@ export function AdminReports() {
               )}
             </div>
 
-            <div className={styles.panel}>
+            <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle}>📦 Por estado de pedido</h2>
-                <span className={styles.panelSubtitle}>Todos los pedidos del período</span>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>📦 Por estado de pedido</h2>
+                <span className={styles.panelSubtitle + ' fadeInFast'}>Todos los pedidos del período</span>
               </div>
               {periodOrders.length === 0 ? (
-                <p className={styles.noData}>Sin datos en este período.</p>
+                <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
               ) : (
                 <Suspense fallback={<DonutChartSkeleton aria-busy="true" />}>
                   <div className={styles.fadeIn}>
@@ -634,14 +712,14 @@ export function AdminReports() {
           </div>
 
           {/* Tabla resumen */}
-          <div className={styles.panel}>
+          <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.panelHeaderLeft}>
-                <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
-                <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>📋 Últimos pedidos del período</h2>
+                <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={styles.exportWrap}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={styles.exportWrap + ' fadeInFast'}>
                 <span>Exportar como:</span>
 
                 <div className={styles.exportSelectWrap}>
@@ -708,7 +786,7 @@ export function AdminReports() {
             </div>
 
             {/* Filtros rápidos para la tabla de pedidos */}
-            <div className={styles.advancedFiltersWrap} style={{ marginBottom: 16 }}>
+            <div className={styles.advancedFiltersWrap + ' fadeInFast'} style={{ marginBottom: 16 }}>
 
               <label className={styles.advancedLabel}>
                 Cliente
@@ -754,14 +832,14 @@ export function AdminReports() {
               </div>
             </div>
             {periodOrders.length === 0 ? (
-              <p className={styles.noData}>Sin pedidos en este período.</p>
+              <p className={styles.noData + ' fadeCross'}>Sin pedidos en este período.</p>
             ) : (
               <>
                 <OrdersTable
                   orders={paginatedOrders}
                 />
                 {periodOrders.length > pageSize && (
-                  <p className={styles.moreHint}>
+                  <p className={styles.moreHint + ' fadeInFast'}>
                     Mostrando {from}-{to} de {periodOrders.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
                   </p>
                 )}

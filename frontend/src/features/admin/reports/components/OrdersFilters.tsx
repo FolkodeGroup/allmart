@@ -34,18 +34,25 @@ export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: Ord
         }));
     };
 
+    // Mobile: inputs y select 100%, columnas, espaciado
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
+
     return (
-        <div className={styles.advancedFiltersWrap}>
-            <label className={styles.advancedLabel}>
+        <div
+            className={styles.advancedFiltersWrap}
+            style={isMobile ? { flexDirection: 'column', gap: 10, width: '100%' } : {}}
+        >
+            <label className={styles.advancedLabel} style={isMobile ? { width: '100%' } : {}}>
                 Estado
                 <select
-                    value="" // 👈 siempre vacío para que no marque nada
+                    value=""
                     onChange={e => {
                         e.preventDefault();
                         const val = e.target.value;
                         if (val) handleAddStatus(val);
                     }}
                     className={styles.advancedMultiSelect}
+                    style={isMobile ? { width: '100%' } : {}}
                 >
                     <option value="">Seleccionar estado...</option>
                     {STATUS_OPTIONS.map(opt => (
@@ -55,9 +62,8 @@ export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: Ord
                     ))}
                 </select>
             </label>
-
             {/* Chips de estados seleccionados */}
-            <div className={styles.statusChips}>
+            <div className={styles.statusChips} style={isMobile ? { width: '100%', flexWrap: 'wrap', gap: 6 } : {}}>
                 {ordersTableFilters.status.map(s => {
                     const label = STATUS_OPTIONS.find(o => o.value === s)?.label || s;
                     return (
@@ -66,9 +72,9 @@ export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: Ord
                             <button
                                 type="button"
                                 className={styles.chipClose}
-                                onClick={(e) => {
+                                onClick={e => {
                                     e.preventDefault();
-                                    handleRemoveStatus(s)
+                                    handleRemoveStatus(s);
                                 }}
                             >
                                 ✕

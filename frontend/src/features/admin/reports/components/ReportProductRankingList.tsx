@@ -22,24 +22,29 @@ export function ProductRankingList({
     maxRevenue,
     formatPrice
 }: ProductReportCardProps) {
-
     const percentage = Math.max((product.revenue / maxRevenue) * 100, 4);
 
     return (
         <div className={styles.reportCardModern} tabIndex={0} aria-label={`Producto #${position}: ${product.name}`}>
-            <div className={styles.reportCardModernHeader}>
-                <span className={styles.rankBadgeModern}>#{position}</span>
-                {product.imageUrl ? (
-                    <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className={styles.productImage}
-                        loading="lazy"
-                    />
-                ) : (
-                    <div className={styles.productImagePlaceholder} aria-hidden="true">📦</div>
-                )}
-                <span className={styles.productNameModern}>{product.name}</span>
+            {/* Mobile-first: separa imagen, ranking y título */}
+            <div className={styles.productRankingMobileRow}>
+                <div className={styles.productRankingImageCol}>
+                    {/* Imagen separada, nunca cortada */}
+                    {product.imageUrl ? (
+                        <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className={styles.productImage}
+                            loading="lazy"
+                        />
+                    ) : (
+                        <div className={styles.productImagePlaceholder} aria-hidden="true">📦</div>
+                    )}
+                </div>
+                <div className={styles.productRankingInfoCol}>
+                    <span className={styles.rankBadgeModern}>#{position}</span>
+                    <span className={styles.productNameModern}>{product.name}</span>
+                </div>
             </div>
             <div className={styles.reportCardModernStats}>
                 <div className={styles.statModernBlock}>
