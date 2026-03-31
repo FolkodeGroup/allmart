@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
 import { useState, useEffect, useCallback } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { useNotification } from '../../../context/NotificationContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
@@ -24,7 +25,7 @@ import { useCategoryBulkEdit } from './hooks/useCategoryBulkEdit';
 
 
 export function AdminCategories() {
-  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory } = useAdminCategories();
+  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory, uploadCategoryImage } = useAdminCategories();
   // Local state for pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(10); // Could be made configurable
@@ -41,9 +42,10 @@ export function AdminCategories() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    image: '',
     isVisible: true,
   });
+  const [formImageFile, setFormImageFile] = useState<File | null>(null);
+  const [formImagePreview, setFormImagePreview] = useState<string>('');
   // Estado para cambio de visibilidad
   const [toggleConfirm, setToggleConfirm] = useState<{ id: string; newVisible: boolean } | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -107,9 +109,10 @@ export function AdminCategories() {
     setFormData({
       name: '',
       description: '',
-      image: '',
       isVisible: true,
     });
+    setFormImageFile(null);
+    setFormImagePreview('');
   };
 
   const closeForm = () => {
@@ -133,10 +136,44 @@ export function AdminCategories() {
     setFormData({
       name: category?.name ?? '',
       description: category?.description ?? '',
-      image: category?.image ?? '',
       isVisible: category?.isVisible ?? true,
     });
+    setFormImageFile(null);
+    setFormImagePreview(category?.image ?? '');
     setShowForm(true);
+  };
+
+  const validateImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      return 'Seleccioná un archivo de imagen válido.';
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return 'La imagen no puede superar los 5 MB.';
+    }
+    return null;
+  };
+
+  const handleImageFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    if (!file) return;
+
+    const fileError = validateImageFile(file);
+    if (fileError) {
+      setFormError(fileError);
+      showNotification('error', fileError);
+      event.target.value = '';
+      return;
+    }
+
+    setFormError(null);
+    setFormImageFile(file);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      setFormImagePreview(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const slugifyCategoryName = (name: string) =>
@@ -148,7 +185,7 @@ export function AdminCategories() {
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
 
-  const handleSubmitCategoryForm = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitCategoryForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (formSubmitting) return;
 
@@ -162,7 +199,6 @@ export function AdminCategories() {
     const payload = {
       name: trimmedName,
       description: formData.description.trim() || undefined,
-      image: formData.image.trim() || undefined,
       isVisible: formData.isVisible,
     };
 
@@ -172,12 +208,19 @@ export function AdminCategories() {
 
       if (editId) {
         await updateCategory(editId, payload);
+        if (formImageFile) {
+          await uploadCategoryImage(editId, formImageFile);
+        }
       } else {
-        await addCategory({
+        const createdCategory = await addCategory({
           ...payload,
           slug: slugifyCategoryName(trimmedName),
           itemCount: 0,
         });
+
+        if (formImageFile) {
+          await uploadCategoryImage(createdCategory.id, formImageFile);
+        }
       }
 
       setShowForm(false);
@@ -460,7 +503,7 @@ export function AdminCategories() {
               type="submit"
               form="admin-category-form"
               disabled={formSubmitting}
-              style={{ minWidth: 120 }}
+              style={{ minWidth: 120, background: '#16a34a' }}
             >
               {formSubmitting ? 'Guardando...' : editId ? 'Actualizar' : 'Crear'}
             </button>
@@ -494,6 +537,7 @@ export function AdminCategories() {
               disabled={formSubmitting}
               required
               maxLength={80}
+              style={{ borderRadius: 8, border: '1px solid #d1d5db', padding: '10px 12px' }}
             />
           </label>
 
@@ -506,19 +550,48 @@ export function AdminCategories() {
               disabled={formSubmitting}
               rows={3}
               maxLength={280}
+              style={{ borderRadius: 8, border: '1px solid #d1d5db', padding: '10px 12px', resize: 'vertical' }}
             />
           </label>
 
           <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontWeight: 600 }}>URL de imagen</span>
+            <span style={{ fontWeight: 600 }}>Imagen</span>
             <input
-              type="url"
-              value={formData.image}
-              onChange={(e) => setFormData((prev) => ({ ...prev, image: e.target.value }))}
-              placeholder="https://..."
+              type="file"
+              accept="image/*"
+              onChange={handleImageFileChange}
               disabled={formSubmitting}
+              style={{ borderRadius: 8, border: '1px dashed #9ca3af', padding: 10, background: '#f9fafb' }}
             />
+            <span style={{ fontSize: 12, color: '#6b7280' }}>
+              Formatos permitidos: imagen. Tamaño máximo: 5 MB.
+              {editId ? ' Si cargás un archivo nuevo, reemplaza la imagen actual.' : ''}
+            </span>
           </label>
+
+          {formImagePreview && (
+            <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
+              <img
+                src={formImagePreview}
+                alt="Vista previa de categoría"
+                style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }}
+              />
+              <div style={{ padding: 8, borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => {
+                    setFormImageFile(null);
+                    setFormImagePreview('');
+                  }}
+                  disabled={formSubmitting}
+                  style={{ minWidth: 100 }}
+                >
+                  Quitar imagen
+                </button>
+              </div>
+            </div>
+          )}
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
