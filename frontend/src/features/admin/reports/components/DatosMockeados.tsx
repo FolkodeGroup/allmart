@@ -20,15 +20,66 @@ const names = [
     ['Valentina', 'Suárez'],
 ];
 
+// 🔥 Catálogo de productos (clave para el modal)
+const productsCatalog = [
+    'Hamburguesa',
+    'Pizza',
+    'Empanadas',
+    'Milanesa',
+    'Papas fritas',
+    'Ensalada',
+    'Tacos',
+    'Sushi',
+    'Helado',
+    'Gaseosa',
+    'Cerveza',
+    'Agua',
+    'Sandwich',
+    'Wrap',
+    'Pollo al horno',
+];
+
 export const generateMockOrders = (count: number): Order[] => {
-    return Array.from({ length: count }).map((_, i) => {
+    const orders: Order[] = [];
+
+    for (let i = 0; i < count; i++) {
         const status = statuses[i % statuses.length];
         const [firstName, lastName] = names[i % names.length];
-        const total = Math.floor(5000 + Math.random() * 70000);
 
-        return {
+        // 🔥 MISMO DÍA para varios pedidos (agrupa cada 5 órdenes)
+        const dayOffset = Math.floor(i / 5);
+
+        const createdAt = new Date(
+            Date.now() - dayOffset * 86400000
+        ).toISOString();
+
+        // 🔥 cantidad de productos por orden (1 a 5)
+        const itemsCount = Math.floor(Math.random() * 5) + 1;
+
+        const items = Array.from({ length: itemsCount }).map(() => {
+            const productName =
+                productsCatalog[Math.floor(Math.random() * productsCatalog.length)];
+
+            const quantity = Math.floor(Math.random() * 3) + 1;
+            const unitPrice = Math.floor(1000 + Math.random() * 5000);
+
+            return {
+                productId: productName.toLowerCase().replace(/\s/g, '-'),
+                productName,
+                quantity,
+                unitPrice,
+            };
+        });
+
+        // 🔥 total calculado real
+        const total = items.reduce(
+            (acc, item) => acc + item.quantity * item.unitPrice,
+            0
+        );
+
+        orders.push({
             id: `order-${i + 1}-${Math.random().toString(36).slice(2, 8)}`,
-            createdAt: new Date(Date.now() - i * 86400000).toISOString(),
+            createdAt,
             status,
             total,
             paymentStatus: i % 2 === 0 ? 'abonado' : 'no-abonado',
@@ -37,14 +88,9 @@ export const generateMockOrders = (count: number): Order[] => {
                 lastName,
                 email: `${firstName.toLowerCase()}@mail.com`,
             },
-            items: [
-                {
-                    productId: `p-${i}`,
-                    productName: 'Producto Test',
-                    quantity: 1,
-                    unitPrice: total,
-                },
-            ],
-        };
-    });
+            items,
+        });
+    }
+
+    return orders;
 };

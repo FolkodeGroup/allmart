@@ -19,6 +19,8 @@ import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName }
 import { generateMockOrders } from './components/DatosMockeados';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
+import { SalesTableView } from './components/SalesTableView';
+import { Bar } from 'recharts';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -128,6 +130,8 @@ export function AdminReports() {
   const { generatePdf, loading: pdfLoading } = useReportsPdfExport();
   // Estado para mostrar/ocultar el contenedor offscreen
   const [showHiddenPdf, setShowHiddenPdf] = useState(false);
+  // Estado para cambiar vista de gráfico barchart
+  const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
 
   useEffect(() => {
@@ -147,7 +151,6 @@ export function AdminReports() {
 
   // Bloquear navegación interna (react-router-dom v6+)
   // Si usas react-router, puedes usar useBlocker o usePrompt aquí
-  // Eliminado: efectos y handlers de navegación SPA y confirmación/cancelación de modal de cambios no guardados
 
   // Determinar periodo para lógica existente
   const period: Period =
@@ -208,7 +211,6 @@ export function AdminReports() {
         );
       });
     }
-
 
     // 3. Filtro por producto (nombre parcial)
     if (ordersTableFilters.productQuery && ordersTableFilters.productQuery.trim() !== '') {
@@ -430,6 +432,68 @@ export function AdminReports() {
     );
   }, [filteredOrdersTable, page, pageSize]);
 
+  const dayKeys = useMemo(() => {
+    if (filters.type === 'predefined') {
+      if (filters.period === 'all') return [];
+
+      const days =
+        filters.period === '7d' ? 7 :
+          filters.period === '30d' ? 30 : 90;
+
+      return lastNDayKeys(days);
+    }
+
+    // custom range
+    if (filters.type === 'custom') {
+      const { from, to } = filters.range;
+      if (!from || !to) return [];
+
+      const result: string[] = [];
+      const current = new Date(from);
+      const end = new Date(to);
+
+      current.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      while (current <= end) {
+        result.push(current.toISOString().slice(0, 10));
+        current.setDate(current.getDate() + 1);
+      }
+
+      return result;
+    }
+
+    return [];
+  }, [filters]);
+
+  const salesContent = useMemo(() => {
+    if (barData.every(d => d.value === 0)) {
+      return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
+    }
+
+    if (salesViewMode === 'chart') {
+      return (
+        <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
+          <div className={styles.fadeIn}>
+            <BarChart data={barData} formatValue={(n) => formatPriceShort(n)} />
+          </div>
+        </Suspense>
+      );
+    }
+
+
+
+    return (
+      <div className={styles.fadeIn}>
+        <SalesTableView
+          orders={activeOrders}
+          formatPrice={formatPrice}
+          dayKeys={dayKeys}
+        />
+      </div>
+    );
+
+  }, [barData, salesViewMode, activeOrders, BarChartSkeleton, dayKeys]);
 
 
   return (
@@ -575,15 +639,24 @@ export function AdminReports() {
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
-            {barData.every(d => d.value === 0) ? (
-              <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>
-            ) : (
-              <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
-                <div className={styles.fadeIn}>
-                  <BarChart data={barData} formatValue={(n) => formatPriceShort(n)} />
-                </div>
-              </Suspense>
-            )}
+            <div className={styles.viewToggle}>
+              <span className={styles.viewToggleLabel}>Vista:</span>
+
+              <button
+                className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
+                onClick={() => setSalesViewMode('chart')}
+              >
+                📊 Gráfico
+              </button>
+
+              <button
+                className={`${styles.toggleBtn} ${salesViewMode === 'table' ? styles.active : ''}`}
+                onClick={() => setSalesViewMode('table')}
+              >
+                📋 Tabla
+              </button>
+            </div>
+            {salesContent}
           </div>
 
           {/* Top productos + Distribución de estados */}
