@@ -313,6 +313,175 @@
   border-color: var(--color-primary, #769282);
 }
 
+/* =========================
+   MODAL OVERLAY
+========================= */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  /* animación */
+  animation: fadeInOverlay 0.2s ease;
+}
+
+/* =========================
+   MODAL CONTENT
+========================= */
+.modalContent {
+  width: 92%;
+  max-width: 520px;
+  max-height: 80vh;
+
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* animación */
+  animation: scaleInModal 0.2s ease;
+}
+
+/* =========================
+   HEADER
+========================= */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 16px 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.modalHeader h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* botón cerrar */
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modalClose:hover {
+  color: #000;
+  transform: scale(1.1);
+}
+
+/* =========================
+   BODY (SCROLL)
+========================= */
+.modalBody {
+  padding: 12px 16px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* scrollbar suave */
+.modalBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+/* =========================
+   ROW PRODUCTO
+========================= */
+.modalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px 10px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  color: #444;
+
+  transition: background 0.2s ease;
+}
+
+.modalRow:hover {
+  background: #f8f8f8;
+}
+
+/* cantidad */
+.modalRow strong {
+  font-weight: 600;
+  color: #222;
+}
+
+.tableCell {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.noDataProducts {
+  text-align: left;
+}
+
+.productsListItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.viewMoreBtn {
+  margin-top: 8px;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f0f0f0;
+  color: #444;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+}
+
+/* =========================
+   ANIMACIONES
+========================= */
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 @keyframes fadeInCard {
   from {
     opacity: 0;
@@ -1400,11 +1569,96 @@ ALLMART — ADMIN REPORTS
 
 .barChartSvg {
   width: 100%;
-  min-width: 700px;
   height: auto;
   display: block;
   overflow: visible;
 }
+
+/* Contenedor responsive */
+.tableResponsive {
+  width: 100%;
+  overflow: auto;
+  max-height: 500px;
+  border-radius: 12px;
+}
+
+/* Tabla base */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
+  background: #fff;
+}
+
+/* Header */
+.table thead {
+  background: #f8f7f5;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e5e2dd;
+}
+
+/* Filas */
+.table td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+/* Hover suave */
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: #fafafa;
+}
+
+/* Primera columna (fecha) */
+.table td:first-child {
+  font-weight: 500;
+  color: #444;
+  white-space: nowrap;
+}
+
+/* Segunda columna (ganancias) */
+.table td:nth-child(2) {
+  font-weight: 600;
+  color: #2e7d32;
+  /* verde suave tipo ingresos */
+}
+
+/* Productos */
+.table td:nth-child(3) {
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Scroll en mobile más lindo */
+.tableResponsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tableResponsive::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+.tableResponsive::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (max-width: 600px) {}
 
 /* ── Two-column layout ── */
 .twoCol {

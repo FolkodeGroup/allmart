@@ -43,6 +43,39 @@ export function BarChart({ data, formatValue }: Props) {
     const W = isMobile ? 420 : 600;
     const H = 220;
 
+    const getRange = (length: number) => {
+        if (length <= 7) return 7;
+        if (length <= 30) return 30;
+        if (length <= 90) return 90;
+        return 'all';
+    };
+
+    const range = getRange(data.length);
+
+    const minWidth = useMemo(() => {
+        if (isMobile) {
+            switch (range) {
+                case 7:
+                case 30:
+                    return 700;
+                case 90:
+                    return 4500;
+                default:
+                    return 700;
+            }
+        } else {
+            switch (range) {
+                case 7:
+                case 30:
+                    return 700;
+                case 90:
+                    return 4000;
+                default:
+                    return 700;
+            }
+        }
+    }, [isMobile, range]);
+
     const padLeft = 50;
     const padBottom = 36;
     const padTop = 16;
@@ -52,9 +85,12 @@ export function BarChart({ data, formatValue }: Props) {
 
     const minBarWidth = 14;
     const gap = 15;
+    const calculatedW =
+        data.length * (minBarWidth + gap) + padLeft + padRight;
+
     const dynamicW = Math.max(
-        W,
-        data.length * (minBarWidth + gap) + padLeft + padRight
+        minWidth,
+        calculatedW
     );
 
     const step = (dynamicW - padLeft - padRight) / data.length;
@@ -70,11 +106,12 @@ export function BarChart({ data, formatValue }: Props) {
     return (
         <div
             className={styles.chartWrap}
-            style={isMobile ? { overflowX: 'auto', WebkitOverflowScrolling: 'touch' } : {}}
+            style={isMobile ? { overflowX: dynamicW > W ? 'auto' : 'hidden', WebkitOverflowScrolling: 'touch' } : {}}
         >
             <svg
                 viewBox={`0 0 ${dynamicW} ${H}`}
                 className={styles.barChartSvg}
+                style={{ minWidth: dynamicW }}
             >
                 {/* GRID */}
                 {yTicks.map(t => {
@@ -147,7 +184,7 @@ export function BarChart({ data, formatValue }: Props) {
 
                             {/* LABEL */}
 
-                            {(showAllLabels || i % 2 === 0) && (
+                            {showAllLabels && (
                                 <text
                                     x={x + barW / 2}
                                     y={padTop + chartH + 16}
