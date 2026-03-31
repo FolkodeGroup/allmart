@@ -1,9 +1,11 @@
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 //import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
+import { useReportsPdfExport } from './useReportsPdfExport';
+import { PrintableReport } from './PrintableReport';
 import { ReportsFilters } from './components/ReportsFilters';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
@@ -112,7 +114,6 @@ export function AdminReports() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-
   // Feedback de exportación
   const [showExportModal, setShowExportModal] = useState(false);
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
@@ -121,6 +122,12 @@ export function AdminReports() {
   // Estados para alternar la vista del top de productos (lista vs tarjetas)
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
 
+  // PDF export
+  const pdfRootRef = useRef<HTMLDivElement>(null); // para la UI visible
+  const hiddenPdfRef = useRef<HTMLDivElement>(null); // para exportación offscreen
+  const { generatePdf, loading: pdfLoading } = useReportsPdfExport();
+  // Estado para mostrar/ocultar el contenedor offscreen
+  const [showHiddenPdf, setShowHiddenPdf] = useState(false);
 
 
   useEffect(() => {
@@ -426,7 +433,7 @@ export function AdminReports() {
 
 
   return (
-    <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`}>
+    <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
       {/* Header */}
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
@@ -457,71 +464,47 @@ export function AdminReports() {
           minDate={minDate}
           maxDate={maxDate}
         />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span>Exportar como:</span>
-
-          <div className={styles.exportSelectWrap}>
-            <select
-              className={styles.exportSelect}
-              value={exportFormat}
-              onChange={e => setExportFormat(e.target.value as 'csv' | 'xlsx' | 'pdf')}
-              disabled={exportLoading !== null}
-              aria-label="Formato de exportación"
-            >
-              <option value="csv">CSV</option>
-              <option value="xlsx">Excel</option>
-              <option value="pdf">PDF</option>
-            </select>
-            <button
-              type="button"
-              className={styles.exportBtn}
-              onClick={() => setShowExportModal(true)}
-              title={`Exportar pedidos del período como ${exportFormat.toUpperCase()}`}
-              disabled={exportLoading !== null}
-            >
-              ⬇ Exportar
-            </button>
-          </div>
-        </div>
-        <ConfirmModal
-          open={showExportModal}
-          title="Exportar pedidos"
-          message={`¿Deseás exportar los pedidos del período como archivo ${exportFormat.toUpperCase()}?`}
-          confirmLabel={exportLoading ? 'Exportando...' : 'Exportar'}
-          cancelLabel="Cancelar"
-          loading={!!exportLoading}
-          onConfirm={async () => {
-            setExportLoading(exportFormat);
-            setShowExportModal(false);
-            const periodLabel =
-              filters.type === 'predefined'
-                ? filters.period
-                : 'custom';
-            const fileName = getExportFileName('pedidos', periodLabel, exportFormat === 'xlsx' ? 'xlsx' : exportFormat);
-            try {
-              if (exportFormat === 'csv') {
-                exportOrdersCSV(periodOrders, fileName);
-              } else if (exportFormat === 'xlsx') {
-                exportOrdersXLSX(periodOrders, fileName);
-              } else if (exportFormat === 'pdf') {
-                await exportOrdersPDF(periodOrders, fileName);
+        <button
+          type="button"
+          className={styles.exportResumeBtn}
+          style={{ marginLeft: 8 }}
+          onClick={async () => {
+            setShowHiddenPdf(true);
+            // Esperar a que el PrintableReport se monte
+            setTimeout(async () => {
+              try {
+                await generatePdf({
+                  rootRef: hiddenPdfRef,
+                  fileName: 'reporte-resumen.pdf',
+                });
+                setNotif({ open: true, type: 'success', message: 'PDF generado y descargado correctamente.' });
+              } catch {
+                setNotif({ open: true, type: 'error', message: 'Ocurrió un error al generar el PDF.' });
+              } finally {
+                setShowHiddenPdf(false);
               }
-              setNotif({ open: true, type: 'success', message: `Exportación exitosa. Archivo ${exportFormat.toUpperCase()} descargado.` });
-            } catch {
-              setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}). Por favor, intentá nuevamente.` });
-            } finally {
-              setExportLoading(null);
-            }
+            }, 300); // da tiempo a renderizar offscreen
           }}
-          onCancel={() => setShowExportModal(false)}
-        />
-        <Notification
-          open={notif.open}
-          type={notif.type}
-          message={notif.message}
-          onClose={() => setNotif(n => ({ ...n, open: false }))}
-        />
+          disabled={pdfLoading}
+        >
+          {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
+        </button>
+      {/* Contenedor invisible para exportación PDF fiel */}
+      {showHiddenPdf && (
+        <div style={{ position: 'absolute', left: -9999, top: 0, width: 900, pointerEvents: 'none', zIndex: -1 }}>
+          <PrintableReport
+            ref={hiddenPdfRef}
+            filters={filters}
+            metrics={metrics}
+            barData={barData}
+            statusSlices={statusSlices}
+            periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
+            ordersTableProps={{ orders: filteredOrdersTable }}
+            ordersTableFilters={ordersTableFilters}
+          />
+        </div>
+      )}
+
       </div>
 
       {/* KPI Cards */}
@@ -653,9 +636,77 @@ export function AdminReports() {
           {/* Tabla resumen */}
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
-              <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
+              <div className={styles.panelHeaderLeft}>
+                <h2 className={styles.panelTitle}>📋 Últimos pedidos del período</h2>
+                <span className={styles.panelSubtitle}>{periodOrders.length} pedidos</span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={styles.exportWrap}>
+                <span>Exportar como:</span>
+
+                <div className={styles.exportSelectWrap}>
+                  <select
+                    className={styles.exportSelect}
+                    value={exportFormat}
+                    onChange={e => setExportFormat(e.target.value as 'csv' | 'xlsx' | 'pdf')}
+                    disabled={exportLoading !== null}
+                    aria-label="Formato de exportación"
+                  >
+                    <option value="csv">CSV</option>
+                    <option value="xlsx">Excel</option>
+                    <option value="pdf">PDF</option>
+                  </select>
+                  <button
+                    type="button"
+                    className={styles.exportBtn}
+                    onClick={() => setShowExportModal(true)}
+                    title={`Exportar pedidos del período como ${exportFormat.toUpperCase()}`}
+                    disabled={exportLoading !== null}
+                  >
+                    ⬇ Exportar
+                  </button>
+                </div>
+              </div>
+              <ConfirmModal
+                open={showExportModal}
+                title="Exportar pedidos"
+                message={`¿Deseás exportar los pedidos del período como archivo ${exportFormat.toUpperCase()}?`}
+                confirmLabel={exportLoading ? 'Exportando...' : 'Exportar'}
+                cancelLabel="Cancelar"
+                loading={!!exportLoading}
+                onConfirm={async () => {
+                  setExportLoading(exportFormat);
+                  setShowExportModal(false);
+                  const periodLabel =
+                    filters.type === 'predefined'
+                      ? filters.period
+                      : 'custom';
+                  const fileName = getExportFileName('pedidos', periodLabel, exportFormat === 'xlsx' ? 'xlsx' : exportFormat);
+                  try {
+                    if (exportFormat === 'csv') {
+                      exportOrdersCSV(periodOrders, fileName);
+                    } else if (exportFormat === 'xlsx') {
+                      exportOrdersXLSX(periodOrders, fileName);
+                    } else if (exportFormat === 'pdf') {
+                      await exportOrdersPDF(periodOrders, fileName);
+                    }
+                    setNotif({ open: true, type: 'success', message: `Exportación exitosa. Archivo ${exportFormat.toUpperCase()} descargado.` });
+                  } catch {
+                    setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}). Por favor, intentá nuevamente.` });
+                  } finally {
+                    setExportLoading(null);
+                  }
+                }}
+                onCancel={() => setShowExportModal(false)}
+              />
+              <Notification
+                open={notif.open}
+                type={notif.type}
+                message={notif.message}
+                onClose={() => setNotif(n => ({ ...n, open: false }))}
+              />
             </div>
+
             {/* Filtros rápidos para la tabla de pedidos */}
             <div className={styles.advancedFiltersWrap} style={{ marginBottom: 16 }}>
 
