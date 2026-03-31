@@ -22,6 +22,7 @@ const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts
 const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders').then(m => ({ default: m.AdminOrders })));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
+const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
 const AdminVariants = lazy(() => import('./features/admin/variants/AdminVariants').then(m => ({ default: m.AdminVariants })));
 const AdminImages = lazy(() => import('./features/admin/images/AdminImages').then(m => ({ default: m.AdminImages })));
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
@@ -90,6 +91,16 @@ const router = createBrowserRouter([
             </Suspense>
           </AdminRoute>
         ) 
+      },
+      {
+        path: 'categorias/:categoryId',
+        element: (
+          <AdminRoute requiredPermission="categories.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCategoryProducts />
+            </Suspense>
+          </AdminRoute>
+        )
       },
       { 
         path: 'pedidos', 
