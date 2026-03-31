@@ -437,7 +437,7 @@ export function AdminReports() {
       {/* Header */}
       <div className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
+        <h1 className={styles.title}>
           <span className={sectionStyles.icon}>📊</span> Reportes y estadísticas
         </h1>
         <p className={sectionStyles.subtitle}>
@@ -464,46 +464,50 @@ export function AdminReports() {
           minDate={minDate}
           maxDate={maxDate}
         />
-        <button
-          type="button"
-          className={styles.exportResumeBtn}
-          style={{ marginLeft: 8 }}
-          onClick={async () => {
-            setShowHiddenPdf(true);
-            // Esperar a que el PrintableReport se monte
-            setTimeout(async () => {
-              try {
-                await generatePdf({
-                  rootRef: hiddenPdfRef,
-                  fileName: 'reporte-resumen.pdf',
-                });
-                setNotif({ open: true, type: 'success', message: 'PDF generado y descargado correctamente.' });
-              } catch {
-                setNotif({ open: true, type: 'error', message: 'Ocurrió un error al generar el PDF.' });
-              } finally {
-                setShowHiddenPdf(false);
-              }
-            }, 300); // da tiempo a renderizar offscreen
-          }}
-          disabled={pdfLoading}
-        >
-          {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
-        </button>
-      {/* Contenedor invisible para exportación PDF fiel */}
-      {showHiddenPdf && (
-        <div style={{ position: 'absolute', left: -9999, top: 0, width: 900, pointerEvents: 'none', zIndex: -1 }}>
-          <PrintableReport
-            ref={hiddenPdfRef}
-            filters={filters}
-            metrics={metrics}
-            barData={barData}
-            statusSlices={statusSlices}
-            periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
-            ordersTableProps={{ orders: filteredOrdersTable }}
-            ordersTableFilters={ordersTableFilters}
-          />
+        <div>
+
+          <span className={styles.exportLabel}>Descargar resumen:</span>
+          <button
+            type="button"
+            className={styles.exportResumeBtn}
+            style={{ marginLeft: 8 }}
+            onClick={async () => {
+              setShowHiddenPdf(true);
+              // Esperar a que el PrintableReport se monte
+              setTimeout(async () => {
+                try {
+                  await generatePdf({
+                    rootRef: hiddenPdfRef,
+                    fileName: 'reporte-resumen.pdf',
+                  });
+                  setNotif({ open: true, type: 'success', message: 'PDF generado y descargado correctamente.' });
+                } catch {
+                  setNotif({ open: true, type: 'error', message: 'Ocurrió un error al generar el PDF.' });
+                } finally {
+                  setShowHiddenPdf(false);
+                }
+              }, 300); // da tiempo a renderizar offscreen
+            }}
+            disabled={pdfLoading}
+          >
+            {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
+          </button>
         </div>
-      )}
+        {/* Contenedor invisible para exportación PDF fiel */}
+        {showHiddenPdf && (
+          <div style={{ position: 'absolute', left: -9999, top: 0, width: 900, pointerEvents: 'none', zIndex: -1 }}>
+            <PrintableReport
+              ref={hiddenPdfRef}
+              filters={filters}
+              metrics={metrics}
+              barData={barData}
+              statusSlices={statusSlices}
+              periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
+              ordersTableProps={{ orders: filteredOrdersTable }}
+              ordersTableFilters={ordersTableFilters}
+            />
+          </div>
+        )}
 
       </div>
 

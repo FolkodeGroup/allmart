@@ -1,5 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import styles from '../AdminReports.module.css';
+
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth <= 600 : false
+    );
+    useEffect(() => {
+        const handler = () => setIsMobile(window.innerWidth <= 600);
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+    return isMobile;
+}
 
 type Props = {
     data: { label: string; value: number; dateKey: string }[];
@@ -14,21 +26,21 @@ type Props = {
  */
 export function BarChart({ data, formatValue }: Props) {
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+    const isMobile = useIsMobile();
 
     const format = formatValue ?? ((n: number) => n.toString());
 
     const { maxVal, yTicks } = useMemo(() => {
         const maxVal = Math.max(...data.map(d => d.value), 1);
-
         const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => ({
             pct: t,
             val: maxVal * t
         }));
-
         return { maxVal, yTicks };
     }, [data]);
 
-    const W = 600;
+    // Ajuste de ancho mínimo en mobile
+    const W = isMobile ? 420 : 600;
     const H = 220;
 
     const padLeft = 50;
@@ -56,7 +68,10 @@ export function BarChart({ data, formatValue }: Props) {
     if (!data.length) return null;
 
     return (
-        <div className={styles.chartWrap}>
+        <div
+            className={styles.chartWrap}
+            style={isMobile ? { overflowX: 'auto', WebkitOverflowScrolling: 'touch' } : {}}
+        >
             <svg
                 viewBox={`0 0 ${dynamicW} ${H}`}
                 className={styles.barChartSvg}

@@ -30,16 +30,18 @@ const PERIOD_LABELS: Record<PredefinedPeriod, string> = {
     'all': 'Todo el tiempo',
 };
 
-/**
- * Componente de filtros avanzados para reportes.
- *
- * Permite seleccionar periodo, rango de fechas y aplicar filtros por estado, cliente y producto.
- *
- * @param value Estado actual de los filtros
- * @param onChange Callback para actualizar filtros
- * @param minDate Fecha mínima permitida
- * @param maxDate Fecha máxima permitida
- */
+function useIsMobile() {
+    const [isMobile, setIsMobile] = React.useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth <= 600 : false
+    );
+    React.useEffect(() => {
+        const handler = () => setIsMobile(window.innerWidth <= 600);
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+    return isMobile;
+}
+
 export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
     value,
     onChange,
@@ -47,6 +49,7 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
     maxDate,
 }) => {
     const isCustom = value.type === 'custom';
+    const isMobile = useIsMobile();
 
     const handlePeriodClick = (period: PredefinedPeriod) => {
         onChange({ type: 'predefined', period });
@@ -63,6 +66,47 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
         }
     };
 
+    if (isMobile) {
+        return (
+            <div className={styles.filtersBarMobile}>
+                <span className={styles.filtersLabel}>Filtros</span>
+                <select
+                    className={styles.filtersSelectMobile}
+                    value={value.type === 'predefined' ? value.period : ''}
+                    onChange={e => onChange({ type: 'predefined', period: e.target.value as PredefinedPeriod })}
+                >
+                    <option value="7d">Últimos 7 días</option>
+                    <option value="30d">Últimos 30 días</option>
+                    <option value="90d">Últimos 90 días</option>
+                    <option value="all">Todo el tiempo</option>
+                </select>
+                <div className={styles.filtersDatesMobile}>
+                    <span className={styles.filtersLabel}>Desde:</span>
+                    <input
+                        type="date"
+                        name="from"
+                        value={isCustom ? value.range.from : ''}
+                        onChange={handleDateChange}
+                        min={minDate}
+                        max={maxDate}
+                        className={styles.dateInputMobile}
+                    />
+                    <span className={styles.filtersLabel}>Hasta:</span>
+                    <input
+                        type="date"
+                        name="to"
+                        value={isCustom ? value.range.to : ''}
+                        onChange={handleDateChange}
+                        min={minDate}
+                        max={maxDate}
+                        className={styles.dateInputMobile}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    // Desktop layout (igual que antes)
     return (
         <div className={styles.filtersBar}>
             <div className={styles.periodTabs}>
@@ -118,6 +162,5 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                 </button>
             </div>
         </div>
-
     );
 };
