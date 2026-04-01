@@ -12,7 +12,7 @@ import type { ReportsFiltersValue, PredefinedPeriod } from './components/Reports
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { Pagination } from './components/Pagination';
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
@@ -75,14 +75,8 @@ const PERIOD_LABELS: Record<Period, string> = {
 };
 
 // Lazy loading de gráficos optimizado (cada chunk por separado, no se recrea en cada render)
-const BarChart = lazy(initBarChart);
-const DonutChart = lazy(initDonutChart);
-function initBarChart() {
-  return import('./components/BarChart').then(m => ({ default: m.BarChart }));
-}
-function initDonutChart() {
-  return import('./components/DonutChart').then(m => ({ default: m.DonutChart }));
-}
+const BarChart = React.lazy(() => import('./components/BarChart'));
+const DonutChart = React.lazy(() => import('./components/DonutChart'));
 
 
 export interface OrdersTableProps {

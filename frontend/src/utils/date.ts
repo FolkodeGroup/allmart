@@ -50,7 +50,6 @@ export function createdAtToMs(createdAt: string): number {
     const date = new Date(createdAt);
 
     if (isNaN(date.getTime())) {
-        console.warn('Fecha inválida:', createdAt);
         return 0;
     }
 
