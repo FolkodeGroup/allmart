@@ -1386,3 +1386,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #701: 450 expandir vista de reportes a toda la pantalla usando gridflexbox | 2026-03-31 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #703: 453 mejorar visualización de gráficos comparativos y tendencias | 2026-03-31 |
 | dgimenezdeveloper | 3 | Asignación de issue a FedericoPaal | Issue #422: Optimizar carga de datos y rendimiento en pedidos | 2026-03-31 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #707: 453 mejorar visualización de gráficos comparativos y tendencias | 2026-04-01 |
