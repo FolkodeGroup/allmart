@@ -608,7 +608,7 @@ export function AdminReports() {
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
-            <div className={styles.viewToggle}>
+            <div className={styles.viewToggleGroup + ' fadeInFast'}>
               <span className={styles.viewToggleLabel}>Vista:</span>
 
               <button
