@@ -11,16 +11,34 @@ const fallbackNavigation: NavigationItem[] = [
 ];
 
 function buildNavigationFromCategories(categories: Category[]): NavigationItem[] {
-  const visibleCategories = categories
-    .filter((category) => category.isVisible)
-    .filter((category, index, array) => array.findIndex((item) => item.slug === category.slug) === index);
+  const normalizeKey = (value: string): string => value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/-+/g, '-');
+
+  const seenKeys = new Set<string>();
+  const visibleCategories = categories.filter((category) => {
+    if (!category.isVisible) {
+      return false;
+    }
+
+    const nameKey = normalizeKey(category.name || '');
+    const slugKey = normalizeKey(category.slug || '');
+    const key = slugKey || nameKey;
+
+    if (!key || seenKeys.has(key)) {
+      return false;
+    }
+
+    seenKeys.add(key);
+    return true;
+  });
 
   const categoryItems: NavigationItem[] = visibleCategories.map((category) => ({
-    label: category.name,
-    href: `/productos?category=${encodeURIComponent(category.slug)}`,
-  }));
-
-  const catalogChildren: NavigationItem[] = visibleCategories.map((category) => ({
     label: category.name,
     href: `/productos?category=${encodeURIComponent(category.slug)}`,
   }));
@@ -30,7 +48,6 @@ function buildNavigationFromCategories(categories: Category[]): NavigationItem[]
     {
       label: 'Ver todo el catalogo',
       href: '/productos',
-      children: catalogChildren,
     },
   ];
 }

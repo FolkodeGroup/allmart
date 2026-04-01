@@ -7,6 +7,10 @@ import { prisma } from '../config/prisma';
 import { BannerWithImageMeta, CreateBannerDTO, UpdateBannerDTO } from '../models/Banner';
 import { createError } from '../middlewares/errorHandler';
 
+function toBuffer(bytes: Uint8Array | Buffer): Buffer {
+  return Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
+}
+
 // Mapea el resultado de Prisma al tipo BannerWithImageMeta
 function toBannerWithMeta(row: any): BannerWithImageMeta {
   return {
@@ -72,7 +76,7 @@ export async function getBannerImageData(id: string): Promise<{ data: Buffer; wi
     select: { data: true, width: true, height: true },
   });
   if (!row) throw createError('Banner no encontrado', 404);
-  return { data: row.data as Buffer, width: row.width, height: row.height };
+  return { data: toBuffer(row.data), width: row.width, height: row.height };
 }
 
 export async function getBannerThumbnail(id: string): Promise<{ data: Buffer; width: number; height: number }> {
@@ -83,7 +87,7 @@ export async function getBannerThumbnail(id: string): Promise<{ data: Buffer; wi
   if (!row) throw createError('Banner no encontrado', 404);
   if (!row.thumbnail) throw createError('Miniatura no disponible', 404);
   return { 
-    data: row.thumbnail as Buffer, 
+    data: toBuffer(row.thumbnail), 
     width: row.thumbWidth ?? 0, 
     height: row.thumbHeight ?? 0 
   };
