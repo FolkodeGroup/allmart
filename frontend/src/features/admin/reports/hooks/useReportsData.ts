@@ -2,7 +2,7 @@
 import { useMemo } from 'react';
 import type { Order } from '../../../../context/AdminOrdersContext';
 import type { ReportsFiltersValue } from '../components/ReportsFilters';
-import { parseDateStartLocal, createdAtToMs, parseDateEndLocal, getDayKeyLocalFromMs } from '../../../../utils/date';
+import { parseDateStartLocal, createdAtToMs, parseDateEndLocal } from '../../../../utils/date';
 
 /**
  * Encapsula filtrado, KPIs y datos para gráficos de reportes.
