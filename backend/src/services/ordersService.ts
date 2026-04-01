@@ -144,7 +144,9 @@ export async function getAllOrders(
     ];
   }
 
-  const [rows, total] = await prisma.$transaction([
+  // Evita timeout por adquisición de conexión transaccional en listados de lectura.
+  // Aquí no se requiere atomicidad estricta entre findMany/count.
+  const [rows, total] = await Promise.all([
     prisma.order.findMany({
       where,
       skip,

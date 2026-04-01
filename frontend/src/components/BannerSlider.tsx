@@ -49,18 +49,10 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
             key={banner.id}
             className={`${styles.slide} ${index === currentIndex ? styles.active : ''}`}
           >
-            <a
-              href={banner.link || '#'}
-              className={styles.slideLink}
-              onClick={(e) => {
-                if (!banner.link) {
-                  e.preventDefault();
-                }
-              }}
-            >
+            <div className={styles.slideContent}>
               <img 
                 src={banner.imageUrl} 
-                alt={banner.title}
+                alt={banner.altText || banner.title}
                 className={styles.bannerImage}
               />
               {banner.title && (
@@ -71,7 +63,7 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
                   )}
                 </div>
               )}
-            </a>
+            </div>
           </div>
         ))}
       </div>

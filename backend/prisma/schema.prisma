@@ -435,15 +435,23 @@ model LowStockAlert {
 // ─── Banners ────────────────────────────────────────────────────────────────
 
 model Banner {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title          String   @db.VarChar(255)
-  description    String?  @db.Text
-  imageUrl       String   @map("image_url")
-  link           String?  @db.VarChar(500)
-  displayOrder   Int      @default(0) @map("display_order")
-  isActive       Boolean  @default(true) @map("is_active")
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title            String   @db.VarChar(255)
+  description      String?  @db.Text
+  data             Bytes                               // WebP completo
+  width            Int
+  height           Int
+  thumbnail        Bytes?                              // WebP miniatura ~400px
+  thumbWidth       Int?     @map("thumb_width")
+  thumbHeight      Int?     @map("thumb_height")
+  mimeType         String   @default("image/webp") @map("mime_type") @db.VarChar(50)
+  originalFilename String?  @map("original_filename") @db.VarChar(255)
+  sizeBytes        Int      @map("size_bytes")
+  altText          String?  @map("alt_text") @db.VarChar(500)
+  displayOrder     Int      @default(0) @map("display_order")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([isActive], map: "idx_banners_is_active")
   @@index([displayOrder], map: "idx_banners_display_order")

@@ -5,7 +5,7 @@
 
 -- ─── UP ───────────────────────────────────────────────────────────────────────
 ALTER TABLE products
-ADD COLUMN is_featured BOOLEAN NOT NULL DEFAULT FALSE;
+ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Índice para búsquedas rápidas de productos destacados
 CREATE INDEX IF NOT EXISTS idx_products_is_featured ON products (is_featured);

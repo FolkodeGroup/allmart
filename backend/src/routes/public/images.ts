@@ -17,6 +17,7 @@
 
 import { Router, Request, Response, NextFunction } from 'express';
 import * as imgStorage from '../../services/imageStorageService';
+import * as bannersCtrl from '../../controllers/public/bannersController';
 
 const router = Router();
 
@@ -73,5 +74,10 @@ router.get('/categories/:id', async (req: Request, res: Response, next: NextFunc
     next(err);
   }
 });
+
+// ─── Banners ───────────────────────────────────────────────────────────────────
+
+router.get('/banners/:id/thumb', bannersCtrl.getBannerThumbnail);
+router.get('/banners/:id', bannersCtrl.getBannerImage);
 
 export default router;

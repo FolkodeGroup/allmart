@@ -16,10 +16,10 @@ import sectionStyles from '../../../pages/Admin/sections/AdminSection.module.css
 interface FormData {
   title: string;
   description: string;
-  imageUrl: string;
-  link: string;
+  imageFile: File | null;
   displayOrder: number;
   isActive: boolean;
+  altText: string;
 }
 
 export function BannersAdmin() {
@@ -30,10 +30,10 @@ export function BannersAdmin() {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
-    imageUrl: '',
-    link: '',
+    imageFile: null,
     displayOrder: 0,
     isActive: true,
+    altText: '',
   });
 
   useEffect(() => {
@@ -57,10 +57,10 @@ export function BannersAdmin() {
     setFormData({
       title: '',
       description: '',
-      imageUrl: '',
-      link: '',
+      imageFile: null,
       displayOrder: 0,
       isActive: true,
+      altText: '',
     });
     setEditingId(null);
     setShowForm(false);
@@ -70,10 +70,10 @@ export function BannersAdmin() {
     setFormData({
       title: banner.title,
       description: banner.description || '',
-      imageUrl: banner.imageUrl,
-      link: banner.link || '',
+      imageFile: null, // No cargar archivo, solo metadatos
       displayOrder: banner.displayOrder,
       isActive: banner.isActive,
+      altText: banner.altText || '',
     });
     setEditingId(banner.id);
     setShowForm(true);
@@ -82,17 +82,45 @@ export function BannersAdmin() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.imageUrl.trim()) {
-      toast.error('Título e imagen son requeridos');
+    if (!formData.title.trim()) {
+      toast.error('Título es requerido');
+      return;
+    }
+
+    // Para crear, requiere imagen
+    if (!editingId && !formData.imageFile) {
+      toast.error('Imagen es requerida para crear un nuevo banner');
       return;
     }
 
     try {
       if (editingId) {
-        await bannersAdminService.updateBanner(editingId, formData);
+        // Actualizar metadatos
+        await bannersAdminService.updateBanner(editingId, {
+          title: formData.title,
+          description: formData.description,
+          displayOrder: formData.displayOrder,
+          isActive: formData.isActive,
+          altText: formData.altText,
+        });
+
+        // Si hay imagen nueva, actualizar
+        if (formData.imageFile) {
+          await bannersAdminService.updateBannerImage(editingId, formData.imageFile);
+        }
         toast.success('Banner actualizado');
       } else {
-        await bannersAdminService.createBanner(formData);
+        // Crear nuevo
+        await bannersAdminService.createBanner(
+          {
+            title: formData.title,
+            description: formData.description,
+            displayOrder: formData.displayOrder,
+            isActive: formData.isActive,
+            altText: formData.altText,
+          },
+          formData.imageFile!
+        );
         toast.success('Banner creado');
       }
       resetForm();
@@ -180,28 +208,41 @@ export function BannersAdmin() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="imageUrl">URL de la Imagen *</label>
+              <label htmlFor="image">Imagen del Banner {!editingId && '*'}</label>
               <input
-                id="imageUrl"
-                type="url"
-                placeholder="https://ejemplo.com/imagen.jpg"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                required
+                id="image"
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp,image/tiff"
+                onChange={(e) => setFormData({ ...formData, imageFile: e.target.files?.[0] ?? null })}
+                required={!editingId}
               />
-              {formData.imageUrl && (
-                <img src={formData.imageUrl} alt="preview" className={styles.preview} />
+              {formData.imageFile && (
+                <img 
+                  src={URL.createObjectURL(formData.imageFile)} 
+                  alt="preview" 
+                  className={styles.preview} 
+                />
+              )}
+              {editingId && !formData.imageFile && (
+                <div className={styles.currentImageInfo}>
+                  <p>Imagen actual cargada</p>
+                  <img 
+                    src={banners.find(b => b.id === editingId)?.thumbUrl}
+                    alt="current"
+                    className={styles.preview}
+                  />
+                </div>
               )}
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="link">Link del Banner</label>
+              <label htmlFor="altText">Texto Alternativo de Imagen</label>
               <input
-                id="link"
-                type="url"
-                placeholder="https://ejemplo.com (opcional)"
-                value={formData.link}
-                onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                id="altText"
+                type="text"
+                placeholder="Descripción para accesibilidad"
+                value={formData.altText}
+                onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
               />
             </div>
 
@@ -212,7 +253,10 @@ export function BannersAdmin() {
                   id="displayOrder"
                   type="number"
                   value={formData.displayOrder}
-                  onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) })}
+                  onChange={(e) => {
+                    const parsed = parseInt(e.target.value, 10);
+                    setFormData({ ...formData, displayOrder: Number.isNaN(parsed) ? 0 : parsed });
+                  }}
                   min="0"
                 />
               </div>
