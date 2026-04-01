@@ -166,7 +166,7 @@ export function AdminReports() {
     const ms = createdAtToMs(o.createdAt);
     return formatDateLocal(new Date(ms));
   });
-  const minDate = allDates.length ? allDates.reduce((a, b) => a < b ? a : b) : undefined;
+  const minDate = undefined;
   const maxDate = allDates.length ? allDates.reduce((a, b) => (a > b ? a : b)) : undefined;
 
   const ordersWithTime = useMemo(() => {
@@ -434,10 +434,10 @@ export function AdminReports() {
 
   const salesContent = useMemo(() => {
     if (salesViewMode === 'chart') {
-      // ✅ El guard solo aplica al gráfico
-      if (barData.every(d => d.value === 0)) {
+      //  El guard por si el periodo no tiene ventas, para evitar mostrar un gráfico vacío sin contexto.
+      /*if (barData.every(d => d.value === 0)) {
         return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
-      }
+      }*/
       return (
         <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
           <div className={styles.fadeIn}>
@@ -447,7 +447,7 @@ export function AdminReports() {
       );
     }
 
-    // ✅ La tabla siempre renderiza, muestra "Sin ventas" por fila internamente
+    //  La tabla siempre renderiza, muestra "Sin ventas" por fila internamente
     return (
       <div className={styles.fadeIn}>
         <SalesTableView
