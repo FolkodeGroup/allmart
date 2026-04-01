@@ -172,11 +172,11 @@ export function AdminCategories() {
         />
 
         {/* Botones de exportación debajo del header */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center'}}>
-          <button className={styles.exportBtn} onClick={handleExportCSV} type="button" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', width: '100%', marginBottom: 8 }}>
+          <button className={styles.exportBtn} onClick={handleExportCSV} type="button">
             Exportar CSV
           </button>
-          <button className={styles.exportBtn} onClick={handleExportExcel} type="button" style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>
+          <button className={styles.exportBtn} onClick={handleExportExcel} type="button">
             Exportar Excel
           </button>
         </div>
