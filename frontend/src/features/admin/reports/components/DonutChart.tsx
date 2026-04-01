@@ -44,7 +44,7 @@ const STATUS_LABELS: Record<string, string> = {
  *
  * @param slices Array de segmentos con key y count
  */
-export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
+const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
     const [hovered, setHovered] = useState<number | null>(null);
     const isMobile = useIsMobile();
 
@@ -238,3 +238,5 @@ export const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
         </div>
     );
 };
+
+export default DonutChart;

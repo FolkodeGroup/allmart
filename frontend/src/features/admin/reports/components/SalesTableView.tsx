@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import type { Order } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminReports.module.css';
+import { createdAtToMs, getDayKeyLocalFromMs } from '../../../../utils/date';
 
 type Props = {
     orders: Order[];
@@ -19,6 +20,7 @@ type DayData = {
     products: Product[];
 };
 
+
 export function SalesTableView({ orders, formatPrice, dayKeys }: Props) {
     const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
 
@@ -29,7 +31,7 @@ export function SalesTableView({ orders, formatPrice, dayKeys }: Props) {
         orders.forEach(order => {
             if (order.status === 'cancelado') return;
 
-            const dateKey = order.createdAt.slice(0, 10);
+            const dateKey = getDayKeyLocalFromMs(createdAtToMs(order.createdAt));
 
             if (!map.has(dateKey)) {
                 map.set(dateKey, {
@@ -56,6 +58,7 @@ export function SalesTableView({ orders, formatPrice, dayKeys }: Props) {
             });
         });
 
+
         // ✅ CASO 1: TODO EL TIEMPO (sin dayKeys)
         if (!dayKeys || dayKeys.length === 0) {
             return Array.from(map.values()).sort((a, b) =>
@@ -80,8 +83,10 @@ export function SalesTableView({ orders, formatPrice, dayKeys }: Props) {
 
 
     const formatDate = (dateKey: string) => {
-        const d = new Date(dateKey);
-        return d.toLocaleDateString('es-AR', {
+        const [y, m, d] = dateKey.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+
+        return date.toLocaleDateString('es-AR', {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
