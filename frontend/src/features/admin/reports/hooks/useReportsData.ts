@@ -47,20 +47,15 @@ export function useReportsData(
         const { from, to } = filters.range;
         if (!from || !to) return [];
 
-        const fromMs = parseDateStartLocal(from);
-        const toMs = parseDateEndLocal(to);
+        const fromMs = parseDateStartLocal(from);  // 00:00:00.000 del día "from"
+        const toMs = parseDateEndLocal(to);      // 23:59:59.999 del día "to"
 
-        return ordersWithTime.filter(o => {
-            console.log({
-                createdAt: o.createdAt,
-                ms: createdAtToMs(o.createdAt),
-                key: getDayKeyLocalFromMs(createdAtToMs(o.createdAt))
-            });
-            return o.createdAtMs >= fromMs && o.createdAtMs <= toMs;
-        });
+        return ordersWithTime.filter(o =>
+            o.createdAtMs >= fromMs && o.createdAtMs <= toMs
+        );
     }, [ordersWithTime, filters, now]);
 
-    // ✅ FILTROS DE TABLA (SIN DUPLICAR EN ADMIN)
+    // FILTROS DE TABLA
     const filteredOrdersTable = useMemo(() => {
         let filtered = periodOrders;
 

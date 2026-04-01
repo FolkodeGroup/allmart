@@ -258,13 +258,45 @@ export function AdminReports() {
     },
   ];
 
+  const dayKeys = useMemo(() => {
+    if (filters.type === 'predefined') {
+      if (filters.period === 'all') return [];
+
+      const days =
+        filters.period === '7d' ? 7 :
+          filters.period === '30d' ? 30 : 90;
+
+      return lastNDayKeys(days);
+    }
+
+    // custom range
+    if (filters.type === 'custom') {
+      const { from: rangeFrom, to: rangeTo } = filters.range;
+      if (!rangeFrom || !rangeTo) return [];
+
+      const result: string[] = [];
+      let currentMs = parseDateStartLocal(rangeFrom);
+      const endMs = parseDateStartLocal(rangeTo);
+
+      while (currentMs <= endMs) {
+        result.push(formatDateLocal(new Date(currentMs)));
+        currentMs += 86400000; // +1 día
+      }
+
+      return result;
+    }
+
+    return [];
+  }, [filters]);
+
   /* ── Datos para BarChart ── */
   const barData = useMemo(() => {
+    // Caso: todo el tiempo → agrupar por mes
     if (period === 'all') {
       const map = new Map<string, number>();
       ordersWithTime.forEach(o => {
         if (o.status === 'cancelado') return;
-        const k = o.createdAt.slice(0, 7);
+        const k = o.createdAt.slice(0, 7); // YYYY-MM
         map.set(k, (map.get(k) ?? 0) + o.total);
       });
       return [...map.entries()]
@@ -275,6 +307,27 @@ export function AdminReports() {
           value: v,
         }));
     }
+
+    // ✅ FIX: separar el caso 'custom' del predefinido.
+    // Antes, 'custom' caía en el branch predefinido y usaba lastNDayKeys(90)
+    // en lugar de las claves del rango seleccionado, resultando en un mapa
+    // vacío para el rango custom → sin datos en gráfico ni tabla.
+    if (period === 'custom') {
+      // dayKeys ya contiene las claves YYYY-MM-DD del rango personalizado
+      // generadas correctamente por parseDateStartLocal + formatDateLocal
+      const map = new Map<string, number>(dayKeys.map(k => [k, 0]));
+      activeOrders.forEach(o => {
+        const k = orderDateKey(o.createdAt);
+        if (map.has(k)) map.set(k, (map.get(k) ?? 0) + o.total);
+      });
+      return dayKeys.map(k => ({
+        dateKey: k,
+        label: isoDateLabel(k + 'T12:00:00'),
+        value: map.get(k) ?? 0,
+      }));
+    }
+
+    // Caso: períodos predefinidos (7d, 30d, 90d)
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
     const keys = lastNDayKeys(days);
     const map = new Map<string, number>(keys.map(k => [k, 0]));
@@ -287,7 +340,7 @@ export function AdminReports() {
       label: isoDateLabel(k + 'T12:00:00'),
       value: map.get(k) ?? 0,
     }));
-  }, [ordersWithTime, activeOrders, period]);
+  }, [ordersWithTime, activeOrders, period, dayKeys]);
 
   /* ── Top productos ── */
   const topProducts = useMemo(() => {
@@ -374,49 +427,24 @@ export function AdminReports() {
     );
   }, [filteredOrdersTable, page, pageSize]);
 
-  const dayKeys = useMemo(() => {
-    if (filters.type === 'predefined') {
-      if (filters.period === 'all') return [];
 
-      const days =
-        filters.period === '7d' ? 7 :
-          filters.period === '30d' ? 30 : 90;
-
-      return lastNDayKeys(days);
-    }
-
-    // custom range
-    if (filters.type === 'custom') {
-      const { from: rangeFrom, to: rangeTo } = filters.range;
-      if (!rangeFrom || !rangeTo) return [];
-
-      const result: string[] = [];
-      let currentMs = parseDateStartLocal(rangeFrom);
-      const endMs = parseDateStartLocal(rangeTo);
-
-      while (currentMs <= endMs) {
-        result.push(formatDateLocal(new Date(currentMs)));
-        currentMs += 86400000; // +1 día
-      }
-
-      return result;
-    }
-
-    return [];
-  }, [filters]);
 
   console.log({
     dayKeys,
     ordersKeys: periodOrders.map(o => getDayKeyLocalFromMs(o.createdAtMs))
   });
 
+  console.log('Fechas disponibles en mock:',
+    [...new Set(orders.map(o => o.createdAt))].sort()
+  );
+
 
   const salesContent = useMemo(() => {
-    if (barData.every(d => d.value === 0)) {
-      return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
-    }
-
     if (salesViewMode === 'chart') {
+      // ✅ El guard solo aplica al gráfico
+      if (barData.every(d => d.value === 0)) {
+        return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
+      }
       return (
         <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
           <div className={styles.fadeIn}>
@@ -426,8 +454,7 @@ export function AdminReports() {
       );
     }
 
-
-
+    // ✅ La tabla siempre renderiza, muestra "Sin ventas" por fila internamente
     return (
       <div className={styles.fadeIn}>
         <SalesTableView
@@ -437,7 +464,6 @@ export function AdminReports() {
         />
       </div>
     );
-
   }, [barData, salesViewMode, BarChartSkeleton, dayKeys, periodOrders]);
 
   const from = filteredOrdersTable.length === 0
