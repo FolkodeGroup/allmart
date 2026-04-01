@@ -50,7 +50,6 @@ function lastNDayKeys(n: number): string[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayMs = today.getTime();
-  console.log('[lastNDayKeys] todayMs:', todayMs, 'parsed:', new Date(todayMs).toISOString());
   for (let i = n - 1; i >= 0; i--) {
     const dayMs = todayMs - i * 24 * 60 * 60 * 1000;
     keys.push(getDayKeyLocalFromMs(dayMs));
@@ -426,18 +425,6 @@ export function AdminReports() {
       page * pageSize
     );
   }, [filteredOrdersTable, page, pageSize]);
-
-
-
-  console.log({
-    dayKeys,
-    ordersKeys: periodOrders.map(o => getDayKeyLocalFromMs(o.createdAtMs))
-  });
-
-  console.log('Fechas disponibles en mock:',
-    [...new Set(orders.map(o => o.createdAt))].sort()
-  );
-
 
   const salesContent = useMemo(() => {
     if (salesViewMode === 'chart') {
