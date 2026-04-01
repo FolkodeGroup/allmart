@@ -20,6 +20,11 @@ import { generateMockOrders } from './components/DatosMockeados';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
 import { SalesTableView } from './components/SalesTableView';
+import {
+  createdAtToMs, parseDateStartLocal, formatDateLocal,
+  getDayKeyLocalFromMs,
+} from '../../../utils/date';
+import { useReportsData } from './hooks/useReportsData';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -41,20 +46,22 @@ function isoDateLabel(iso: string) {
 
 /* Genera array de fechas [YYYY-MM-DD] de los últimos N días */
 function lastNDayKeys(n: number): string[] {
-  const today = new Date();
   const keys: string[] = [];
-
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMs = today.getTime();
+  console.log('[lastNDayKeys] todayMs:', todayMs, 'parsed:', new Date(todayMs).toISOString());
   for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    keys.push(d.toISOString().slice(0, 10));
+    const dayMs = todayMs - i * 24 * 60 * 60 * 1000;
+    keys.push(getDayKeyLocalFromMs(dayMs));
   }
-
   return keys;
 }
 
-function orderDateKey(iso: string) {
-  return iso.slice(0, 10);
+function orderDateKey(createdAt: string): string {
+  // Normaliza a ms y luego a key local
+  const ms = createdAtToMs(createdAt);
+  return getDayKeyLocalFromMs(ms);
 }
 
 /* ── Tipos internos ─────────────────────────────────────────────── */
@@ -97,7 +104,7 @@ export interface OrdersTableProps {
 export function AdminReports() {
 
   //const { orders } = useAdminOrders();
-  const orders = generateMockOrders(50);
+  const orders = useMemo(() => generateMockOrders(50), []);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   // Unsaved changes detection
@@ -152,102 +159,38 @@ export function AdminReports() {
   // Si usas react-router, puedes usar useBlocker o usePrompt aquí
 
   // Determinar periodo para lógica existente
-  const period: Period =
-    filters.type === 'predefined' ? filters.period : 'custom';
 
   // Calcular min/max fechas para inputs
-  const allDates = orders.map(o => o.createdAt.slice(0, 10));
-  const minDate = allDates.length ? allDates.reduce((a, b) => (a < b ? a : b)) : undefined;
+  const allDates = orders.map(o => {
+    // normaliza strings YYYY-MM-DD o ISO con hora
+    const ms = createdAtToMs(o.createdAt);
+    return formatDateLocal(new Date(ms));
+  });
+  const minDate = undefined;
   const maxDate = allDates.length ? allDates.reduce((a, b) => (a > b ? a : b)) : undefined;
 
-  const ordersWithTime = useMemo(() =>
-    orders.map(o => ({
+  const ordersWithTime = useMemo(() => {
+    return orders.map(o => ({
       ...o,
-      createdAtMs: new Date(o.createdAt).getTime()
-    })),
+      createdAtMs: createdAtToMs(o.createdAt)
+    }))
+  },
     [orders]);
 
   // Filtrado extendido
   // periodOrders: solo filtra por período (filtros generales)
-  const periodOrders = useMemo(() => {
-    let filtered = [] as typeof ordersWithTime;
-    if (filters.type === 'predefined') {
-      if (filters.period === 'all') {
-        filtered = ordersWithTime;
-      } else {
-        const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
-        const cutoff = now - days * 86400000;
-        filtered = ordersWithTime.filter(o => o.createdAtMs >= cutoff);
-      }
-    } else {
-      const { from, to } = filters.range;
-      if (!from || !to) return [];
-      const fromTime = new Date(from).setHours(0, 0, 0, 0);
-      const toTime = new Date(to).setHours(23, 59, 59, 999);
-      filtered = ordersWithTime.filter(o => o.createdAtMs >= fromTime && o.createdAtMs <= toTime);
-    }
-    return filtered;
-  }, [ordersWithTime, filters, now]);
-
-
-
-  // Filtros avanzados SOLO para la tabla de pedidos
-  const filteredOrdersTable = useMemo(() => {
-    let filtered = periodOrders;
-    // 1. Filtro por estado (multi-select)
-    if (ordersTableFilters.status && ordersTableFilters.status.length > 0) {
-      filtered = filtered.filter(o => ordersTableFilters.status.includes(o.status));
-    }
-    // 2. Filtro por cliente (nombre, email)
-    if (ordersTableFilters.clientQuery && ordersTableFilters.clientQuery.trim() !== '') {
-      const q = ordersTableFilters.clientQuery.trim().toLowerCase();
-      filtered = filtered.filter(o => {
-        const c = o.customer;
-        return (
-          (c.firstName && c.firstName.toLowerCase().includes(q)) ||
-          (c.lastName && c.lastName.toLowerCase().includes(q)) ||
-          (c.email && c.email.toLowerCase().includes(q))
-        );
-      });
-    }
-
-    // 3. Filtro por producto (nombre parcial)
-    if (ordersTableFilters.productQuery && ordersTableFilters.productQuery.trim() !== '') {
-      const pq = ordersTableFilters.productQuery.trim().toLowerCase();
-      filtered = filtered.filter(o =>
-        o.items && o.items.some(it => it.productName && it.productName.toLowerCase().includes(pq))
-      );
-    }
-    return filtered;
-  }, [periodOrders, ordersTableFilters]);
-
-  // Corrige la página si los filtros dejan menos elementos de los que la página actual puede mostrar
-  useEffect(() => {
-    const totalFiltered = filteredOrdersTable.length;
-    const maxPage = Math.max(1, Math.ceil(totalFiltered / pageSize));
-    if (page > maxPage) {
-      setPage(maxPage);
-    }
-  }, [filteredOrdersTable.length, pageSize, page]);
-
-  const from = filteredOrdersTable.length === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to = Math.min(page * pageSize, filteredOrdersTable.length);
-
-  const activeOrders = useMemo(
-    () => periodOrders.filter(o => o.status !== 'cancelado'),
-    [periodOrders]
+  const {
+    period,
+    periodOrders,
+    filteredOrdersTable,
+    activeOrders,
+    kpis
+  } = useReportsData(
+    orders,
+    filters,
+    ordersTableFilters,
+    now
   );
-
-  /* ── KPIs ── */
-  const kpis = useMemo(() => {
-    const totalRevenue = activeOrders.reduce((s, o) => s + o.total, 0);
-    const orderCount = activeOrders.length;
-    const avgTicket = orderCount ? totalRevenue / orderCount : 0;
-    const delivered = activeOrders.filter(o => o.status === 'entregado').length;
-    const completionRate = orderCount ? Math.round((delivered / orderCount) * 100) : 0;
-    const paid = periodOrders.filter(o => o.paymentStatus === 'abonado').length;
-    return { totalRevenue, orderCount, avgTicket, completionRate, paid };
-  }, [activeOrders, periodOrders]);
 
   /* ── Comparativa período anterior ── */
   const prevPeriodRevenue = useMemo(() => {
@@ -444,19 +387,16 @@ export function AdminReports() {
 
     // custom range
     if (filters.type === 'custom') {
-      const { from, to } = filters.range;
-      if (!from || !to) return [];
+      const { from: rangeFrom, to: rangeTo } = filters.range;
+      if (!rangeFrom || !rangeTo) return [];
 
       const result: string[] = [];
-      const current = new Date(from);
-      const end = new Date(to);
+      let currentMs = parseDateStartLocal(rangeFrom);
+      const endMs = parseDateStartLocal(rangeTo);
 
-      current.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
-
-      while (current <= end) {
-        result.push(current.toISOString().slice(0, 10));
-        current.setDate(current.getDate() + 1);
+      while (currentMs <= endMs) {
+        result.push(formatDateLocal(new Date(currentMs)));
+        currentMs += 86400000; // +1 día
       }
 
       return result;
@@ -464,6 +404,12 @@ export function AdminReports() {
 
     return [];
   }, [filters]);
+
+  console.log({
+    dayKeys,
+    ordersKeys: periodOrders.map(o => getDayKeyLocalFromMs(o.createdAtMs))
+  });
+
 
   const salesContent = useMemo(() => {
     if (barData.every(d => d.value === 0)) {
@@ -485,15 +431,20 @@ export function AdminReports() {
     return (
       <div className={styles.fadeIn}>
         <SalesTableView
-          orders={activeOrders}
+          orders={periodOrders}
           formatPrice={formatPrice}
           dayKeys={dayKeys}
         />
       </div>
     );
 
-  }, [barData, salesViewMode, activeOrders, BarChartSkeleton, dayKeys]);
+  }, [barData, salesViewMode, BarChartSkeleton, dayKeys, periodOrders]);
 
+  const from = filteredOrdersTable.length === 0
+    ? 0
+    : (page - 1) * pageSize + 1;
+
+  const to = Math.min(page * pageSize, filteredOrdersTable.length);
 
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
@@ -838,9 +789,9 @@ export function AdminReports() {
                 <OrdersTable
                   orders={paginatedOrders}
                 />
-                {periodOrders.length > pageSize && (
+                {filteredOrdersTable.length > pageSize && (
                   <p className={styles.moreHint + ' fadeInFast'}>
-                    Mostrando {from}-{to} de {periodOrders.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
+                    Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
                   </p>
                 )}
                 <Pagination

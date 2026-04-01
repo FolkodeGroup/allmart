@@ -9,12 +9,8 @@ export interface DateRange {
 }
 
 export type ReportsFiltersValue =
-    | ({ type: 'predefined'; period: PredefinedPeriod }
-        | { type: 'custom'; range: DateRange }) & {
-            status?: string[];
-            clientQuery?: string;
-            productQuery?: string;
-        };
+    | { type: 'predefined'; period: PredefinedPeriod; status?: string[]; clientQuery?: string; productQuery?: string }
+    | { type: 'custom'; range: DateRange; status?: string[]; clientQuery?: string; productQuery?: string };
 
 interface ReportsFiltersProps {
     value: ReportsFiltersValue;
@@ -57,12 +53,29 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value: dateValue } = e.target;
+
+        const prevRange =
+            value.type === 'custom'
+                ? value.range
+                : { from: '', to: '' };
+
         if (value.type === 'custom') {
-            const range = { ...value.range, [name]: dateValue };
-            onChange({ type: 'custom', range });
+            onChange({
+                ...value,
+                range: { ...value.range, [name]: dateValue },
+            });
         } else {
-            // Switch to custom if user starts editing
-            onChange({ type: 'custom', range: { from: '', to: '' } });
+
+            onChange({
+                type: 'custom',
+                range: {
+                    from: name === 'from' ? dateValue : prevRange.from,
+                    to: name === 'to' ? dateValue : prevRange.to,
+                },
+                status: value.status,
+                clientQuery: value.clientQuery,
+                productQuery: value.productQuery,
+            });
         }
     };
 
