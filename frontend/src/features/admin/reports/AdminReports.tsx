@@ -132,6 +132,13 @@ export function AdminReports() {
   // Estado para cambiar vista de gráfico barchart
   const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
+  useEffect(() => {
+    if (!showHiddenPdf) return;
+    generatePdf({ rootRef: hiddenPdfRef, fileName: 'reporte-resumen.pdf' })
+      .then(() => setNotif({ open: true, type: 'success', message: 'PDF generado.' }))
+      .catch(() => setNotif({ open: true, type: 'error', message: 'Error generando PDF.' }))
+      .finally(() => setShowHiddenPdf(false));
+  }, [showHiddenPdf, generatePdf]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
@@ -159,7 +166,7 @@ export function AdminReports() {
     const ms = createdAtToMs(o.createdAt);
     return formatDateLocal(new Date(ms));
   });
-  const minDate = undefined;
+  const minDate = allDates.length ? allDates.reduce((a, b) => a < b ? a : b) : undefined;
   const maxDate = allDates.length ? allDates.reduce((a, b) => (a > b ? a : b)) : undefined;
 
   const ordersWithTime = useMemo(() => {
@@ -419,6 +426,11 @@ export function AdminReports() {
       page * pageSize
     );
   }, [filteredOrdersTable, page, pageSize]);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredOrdersTable.length / pageSize);
+    if (page > maxPage) setPage(maxPage || 1);
+  }, [filteredOrdersTable, pageSize, page]);
 
   const salesContent = useMemo(() => {
     if (salesViewMode === 'chart') {
