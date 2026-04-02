@@ -133,6 +133,77 @@
     color: #1a1a1a;
   }
 
+  /* === Sales Cards (mobile) === */
+  .salesCardsWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-height: 500px;
+    overflow-y: scroll;
+  }
+
+  .salesCard {
+    background: #fff;
+    border: 1px solid #e5e2dd;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    box-shadow: 0 1px 4px #0001;
+  }
+
+  .salesCardHeader {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    gap: 0.5rem;
+  }
+
+  .salesCardDate {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #444;
+  }
+
+  .salesCardTotal {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2e7d32;
+    white-space: nowrap;
+  }
+
+  .salesCardProducts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .salesCardProduct {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #555;
+    padding: 2px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .salesCardProduct:last-of-type {
+    border-bottom: none;
+  }
+
+  .salesCardQty {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #888;
+    background: #f5f5f5;
+    border-radius: 999px;
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
 
 
   /* === Advanced Filters === */
@@ -1526,6 +1597,14 @@ ALLMART — ADMIN REPORTS
   color: var(--color-text-tertiary);
 }
 
+.viewToggleGroup {
+  margin-bottom: 1rem;
+}
+
+.viewToggle {
+  margin-bottom: 1rem;
+}
+
 .viewToggleLabel {
   padding-left: 5px;
   display: block;
@@ -1550,6 +1629,13 @@ ALLMART — ADMIN REPORTS
 .toggleBtn:hover {
   background: color-mix(in srgb, var(--color-primary) 10%, transparent);
   color: var(--color-primary-dark);
+}
+
+@media (max-width: 600px) {
+  .toggleBtn {
+    font-size: var(--text-sm);
+    padding: var(--space-2) var(--space-4);
+  }
 }
 
 .noData {

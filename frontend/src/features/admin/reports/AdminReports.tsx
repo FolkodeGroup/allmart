@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-//import { useAdminOrders } from '../../../context/AdminOrdersContext';
+import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
@@ -16,7 +16,7 @@ import { Suspense } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
-import { generateMockOrders } from './components/DatosMockeados';
+//import { generateMockOrders } from './components/DatosMockeados';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
 import { SalesTableView } from './components/SalesTableView';
@@ -96,8 +96,8 @@ export interface OrdersTableProps {
  */
 export function AdminReports() {
 
-  //const { orders } = useAdminOrders();
-  const orders = useMemo(() => generateMockOrders(50), []);
+  const { orders } = useAdminOrders();
+  //const orders = useMemo(() => generateMockOrders(50), []);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   // Unsaved changes detection
@@ -608,7 +608,7 @@ export function AdminReports() {
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
-            <div className={styles.viewToggle}>
+            <div className={styles.viewToggleGroup + ' fadeInFast'}>
               <span className={styles.viewToggleLabel}>Vista:</span>
 
               <button
