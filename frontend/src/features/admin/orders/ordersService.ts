@@ -111,7 +111,7 @@ function normalizePaymentStatus(status?: string): PaymentStatus {
   return 'no-abonado';
 }
 
-function mapApiOrderToOrder(api: ApiOrder): Order {
+export function mapApiOrderToOrder(api: ApiOrder): Order {
   return {
     id: api.id,
     createdAt: api.createdAt,
