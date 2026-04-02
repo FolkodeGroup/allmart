@@ -39,13 +39,13 @@ export async function getActivePromotions(): Promise<Promotion[]> {
  */
 export async function getPromotionRulesForProduct(
   productId: string,
-  categoryId?: string
+  categoryIds: string[] = []
 ): Promise<PromotionRule[]> {
   return prisma.promotionRule.findMany({
     where: {
       OR: [
         { productId },
-        { categoryId },
+        ...(categoryIds.length > 0 ? [{ categoryId: { in: categoryIds } }] : []),
       ],
     },
   });
@@ -93,7 +93,7 @@ export function calculateDiscount(
 export async function getBestDiscount(
   productId: string,
   originalPrice: number,
-  categoryId?: string
+  categoryIds: string[] = []
 ): Promise<DiscountResult | null> {
   try {
     // Obtener promociones activas
@@ -104,7 +104,7 @@ export async function getBestDiscount(
     }
 
     // Obtener reglas que aplican a este producto
-    const applicableRules = await getPromotionRulesForProduct(productId, categoryId);
+    const applicableRules = await getPromotionRulesForProduct(productId, categoryIds);
 
     if (applicableRules.length === 0) {
       return null;
@@ -160,10 +160,16 @@ export async function applyDiscountsToProducts(
 ): Promise<any[]> {
   return Promise.all(
     products.map(async (product) => {
+      const categoryIds = Array.isArray(product.categoryIds)
+        ? product.categoryIds
+        : product.categoryId
+          ? [product.categoryId]
+          : [];
+
       const discount = await getBestDiscount(
         product.id,
         product.price.toNumber ? product.price.toNumber() : product.price,
-        product.categoryId
+        categoryIds
       );
 
       return {

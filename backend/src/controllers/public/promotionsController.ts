@@ -44,7 +44,7 @@ export async function getProductDiscount(
 ): Promise<void> {
   try {
     const { productId } = req.params;
-    const { price, categoryId } = req.query;
+    const { price, categoryId, categoryIds } = req.query;
 
     if (!productId || !price) {
       res.status(400).json({
@@ -53,10 +53,22 @@ export async function getProductDiscount(
       return;
     }
 
+    const categoryList: string[] = [];
+    if (typeof categoryId === 'string' && categoryId.trim()) {
+      categoryList.push(categoryId);
+    }
+    if (typeof categoryIds === 'string' && categoryIds.trim()) {
+      categoryIds
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .forEach((value) => categoryList.push(value));
+    }
+
     const discount = await discountService.getBestDiscount(
       productId,
       parseFloat(price as string),
-      categoryId as string | undefined
+      Array.from(new Set(categoryList))
     );
 
     res.json(discount || { message: 'No hay descuentos aplicables' });

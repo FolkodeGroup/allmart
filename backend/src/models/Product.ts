@@ -18,6 +18,7 @@ export interface Product {
   discount?: number;
   images: string[];         // Json en DB
   categoryId: string;
+  categoryIds?: string[];
   tags: string[];           // Json en DB
   rating: number;
   reviewCount: number;

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { ProductDetailPage } from '../ProductDetailPage';
 import * as productsService from '../../../services/productsService';
@@ -59,6 +59,7 @@ const mockProduct = {
   description: 'Test product description',
   category: mockCategory,
   categoryId: 'cat1',
+  categoryIds: ['cat1'],
   images: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
   stock: 10,
   tags: [],
@@ -98,12 +99,12 @@ describe('ProductDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (categoriesService.fetchPublicCategories as any).mockResolvedValueOnce([mockCategory]);
-    (productsService.fetchPublicProductBySlug as any).mockResolvedValueOnce(mockProduct);
-    (productsService.fetchPublicProducts as any).mockResolvedValueOnce({
+    (categoriesService.fetchPublicCategories as any).mockResolvedValue([mockCategory]);
+    (productsService.fetchPublicProductBySlug as any).mockResolvedValue(mockProduct);
+    (productsService.fetchPublicProducts as any).mockResolvedValue({
       data: mockRelatedProducts,
     });
-    (publicCollectionsService.publicCollectionsService.getProductDiscount as any).mockResolvedValueOnce(null);
+    (publicCollectionsService.publicCollectionsService.getProductDiscount as any).mockResolvedValue(null);
   });
 
   describe('Page Rendering', () => {
@@ -111,7 +112,7 @@ describe('ProductDetailPage', () => {
       renderProductDetail();
 
       await waitFor(() => {
-        expect(screen.getByText('Test Product')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Test Product' })).toBeInTheDocument();
       });
     });
 
@@ -126,10 +127,11 @@ describe('ProductDetailPage', () => {
       renderProductDetail();
 
       await waitFor(() => {
-        expect(screen.getByText('Inicio')).toBeInTheDocument();
-        expect(screen.getByText('Productos')).toBeInTheDocument();
-        expect(screen.getByText('Electronics')).toBeInTheDocument();
-        expect(screen.getByText('Test Product')).toBeInTheDocument();
+        const breadcrumb = screen.getByRole('navigation', { name: /Breadcrumb/i });
+        expect(within(breadcrumb).getByText('Inicio')).toBeInTheDocument();
+        expect(within(breadcrumb).getByText('Productos')).toBeInTheDocument();
+        expect(within(breadcrumb).getByText('Electronics')).toBeInTheDocument();
+        expect(within(breadcrumb).getByText('Test Product')).toBeInTheDocument();
       });
     });
   });
@@ -214,7 +216,7 @@ describe('ProductDetailPage', () => {
       renderProductDetail();
 
       await waitFor(() => {
-        expect(screen.getByText(/\$100/)).toBeInTheDocument();
+        expect(screen.getByText(/\$\s*100/)).toBeInTheDocument();
       });
     });
 
@@ -222,7 +224,7 @@ describe('ProductDetailPage', () => {
       renderProductDetail();
 
       await waitFor(() => {
-        expect(screen.getByText(/\$120/)).toBeInTheDocument();
+        expect(screen.getByText(/\$\s*120/)).toBeInTheDocument();
       });
     });
 
@@ -243,7 +245,7 @@ describe('ProductDetailPage', () => {
         expect(publicCollectionsService.publicCollectionsService.getProductDiscount).toHaveBeenCalledWith(
           'p1',
           100,
-          'cat1'
+          ['cat1']
         );
       });
     });
@@ -306,7 +308,7 @@ describe('ProductDetailPage', () => {
       renderProductDetail();
 
       await waitFor(() => {
-        expect(screen.getByText('Test Product')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Test Product' })).toBeInTheDocument();
       });
 
       // Should fall back to static discount
@@ -362,7 +364,7 @@ describe('ProductDetailPage', () => {
       renderProductDetail();
 
       await waitFor(() => {
-        expect(screen.getByText('Test Product')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Test Product' })).toBeInTheDocument();
       });
 
       expect(screen.queryByText(/-\d+%/)).not.toBeInTheDocument();
@@ -382,7 +384,7 @@ describe('ProductDetailPage', () => {
 
   describe('Error Handling', () => {
     it('should display error message when product not found', async () => {
-      (productsService.fetchPublicProductBySlug as any).mockRejectedValueOnce(new Error('Not found'));
+      (productsService.fetchPublicProductBySlug as any).mockRejectedValue(new Error('Not found'));
 
       renderProductDetail();
 
@@ -392,6 +394,8 @@ describe('ProductDetailPage', () => {
     });
 
     it('should display error when slug is invalid', async () => {
+      (productsService.fetchPublicProductBySlug as any).mockRejectedValue(new Error('Not found'));
+
       renderProductDetail('invalid-slug');
 
       await waitFor(() => {
@@ -400,7 +404,7 @@ describe('ProductDetailPage', () => {
     });
 
     it('should have link back to catalog on error', async () => {
-      (productsService.fetchPublicProductBySlug as any).mockRejectedValueOnce(new Error('Not found'));
+      (productsService.fetchPublicProductBySlug as any).mockRejectedValue(new Error('Not found'));
 
       renderProductDetail();
 

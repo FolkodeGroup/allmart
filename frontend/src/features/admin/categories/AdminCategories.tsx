@@ -42,6 +42,7 @@ export function AdminCategories() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    parentId: '',
     isVisible: true,
   });
   const [formImageFile, setFormImageFile] = useState<File | null>(null);
@@ -109,6 +110,7 @@ export function AdminCategories() {
     setFormData({
       name: '',
       description: '',
+      parentId: '',
       isVisible: true,
     });
     setFormImageFile(null);
@@ -136,6 +138,7 @@ export function AdminCategories() {
     setFormData({
       name: category?.name ?? '',
       description: category?.description ?? '',
+      parentId: category?.parentId ?? '',
       isVisible: category?.isVisible ?? true,
     });
     setFormImageFile(null);
@@ -199,6 +202,7 @@ export function AdminCategories() {
     const payload = {
       name: trimmedName,
       description: formData.description.trim() || undefined,
+      parentId: formData.parentId || null,
       isVisible: formData.isVisible,
     };
 
@@ -289,6 +293,8 @@ export function AdminCategories() {
   const categoriesWithOptimism = categories.map(cat =>
     optimisticVis[cat.id] !== undefined ? { ...cat, isVisible: optimisticVis[cat.id] } : cat
   );
+  const hasChildren = editId ? categories.some((cat) => cat.parentId === editId) : false;
+  const parentOptions = categories.filter((cat) => !cat.parentId && cat.id !== editId);
 
   // Export handlers
   const handleExportCSV = () => {
@@ -552,6 +558,28 @@ export function AdminCategories() {
               maxLength={280}
               style={{ borderRadius: 8, border: '1px solid #d1d5db', padding: '10px 12px', resize: 'vertical' }}
             />
+          </label>
+
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span style={{ fontWeight: 600 }}>Categoría padre</span>
+            <select
+              value={formData.parentId}
+              onChange={(e) => setFormData((prev) => ({ ...prev, parentId: e.target.value }))}
+              disabled={formSubmitting || hasChildren}
+              style={{ borderRadius: 8, border: '1px solid #d1d5db', padding: '10px 12px' }}
+            >
+              <option value="">Sin categoría padre</option>
+              {parentOptions.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            {hasChildren && (
+              <span style={{ fontSize: 12, color: '#6b7280' }}>
+                Esta categoría ya tiene subcategorías, no puede asignarse como hija.
+              </span>
+            )}
           </label>
 
           <label style={{ display: 'grid', gap: 6 }}>

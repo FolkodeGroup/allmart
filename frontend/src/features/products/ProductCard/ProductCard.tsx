@@ -46,10 +46,15 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   useEffect(() => {
     const loadDiscount = async () => {
       try {
+        const categoryIds = Array.isArray(product.categoryIds)
+          ? product.categoryIds
+          : product.category?.id
+            ? [product.category.id]
+            : [];
         const discount = await publicCollectionsService.getProductDiscount(
           product.id,
           product.price,
-          product.category?.id
+          categoryIds
         );
         setDynamicDiscount(discount);
       } catch (error) {
@@ -59,9 +64,9 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     };
     
     loadDiscount();
-  }, [product.id, product.price, product.category?.id]);
+  }, [product.id, product.price, product.category?.id, product.categoryIds]);
 
-  const hasDiscount = product.discount && product.discount > 0;
+  const hasDiscount = Boolean(product.discount && product.discount > 0);
   const isNew = product.tags.includes("nuevo");
   const isFeatured = variant === 'featured';
   const hasGallery = isFeatured && galleryImages.length > 1;

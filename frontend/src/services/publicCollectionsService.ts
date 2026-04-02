@@ -114,11 +114,13 @@ export const publicCollectionsService = {
   /**
    * Obtiene el descuento para un producto específico
    */
-  async getProductDiscount(productId: string, price: number, categoryId?: string): Promise<ProductDiscount | null> {
+  async getProductDiscount(productId: string, price: number, categoryIds: string[] = []): Promise<ProductDiscount | null> {
     const params = new URLSearchParams({
       price: String(price),
-      ...(categoryId && { categoryId }),
     });
+    if (categoryIds.length > 0) {
+      params.set('categoryIds', categoryIds.join(','));
+    }
     try {
       const result = await apiFetch(`/api/promotions/product-discount/${productId}?${params}`) as unknown;
       return isValidProductDiscount(result) ? result : null;

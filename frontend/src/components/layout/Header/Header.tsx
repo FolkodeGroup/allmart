@@ -1,54 +1,52 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CircleUserRound, Menu, Search, ShoppingCart, X } from 'lucide-react';
-import type { NavigationItem, Category } from '../../../types';
+import type { Category, NavigationItem } from '../../../types';
 import { fetchPublicCategories } from '../../../services/categoriesService';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
 
+const baseNavigation: NavigationItem[] = [
+  { label: 'Ofertas', href: '/productos?tag=oferta' },
+  { label: 'Novedades', href: '/productos?tag=nuevo' },
+];
+
 const fallbackNavigation: NavigationItem[] = [
+  ...baseNavigation,
   { label: 'Ver todo el catalogo', href: '/productos' },
 ];
 
 function buildNavigationFromCategories(categories: Category[]): NavigationItem[] {
-  const normalizeKey = (value: string): string => value
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, ' ')
-    .replace(/-+/g, '-');
+  const visible = categories.filter((category) => category.isVisible);
+  const roots = visible.filter((category) => !category.parentId);
+  const childrenByParent = new Map<string, Category[]>();
 
-  const seenKeys = new Set<string>();
-  const visibleCategories = categories.filter((category) => {
-    if (!category.isVisible) {
-      return false;
+  for (const category of visible) {
+    if (category.parentId) {
+      const current = childrenByParent.get(category.parentId) ?? [];
+      current.push(category);
+      childrenByParent.set(category.parentId, current);
     }
+  }
 
-    const nameKey = normalizeKey(category.name || '');
-    const slugKey = normalizeKey(category.slug || '');
-    const key = slugKey || nameKey;
-
-    if (!key || seenKeys.has(key)) {
-      return false;
-    }
-
-    seenKeys.add(key);
-    return true;
+  const rootItems: NavigationItem[] = roots.map((category) => {
+    const children = childrenByParent.get(category.id) ?? [];
+    return {
+      label: category.name,
+      href: `/productos?category=${encodeURIComponent(category.slug)}`,
+      children: children.length
+        ? children.map((child) => ({
+            label: child.name,
+            href: `/productos?category=${encodeURIComponent(child.slug)}`,
+          }))
+        : undefined,
+    };
   });
 
-  const categoryItems: NavigationItem[] = visibleCategories.map((category) => ({
-    label: category.name,
-    href: `/productos?category=${encodeURIComponent(category.slug)}`,
-  }));
-
   return [
-    ...categoryItems,
-    {
-      label: 'Ver todo el catalogo',
-      href: '/productos',
-    },
+    ...baseNavigation,
+    ...rootItems,
+    { label: 'Ver todo el catalogo', href: '/productos' },
   ];
 }
 

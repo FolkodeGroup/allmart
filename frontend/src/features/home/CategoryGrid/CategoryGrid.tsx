@@ -48,7 +48,8 @@ export function CategoryGrid() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const featured = [...categories]
+  const rootCategories = categories.filter((cat) => !cat.parentId);
+  const featured = [...rootCategories]
     .sort((a, b) => (b.itemCount ?? 0) - (a.itemCount ?? 0))
     .slice(0, 6);
 

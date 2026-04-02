@@ -85,15 +85,20 @@ model Category {
   slug        String    @unique(map: "categories_slug_unique") @db.VarChar(150)
   description String?
   imageUrl    String?   @map("image_url")
+  parentId    String?   @map("parent_id") @db.Uuid
   itemCount   Int       @default(0) @map("item_count")
   isVisible   Boolean   @default(true) @map("is_visible")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   products    Product[]
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "categories_parent_fk")
+  children    Category[] @relation("CategoryHierarchy")
   promotionRules PromotionRule[]
   categoryImage CategoryImageStorage?
+  productCategories ProductCategory[]
 
   @@index([slug], map: "idx_categories_slug")
+  @@index([parentId], map: "idx_categories_parent_id")
   @@map("categories")
 }
 
@@ -127,6 +132,7 @@ model Product {
   collectionItems  CollectionItem[]
   promotionRules   PromotionRule[]
   lowStockAlerts   LowStockAlert[]
+  productCategories ProductCategory[]
   category         Category?        @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "products_category_fk")
 
   @@index([categoryId], map: "idx_products_category_id")
@@ -135,6 +141,19 @@ model Product {
   @@index([status], map: "idx_products_status")
   @@index([isFeatured], map: "idx_products_is_featured")
   @@map("products")
+}
+
+model ProductCategory {
+  productId  String   @map("product_id") @db.Uuid
+  categoryId String   @map("category_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_categories_product_fk")
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_categories_category_fk")
+
+  @@id([productId, categoryId])
+  @@index([categoryId], map: "idx_product_categories_category_id")
+  @@index([productId], map: "idx_product_categories_product_id")
+  @@map("product_categories")
 }
 
 /// Imagen de producto almacenada en binario WebP en base de datos

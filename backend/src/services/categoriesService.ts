@@ -25,6 +25,7 @@ function toCategory(row: {
   slug: string;
   description: string | null;
   imageUrl: string | null;
+  parentId: string | null;
   itemCount: number;
   isVisible: boolean;
   createdAt: Date;
@@ -74,7 +75,7 @@ export async function getAdminCategories(query: {
       skip: (page - 1) * limit,
       take: limit,
       include: {
-        _count: { select: { products: true } },
+        _count: { select: { productCategories: true } },
       },
     }),
   ]);
@@ -82,17 +83,17 @@ export async function getAdminCategories(query: {
   // Filtrar por minProducts y maxProducts en memoria (paginación ya aplicada)
   let filteredRows = rows;
   if (typeof minProducts === 'number') {
-    filteredRows = filteredRows.filter(row => row._count.products >= minProducts);
+    filteredRows = filteredRows.filter(row => row._count.productCategories >= minProducts);
   }
   if (typeof maxProducts === 'number') {
-    filteredRows = filteredRows.filter(row => row._count.products <= maxProducts);
+    filteredRows = filteredRows.filter(row => row._count.productCategories <= maxProducts);
   }
 
   // Mapear para incluir el conteo real de productos
   const data = filteredRows.map(row =>
     toCategory({
       ...row,
-      itemCount: row._count.products,
+      itemCount: row._count.productCategories,
     })
   );
 
@@ -109,8 +110,36 @@ export async function getAdminCategories(query: {
 }
 
 export async function getAllActiveCategories(): Promise<Category[]> {
-  const rows = await prisma.category.findMany({ orderBy: { name: 'asc' } });
-  return rows.map(toCategory);
+  const rows = await prisma.category.findMany({
+    where: { isVisible: true },
+    orderBy: { name: 'asc' },
+  });
+
+  const counts = await prisma.productCategory.groupBy({
+    by: ['categoryId'],
+    where: { product: { status: 'active' } },
+    _count: { productId: true },
+  });
+
+  const baseCounts = new Map<string, number>();
+  for (const row of counts) {
+    baseCounts.set(row.categoryId, row._count.productId);
+  }
+
+  const rollupCounts = new Map(baseCounts);
+  for (const row of rows) {
+    if (row.parentId) {
+      const childCount = baseCounts.get(row.id) ?? 0;
+      rollupCounts.set(row.parentId, (rollupCounts.get(row.parentId) ?? 0) + childCount);
+    }
+  }
+
+  return rows.map(row =>
+    toCategory({
+      ...row,
+      itemCount: row.parentId ? (baseCounts.get(row.id) ?? 0) : (rollupCounts.get(row.id) ?? 0),
+    })
+  );
 }
 
 export async function getCategoryById(id: string): Promise<Category> {
@@ -140,12 +169,25 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
     throw createError(`El slug "${slug}" ya está en uso por otra categoría`, 409);
   }
 
+  let parentId: string | null = null;
+  if (dto.parentId) {
+    const parent = await prisma.category.findUnique({ where: { id: dto.parentId } });
+    if (!parent) {
+      throw createError('Categoría padre no encontrada', 404);
+    }
+    if (parent.parentId) {
+      throw createError('Solo se permite un nivel de subcategorías', 400);
+    }
+    parentId = parent.id;
+  }
+
   const row = await prisma.category.create({
     data: {
       name: dto.name,
       slug,
       description: dto.description ?? null,
       imageUrl: dto.imageUrl ?? null,
+      parentId,
       isVisible: dto.isVisible !== undefined ? dto.isVisible : true,
     },
   });
@@ -168,6 +210,32 @@ export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promis
     if (conflict) throw createError(`El slug "${newSlug}" ya está en uso`, 409);
   }
 
+  let parentId: string | null | undefined = undefined;
+  if (dto.parentId !== undefined) {
+    if (dto.parentId === id) {
+      throw createError('Una categoría no puede ser su propio padre', 400);
+    }
+
+    if (dto.parentId) {
+      const parent = await prisma.category.findUnique({ where: { id: dto.parentId } });
+      if (!parent) {
+        throw createError('Categoría padre no encontrada', 404);
+      }
+      if (parent.parentId) {
+        throw createError('Solo se permite un nivel de subcategorías', 400);
+      }
+
+      const childCount = await prisma.category.count({ where: { parentId: id } });
+      if (childCount > 0) {
+        throw createError('No se puede asignar padre a una categoría que ya tiene subcategorías', 400);
+      }
+
+      parentId = parent.id;
+    } else {
+      parentId = null;
+    }
+  }
+
   const row = await prisma.category.update({
     where: { id },
     data: {
@@ -175,6 +243,7 @@ export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promis
       slug: newSlug,
       description: dto.description !== undefined ? dto.description : existing.description,
       imageUrl: dto.imageUrl !== undefined ? dto.imageUrl : existing.imageUrl,
+      parentId: parentId !== undefined ? parentId : existing.parentId,
       isVisible: dto.isVisible !== undefined ? dto.isVisible : existing.isVisible,
     },
   });

@@ -29,8 +29,8 @@ vi.mock('../../../features/products/ProductCard/ProductCard', () => ({
 }));
 
 const mockCategories = [
-  { id: 'cat1', name: 'Electronics', slug: 'electronics' },
-  { id: 'cat2', name: 'Clothing', slug: 'clothing' },
+  { id: 'cat1', name: 'Electronics', slug: 'electronics', parentId: null },
+  { id: 'cat2', name: 'Clothing', slug: 'clothing', parentId: null },
 ];
 
 const mockProducts = [
@@ -62,15 +62,17 @@ const mockProducts = [
 
 const mockActiveDiscounts = [
   {
-    promotionId: 'promo1',
-    promotionName: '20% Off',
-    originalPrice: 100,
-    discountAmount: 20,
-    finalPrice: 80,
-    discountPercentage: 20,
-    promotionType: 'percentage',
-    priority: 1,
-    applicableProducts: [{ id: 'p1', name: 'Product 1' }],
+    productId: 'p1',
+    discount: {
+      promotionId: 'promo1',
+      promotionName: '20% Off',
+      originalPrice: 100,
+      discountAmount: 20,
+      finalPrice: 80,
+      discountPercentage: 20,
+      promotionType: 'percentage',
+      priority: 1,
+    },
   },
 ];
 
@@ -82,15 +84,25 @@ const renderProductListPage = () => {
   );
 };
 
+const expectResultCount = (count: number) => {
+  const matcher = (_: string, element: Element | null) => {
+    if (!element) return false;
+    const normalized = element.textContent?.replace(/\s+/g, ' ').trim();
+    return normalized === `Mostrando ${count} productos`;
+  };
+
+  expect(screen.getByText(matcher)).toBeInTheDocument();
+};
+
 describe('ProductListPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
-    (categoriesService.fetchPublicCategories as any).mockResolvedValueOnce(mockCategories);
-    (productsService.fetchPublicProducts as any).mockResolvedValueOnce({
+    (categoriesService.fetchPublicCategories as any).mockResolvedValue(mockCategories);
+    (productsService.fetchPublicProducts as any).mockResolvedValue({
       data: mockProducts,
     });
-    (publicCollectionsService.publicCollectionsService.getActiveDiscounts as any).mockResolvedValueOnce(
+    (publicCollectionsService.publicCollectionsService.getActiveDiscounts as any).mockResolvedValue(
       mockActiveDiscounts
     );
   });
@@ -225,6 +237,10 @@ describe('ProductListPage', () => {
         expect(productsService.fetchPublicProducts).toHaveBeenCalled();
       });
 
+      await waitFor(() => {
+        expect(screen.getByLabelText('Electronics')).toBeInTheDocument();
+      });
+
       const electronicsCheckbox = screen.getByLabelText('Electronics');
       fireEvent.click(electronicsCheckbox);
 
@@ -239,6 +255,10 @@ describe('ProductListPage', () => {
 
     it('should clear category filter when unchecked', async () => {
       renderProductListPage();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Electronics')).toBeInTheDocument();
+      });
 
       const electronicsCheckbox = screen.getByLabelText('Electronics');
       fireEvent.click(electronicsCheckbox);
@@ -285,6 +305,10 @@ describe('ProductListPage', () => {
         expect(productsService.fetchPublicProducts).toHaveBeenCalled();
       });
 
+      await waitFor(() => {
+        expect(screen.getByTestId('product-p1')).toBeInTheDocument();
+      });
+
       const enOfertaCheckbox = screen.getByLabelText(/En oferta/i);
       fireEvent.click(enOfertaCheckbox);
 
@@ -328,6 +352,10 @@ describe('ProductListPage', () => {
         expect(productsService.fetchPublicProducts).toHaveBeenCalled();
       });
 
+      await waitFor(() => {
+        expect(screen.getByTestId('product-p1')).toBeInTheDocument();
+      });
+
       const enOfertaCheckbox = screen.getByLabelText(/En oferta/i);
       fireEvent.click(enOfertaCheckbox);
 
@@ -351,6 +379,10 @@ describe('ProductListPage', () => {
         expect(productsService.fetchPublicProducts).toHaveBeenCalled();
       });
 
+      await waitFor(() => {
+        expect(screen.getByLabelText('Electronics')).toBeInTheDocument();
+      });
+
       const electronicsCheckbox = screen.getByLabelText('Electronics');
       const enOfertaCheckbox = screen.getByLabelText(/En oferta/i);
 
@@ -372,7 +404,7 @@ describe('ProductListPage', () => {
       renderProductListPage();
 
       await waitFor(() => {
-        expect(screen.getByText(/Mostrando 2 productos/)).toBeInTheDocument();
+        expectResultCount(2);
       });
     });
 
@@ -380,14 +412,18 @@ describe('ProductListPage', () => {
       renderProductListPage();
 
       await waitFor(() => {
-        expect(screen.getByText(/Mostrando 2 productos/)).toBeInTheDocument();
+        expectResultCount(2);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('product-p1')).toBeInTheDocument();
       });
 
       const enOfertaCheckbox = screen.getByLabelText(/En oferta/i);
       fireEvent.click(enOfertaCheckbox);
 
       await waitFor(() => {
-        expect(screen.getByText(/Mostrando 1 productos/)).toBeInTheDocument();
+        expectResultCount(1);
       });
     });
   });
@@ -409,15 +445,15 @@ describe('ProductListPage', () => {
       });
 
       const filterButton = screen.getByRole('button', { name: /☰ Filtros/ });
-      const sidebar = container.querySelector('[aria-label="Filtros de productos"]');
+      const sidebar = container.querySelector('[aria-label="Filtros de productos"]') as HTMLElement;
 
-      expect(sidebar).not.toHaveClass('open');
-
-      fireEvent.click(filterButton);
-      expect(sidebar).toHaveClass('open');
+      expect(sidebar.className).not.toMatch(/open/);
 
       fireEvent.click(filterButton);
-      expect(sidebar).not.toHaveClass('open');
+      expect(sidebar.className).toMatch(/open/);
+
+      fireEvent.click(filterButton);
+      expect(sidebar.className).not.toMatch(/open/);
     });
   });
 

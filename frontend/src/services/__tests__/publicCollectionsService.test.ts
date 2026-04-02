@@ -47,7 +47,7 @@ describe('publicCollectionsService', () => {
 
       const result = await publicCollectionsService.getHomeCollections();
 
-      expect(mockApiFetch).toHaveBeenCalledWith('/collections');
+      expect(mockApiFetch).toHaveBeenCalledWith('/api/collections');
       expect(result).toEqual(mockCollections);
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Summer Collection');
@@ -93,7 +93,7 @@ describe('publicCollectionsService', () => {
 
       const result = await publicCollectionsService.getCollectionsByPosition('home');
 
-      expect(mockApiFetch).toHaveBeenCalledWith('/collections/position/home');
+      expect(mockApiFetch).toHaveBeenCalledWith('/api/collections/position/home');
       expect(result).toEqual(mockCollections);
     });
 
@@ -102,7 +102,7 @@ describe('publicCollectionsService', () => {
 
       await publicCollectionsService.getCollectionsByPosition('category');
 
-      expect(mockApiFetch).toHaveBeenCalledWith('/collections/position/category');
+      expect(mockApiFetch).toHaveBeenCalledWith('/api/collections/position/category');
     });
   });
 
@@ -135,7 +135,7 @@ describe('publicCollectionsService', () => {
 
       const result = await publicCollectionsService.getCollectionBySlug('summer-sale');
 
-      expect(mockApiFetch).toHaveBeenCalledWith('/collections/summer-sale');
+      expect(mockApiFetch).toHaveBeenCalledWith('/api/collections/summer-sale');
       expect(result.name).toBe('Summer Sale');
       expect(result.products).toHaveLength(1);
     });
@@ -174,7 +174,7 @@ describe('publicCollectionsService', () => {
 
       const result = await publicCollectionsService.getActivePromotions();
 
-      expect(mockApiFetch).toHaveBeenCalledWith('/promotions/active');
+      expect(mockApiFetch).toHaveBeenCalledWith('/api/promotions/active');
       expect(result).toEqual(mockPromotions);
       expect(result[0].type).toBe('percentage');
     });
@@ -210,7 +210,7 @@ describe('publicCollectionsService', () => {
 
       const result = await publicCollectionsService.getActiveDiscounts();
 
-      expect(mockApiFetch).toHaveBeenCalledWith('/promotions/discounts/active');
+      expect(mockApiFetch).toHaveBeenCalledWith('/api/promotions/discounts/active');
       expect(result).toHaveLength(1);
       expect(result[0].discount.finalPrice).toBe(80);
     });
@@ -239,10 +239,10 @@ describe('publicCollectionsService', () => {
 
       mockApiFetch.mockResolvedValueOnce(mockDiscount);
 
-      const result = await publicCollectionsService.getProductDiscount('p1', 100, 'cat1');
+      const result = await publicCollectionsService.getProductDiscount('p1', 100, ['cat1']);
 
       expect(mockApiFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/promotions/product-discount/p1?')
+        expect.stringContaining('/api/promotions/product-discount/p1?')
       );
       expect(result).toEqual(mockDiscount);
       expect(result?.finalPrice).toBe(80);
@@ -257,13 +257,13 @@ describe('publicCollectionsService', () => {
       expect(callArgs).toContain('price=250.5');
     });
 
-    it('should include categoryId when provided', async () => {
+    it('should include categoryIds when provided', async () => {
       mockApiFetch.mockResolvedValueOnce(null);
 
-      await publicCollectionsService.getProductDiscount('p1', 100, 'electronics');
+      await publicCollectionsService.getProductDiscount('p1', 100, ['electronics']);
 
       const callArgs = mockApiFetch.mock.calls[0][0] as string;
-      expect(callArgs).toContain('categoryId=electronics');
+      expect(callArgs).toContain('categoryIds=electronics');
     });
 
     it('should return null when no discount exists', async () => {

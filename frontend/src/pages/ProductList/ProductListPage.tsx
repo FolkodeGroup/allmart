@@ -32,6 +32,7 @@ export function ProductListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeDiscounts, setActiveDiscounts] = useState<Set<string>>(new Set());
+  const rootCategories = categories.filter((cat) => !cat.parentId);
 
   /* Cargar categorías una sola vez */
   useEffect(() => {
@@ -102,20 +103,43 @@ export function ProductListPage() {
         >
           <div className={styles.filterGroup}>
             <h3 className={styles.filterTitle}>Categorías</h3>
-            {categories.map((cat) => (
-              <label className={styles.filterOption} key={cat.id}>
-                <input
-                  type="checkbox"
-                  className={styles.filterCheckbox}
-                  checked={selectedCategory === cat.slug}
-                  onChange={() => toggleCategory(cat.slug)}
-                />
-                <span className={styles.filterLabel}>{cat.name}</span>
-                {cat.itemCount !== undefined && (
-                  <span className={styles.filterCount}>{cat.itemCount}</span>
-                )}
-              </label>
-            ))}
+            {rootCategories.map((cat) => {
+              const children = categories.filter((child) => child.parentId === cat.id);
+              return (
+                <div key={cat.id} className={styles.categoryGroup}>
+                  <label className={styles.filterOption}>
+                    <input
+                      type="checkbox"
+                      className={styles.filterCheckbox}
+                      checked={selectedCategory === cat.slug}
+                      onChange={() => toggleCategory(cat.slug)}
+                    />
+                    <span className={styles.filterLabel}>{cat.name}</span>
+                    {cat.itemCount !== undefined && (
+                      <span className={styles.filterCount}>{cat.itemCount}</span>
+                    )}
+                  </label>
+                  {children.length > 0 && (
+                    <div className={styles.subCategoryList}>
+                      {children.map((child) => (
+                        <label className={`${styles.filterOption} ${styles.filterOptionChild}`} key={child.id}>
+                          <input
+                            type="checkbox"
+                            className={styles.filterCheckbox}
+                            checked={selectedCategory === child.slug}
+                            onChange={() => toggleCategory(child.slug)}
+                          />
+                          <span className={styles.filterLabel}>{child.name}</span>
+                          {child.itemCount !== undefined && (
+                            <span className={styles.filterCount}>{child.itemCount}</span>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <div className={styles.filterGroup}>

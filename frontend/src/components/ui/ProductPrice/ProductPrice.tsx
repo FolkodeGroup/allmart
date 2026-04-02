@@ -24,7 +24,7 @@ export const ProductPrice: React.FC<ProductPriceProps> = ({
   className = "",
   size = "md",
 }) => {
-  const hasDiscount = discount && discount > 0 && originalPrice && originalPrice > price;
+  const hasDiscount = Boolean(discount && discount > 0 && originalPrice && originalPrice > price);
   const percent = hasDiscount ? Math.round(((originalPrice! - price) / originalPrice!) * 100) : 0;
 
   return (

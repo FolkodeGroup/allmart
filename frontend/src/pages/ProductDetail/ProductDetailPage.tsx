@@ -63,7 +63,9 @@ export function ProductDetailPage() {
         setLoading(false);
 
         // Cargar relacionados luego del render inicial.
-        const categorySlug = categories.find((c) => c.id === apiProduct.categoryId)?.slug;
+        const primaryCategoryId = apiProduct.categoryId || apiProduct.categoryIds?.[0];
+        const categorySlug = categories.find((c) => c.id === primaryCategoryId)?.slug;
+        if (!categorySlug) return;
         try {
           const { data } = await fetchPublicProducts({ category: categorySlug, limit: 5 });
           if (cancelled) return;
@@ -99,10 +101,15 @@ export function ProductDetailPage() {
     
     const loadDiscount = async () => {
       try {
+        const categoryIds = Array.isArray(product.categoryIds)
+          ? product.categoryIds
+          : product.categoryId
+            ? [product.categoryId]
+            : [];
         const discount = await publicCollectionsService.getProductDiscount(
           product.id,
           product.price,
-          product.categoryId
+          categoryIds
         );
         setDynamicDiscount(discount);
       } catch (error) {
@@ -112,10 +119,10 @@ export function ProductDetailPage() {
     };
 
     loadDiscount();
-  }, [product?.id, product?.price, product?.categoryId]);
+  }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
 
   const variantGroups: VariantGroup[] = product ? (product as any).variants ?? [] : [];
-  const hasDiscount = product ? product.discount && product.discount > 0 : false;
+  const hasDiscount = product ? Boolean(product.discount && product.discount > 0) : false;
   const isNew = product ? product.tags.includes('nuevo') : false;
 
   const handleAddToCart = () => {

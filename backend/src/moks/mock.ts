@@ -1,7 +1,38 @@
 // backend/src/mocks/mock.ts
 // Mock de datos iniciales para seed.ts
 
-export const categories = [
+type MockCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+  itemCount: number;
+  parentSlug?: string | null;
+};
+
+type MockProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  shortDescription?: string;
+  price: number;
+  originalPrice?: number;
+  discount?: number;
+  images: string[];
+  category?: MockCategory;
+  categorySlugs?: string[];
+  categories?: Array<{ slug: string }>;
+  tags?: string[];
+  rating?: number;
+  reviewCount?: number;
+  inStock?: boolean;
+  sku?: string;
+  features?: string[];
+};
+
+export const categories: MockCategory[] = [
   {
     id: 'cat-1',
     name: 'Todo para la cocina',
@@ -52,7 +83,7 @@ export const categories = [
   },
 ];
 
-export const products = [
+export const products: MockProduct[] = [
   {
     id: 'prod-1',
     name: 'Batería de Cocina Granito 5 Piezas',

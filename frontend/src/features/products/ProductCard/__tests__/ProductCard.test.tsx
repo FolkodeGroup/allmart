@@ -6,7 +6,7 @@ import type { Product } from '../../../../types';
 import * as publicCollectionsService from '../../../../services/publicCollectionsService';
 
 // Mock publicCollectionsService
-vi.mock('../../../services/publicCollectionsService', () => ({
+vi.mock('../../../../services/publicCollectionsService', () => ({
   publicCollectionsService: {
     getProductDiscount: vi.fn(),
   },
@@ -37,6 +37,7 @@ const mockProduct: Product = {
     isVisible: true,
   },
   categoryId: 'cat1',
+  categoryIds: ['cat1'],
   sku: 'SKU001',
   tags: [],
   images: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
@@ -87,15 +88,17 @@ describe('ProductCard', () => {
 
     it('should have link to product detail page', () => {
       renderProductCard();
-      const link = screen.getByRole('link', { name: /Test Product/i });
-      expect(link).toHaveAttribute('href', '/producto/test-product');
+      const links = screen.getAllByRole('link', { name: /Test Product/i });
+      links.forEach((link) => {
+        expect(link).toHaveAttribute('href', '/producto/test-product');
+      });
     });
   });
 
   describe('Static Discount Badge', () => {
     it('should display discount badge when product has discount', () => {
       renderProductCard();
-      expect(screen.getByText('-15%')).toBeInTheDocument();
+      expect(screen.getAllByText('-15%').length).toBeGreaterThan(0);
     });
 
     it('should not display discount badge when product has no discount', () => {
@@ -115,13 +118,13 @@ describe('ProductCard', () => {
     it('should display current price', () => {
       renderProductCard();
       // Price formatting: $100
-      expect(screen.getByText(/\$100/)).toBeInTheDocument();
+      expect(screen.getByText(/\$\s*100/)).toBeInTheDocument();
     });
 
     it('should display original price when discount exists', () => {
       renderProductCard();
       // Original price should be struck through
-      expect(screen.getByText(/\$120/)).toBeInTheDocument();
+      expect(screen.getByText(/\$\s*120/)).toBeInTheDocument();
     });
 
     it('should update price display when dynamic discount is loaded', async () => {
@@ -142,7 +145,7 @@ describe('ProductCard', () => {
         expect(publicCollectionsService.publicCollectionsService.getProductDiscount).toHaveBeenCalledWith(
           'p1',
           100,
-          'cat1'
+          ['cat1']
         );
       });
     });
@@ -158,7 +161,7 @@ describe('ProductCard', () => {
         expect(publicCollectionsService.publicCollectionsService.getProductDiscount).toHaveBeenCalledWith(
           'p1',
           100,
-          'cat1'
+          ['cat1']
         );
       });
     });
@@ -175,7 +178,7 @@ describe('ProductCard', () => {
       });
 
       // Should not crash and should fall back to static discount
-      expect(screen.getByText('-15%')).toBeInTheDocument();
+      expect(screen.getAllByText('-15%').length).toBeGreaterThan(0);
     });
 
     it('should use dynamic discount when available', async () => {
@@ -250,10 +253,10 @@ describe('ProductCard', () => {
       const button = screen.getByLabelText(/Agregar .* a favoritos/i);
 
       fireEvent.click(button);
-      expect(button).toHaveClass('activo');
+      expect(button.className).toMatch(/activo/);
 
       fireEvent.click(button);
-      expect(button).not.toHaveClass('activo');
+      expect(button.className).not.toMatch(/activo/);
     });
 
     it('should persist favoritos state to localStorage', () => {
@@ -272,19 +275,21 @@ describe('ProductCard', () => {
       renderProductCard();
       const button = screen.getByLabelText(/Agregar .* a favoritos/i);
 
-      expect(button).toHaveClass('activo');
+      expect(button.className).toMatch(/activo/);
     });
   });
 
   describe('Variant Display', () => {
     it('should render as default variant by default', () => {
-      const { container } = renderProductCard();
-      expect(container.querySelector('.card:not(.featuredCard)')).toBeInTheDocument();
+      renderProductCard();
+      const article = screen.getByRole('article', { name: 'Test Product' });
+      expect(article.className).not.toMatch(/featuredCard/);
     });
 
     it('should render as featured variant when specified', () => {
-      const { container } = renderProductCard(mockProduct, 'featured');
-      expect(container.querySelector('.featuredCard')).toBeInTheDocument();
+      renderProductCard(mockProduct, 'featured');
+      const article = screen.getByRole('article', { name: 'Test Product' });
+      expect(article.className).toMatch(/featuredCard/);
     });
   });
 
