@@ -325,7 +325,7 @@ export function AdminLayout() {
           )}
         </div>
       </aside>
-      // ... en el renderizado del main
+    
       <main className={styles.main}>
         <AdminHeader />
         {/* Contenedor relativo para evitar saltos */}
