@@ -10,6 +10,9 @@ import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { StatusChipSelect } from './components/StatusChipSelect';
+import { OrdersFiltersBar } from './components/OrdersFiltersBar';
+import { useOrdersFilters } from './hooks/useOrdersFilters';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -129,6 +132,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const [confirmPaid, setConfirmPaid] = useState(false);
   const [statusNote, setStatusNote] = useState('');
   const [pendingStatus, setPendingStatus] = useState<OrderStatus>(order.status);
+
 
   const paymentStatus: PaymentStatus = order.paymentStatus ?? 'no-abonado';
   const isAbonado = paymentStatus === 'abonado';
@@ -536,10 +540,7 @@ export function AdminOrders() {
   const deleteOrder = (..._args: any[]) => Promise.resolve();
   const markAsPaid = (..._args: any[]) => Promise.resolve();
 
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<OrderStatus | ''>('');
-  const [filterDateFrom, setFilterDateFrom] = useState('');
-  const [filterDateTo, setFilterDateTo] = useState('');
+  const { filters, setFilters, filtered, hasActiveFilters, reset } = useOrdersFilters(orders)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   // Estado para selección múltiple
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -603,31 +604,6 @@ export function AdminOrders() {
   // Paginación
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Resetear página al cambiar filtros
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [search, filterStatus, filterDateFrom, filterDateTo]);
-
-  const filtered = useMemo(() => {
-    return orders.filter(o => {
-      const q = search.toLowerCase();
-      const matchSearch =
-        !q ||
-        o.id.toLowerCase().includes(q) ||
-        o.customer.firstName.toLowerCase().includes(q) ||
-        o.customer.lastName.toLowerCase().includes(q) ||
-        o.customer.email.toLowerCase().includes(q);
-
-      const matchStatus = !filterStatus || o.status === filterStatus;
-
-      const date = new Date(o.createdAt).getTime();
-      const matchFrom = !filterDateFrom || date >= new Date(filterDateFrom).getTime();
-      const matchTo = !filterDateTo || date <= new Date(filterDateTo + 'T23:59:59').getTime();
-
-      return matchSearch && matchStatus && matchFrom && matchTo;
-    });
-  }, [orders, search, filterStatus, filterDateFrom, filterDateTo]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
 
@@ -824,59 +800,13 @@ export function AdminOrders() {
       </div>
 
       {/* Filtros */}
-      <div className={styles.filters}>
-        <div className={styles.searchWrap}>
-          <span className={styles.searchIcon}>🔍</span>
-          <input
-            className={styles.searchInput}
-            type="text"
-            placeholder="Buscar por cliente, email o N° de pedido..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
-        <select
-          className={styles.filterSelect}
-          value={filterStatus}
-          onChange={e => setFilterStatus(e.target.value as OrderStatus | '')}
-          disabled={isLoading}
-        >
-          <option value="">Todos los estados</option>
-          {STATUS_OPTIONS.map(s => (
-            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-          ))}
-        </select>
-        <div className={styles.dateFilters}>
-          <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
-          <input
-            className={styles.dateInput}
-            id="order-date-from"
-            type="date"
-            value={filterDateFrom}
-            onChange={e => setFilterDateFrom(e.target.value)}
-            disabled={isLoading}
-          />
-          <label className={styles.dateLabel} htmlFor="order-date-to">Hasta</label>
-          <input
-            className={styles.dateInput}
-            id="order-date-to"
-            type="date"
-            value={filterDateTo}
-            onChange={e => setFilterDateTo(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
-        {!isLoading && (search || filterStatus || filterDateFrom || filterDateTo) && (
-          <button
-            className={styles.clearBtn}
-            type="button"
-            onClick={() => { setSearch(''); setFilterStatus(''); setFilterDateFrom(''); setFilterDateTo(''); }}
-          >
-            ✕ Limpiar
-          </button>
-        )}
-      </div>
+      <OrdersFiltersBar
+        filters={filters}
+        onChange={setFilters}
+        onReset={reset}
+        hasActiveFilters={hasActiveFilters}
+        disabled={isLoading}
+      />
 
       {!isLoading && (
         <p className={styles.resultsCount}>
@@ -930,18 +860,18 @@ export function AdminOrders() {
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
-          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
-            <table className={styles.table} style={{minWidth: 900}}>
+          <div className={styles.tableWrapper} style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+            <table className={styles.table} style={{ minWidth: 900 }}>
               <thead>
                 <tr>
-                  <th style={{width: 48}}></th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
-                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
-                  <th style={{width: 80}}></th>
+                  <th style={{ width: 48 }}></th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>N° Pedido</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Fecha</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Cliente</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Productos</th>
+                  <th style={{ textAlign: 'right', padding: '18px 20px' }}>Total</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Estado</th>
+                  <th style={{ width: 80 }}></th>
                 </tr>
               </thead>
               <tbody>
@@ -965,18 +895,18 @@ export function AdminOrders() {
       ) : (
         <>
           {/* Tabla — tablet y desktop */}
-          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
-            <table className={styles.table} style={{minWidth: 900}}>
+          <div className={styles.tableWrapper} style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+            <table className={styles.table} style={{ minWidth: 900 }}>
               <thead>
                 <tr>
-                  <th style={{width: 48}}></th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
-                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
-                  <th style={{width: 80}}></th>
+                  <th style={{ width: 48 }}></th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>N° Pedido</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Fecha</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Cliente</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Productos</th>
+                  <th style={{ textAlign: 'right', padding: '18px 20px' }}>Total</th>
+                  <th style={{ textAlign: 'left', padding: '18px 20px' }}>Estado</th>
+                  <th style={{ width: 80 }}></th>
                 </tr>
               </thead>
               <tbody>
@@ -998,7 +928,7 @@ export function AdminOrders() {
                     onFocus={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
                     onBlur={e => (e.currentTarget.style.background = '#fff')}
                   >
-                    <td style={{padding: '16px 12px'}}>
+                    <td style={{ padding: '16px 12px' }}>
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(order.id)}
@@ -1007,21 +937,21 @@ export function AdminOrders() {
                         onClick={e => e.stopPropagation()}
                       />
                     </td>
-                    <td style={{padding: '16px 20px', fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5}}>
-                      #{order.id.slice(0,8).toUpperCase()}
+                    <td style={{ padding: '16px 20px', fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5 }}>
+                      #{order.id.slice(0, 8).toUpperCase()}
                     </td>
-                    <td style={{padding: '16px 20px', color: '#64748b', fontSize: 15}}>{formatDate(order.createdAt)}</td>
-                    <td style={{padding: '16px 20px'}}>
-                      <div style={{fontWeight: 600, fontSize: 16, color: '#111827'}}>{order.customer.firstName} {order.customer.lastName}</div>
-                      <div style={{color: '#64748b', fontSize: 14}}>{order.customer.email}</div>
+                    <td style={{ padding: '16px 20px', color: '#64748b', fontSize: 15 }}>{formatDate(order.createdAt)}</td>
+                    <td style={{ padding: '16px 20px' }}>
+                      <div style={{ fontWeight: 600, fontSize: 16, color: '#111827' }}>{order.customer.firstName} {order.customer.lastName}</div>
+                      <div style={{ color: '#64748b', fontSize: 14 }}>{order.customer.email}</div>
                     </td>
-                    <td style={{padding: '16px 20px', color: '#334155', fontSize: 15}}>
+                    <td style={{ padding: '16px 20px', color: '#334155', fontSize: 15 }}>
                       {order.items.reduce((s, i) => s + i.quantity, 0)} ítem{order.items.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
                     </td>
-                    <td style={{padding: '16px 20px', textAlign: 'right', fontWeight: 700, fontSize: 16, color: '#059669'}}>
+                    <td style={{ padding: '16px 20px', textAlign: 'right', fontWeight: 700, fontSize: 16, color: '#059669' }}>
                       {formatPrice(order.total)}
                     </td>
-                    <td style={{padding: '16px 20px'}}>
+                    <td style={{ padding: '16px 20px' }}>
                       <span style={{
                         display: 'inline-block',
                         borderRadius: 8,
@@ -1030,20 +960,20 @@ export function AdminOrders() {
                         fontSize: 14,
                         background:
                           order.status === 'entregado' ? 'rgba(34,197,94,0.13)' :
-                          order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
-                          order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
-                          order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
-                          order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
-                          order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
-                          '#f3f4f6',
+                            order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
+                              order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
+                                order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
+                                  order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
+                                    order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
+                                      '#f3f4f6',
                         color:
                           order.status === 'entregado' ? '#22c55e' :
-                          order.status === 'pendiente' ? '#d97706' :
-                          order.status === 'cancelado' ? '#ef4444' :
-                          order.status === 'enviado' ? '#10b981' :
-                          order.status === 'confirmado' ? '#2563eb' :
-                          order.status === 'en-preparacion' ? '#8b5cf6' :
-                          '#6b7280',
+                            order.status === 'pendiente' ? '#d97706' :
+                              order.status === 'cancelado' ? '#ef4444' :
+                                order.status === 'enviado' ? '#10b981' :
+                                  order.status === 'confirmado' ? '#2563eb' :
+                                    order.status === 'en-preparacion' ? '#8b5cf6' :
+                                      '#6b7280',
                         border: 'none',
                         marginRight: order.paymentStatus === 'abonado' ? 8 : 0,
                         minWidth: 90,
@@ -1066,13 +996,13 @@ export function AdminOrders() {
                         </span>
                       )}
                     </td>
-                    <td style={{padding: '16px 8px', textAlign: 'center'}}>
+                    <td style={{ padding: '16px 8px', textAlign: 'center' }}>
                       <button
                         className={styles.detailBtn}
                         type="button"
                         onClick={e => { e.stopPropagation(); setSelectedOrder(order); }}
                         title="Ver detalle"
-                        style={{background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s'}}
+                        style={{ background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s' }}
                         onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
                         onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
                         onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
@@ -1112,7 +1042,7 @@ export function AdminOrders() {
                       style={{ marginRight: 8, minWidth: 24, minHeight: 24 }}
                     />
                     <span className={styles.mobileCardId}>
-                      #{order.id.slice(0,8).toUpperCase()}
+                      #{order.id.slice(0, 8).toUpperCase()}
                     </span>
                     <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
                   </div>
@@ -1134,118 +1064,118 @@ export function AdminOrders() {
               );
             })}
           </div>
-                {/* Acciones masivas */}
-                {selectedIds.length > 0 && (
-                  <div
-                    style={{
-                      position: 'fixed',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      zIndex: 50,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      pointerEvents: 'none',
-                      padding: '0 0 8px 0',
-                    }}
-                  >
-                    <div
-                      style={{
-                        background: '#fff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 12,
-                        boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                        padding: 12,
-                        display: 'flex',
-                        gap: 8,
-                        alignItems: 'center',
-                        pointerEvents: 'auto',
-                        maxWidth: 480,
-                        width: '100%',
-                        margin: '0 8px',
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <span style={{ fontWeight: 500, fontSize: 15, flex: '1 1 100%' }}>{selectedIds.length} seleccionados</span>
-                      <button
-                        type="button"
-                        disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
-                        onClick={() => handleBulkAction('confirm')}
-                        style={{
-                          padding: '8px 0',
-                          borderRadius: 8,
-                          border: 'none',
-                          background: '#2563eb',
-                          color: '#fff',
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          flex: '1 1 120px',
-                          fontSize: 15,
-                        }}
-                      >Confirmar</button>
-                      <button
-                        type="button"
-                        disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
-                        onClick={() => handleBulkAction('ship')}
-                        style={{
-                          padding: '8px 0',
-                          borderRadius: 8,
-                          border: 'none',
-                          background: '#10b981',
-                          color: '#fff',
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          flex: '1 1 120px',
-                          fontSize: 15,
-                        }}
-                      >Enviado</button>
-                      <button
-                        type="button"
-                        disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
-                        onClick={() => handleBulkAction('cancel')}
-                        style={{
-                          padding: '8px 0',
-                          borderRadius: 8,
-                          border: 'none',
-                          background: '#ef4444',
-                          color: '#fff',
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          flex: '1 1 120px',
-                          fontSize: 15,
-                        }}
-                      >Cancelar</button>
-                      <button
-                        type="button"
-                        onClick={clearSelection}
-                        style={{
-                          marginLeft: 0,
-                          background: 'none',
-                          border: 'none',
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          flex: '1 1 100%',
-                          fontSize: 14,
-                          padding: '6px 0 0 0',
-                        }}
-                      >Limpiar</button>
-                    </div>
-                  </div>
-                )}
+          {/* Acciones masivas */}
+          {selectedIds.length > 0 && (
+            <div
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 50,
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'none',
+                padding: '0 0 8px 0',
+              }}
+            >
+              <div
+                style={{
+                  background: '#fff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 12,
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
+                  padding: 12,
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'center',
+                  pointerEvents: 'auto',
+                  maxWidth: 480,
+                  width: '100%',
+                  margin: '0 8px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span style={{ fontWeight: 500, fontSize: 15, flex: '1 1 100%' }}>{selectedIds.length} seleccionados</span>
+                <button
+                  type="button"
+                  disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
+                  onClick={() => handleBulkAction('confirm')}
+                  style={{
+                    padding: '8px 0',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: '#2563eb',
+                    color: '#fff',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    flex: '1 1 120px',
+                    fontSize: 15,
+                  }}
+                >Confirmar</button>
+                <button
+                  type="button"
+                  disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
+                  onClick={() => handleBulkAction('ship')}
+                  style={{
+                    padding: '8px 0',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: '#10b981',
+                    color: '#fff',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    flex: '1 1 120px',
+                    fontSize: 15,
+                  }}
+                >Enviado</button>
+                <button
+                  type="button"
+                  disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
+                  onClick={() => handleBulkAction('cancel')}
+                  style={{
+                    padding: '8px 0',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: '#ef4444',
+                    color: '#fff',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    flex: '1 1 120px',
+                    fontSize: 15,
+                  }}
+                >Cancelar</button>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  style={{
+                    marginLeft: 0,
+                    background: 'none',
+                    border: 'none',
+                    color: '#6b7280',
+                    cursor: 'pointer',
+                    flex: '1 1 100%',
+                    fontSize: 14,
+                    padding: '6px 0 0 0',
+                  }}
+                >Limpiar</button>
+              </div>
+            </div>
+          )}
 
-                {/* Modal de confirmación de acción masiva */}
-                {bulkModalOpen && bulkAction && (
-                  <ModalConfirm
-                    open={bulkModalOpen}
-                    title={`Acción masiva: ${getBulkActionLabel(bulkAction)}`}
-                    message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
-                    confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
-                    cancelText={'Cancelar'}
-                    onConfirm={bulkLoading ? () => {} : executeBulkAction}
-                    onCancel={bulkLoading ? () => {} : () => setBulkModalOpen(false)}
-                  />
-                )}
-          <div style={{ height: '100px'}} aria-hidden='true'/>
+          {/* Modal de confirmación de acción masiva */}
+          {bulkModalOpen && bulkAction && (
+            <ModalConfirm
+              open={bulkModalOpen}
+              title={`Acción masiva: ${getBulkActionLabel(bulkAction)}`}
+              message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
+              confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
+              cancelText={'Cancelar'}
+              onConfirm={bulkLoading ? () => { } : executeBulkAction}
+              onCancel={bulkLoading ? () => { } : () => setBulkModalOpen(false)}
+            />
+          )}
+          <div style={{ height: '100px' }} aria-hidden='true' />
         </>
       )}
 
