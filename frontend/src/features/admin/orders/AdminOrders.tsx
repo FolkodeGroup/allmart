@@ -418,8 +418,8 @@ export function AdminOrders() {
   const { token } = useAdminAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  // const [isLoadingMore, setIsLoadingMore] = useState(false); // No se usa
+  // const [hasMore, setHasMore] = useState(true); // No se usa
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
@@ -445,7 +445,7 @@ export function AdminOrders() {
   useEffect(() => {
     setPage(1);
     setOrders([]);
-    setHasMore(true);
+    // setHasMore(true);
   }, [debouncedSearch, filterStatus, filterDateFrom, filterDateTo]);
 
   // Fetch paginado
@@ -456,7 +456,7 @@ export function AdminOrders() {
     const controller = new AbortController();
     abortRef.current = controller;
     if (reset) setIsLoading(true);
-    else setIsLoadingMore(true);
+    else setIsLoading(true);
     try {
       const params: any = {
         page,
@@ -468,14 +468,14 @@ export function AdminOrders() {
       if (filterDateTo) params.to = filterDateTo;
       // API puede requerir otros nombres, ajustar si es necesario
       const res = await fetchAdminOrders(token, params);
-      setHasMore(res.data.length === PAGE_SIZE);
+      // setHasMore(res.data.length === PAGE_SIZE);
       const normalized = res.data.map(mapApiOrderToOrder);
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
     } catch (e: any) {
       if (e.name !== 'AbortError') toast.error('Error al cargar pedidos');
     } finally {
       setIsLoading(false);
-      setIsLoadingMore(false);
+      setIsLoading(false);
     }
   }, [token, page, PAGE_SIZE, debouncedSearch, filterStatus, filterDateFrom, filterDateTo]);
 
@@ -486,9 +486,9 @@ export function AdminOrders() {
   }, [debouncedSearch, filterStatus, filterDateFrom, filterDateTo, token]);
 
   // Cargar más
-  const handleLoadMore = useCallback(() => {
-    setPage(p => p + 1);
-  }, []);
+  // const handleLoadMore = useCallback(() => {
+  //   setPage(p => p + 1);
+  // }, []); // No se usa
 
   // Cargar más cuando cambia page
   useEffect(() => {
@@ -782,35 +782,35 @@ export function AdminOrders() {
 
       {!isLoading && (
         <p className={styles.resultsCount} id="orders-count" aria-live="polite">
-          {filtered.length} pedido{filtered.length !== 1 ? 's' : ''}
-          {filtered.length !== orders.length ? ` (de ${orders.length})` : ''}
+          {orders.length} pedido{orders.length !== 1 ? 's' : ''}
         </p>
       )}
 
 
 
       {/* Controles de paginación */}
+      {/* Paginación simple basada en page y PAGE_SIZE */}
       <nav className={styles.paginationWrap} aria-label="Paginación de pedidos">
         <button
           className={styles.paginationBtn}
           type="button"
-          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-          disabled={currentPage === 1}
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+          disabled={page === 1}
         >
           ← Anterior
         </button>
         <div className={styles.paginationPages}>
-          {Array.from({ length: totalPages }).map((_, i) => (
+          {Array.from({ length: Math.ceil(orders.length / PAGE_SIZE) || 1 }).map((_, i) => (
             <button
               key={i + 1}
               className={
-                currentPage === i + 1
+                page === i + 1
                   ? `${styles.paginationPage} ${styles.paginationPageActive}`
                   : styles.paginationPage
               }
               type="button"
-              onClick={() => setCurrentPage(i + 1)}
-              aria-current={currentPage === i + 1 ? 'page' : undefined}
+              onClick={() => setPage(i + 1)}
+              aria-current={page === i + 1 ? 'page' : undefined}
             >
               {i + 1}
             </button>
@@ -819,8 +819,8 @@ export function AdminOrders() {
         <button
           className={styles.paginationBtn}
           type="button"
-          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-          disabled={currentPage === totalPages}
+          onClick={() => setPage(p => Math.min(Math.ceil(orders.length / PAGE_SIZE) || 1, p + 1))}
+          disabled={page === (Math.ceil(orders.length / PAGE_SIZE) || 1)}
         >
           Siguiente →
         </button>
