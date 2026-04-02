@@ -1228,35 +1228,98 @@ export function AdminOrders() {
 
                 {/* Acciones masivas */}
                 {selectedIds.length > 0 && (
-                  <div style={{
-                    position: 'fixed', bottom: 32, left: 0, right: 0, zIndex: 50, display: 'flex', justifyContent: 'center', pointerEvents: 'none'
-                  }}>
-                    <div style={{
-                      background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: 16, display: 'flex', gap: 16, alignItems: 'center', pointerEvents: 'auto'
-                    }}>
-                      <span style={{ fontWeight: 500 }}>{selectedIds.length} seleccionados</span>
+                  <div
+                    style={{
+                      position: 'fixed',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      zIndex: 50,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      pointerEvents: 'none',
+                      padding: '0 0 8px 0',
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
+                        padding: 12,
+                        display: 'flex',
+                        gap: 8,
+                        alignItems: 'center',
+                        pointerEvents: 'auto',
+                        maxWidth: 480,
+                        width: '100%',
+                        margin: '0 8px',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <span style={{ fontWeight: 500, fontSize: 15, flex: '1 1 100%' }}>{selectedIds.length} seleccionados</span>
                       <button
                         type="button"
                         disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
                         onClick={() => handleBulkAction('confirm')}
-                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#2563eb', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
+                        style={{
+                          padding: '8px 0',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: '#2563eb',
+                          color: '#fff',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          flex: '1 1 120px',
+                          fontSize: 15,
+                        }}
                       >Confirmar</button>
                       <button
                         type="button"
                         disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
                         onClick={() => handleBulkAction('ship')}
-                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#10b981', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
-                      >Marcar como Enviado</button>
+                        style={{
+                          padding: '8px 0',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: '#10b981',
+                          color: '#fff',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          flex: '1 1 120px',
+                          fontSize: 15,
+                        }}
+                      >Enviado</button>
                       <button
                         type="button"
                         disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
                         onClick={() => handleBulkAction('cancel')}
-                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
+                        style={{
+                          padding: '8px 0',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: '#ef4444',
+                          color: '#fff',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          flex: '1 1 120px',
+                          fontSize: 15,
+                        }}
                       >Cancelar</button>
                       <button
                         type="button"
                         onClick={clearSelection}
-                        style={{ marginLeft: 8, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}
+                        style={{
+                          marginLeft: 0,
+                          background: 'none',
+                          border: 'none',
+                          color: '#6b7280',
+                          cursor: 'pointer',
+                          flex: '1 1 100%',
+                          fontSize: 14,
+                          padding: '6px 0 0 0',
+                        }}
                       >Limpiar</button>
                     </div>
                   </div>
