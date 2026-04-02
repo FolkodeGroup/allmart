@@ -72,14 +72,6 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
         role="button"
         tabIndex={0}
         aria-label={`Ver detalles de la categoría ${category.name}`}
-        style={{
-          background: 'none',
-          border: 'none',
-          padding: 0,
-          cursor: 'pointer',
-          textAlign: 'left',
-          outline: 'none'
-        }}
       >
         {/* Imagen */}
         {category.image ? (
