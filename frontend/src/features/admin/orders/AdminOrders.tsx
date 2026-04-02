@@ -1100,117 +1100,134 @@ export function AdminOrders() {
                   role="button"
                   tabIndex={0}
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
-                  style={{boxShadow: '0 2px 8px rgba(0,0,0,0.04)', borderRadius: 14, marginBottom: 16, background: '#fff'}}
+                  style={{ marginBottom: 16, background: '#fff' }}
                 >
-                  <div className={styles.mobileCardTop} style={{display: 'flex', alignItems: 'center', gap: 8, padding: '14px 16px 0 16px'}}>
+                  <div className={styles.mobileCardTop}>
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(order.id)}
                       onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
                       aria-label={`Seleccionar pedido ${order.id}`}
                       onClick={e => e.stopPropagation()}
-                      style={{ marginRight: 8 }}
+                      style={{ marginRight: 8, minWidth: 24, minHeight: 24 }}
                     />
-                    <span style={{fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5}}>
+                    <span className={styles.mobileCardId}>
                       #{order.id.slice(0,8).toUpperCase()}
                     </span>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', marginLeft: 'auto' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        borderRadius: 8,
-                        padding: '4px 14px',
-                        fontWeight: 600,
-                        fontSize: 14,
-                        background:
-                          order.status === 'entregado' ? 'rgba(34,197,94,0.13)' :
-                          order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
-                          order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
-                          order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
-                          order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
-                          order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
-                          '#f3f4f6',
-                        color:
-                          order.status === 'entregado' ? '#22c55e' :
-                          order.status === 'pendiente' ? '#d97706' :
-                          order.status === 'cancelado' ? '#ef4444' :
-                          order.status === 'enviado' ? '#10b981' :
-                          order.status === 'confirmado' ? '#2563eb' :
-                          order.status === 'en-preparacion' ? '#8b5cf6' :
-                          '#6b7280',
-                        border: 'none',
-                        minWidth: 90,
-                        textAlign: 'center',
-                      }}>
-                        {STATUS_LABELS[order.status]}
-                      </span>
-                      {order.paymentStatus === 'abonado' && (
-                        <span style={{
-                          display: 'inline-block',
-                          borderRadius: 8,
-                          padding: '4px 12px',
-                          fontWeight: 600,
-                          fontSize: 13,
-                          background: 'rgba(16,185,129,0.10)',
-                          color: '#128C48',
-                          marginLeft: 2,
-                        }}>
-                          ✓ Abonado
-                        </span>
-                      )}
-                    </div>
+                    <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
                   </div>
-                  <div className={styles.mobileCardMid} style={{padding: '0 16px'}}>
+                  <div className={styles.mobileCardMid}>
                     <div className={styles.mobileCardCustomer}>
-                      <div className={styles.mobileCardAvatar} style={{background: '#f3f4f6', color: '#2563eb', fontWeight: 700, fontSize: 16}}>{initials}</div>
-                      <div>
-                        <div className={styles.mobileCardName} style={{fontWeight: 600, fontSize: 16, color: '#111827'}}>
-                          {order.customer.firstName} {order.customer.lastName}
-                        </div>
-                        <div className={styles.mobileCardEmail} style={{color: '#64748b', fontSize: 14}}>{order.customer.email}</div>
+                      <div className={styles.mobileCardAvatar}>{initials}</div>
+                      <div style={{ minWidth: 0 }}>
+                        <div className={styles.mobileCardName}>{order.customer.firstName} {order.customer.lastName}</div>
+                        <div className={styles.mobileCardEmail}>{order.customer.email}</div>
                       </div>
                     </div>
                   </div>
-                  <div className={styles.mobileCardBottom} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px 14px 16px'}}>
-                    <span className={styles.mobileCardDate} style={{color: '#64748b', fontSize: 14}}>{formatDate(order.createdAt)}</span>
-                    <span className={styles.mobileCardItems} style={{color: '#334155', fontSize: 15}}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
-                    <span className={styles.mobileCardTotal} style={{fontWeight: 700, fontSize: 16, color: '#059669'}}>{formatPrice(order.total)}</span>
+                  <div className={styles.mobileCardBottom}>
+                    <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
+                    <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
+                    <span className={styles.statusBadge + ' ' + statusClass(order.status)}>{STATUS_LABELS[order.status]}</span>
                   </div>
                 </div>
               );
             })}
           </div>
-
                 {/* Acciones masivas */}
                 {selectedIds.length > 0 && (
-                  <div style={{
-                    position: 'fixed', bottom: 32, left: 0, right: 0, zIndex: 50, display: 'flex', justifyContent: 'center', pointerEvents: 'none'
-                  }}>
-                    <div style={{
-                      background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: 16, display: 'flex', gap: 16, alignItems: 'center', pointerEvents: 'auto'
-                    }}>
-                      <span style={{ fontWeight: 500 }}>{selectedIds.length} seleccionados</span>
+                  <div
+                    style={{
+                      position: 'fixed',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      zIndex: 50,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      pointerEvents: 'none',
+                      padding: '0 0 8px 0',
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
+                        padding: 12,
+                        display: 'flex',
+                        gap: 8,
+                        alignItems: 'center',
+                        pointerEvents: 'auto',
+                        maxWidth: 480,
+                        width: '100%',
+                        margin: '0 8px',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <span style={{ fontWeight: 500, fontSize: 15, flex: '1 1 100%' }}>{selectedIds.length} seleccionados</span>
                       <button
                         type="button"
                         disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
                         onClick={() => handleBulkAction('confirm')}
-                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#2563eb', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
+                        style={{
+                          padding: '8px 0',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: '#2563eb',
+                          color: '#fff',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          flex: '1 1 120px',
+                          fontSize: 15,
+                        }}
                       >Confirmar</button>
                       <button
                         type="button"
                         disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
                         onClick={() => handleBulkAction('ship')}
-                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#10b981', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
-                      >Marcar como Enviado</button>
+                        style={{
+                          padding: '8px 0',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: '#10b981',
+                          color: '#fff',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          flex: '1 1 120px',
+                          fontSize: 15,
+                        }}
+                      >Enviado</button>
                       <button
                         type="button"
                         disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
                         onClick={() => handleBulkAction('cancel')}
-                        style={{ padding: '6px 16px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontWeight: 500, cursor: 'pointer' }}
+                        style={{
+                          padding: '8px 0',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: '#ef4444',
+                          color: '#fff',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          flex: '1 1 120px',
+                          fontSize: 15,
+                        }}
                       >Cancelar</button>
                       <button
                         type="button"
                         onClick={clearSelection}
-                        style={{ marginLeft: 8, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}
+                        style={{
+                          marginLeft: 0,
+                          background: 'none',
+                          border: 'none',
+                          color: '#6b7280',
+                          cursor: 'pointer',
+                          flex: '1 1 100%',
+                          fontSize: 14,
+                          padding: '6px 0 0 0',
+                        }}
                       >Limpiar</button>
                     </div>
                   </div>
