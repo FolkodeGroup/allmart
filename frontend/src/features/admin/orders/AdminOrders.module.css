@@ -182,7 +182,7 @@
 /* ── Filtros ── */
 .filters {
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: 1fr auto auto auto auto;
   gap: var(--space-3);
   align-items: center;
   flex-wrap: wrap;
@@ -323,6 +323,26 @@
 
 .dateInput:focus {
   border-color: var(--color-primary);
+}
+
+.totalFilters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.totalInput {
+  width: 80px;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
 }
 
 .clearBtn {

@@ -7,6 +7,8 @@ export interface OrdersFiltersState {
     statuses: string[];
     dateFrom: string;
     dateTo: string;
+    totalMin: string;
+    totalMax: string;
 }
 
 const INITIAL: OrdersFiltersState = {
@@ -14,6 +16,8 @@ const INITIAL: OrdersFiltersState = {
     statuses: [],
     dateFrom: '',
     dateTo: '',
+    totalMin: '',
+    totalMax: '',
 };
 
 export function useOrdersFilters(orders: Order[]) {
@@ -36,8 +40,10 @@ export function useOrdersFilters(orders: Order[]) {
             const date = new Date(o.createdAt).getTime();
             const matchFrom = !filters.dateFrom || date >= new Date(filters.dateFrom).getTime();
             const matchTo = !filters.dateTo || date <= new Date(filters.dateTo + 'T23:59:59').getTime();
+            const matchTotalMin = !filters.totalMin || o.total >= parseFloat(filters.totalMin);
+            const matchTotalMax = !filters.totalMax || o.total <= parseFloat(filters.totalMax);
 
-            return matchSearch && matchStatus && matchFrom && matchTo;
+            return matchSearch && matchStatus && matchFrom && matchTo && matchTotalMin && matchTotalMax;
         });
     }, [orders, filters]);
 
@@ -45,7 +51,9 @@ export function useOrdersFilters(orders: Order[]) {
         !!filters.search ||
         filters.statuses.length > 0 ||
         !!filters.dateFrom ||
-        !!filters.dateTo;
+        !!filters.dateTo ||
+        !!filters.totalMin ||
+        !!filters.totalMax;
 
     const reset = () => setFilters(INITIAL);
 

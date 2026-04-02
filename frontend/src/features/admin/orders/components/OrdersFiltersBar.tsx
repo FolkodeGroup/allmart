@@ -70,6 +70,33 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                 />
             </div>
 
+            <div className={styles.totalFilters}>
+                <label className={styles.totalLabel} htmlFor="order-total-min">$ Mín</label>
+                <input
+                    className={styles.totalInput}
+                    id="order-total-min"
+                    type="number"
+                    min={0}
+                    step={1}
+                    placeholder="0"
+                    value={filters.totalMin}
+                    onChange={e => onChange({ ...filters, totalMin: e.target.value })}
+                    disabled={disabled}
+                />
+                <label className={styles.totalLabel} htmlFor="order-total-max">$ Máx</label>
+                <input
+                    className={styles.totalInput}
+                    id="order-total-max"
+                    type="number"
+                    min={0}
+                    step={1}
+                    placeholder="Sin límite"
+                    value={filters.totalMax}
+                    onChange={e => onChange({ ...filters, totalMax: e.target.value })}
+                    disabled={disabled}
+                />
+            </div>
+
             {hasActiveFilters && (
                 <button className={styles.clearBtn} type="button" onClick={onReset}>
                     ✕ Limpiar
