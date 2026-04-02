@@ -1,80 +1,22 @@
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-
-import toast from 'react-hot-toast';
+import { useState, useCallback } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
-import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
-import { logAdminActivity } from '../../../services/adminActivityLogService';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
-// ...existing code...
+import { STATUS_LABELS, PAYMENT_LABELS, paymentClass, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS, formatPrice } from './utils/ordersHelpers';
+import toast from 'react-hot-toast';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { OrdersHeader } from './components/OrdersHeader';
+import { OrdersFilters } from './components/OrdersFilters';
+import { OrdersTable } from './components/OrdersTable';
+import { OrderList } from './components/OrderList';
+import { useOrders } from './hooks/useOrders';
+import { useOrdersFilters } from './hooks/useOrdersFilters';
 
-/* ── Helpers ──────────────────────────────────────────────────── */
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  pendiente: 'Pendiente',
-  confirmado: 'Confirmado',
-  'en-preparacion': 'En preparación',
-  enviado: 'Enviado',
-  entregado: 'Entregado',
-  cancelado: 'Cancelado',
-};
-
-const PAYMENT_LABELS: Record<PaymentStatus, string> = {
-  'no-abonado': 'Sin abonar',
-  'abonado': 'Abonado',
-};
-
-function paymentClass(status: PaymentStatus): string {
-  return status === 'abonado' ? styles.paymentAbonado : styles.paymentNoAbonado;
-}
-
-const STATUS_OPTIONS: OrderStatus[] = [
-  'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
-];
-
-function statusClass(status: OrderStatus): string {
-  const map: Record<OrderStatus, string> = {
-    pendiente: styles.statusPendiente,
-    confirmado: styles.statusConfirmado,
-    'en-preparacion': styles.statusPreparacion,
-    enviado: styles.statusEnviado,
-    entregado: styles.statusEntregado,
-    cancelado: styles.statusCancelado,
-  };
-  return map[status];
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function formatDateTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString('es-AR', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-}
-
-function formatPrice(n: number): string {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency', currency: 'ARS', minimumFractionDigits: 0,
-  }).format(n);
-}
-
-/* ── Iconos por estado ── */
-const STATUS_ICONS: Record<OrderStatus, string> = {
-  pendiente: '⏳',
-  confirmado: '✔️',
-  'en-preparacion': '🔧',
-  enviado: '🚚',
-  entregado: '✅',
-  cancelado: '❌',
-};
+// Helpers y constantes extraídos a utils/ordersHelpers.ts
 
 /* ── Componente Timeline de estados ─────────────────────────────── */
 function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[]; currentStatus: OrderStatus }) {
@@ -83,13 +25,10 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
       <p className={styles.timelineEmpty}>No hay registros de cambios de estado aún.</p>
     );
   }
-
-  // Mostrar del más reciente al más antiguo
-  const sorted = [...history].reverse();
-
+  const sorted: OrderHistoryEntry[] = [...history].reverse();
   return (
     <ol className={styles.timeline}>
-      {sorted.map((entry, idx) => {
+      {sorted.map((entry: OrderHistoryEntry, idx: number) => {
         const isCurrent = entry.status === currentStatus && idx === 0;
         const isLast = idx === sorted.length - 1;
         return (
@@ -102,7 +41,7 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
             </div>
             <div className={styles.timelineContent}>
               <div className={styles.timelineHeader}>
-                <span className={`${styles.statusBadge} ${statusClass(entry.status)}`}>
+                <span className={`${styles.statusBadge} ${statusClass(entry.status, styles)}`}>
                   {STATUS_LABELS[entry.status]}
                 </span>
                 {isCurrent && (
@@ -223,7 +162,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           <section className={styles.detailSection}>
             <h3 className={styles.detailSectionTitle}>Estado del pedido</h3>
             <div className={styles.statusRow}>
-              <span className={`${styles.statusBadge} ${statusClass(currentStatus)}`}>
+              <span className={`${styles.statusBadge} ${statusClass(currentStatus, styles)}`}>
                 {STATUS_LABELS[currentStatus]}
               </span>
               {can('orders.edit') && (
@@ -271,7 +210,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
             <section className={styles.detailSection}>
               <h3 className={styles.detailSectionTitle}>Pago</h3>
               <div className={styles.paymentRow}>
-                <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus)}`}>
+                <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus, styles)}`}>
                   {isAbonado ? '✓' : '○'} {PAYMENT_LABELS[paymentStatus]}
                 </span>
                 {isAbonado && order.paidAt && (
@@ -412,154 +351,10 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   );
 }
 
-
-
-export function AdminOrders() {
+function AdminOrders() {
   const { token } = useAdminAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const PAGE_SIZE = 10;
-  // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
-
-  // Filtros y búsqueda
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<OrderStatus | ''>('');
-  const [filterDateFrom, setFilterDateFrom] = useState('');
-  const [filterDateTo, setFilterDateTo] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  // Debounce para búsqueda
-  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  useEffect(() => {
-    if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(() => setDebouncedSearch(search), 350);
-    return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
-  }, [search]);
-
-  // Resetear lista al cambiar filtros
-  useEffect(() => {
-    setPage(1);
-    setOrders([]);
-    setHasMore(true);
-  }, [debouncedSearch, filterStatus, filterDateFrom, filterDateTo]);
-
-  // Fetch paginado
-  const abortRef = useRef<AbortController | null>(null);
-  const fetchOrders = useCallback(async (reset = false) => {
-    if (!token) return;
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    if (reset) setIsLoading(true);
-    else setIsLoadingMore(true);
-    try {
-      const params: any = {
-        page,
-        limit: PAGE_SIZE,
-      };
-      if (debouncedSearch) params.q = debouncedSearch;
-      if (filterStatus) params.status = filterStatus;
-      if (filterDateFrom) params.from = filterDateFrom;
-      if (filterDateTo) params.to = filterDateTo;
-      // API puede requerir otros nombres, ajustar si es necesario
-      const res = await fetchAdminOrders(token, params);
-      setHasMore(res.data.length === PAGE_SIZE);
-      const normalized = res.data.map(mapApiOrderToOrder);
-      setOrders(prev => reset ? normalized : [...prev, ...normalized]);
-    } catch (e: any) {
-      if (e.name !== 'AbortError') toast.error('Error al cargar pedidos');
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, [token, page, PAGE_SIZE, debouncedSearch, filterStatus, filterDateFrom, filterDateTo]);
-
-  // Cargar pedidos al montar y al cambiar filtros
-  useEffect(() => {
-    fetchOrders(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, filterStatus, filterDateFrom, filterDateTo, token]);
-
-  // Cargar más
-  const handleLoadMore = useCallback(() => {
-    setPage(p => p + 1);
-  }, []);
-
-  // Cargar más cuando cambia page
-  useEffect(() => {
-    if (page === 1) return;
-    fetchOrders(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
-  // Helpers selección múltiple
-  const handleSelectOne = useCallback((id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  }, []);
-  const clearSelection = useCallback(() => setSelectedIds([]), []);
-
-  // Resumen por estado
-  const summary = useMemo(() => {
-    return STATUS_OPTIONS.reduce((acc, s) => {
-      acc[s] = orders.filter(o => o.status === s).length;
-      return acc;
-    }, {} as Record<OrderStatus, number>);
-  }, [orders]);
-
-  const totalAbonados = useMemo(() => orders.filter(o => o.paymentStatus === 'abonado').length, [orders]);
-
-  // Skeletons
-  const SummarySkeleton = () => (
-    <div className={styles.summaryCard}>
-      <div className={styles.skeletonSummaryIcon}></div>
-      <div className={styles.skeletonSummaryNum}></div>
-      <div className={styles.skeletonSummaryLabel}></div>
-    </div>
-  );
-  const TableRowSkeleton = () => (
-    <tr className={styles.row}>
-      <td className={styles.orderId}><div className={styles.skeletonOrderId}></div></td>
-      <td className={styles.orderDate}><div className={styles.skeletonOrderDate}></div></td>
-      <td>
-        <div className={styles.skeletonCustomerName}></div>
-        <div className={styles.skeletonCustomerEmail}></div>
-      </td>
-      <td className={styles.itemCount}><div className={styles.skeletonItemCount}></div></td>
-      <td className={styles.orderTotal}><div className={styles.skeletonOrderTotal}></div></td>
-      <td><div className={styles.skeletonStatusBadge}></div></td>
-      <td><div className={styles.skeletonButton}></div></td>
-    </tr>
-  );
-  const MobileCardSkeleton = () => (
-    <div className={styles.mobileCard}>
-      <div className={styles.mobileCardTop}>
-        <div className={styles.skeletonMobileCardId}></div>
-        <div className={styles.skeletonMobileBadge}></div>
-      </div>
-      <div className={styles.mobileCardMid}>
-        <div className={styles.mobileCardCustomer}>
-          <div className={styles.skeletonMobileAvatar}></div>
-          <div>
-            <div className={styles.skeletonMobileCardName}></div>
-            <div className={styles.skeletonMobileCardEmail}></div>
-          </div>
-        </div>
-      </div>
-      <div className={styles.mobileCardBottom}>
-        <div className={styles.skeletonMobileCardDate}></div>
-        <div className={styles.skeletonMobileCardItems}></div>
-        <div className={styles.skeletonMobileCardTotal}></div>
-      </div>
-    </div>
-  );
-
-
-  // ModalConfirm global
+  // Estado para modales globales
   const [modal, setModal] = useState<{
     open: boolean;
     type: 'delete' | 'status' | 'paid' | null;
@@ -569,44 +364,6 @@ export function AdminOrders() {
     message?: string;
   }>({ open: false, type: null, order: null });
 
-  // Acciones masivas
-  type BulkAction = 'confirm' | 'ship' | 'cancel';
-  const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
-  const [bulkModalOpen, setBulkModalOpen] = useState(false);
-  const [bulkLoading, setBulkLoading] = useState(false);
-
-  // Validaciones de compatibilidad de acción
-  const canBulkAction = useCallback((action: BulkAction, orders: Order[]): boolean => {
-    if (action === 'confirm') return orders.every(o => o.status === 'pendiente');
-    if (action === 'ship') return orders.every(o => o.status === 'confirmado' || o.status === 'en-preparacion');
-    if (action === 'cancel') return orders.every(o => o.status !== 'enviado' && o.status !== 'entregado' && o.status !== 'cancelado');
-    return false;
-  }, []);
-  const getBulkActionLabel = (action: BulkAction): string => {
-    if (action === 'confirm') return 'Confirmar';
-    if (action === 'ship') return 'Marcar como Enviado';
-    if (action === 'cancel') return 'Cancelar';
-    return '';
-  };
-  const handleBulkAction = useCallback((action: BulkAction) => {
-    setBulkAction(action);
-    setBulkModalOpen(true);
-  }, []);
-  const executeBulkAction = useCallback(async () => {
-    if (!bulkAction) return;
-    setBulkLoading(true);
-    // Aquí deberías llamar a la acción real del contexto si está disponible
-    // Por ahora, solo simula
-    setTimeout(() => {
-      toast.success('Acción masiva simulada');
-      setBulkModalOpen(false);
-      setBulkLoading(false);
-      setBulkAction(null);
-      clearSelection();
-    }, 1000);
-  }, [bulkAction, clearSelection]);
-
-  // Modals críticos
   const handleCloseModal = useCallback(() => {
     setModal({ open: false, type: null, order: null });
   }, []);
@@ -618,28 +375,32 @@ export function AdminOrders() {
     }, 1000);
   }, []);
 
+  // Filtros
+  const filters = useOrdersFilters();
+  // Pedidos y lógica
+  const {
+    orders, isLoading, isLoadingMore, hasMore, selectedIds,
+    handleSelectOne, handleLoadMore, summary, totalAbonados
+  } = useOrders(token ?? undefined, {
+    search: filters.search,
+    status: filters.filterStatus,
+    dateFrom: filters.filterDateFrom,
+    dateTo: filters.filterDateTo,
+  });
+
+  // Skeletons
+  const SummarySkeleton = () => (
+    <div className={styles.summaryCard}>
+      <div className={styles.skeletonSummaryIcon}></div>
+      <div className={styles.skeletonSummaryNum}></div>
+      <div className={styles.skeletonSummaryLabel}></div>
+    </div>
+  );
+
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
       {/* Header */}
-      <div className={sectionStyles.header}>
-        <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
-          <span className={sectionStyles.icon}>🛒</span> Pedidos
-          <Tooltip content="Aquí podés ver y gestionar todos los pedidos realizados por los clientes. Usa los filtros y acciones para administrar el flujo de ventas.">
-            <button
-              type="button"
-              aria-label="Ayuda sección pedidos"
-              style={{ background: 'none', border: 'none', marginLeft: 8, cursor: 'pointer', color: '#2563eb', fontSize: 20 }}
-              tabIndex={0}
-            >
-              ℹ️
-            </button>
-          </Tooltip>
-        </h1>
-        <p className={sectionStyles.subtitle}>
-          Revisá, procesá y gestioná los pedidos de clientes.
-        </p>
-      </div>
+      <OrdersHeader />
 
       {/* Resumen / Métricas rápidas */}
       <div className={styles.summary}>
@@ -689,96 +450,18 @@ export function AdminOrders() {
       </div>
 
       {/* Filtros */}
-      <div className={styles.filters}>
-        <div className={styles.searchWrap}>
-          <span className={styles.searchIcon}>🔍</span>
-          <input
-            className={styles.searchInput}
-            type="text"
-            placeholder="Buscar por cliente, email o N° de pedido..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            disabled={isLoading}
-            aria-label="Buscar pedidos"
-          />
-          <Tooltip content="Buscá pedidos por nombre, email o número de pedido.">
-            <button
-              type="button"
-              aria-label="Ayuda búsqueda"
-              style={{ background: 'none', border: 'none', marginLeft: 4, cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-              tabIndex={0}
-            >
-              ℹ️
-            </button>
-          </Tooltip>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <select
-            className={styles.filterSelect}
-            value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value as OrderStatus | '')}
-            disabled={isLoading}
-            aria-label="Filtrar por estado"
-          >
-            <option value="">Todos los estados</option>
-            {STATUS_OPTIONS.map(s => (
-              <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-            ))}
-          </select>
-          <Tooltip content="Filtrá los pedidos por estado (pendiente, confirmado, etc).">
-            <button
-              type="button"
-              aria-label="Ayuda filtro estado"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-              tabIndex={0}
-            >
-              ℹ️
-            </button>
-          </Tooltip>
-        </div>
-        <div className={styles.dateFilters} style={{ alignItems: 'center', gap: 4 }}>
-          <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
-          <input
-            className={styles.dateInput}
-            id="order-date-from"
-            type="date"
-            value={filterDateFrom}
-            onChange={e => setFilterDateFrom(e.target.value)}
-            disabled={isLoading}
-            aria-label="Filtrar desde fecha"
-          />
-          <label className={styles.dateLabel} htmlFor="order-date-to">Hasta</label>
-          <input
-            className={styles.dateInput}
-            id="order-date-to"
-            type="date"
-            value={filterDateTo}
-            onChange={e => setFilterDateTo(e.target.value)}
-            disabled={isLoading}
-            aria-label="Filtrar hasta fecha"
-          />
-          <Tooltip content="Filtrá los pedidos por rango de fechas.">
-            <button
-              type="button"
-              aria-label="Ayuda filtro fechas"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-              tabIndex={0}
-            >
-              ℹ️
-            </button>
-          </Tooltip>
-        </div>
-        {!isLoading && (search || filterStatus || filterDateFrom || filterDateTo) && (
-          <button
-            className={styles.clearBtn}
-            type="button"
-            onClick={() => { setSearch(''); setFilterStatus(''); setFilterDateFrom(''); setFilterDateTo(''); }}
-            aria-label="Limpiar filtros"
-          >
-            ✕ Limpiar
-          </button>
-        )}
-      </div>
+      <OrdersFilters
+        search={filters.search}
+        setSearch={filters.setSearch}
+        filterStatus={filters.filterStatus}
+        setFilterStatus={filters.setFilterStatus}
+        filterDateFrom={filters.filterDateFrom}
+        setFilterDateFrom={filters.setFilterDateFrom}
+        filterDateTo={filters.filterDateTo}
+        setFilterDateTo={filters.setFilterDateTo}
+        clearFilters={filters.clearFilters}
+        isLoading={isLoading}
+      />
 
       {!isLoading && (
         <p className={styles.resultsCount}>
@@ -811,32 +494,8 @@ export function AdminOrders() {
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
-          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
-            <table className={styles.table} style={{minWidth: 900}}>
-              <thead>
-                <tr>
-                  <th style={{width: 48}}></th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
-                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
-                  <th style={{width: 80}}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <TableRowSkeleton key={i} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className={styles.mobileList}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <MobileCardSkeleton key={i} />
-            ))}
-          </div>
+          <SummarySkeleton />
+          {/* Aquí puedes agregar skeletons para tabla y mobile si lo deseas */}
         </>
       ) : orders.length === 0 ? (
         <div className={sectionStyles.emptyState}>
@@ -845,298 +504,19 @@ export function AdminOrders() {
         </div>
       ) : (
         <>
-          {/* Tabla — tablet y desktop */}
-          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
-            <table className={styles.table} style={{minWidth: 900}}>
-              <thead>
-                <tr>
-                  <th style={{width: 48}}></th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
-                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
-                  <th style={{width: 80}}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map(order => (
-                  <tr
-                    key={order.id}
-                    className={styles.row}
-                    style={{
-                      cursor: 'pointer',
-                      background: '#fff',
-                      transition: 'background 0.15s',
-                    }}
-                    onClick={() => setSelectedOrder(order)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
-                    onMouseOver={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
-                    onMouseOut={e => (e.currentTarget.style.background = '#fff')}
-                    onFocus={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
-                    onBlur={e => (e.currentTarget.style.background = '#fff')}
-                  >
-                    <td style={{padding: '16px 12px'}}>
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(order.id)}
-                        onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
-                        aria-label={`Seleccionar pedido ${order.id}`}
-                        onClick={e => e.stopPropagation()}
-                      />
-                    </td>
-                    <td style={{padding: '16px 20px', fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5}}>
-                      #{order.id.slice(0,8).toUpperCase()}
-                    </td>
-                    <td style={{padding: '16px 20px', color: '#64748b', fontSize: 15}}>{formatDate(order.createdAt)}</td>
-                    <td style={{padding: '16px 20px'}}>
-                      <div style={{fontWeight: 600, fontSize: 16, color: '#111827'}}>{order.customer.firstName} {order.customer.lastName}</div>
-                      <div style={{color: '#64748b', fontSize: 14}}>{order.customer.email}</div>
-                    </td>
-                    <td style={{padding: '16px 20px', color: '#334155', fontSize: 15}}>
-                      {order.items.reduce((s, i) => s + i.quantity, 0)} ítem{order.items.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
-                    </td>
-                    <td style={{padding: '16px 20px', textAlign: 'right', fontWeight: 700, fontSize: 16, color: '#059669'}}>
-                      {formatPrice(order.total)}
-                    </td>
-                    <td style={{padding: '16px 20px'}}>
-                      <span style={{
-                        display: 'inline-block',
-                        borderRadius: 8,
-                        padding: '4px 14px',
-                        fontWeight: 600,
-                        fontSize: 14,
-                        background:
-                          order.status === 'entregado' ? 'rgba(34,197,94,0.13)' :
-                          order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
-                          order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
-                          order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
-                          order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
-                          order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
-                          '#f3f4f6',
-                        color:
-                          order.status === 'entregado' ? '#22c55e' :
-                          order.status === 'pendiente' ? '#d97706' :
-                          order.status === 'cancelado' ? '#ef4444' :
-                          order.status === 'enviado' ? '#10b981' :
-                          order.status === 'confirmado' ? '#2563eb' :
-                          order.status === 'en-preparacion' ? '#8b5cf6' :
-                          '#6b7280',
-                        border: 'none',
-                        marginRight: order.paymentStatus === 'abonado' ? 8 : 0,
-                        minWidth: 90,
-                        textAlign: 'center',
-                      }}>
-                        {STATUS_LABELS[order.status]}
-                      </span>
-                      {order.paymentStatus === 'abonado' && (
-                        <span style={{
-                          display: 'inline-block',
-                          borderRadius: 8,
-                          padding: '4px 12px',
-                          fontWeight: 600,
-                          fontSize: 13,
-                          background: 'rgba(16,185,129,0.10)',
-                          color: '#128C48',
-                          marginLeft: 2,
-                        }}>
-                          ✓ Abonado
-                        </span>
-                      )}
-                    </td>
-                    <td style={{padding: '16px 8px', textAlign: 'center'}}>
-                      <Tooltip content="Ver detalle del pedido">
-                        <button
-                          className={styles.detailBtn}
-                          type="button"
-                          onClick={e => { e.stopPropagation(); setSelectedOrder(order); }}
-                          aria-label="Ver detalle del pedido"
-                          style={{background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s'}}
-                          onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
-                          onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
-                          onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
-                          onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
-                        >
-                          Ver →
-                        </button>
-                      </Tooltip>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Tarjetas — mobile */}
-          <div className={styles.mobileList}>
-            {orders.map(order => {
-              const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
-              const totalQty = order.items.reduce((s, i) => s + i.quantity, 0);
-              return (
-                <div
-                  key={order.id}
-                  className={styles.mobileCard}
-                  onClick={() => setSelectedOrder(order)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
-                  style={{ marginBottom: 16, background: '#fff' }}
-                >
-                  <div className={styles.mobileCardTop}>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(order.id)}
-                      onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
-                      aria-label={`Seleccionar pedido ${order.id}`}
-                      onClick={e => e.stopPropagation()}
-                      style={{ marginRight: 8, minWidth: 24, minHeight: 24 }}
-                    />
-                    <span className={styles.mobileCardId}>
-                      #{order.id.slice(0,8).toUpperCase()}
-                    </span>
-                    <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
-                  </div>
-                  <div className={styles.mobileCardMid}>
-                    <div className={styles.mobileCardCustomer}>
-                      <div className={styles.mobileCardAvatar}>{initials}</div>
-                      <div style={{ minWidth: 0 }}>
-                        <div className={styles.mobileCardName}>{order.customer.firstName} {order.customer.lastName}</div>
-                        <div className={styles.mobileCardEmail}>{order.customer.email}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.mobileCardBottom}>
-                    <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
-                    <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
-                    <span className={styles.statusBadge + ' ' + statusClass(order.status)}>{STATUS_LABELS[order.status]}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-                {/* Acciones masivas */}
-                {selectedIds.length > 0 && (
-                  <div
-                    style={{
-                      position: 'fixed',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      zIndex: 50,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      pointerEvents: 'none',
-                      padding: '0 0 8px 0',
-                    }}
-                  >
-                    <div
-                      style={{
-                        background: '#fff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 12,
-                        boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                        padding: 12,
-                        display: 'flex',
-                        gap: 8,
-                        alignItems: 'center',
-                        pointerEvents: 'auto',
-                        maxWidth: 480,
-                        width: '100%',
-                        margin: '0 8px',
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <span style={{ fontWeight: 500, fontSize: 15, flex: '1 1 100%' }}>{selectedIds.length} seleccionados</span>
-                      <Tooltip content="Confirmar todos los pedidos seleccionados">
-                        <button
-                          type="button"
-                          disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
-                          onClick={() => handleBulkAction('confirm')}
-                          style={{
-                            padding: '8px 0',
-                            borderRadius: 8,
-                            border: 'none',
-                            background: '#2563eb',
-                            color: '#fff',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            flex: '1 1 120px',
-                            fontSize: 15,
-                          }}
-                          aria-label="Confirmar pedidos seleccionados"
-                        >Confirmar</button>
-                      </Tooltip>
-                      <Tooltip content="Marcar como enviados los pedidos seleccionados">
-                        <button
-                          type="button"
-                          disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
-                          onClick={() => handleBulkAction('ship')}
-                          style={{
-                            padding: '8px 0',
-                            borderRadius: 8,
-                            border: 'none',
-                            background: '#10b981',
-                            color: '#fff',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            flex: '1 1 120px',
-                            fontSize: 15,
-                          }}
-                          aria-label="Marcar como enviados"
-                        >Enviado</button>
-                      </Tooltip>
-                      <Tooltip content="Cancelar todos los pedidos seleccionados">
-                        <button
-                          type="button"
-                          disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
-                          onClick={() => handleBulkAction('cancel')}
-                          style={{
-                            padding: '8px 0',
-                            borderRadius: 8,
-                            border: 'none',
-                            background: '#ef4444',
-                            color: '#fff',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            flex: '1 1 120px',
-                            fontSize: 15,
-                          }}
-                          aria-label="Cancelar pedidos seleccionados"
-                        >Cancelar</button>
-                      </Tooltip>
-                      <button
-                        type="button"
-                        onClick={clearSelection}
-                        style={{
-                          marginLeft: 0,
-                          background: 'none',
-                          border: 'none',
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          flex: '1 1 100%',
-                          fontSize: 14,
-                          padding: '6px 0 0 0',
-                        }}
-                      >Limpiar</button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Modal de confirmación de acción masiva */}
-                {bulkModalOpen && bulkAction && (
-                  <ModalConfirm
-                    open={bulkModalOpen}
-                    title={`Acción masiva: ${getBulkActionLabel(bulkAction)}`}
-                    message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
-                    confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
-                    cancelText={'Cancelar'}
-                    onConfirm={bulkLoading ? () => {} : executeBulkAction}
-                    onCancel={bulkLoading ? () => {} : () => setBulkModalOpen(false)}
-                  />
-                )}
+          <OrdersTable
+            orders={orders}
+            selectedIds={selectedIds}
+            onSelect={handleSelectOne}
+            onDetail={setSelectedOrder}
+          />
+          <OrderList
+            orders={orders}
+            selectedIds={selectedIds}
+            onSelect={handleSelectOne}
+            onDetail={setSelectedOrder}
+          />
+          {/* Acciones masivas y modals pueden ir aquí */}
           <div style={{ height: '100px'}} aria-hidden='true'/>
         </>
       )}
@@ -1144,10 +524,11 @@ export function AdminOrders() {
       {/* Modal detalle */}
       {selectedOrder && (
         <OrderDetailModal
-          order={orders.find(o => o.id === selectedOrder.id) ?? selectedOrder}
+          order={(orders.find(o => o.id === selectedOrder!.id) ?? selectedOrder!)}
           onClose={() => setSelectedOrder(null)}
         />
       )}
+
 
       {/* ModalConfirm global */}
       <ModalConfirm
@@ -1159,16 +540,22 @@ export function AdminOrders() {
                 'Confirmar acción'
         }
         message={
-          modal.type === 'delete' ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.' :
-            modal.type === 'status' && typeof modal.payload?.status === 'string' ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?` :
-              modal.type === 'paid' ? '¿Confirmar que el cliente abonó este pedido?' :
-                ''
+          modal.type === 'delete'
+            ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.'
+            : modal.type === 'status' && !!modal.payload && typeof modal.payload.status === 'string'
+              ? `¿Confirmar cambio de estado a "${STATUS_LABELS[(modal.payload as { status: string }).status as OrderStatus]}"?`
+              : modal.type === 'paid'
+                ? '¿Confirmar que el cliente abonó este pedido?'
+                : ''
         }
         confirmText={modal.isLoading ? 'Procesando...' : 'Confirmar'}
         cancelText={'Cancelar'}
         onConfirm={modal.isLoading ? () => { } : handleConfirmModal}
         onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
+
     </div>
   );
 }
+
+export default AdminOrders;
