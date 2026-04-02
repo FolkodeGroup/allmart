@@ -41,6 +41,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
   }, []);
 
+  // Mapear placement a clase válida
+  const placementClass =
+    placement === 'top' ? styles.top :
+    placement === 'bottom' ? styles.bottom :
+    placement === 'left' ? styles.left :
+    placement === 'right' ? styles.right :
+    '';
+
   return (
     <span
       className={styles.wrapper}
@@ -54,7 +62,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
       {visible && (
         <span
-          className={`${styles.tooltip} ${styles[placement]}`}
+          className={`${styles.tooltip} ${placementClass}`}
           role="tooltip"
         >
           {content}
