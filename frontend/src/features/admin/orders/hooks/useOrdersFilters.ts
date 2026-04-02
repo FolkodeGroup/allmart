@@ -1,6 +1,6 @@
 // hooks/useOrdersFilters.ts
 import { useState, useMemo } from 'react';
-import type { Order, OrderStatus } from '../../../../context/AdminOrdersContext';
+import type { Order } from '../../../../context/AdminOrdersContext';
 
 export interface OrdersFiltersState {
     search: string;

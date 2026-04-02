@@ -1,7 +1,4 @@
-import React, { useState, useMemo } from 'react';
-
-
-
+import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
@@ -10,7 +7,6 @@ import { useAdminAuth } from '../../../context/AdminAuthContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
-import { StatusChipSelect } from './components/StatusChipSelect';
 import { OrdersFiltersBar } from './components/OrdersFiltersBar';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
 
@@ -196,7 +192,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
     try {
       await markAsPaid(orderId);
       toast.success('Pedido marcado como abonado');
-    } catch (err) {
+    } catch {
       toast.error('Error al marcar como abonado');
     }
   };

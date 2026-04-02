@@ -24,7 +24,6 @@ export function StatusChipSelect({
     onChange,
     placeholder = 'Seleccionar...',
     label,
-    chipClassName,
     chipCloseClassName,
     selectClassName,
     labelClassName,
