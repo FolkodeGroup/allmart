@@ -1,4 +1,5 @@
 // components/ui/StatusChipSelect/StatusChipSelect.tsx
+import { Tooltip } from '../../../../components/ui/Tooltip';
 import styles from '../AdminOrders.module.css';
 
 interface StatusOption {
@@ -25,7 +26,6 @@ export function StatusChipSelect({
     placeholder = 'Seleccionar...',
     label,
     chipCloseClassName,
-    selectClassName,
     labelClassName,
 }: StatusChipSelectProps) {
     const handleAdd = (value: string) => {
@@ -46,9 +46,10 @@ export function StatusChipSelect({
                 </label>
             )}
             <select
-                value=""
+                className={styles.filterSelect}
+                value={selected[0] || ''}
                 onChange={e => { if (e.target.value) handleAdd(e.target.value); }}
-                className={selectClassName}
+                aria-label="Filtrar por estado"
             >
                 <option value="">{placeholder}</option>
                 {options.map(opt => (
@@ -57,6 +58,17 @@ export function StatusChipSelect({
                     </option>
                 ))}
             </select>
+            <Tooltip content="Filtrá los pedidos por estado (pendiente, confirmado, etc).">
+                <button
+                    type="button"
+                    aria-label="Ayuda filtro estado"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
+                    tabIndex={0}
+                >
+                    ℹ️
+                </button>
+            </Tooltip>
+
             <div className={styles.chipsContainer}>
                 {selected.map(s => {
                     const label = options.find(o => o.value === s)?.label || s;

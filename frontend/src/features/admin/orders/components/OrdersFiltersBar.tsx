@@ -3,6 +3,7 @@ import { StatusChipSelect } from './StatusChipSelect';
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
+import { Tooltip } from '../../../../components/ui/Tooltip';
 
 const STATUS_OPTIONS: OrderStatus[] = [
     'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
@@ -36,7 +37,18 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     value={filters.search}
                     onChange={e => onChange({ ...filters, search: e.target.value })}
                     disabled={disabled}
+                    aria-label="Buscar pedidos"
                 />
+                <Tooltip content="Buscá pedidos por nombre, email o número de pedido.">
+                    <button
+                        type="button"
+                        aria-label="Ayuda búsqueda"
+                        style={{ background: 'none', border: 'none', marginLeft: 4, cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
+                        tabIndex={0}
+                    >
+                        ℹ️
+                    </button>
+                </Tooltip>
             </div>
 
             <StatusChipSelect
@@ -50,58 +62,90 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
             />
 
             <div className={styles.dateFilters}>
-                <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
-                <input
-                    className={styles.dateInput}
-                    id="order-date-from"
-                    type="date"
-                    value={filters.dateFrom}
-                    onChange={e => onChange({ ...filters, dateFrom: e.target.value })}
-                    disabled={disabled}
-                />
-                <label className={styles.dateLabel} htmlFor="order-date-to">Hasta</label>
-                <input
-                    className={styles.dateInput}
-                    id="order-date-to"
-                    type="date"
-                    value={filters.dateTo}
-                    onChange={e => onChange({ ...filters, dateTo: e.target.value })}
-                    disabled={disabled}
-                />
+                <div className={styles.dateFiltersSeparation}>
+                    <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
+                    <input
+                        className={styles.dateInput}
+                        id="order-date-from"
+                        type="date"
+                        value={filters.dateFrom}
+                        onChange={e => onChange({ ...filters, dateFrom: e.target.value })}
+                        disabled={disabled}
+                        aria-label="Filtrar desde fecha"
+                    />
+                </div>
+                <div className={styles.dateFiltersSeparation}>
+                    <label className={styles.dateLabel} htmlFor="order-date-to">Hasta</label>
+                    <input
+                        className={styles.dateInput}
+                        id="order-date-to"
+                        type="date"
+                        value={filters.dateTo}
+                        onChange={e => onChange({ ...filters, dateTo: e.target.value })}
+                        disabled={disabled}
+                        aria-label="Filtrar hasta fecha"
+                    />
+                </div>
+                <Tooltip content="Filtrá los pedidos por rango de fechas.">
+                    <button
+                        type="button"
+                        aria-label="Ayuda filtro fechas"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
+                        tabIndex={0}
+                    >
+                        ℹ️
+                    </button>
+                </Tooltip>
             </div>
 
             <div className={styles.totalFilters}>
-                <label className={styles.totalLabel} htmlFor="order-total-min">$ Mín</label>
-                <input
-                    className={styles.totalInput}
-                    id="order-total-min"
-                    type="number"
-                    min={0}
-                    step={1}
-                    placeholder="0"
-                    value={filters.totalMin}
-                    onChange={e => onChange({ ...filters, totalMin: e.target.value })}
-                    disabled={disabled}
-                />
-                <label className={styles.totalLabel} htmlFor="order-total-max">$ Máx</label>
-                <input
-                    className={styles.totalInput}
-                    id="order-total-max"
-                    type="number"
-                    min={0}
-                    step={1}
-                    placeholder="Sin límite"
-                    value={filters.totalMax}
-                    onChange={e => onChange({ ...filters, totalMax: e.target.value })}
-                    disabled={disabled}
-                />
+                <div className={styles.totalFiltersSeparation}>
+                    <label className={styles.totalLabel} htmlFor="order-total-min">$ Mín</label>
+                    <input
+                        className={styles.totalInput}
+                        id="order-total-min"
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="0"
+                        value={filters.totalMin}
+                        onChange={e => onChange({ ...filters, totalMin: e.target.value })}
+                        disabled={disabled}
+                    />
+                </div>
+                <div className={styles.totalFiltersSeparation}>
+                    <label className={styles.totalLabel} htmlFor="order-total-max">$ Máx</label>
+                    <input
+                        className={styles.totalInput}
+                        id="order-total-max"
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="Sin límite"
+                        value={filters.totalMax}
+                        onChange={e => onChange({ ...filters, totalMax: e.target.value })}
+                        disabled={disabled}
+                    />
+                </div>
+                <Tooltip content="Filtrá los pedidos por monto total.">
+                    <button
+                        type="button"
+                        aria-label="Ayuda filtro monto"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
+                        tabIndex={0}
+                    >
+                        ℹ️
+                    </button>
+                </Tooltip>
             </div>
 
-            {hasActiveFilters && (
-                <button className={styles.clearBtn} type="button" onClick={onReset}>
-                    ✕ Limpiar
-                </button>
-            )}
-        </div>
+            {
+                hasActiveFilters && (
+                    <button className={styles.clearBtn} type="button" onClick={onReset} aria-label="Limpiar filtros">
+                        ✕ Limpiar
+                    </button>
+                )
+            }
+        </div >
     );
 }

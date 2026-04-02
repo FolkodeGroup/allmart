@@ -182,9 +182,9 @@
 /* ── Filtros ── */
 .filters {
   display: grid;
-  grid-template-columns: 1fr auto auto auto auto;
+  grid-template-columns: 1fr auto auto auto auto auto;
   gap: var(--space-3);
-  align-items: center;
+  align-items: end;
   flex-wrap: wrap;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
@@ -290,9 +290,16 @@
 
 .dateFilters {
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: var(--space-2);
 
+}
+
+.dateFiltersSeparation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
 }
 
 @media (max-width: 639px) {
@@ -327,8 +334,15 @@
 
 .totalFilters {
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: var(--space-2);
+}
+
+.totalFiltersSeparation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
 }
 
 .totalInput {
