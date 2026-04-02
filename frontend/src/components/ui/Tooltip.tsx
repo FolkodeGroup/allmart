@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useId } from 'react';
 import styles from './Tooltip.module.css';
 
 interface TooltipProps {
@@ -7,6 +8,7 @@ interface TooltipProps {
   children: ReactNode;
   placement?: 'top' | 'bottom' | 'left' | 'right';
   delay?: number;
+  id?: string;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -14,9 +16,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
   children,
   placement = 'top',
   delay = 200,
+  id,
 }) => {
   const [visible, setVisible] = useState(false);
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // id accesible y estable
+  const reactId = typeof useId === 'function' ? useId() : undefined;
+  const idRef = useRef(id || reactId || `tooltip-${Math.random().toString(36).slice(2, 10)}`);
+  const tooltipId = idRef.current;
 
   const show = () => {
     timeout.current = setTimeout(() => {
@@ -41,14 +48,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
   }, []);
 
-  // Mapear placement a clase válida
-  const placementClass =
-    placement === 'top' ? styles.top :
-    placement === 'bottom' ? styles.bottom :
-    placement === 'left' ? styles.left :
-    placement === 'right' ? styles.right :
-    '';
-
   return (
     <span
       className={styles.wrapper}
@@ -57,12 +56,19 @@ export const Tooltip: React.FC<TooltipProps> = ({
       onFocus={show}
       onBlur={hide}
       tabIndex={-1}
+      aria-describedby={tooltipId}
     >
       {children}
 
       {visible && (
         <span
-          className={`${styles.tooltip} ${placementClass}`}
+          id={tooltipId}
+          className={`${styles.tooltip} ${
+            placement === 'top' ? styles.top :
+            placement === 'bottom' ? styles.bottom :
+            placement === 'left' ? styles.left :
+            placement === 'right' ? styles.right : ''
+          }`}
           role="tooltip"
         >
           {content}

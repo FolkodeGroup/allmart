@@ -1,88 +1,75 @@
-import React, { useState, useRef, useEffect } from 'react';
-import type { ReactNode, ReactElement } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
+import type { ReactNode } from 'react';
 import styles from './Tooltip.module.css';
-
-export type TooltipPosition = 'top' | 'bottom';
 
 interface TooltipProps {
   content: ReactNode;
-  children: ReactElement;
-  position?: TooltipPosition;
-  className?: string;
+  children: ReactNode;
+  placement?: 'top' | 'bottom' | 'left' | 'right';
+  delay?: number;
   id?: string;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
-  position = 'top',
-  className = '',
+  placement = 'top',
+  delay = 200,
   id,
 }) => {
   const [visible, setVisible] = useState(false);
-  const [tooltipPos, setTooltipPos] = useState<TooltipPosition>(position);
-  const triggerRef = useRef<HTMLSpanElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const tooltipId = id || `tooltip-${Math.random().toString(36).slice(2, 10)}`;
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reactId = useId();
+  const tooltipId = id || reactId;
 
-  // Posición inteligente
-  useEffect(() => {
-    if (visible && triggerRef.current && tooltipRef.current) {
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
-      const spaceAbove = triggerRect.top;
-      const spaceBelow = window.innerHeight - triggerRect.bottom;
-      if (position === 'top' && spaceAbove < tooltipRect.height + 12 && spaceBelow > spaceAbove) {
-        setTooltipPos('bottom');
-      } else if (position === 'bottom' && spaceBelow < tooltipRect.height + 12 && spaceAbove > spaceBelow) {
-        setTooltipPos('top');
-      } else {
-        setTooltipPos(position);
-      }
+  const show = () => {
+    timeout.current = setTimeout(() => {
+      setVisible(true);
+    }, delay);
+  };
+
+  const hide = () => {
+    if (timeout.current) {
+      clearTimeout(timeout.current);
+      timeout.current = null;
     }
-  }, [visible, position]);
+    setVisible(false);
+  };
 
-  // Accesibilidad: mostrar en focus
-  const show = () => setVisible(true);
-  const hide = () => setVisible(false);
+  // ✅ Limpieza correcta (CLAVE)
+  useEffect(() => {
+    return () => {
+      if (timeout.current) {
+        clearTimeout(timeout.current);
+      }
+    };
+  }, []);
 
-  // Asegurar que children es ReactElement con props
-  // Forzar tabIndex en el wrapper solo si el hijo no lo tiene
-  // Acceso seguro a props dinámicos
-  const childTabIndex = ((children.props as any)?.tabIndex);
   return (
     <span
-      className={styles.tooltipWrapper + (className ? ' ' + className : '')}
-      ref={triggerRef}
-      tabIndex={typeof childTabIndex === 'number' ? undefined : 0}
-      aria-describedby={tooltipId}
+      className={styles.wrapper}
       onMouseEnter={show}
       onMouseLeave={hide}
       onFocus={show}
       onBlur={hide}
-      style={{display: 'inline-block', position: 'relative'}}
+      tabIndex={-1}
+      aria-describedby={tooltipId}
     >
-      {React.cloneElement(
-        children,
-        {
-          ...(typeof childTabIndex === 'number' ? {} : { tabIndex: 0 }),
-          ...(typeof children.type === 'string' && ["button", "input", "select", "textarea", "a", "div", "span"].includes(children.type)
-            ? { 'aria-describedby': tooltipId }
-            : {}),
-        }
-      )}
+      {children}
+
       {visible && (
-        <div
-          className={
-            styles.tooltip +
-            ' ' + styles[`tooltip_${tooltipPos}`]
-          }
-          ref={tooltipRef}
+        <span
           id={tooltipId}
+          className={`${styles.tooltip} ${
+            placement === 'top' ? styles.top :
+            placement === 'bottom' ? styles.bottom :
+            placement === 'left' ? styles.left :
+            placement === 'right' ? styles.right : ''
+          }`}
           role="tooltip"
         >
           {content}
-        </div>
+        </span>
       )}
     </span>
   );
