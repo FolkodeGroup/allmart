@@ -764,20 +764,20 @@ export function AdminOrders() {
   };
 
   return (
-    <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
+    <main className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`} tabIndex={-1} aria-label="Gestión de pedidos">
       {/* Header */}
-      <div className={sectionStyles.header}>
+      <header className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title}>
-          <span className={sectionStyles.icon}>🛒</span> Pedidos
+          <span className={sectionStyles.icon} aria-hidden="true">🛒</span> Pedidos
         </h1>
         <p className={sectionStyles.subtitle}>
           Revisá, procesá y gestioná los pedidos de clientes.
         </p>
-      </div>
+      </header>
 
       {/* Resumen / Métricas rápidas */}
-      <div className={styles.summary}>
+      <section className={styles.summary} aria-label="Resumen de pedidos">
         {isLoading ? (
           <>
             <SummarySkeleton />
@@ -821,10 +821,10 @@ export function AdminOrders() {
             </div>
           </>
         )}
-      </div>
+      </section>
 
       {/* Filtros */}
-      <div className={styles.filters}>
+      <section className={styles.filters} aria-label="Filtros de pedidos">
         <div className={styles.searchWrap}>
           <span className={styles.searchIcon}>🔍</span>
           <input
@@ -876,10 +876,10 @@ export function AdminOrders() {
             ✕ Limpiar
           </button>
         )}
-      </div>
+      </section>
 
       {!isLoading && (
-        <p className={styles.resultsCount}>
+        <p className={styles.resultsCount} id="orders-count" aria-live="polite">
           {filtered.length} pedido{filtered.length !== 1 ? 's' : ''}
           {filtered.length !== orders.length ? ` (de ${orders.length})` : ''}
         </p>
@@ -888,7 +888,7 @@ export function AdminOrders() {
 
 
       {/* Controles de paginación */}
-      <div className={styles.paginationWrap}>
+      <nav className={styles.paginationWrap} aria-label="Paginación de pedidos">
         <button
           className={styles.paginationBtn}
           type="button"
@@ -922,7 +922,7 @@ export function AdminOrders() {
         >
           Siguiente →
         </button>
-      </div>
+      </nav>
 
 
 
@@ -930,18 +930,19 @@ export function AdminOrders() {
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
-          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
-            <table className={styles.table} style={{minWidth: 900}}>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table} aria-label="Pedidos" aria-describedby="orders-count">
+              <caption className="sr-only">Lista de pedidos de clientes</caption>
               <thead>
                 <tr>
-                  <th style={{width: 48}}></th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
-                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
-                  <th style={{width: 80}}></th>
+                  <th scope="col"></th>
+                  <th scope="col">N° Pedido</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Cliente</th>
+                  <th scope="col">Productos</th>
+                  <th scope="col">Total</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
@@ -965,18 +966,19 @@ export function AdminOrders() {
       ) : (
         <>
           {/* Tabla — tablet y desktop */}
-          <div className={styles.tableWrapper} style={{overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)'}}>
-            <table className={styles.table} style={{minWidth: 900}}>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table} aria-label="Pedidos" aria-describedby="orders-count">
+              <caption className="sr-only">Lista de pedidos de clientes</caption>
               <thead>
                 <tr>
-                  <th style={{width: 48}}></th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>N° Pedido</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Fecha</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Cliente</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Productos</th>
-                  <th style={{textAlign: 'right', padding: '18px 20px'}}>Total</th>
-                  <th style={{textAlign: 'left', padding: '18px 20px'}}>Estado</th>
-                  <th style={{width: 80}}></th>
+                  <th scope="col"></th>
+                  <th scope="col">N° Pedido</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Cliente</th>
+                  <th scope="col">Productos</th>
+                  <th scope="col">Total</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
@@ -984,99 +986,63 @@ export function AdminOrders() {
                   <tr
                     key={order.id}
                     className={styles.row}
-                    style={{
-                      cursor: 'pointer',
-                      background: '#fff',
-                      transition: 'background 0.15s',
-                    }}
                     onClick={() => setSelectedOrder(order)}
-                    role="button"
                     tabIndex={0}
+                    aria-label={`Ver detalle del pedido #${order.id.slice(0,8).toUpperCase()}`}
                     onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
-                    onMouseOver={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
-                    onMouseOut={e => (e.currentTarget.style.background = '#fff')}
-                    onFocus={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
-                    onBlur={e => (e.currentTarget.style.background = '#fff')}
                   >
-                    <td style={{padding: '16px 12px'}}>
+                    <td>
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(order.id)}
                         onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
                         aria-label={`Seleccionar pedido ${order.id}`}
                         onClick={e => e.stopPropagation()}
+                        tabIndex={0}
                       />
                     </td>
-                    <td style={{padding: '16px 20px', fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5}}>
+                    <td className={styles.orderId}>
                       #{order.id.slice(0,8).toUpperCase()}
                     </td>
-                    <td style={{padding: '16px 20px', color: '#64748b', fontSize: 15}}>{formatDate(order.createdAt)}</td>
-                    <td style={{padding: '16px 20px'}}>
-                      <div style={{fontWeight: 600, fontSize: 16, color: '#111827'}}>{order.customer.firstName} {order.customer.lastName}</div>
-                      <div style={{color: '#64748b', fontSize: 14}}>{order.customer.email}</div>
+                    <td className={styles.orderDate}>{formatDate(order.createdAt)}</td>
+                    <td>
+                      <div className={styles.customerName}>{order.customer.firstName} {order.customer.lastName}</div>
+                      <div className={styles.customerEmail}>{order.customer.email}</div>
                     </td>
-                    <td style={{padding: '16px 20px', color: '#334155', fontSize: 15}}>
+                    <td className={styles.itemCount}>
                       {order.items.reduce((s, i) => s + i.quantity, 0)} ítem{order.items.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
                     </td>
-                    <td style={{padding: '16px 20px', textAlign: 'right', fontWeight: 700, fontSize: 16, color: '#059669'}}>
+                    <td className={styles.orderTotal}>
                       {formatPrice(order.total)}
                     </td>
-                    <td style={{padding: '16px 20px'}}>
-                      <span style={{
-                        display: 'inline-block',
-                        borderRadius: 8,
-                        padding: '4px 14px',
-                        fontWeight: 600,
-                        fontSize: 14,
-                        background:
-                          order.status === 'entregado' ? 'rgba(34,197,94,0.13)' :
-                          order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
-                          order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
-                          order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
-                          order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
-                          order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
-                          '#f3f4f6',
-                        color:
-                          order.status === 'entregado' ? '#22c55e' :
-                          order.status === 'pendiente' ? '#d97706' :
-                          order.status === 'cancelado' ? '#ef4444' :
-                          order.status === 'enviado' ? '#10b981' :
-                          order.status === 'confirmado' ? '#2563eb' :
-                          order.status === 'en-preparacion' ? '#8b5cf6' :
-                          '#6b7280',
-                        border: 'none',
-                        marginRight: order.paymentStatus === 'abonado' ? 8 : 0,
-                        minWidth: 90,
-                        textAlign: 'center',
-                      }}>
+                    <td>
+                      <span
+                        className={`${styles.statusBadge} ${statusClass(order.status)}`}
+                        aria-label={`Estado: ${STATUS_LABELS[order.status]}`}
+                        role="status"
+                        aria-live="polite"
+                        tabIndex={0}
+                      >
                         {STATUS_LABELS[order.status]}
                       </span>
                       {order.paymentStatus === 'abonado' && (
-                        <span style={{
-                          display: 'inline-block',
-                          borderRadius: 8,
-                          padding: '4px 12px',
-                          fontWeight: 600,
-                          fontSize: 13,
-                          background: 'rgba(16,185,129,0.10)',
-                          color: '#128C48',
-                          marginLeft: 2,
-                        }}>
+                        <span
+                          className={styles.paymentBadge}
+                          aria-label="Pago abonado"
+                          tabIndex={0}
+                        >
                           ✓ Abonado
                         </span>
                       )}
                     </td>
-                    <td style={{padding: '16px 8px', textAlign: 'center'}}>
+                    <td style={{textAlign: 'center'}}>
                       <button
                         className={styles.detailBtn}
                         type="button"
                         onClick={e => { e.stopPropagation(); setSelectedOrder(order); }}
+                        aria-label={`Ver detalle del pedido #${order.id.slice(0,8).toUpperCase()}`}
                         title="Ver detalle"
-                        style={{background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s'}}
-                        onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
-                        onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
-                        onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
-                        onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
+                        tabIndex={0}
                       >
                         Ver →
                       </button>
@@ -1100,7 +1066,6 @@ export function AdminOrders() {
                   role="button"
                   tabIndex={0}
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
-                  style={{ marginBottom: 16, background: '#fff' }}
                 >
                   <div className={styles.mobileCardTop}>
                     <input
@@ -1277,6 +1242,6 @@ export function AdminOrders() {
         onConfirm={modal.isLoading ? () => { } : handleConfirmModal}
         onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
-    </div>
+    </main>
   );
 }
