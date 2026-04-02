@@ -1,4 +1,6 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+
 import toast from 'react-hot-toast';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
@@ -390,9 +392,11 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
               <h3 className={styles.detailSectionTitle}>Zona peligrosa</h3>
               <div className={styles.dangerSection}>
                 {!confirmDelete ? (
-                  <button className={styles.deleteBtn} type="button" onClick={() => setConfirmDelete(true)}>
-                    🗑️ Eliminar este pedido
-                  </button>
+                  <Tooltip content="Eliminar este pedido. Esta acción no se puede deshacer.">
+                    <button className={styles.deleteBtn} type="button" onClick={() => setConfirmDelete(true)} aria-label="Eliminar pedido">
+                      🗑️ Eliminar este pedido
+                    </button>
+                  </Tooltip>
                 ) : (
                   <div className={styles.confirmDelete}>
                     <span>¿Seguro que querés eliminar este pedido? Esta acción no se puede deshacer.</span>
@@ -472,7 +476,7 @@ export function AdminOrders() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [token, page, PAGE_SIZE, debouncedFilters]);
+  }, [token, page, PAGE_SIZE]);
 
   // Cargar pedidos al montar y al cambiar filtros
   useEffect(() => {
@@ -620,6 +624,16 @@ export function AdminOrders() {
         <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title}>
           <span className={sectionStyles.icon}>🛒</span> Pedidos
+          <Tooltip content="Aquí podés ver y gestionar todos los pedidos realizados por los clientes. Usa los filtros y acciones para administrar el flujo de ventas.">
+            <button
+              type="button"
+              aria-label="Ayuda sección pedidos"
+              style={{ background: 'none', border: 'none', marginLeft: 8, cursor: 'pointer', color: '#2563eb', fontSize: 20 }}
+              tabIndex={0}
+            >
+              ℹ️
+            </button>
+          </Tooltip>
         </h1>
         <p className={sectionStyles.subtitle}>
           Revisá, procesá y gestioná los pedidos de clientes.
@@ -850,19 +864,21 @@ export function AdminOrders() {
                       )}
                     </td>
                     <td style={{ padding: '16px 8px', textAlign: 'center' }}>
-                      <button
-                        className={styles.detailBtn}
-                        type="button"
-                        onClick={e => { e.stopPropagation(); setSelectedOrder(order); }}
-                        title="Ver detalle"
-                        style={{ background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s' }}
-                        onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
-                        onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
-                        onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
-                        onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
-                      >
-                        Ver →
-                      </button>
+                      <Tooltip content="Ver detalle del pedido">
+                        <button
+                          className={styles.detailBtn}
+                          type="button"
+                          onClick={e => { e.stopPropagation(); setSelectedOrder(order); }}
+                          aria-label="Ver detalle del pedido"
+                          style={{ background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s' }}
+                          onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
+                          onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
+                          onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
+                          onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
+                        >
+                          Ver →
+                        </button>
+                      </Tooltip>
                     </td>
                   </tr>
                 ))}
@@ -950,54 +966,63 @@ export function AdminOrders() {
                 }}
               >
                 <span style={{ fontWeight: 500, fontSize: 15, flex: '1 1 100%' }}>{selectedIds.length} seleccionados</span>
-                <button
-                  type="button"
-                  disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
-                  onClick={() => handleBulkAction('confirm')}
-                  style={{
-                    padding: '8px 0',
-                    borderRadius: 8,
-                    border: 'none',
-                    background: '#2563eb',
-                    color: '#fff',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    flex: '1 1 120px',
-                    fontSize: 15,
-                  }}
-                >Confirmar</button>
-                <button
-                  type="button"
-                  disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
-                  onClick={() => handleBulkAction('ship')}
-                  style={{
-                    padding: '8px 0',
-                    borderRadius: 8,
-                    border: 'none',
-                    background: '#10b981',
-                    color: '#fff',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    flex: '1 1 120px',
-                    fontSize: 15,
-                  }}
-                >Enviado</button>
-                <button
-                  type="button"
-                  disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
-                  onClick={() => handleBulkAction('cancel')}
-                  style={{
-                    padding: '8px 0',
-                    borderRadius: 8,
-                    border: 'none',
-                    background: '#ef4444',
-                    color: '#fff',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    flex: '1 1 120px',
-                    fontSize: 15,
-                  }}
-                >Cancelar</button>
+                <Tooltip content="Confirmar todos los pedidos seleccionados">
+                  <button
+                    type="button"
+                    disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
+                    onClick={() => handleBulkAction('confirm')}
+                    style={{
+                      padding: '8px 0',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: '#2563eb',
+                      color: '#fff',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      flex: '1 1 120px',
+                      fontSize: 15,
+                    }}
+                    aria-label="Confirmar pedidos seleccionados"
+                  >Confirmar</button>
+                </Tooltip>
+                <Tooltip content="Marcar como enviados los pedidos seleccionados">
+                  <button
+                    type="button"
+                    disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
+                    onClick={() => handleBulkAction('ship')}
+                    style={{
+                      padding: '8px 0',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: '#10b981',
+                      color: '#fff',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      flex: '1 1 120px',
+                      fontSize: 15,
+                    }}
+                    aria-label="Marcar como enviados"
+                  >Enviado</button>
+                </Tooltip>
+                <Tooltip content="Cancelar todos los pedidos seleccionados">
+                  <button
+                    type="button"
+                    disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
+                    onClick={() => handleBulkAction('cancel')}
+                    style={{
+                      padding: '8px 0',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: '#ef4444',
+                      color: '#fff',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      flex: '1 1 120px',
+                      fontSize: 15,
+                    }}
+                    aria-label="Cancelar pedidos seleccionados"
+                  >Cancelar</button>
+                </Tooltip>
                 <button
                   type="button"
                   onClick={clearSelection}
