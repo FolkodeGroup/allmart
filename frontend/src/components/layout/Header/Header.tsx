@@ -152,15 +152,14 @@ export function Header() {
               <div className={styles.navItem} key={item.href}>
                 {item.children ? (
                   <>
-                    <button
+                    <Link
+                      to={item.href}
                       className={styles.navLink}
-                      aria-expanded="false"
                       aria-haspopup="true"
-                      type="button"
                     >
                       {item.label}
                       <span className={styles.chevron} aria-hidden="true">▾</span>
-                    </button>
+                    </Link>
                     <div className={styles.dropdown} role="menu">
                       {item.children.map((child) => (
                         <Link

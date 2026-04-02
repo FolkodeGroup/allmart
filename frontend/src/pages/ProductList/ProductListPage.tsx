@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import type { Product, Category } from '../../types';
 import {
   fetchPublicProducts,
@@ -21,9 +21,22 @@ const SORT_OPTIONS: SortOption[] = [
   { label: 'Más nuevos', value: 'newest' },
 ];
 
+function getProductCategoryIds(product: Product): string[] {
+  const ids = new Set<string>();
+  if (Array.isArray(product.categoryIds)) {
+    product.categoryIds.filter(Boolean).forEach((id) => ids.add(id));
+  }
+  if (product.categoryId) ids.add(product.categoryId);
+  if (product.category?.id) ids.add(product.category.id);
+  return Array.from(ids);
+}
+
 export function ProductListPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category') ?? '';
+  const urlSubCategory = searchParams.get('sub') ?? '';
   const [sortBy, setSortBy] = useState('relevance');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>(urlSubCategory || urlCategory);
   const [showOnlyOnSale, setShowOnlyOnSale] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -33,6 +46,11 @@ export function ProductListPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeDiscounts, setActiveDiscounts] = useState<Set<string>>(new Set());
   const rootCategories = categories.filter((cat) => !cat.parentId);
+
+  useEffect(() => {
+    const next = urlSubCategory || urlCategory;
+    setSelectedCategory((prev) => (prev === next ? prev : next));
+  }, [urlCategory, urlSubCategory]);
 
   /* Cargar categorías una sola vez */
   useEffect(() => {
@@ -83,8 +101,76 @@ export function ProductListPage() {
   }, [sortBy, selectedCategory, showOnlyOnSale, activeDiscounts, categories]);
 
   const toggleCategory = (slug: string) => {
-    setSelectedCategory((prev) => (prev === slug ? '' : slug));
+    const next = selectedCategory === slug ? '' : slug;
+    setSelectedCategory(next);
+    const updated = new URLSearchParams(searchParams);
+    if (next) {
+      updated.set('category', next);
+    } else {
+      updated.delete('category');
+    }
+    updated.delete('sub');
+    setSearchParams(updated, { replace: true });
   };
+
+  const selectedCategoryInfo = useMemo(
+    () => categories.find((cat) => cat.slug === selectedCategory),
+    [categories, selectedCategory]
+  );
+
+  const selectedParentCategory = useMemo(() => {
+    if (!selectedCategoryInfo) return undefined;
+    if (!selectedCategoryInfo.parentId) return selectedCategoryInfo;
+    return categories.find((cat) => cat.id === selectedCategoryInfo.parentId);
+  }, [categories, selectedCategoryInfo]);
+
+  const childCategories = useMemo(
+    () => (selectedParentCategory ? categories.filter((cat) => cat.parentId === selectedParentCategory.id) : []),
+    [categories, selectedParentCategory]
+  );
+
+  const visibleProducts = useMemo(() => {
+    if (!selectedCategoryInfo) return products;
+
+    const childIds = new Set(childCategories.map((child) => child.id));
+    return products.filter((product) => {
+      const ids = getProductCategoryIds(product);
+      if (!selectedCategoryInfo.parentId) {
+        if (ids.includes(selectedCategoryInfo.id)) return true;
+        return ids.some((id) => childIds.has(id));
+      }
+      return ids.includes(selectedCategoryInfo.id);
+    });
+  }, [childCategories, products, selectedCategoryInfo]);
+
+  const groupedProducts = useMemo(() => {
+    const shouldGroup =
+      Boolean(selectedCategoryInfo) && !selectedCategoryInfo?.parentId && childCategories.length > 0;
+    if (!shouldGroup) return null;
+
+    const groups = childCategories.map((category) => ({ category, products: [] as Product[] }));
+    const uncategorized: Product[] = [];
+
+    for (const product of visibleProducts) {
+      const ids = getProductCategoryIds(product);
+      let assigned = false;
+      for (let i = 0; i < childCategories.length; i += 1) {
+        if (ids.includes(childCategories[i].id)) {
+          groups[i].products.push(product);
+          assigned = true;
+          break;
+        }
+      }
+      if (!assigned) {
+        uncategorized.push(product);
+      }
+    }
+
+    return {
+      groups: groups.filter((group) => group.products.length > 0),
+      uncategorized,
+    };
+  }, [childCategories, selectedCategoryInfo, visibleProducts]);
 
   return (
     <main className={styles.page}>
@@ -198,7 +284,7 @@ export function ProductListPage() {
               <span className={styles.resultCount}>
                 Mostrando{' '}
                 <span className={styles.resultCountBold}>
-                  {products.length}
+                  {visibleProducts.length}
                 </span>{' '}
                 productos
               </span>
@@ -237,15 +323,46 @@ export function ProductListPage() {
             </div>
           )}
 
-          {!loading && !error && products.length > 0 && (
-            <div className={styles.productsGrid}>
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+          {!loading && !error && visibleProducts.length > 0 && (
+            groupedProducts ? (
+              <div className={styles.groupedProducts}>
+                {groupedProducts.groups.map((group) => (
+                  <section key={group.category.id} className={styles.groupSection}>
+                    <div className={styles.groupHeader}>
+                      <h3 className={styles.groupTitle}>{group.category.name}</h3>
+                      <span className={styles.groupCount}>{group.products.length}</span>
+                    </div>
+                    <div className={styles.productsGrid}>
+                      {group.products.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+                {groupedProducts.uncategorized.length > 0 && (
+                  <section className={styles.groupSection}>
+                    <div className={styles.groupHeader}>
+                      <h3 className={styles.groupTitle}>Sin subcategoria</h3>
+                      <span className={styles.groupCount}>{groupedProducts.uncategorized.length}</span>
+                    </div>
+                    <div className={styles.productsGrid}>
+                      {groupedProducts.uncategorized.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
+            ) : (
+              <div className={styles.productsGrid}>
+                {visibleProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )
           )}
 
-          {!loading && !error && products.length === 0 && (
+          {!loading && !error && visibleProducts.length === 0 && (
             <div className={styles.emptyState}>
               <span className={styles.emptyIcon}>🔍</span>
               <h3 className={styles.emptyTitle}>
