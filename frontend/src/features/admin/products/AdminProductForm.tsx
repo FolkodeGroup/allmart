@@ -8,6 +8,7 @@ import { useAdminImages } from '../../../context/AdminImagesContext';
 import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
+import { Modal } from '../../../components/ui/Modal';
 import { ProductImage } from '../../../components/ui/ProductImage';
 
 const EMPTY: Omit<AdminProduct, 'id'> = {
@@ -380,22 +381,23 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
     : [];
 
   return (
-    <div
-      className={`${styles.backdrop} dark:bg-black/60`}
-      onClick={e => e.target === e.currentTarget && onClose()}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && onClose()}
+    <Modal
+      open
+      onClose={onClose}
+      disableClose={saving}
+      size="lg"
+      layout="flush"
+      className={`${styles.panel} dark:bg-gray-800 dark:text-gray-100`}
+      ariaLabelledBy="admin-product-form-title"
     >
-      <div className={`${styles.panel} dark:bg-gray-800 dark:text-gray-100`}>
-        <div className={styles.panelHeader}>
-          <h2 className={styles.panelTitle}>
-            {isEdit ? 'Editar producto' : 'Nuevo producto'}
-          </h2>
-          <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="Cerrar">✕</button>
-        </div>
+      <div className={styles.panelHeader}>
+        <h2 className={styles.panelTitle} id="admin-product-form-title">
+          {isEdit ? 'Editar producto' : 'Nuevo producto'}
+        </h2>
+        <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="Cerrar">✕</button>
+      </div>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={handleSubmit}>
 
           {/* ── Información básica ── */}
           <fieldset className={styles.fieldset}>
@@ -761,9 +763,8 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
               {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear producto'}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }
 

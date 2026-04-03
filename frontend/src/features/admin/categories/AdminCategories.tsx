@@ -22,6 +22,7 @@ import { CategoriesFilters } from './components/CategoriesFilters';
 // import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { useCategoryBulkActions } from './hooks/useCategoryBulkActions';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 
 
 export function AdminCategories() {
@@ -29,7 +30,7 @@ export function AdminCategories() {
   // Local state for pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(10); // Could be made configurable
-  const { can } = useAdminAuth();
+  const { can, user } = useAdminAuth();
   const [search, setSearch] = useState('');
   // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
@@ -212,6 +213,14 @@ export function AdminCategories() {
 
       if (editId) {
         await updateCategory(editId, payload);
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: user || 'desconocido',
+          action: 'edit',
+          entity: 'category',
+          entityId: editId,
+          details: { ...payload },
+        });
         if (formImageFile) {
           await uploadCategoryImage(editId, formImageFile);
         }
@@ -221,7 +230,14 @@ export function AdminCategories() {
           slug: slugifyCategoryName(trimmedName),
           itemCount: 0,
         });
-
+        logAdminActivity({
+          timestamp: new Date().toISOString(),
+          user: user || 'desconocido',
+          action: 'create',
+          entity: 'category',
+          entityId: createdCategory.id,
+          details: { ...payload },
+        });
         if (formImageFile) {
           await uploadCategoryImage(createdCategory.id, formImageFile);
         }
@@ -252,6 +268,14 @@ export function AdminCategories() {
     setDeleting(true);
     try {
       await deleteCategory(id);
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: user || 'desconocido',
+        action: 'delete',
+        entity: 'category',
+        entityId: id,
+        details: {},
+      });
       showNotification('success', 'Categoría eliminada correctamente');
       refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
     } catch (err: any) {
@@ -278,6 +302,14 @@ export function AdminCategories() {
     setOptimisticVis(prev => ({ ...prev, [id]: newVisible }));
     try {
       await updateCategory(id, { isVisible: newVisible });
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: user || 'desconocido',
+        action: 'edit',
+        entity: 'category',
+        entityId: id,
+        details: { isVisible: newVisible },
+      });
       showNotification('success', newVisible ? 'Categoría visible' : 'Categoría oculta');
     } catch (err: any) {
       setOptimisticVis(prev => ({ ...prev, [id]: !newVisible }));

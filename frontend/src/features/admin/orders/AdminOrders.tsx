@@ -11,6 +11,7 @@ import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../..
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { Modal } from '../../../components/ui/Modal';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -201,24 +202,27 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
 
   return (
-    <div
-      className={styles.backdrop}
-      onClick={e => e.target === e.currentTarget && onClose()}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && onClose()}
+    <Modal
+      open
+      onClose={onClose}
+      size="full"
+      layout="flush"
+      className={styles.detailPanel}
+      overlayClassName={styles.backdrop}
+      ariaLabelledBy="order-detail-title"
     >
-      <div className={styles.detailPanel} role="dialog" aria-modal="true">
-        {/* Header */}
-        <div className={styles.detailHeader}>
-          <div className={styles.detailHeaderInfo}>
-            <h2 className={styles.detailTitle}>Pedido #{order.id.slice(0, 8).toUpperCase()}</h2>
-            <span className={styles.detailDate}>{formatDateTime(order.createdAt)}</span>
-          </div>
-          <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="Cerrar">✕</button>
+      {/* Header */}
+      <div className={styles.detailHeader}>
+        <div className={styles.detailHeaderInfo}>
+          <h2 className={styles.detailTitle} id="order-detail-title">
+            Pedido #{order.id.slice(0, 8).toUpperCase()}
+          </h2>
+          <span className={styles.detailDate}>{formatDateTime(order.createdAt)}</span>
         </div>
+        <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="Cerrar">✕</button>
+      </div>
 
-        <div className={styles.detailBody}>
+      <div className={styles.detailBody}>
           {/* Estado */}
           <section className={styles.detailSection}>
             <h3 className={styles.detailSectionTitle}>Estado del pedido</h3>
@@ -406,9 +410,8 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
               </div>
             </section>
           )}
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

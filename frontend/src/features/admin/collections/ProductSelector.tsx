@@ -3,8 +3,8 @@
  * Componente para seleccionar productos para agregar a una colección.
  */
 
-import React, { useState, useEffect } from 'react';
-import { fetchAdminProducts } from '../../../features/admin/products/productsService';
+import React, { useState, useEffect, useCallback } from 'react';
+import { fetchAdminProducts, type ApiProduct } from '../../../features/admin/products/productsService';
 import { getStoredToken } from '../../../utils/apiClient';
 import styles from './AdminCollections.module.css';
 
@@ -30,18 +30,10 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Cargar productos cuando el usuario escribe
-  useEffect(() => {
-    if (searchQuery.length > 0) {
-      fetchProducts(searchQuery);
-    } else {
-      setAvailableProducts([]);
-    }
-  }, [searchQuery]);
-
-  async function fetchProducts(query: string) {
+  const fetchProducts = useCallback(async (query: string) => {
     setLoading(true);
     setError(null);
+    setShowDropdown(true);
     try {
       const token = getStoredToken();
       if (!token) {
@@ -51,9 +43,15 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       const result = await fetchAdminProducts(token, { q: query, page: 1, limit: 10 });
       // Filtrar productos que ya están seleccionados
       const filtered = (result.data || []).filter(
-        (p: any) => !selectedIds.includes(p.id)
+        (product: ApiProduct) => !selectedIds.includes(product.id)
       );
-      setAvailableProducts(filtered);
+      const normalized: Product[] = filtered.map((product) => ({
+        id: product.id,
+        name: product.name,
+        sku: product.sku,
+        price: product.price,
+      }));
+      setAvailableProducts(normalized);
       setShowDropdown(true);
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -61,7 +59,18 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedIds]);
+
+  // Cargar productos cuando el usuario escribe
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      fetchProducts(searchQuery.trim());
+    } else {
+      setAvailableProducts([]);
+      setShowDropdown(false);
+      setError(null);
+    }
+  }, [searchQuery, fetchProducts]);
 
   function handleSelectProduct(product: Product) {
     onProductsChange([...selectedIds, product.id]);
@@ -75,11 +84,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
 
   return (
     <div className={styles.formGroup}>
-      <label>Productos en esta colección</label>
+      <label htmlFor="collection-products-search">Productos en esta colección</label>
 
       {/* Búsqueda de productos */}
       <div style={{ position: 'relative', marginBottom: '16px' }}>
         <input
+          id="collection-products-search"
           type="text"
           placeholder="Buscar productos para agregar..."
           value={searchQuery}
@@ -116,20 +126,25 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
               </div>
             )}
             {availableProducts.map((product) => (
-              <div
+              <button
                 key={product.id}
+                type="button"
                 onClick={() => handleSelectProduct(product)}
                 style={{
                   padding: '8px 12px',
                   borderBottom: '1px solid #f0f0f0',
                   cursor: 'pointer',
                   fontSize: '14px',
+                  width: '100%',
+                  textAlign: 'left',
+                  background: 'white',
+                  border: 'none',
                 }}
                 onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background = '#f5f5f5')
+                  ((e.currentTarget as HTMLButtonElement).style.background = '#f5f5f5')
                 }
                 onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background = 'white')
+                  ((e.currentTarget as HTMLButtonElement).style.background = 'white')
                 }
               >
                 <strong>{product.name}</strong>
@@ -137,7 +152,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                 <div style={{ fontSize: '12px', color: '#666' }}>
                   Precio: ${product.price}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}

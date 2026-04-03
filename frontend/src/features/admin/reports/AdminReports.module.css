@@ -465,6 +465,14 @@
   gap: 6px;
 }
 
+.chartModalBody {
+  padding: 0;
+}
+
+.chartModalInner {
+  padding: 16px;
+}
+
 /* scrollbar suave */
 .modalBody::-webkit-scrollbar {
   width: 6px;
