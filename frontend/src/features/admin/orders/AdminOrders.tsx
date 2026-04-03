@@ -1,84 +1,24 @@
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-
-import toast from 'react-hot-toast';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
-import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
-import { logAdminActivity } from '../../../services/adminActivityLogService';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
-// ...existing code...
+import { STATUS_LABELS, PAYMENT_LABELS, paymentClass, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS, formatPrice } from './utils/ordersHelpers';
+import toast from 'react-hot-toast';
+import { logAdminActivity } from '../../../services/adminActivityLogService';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { OrdersHeader } from './components/OrdersHeader';
+import { OrdersTable } from './components/OrdersTable';
+import { OrderList } from './components/OrderList';
 import { Notification } from '../../../components/ui/Notification';
 import { useReportsExport } from '../reports/hooks/useReportsExport';
 import { OrdersFiltersBar } from './components/OrdersFiltersBar';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
+import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
 
-/* ── Helpers ──────────────────────────────────────────────────── */
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  pendiente: 'Pendiente',
-  confirmado: 'Confirmado',
-  'en-preparacion': 'En preparación',
-  enviado: 'Enviado',
-  entregado: 'Entregado',
-  cancelado: 'Cancelado',
-};
-
-const PAYMENT_LABELS: Record<PaymentStatus, string> = {
-  'no-abonado': 'Sin abonar',
-  'abonado': 'Abonado',
-};
-
-function paymentClass(status: PaymentStatus): string {
-  return status === 'abonado' ? styles.paymentAbonado : styles.paymentNoAbonado;
-}
-
-const STATUS_OPTIONS: OrderStatus[] = [
-  'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
-];
-
-function statusClass(status: OrderStatus): string {
-  const map: Record<OrderStatus, string> = {
-    pendiente: styles.statusPendiente,
-    confirmado: styles.statusConfirmado,
-    'en-preparacion': styles.statusPreparacion,
-    enviado: styles.statusEnviado,
-    entregado: styles.statusEntregado,
-    cancelado: styles.statusCancelado,
-  };
-  return map[status];
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function formatDateTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString('es-AR', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-}
-
-function formatPrice(n: number): string {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency', currency: 'ARS', minimumFractionDigits: 0,
-  }).format(n);
-}
-
-/* ── Iconos por estado ── */
-const STATUS_ICONS: Record<OrderStatus, string> = {
-  pendiente: '⏳',
-  confirmado: '✔️',
-  'en-preparacion': '🔧',
-  enviado: '🚚',
-  entregado: '✅',
-  cancelado: '❌',
-};
+// Helpers y constantes extraídos a utils/ordersHelpers.ts
 
 /* ── Componente Timeline de estados ─────────────────────────────── */
 function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[]; currentStatus: OrderStatus }) {
@@ -87,13 +27,10 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
       <p className={styles.timelineEmpty}>No hay registros de cambios de estado aún.</p>
     );
   }
-
-  // Mostrar del más reciente al más antiguo
-  const sorted = [...history].reverse();
-
+  const sorted: OrderHistoryEntry[] = [...history].reverse();
   return (
     <ol className={styles.timeline}>
-      {sorted.map((entry, idx) => {
+      {sorted.map((entry: OrderHistoryEntry, idx: number) => {
         const isCurrent = entry.status === currentStatus && idx === 0;
         const isLast = idx === sorted.length - 1;
         return (
@@ -106,7 +43,7 @@ function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[
             </div>
             <div className={styles.timelineContent}>
               <div className={styles.timelineHeader}>
-                <span className={`${styles.statusBadge} ${statusClass(entry.status)}`}>
+                <span className={`${styles.statusBadge} ${statusClass(entry.status, styles)}`}>
                   {STATUS_LABELS[entry.status]}
                 </span>
                 {isCurrent && (
@@ -228,7 +165,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           <section className={styles.detailSection}>
             <h3 className={styles.detailSectionTitle}>Estado del pedido</h3>
             <div className={styles.statusRow}>
-              <span className={`${styles.statusBadge} ${statusClass(currentStatus)}`}>
+              <span className={`${styles.statusBadge} ${statusClass(currentStatus, styles)}`}>
                 {STATUS_LABELS[currentStatus]}
               </span>
               {can('orders.edit') && (
@@ -276,7 +213,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
             <section className={styles.detailSection}>
               <h3 className={styles.detailSectionTitle}>Pago</h3>
               <div className={styles.paymentRow}>
-                <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus)}`}>
+                <span className={`${styles.paymentBadge} ${paymentClass(paymentStatus, styles)}`}>
                   {isAbonado ? '✓' : '○'} {PAYMENT_LABELS[paymentStatus]}
                 </span>
                 {isAbonado && order.paidAt && (
@@ -417,10 +354,10 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   );
 }
 
-
-
-export function AdminOrders() {
+function AdminOrders() {
   const { token } = useAdminAuth();
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  // Estado para modales globales
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   // const [isLoadingMore, setIsLoadingMore] = useState(false); // No se usa
@@ -428,7 +365,6 @@ export function AdminOrders() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
 
@@ -650,6 +586,7 @@ export function AdminOrders() {
   return (
     <main className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`} tabIndex={-1} aria-label="Gestión de pedidos">
       {/* Header */}
+      <OrdersHeader />
       <header className={sectionStyles.header}>
         <span className={sectionStyles.label}>Administración</span>
         <h1 className={sectionStyles.title}>
@@ -716,6 +653,7 @@ export function AdminOrders() {
           </>
         )}
       </section>
+
       {/* Exportación */}
       <section className={styles.exportWrap} aria-label="Exportar pedidos">
         <div className={styles.exportWrap}>
@@ -832,6 +770,8 @@ export function AdminOrders() {
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
+          <SummarySkeleton />
+          {/* Aquí puedes agregar skeletons para tabla y mobile si lo deseas */}
           <div className={styles.tableWrapper} style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
             <table className={styles.table} style={{ minWidth: 900 }} aria-label="Pedidos" aria-describedby="orders-count">
               <caption className="sr-only">Lista de pedidos de clientes</caption>
@@ -867,6 +807,20 @@ export function AdminOrders() {
         </div>
       ) : (
         <>
+          <OrdersTable
+            orders={orders}
+            selectedIds={selectedIds}
+            onSelect={handleSelectOne}
+            onDetail={setSelectedOrder}
+          />
+          <OrderList
+            orders={orders}
+            selectedIds={selectedIds}
+            onSelect={handleSelectOne}
+            onDetail={setSelectedOrder}
+          />
+          {/* Acciones masivas y modals pueden ir aquí */}
+          <div style={{ height: '100px'}} aria-hidden='true'/>
           {/* Tabla — tablet y desktop */}
           <div className={styles.tableWrapper} style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
             <table className={styles.table} style={{ minWidth: 900 }} aria-label="Pedidos" aria-describedby="orders-count">
@@ -907,7 +861,7 @@ export function AdminOrders() {
                     <td className={styles.orderId}>
                       #{order.id.slice(0, 8).toUpperCase()}
                     </td>
-                    <td className={styles.orderDate}>{formatDate(order.createdAt)}</td>
+                    <td className={styles.orderDate}>{formatDateTime(order.createdAt)}</td>
                     <td>
                       <div className={styles.customerName}>{order.customer.firstName} {order.customer.lastName}</div>
                       <div className={styles.customerEmail}>{order.customer.email}</div>
@@ -920,7 +874,7 @@ export function AdminOrders() {
                     </td>
                     <td>
                       <span
-                        className={`${styles.statusBadge} ${statusClass(order.status)}`}
+                        className={`${styles.statusBadge} ${statusClass(order.status, styles)}`}
                         aria-label={`Estado: ${STATUS_LABELS[order.status]}`}
                         role="status"
                         aria-live="polite"
@@ -998,7 +952,7 @@ export function AdminOrders() {
                     <span className={styles.mobileCardId}>
                       #{order.id.slice(0, 8).toUpperCase()}
                     </span>
-                    <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
+                    <span className={styles.mobileCardDate}>{formatDateTime(order.createdAt)}</span>
                   </div>
                   <div className={styles.mobileCardMid}>
                     <div className={styles.mobileCardCustomer}>
@@ -1012,7 +966,7 @@ export function AdminOrders() {
                   <div className={styles.mobileCardBottom}>
                     <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
                     <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
-                    <span className={styles.statusBadge + ' ' + statusClass(order.status)}>{STATUS_LABELS[order.status]}</span>
+                    <span className={styles.statusBadge + ' ' + statusClass(order.status, styles)}>{STATUS_LABELS[order.status]}</span>
                   </div>
                 </div>
               );
@@ -1136,8 +1090,8 @@ export function AdminOrders() {
             bulkModalOpen && bulkAction && (
               <ModalConfirm
                 open={bulkModalOpen}
-                title={`Acción masiva: ${getBulkActionLabel(bulkAction)}`}
-                message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
+                title={`Acción masiva: ${getBulkActionLabel(bulkAction!)}`}
+                message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction!)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
                 confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
                 cancelText={'Cancelar'}
                 onConfirm={bulkLoading ? () => { } : executeBulkAction}
@@ -1151,14 +1105,13 @@ export function AdminOrders() {
       }
 
       {/* Modal detalle */}
-      {
-        selectedOrder && (
-          <OrderDetailModal
-            order={orders.find(o => o.id === selectedOrder.id) ?? selectedOrder}
-            onClose={() => setSelectedOrder(null)}
-          />
-        )
-      }
+      {selectedOrder && (
+        <OrderDetailModal
+          order={(orders.find(o => o.id === selectedOrder!.id) ?? selectedOrder!)}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
+
 
       {/* ModalConfirm global */}
       <ModalConfirm
@@ -1170,16 +1123,22 @@ export function AdminOrders() {
                 'Confirmar acción'
         }
         message={
-          modal.type === 'delete' ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.' :
-            modal.type === 'status' && typeof modal.payload?.status === 'string' ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?` :
-              modal.type === 'paid' ? '¿Confirmar que el cliente abonó este pedido?' :
-                ''
+          modal.type === 'delete'
+            ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.'
+            : modal.type === 'status' && typeof modal.payload?.status === 'string'
+              ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?`
+              : modal.type === 'paid'
+                ? '¿Confirmar que el cliente abonó este pedido?'
+                : ''
         }
         confirmText={modal.isLoading ? 'Procesando...' : 'Confirmar'}
         cancelText={'Cancelar'}
         onConfirm={modal.isLoading ? () => { } : handleConfirmModal}
         onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
-    </main >
+
+    </main>
   );
 }
+
+export default AdminOrders;

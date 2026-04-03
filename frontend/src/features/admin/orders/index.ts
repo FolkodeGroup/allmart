@@ -1,2 +1,2 @@
 // Barrel — módulo de Órdenes
-export { AdminOrders } from './AdminOrders';
+export { default as AdminOrders } from './AdminOrders';
