@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import type { ReportsFiltersValue } from './components/ReportsFilters';
 import type { OrdersTableProps } from './AdminReports';
-import { BarChart } from './components/BarChart';
-import { DonutChart } from './components/DonutChart';
 import { OrdersTable } from './components/OrdersTable';
+import { generateMockOrders } from "./components/DatosMockeados";
+import { chunkOrdersForPDF } from "./components/chunkOrdersForPDF";
 // import { flushSync } from 'react-dom';
 
 export interface PrintableReportProps {
@@ -26,10 +26,10 @@ export interface PrintableReportProps {
     };
 }
 
-
+const BarChart = React.lazy(() => import('./components/BarChart'));
+const DonutChart = React.lazy(() => import('./components/DonutChart'));
 // IMPORTA DATOS MOCKEADOS PARA PRUEBA
-import { generateMockOrders } from "./components/DatosMockeados";
-import { chunkOrdersForPDF } from "./components/chunkOrdersForPDF";
+
 
 export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportProps>(
     (
@@ -151,12 +151,14 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                     >
                         <div style={{ ...box, border: "none" }}>
                             <h3 style={title}>Ventas</h3>
-                            <BarChart
-                                data={barData}
-                                formatValue={(n: number) =>
-                                    `$${n.toLocaleString('es-AR')}`
-                                }
-                            />
+                            <Suspense fallback="Cargando gráfico...">
+                                <BarChart
+                                    data={barData}
+                                    formatValue={(n: number) =>
+                                        `$${n.toLocaleString('es-AR')}`
+                                    }
+                                />
+                            </Suspense>
                         </div>
                         <div
                             style={{
@@ -168,7 +170,9 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                         >
                             <div>
                                 <h3 style={title}>Pedidos por estado</h3>
-                                <DonutChart slices={statusSlices} />
+                                <Suspense fallback="Cargando gráfico...">
+                                    <DonutChart slices={statusSlices} />
+                                </Suspense>
                             </div>
                         </div>
                     </section>

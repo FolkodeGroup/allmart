@@ -1,7 +1,7 @@
 // Gráficos con lazy loading y skeletons
 import React, { Suspense } from 'react';
-const BarChart = React.lazy(() => import('./BarChart').then(m => ({ default: m.BarChart })));
-const DonutChart = React.lazy(() => import('./DonutChart').then(m => ({ default: m.DonutChart })));
+const BarChart = React.lazy(() => import('../components/BarChart'));
+const DonutChart = React.lazy(() => import('../components/DonutChart'));
 import { BarChartSkeleton, DonutChartSkeleton } from './Skeletons';
 
 /**

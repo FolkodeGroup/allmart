@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-//import { useAdminOrders } from '../../../context/AdminOrdersContext';
+import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminReports.module.css';
@@ -12,14 +12,19 @@ import type { ReportsFiltersValue, PredefinedPeriod } from './components/Reports
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { Pagination } from './components/Pagination';
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
-import { generateMockOrders } from './components/DatosMockeados';
+//import { generateMockOrders } from './components/DatosMockeados';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
 import { SalesTableView } from './components/SalesTableView';
+import {
+  createdAtToMs, parseDateStartLocal, formatDateLocal,
+  getDayKeyLocalFromMs,
+} from '../../../utils/date';
+import { useReportsData } from './hooks/useReportsData';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -41,20 +46,21 @@ function isoDateLabel(iso: string) {
 
 /* Genera array de fechas [YYYY-MM-DD] de los últimos N días */
 function lastNDayKeys(n: number): string[] {
-  const today = new Date();
   const keys: string[] = [];
-
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMs = today.getTime();
   for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    keys.push(d.toISOString().slice(0, 10));
+    const dayMs = todayMs - i * 24 * 60 * 60 * 1000;
+    keys.push(getDayKeyLocalFromMs(dayMs));
   }
-
   return keys;
 }
 
-function orderDateKey(iso: string) {
-  return iso.slice(0, 10);
+function orderDateKey(createdAt: string): string {
+  // Normaliza a ms y luego a key local
+  const ms = createdAtToMs(createdAt);
+  return getDayKeyLocalFromMs(ms);
 }
 
 /* ── Tipos internos ─────────────────────────────────────────────── */
@@ -69,14 +75,8 @@ const PERIOD_LABELS: Record<Period, string> = {
 };
 
 // Lazy loading de gráficos optimizado (cada chunk por separado, no se recrea en cada render)
-const BarChart = lazy(initBarChart);
-const DonutChart = lazy(initDonutChart);
-function initBarChart() {
-  return import('./components/BarChart').then(m => ({ default: m.BarChart }));
-}
-function initDonutChart() {
-  return import('./components/DonutChart').then(m => ({ default: m.DonutChart }));
-}
+const BarChart = React.lazy(() => import('./components/BarChart'));
+const DonutChart = React.lazy(() => import('./components/DonutChart'));
 
 
 export interface OrdersTableProps {
@@ -96,8 +96,8 @@ export interface OrdersTableProps {
  */
 export function AdminReports() {
 
-  //const { orders } = useAdminOrders();
-  const orders = generateMockOrders(50);
+  const { orders } = useAdminOrders();
+  //const orders = useMemo(() => generateMockOrders(50), []);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
   // Unsaved changes detection
@@ -132,6 +132,13 @@ export function AdminReports() {
   // Estado para cambiar vista de gráfico barchart
   const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
+  useEffect(() => {
+    if (!showHiddenPdf) return;
+    generatePdf({ rootRef: hiddenPdfRef, fileName: 'reporte-resumen.pdf' })
+      .then(() => setNotif({ open: true, type: 'success', message: 'PDF generado.' }))
+      .catch(() => setNotif({ open: true, type: 'error', message: 'Error generando PDF.' }))
+      .finally(() => setShowHiddenPdf(false));
+  }, [showHiddenPdf, generatePdf]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
@@ -152,102 +159,38 @@ export function AdminReports() {
   // Si usas react-router, puedes usar useBlocker o usePrompt aquí
 
   // Determinar periodo para lógica existente
-  const period: Period =
-    filters.type === 'predefined' ? filters.period : 'custom';
 
   // Calcular min/max fechas para inputs
-  const allDates = orders.map(o => o.createdAt.slice(0, 10));
-  const minDate = allDates.length ? allDates.reduce((a, b) => (a < b ? a : b)) : undefined;
+  const allDates = orders.map(o => {
+    // normaliza strings YYYY-MM-DD o ISO con hora
+    const ms = createdAtToMs(o.createdAt);
+    return formatDateLocal(new Date(ms));
+  });
+  const minDate = undefined;
   const maxDate = allDates.length ? allDates.reduce((a, b) => (a > b ? a : b)) : undefined;
 
-  const ordersWithTime = useMemo(() =>
-    orders.map(o => ({
+  const ordersWithTime = useMemo(() => {
+    return orders.map(o => ({
       ...o,
-      createdAtMs: new Date(o.createdAt).getTime()
-    })),
+      createdAtMs: createdAtToMs(o.createdAt)
+    }))
+  },
     [orders]);
 
   // Filtrado extendido
   // periodOrders: solo filtra por período (filtros generales)
-  const periodOrders = useMemo(() => {
-    let filtered = [] as typeof ordersWithTime;
-    if (filters.type === 'predefined') {
-      if (filters.period === 'all') {
-        filtered = ordersWithTime;
-      } else {
-        const days = filters.period === '7d' ? 7 : filters.period === '30d' ? 30 : 90;
-        const cutoff = now - days * 86400000;
-        filtered = ordersWithTime.filter(o => o.createdAtMs >= cutoff);
-      }
-    } else {
-      const { from, to } = filters.range;
-      if (!from || !to) return [];
-      const fromTime = new Date(from).setHours(0, 0, 0, 0);
-      const toTime = new Date(to).setHours(23, 59, 59, 999);
-      filtered = ordersWithTime.filter(o => o.createdAtMs >= fromTime && o.createdAtMs <= toTime);
-    }
-    return filtered;
-  }, [ordersWithTime, filters, now]);
-
-
-
-  // Filtros avanzados SOLO para la tabla de pedidos
-  const filteredOrdersTable = useMemo(() => {
-    let filtered = periodOrders;
-    // 1. Filtro por estado (multi-select)
-    if (ordersTableFilters.status && ordersTableFilters.status.length > 0) {
-      filtered = filtered.filter(o => ordersTableFilters.status.includes(o.status));
-    }
-    // 2. Filtro por cliente (nombre, email)
-    if (ordersTableFilters.clientQuery && ordersTableFilters.clientQuery.trim() !== '') {
-      const q = ordersTableFilters.clientQuery.trim().toLowerCase();
-      filtered = filtered.filter(o => {
-        const c = o.customer;
-        return (
-          (c.firstName && c.firstName.toLowerCase().includes(q)) ||
-          (c.lastName && c.lastName.toLowerCase().includes(q)) ||
-          (c.email && c.email.toLowerCase().includes(q))
-        );
-      });
-    }
-
-    // 3. Filtro por producto (nombre parcial)
-    if (ordersTableFilters.productQuery && ordersTableFilters.productQuery.trim() !== '') {
-      const pq = ordersTableFilters.productQuery.trim().toLowerCase();
-      filtered = filtered.filter(o =>
-        o.items && o.items.some(it => it.productName && it.productName.toLowerCase().includes(pq))
-      );
-    }
-    return filtered;
-  }, [periodOrders, ordersTableFilters]);
-
-  // Corrige la página si los filtros dejan menos elementos de los que la página actual puede mostrar
-  useEffect(() => {
-    const totalFiltered = filteredOrdersTable.length;
-    const maxPage = Math.max(1, Math.ceil(totalFiltered / pageSize));
-    if (page > maxPage) {
-      setPage(maxPage);
-    }
-  }, [filteredOrdersTable.length, pageSize, page]);
-
-  const from = filteredOrdersTable.length === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to = Math.min(page * pageSize, filteredOrdersTable.length);
-
-  const activeOrders = useMemo(
-    () => periodOrders.filter(o => o.status !== 'cancelado'),
-    [periodOrders]
+  const {
+    period,
+    periodOrders,
+    filteredOrdersTable,
+    activeOrders,
+    kpis
+  } = useReportsData(
+    orders,
+    filters,
+    ordersTableFilters,
+    now
   );
-
-  /* ── KPIs ── */
-  const kpis = useMemo(() => {
-    const totalRevenue = activeOrders.reduce((s, o) => s + o.total, 0);
-    const orderCount = activeOrders.length;
-    const avgTicket = orderCount ? totalRevenue / orderCount : 0;
-    const delivered = activeOrders.filter(o => o.status === 'entregado').length;
-    const completionRate = orderCount ? Math.round((delivered / orderCount) * 100) : 0;
-    const paid = periodOrders.filter(o => o.paymentStatus === 'abonado').length;
-    return { totalRevenue, orderCount, avgTicket, completionRate, paid };
-  }, [activeOrders, periodOrders]);
 
   /* ── Comparativa período anterior ── */
   const prevPeriodRevenue = useMemo(() => {
@@ -315,13 +258,45 @@ export function AdminReports() {
     },
   ];
 
+  const dayKeys = useMemo(() => {
+    if (filters.type === 'predefined') {
+      if (filters.period === 'all') return [];
+
+      const days =
+        filters.period === '7d' ? 7 :
+          filters.period === '30d' ? 30 : 90;
+
+      return lastNDayKeys(days);
+    }
+
+    // custom range
+    if (filters.type === 'custom') {
+      const { from: rangeFrom, to: rangeTo } = filters.range;
+      if (!rangeFrom || !rangeTo) return [];
+
+      const result: string[] = [];
+      let currentMs = parseDateStartLocal(rangeFrom);
+      const endMs = parseDateStartLocal(rangeTo);
+
+      while (currentMs <= endMs) {
+        result.push(formatDateLocal(new Date(currentMs)));
+        currentMs += 86400000; // +1 día
+      }
+
+      return result;
+    }
+
+    return [];
+  }, [filters]);
+
   /* ── Datos para BarChart ── */
   const barData = useMemo(() => {
+    // Caso: todo el tiempo → agrupar por mes
     if (period === 'all') {
       const map = new Map<string, number>();
       ordersWithTime.forEach(o => {
         if (o.status === 'cancelado') return;
-        const k = o.createdAt.slice(0, 7);
+        const k = o.createdAt.slice(0, 7); // YYYY-MM
         map.set(k, (map.get(k) ?? 0) + o.total);
       });
       return [...map.entries()]
@@ -332,6 +307,27 @@ export function AdminReports() {
           value: v,
         }));
     }
+
+    // ✅ FIX: separar el caso 'custom' del predefinido.
+    // Antes, 'custom' caía en el branch predefinido y usaba lastNDayKeys(90)
+    // en lugar de las claves del rango seleccionado, resultando en un mapa
+    // vacío para el rango custom → sin datos en gráfico ni tabla.
+    if (period === 'custom') {
+      // dayKeys ya contiene las claves YYYY-MM-DD del rango personalizado
+      // generadas correctamente por parseDateStartLocal + formatDateLocal
+      const map = new Map<string, number>(dayKeys.map(k => [k, 0]));
+      activeOrders.forEach(o => {
+        const k = orderDateKey(o.createdAt);
+        if (map.has(k)) map.set(k, (map.get(k) ?? 0) + o.total);
+      });
+      return dayKeys.map(k => ({
+        dateKey: k,
+        label: isoDateLabel(k + 'T12:00:00'),
+        value: map.get(k) ?? 0,
+      }));
+    }
+
+    // Caso: períodos predefinidos (7d, 30d, 90d)
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
     const keys = lastNDayKeys(days);
     const map = new Map<string, number>(keys.map(k => [k, 0]));
@@ -344,7 +340,7 @@ export function AdminReports() {
       label: isoDateLabel(k + 'T12:00:00'),
       value: map.get(k) ?? 0,
     }));
-  }, [ordersWithTime, activeOrders, period]);
+  }, [ordersWithTime, activeOrders, period, dayKeys]);
 
   /* ── Top productos ── */
   const topProducts = useMemo(() => {
@@ -431,46 +427,17 @@ export function AdminReports() {
     );
   }, [filteredOrdersTable, page, pageSize]);
 
-  const dayKeys = useMemo(() => {
-    if (filters.type === 'predefined') {
-      if (filters.period === 'all') return [];
-
-      const days =
-        filters.period === '7d' ? 7 :
-          filters.period === '30d' ? 30 : 90;
-
-      return lastNDayKeys(days);
-    }
-
-    // custom range
-    if (filters.type === 'custom') {
-      const { from, to } = filters.range;
-      if (!from || !to) return [];
-
-      const result: string[] = [];
-      const current = new Date(from);
-      const end = new Date(to);
-
-      current.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
-
-      while (current <= end) {
-        result.push(current.toISOString().slice(0, 10));
-        current.setDate(current.getDate() + 1);
-      }
-
-      return result;
-    }
-
-    return [];
-  }, [filters]);
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredOrdersTable.length / pageSize);
+    if (page > maxPage) setPage(maxPage || 1);
+  }, [filteredOrdersTable, pageSize, page]);
 
   const salesContent = useMemo(() => {
-    if (barData.every(d => d.value === 0)) {
-      return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
-    }
-
     if (salesViewMode === 'chart') {
+      //  El guard por si el periodo no tiene ventas, para evitar mostrar un gráfico vacío sin contexto.
+      /*if (barData.every(d => d.value === 0)) {
+        return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
+      }*/
       return (
         <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
           <div className={styles.fadeIn}>
@@ -480,20 +447,23 @@ export function AdminReports() {
       );
     }
 
-
-
+    //  La tabla siempre renderiza, muestra "Sin ventas" por fila internamente
     return (
       <div className={styles.fadeIn}>
         <SalesTableView
-          orders={activeOrders}
+          orders={periodOrders}
           formatPrice={formatPrice}
           dayKeys={dayKeys}
         />
       </div>
     );
+  }, [barData, salesViewMode, BarChartSkeleton, dayKeys, periodOrders]);
 
-  }, [barData, salesViewMode, activeOrders, BarChartSkeleton, dayKeys]);
+  const from = filteredOrdersTable.length === 0
+    ? 0
+    : (page - 1) * pageSize + 1;
 
+  const to = Math.min(page * pageSize, filteredOrdersTable.length);
 
   return (
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
@@ -637,7 +607,7 @@ export function AdminReports() {
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
-            <div className={styles.viewToggle}>
+            <div className={styles.viewToggleGroup + ' fadeInFast'}>
               <span className={styles.viewToggleLabel}>Vista:</span>
 
               <button
@@ -837,9 +807,9 @@ export function AdminReports() {
                 <OrdersTable
                   orders={paginatedOrders}
                 />
-                {periodOrders.length > pageSize && (
+                {filteredOrdersTable.length > pageSize && (
                   <p className={styles.moreHint + ' fadeInFast'}>
-                    Mostrando {from}-{to} de {periodOrders.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
+                    Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
                   </p>
                 )}
                 <Pagination

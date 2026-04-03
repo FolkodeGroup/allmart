@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import type { ReactNode } from 'react';
-import { useId } from 'react';
 import styles from './Tooltip.module.css';
 
 interface TooltipProps {
@@ -20,10 +19,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
 }) => {
   const [visible, setVisible] = useState(false);
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // id accesible y estable
-  const reactId = typeof useId === 'function' ? useId() : undefined;
-  const idRef = useRef(id || reactId || `tooltip-${Math.random().toString(36).slice(2, 10)}`);
-  const tooltipId = idRef.current;
+  const reactId = useId();
+  const tooltipId = id || reactId;
 
   const show = () => {
     timeout.current = setTimeout(() => {

@@ -1,0 +1,52 @@
+.tooltipWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 1000;
+  min-width: 120px;
+  max-width: 260px;
+  background: #23272f;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(.4,0,.2,1), transform 0.18s cubic-bezier(.4,0,.2,1);
+  will-change: opacity, transform;
+  line-height: 1.4;
+  text-align: left;
+  user-select: none;
+}
+
+.tooltip_top {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  animation: fadeInUp 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+.tooltip_bottom {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  animation: fadeInDown 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.98); }
+  to { opacity: 1; transform: translateX(-50%) translateY(-8px) scale(1); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.98); }
+  to { opacity: 1; transform: translateX(-50%) translateY(8px) scale(1); }
+}

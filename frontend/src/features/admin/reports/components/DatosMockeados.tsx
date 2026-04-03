@@ -1,4 +1,5 @@
 import type { Order } from '../../../../context/AdminOrdersContext';
+import { formatDateLocal } from '../../../../utils/date';
 
 const statuses = [
     'pendiente',
@@ -48,10 +49,8 @@ export const generateMockOrders = (count: number): Order[] => {
 
         // 🔥 MISMO DÍA para varios pedidos (agrupa cada 5 órdenes)
         const dayOffset = Math.floor(i / 5);
-
-        const createdAt = new Date(
-            Date.now() - dayOffset * 86400000
-        ).toISOString();
+        const mockDate = new Date(Date.now() - dayOffset * 24 * 60 * 60 * 1000);
+        const createdAt = formatDateLocal(mockDate);
 
         // 🔥 cantidad de productos por orden (1 a 5)
         const itemsCount = Math.floor(Math.random() * 5) + 1;
@@ -70,6 +69,7 @@ export const generateMockOrders = (count: number): Order[] => {
                 unitPrice,
             };
         });
+
 
         // 🔥 total calculado real
         const total = items.reduce(

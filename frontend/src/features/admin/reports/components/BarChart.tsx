@@ -24,7 +24,7 @@ type Props = {
  * @param data Array de objetos con label, value y dateKey
  * @param formatValue Función opcional para formatear los valores
  */
-export function BarChart({ data, formatValue }: Props) {
+const BarChart = ({ data, formatValue }: Props) => {
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
     const isMobile = useIsMobile();
 
@@ -96,7 +96,7 @@ export function BarChart({ data, formatValue }: Props) {
     const step = (dynamicW - padLeft - padRight) / data.length;
 
     const barW = Math.max(10, step - gap);
-    const showAllLabels = data.length <= 30;
+    const showAllLabels = data.length <= 90;
 
     const hoveredItem =
         hoveredIdx !== null ? data[hoveredIdx] : null;
@@ -244,3 +244,5 @@ export function BarChart({ data, formatValue }: Props) {
         </div >
     );
 }
+
+export default BarChart;
