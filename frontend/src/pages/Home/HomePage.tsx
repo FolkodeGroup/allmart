@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Hero } from '../../features/home/Hero/Hero';
 import { CategoryGrid } from '../../features/home/CategoryGrid/CategoryGrid';
 import { FeaturedProducts } from '../../features/home/FeaturedProducts/FeaturedProducts';
 import type { PublicCollection } from '../../services/publicCollectionsService';
@@ -52,7 +51,6 @@ export function HomePage() {
 
   return (
     <main>
-      <Hero />
       {banners.length > 0 && <BannerSlider banners={banners} />}
       <CategoryGrid />
       <FeaturedProducts

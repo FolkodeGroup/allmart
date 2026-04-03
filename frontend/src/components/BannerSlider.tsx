@@ -55,14 +55,6 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
                 alt={banner.altText || banner.title}
                 className={styles.bannerImage}
               />
-              {banner.title && (
-                <div className={styles.bannerOverlay}>
-                  <h2 className={styles.bannerTitle}>{banner.title}</h2>
-                  {banner.description && (
-                    <p className={styles.bannerDescription}>{banner.description}</p>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         ))}
