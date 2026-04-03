@@ -182,9 +182,16 @@
 }
 
 .navBarStrip {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
   background: linear-gradient(90deg, #e9f0eb 0%, #dde9e1 55%, #d4e3d9 100%);
   border-top: 1px solid rgba(47, 95, 70, 0.2);
   border-bottom: 1px solid rgba(47, 95, 70, 0.2);
+  z-index: 10;
 }
 
 .nav {
@@ -203,7 +210,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.58rem 0.78rem;
+  padding: 0.58rem 0.55rem;
   border: none;
   border-radius: var(--radius-md);
   text-decoration: none;
@@ -211,10 +218,10 @@
   cursor: pointer;
   color: #2c4135;
   font-family: var(--font-ui);
-  font-size: var(--text-sm);
+  font-size: 0.88rem;
   font-weight: var(--font-medium);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  /* text-transform: uppercase; */
   transition: color var(--transition-base), background var(--transition-base);
 }
 
