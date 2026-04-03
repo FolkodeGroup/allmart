@@ -32,7 +32,7 @@ export const ProductPagination: React.FC<ProductPaginationProps> = ({ page, tota
   return (
     <nav
       className={styles.pagination}
-      style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+      style={{ marginTop: 12, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}
       aria-label="Paginación de productos"
       role="navigation"
     >

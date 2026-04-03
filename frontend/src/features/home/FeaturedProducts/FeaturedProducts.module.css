@@ -1,5 +1,5 @@
 .section {
-  padding: var(--space-20) 0;
+  padding: var(--space-16) 0;
   background: var(--color-primary-light);
 }
 
@@ -10,7 +10,7 @@
   max-width: var(--container-2xl);
   margin: 0 auto;
   padding: 0 var(--space-6);
-  margin-bottom: var(--space-10);
+  margin-bottom: var(--space-6);
 }
 
 .headerText {
@@ -90,7 +90,7 @@
   }
 
   .section {
-    padding: var(--space-12) 0;
+    padding: var(--space-8) 0;
   }
 
   .header {

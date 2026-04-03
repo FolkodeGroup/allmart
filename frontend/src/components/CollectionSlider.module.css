@@ -15,7 +15,7 @@
 .banner {
   width: 100%;
   height: 240px;
-  margin-bottom: 32px;
+  margin-bottom: var(--space-6);
   border-radius: 12px;
   overflow: hidden;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -29,7 +29,7 @@
 
 /* ── Header (Título y Descripción) ── */
 .header {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-5);
 }
 
 .titleSection {
@@ -56,7 +56,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 0;
 }
 
@@ -71,7 +71,7 @@
 /* ── Slider Track ── */
 .slider {
   display: flex;
-  gap: 20px;
+  gap: var(--space-4);
   overflow-x: auto;
   overflow-y: hidden;
   scroll-behavior: smooth;
@@ -250,7 +250,7 @@
 
   .banner {
     height: 180px;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-5);
   }
 
   .titleSection h2 {
@@ -262,11 +262,11 @@
   }
 
   .header {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
   }
 
   .slider {
-    gap: 12px;
+    gap: var(--space-3);
   }
 
   .productCard {
@@ -297,14 +297,14 @@
   }
 
   .sliderWrapper {
-    gap: 8px;
+    gap: var(--space-2);
   }
 }
 
 @media (max-width: 480px) {
   .banner {
     height: 140px;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
   }
 
   .titleSection h2 {
@@ -317,11 +317,11 @@
   }
 
   .header {
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
   }
 
   .slider {
-    gap: 10px;
+    gap: var(--space-2);
   }
 
   .productCard {
@@ -352,7 +352,7 @@
   }
 
   .sliderWrapper {
-    gap: 6px;
+    gap: var(--space-1);
   }
 }
 

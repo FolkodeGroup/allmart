@@ -5,7 +5,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-4);
   max-width: 1900px;
   animation: fadeIn 0.4s both;
   width: 100%;
@@ -31,7 +31,7 @@
   border: none;
   border-radius: 0;
   padding: 0;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
 }
 
 .label {

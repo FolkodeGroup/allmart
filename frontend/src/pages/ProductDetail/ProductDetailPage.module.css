@@ -58,7 +58,7 @@
 }
 .page {
   padding-top: var(--space-8);
-  padding-bottom: var(--space-20);
+  padding-bottom: var(--space-16);
 }
 
 .breadcrumb {
@@ -97,7 +97,7 @@
 .productLayout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-12);
+  gap: var(--space-10);
   max-width: var(--container-2xl);
   margin: 0 auto;
   padding: 0 var(--space-6);
@@ -362,7 +362,7 @@
 
 /* ── Related Products ── */
 .relatedSection {
-  margin-top: var(--space-20);
+  margin-top: var(--space-16);
   max-width: var(--container-2xl);
   margin-left: auto;
   margin-right: auto;
@@ -374,7 +374,7 @@
   font-size: var(--text-xl);
   font-weight: var(--font-bold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 
 .relatedGrid {
@@ -398,7 +398,7 @@
   }
 
   .page {
-    padding-bottom: var(--space-12);
+    padding-bottom: var(--space-8);
   }
 
   .breadcrumb {
@@ -412,7 +412,7 @@
 
   .relatedSection {
     padding: 0 var(--space-4);
-    margin-top: var(--space-12);
+    margin-top: var(--space-8);
   }
 
   .currentPrice {

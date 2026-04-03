@@ -7,15 +7,15 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px;
+  padding: var(--space-5);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
   flex-wrap: wrap;
 }
 
@@ -45,12 +45,12 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    padding: var(--space-4);
   }
 
   .header {
     flex-direction: column;
-    gap: 16px;
+    gap: var(--space-4);
   }
 
   .header button {

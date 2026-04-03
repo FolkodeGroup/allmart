@@ -63,8 +63,8 @@ export function HomePage() {
       
       {/* Secciones de Colecciones - Dinámicas con colores alternados */}
       {loading && (
-        <section style={{ background: 'var(--color-primary-light)', padding: '60px 0' }}>
-          <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 48px' }}>
+        <section style={{ background: 'var(--color-primary-light)', padding: 'var(--space-16) 0' }}>
+          <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
             <p style={{ color: '#666' }}>Cargando colecciones especiales...</p>
           </div>
         </section>
@@ -79,10 +79,10 @@ export function HomePage() {
             return (
               <section
                 key={collection.id}
-                style={{ background: backgroundColor, padding: '60px 0' }}
+                style={{ background: backgroundColor, padding: 'var(--space-16) 0' }}
                 aria-label={collection.name}
               >
-                <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 48px' }}>
+                <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
                   <CollectionSlider
                     title={collection.name}
                     description={collection.description}
