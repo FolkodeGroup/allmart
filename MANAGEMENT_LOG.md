@@ -1389,3 +1389,5 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #707: 453 mejorar visualización de gráficos comparativos y tendencias | 2026-04-01 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #709: 453 mejorar visualización de gráficos comparativos y tendencias | 2026-04-02 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #711: 420 adaptar la interfaz de pedidos para dispositivos móviles | 2026-04-02 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #717: 423 añadir tooltips y ayuda contextual en acciones de pedidos | 2026-04-02 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #716: 430 añadir filtro avanzado por estado fecha y total | 2026-04-03 |
