@@ -331,8 +331,6 @@
 .dateInput:focus {
   border-color: var(--color-primary);
 }
-<<<<<<< HEAD
-=======
 
 .totalFilters {
   display: flex;
@@ -360,7 +358,6 @@
   cursor: pointer;
   transition: border-color 0.15s;
 }
->>>>>>> 8779cd72645818ef4b68e64aac9de5f350979a27
 
 .clearBtn {
   font-family: var(--font-ui);
@@ -1058,6 +1055,13 @@
   flex-wrap: wrap;
 }
 
+.exportSelectWrap {
+  position: relative;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 10px;
+  display: flex;
+}
+
 .exportBtn,
 .exportResumeBtn,
 .toggleBtn {
@@ -1068,10 +1072,36 @@
 .exportSelect {
   transition: border-color 0.18s, box-shadow 0.18s;
   will-change: border-color, box-shadow;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  background: none;
+  padding: var(--space-2) var(--space-5);
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  white-space: nowrap;
 }
 
 .exportSelect:focus {
   box-shadow: 0 0 0 2px #76928233;
+}
+
+.exportBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  background: none;
+  padding: var(--space-2) var(--space-5);
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.exportBtn:hover,
+.exportSelect:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 /* ── Tabla de items ── */
