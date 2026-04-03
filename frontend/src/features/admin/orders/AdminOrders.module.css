@@ -181,9 +181,10 @@
 
 /* ── Filtros ── */
 .filters {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto auto;
   gap: var(--space-3);
-  align-items: center;
+  align-items: end;
   flex-wrap: wrap;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
@@ -227,7 +228,6 @@
 .searchWrap {
   position: relative;
   flex: 1;
-  min-width: 220px;
 }
 
 @media (max-width: 639px) {
@@ -265,11 +265,41 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 
+.chipsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  order: 6;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+
 .dateFilters {
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: var(--space-2);
-  flex-wrap: wrap;
+
+}
+
+.dateFiltersSeparation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
 }
 
 @media (max-width: 639px) {
@@ -301,6 +331,36 @@
 .dateInput:focus {
   border-color: var(--color-primary);
 }
+<<<<<<< HEAD
+=======
+
+.totalFilters {
+  display: flex;
+  align-items: end;
+  gap: var(--space-2);
+}
+
+.totalFiltersSeparation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.totalInput {
+  width: 80px;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+>>>>>>> 8779cd72645818ef4b68e64aac9de5f350979a27
 
 .clearBtn {
   font-family: var(--font-ui);
