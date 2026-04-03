@@ -3,7 +3,6 @@ import { StatusChipSelect } from './StatusChipSelect';
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
-import { Tooltip } from '../../../../components/ui/Tooltip';
 
 const STATUS_OPTIONS: OrderStatus[] = [
     'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
@@ -39,16 +38,6 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     disabled={disabled}
                     aria-label="Buscar pedidos"
                 />
-                <Tooltip content="Buscá pedidos por nombre, email o número de pedido.">
-                    <button
-                        type="button"
-                        aria-label="Ayuda búsqueda"
-                        style={{ background: 'none', border: 'none', marginLeft: 4, cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-                        tabIndex={0}
-                    >
-                        ℹ️
-                    </button>
-                </Tooltip>
             </div>
 
             <StatusChipSelect
@@ -86,16 +75,6 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                         aria-label="Filtrar hasta fecha"
                     />
                 </div>
-                <Tooltip content="Filtrá los pedidos por rango de fechas.">
-                    <button
-                        type="button"
-                        aria-label="Ayuda filtro fechas"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-                        tabIndex={0}
-                    >
-                        ℹ️
-                    </button>
-                </Tooltip>
             </div>
 
             <div className={styles.totalFilters}>
@@ -127,16 +106,6 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                         disabled={disabled}
                     />
                 </div>
-                <Tooltip content="Filtrá los pedidos por monto total.">
-                    <button
-                        type="button"
-                        aria-label="Ayuda filtro monto"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-                        tabIndex={0}
-                    >
-                        ℹ️
-                    </button>
-                </Tooltip>
             </div>
 
             {
