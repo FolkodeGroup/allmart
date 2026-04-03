@@ -1,5 +1,7 @@
 .section {
   padding: var(--space-20) 0;
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-bg-secondary) 100%);
+  border-top: none;
 }
 
 .grid {
