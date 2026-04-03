@@ -152,46 +152,6 @@ export function AdminLayout() {
 
   return (
     <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'dark' : ''}`}>
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        gutter={12}
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: "var(--color-neutral-dark)",
-            color: "var(--color-neutral-light)",
-            borderRadius: "var(--radius-lg, 8px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            padding: "16px",
-            fontFamily: "var(--font-ui)",
-            fontSize: "var(--text-sm)",
-            boxShadow: "var(--shadow-lg)",
-          },
-          success: {
-            style: {
-              background: "rgba(118, 146, 130, 0.15)",
-              borderColor: "rgba(118, 146, 130, 0.4)",
-              color: "var(--color-primary)",
-            },
-            iconTheme: {
-              primary: "var(--color-primary)",
-              secondary: "rgba(118, 146, 130, 0.15)",
-            },
-          },
-          error: {
-            style: {
-              background: "rgba(220, 100, 100, 0.15)",
-              borderColor: "rgba(220, 100, 100, 0.4)",
-              color: "#dc6464",
-            },
-            iconTheme: {
-              primary: "#dc6464",
-              secondary: "rgba(220, 100, 100, 0.15)",
-            },
-          },
-        }}
-      />
       <Button
         className={styles.mobileToggle}
         onClick={() => setIsMobileOpen(true)}
