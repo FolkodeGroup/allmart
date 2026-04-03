@@ -1,5 +1,5 @@
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
@@ -10,14 +10,13 @@ import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { OrdersHeader } from './components/OrdersHeader';
-import { OrdersFilters } from './components/OrdersFilters';
 import { OrdersTable } from './components/OrdersTable';
 import { OrderList } from './components/OrderList';
-import { useOrders } from './hooks/useOrders';
 import { Notification } from '../../../components/ui/Notification';
 import { useReportsExport } from '../reports/hooks/useReportsExport';
 import { OrdersFiltersBar } from './components/OrdersFiltersBar';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
+import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
 
 // Helpers y constantes extraídos a utils/ordersHelpers.ts
 
@@ -366,7 +365,6 @@ function AdminOrders() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
 
@@ -585,28 +583,6 @@ function AdminOrders() {
     }, 1000);
   }, []);
 
-  // Filtros
-  const filters = useOrdersFilters();
-  // Pedidos y lógica
-  const {
-    orders, isLoading, isLoadingMore, hasMore, selectedIds,
-    handleSelectOne, handleLoadMore, summary, totalAbonados
-  } = useOrders(token ?? undefined, {
-    search: filters.search,
-    status: filters.filterStatus,
-    dateFrom: filters.filterDateFrom,
-    dateTo: filters.filterDateTo,
-  });
-
-  // Skeletons
-  const SummarySkeleton = () => (
-    <div className={styles.summaryCard}>
-      <div className={styles.skeletonSummaryIcon}></div>
-      <div className={styles.skeletonSummaryNum}></div>
-      <div className={styles.skeletonSummaryLabel}></div>
-    </div>
-  );
-
   return (
     <main className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`} tabIndex={-1} aria-label="Gestión de pedidos">
       {/* Header */}
@@ -676,47 +652,8 @@ function AdminOrders() {
             </div>
           </>
         )}
-      </div>
-
-      {/* Filtros */}
-      <OrdersFilters
-        search={filters.search}
-        setSearch={filters.setSearch}
-        filterStatus={filters.filterStatus}
-        setFilterStatus={filters.setFilterStatus}
-        filterDateFrom={filters.filterDateFrom}
-        setFilterDateFrom={filters.setFilterDateFrom}
-        filterDateTo={filters.filterDateTo}
-        setFilterDateTo={filters.setFilterDateTo}
-        clearFilters={filters.clearFilters}
-        isLoading={isLoading}
-      />
-
-      {!isLoading && (
-        <p className={styles.resultsCount}>
-          {orders.length} pedido{orders.length !== 1 ? 's' : ''}
-        </p>
-      )}
-
-
-
-      {/* Carga progresiva: botón cargar más */}
-      <div className={styles.paginationWrap}>
-        {hasMore && !isLoading && (
-          <button
-            className={styles.paginationBtn}
-            type="button"
-            onClick={handleLoadMore}
-            disabled={isLoadingMore}
-          >
-            {isLoadingMore ? 'Cargando...' : 'Cargar más'}
-          </button>
-        )}
-        {!hasMore && !isLoading && orders.length > 0 && (
-          <span className={styles.paginationEnd}>No hay más pedidos para mostrar.</span>
-        )}
-      </div>
       </section>
+
       {/* Exportación */}
       <section className={styles.exportWrap} aria-label="Exportar pedidos">
         <div className={styles.exportWrap}>
@@ -924,7 +861,7 @@ function AdminOrders() {
                     <td className={styles.orderId}>
                       #{order.id.slice(0, 8).toUpperCase()}
                     </td>
-                    <td className={styles.orderDate}>{formatDate(order.createdAt)}</td>
+                    <td className={styles.orderDate}>{formatDateTime(order.createdAt)}</td>
                     <td>
                       <div className={styles.customerName}>{order.customer.firstName} {order.customer.lastName}</div>
                       <div className={styles.customerEmail}>{order.customer.email}</div>
@@ -937,7 +874,7 @@ function AdminOrders() {
                     </td>
                     <td>
                       <span
-                        className={`${styles.statusBadge} ${statusClass(order.status)}`}
+                        className={`${styles.statusBadge} ${statusClass(order.status, styles)}`}
                         aria-label={`Estado: ${STATUS_LABELS[order.status]}`}
                         role="status"
                         aria-live="polite"
@@ -1015,7 +952,7 @@ function AdminOrders() {
                     <span className={styles.mobileCardId}>
                       #{order.id.slice(0, 8).toUpperCase()}
                     </span>
-                    <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
+                    <span className={styles.mobileCardDate}>{formatDateTime(order.createdAt)}</span>
                   </div>
                   <div className={styles.mobileCardMid}>
                     <div className={styles.mobileCardCustomer}>
@@ -1029,7 +966,7 @@ function AdminOrders() {
                   <div className={styles.mobileCardBottom}>
                     <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
                     <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
-                    <span className={styles.statusBadge + ' ' + statusClass(order.status)}>{STATUS_LABELS[order.status]}</span>
+                    <span className={styles.statusBadge + ' ' + statusClass(order.status, styles)}>{STATUS_LABELS[order.status]}</span>
                   </div>
                 </div>
               );
@@ -1153,8 +1090,8 @@ function AdminOrders() {
             bulkModalOpen && bulkAction && (
               <ModalConfirm
                 open={bulkModalOpen}
-                title={`Acción masiva: ${getBulkActionLabel(bulkAction)}`}
-                message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
+                title={`Acción masiva: ${getBulkActionLabel(bulkAction!)}`}
+                message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction!)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
                 confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
                 cancelText={'Cancelar'}
                 onConfirm={bulkLoading ? () => { } : executeBulkAction}
@@ -1174,14 +1111,6 @@ function AdminOrders() {
           onClose={() => setSelectedOrder(null)}
         />
       )}
-      {
-        selectedOrder && (
-          <OrderDetailModal
-            order={orders.find(o => o.id === selectedOrder.id) ?? selectedOrder}
-            onClose={() => setSelectedOrder(null)}
-          />
-        )
-      }
 
 
       {/* ModalConfirm global */}
@@ -1196,8 +1125,8 @@ function AdminOrders() {
         message={
           modal.type === 'delete'
             ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.'
-            : modal.type === 'status' && !!modal.payload && typeof modal.payload.status === 'string'
-              ? `¿Confirmar cambio de estado a "${STATUS_LABELS[(modal.payload as { status: string }).status as OrderStatus]}"?`
+            : modal.type === 'status' && typeof modal.payload?.status === 'string'
+              ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?`
               : modal.type === 'paid'
                 ? '¿Confirmar que el cliente abonó este pedido?'
                 : ''
@@ -1208,8 +1137,7 @@ function AdminOrders() {
         onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
 
-    </div>
-    </main >
+    </main>
   );
 }
 
