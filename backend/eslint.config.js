@@ -11,7 +11,6 @@ module.exports = defineConfig([
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: ["./tsconfig.json"],
         sourceType: "module",
         ecmaVersion: 2021
       },
