@@ -1,6 +1,12 @@
-import { STATUS_LABELS, formatDate, formatPrice, statusClass } from '../utils/ordersHelpers';
+import { formatDate, formatPrice } from '../utils/ordersHelpers';
+import { OrderStatusBadge } from './OrderStatusBadge';
+import { OrderStatusSelector } from './OrderStatusSelector';
 import styles from '../AdminOrders.module.css';
 import type { Order } from '../../../../context/AdminOrdersContext';
+import { useAdminOrders } from '../../../../context/AdminOrdersContext';
+import { useState } from 'react';
+import React from 'react';
+import toast from 'react-hot-toast';
 
 interface OrderListProps {
   orders: Order[];
@@ -8,6 +14,7 @@ interface OrderListProps {
   onSelect: (id: string) => void;
   onDetail: (order: Order) => void;
 }
+
 
 export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderListProps) {
   return (
@@ -51,11 +58,69 @@ export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderList
             <div className={styles.mobileCardBottom}>
               <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
               <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
-              <span className={styles.statusBadge + ' ' + statusClass(order.status, styles)}>{STATUS_LABELS[order.status]}</span>
+              <OrderStatusMobile order={order} />
             </div>
           </div>
         );
       })}
     </div>
+  );
+}
+
+// Componente para manejar el cambio de estado en mobile
+function OrderStatusMobile({ order }: { order: Order }) {
+  const { updateOrderStatus } = useAdminOrders();
+  const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [localStatus, setLocalStatus] = useState(order.status);
+  const [error, setError] = useState<string | null>(null);
+
+  // Optimistic update: si cambia la prop, sincroniza
+  React.useEffect(() => {
+    setLocalStatus(order.status);
+  }, [order.status]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === localStatus) return;
+    setLoading(true);
+    setError(null);
+    const prev = localStatus;
+    setLocalStatus(newStatus as typeof localStatus);
+    try {
+      await updateOrderStatus(order.id, newStatus as typeof localStatus);
+      toast.success('Estado actualizado');
+    } catch (e: any) {
+      setLocalStatus(prev);
+      setError(e?.message || 'Error al actualizar');
+      toast.error('No se pudo actualizar el estado');
+    } finally {
+      setLoading(false);
+      setEditing(false);
+    }
+  };
+
+  return (
+    <span style={{ position: 'relative', minWidth: 90, display: 'inline-block' }}>
+      {editing ? (
+        <OrderStatusSelector
+          value={localStatus}
+          onChange={handleStatusChange}
+          disabled={loading}
+        />
+      ) : (
+        <span
+          tabIndex={0}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          onClick={e => { e.stopPropagation(); setEditing(true); }}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setEditing(true); } }}
+          aria-label="Cambiar estado"
+          role="button"
+        >
+          <OrderStatusBadge status={localStatus} />
+          {loading && <span className={styles.statusLoading} style={{marginLeft: 6}}>⏳</span>}
+        </span>
+      )}
+      {error && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</div>}
+    </span>
   );
 }

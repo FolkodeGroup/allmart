@@ -1,4 +1,9 @@
-import { STATUS_LABELS, formatDate, formatPrice } from '../utils/ordersHelpers';
+import { formatDate, formatPrice } from '../utils/ordersHelpers';
+import { OrderStatusBadge } from './OrderStatusBadge';
+import { OrderStatusSelector } from './OrderStatusSelector';
+import React, { useState } from 'react';
+import { useAdminOrders } from '../../../../context/AdminOrdersContext';
+import toast from 'react-hot-toast';
 import styles from '../AdminOrders.module.css';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import type { Order } from '../../../../context/AdminOrdersContext';
@@ -52,6 +57,36 @@ interface OrderItemProps {
 
 export function OrderItem({ order, selected, onSelect, onDetail }: OrderItemProps) {
   const totalQty = order.items.reduce((s: number, i: any) => s + i.quantity, 0);
+  const { updateOrderStatus } = useAdminOrders();
+  const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [localStatus, setLocalStatus] = useState(order.status);
+  const [error, setError] = useState<string | null>(null);
+
+  // Optimistic update: si cambia la prop, sincroniza
+  React.useEffect(() => {
+    setLocalStatus(order.status);
+  }, [order.status]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === localStatus) return;
+    setLoading(true);
+    setError(null);
+    const prev = localStatus;
+    setLocalStatus(newStatus as typeof localStatus);
+    try {
+      await updateOrderStatus(order.id, newStatus as typeof localStatus);
+      toast.success('Estado actualizado');
+    } catch (e: any) {
+      setLocalStatus(prev);
+      setError(e?.message || 'Error al actualizar');
+      toast.error('No se pudo actualizar el estado');
+    } finally {
+      setLoading(false);
+      setEditing(false);
+    }
+  };
+
   return (
     <tr
       className={styles.row}
@@ -88,50 +123,27 @@ export function OrderItem({ order, selected, onSelect, onDetail }: OrderItemProp
       <td style={{padding: '16px 20px', textAlign: 'right', fontWeight: 700, fontSize: 16, color: '#059669'}}>
         {formatPrice(order.total)}
       </td>
-      <td style={{padding: '16px 20px'}}>
-        <span style={{
-          display: 'inline-block',
-          borderRadius: 8,
-          padding: '4px 14px',
-          fontWeight: 600,
-          fontSize: 14,
-          background:
-            order.status === 'entregado' ? 'rgba(34,197,94,0.13)' :
-            order.status === 'pendiente' ? 'rgba(251,191,36,0.13)' :
-            order.status === 'cancelado' ? 'rgba(239,68,68,0.13)' :
-            order.status === 'enviado' ? 'rgba(16,185,129,0.13)' :
-            order.status === 'confirmado' ? 'rgba(59,130,246,0.13)' :
-            order.status === 'en-preparacion' ? 'rgba(139,92,246,0.13)' :
-            '#f3f4f6',
-          color:
-            order.status === 'entregado' ? '#22c55e' :
-            order.status === 'pendiente' ? '#d97706' :
-            order.status === 'cancelado' ? '#ef4444' :
-            order.status === 'enviado' ? '#10b981' :
-            order.status === 'confirmado' ? '#2563eb' :
-            order.status === 'en-preparacion' ? '#8b5cf6' :
-            '#6b7280',
-          border: 'none',
-          marginRight: order.paymentStatus === 'abonado' ? 8 : 0,
-          minWidth: 90,
-          textAlign: 'center',
-        }}>
-          {STATUS_LABELS[order.status]}
-        </span>
-        {order.paymentStatus === 'abonado' && (
-          <span style={{
-            display: 'inline-block',
-            borderRadius: 8,
-            padding: '4px 12px',
-            fontWeight: 600,
-            fontSize: 13,
-            background: 'rgba(16,185,129,0.10)',
-            color: '#128C48',
-            marginLeft: 2,
-          }}>
-            ✓ Abonado
+      <td style={{padding: '16px 20px', position: 'relative', minWidth: 120}} onClick={e => e.stopPropagation()}>
+        {editing ? (
+          <OrderStatusSelector
+            value={localStatus}
+            onChange={handleStatusChange}
+            disabled={loading}
+          />
+        ) : (
+          <span
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 90 }}
+            tabIndex={0}
+            onClick={e => { e.stopPropagation(); setEditing(true); }}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setEditing(true); } }}
+            aria-label="Cambiar estado"
+            role="button"
+          >
+            <OrderStatusBadge status={localStatus} />
+            {loading && <span className={styles.statusLoading} style={{marginLeft: 6}}>⏳</span>}
           </span>
         )}
+        {error && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</div>}
       </td>
       <td style={{padding: '16px 8px', textAlign: 'center'}}>
         <Tooltip content="Ver detalle del pedido">

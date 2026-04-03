@@ -4,6 +4,8 @@ import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order, OrderStatus, PaymentStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { STATUS_LABELS, PAYMENT_LABELS, paymentClass, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS, formatPrice } from './utils/ordersHelpers';
+import { OrderStatusBadge } from './components/OrderStatusBadge';
+import { OrderStatusSelector } from './components/OrderStatusSelector';
 import toast from 'react-hot-toast';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -71,6 +73,8 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const [confirmPaid, setConfirmPaid] = useState(false);
   const [statusNote, setStatusNote] = useState('');
   const [pendingStatus, setPendingStatus] = useState<OrderStatus>(order.status);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
 
   const paymentStatus: PaymentStatus = order.paymentStatus ?? 'no-abonado';
@@ -81,6 +85,9 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
   const auth = useAdminAuth();
   const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
   const handleStatusApply = async () => {
+    setStatusLoading(true);
+    setStatusError(null);
+    const prev = order.status;
     try {
       await updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
       logAdminActivity({
@@ -89,13 +96,16 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
         action: 'update-status',
         entity: 'order',
         entityId: order.id,
-        details: { from: order.status, to: pendingStatus, note: statusNote },
+        details: { from: prev, to: pendingStatus, note: statusNote },
       });
       toast.success('Estado del pedido actualizado con éxito');
       setStatusNote('');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`No se pudo actualizar el pedido: ${message}`);
+      setStatusError(err instanceof Error ? err.message : 'Error desconocido');
+      toast.error(`No se pudo actualizar el pedido: ${statusError}`);
+      setPendingStatus(prev);
+    } finally {
+      setStatusLoading(false);
     }
   };
 
@@ -165,20 +175,15 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           <section className={styles.detailSection}>
             <h3 className={styles.detailSectionTitle}>Estado del pedido</h3>
             <div className={styles.statusRow}>
-              <span className={`${styles.statusBadge} ${statusClass(currentStatus, styles)}`}>
-                {STATUS_LABELS[currentStatus]}
-              </span>
+              <OrderStatusBadge status={pendingStatus} />
               {can('orders.edit') && (
-                <select
-                  className={styles.statusSelect}
+                <OrderStatusSelector
                   value={pendingStatus}
-                  onChange={e => setPendingStatus(e.target.value as OrderStatus)}
-                >
-                  {STATUS_OPTIONS.map(s => (
-                    <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                  ))}
-                </select>
+                  onChange={s => setPendingStatus(s as OrderStatus)}
+                  disabled={statusLoading}
+                />
               )}
+              {statusLoading && <span className={styles.statusLoading} style={{marginLeft: 6}}>⏳</span>}
             </div>
             {can('orders.edit') && hasStatusChange && (
               <div className={styles.statusChangeBox}>
@@ -189,15 +194,17 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
                   value={statusNote}
                   onChange={e => setStatusNote(e.target.value)}
                   maxLength={120}
+                  disabled={statusLoading}
                 />
                 <div className={styles.statusChangeActions}>
-                  <button className={styles.applyStatusBtn} type="button" onClick={handleStatusApply}>
-                    Guardar cambio
+                  <button className={styles.applyStatusBtn} type="button" onClick={handleStatusApply} disabled={statusLoading}>
+                    {statusLoading ? 'Guardando...' : 'Guardar cambio'}
                   </button>
-                  <button className={styles.cancelBtn} type="button" onClick={() => { setPendingStatus(currentStatus); setStatusNote(''); }}>
+                  <button className={styles.cancelBtn} type="button" onClick={() => { setPendingStatus(currentStatus); setStatusNote(''); }} disabled={statusLoading}>
                     Cancelar
                   </button>
                 </div>
+                {statusError && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{statusError}</div>}
               </div>
             )}
           </section>

@@ -1,5 +1,4 @@
 // components/ui/StatusChipSelect/StatusChipSelect.tsx
-import { Tooltip } from '../../../../components/ui/Tooltip';
 import styles from '../AdminOrders.module.css';
 
 interface StatusOption {
@@ -58,16 +57,6 @@ export function StatusChipSelect({
                     </option>
                 ))}
             </select>
-            <Tooltip content="Filtrá los pedidos por estado (pendiente, confirmado, etc).">
-                <button
-                    type="button"
-                    aria-label="Ayuda filtro estado"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-                    tabIndex={0}
-                >
-                    ℹ️
-                </button>
-            </Tooltip>
 
             <div className={styles.chipsContainer}>
                 {selected.map(s => {

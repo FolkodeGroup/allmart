@@ -1,6 +1,5 @@
 import { STATUS_OPTIONS, STATUS_LABELS } from '../utils/ordersHelpers';
 import styles from '../AdminOrders.module.css';
-import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 
 interface OrdersFiltersProps {
@@ -35,15 +34,6 @@ export function OrdersFilters(props: OrdersFiltersProps) {
           disabled={isLoading}
           aria-label="Buscar pedidos"
         />
-        <Tooltip content="Buscá pedidos por nombre, email o número de pedido.">
-          <button
-            type="button"
-            aria-label="Ayuda búsqueda"
-            style={{ background: 'none', border: 'none', marginLeft: 4, cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-            tabIndex={0}
-          >
-          </button>
-        </Tooltip>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         <select
@@ -58,15 +48,6 @@ export function OrdersFilters(props: OrdersFiltersProps) {
             <option key={s} value={s}>{STATUS_LABELS[s]}</option>
           ))}
         </select>
-        <Tooltip content="Filtrá los pedidos por estado (pendiente, confirmado, etc).">
-          <button
-            type="button"
-            aria-label="Ayuda filtro estado"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-            tabIndex={0}
-          >
-          </button>
-        </Tooltip>
       </div>
       <div className={styles.dateFilters} style={{ alignItems: 'center', gap: 4 }}>
         <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
@@ -89,15 +70,6 @@ export function OrdersFilters(props: OrdersFiltersProps) {
           disabled={isLoading}
           aria-label="Filtrar hasta fecha"
         />
-        <Tooltip content="Filtrá los pedidos por rango de fechas.">
-          <button
-            type="button"
-            aria-label="Ayuda filtro fechas"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 18 }}
-            tabIndex={0}
-          >
-          </button>
-        </Tooltip>
       </div>
       {!isLoading && (search || filterStatus || filterDateFrom || filterDateTo) && (
         <button
