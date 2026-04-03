@@ -164,46 +164,46 @@ export function AdminCategories() {
   return (
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
 
-        {/* Header */}
+      {/* Header */}
 
-        <CategoriesHeader
-          canCreate={can('categories.create')}
-          onNew={handleNew}
+      <CategoriesHeader
+        canCreate={can('categories.create')}
+        onNew={handleNew}
+      />
+
+      {/* Botones de exportación debajo del header */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', width: '100%', marginBottom: 8 }}>
+        <button className={styles.exportBtn} onClick={handleExportCSV} type="button">
+          Exportar CSV
+        </button>
+        <button className={styles.exportBtn} onClick={handleExportExcel} type="button">
+          Exportar Excel
+        </button>
+      </div>
+
+
+      {/* Filtros fuera del header */}
+      <motion.div
+        variants={fadeSlideIn}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        layout
+      >
+        <CategoriesFilters
+          categories={categories}
+          search={search}
+          setSearch={setSearch}
+          setSelectedSuggestion={setSelectedSuggestion}
+          total={total}
+          minProducts={minProducts}
+          setMinProducts={setMinProducts}
+          maxProducts={maxProducts}
+          setMaxProducts={setMaxProducts}
+          isVisible={isVisible}
+          setIsVisible={setIsVisible}
         />
-
-        {/* Botones de exportación debajo del header */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', width: '100%', marginBottom: 8 }}>
-          <button className={styles.exportBtn} onClick={handleExportCSV} type="button">
-            Exportar CSV
-          </button>
-          <button className={styles.exportBtn} onClick={handleExportExcel} type="button">
-            Exportar Excel
-          </button>
-        </div>
-
-
-        {/* Filtros fuera del header */}
-        <motion.div
-          variants={fadeSlideIn}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          layout
-        >
-          <CategoriesFilters
-            categories={categories}
-            search={search}
-            setSearch={setSearch}
-            setSelectedSuggestion={setSelectedSuggestion}
-            total={total}
-            minProducts={minProducts}
-            setMinProducts={setMinProducts}
-            maxProducts={maxProducts}
-            setMaxProducts={setMaxProducts}
-            isVisible={isVisible}
-            setIsVisible={setIsVisible}
-          />
-        </motion.div>
+      </motion.div>
 
       {/* Tabla y feedback */}
       <AnimatePresence mode="wait">
@@ -351,16 +351,16 @@ export function AdminCategories() {
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', maxWidth: 400 }}>
-             <p><b>Componente Formulario no encontrado.</b></p>
-             <p style={{ fontSize: '0.95em', color: '#666', marginTop: 8 }}>
-               Cuando se implemente el formulario de edición/creación de categoría, debe incluir:<br />
-               <ul style={{ margin: '8px 0 0 18px', padding: 0 }}>
-                 <li>Feedback visual de loading en el botón/inputs</li>
-                 <li>Notificaciones de éxito y error usando <code>useNotification</code></li>
-                 <li>Evitar submits múltiples y validar errores</li>
-               </ul>
-             </p>
-             <button onClick={() => setShowForm(false)} style={{ marginTop: 16 }}>Cerrar</button>
+            <p><b>Componente Formulario no encontrado.</b></p>
+            <p style={{ fontSize: '0.95em', color: '#666', marginTop: 8 }}>
+              Cuando se implemente el formulario de edición/creación de categoría, debe incluir:<br />
+              <ul style={{ margin: '8px 0 0 18px', padding: 0 }}>
+                <li>Feedback visual de loading en el botón/inputs</li>
+                <li>Notificaciones de éxito y error usando <code>useNotification</code></li>
+                <li>Evitar submits múltiples y validar errores</li>
+              </ul>
+            </p>
+            <button onClick={() => setShowForm(false)} style={{ marginTop: 16 }}>Cerrar</button>
           </div>
         </div>
       )}
