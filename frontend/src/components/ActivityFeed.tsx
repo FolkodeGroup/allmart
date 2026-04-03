@@ -155,7 +155,12 @@ export function ActivityFeed({
   };
 
   const filtered = logs.filter(
-    (l) => filter === "all" || l.action?.toLowerCase() === filter,
+    (l) => {
+      if (filter === "all") return true;
+      // Normalizar acción para comparar
+      const action = (l.action || '').toLowerCase().trim();
+      return action === filter.toLowerCase().trim();
+    }
   );
 
   return (
