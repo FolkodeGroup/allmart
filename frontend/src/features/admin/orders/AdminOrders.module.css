@@ -1,4 +1,3 @@
-
 /* ── Paginación ── */
 .paginationWrap {
   display: flex;
@@ -21,10 +20,12 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
+
 .paginationBtn:hover:not(:disabled) {
   background: var(--color-primary);
   color: #fff;
 }
+
 .paginationBtn:disabled {
   background: var(--color-bg-tertiary);
   color: var(--color-text-tertiary);
@@ -48,15 +49,18 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
+
 .paginationPage:hover {
   background: var(--color-primary);
   color: #fff;
 }
+
 .paginationPageActive {
   background: var(--color-primary);
   color: #fff;
   border-color: var(--color-primary-dark);
 }
+
 /* ============================================
    ALLMART — ADMIN ORDERS  (v2 — responsive)
    ============================================ */
@@ -69,10 +73,15 @@
 }
 
 @media (max-width: 1023px) {
-  .summary { grid-template-columns: repeat(3, 1fr); }
+  .summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
+
 @media (max-width: 639px) {
-  .summary { grid-template-columns: repeat(2, 1fr); }
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .summaryCard {
@@ -88,18 +97,23 @@
   overflow: hidden;
   transition: box-shadow 0.15s, transform 0.15s;
 }
+
 .summaryCard:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
+
 .summaryCard::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
   background: var(--color-border);
   border-radius: 14px 14px 0 0;
 }
+
 .summaryCard .summaryIcon {
   font-size: 1.3rem;
   line-height: 1;
@@ -113,6 +127,7 @@
   color: var(--color-text-primary);
   line-height: 1;
 }
+
 .summaryLabel {
   font-family: var(--font-ui);
   font-size: var(--text-xs);
@@ -120,18 +135,49 @@
 }
 
 /* Color accent por estado */
-.cardTotal::before   { background: #6366f1; }
-.cardPendiente::before { background: #f59e0b; }
-.cardPreparacion::before { background: #8b5cf6; }
-.cardEnviado::before   { background: var(--color-primary, #10b981); }
-.cardEntregado::before { background: #22c55e; }
-.cardAbonado::before   { background: #25D366; }
+.cardTotal::before {
+  background: #6366f1;
+}
 
-.numPendiente   { color: #d97706; }
-.numPreparacion { color: #7c3aed; }
-.numEnviado     { color: var(--color-primary); }
-.numEntregado   { color: #16a34a; }
-.numAbonado     { color: #128C48; }
+.cardPendiente::before {
+  background: #f59e0b;
+}
+
+.cardPreparacion::before {
+  background: #8b5cf6;
+}
+
+.cardEnviado::before {
+  background: var(--color-primary, #10b981);
+}
+
+.cardEntregado::before {
+  background: #22c55e;
+}
+
+.cardAbonado::before {
+  background: #25D366;
+}
+
+.numPendiente {
+  color: #d97706;
+}
+
+.numPreparacion {
+  color: #7c3aed;
+}
+
+.numEnviado {
+  color: var(--color-primary);
+}
+
+.numEntregado {
+  color: #16a34a;
+}
+
+.numAbonado {
+  color: #128C48;
+}
 
 /* ── Filtros ── */
 .filters {
@@ -167,12 +213,16 @@
   min-width: 220px;
   flex: 1;
 }
+
 .searchInput:focus {
   border-color: var(--color-primary);
   background: var(--color-bg-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
-.searchInput::placeholder { color: var(--color-text-tertiary); }
+
+.searchInput::placeholder {
+  color: var(--color-text-tertiary);
+}
 
 .searchWrap {
   position: relative;
@@ -181,7 +231,9 @@
 }
 
 @media (max-width: 639px) {
-  .searchWrap { min-width: 0; }
+  .searchWrap {
+    min-width: 0;
+  }
 }
 
 .searchIcon {
@@ -207,6 +259,7 @@
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
+
 .filterSelect:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
@@ -220,7 +273,9 @@
 }
 
 @media (max-width: 639px) {
-  .dateFilters { gap: var(--space-2); }
+  .dateFilters {
+    gap: var(--space-2);
+  }
 }
 
 .dateLabel {
@@ -242,7 +297,10 @@
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.dateInput:focus { border-color: var(--color-primary); }
+
+.dateInput:focus {
+  border-color: var(--color-primary);
+}
 
 .clearBtn {
   font-family: var(--font-ui);
@@ -257,7 +315,12 @@
   white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
-.clearBtn:hover { background: #fee2e2; color: var(--color-error); border-color: var(--color-error); }
+
+.clearBtn:hover {
+  background: #fee2e2;
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
 
 .resultsCount {
   font-family: var(--font-ui);
@@ -274,7 +337,9 @@
 }
 
 @media (max-width: 639px) {
-  .tableWrapper { display: none; }
+  .tableWrapper {
+    display: none;
+  }
 }
 
 .table {
@@ -305,8 +370,14 @@
   cursor: pointer;
   transition: background 0.1s;
 }
-.row:last-child { border-bottom: none; }
-.row:hover { background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg-secondary)); }
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:hover {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg-secondary));
+}
 
 .table td {
   padding: var(--space-3) var(--space-4);
@@ -333,6 +404,7 @@
   font-weight: var(--font-semibold);
   color: var(--color-text-primary);
 }
+
 .customerEmail {
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);
@@ -363,6 +435,7 @@
   white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
+
 .detailBtn:hover {
   background: var(--color-primary);
   color: #fff;
@@ -376,7 +449,9 @@
 }
 
 @media (max-width: 639px) {
-  .mobileList { display: flex; }
+  .mobileList {
+    display: flex;
+  }
 }
 
 .mobileCard {
@@ -390,9 +465,11 @@
   flex-direction: column;
   gap: var(--space-3);
 }
-.mobileCard:hover, .mobileCard:active {
+
+.mobileCard:hover,
+.mobileCard:active {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.09);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
 }
 
 .mobileCardTop {
@@ -452,6 +529,7 @@
   color: var(--color-text-primary);
   line-height: 1.2;
 }
+
 .mobileCardEmail {
   font-family: var(--font-ui);
   font-size: var(--text-xs);
@@ -493,12 +571,35 @@
   white-space: nowrap;
 }
 
-.statusPendiente   { background: #fef3c7; color: #92400e; }
-.statusConfirmado  { background: #dbeafe; color: #1e40af; }
-.statusPreparacion { background: #ede9fe; color: #5b21b6; }
-.statusEnviado     { background: #d1fae5; color: #065f46; }
-.statusEntregado   { background: #dcfce7; color: #166534; }
-.statusCancelado   { background: #fee2e2; color: #991b1b; }
+.statusPendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusConfirmado {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusPreparacion {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.statusEnviado {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.statusEntregado {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.statusCancelado {
+  background: #fee2e2;
+  color: #991b1b;
+}
 
 /* ── Badges de pago ── */
 .paymentBadge {
@@ -513,8 +614,15 @@
   white-space: nowrap;
 }
 
-.paymentAbonado    { background: #dcfce7; color: #128C48; }
-.paymentNoAbonado  { background: #f3f4f6; color: #6b7280; }
+.paymentAbonado {
+  background: #dcfce7;
+  color: #128C48;
+}
+
+.paymentNoAbonado {
+  background: #f3f4f6;
+  color: #6b7280;
+}
 
 .paymentBadgeInline {
   margin-left: var(--space-2);
@@ -557,12 +665,16 @@
   transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
   box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25);
 }
+
 .whatsappBtn:hover {
   background: #128C48;
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
 }
-.whatsappBtn:active { transform: translateY(0); }
+
+.whatsappBtn:active {
+  transform: translateY(0);
+}
 
 .whatsappIcon {
   font-size: 1rem;
@@ -606,7 +718,10 @@
   transition: background 0.15s;
   flex: 1;
 }
-.whatsappBtnConfirm:hover { background: #128C48; }
+
+.whatsappBtnConfirm:hover {
+  background: #128C48;
+}
 
 /* ── Modal backdrop ── */
 .backdrop {
@@ -616,9 +731,12 @@
   backdrop-filter: blur(2px);
   z-index: 1000;
   display: flex;
-  align-items: center; /* Centrar el modal verticalmente */
-  justify-content: center; /* Centrar el modal horizontalmente */
-  overflow-y: auto; /* Permitir desplazamiento interno */
+  align-items: center;
+  /* Centrar el modal verticalmente */
+  justify-content: center;
+  /* Centrar el modal horizontalmente */
+  overflow-y: auto;
+  /* Permitir desplazamiento interno */
   padding: 0;
 }
 
@@ -651,13 +769,27 @@
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(40px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(60px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .detailHeader {
@@ -671,13 +803,16 @@
 }
 
 @media (max-width: 1024px) {
-  .detailHeader { padding: var(--space-5) var(--space-6) var(--space-4); }
+  .detailHeader {
+    padding: var(--space-5) var(--space-6) var(--space-4);
+  }
 }
 
 @media (max-width: 639px) {
   .detailHeader {
     padding: var(--space-4) var(--space-4) var(--space-3);
   }
+
   /* Indicador "handle" para el bottom sheet en mobile */
   .detailPanel::before {
     content: '';
@@ -691,7 +826,11 @@
   }
 }
 
-.detailHeaderInfo { display: flex; flex-direction: column; gap: 2px; }
+.detailHeaderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 .detailTitle {
   font-family: var(--font-heading);
@@ -702,7 +841,9 @@
 }
 
 @media (max-width: 639px) {
-  .detailTitle { font-size: var(--text-lg); }
+  .detailTitle {
+    font-size: var(--text-lg);
+  }
 }
 
 .detailDate {
@@ -723,6 +864,7 @@
   flex-shrink: 0;
   line-height: 1;
 }
+
 .closeBtn:hover {
   background: var(--color-bg-tertiary);
   color: var(--color-text-primary);
@@ -745,13 +887,21 @@
   padding: var(--space-5) var(--space-8);
   border-bottom: 1px solid var(--color-border-light);
 }
-.detailSection:last-child { border-bottom: none; }
+
+.detailSection:last-child {
+  border-bottom: none;
+}
 
 @media (max-width: 1024px) {
-  .detailSection { padding: var(--space-5) var(--space-6); }
+  .detailSection {
+    padding: var(--space-5) var(--space-6);
+  }
 }
+
 @media (max-width: 639px) {
-  .detailSection { padding: var(--space-4) var(--space-4); }
+  .detailSection {
+    padding: var(--space-4) var(--space-4);
+  }
 }
 
 .detailSectionTitle {
@@ -785,7 +935,10 @@
   transition: border-color 0.15s;
   flex: 1;
 }
-.statusSelect:focus { border-color: var(--color-primary); }
+
+.statusSelect:focus {
+  border-color: var(--color-primary);
+}
 
 /* ── Datos del cliente ── */
 .customerCard {
@@ -814,7 +967,12 @@
   text-transform: uppercase;
 }
 
-.customerInfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
 
 .customerFullName {
   font-family: var(--font-ui);
@@ -832,6 +990,30 @@
   white-space: nowrap;
 }
 
+/*  ── Exportación ──   */
+.exportWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.exportBtn,
+.exportResumeBtn,
+.toggleBtn {
+  transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s, transform 0.13s;
+  will-change: background, border-color, color, box-shadow, transform;
+}
+
+.exportSelect {
+  transition: border-color 0.18s, box-shadow 0.18s;
+  will-change: border-color, box-shadow;
+}
+
+.exportSelect:focus {
+  box-shadow: 0 0 0 2px #76928233;
+}
+
 /* ── Tabla de items ── */
 .itemsTable {
   width: 100%;
@@ -839,6 +1021,7 @@
   font-family: var(--font-ui);
   font-size: var(--text-sm);
 }
+
 .itemsTable th {
   text-align: left;
   font-size: var(--text-xs);
@@ -849,26 +1032,39 @@
   padding: 0 var(--space-2) var(--space-2) 0;
   border-bottom: 1px solid var(--color-border);
 }
+
 .itemsTable td {
   padding: var(--space-2) var(--space-2) var(--space-2) 0;
   color: var(--color-text-primary);
   border-bottom: 1px solid var(--color-border-light);
   vertical-align: middle;
 }
-.itemsTable tr:last-child td { border-bottom: none; }
-.tdCenter { text-align: center; }
-.tdRight { text-align: right; }
+
+.itemsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.tdCenter {
+  text-align: center;
+}
+
+.tdRight {
+  text-align: right;
+}
+
 .itemsTable tfoot tr td {
   padding-top: var(--space-3);
   border-top: 2px solid var(--color-border);
   border-bottom: none;
 }
+
 .totalLabel {
   font-weight: var(--font-semibold);
   text-align: right;
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
 }
+
 .totalValue {
   font-weight: var(--font-bold);
   font-size: var(--text-base);
@@ -893,12 +1089,16 @@
   margin-bottom: var(--space-3);
   min-height: 80px;
 }
+
 .notesInput:focus {
   border-color: var(--color-primary);
   background: var(--color-bg-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
-.notesInput::placeholder { color: var(--color-text-tertiary); }
+
+.notesInput::placeholder {
+  color: var(--color-text-tertiary);
+}
 
 .saveNotesBtn {
   font-family: var(--font-ui);
@@ -912,6 +1112,7 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
+
 .saveNotesBtn:hover {
   background: var(--color-primary);
   color: #fff;
@@ -940,7 +1141,10 @@
   width: 100%;
   text-align: left;
 }
-.deleteBtn:hover { background: #fee2e2; }
+
+.deleteBtn:hover {
+  background: #fee2e2;
+}
 
 .confirmDelete {
   display: flex;
@@ -969,7 +1173,10 @@
   transition: background 0.15s;
   flex: 1;
 }
-.deleteConfirmBtn:hover { background: #b91c1c; }
+
+.deleteConfirmBtn:hover {
+  background: #b91c1c;
+}
 
 .cancelBtn {
   font-family: var(--font-ui);
@@ -983,7 +1190,10 @@
   transition: background 0.15s;
   flex: 1;
 }
-.cancelBtn:hover { background: var(--color-bg-tertiary); }
+
+.cancelBtn:hover {
+  background: var(--color-bg-tertiary);
+}
 
 /* ── Cambio de estado con nota ── */
 .statusChangeBox {
@@ -1010,11 +1220,15 @@
   width: 100%;
   box-sizing: border-box;
 }
+
 .statusNoteInput:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
-.statusNoteInput::placeholder { color: var(--color-text-tertiary); }
+
+.statusNoteInput::placeholder {
+  color: var(--color-text-tertiary);
+}
 
 .statusChangeActions {
   display: flex;
@@ -1034,8 +1248,15 @@
   transition: background 0.15s, transform 0.1s;
   flex: 1;
 }
-.applyStatusBtn:hover { background: var(--color-primary-dark); transform: translateY(-1px); }
-.applyStatusBtn:active { transform: translateY(0); }
+
+.applyStatusBtn:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.applyStatusBtn:active {
+  transform: translateY(0);
+}
 
 /* ── Timeline de historial de estados ── */
 .timeline {
@@ -1141,17 +1362,20 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
 }
 
 .skeletonBase {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
