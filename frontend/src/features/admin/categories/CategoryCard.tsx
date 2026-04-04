@@ -26,6 +26,14 @@ const isEmptyCategory = (productCount?: number) => {
   return productCount === 0;
 };
 
+const toHumanLabel = (slug: string) => {
+  const decoded = decodeURIComponent(slug || '').trim();
+  if (!decoded) return 'Categoria';
+  const normalized = decoded.replace(/[-_]+/g, ' ').trim();
+  if (!normalized) return 'Categoria';
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
+
 export const CategoryCard: FC<CategoryCardProps> = memo(({
   category,
   onEdit,
@@ -40,20 +48,21 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
   const navigate = useNavigate();
 
   const isEmpty = isEmptyCategory(productCount);
+  const categoryDisplayName = category.name.trim() || toHumanLabel(category.slug);
 
   return (
     <div className={styles.cardWrapper} style={{ position: 'relative', willChange: 'opacity, transform' }}>
 
       {/* Checkbox de selección múltiple */}
       {onSelect && (
-        <Tooltip content={`Seleccionar categoría ${category.name}`}>
+        <Tooltip content={`Seleccionar categoría ${categoryDisplayName}`}>
           <input
             type="checkbox"
             checked={selected}
             onChange={e => onSelect(category.id, e.target.checked)}
             className={styles.cardCheckbox}
             style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}
-            aria-label={`Seleccionar categoría ${category.name}`}
+            aria-label={`Seleccionar categoría ${categoryDisplayName}`}
             tabIndex={0}
             onClick={e => e.stopPropagation()}
           />
@@ -71,13 +80,13 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
         }}
         role="button"
         tabIndex={0}
-        aria-label={`Ver detalles de la categoría ${category.name}`}
+        aria-label={`Ver detalles de la categoría ${categoryDisplayName}`}
       >
         {/* Imagen */}
         {category.image ? (
           <ProductImage
             src={category.image}
-            alt={category.name}
+            alt={categoryDisplayName}
             className={styles.cardImg}
             width={300}
             height={140}
@@ -91,7 +100,7 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
 
         <div className={styles.cardBody}>
           <div className={styles.cardTop}>
-            <span className={styles.cardName}>{category.name}</span>
+            <span className={styles.cardName}>{categoryDisplayName}</span>
 
             {/* Indicador de productos */}
             {productCount !== undefined && (
@@ -151,7 +160,7 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
                       e.stopPropagation();
                       onEdit?.(category.id);
                     }}
-                    aria-label={`Editar categoría ${category.name}`}
+                    aria-label={`Editar categoría ${categoryDisplayName}`}
                     tabIndex={0}
                   >
                     ✏️
@@ -171,7 +180,7 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
                       e.stopPropagation();
                       onToggleVisibility(category.id, !category.isVisible);
                     }}
-                    aria-label={`${category.isVisible ? 'Ocultar' : 'Mostrar'} categoría ${category.name}`}
+                    aria-label={`${category.isVisible ? 'Ocultar' : 'Mostrar'} categoría ${categoryDisplayName}`}
                     tabIndex={0}
                     title={category.isVisible ? 'Ocultar' : 'Mostrar'}
                   >
@@ -193,7 +202,7 @@ export const CategoryCard: FC<CategoryCardProps> = memo(({
                       e.stopPropagation();
                       onDelete?.(category.id);
                     }}
-                    aria-label={`Eliminar categoría ${category.name}`}
+                    aria-label={`Eliminar categoría ${categoryDisplayName}`}
                     tabIndex={0}
                   >
                     🗑️

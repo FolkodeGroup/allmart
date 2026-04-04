@@ -10,6 +10,22 @@ export const fallbackNavigation: NavigationItem[] = [
   { label: 'Ver todo el catalogo', href: '/productos' },
 ];
 
+function toHumanLabel(slug: string): string {
+  const decoded = decodeURIComponent(slug || '').trim();
+  if (!decoded) return 'Categoria';
+
+  const normalized = decoded.replace(/[-_]+/g, ' ').trim();
+  if (!normalized) return 'Categoria';
+
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function getCategoryLabel(category: Category): string {
+  const trimmedName = category.name.trim();
+  if (trimmedName) return trimmedName;
+  return toHumanLabel(category.slug);
+}
+
 export function buildNavigationFromCategories(categories: Category[]): NavigationItem[] {
   const visible = categories.filter((category) => category.isVisible);
   const roots = visible.filter((category) => !category.parentId);
@@ -26,11 +42,11 @@ export function buildNavigationFromCategories(categories: Category[]): Navigatio
   const rootItems: NavigationItem[] = roots.map((category) => {
     const children = childrenByParent.get(category.id) ?? [];
     return {
-      label: category.name,
+      label: getCategoryLabel(category),
       href: `/productos?category=${encodeURIComponent(category.slug)}`,
       children: children.length
         ? children.map((child) => ({
-            label: child.name,
+            label: getCategoryLabel(child),
             href: `/productos?category=${encodeURIComponent(child.slug)}`,
           }))
         : undefined,

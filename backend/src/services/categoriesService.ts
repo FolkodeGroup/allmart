@@ -157,12 +157,16 @@ export async function getCategoryBySlug(slug: string): Promise<Category> {
 // ─── Mutaciones ────────────────────────────────────────────────────────────────
 
 export async function createCategory(dto: CreateCategoryDTO): Promise<Category> {
-  if (!dto.name) {
+  const normalizedName = dto.name?.trim();
+  if (!normalizedName) {
     throw createError('El nombre de la categoría es obligatorio', 400);
   }
 
-  const sourceForSlug = dto.slug && dto.slug.trim() !== '' ? dto.slug : dto.name;
+  const sourceForSlug = dto.slug && dto.slug.trim() !== '' ? dto.slug.trim() : normalizedName;
   const slug = generateSlug(sourceForSlug);
+  if (!slug) {
+    throw createError('No se pudo generar un slug válido para la categoría', 400);
+  }
 
   const existing = await prisma.category.findUnique({ where: { slug } });
   if (existing) {
@@ -183,7 +187,7 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
 
   const row = await prisma.category.create({
     data: {
-      name: dto.name,
+      name: normalizedName,
       slug,
       description: dto.description ?? null,
       imageUrl: dto.imageUrl ?? null,
@@ -198,11 +202,20 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
 export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promise<Category> {
   const existing = await getCategoryById(id);
 
+  const nextName = dto.name !== undefined ? dto.name.trim() : existing.name;
+  if (dto.name !== undefined && !nextName) {
+    throw createError('El nombre de la categoría es obligatorio', 400);
+  }
+
   let newSlug = existing.slug;
-  if (dto.slug) {
-    newSlug = generateSlug(dto.slug);
-  } else if (dto.name) {
-    newSlug = generateSlug(dto.name);
+  if (dto.slug && dto.slug.trim() !== '') {
+    newSlug = generateSlug(dto.slug.trim());
+  } else if (dto.name !== undefined) {
+    newSlug = generateSlug(nextName);
+  }
+
+  if (!newSlug) {
+    throw createError('No se pudo generar un slug válido para la categoría', 400);
   }
 
   if (newSlug !== existing.slug) {
@@ -239,7 +252,7 @@ export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promis
   const row = await prisma.category.update({
     where: { id },
     data: {
-      name: dto.name ?? existing.name,
+      name: dto.name !== undefined ? nextName : existing.name,
       slug: newSlug,
       description: dto.description !== undefined ? dto.description : existing.description,
       imageUrl: dto.imageUrl !== undefined ? dto.imageUrl : existing.imageUrl,
