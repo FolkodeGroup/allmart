@@ -1,8 +1,6 @@
 // src/pages/Admin/AdminLayout.tsx
-import { useLocation } from "react-router-dom";
 import { Suspense, useState, useEffect, useRef } from "react";
-import { NavLink, Outlet } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
 import { useAdminProducts } from "../../context/AdminProductsContext";
@@ -11,6 +9,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { AdminLoadingFallback } from '../../components/ui/AdminLoadingFallback';
 import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
+import { ModalConfirm } from "../../components/ui/ModalConfirm";
 
 const navItems = [
   {
@@ -97,10 +96,14 @@ export function AdminLayout() {
   const { getPendingOrdersCount } = useAdminOrders();
   const { getLowStockCount } = useAdminProducts();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const location = useLocation();
   const {
     isDirty,
     interceptNavigation,
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
   } = useUnsavedChanges();
 
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -216,15 +219,30 @@ export function AdminLayout() {
               };
               if (locked) {
                 return (
-                  <span
+                  <NavLink
                     key={item.to}
                     {...commonProps}
-                    className={`${styles.navItem} ${styles.navItemLocked}`}
+                    to={item.to}
+                    onClick={(e) => {
+                      console.log('[NavLink onClick] isDirty del contexto:', isDirty);
+                      setIsMobileOpen(false);
+                      if (isDirty) {
+                        e.preventDefault(); // bloquea la navegación de React Router
+                        console.log('[NavLink onClick] → llamando interceptNavigation');
+                        interceptNavigation(() => navigate(item.to)); // ← usar navigate, no window.location.href
+                      }
+                    }}
+                    className={({ isActive }) =>
+                      `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+                    }
                   >
                     <span className={styles.navIcon}>{item.icon}</span>
                     <span className={styles.navLabel}>{item.label}</span>
                     <span className={styles.navLockIcon}>🔒</span>
-                  </span>
+                    {badgeCount !== null && badgeCount > 0 && (
+                      <span className={styles.navBadge}>{badgeCount}</span>
+                    )}
+                  </NavLink>
                 );
               }
               return (
@@ -233,14 +251,10 @@ export function AdminLayout() {
                   {...commonProps}
                   to={item.to}
                   onClick={(e) => {
+                    setIsMobileOpen(false);
                     if (isDirty) {
-                      e.preventDefault();
-
-                      interceptNavigation(() => {
-                        window.location.href = item.to;
-                      });
-                    } else {
-                      setIsMobileOpen(false);
+                      e.preventDefault(); // bloquea React Router
+                      interceptNavigation(() => navigate(item.to)); // ← navigate SPA, no hard reload
                     }
                   }}
                   className={({ isActive }) =>
@@ -306,7 +320,7 @@ export function AdminLayout() {
           )}
         </div>
       </aside>
-    
+
       <main className={styles.main}>
         <AdminHeader />
         {/* Contenedor relativo para evitar saltos */}
@@ -329,6 +343,15 @@ export function AdminLayout() {
           </div>
         </div>
       </main>
+      <ModalConfirm
+        open={showWarning}
+        title="Cambios sin guardar"
+        description="Tenés cambios sin guardar. ¿Querés salir y descartarlos?"
+        confirmText="Salir sin guardar"
+        cancelText="Seguir editando"
+        onConfirm={confirmNavigation}
+        onCancel={cancelNavigation}
+      />
     </div>
   );
 }

@@ -19,7 +19,7 @@ import { RouteErrorBoundary } from './components/RouteErrorBoundary';
 
 // Lazy load admin feature components for better code splitting
 const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts').then(m => ({ default: m.AdminProducts })));
-const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders').then(m => ({ default: m.AdminOrders })));
+const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders'));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
 const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
