@@ -26,18 +26,23 @@ interface Props {
 
 export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters, disabled }: Props) {
     return (
+
         <div className={styles.filters}>
             <div className={styles.searchWrap}>
-                <span className={styles.searchIcon}>🔍</span>
-                <input
-                    className={styles.searchInput}
-                    type="text"
-                    placeholder="Buscar por cliente, email o N° de pedido..."
-                    value={filters.search}
-                    onChange={e => onChange({ ...filters, search: e.target.value })}
-                    disabled={disabled}
-                    aria-label="Buscar pedidos"
-                />
+                <label className={styles.dateLabel} htmlFor="order-search">Buscar</label>
+                <div className={styles.searchInputWrap}>
+                    <span className={styles.searchIcon}>🔍</span>
+                    <input
+                        className={styles.searchInput}
+                        id="order-search"
+                        type="text"
+                        placeholder="Buscar por cliente, email o N° de pedido..."
+                        value={filters.search}
+                        onChange={e => onChange({ ...filters, search: e.target.value })}
+                        disabled={disabled}
+                        aria-label="Buscar pedidos"
+                    />
+                </div>
             </div>
 
             <StatusChipSelect
@@ -46,6 +51,8 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                 onChange={statuses => onChange({ ...filters, statuses })}
                 placeholder="Todos los estados"
                 selectClassName={styles.filterSelect}
+                label='Estado'
+                labelClassName={styles.dateLabel}
                 chipClassName={styles.chip}
                 chipCloseClassName={styles.chipClose}
             />

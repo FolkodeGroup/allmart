@@ -2,7 +2,7 @@ import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import type { Order, OrderStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
-import { STATUS_LABELS, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS, formatPrice } from './utils/ordersHelpers';
+import { STATUS_LABELS, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS } from './utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
@@ -298,25 +298,6 @@ function AdminOrders() {
     <main className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`} tabIndex={-1} aria-label="Gestión de pedidos">
       {/* Header */}
       <OrdersHeader />
-      <header className={sectionStyles.header}>
-        <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
-          <span className={sectionStyles.icon} aria-hidden="true">🛒</span> Pedidos
-          <Tooltip content="Aquí podés ver y gestionar todos los pedidos realizados por los clientes. Usa los filtros y acciones para administrar el flujo de ventas.">
-            <button
-              type="button"
-              aria-label="Ayuda sección pedidos"
-              style={{ background: 'none', border: 'none', marginLeft: 8, cursor: 'pointer', color: '#2563eb', fontSize: 20 }}
-              tabIndex={0}
-            >
-              ℹ️
-            </button>
-          </Tooltip>
-        </h1>
-        <p className={sectionStyles.subtitle}>
-          Revisá, procesá y gestioná los pedidos de clientes.
-        </p>
-      </header>
 
       {/* Resumen / Métricas rápidas */}
       <section className={styles.summary} aria-label="Resumen de pedidos">
@@ -427,57 +408,13 @@ function AdminOrders() {
         disabled={isLoading}
       />
 
-      {
+      {/* CANTIDAD DE PEDIDOS, COMENTADO PORQUE YA SE MUESTRA EN LAS MÉTRICAS RÁPIDAS
         !isLoading && (
           <p className={styles.resultsCount} id="orders-count" aria-live="polite">
             {orders.length} pedido{orders.length !== 1 ? 's' : ''}
           </p>
         )
-      }
-
-
-
-      {/* Controles de paginación */}
-      {/* Paginación simple basada en page y PAGE_SIZE */}
-      <nav className={styles.paginationWrap} aria-label="Paginación de pedidos">
-        <button
-          className={styles.paginationBtn}
-          type="button"
-          onClick={() => setPage(p => Math.max(1, p - 1))}
-          disabled={page === 1}
-        >
-          ← Anterior
-        </button>
-        <div className={styles.paginationPages}>
-          {Array.from({ length: Math.ceil(orders.length / PAGE_SIZE) || 1 }).map((_, i) => (
-            <button
-              key={i + 1}
-              className={
-                page === i + 1
-                  ? `${styles.paginationPage} ${styles.paginationPageActive}`
-                  : styles.paginationPage
-              }
-              type="button"
-              onClick={() => setPage(i + 1)}
-              aria-current={page === i + 1 ? 'page' : undefined}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-        <button
-          className={styles.paginationBtn}
-          type="button"
-          onClick={() => setPage(p => Math.min(Math.ceil(orders.length / PAGE_SIZE) || 1, p + 1))}
-          disabled={page === (Math.ceil(orders.length / PAGE_SIZE) || 1)}
-        >
-          Siguiente →
-        </button>
-      </nav>
-
-
-
-
+      */}
       {/* Lista de pedidos */}
       {isLoading ? (
         <>
@@ -519,278 +456,109 @@ function AdminOrders() {
       ) : (
         <>
           <OrdersTable
-            orders={orders}
+            orders={filtered}
             selectedIds={selectedIds}
             onSelect={handleSelectOne}
             onDetail={setSelectedOrder}
           />
           <OrderList
-            orders={orders}
+            orders={filtered}
             selectedIds={selectedIds}
             onSelect={handleSelectOne}
             onDetail={setSelectedOrder}
           />
           {/* Acciones masivas y modals pueden ir aquí */}
-          <div style={{ height: '100px' }} aria-hidden='true' />
-          {/* Tabla — tablet y desktop */}
-          <div className={styles.tableWrapper} style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-            <table className={styles.table} style={{ minWidth: 900 }} aria-label="Pedidos" aria-describedby="orders-count">
-              <caption className="sr-only">Lista de pedidos de clientes</caption>
-              <thead>
-                <tr>
-                  <th style={{ width: 48 }} scope="col"></th>
-                  <th style={{ textAlign: 'left', padding: '18px 20px' }} scope="col">N° Pedido</th>
-                  <th style={{ textAlign: 'left', padding: '18px 20px' }} scope="col">Fecha</th>
-                  <th style={{ textAlign: 'left', padding: '18px 20px' }} scope="col">Cliente</th>
-                  <th style={{ textAlign: 'left', padding: '18px 20px' }} scope="col">Productos</th>
-                  <th style={{ textAlign: 'left', padding: '18px 20px' }} scope="col">Total</th>
-                  <th style={{ textAlign: 'left', padding: '18px 20px' }} scope="col">Estado</th>
-                  <th style={{ width: 80 }} scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(order => (
-                  <tr
-                    key={order.id}
-                    className={styles.row}
-                    onClick={() => setSelectedOrder(order)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Ver detalle del pedido #${order.id.slice(0, 8).toUpperCase()}`}
-                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
-                  >
-                    <td style={{ padding: '16px 12px' }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(order.id)}
-                        onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
-                        aria-label={`Seleccionar pedido ${order.id}`}
-                        onClick={e => e.stopPropagation()}
-                        tabIndex={0}
-                      />
-                    </td>
-                    <td className={styles.orderId}>
-                      #{order.id.slice(0, 8).toUpperCase()}
-                    </td>
-                    <td className={styles.orderDate}>{formatDateTime(order.createdAt)}</td>
-                    <td>
-                      <div className={styles.customerName}>{order.customer.firstName} {order.customer.lastName}</div>
-                      <div className={styles.customerEmail}>{order.customer.email}</div>
-                    </td>
-                    <td className={styles.itemCount}>
-                      {order.items.reduce((s, i) => s + i.quantity, 0)} ítem{order.items.reduce((s, i) => s + i.quantity, 0) !== 1 ? 's' : ''}
-                    </td>
-                    <td className={styles.orderTotal}>
-                      {formatPrice(order.total)}
-                    </td>
-                    <td>
-                      <span
-                        className={`${styles.statusBadge} ${statusClass(order.status, styles)}`}
-                        aria-label={`Estado: ${STATUS_LABELS[order.status]}`}
-                        role="status"
-                        aria-live="polite"
-                        tabIndex={0}
-                      >
-                        {STATUS_LABELS[order.status]}
-                      </span>
-                      {order.paymentStatus === 'abonado' && (
-                        <span
-                          className={styles.paymentBadge}
-                          aria-label="Pago abonado"
-                          tabIndex={0}
-                        >
-                          ✓ Abonado
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {order.paymentStatus === 'abonado' && (
-                        <span
-                          className={styles.paymentBadge}
-                          aria-label="Pago abonado"
-                          tabIndex={0}
-                        >
-                          ✓ Abonado
-                        </span>
-                      )}
-                    </td>
-                    <td style={{ padding: '16px 8px', textAlign: 'center' }}>
-                      <Tooltip content="Ver detalle del pedido">
-                        <button
-                          className={styles.detailBtn}
-                          type="button"
-                          onClick={e => { e.stopPropagation(); setSelectedOrder(order); }}
-                          aria-label="Ver detalle del pedido"
-                          style={{ background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s' }}
-                          onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
-                          onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
-                          onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
-                          onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
-                        >
-                          Ver →
-                        </button>
-                      </Tooltip>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
 
-          {/* Tarjetas — mobile */}
-          <div className={styles.mobileList}>
-            {filtered.map(order => {
-              const initials = `${order.customer?.firstName?.[0] ?? ''}${order.customer?.lastName?.[0] ?? ''}`;
-              const totalQty = order.items.reduce((s, i) => s + i.quantity, 0);
-              return (
-                <div
-                  key={order.id}
-                  className={styles.mobileCard}
-                  onClick={() => setSelectedOrder(order)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedOrder(order)}
+          {/* Controles de paginación */}
+          {/* Paginación simple basada en page y PAGE_SIZE */}
+          <nav className={styles.paginationWrap} aria-label="Paginación de pedidos">
+            <button
+              className={styles.paginationBtn}
+              type="button"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              <span className={styles.paginationBtnIcon}>←</span> Anterior
+            </button>
+            <div className={styles.paginationPages}>
+              {Array.from({ length: Math.ceil(orders.length / PAGE_SIZE) || 1 }).map((_, i) => (
+                <button
+                  key={i + 1}
+                  className={
+                    page === i + 1
+                      ? `${styles.paginationPage} ${styles.paginationPageActive}`
+                      : styles.paginationPage
+                  }
+                  type="button"
+                  onClick={() => setPage(i + 1)}
+                  aria-current={page === i + 1 ? 'page' : undefined}
                 >
-                  <div className={styles.mobileCardTop}>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(order.id)}
-                      onChange={e => { e.stopPropagation(); handleSelectOne(order.id); }}
-                      aria-label={`Seleccionar pedido ${order.id}`}
-                      onClick={e => e.stopPropagation()}
-                      style={{ marginRight: 8, minWidth: 24, minHeight: 24 }}
-                    />
-                    <span className={styles.mobileCardId}>
-                      #{order.id.slice(0, 8).toUpperCase()}
-                    </span>
-                    <span className={styles.mobileCardDate}>{formatDateTime(order.createdAt)}</span>
-                  </div>
-                  <div className={styles.mobileCardMid}>
-                    <div className={styles.mobileCardCustomer}>
-                      <div className={styles.mobileCardAvatar}>{initials}</div>
-                      <div style={{ minWidth: 0 }}>
-                        <div className={styles.mobileCardName}>{order.customer.firstName} {order.customer.lastName}</div>
-                        <div className={styles.mobileCardEmail}>{order.customer.email}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.mobileCardBottom}>
-                    <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
-                    <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
-                    <span className={styles.statusBadge + ' ' + statusClass(order.status, styles)}>{STATUS_LABELS[order.status]}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          {/* Detalle rápido */}
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              className={styles.paginationBtn}
+              type="button"
+              onClick={() => setPage(p => Math.min(Math.ceil(orders.length / PAGE_SIZE) || 1, p + 1))}
+              disabled={page === (Math.ceil(orders.length / PAGE_SIZE) || 1)}
+            >
+              Siguiente <span className={styles.paginationBtnIcon}>→</span>
+            </button>
+          </nav>
+
           {/* Acciones masivas */}
           {
             selectedIds.length > 0 && (
-              <div
-                style={{
-                  position: 'fixed',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 50,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  pointerEvents: 'none',
-                  padding: '0 0 8px 0',
-                }}
-              >
-                <div
-                  style={{
-                    background: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: 12,
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                    padding: 12,
-                    display: 'flex',
-                    gap: 8,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    pointerEvents: 'auto',
-                    maxWidth: 480,
-                    width: '100%',
-                    margin: '0 8px',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span style={{ fontWeight: 500, fontSize: 15, flex: '1 1 100%' }}>{selectedIds.length} seleccionados</span>
+              <div className={styles.bulkActionsContainer}>
+                <div className={styles.bulkActionsBox}>
+                  <span className={styles.bulkActionsTitle}>
+                    {selectedIds.length} seleccionados
+                  </span>
+
                   <Tooltip content="Confirmar todos los pedidos seleccionados">
                     <button
                       type="button"
                       disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
                       onClick={() => handleBulkAction('confirm')}
-                      style={{
-                        padding: '8px 4px',
-                        borderRadius: 8,
-                        border: 'none',
-                        background: '#2563eb',
-                        color: '#fff',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        flex: '1 1 120px',
-                        fontSize: 15,
-                      }}
+                      className={`${styles.bulkBtn} ${styles.bulkBtnConfirm}`}
                       aria-label="Confirmar pedidos seleccionados"
-                    >Confirmar</button>
+                    >
+                      Confirmar
+                    </button>
                   </Tooltip>
+
                   <Tooltip content="Marcar como enviados los pedidos seleccionados">
                     <button
                       type="button"
                       disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
                       onClick={() => handleBulkAction('ship')}
-                      style={{
-                        padding: '8px 4px',
-                        borderRadius: 8,
-                        border: 'none',
-                        background: '#10b981',
-                        color: '#fff',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        flex: '1 1 120px',
-                        fontSize: 15,
-                      }}
+                      className={`${styles.bulkBtn} ${styles.bulkBtnShip}`}
                       aria-label="Marcar como enviados"
-                    >Enviado</button>
+                    >
+                      Enviado
+                    </button>
                   </Tooltip>
+
                   <Tooltip content="Cancelar todos los pedidos seleccionados">
                     <button
                       type="button"
                       disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
                       onClick={() => handleBulkAction('cancel')}
-                      style={{
-                        padding: '8px 4px',
-                        borderRadius: 8,
-                        border: 'none',
-                        background: '#ef4444',
-                        color: '#fff',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        flex: '1 1 120px',
-                        fontSize: 15,
-                      }}
+                      className={`${styles.bulkBtn} ${styles.bulkBtnCancel}`}
                       aria-label="Cancelar pedidos seleccionados"
-                    >Cancelar</button>
+                    >
+                      Cancelar
+                    </button>
                   </Tooltip>
+
                   <button
                     type="button"
                     onClick={clearSelection}
-                    style={{
-                      marginLeft: 0,
-                      background: 'none',
-                      border: 'none',
-                      color: '#6b7280',
-                      cursor: 'pointer',
-                      flex: '1 1 100%',
-                      fontSize: 14,
-                      padding: '6px 0 0 0',
-                    }}
-                  >Limpiar</button>
+                    className={styles.bulkBtnClear}
+                  >
+                    Limpiar
+                  </button>
                 </div>
               </div>
             )
@@ -810,7 +578,6 @@ function AdminOrders() {
               />
             )
           }
-          <div style={{ height: '100px' }} aria-hidden='true' />
         </>
       )
       }

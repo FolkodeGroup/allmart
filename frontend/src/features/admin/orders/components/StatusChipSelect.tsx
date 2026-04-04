@@ -39,24 +39,26 @@ export function StatusChipSelect({
 
     return (
         <>
-            {label && (
-                <label className={labelClassName}>
-                    {label}
-                </label>
-            )}
-            <select
-                className={styles.filterSelect}
-                value={selected[0] || ''}
-                onChange={e => { if (e.target.value) handleAdd(e.target.value); }}
-                aria-label="Filtrar por estado"
-            >
-                <option value="">{placeholder}</option>
-                {options.map(opt => (
-                    <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                    </option>
-                ))}
-            </select>
+            <div className={styles.filterSelectWrap}>
+                {label && (
+                    <label className={labelClassName}>
+                        {label}
+                    </label>
+                )}
+                <select
+                    className={styles.filterSelect}
+                    value={selected[0] || ''}
+                    onChange={e => { if (e.target.value) handleAdd(e.target.value); }}
+                    aria-label="Filtrar por estado"
+                >
+                    <option value="">{placeholder}</option>
+                    {options.map(opt => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
             <div className={styles.chipsContainer}>
                 {selected.map(s => {
