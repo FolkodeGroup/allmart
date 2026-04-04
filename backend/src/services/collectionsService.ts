@@ -59,6 +59,40 @@ function generateSlug(name: string): string {
     .replace(/[^\w-]+/g, '');
 }
 
+type LegacyImageValue = string | { url?: unknown } | null | undefined;
+
+function normalizeImageUrl(value: LegacyImageValue): string | undefined {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+
+  if (value && typeof value === 'object' && 'url' in value) {
+    const nestedUrl = (value as { url?: unknown }).url;
+    if (typeof nestedUrl === 'string') {
+      const trimmed = nestedUrl.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    }
+  }
+
+  return undefined;
+}
+
+function getFirstImageUrl(images: unknown): string | undefined {
+  if (!Array.isArray(images)) {
+    return undefined;
+  }
+
+  for (const image of images as LegacyImageValue[]) {
+    const normalized = normalizeImageUrl(image);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return undefined;
+}
+
 function toCollectionDTO(
   collection: Collection,
   productCount: number,
@@ -81,9 +115,7 @@ function toCollectionDTO(
       name: item.product.name,
       slug: item.product.slug,
       price: item.product.price.toNumber(),
-      imageUrl: Array.isArray(item.product.images)
-        ? item.product.images[0]
-        : undefined,
+      imageUrl: getFirstImageUrl(item.product.images),
       position: item.position,
     })),
   };

@@ -71,6 +71,38 @@ describe('publicCollectionsService', () => {
         expect((error as Error).message).toBe('API Error');
       }
     });
+
+    it('should normalize legacy object image urls', async () => {
+      mockApiFetch.mockResolvedValueOnce([
+        {
+          id: 'legacy-1',
+          name: 'Legacy Collection',
+          slug: 'legacy-collection',
+          displayOrder: 1,
+          displayPosition: 'home',
+          imageUrl: { url: 'https://example.com/banner.jpg' },
+          isActive: true,
+          productCount: 1,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-15T00:00:00Z',
+          products: [
+            {
+              id: 'p-legacy',
+              name: 'Legacy Product',
+              slug: 'legacy-product',
+              price: 10,
+              imageUrl: { url: 'https://example.com/product.jpg' },
+              position: 0,
+            },
+          ],
+        },
+      ]);
+
+      const result = await publicCollectionsService.getHomeCollections();
+
+      expect(result[0].imageUrl).toBe('https://example.com/banner.jpg');
+      expect(result[0].products?.[0].imageUrl).toBe('https://example.com/product.jpg');
+    });
   });
 
   describe('getCollectionsByPosition', () => {

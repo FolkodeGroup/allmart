@@ -4,6 +4,7 @@
  */
 
 import { apiFetch } from '../utils/apiClient';
+import { normalizeImageUrl } from '../utils/imageUrl';
 
 export interface PublicCollection {
   id: string;
@@ -25,6 +26,17 @@ export interface PublicCollection {
     imageUrl?: string;
     position: number;
   }[];
+}
+
+type PublicCollectionProduct = NonNullable<PublicCollection['products']>[number];
+
+interface RawPublicCollectionProduct extends Omit<PublicCollectionProduct, 'imageUrl'> {
+  imageUrl?: unknown;
+}
+
+interface RawPublicCollection extends Omit<PublicCollection, 'imageUrl' | 'products'> {
+  imageUrl?: unknown;
+  products?: RawPublicCollectionProduct[];
 }
 
 export interface PublicPromotion {
@@ -73,26 +85,42 @@ function isValidProductDiscount(value: unknown): value is ProductDiscount {
   );
 }
 
+function normalizeCollection(collection: RawPublicCollection): PublicCollection {
+  return {
+    ...collection,
+    imageUrl: normalizeImageUrl(collection.imageUrl),
+    products: Array.isArray(collection.products)
+      ? collection.products.map((product) => ({
+          ...product,
+          imageUrl: normalizeImageUrl(product.imageUrl),
+        }))
+      : undefined,
+  };
+}
+
 export const publicCollectionsService = {
   /**
    * Obtiene colecciones para mostrar en home
    */
   async getHomeCollections(): Promise<PublicCollection[]> {
-    return apiFetch('/api/collections');
+    const collections = await apiFetch<RawPublicCollection[]>('/api/collections');
+    return collections.map(normalizeCollection);
   },
 
   /**
    * Obtiene colecciones por posición de display
    */
   async getCollectionsByPosition(position: 'home' | 'category'): Promise<PublicCollection[]> {
-    return apiFetch(`/api/collections/position/${position}`);
+    const collections = await apiFetch<RawPublicCollection[]>(`/api/collections/position/${position}`);
+    return collections.map(normalizeCollection);
   },
 
   /**
    * Obtiene una colección específica por slug
    */
   async getCollectionBySlug(slug: string): Promise<PublicCollection> {
-    return apiFetch(`/api/collections/${slug}`);
+    const collection = await apiFetch<RawPublicCollection>(`/api/collections/${slug}`);
+    return normalizeCollection(collection);
   },
 
   /**

@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './BannerSlider.module.css';
 import type { PublicBanner } from '../services/publicBannersService';
+import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../utils/imageUrl';
 
 interface Props {
   banners: PublicBanner[];
@@ -13,6 +14,16 @@ interface Props {
 
 const BannerSlider: React.FC<Props> = ({ banners }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = event.currentTarget;
+    if (target.dataset.fallbackApplied === 'true') {
+      return;
+    }
+
+    target.dataset.fallbackApplied = 'true';
+    target.src = DEFAULT_IMAGE_PLACEHOLDER;
+  };
 
   // Auto-advance slides every 5 seconds
   useEffect(() => {
@@ -44,20 +55,25 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
   return (
     <div className={styles.slider}>
       <div className={styles.slidesContainer}>
-        {banners.map((banner, index) => (
-          <div
-            key={banner.id}
-            className={`${styles.slide} ${index === currentIndex ? styles.active : ''}`}
-          >
-            <div className={styles.slideContent}>
-              <img 
-                src={banner.imageUrl} 
-                alt={banner.altText || banner.title}
-                className={styles.bannerImage}
-              />
+        {banners.map((banner, index) => {
+          const imageUrl = normalizeImageUrl(banner.imageUrl) ?? DEFAULT_IMAGE_PLACEHOLDER;
+
+          return (
+            <div
+              key={banner.id}
+              className={`${styles.slide} ${index === currentIndex ? styles.active : ''}`}
+            >
+              <div className={styles.slideContent}>
+                <img
+                  src={imageUrl}
+                  alt={banner.altText || banner.title}
+                  className={styles.bannerImage}
+                  onError={handleImageError}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Navigation arrows - only show if more than one banner */}

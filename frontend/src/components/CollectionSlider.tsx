@@ -8,13 +8,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './CollectionSlider.module.css';
+import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../utils/imageUrl';
 
 export interface CollectionProduct {
   id: string;
   name: string;
   slug: string;
   price: number | string;
-  imageUrl?: string;
+  imageUrl?: string | { url?: unknown } | null;
   position: number;
 }
 
@@ -88,6 +89,16 @@ const CollectionSlider: React.FC<Props> = ({
     }
   };
 
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = event.currentTarget;
+    if (target.dataset.fallbackApplied === 'true') {
+      return;
+    }
+
+    target.dataset.fallbackApplied = 'true';
+    target.src = DEFAULT_IMAGE_PLACEHOLDER;
+  };
+
   if (!products || products.length === 0) {
     return null;
   }
@@ -129,38 +140,41 @@ const CollectionSlider: React.FC<Props> = ({
           role="region"
           aria-label={`Productos de ${title}`}
         >
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className={styles.productCard}
-              onClick={() => handleProductClick(product.slug)}
-              role="button"
-              tabIndex={0}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  handleProductClick(product.slug);
-                }
-              }}
-            >
-              {product.imageUrl && (
+          {products.map((product) => {
+            const imageUrl = normalizeImageUrl(product.imageUrl) ?? DEFAULT_IMAGE_PLACEHOLDER;
+
+            return (
+              <div
+                key={product.id}
+                className={styles.productCard}
+                onClick={() => handleProductClick(product.slug)}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleProductClick(product.slug);
+                  }
+                }}
+              >
                 <div className={styles.imageWrapper}>
                   <img
-                    src={product.imageUrl}
+                    src={imageUrl}
                     alt={product.name}
                     className={styles.productImage}
                     loading="lazy"
+                    onError={handleImageError}
                   />
                 </div>
-              )}
 
-              <div className={styles.productInfo}>
-                <h3>{product.name}</h3>
-                <p className={styles.price}>
-                  ${product.price}
-                </p>
+                <div className={styles.productInfo}>
+                  <h3>{product.name}</h3>
+                  <p className={styles.price}>
+                    ${product.price}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {hasOverflow && (
