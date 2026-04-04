@@ -2,7 +2,7 @@ import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import type { Order, OrderStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
-import { STATUS_LABELS, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS, formatPrice } from './utils/ordersHelpers';
+import { STATUS_LABELS, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS } from './utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
