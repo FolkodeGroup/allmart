@@ -2,7 +2,7 @@ import { CategoriesPagination } from './components/CategoriesPagination';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { useNotification } from '../../../context/NotificationContext';
@@ -12,7 +12,7 @@ import { useCategorySelection } from './hooks/useCategorySelection';
 import { BulkEditCategoriesBar } from './BulkEditCategoriesBar';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
-import { FolderSearch, AlertCircle } from 'lucide-react';
+import { FolderSearch, AlertCircle, Grid3x3, List } from 'lucide-react';
 import { CategoriesGrid } from './CategoriesGrid';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
@@ -23,6 +23,9 @@ import { CategoriesFilters } from './components/CategoriesFilters';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { useCategoryBulkActions } from './hooks/useCategoryBulkActions';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
+
+type CategorySortField = 'name' | 'slug' | 'itemCount' | 'isVisible';
+type CategorySortDirection = 'asc' | 'desc';
 
 
 export function AdminCategories() {
@@ -37,6 +40,12 @@ export function AdminCategories() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<CategorySortField>('name');
+  const [sortDirection, setSortDirection] = useState<CategorySortDirection>('asc');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('adminCategoriesViewMode');
+    return saved === 'list' ? 'list' : 'grid';
+  });
   const [deleting, setDeleting] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -99,6 +108,10 @@ export function AdminCategories() {
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, minProducts, maxProducts, isVisible]);
+
+  useEffect(() => {
+    localStorage.setItem('adminCategoriesViewMode', viewMode);
+  }, [viewMode]);
 
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -325,6 +338,33 @@ export function AdminCategories() {
   const categoriesWithOptimism = categories.map(cat =>
     optimisticVis[cat.id] !== undefined ? { ...cat, isVisible: optimisticVis[cat.id] } : cat
   );
+  const sortedCategories = useMemo(() => {
+    const ordered = [...categoriesWithOptimism];
+
+    ordered.sort((a, b) => {
+      let result = 0;
+
+      switch (sortField) {
+        case 'name':
+          result = a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+          break;
+        case 'slug':
+          result = a.slug.localeCompare(b.slug, 'es', { sensitivity: 'base' });
+          break;
+        case 'itemCount':
+          result = (a.itemCount ?? 0) - (b.itemCount ?? 0);
+          break;
+        case 'isVisible':
+          result = Number(a.isVisible) - Number(b.isVisible);
+          break;
+      }
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+
+    return ordered;
+  }, [categoriesWithOptimism, sortField, sortDirection]);
+  const someVisibleSelected = categoriesWithOptimism.some(cat => selectedIds.includes(cat.id));
   const hasChildren = editId ? categories.some((cat) => cat.parentId === editId) : false;
   const parentOptions = categories.filter((cat) => !cat.parentId && cat.id !== editId);
 
@@ -354,17 +394,6 @@ export function AdminCategories() {
           onNew={handleNew}
         />
 
-        {/* Botones de exportación debajo del header */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', width: '100%', marginBottom: 8 }}>
-          <button className={styles.exportBtn} onClick={handleExportCSV} type="button">
-            Exportar CSV
-          </button>
-          <button className={styles.exportBtn} onClick={handleExportExcel} type="button">
-            Exportar Excel
-          </button>
-        </div>
-
-
         {/* Filtros fuera del header */}
         <motion.div
           variants={fadeSlideIn}
@@ -387,6 +416,104 @@ export function AdminCategories() {
             setIsVisible={setIsVisible}
           />
         </motion.div>
+
+      {!loading && !error && categories.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            marginTop: 8,
+            marginBottom: 8,
+            padding: '8px 12px',
+            background: '#fafaf8',
+            borderRadius: 10,
+            border: '1px solid #e5e2dd',
+          }}
+        >
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button className={styles.exportBtn} onClick={handleExportCSV} type="button">
+              Exportar CSV
+            </button>
+            <button className={styles.exportBtn} onClick={handleExportExcel} type="button">
+              Exportar Excel
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '6px 10px', background: '#fff', borderRadius: 8, border: '1px solid #e5e2dd' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ordenar:</span>
+              <select
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value as CategorySortField)}
+                style={{ padding: '5px 6px', borderRadius: 6, border: '1px solid #e5e2dd', background: '#fff', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                <option value="name">Nombre</option>
+                <option value="slug">Slug</option>
+                <option value="itemCount">Productos</option>
+                <option value="isVisible">Estado</option>
+              </select>
+              <button
+                onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                style={{ padding: '5px 8px', borderRadius: 6, border: '1px solid #e5e2dd', background: sortDirection === 'asc' ? '#769282' : '#fff', color: sortDirection === 'asc' ? '#fff' : '#666', cursor: 'pointer', fontWeight: 600, fontSize: 11, transition: 'all 0.2s', minWidth: 35 }}
+                title={`Ordenar ${sortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
+                type="button"
+              >
+                {sortDirection === 'asc' ? '▲' : '▼'}
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: 4, border: '1px solid #e5e2dd', borderRadius: 8, padding: '4px', background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+              <button
+                onClick={() => setViewMode('grid')}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: viewMode === 'grid' ? '#769282' : '#fff',
+                  color: viewMode === 'grid' ? '#fff' : '#666',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 12,
+                  fontWeight: viewMode === 'grid' ? 600 : 500,
+                  transition: 'all 200ms'
+                }}
+                title="Vista en cuadrícula"
+                aria-pressed={viewMode === 'grid'}
+                type="button"
+              >
+                <Grid3x3 size={16} /> Grid
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: viewMode === 'list' ? '#769282' : '#fff',
+                  color: viewMode === 'list' ? '#fff' : '#666',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 12,
+                  fontWeight: viewMode === 'list' ? 600 : 500,
+                  transition: 'all 200ms'
+                }}
+                title="Vista en lista"
+                aria-pressed={viewMode === 'list'}
+                type="button"
+              >
+                <List size={16} /> Lista
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabla y feedback */}
       <AnimatePresence mode="wait">
@@ -436,10 +563,10 @@ export function AdminCategories() {
               action={can('categories.create') ? { label: 'Nueva Categoría', onClick: handleNew } : undefined}
             />
           </motion.div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <CategoriesGrid
             key="grid"
-            categories={categoriesWithOptimism}
+            categories={sortedCategories}
             onEdit={can('categories.edit') ? handleEdit : undefined}
             onDelete={can('categories.delete') ? (id => setDeleteConfirm(id)) : undefined}
             canEdit={can('categories.edit')}
@@ -451,6 +578,171 @@ export function AdminCategories() {
             onSelectAll={handleSelectAllVisible}
             onToggleVisibility={can('categories.edit') ? handleToggleVisibility : undefined}
           />
+        ) : (
+          <motion.div
+            key="list"
+            variants={fadeSlideIn}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+          >
+            <div
+              style={{
+                overflowX: 'auto',
+                border: '1px solid #e5e2dd',
+                borderRadius: 12,
+              }}
+            >
+              <table
+                style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  fontSize: 14,
+                }}
+              >
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #f8f6f3 0%, #faf8f5 100%)', borderBottom: '2px solid #e5e2dd' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#1a1a1a' }}>
+                      <input
+                        type="checkbox"
+                        checked={allVisibleSelected}
+                        onChange={(e) => handleSelectAllVisible(e.target.checked)}
+                        ref={(el) => {
+                          if (el) {
+                            el.indeterminate = someVisibleSelected && !allVisibleSelected;
+                          }
+                        }}
+                        style={{ cursor: 'pointer' }}
+                        aria-label="Seleccionar todas las categorías visibles"
+                      />
+                    </th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#1a1a1a' }}>Nombre</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#1a1a1a' }}>Slug</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#1a1a1a' }}>Productos</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#1a1a1a' }}>Estado</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#1a1a1a' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedCategories.map((cat, idx) => {
+                    const categoryName = cat.name?.trim() || cat.slug;
+
+                    return (
+                      <tr key={cat.id} style={{ borderBottom: '1px solid #f0ede8', background: idx % 2 === 0 ? '#fff' : '#f9f7f4' }}>
+                        <td style={{ padding: '12px 16px' }}>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(cat.id)}
+                            onChange={(e) => handleSelectCategory(cat.id, e.target.checked)}
+                            style={{ cursor: 'pointer' }}
+                            aria-label={`Seleccionar categoría ${categoryName}`}
+                          />
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#1a1a1a', fontWeight: 500 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {cat.image ? (
+                              <img src={cat.image} alt={categoryName} style={{ width: 32, height: 32, borderRadius: 4, objectFit: 'cover' }} />
+                            ) : (
+                              <div style={{ width: 32, height: 32, borderRadius: 4, background: '#ece9e2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8c8478', fontSize: 10 }}>N/A</div>
+                            )}
+                            <span>{categoryName}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#767676', fontSize: 12 }}>{cat.slug}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <span
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: 4,
+                              background: (cat.itemCount ?? 0) > 0 ? '#d4edda' : '#f8d7da',
+                              color: (cat.itemCount ?? 0) > 0 ? '#155724' : '#721c24',
+                              fontSize: 12,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {cat.itemCount ?? 0}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <span
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: 4,
+                              background: cat.isVisible ? '#d4edda' : '#f8d7da',
+                              color: cat.isVisible ? '#155724' : '#721c24',
+                              fontSize: 12,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {cat.isVisible ? 'Visible' : 'Oculta'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                            {can('categories.edit') && (
+                              <button
+                                onClick={() => handleEdit(cat.id)}
+                                style={{
+                                  padding: '4px 8px',
+                                  background: '#769282',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 4,
+                                  cursor: 'pointer',
+                                  fontSize: 12,
+                                  fontWeight: 500
+                                }}
+                                type="button"
+                              >
+                                Editar
+                              </button>
+                            )}
+                            {can('categories.edit') && (
+                              <button
+                                onClick={() => handleToggleVisibility(cat.id, !cat.isVisible)}
+                                style={{
+                                  padding: '4px 8px',
+                                  background: cat.isVisible ? '#c46d2e' : '#3b82f6',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 4,
+                                  cursor: 'pointer',
+                                  fontSize: 12,
+                                  fontWeight: 500
+                                }}
+                                type="button"
+                              >
+                                {cat.isVisible ? 'Ocultar' : 'Mostrar'}
+                              </button>
+                            )}
+                            {can('categories.delete') && (
+                              <button
+                                onClick={() => setDeleteConfirm(cat.id)}
+                                style={{
+                                  padding: '4px 8px',
+                                  background: '#c75050',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 4,
+                                  cursor: 'pointer',
+                                  fontSize: 12,
+                                  fontWeight: 500
+                                }}
+                                type="button"
+                              >
+                                Eliminar
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
