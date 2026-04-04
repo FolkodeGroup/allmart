@@ -1,54 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CircleUserRound, Menu, Search, ShoppingCart, X } from 'lucide-react';
-import type { Category, NavigationItem } from '../../../types';
+import type { NavigationItem } from '../../../types';
 import { fetchPublicCategories } from '../../../services/categoriesService';
+import { buildNavigationFromCategories, fallbackNavigation } from '../navigation/publicNavigation';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
-
-const baseNavigation: NavigationItem[] = [
-  { label: 'Ofertas', href: '/productos?tag=oferta' },
-  { label: 'Novedades', href: '/productos?tag=nuevo' },
-];
-
-const fallbackNavigation: NavigationItem[] = [
-  ...baseNavigation,
-  { label: 'Ver todo el catalogo', href: '/productos' },
-];
-
-function buildNavigationFromCategories(categories: Category[]): NavigationItem[] {
-  const visible = categories.filter((category) => category.isVisible);
-  const roots = visible.filter((category) => !category.parentId);
-  const childrenByParent = new Map<string, Category[]>();
-
-  for (const category of visible) {
-    if (category.parentId) {
-      const current = childrenByParent.get(category.parentId) ?? [];
-      current.push(category);
-      childrenByParent.set(category.parentId, current);
-    }
-  }
-
-  const rootItems: NavigationItem[] = roots.map((category) => {
-    const children = childrenByParent.get(category.id) ?? [];
-    return {
-      label: category.name,
-      href: `/productos?category=${encodeURIComponent(category.slug)}`,
-      children: children.length
-        ? children.map((child) => ({
-            label: child.name,
-            href: `/productos?category=${encodeURIComponent(child.slug)}`,
-          }))
-        : undefined,
-    };
-  });
-
-  return [
-    ...baseNavigation,
-    ...rootItems,
-    { label: 'Ver todo el catalogo', href: '/productos' },
-  ];
-}
 
 export function Header() {
   const { totalItems } = useCart();

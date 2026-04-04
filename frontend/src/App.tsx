@@ -6,6 +6,13 @@ import { ProductListPage } from './pages/ProductList/ProductListPage';
 import { ProductDetailPage } from './pages/ProductDetail/ProductDetailPage';
 import { CartProvider } from './components/layout/context/CartContext';
 import { CartPage } from './pages/Cart/CartPage';
+import { ContactPage } from './pages/StaticInfo/ContactPage';
+import { FaqPage } from './pages/StaticInfo/FaqPage';
+import { HowToBuyPage } from './pages/StaticInfo/HowToBuyPage';
+import { PrivacyPage } from './pages/StaticInfo/PrivacyPage';
+import { ShippingPage } from './pages/StaticInfo/ShippingPage';
+import { TermsPage } from './pages/StaticInfo/TermsPage';
+import { WithdrawalPage } from './pages/StaticInfo/WithdrawalPage';
 import { AdminLogin } from './pages/AdminLogin/AdminLogin';
 import { AdminLayout } from './pages/Admin/AdminLayout';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
@@ -40,6 +47,13 @@ const router = createBrowserRouter([
       { path: 'productos', element: <ProductListPage /> },
       { path: 'producto/:slug', element: <ProductDetailPage /> },
       { path: 'carrito', element: <CartPage /> },
+      { path: 'como-comprar', element: <HowToBuyPage /> },
+      { path: 'envios', element: <ShippingPage /> },
+      { path: 'preguntas-frecuentes', element: <FaqPage /> },
+      { path: 'contacto', element: <ContactPage /> },
+      { path: 'terminos', element: <TermsPage /> },
+      { path: 'privacidad', element: <PrivacyPage /> },
+      { path: 'arrepentimiento', element: <WithdrawalPage /> },
     ],
   },
   {

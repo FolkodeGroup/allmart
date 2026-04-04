@@ -1,0 +1,103 @@
+.page {
+  min-height: calc(100vh - var(--header-height));
+  background:
+    radial-gradient(circle at 10% 0%, rgba(118, 146, 130, 0.14), transparent 38%),
+    radial-gradient(circle at 90% 100%, rgba(221, 176, 140, 0.16), transparent 42%),
+    linear-gradient(180deg, #f6faf8 0%, #ffffff 42%, #f7f4ef 100%);
+  padding: var(--space-10) var(--space-4) var(--space-20);
+}
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  gap: var(--space-6);
+}
+
+.hero {
+  background: var(--color-neutral-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-sm);
+}
+
+.updatedAt {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: #4a6b5a;
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.7rem, 2.5vw, 2.35rem);
+  color: #142117;
+  margin-bottom: var(--space-3);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: #314539;
+  max-width: 72ch;
+}
+
+.extra {
+  margin-top: var(--space-6);
+}
+
+.card {
+  background: var(--color-neutral-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-xs);
+}
+
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: #1f3328;
+  margin-bottom: var(--space-3);
+}
+
+.paragraph {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: #34483d;
+  line-height: var(--leading-relaxed);
+}
+
+.paragraph + .paragraph {
+  margin-top: var(--space-3);
+}
+
+.bulletList {
+  margin-top: var(--space-4);
+  padding-left: 1.1rem;
+  display: grid;
+  gap: var(--space-2);
+  list-style: disc;
+}
+
+.bulletItem {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: #34483d;
+  line-height: var(--leading-relaxed);
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-16);
+  }
+
+  .hero,
+  .card {
+    padding: var(--space-5);
+  }
+}

@@ -62,18 +62,29 @@ export function ProductDetailPage() {
         setProduct(mappedProduct);
         setLoading(false);
 
-        // Cargar relacionados luego del render inicial.
+        // Cargar productos relacionados de la misma categoría
         const primaryCategoryId = apiProduct.categoryId || apiProduct.categoryIds?.[0];
-        const categorySlug = categories.find((c) => c.id === primaryCategoryId)?.slug;
-        if (!categorySlug) return;
+        const category = categories.find((c) => c.id === primaryCategoryId);
+        
+        if (!category) {
+          setRelatedProducts([]);
+          return;
+        }
+
         try {
-          const { data } = await fetchPublicProducts({ category: categorySlug, limit: 5 });
+          // Cargar más productos para filtrar mejor
+          const { data } = await fetchPublicProducts({ 
+            category: category.slug, 
+            limit: 8 // Cargar más para tener mejor selección
+          });
+          
           if (cancelled) return;
 
+          // Filtrar: excluir el producto actual y tomar los primeros 4
           const related = data
-            .map((p) => mapApiProductToProduct(p, categories))
             .filter((p) => p.id !== apiProduct.id)
-            .slice(0, 4);
+            .slice(0, 4)
+            .map((p) => mapApiProductToProduct(p, categories));
 
           setRelatedProducts(related);
         } catch {

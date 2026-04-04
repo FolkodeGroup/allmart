@@ -1,7 +1,33 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { NavigationItem } from '../../../types';
+import { fetchPublicCategories } from '../../../services/categoriesService';
+import { buildNavigationFromCategories, fallbackNavigation } from '../navigation/publicNavigation';
 import styles from './Footer.module.css';
 
 export function Footer() {
+  const [productLinks, setProductLinks] = useState<NavigationItem[]>(fallbackNavigation);
+
+  useEffect(() => {
+    let ignore = false;
+
+    fetchPublicCategories()
+      .then((categories) => {
+        if (!ignore && categories.length > 0) {
+          setProductLinks(buildNavigationFromCategories(categories));
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setProductLinks(fallbackNavigation);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   return (
     <footer className={styles.footer} role="contentinfo">
       <div className={styles.grid}>
@@ -49,12 +75,11 @@ export function Footer() {
         {/* Productos */}
         <div className={styles.linksCol}>
           <h3 className={styles.colTitle}>Productos</h3>
-          <Link to="/productos?tag=oferta" className={styles.colLink}>Ofertas</Link>
-          <Link to="/productos?tag=nuevo" className={styles.colLink}>Novedades</Link>
-          <Link to="/productos?category=cocina" className={styles.colLink}>Cocina</Link>
-          <Link to="/productos?category=hogar-deco" className={styles.colLink}>Hogar & Deco</Link>
-          <Link to="/productos?category=bano" className={styles.colLink}>Baño</Link>
-          <Link to="/productos" className={styles.colLink}>Ver todo el catálogo</Link>
+          {productLinks.map((item) => (
+            <Link key={item.href} to={item.href} className={styles.colLink}>
+              {item.label}
+            </Link>
+          ))}
         </div>
 
         {/* Ayuda */}
