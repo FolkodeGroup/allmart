@@ -113,8 +113,8 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
             src={galleryImages[currentImageIndex]}
             alt={`${product.name}${hasGallery ? ` - imagen ${currentImageIndex + 1} de ${galleryImages.length}` : ''}`}
             className={styles.image}
-            width={isFeatured ? 420 : 240}
-            height={isFeatured ? 320 : 180}
+            width={isFeatured ? 420 : undefined}
+            height={isFeatured ? 320 : undefined}
             placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
             loading={isFeatured ? 'eager' : 'lazy'}
             fetchPriority={isFeatured ? 'high' : 'auto'}
@@ -174,11 +174,6 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         )}
 
         <div className={styles.badges}>
-          {hasDiscount && (
-            <Badge className={styles.badge} variant="discount">
-              -{product.discount}%
-            </Badge>
-          )}
           {isNew && <Badge variant="new">Nuevo</Badge>}
           {typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
             <Badge className={`${styles.badge} ${styles.lowStockBadge}`}>

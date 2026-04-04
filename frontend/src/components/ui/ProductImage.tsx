@@ -20,8 +20,8 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   src,
   alt,
   className,
-  width = 240,
-  height = 180,
+  width,
+  height,
   placeholder = 'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E',
   style,
   loading = 'lazy',
@@ -40,7 +40,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         className={className}
         width={width}
         height={height}
-        style={{ objectFit: 'cover', ...style }}
+        style={{ width: width ? width : '100%', height: height ? height : '100%', objectFit: 'cover', ...style }}
         aria-label={alt}
       />
     );
@@ -52,7 +52,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
       ? safeSrc.replace(/\.png$/i, '.webp')
       : undefined;
   return (
-    <div style={{ position: 'relative', width, height, ...style }} className={className}>
+    <div style={{ position: 'relative', width: width || '100%', height: height || '100%', ...style }} className={className}>
       {/* Placeholder blur/liviano */}
       <img
         src={placeholder}
