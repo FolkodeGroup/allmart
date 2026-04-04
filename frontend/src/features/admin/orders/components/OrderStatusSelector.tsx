@@ -47,6 +47,21 @@ export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value,
           <option key={s} value={s}>{STATUS_LABELS[s]}</option>
         ))}
       </select>
+      {showConfirm && (
+        <div className={styles.statusConfirmBox}>
+          <span className={styles.statusConfirmText}>
+            ¿Confirmar cambio de estado a "{STATUS_LABELS[pendingStatus as keyof typeof STATUS_LABELS]}"?
+          </span>
+          <div className={styles.statusConfirmActions}>
+            <button className={styles.applyStatusBtn} type="button" onClick={handleConfirm}>
+              Confirmar
+            </button>
+            <button className={styles.cancelBtn} type="button" onClick={handleCancel}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
