@@ -78,7 +78,7 @@ const navItems = [
   {
     label: "Banners",
     to: "/admin/banners",
-    icon: "🎨",
+    icon: "📣",
     permission: null,
     badge: null,
   },
