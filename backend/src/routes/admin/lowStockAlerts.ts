@@ -14,6 +14,9 @@ router.get('/', lowStockAlertsController.index);
 // GET /api/admin/low-stock-alerts/count - Obtener cantidad de alertas en últimas 24hs
 router.get('/count', lowStockAlertsController.count);
 
+// GET /api/admin/low-stock-alerts/current-products - Obtener productos con stock crítico actual
+router.get('/current-products', lowStockAlertsController.currentProducts);
+
 // GET /api/admin/low-stock-alerts/product/:productId - Obtener alertas de un producto
 router.get('/product/:productId', lowStockAlertsController.getByProductId);
 

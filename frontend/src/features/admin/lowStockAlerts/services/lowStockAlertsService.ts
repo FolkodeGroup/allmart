@@ -52,6 +52,37 @@ function normalizeLowStockAlertsPayload(
   };
 }
 
+export type StockAlertLevel = 'no_stock' | 'low_stock';
+
+export interface CurrentLowStockProductDTO {
+  id: string;
+  name: string;
+  sku: string | null;
+  stock: number;
+  inStock: boolean;
+  status: string;
+  updatedAt: string;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
+  alertLevel: StockAlertLevel;
+}
+
+export interface CurrentLowStockProductsResponse {
+  data: CurrentLowStockProductDTO[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+  summary: {
+    noStock: number;
+    lowStock: number;
+    threshold: number;
+  };
+}
+
 export async function getLowStockAlerts(
   page = 1,
   limit = 20
@@ -86,4 +117,46 @@ export async function getLowStockAlertsByProductId(productId: string): Promise<L
   );
 
   return Array.isArray(response?.data) ? response.data : [];
+}
+
+function normalizeCurrentLowStockPayload(
+  payload: unknown,
+  fallbackPage: number,
+  fallbackLimit: number,
+  fallbackThreshold: number,
+): CurrentLowStockProductsResponse {
+  const raw = payload as Partial<CurrentLowStockProductsResponse> | undefined;
+  const data = Array.isArray(raw?.data) ? raw.data : [];
+  const total = typeof raw?.total === 'number' ? raw.total : data.length;
+  const limit = typeof raw?.limit === 'number' ? raw.limit : fallbackLimit;
+  const computedNoStock = data.filter((product) => product.stock <= 0).length;
+  const computedLowStock = data.filter((product) => product.stock > 0 && product.stock <= fallbackThreshold).length;
+
+  return {
+    data,
+    total,
+    page: typeof raw?.page === 'number' ? raw.page : fallbackPage,
+    limit,
+    pages: typeof raw?.pages === 'number' ? raw.pages : Math.max(1, Math.ceil(total / limit)),
+    summary: {
+      noStock: typeof raw?.summary?.noStock === 'number' ? raw.summary.noStock : computedNoStock,
+      lowStock: typeof raw?.summary?.lowStock === 'number' ? raw.summary.lowStock : computedLowStock,
+      threshold: typeof raw?.summary?.threshold === 'number' ? raw.summary.threshold : fallbackThreshold,
+    },
+  };
+}
+
+export async function getCurrentLowStockProducts(
+  page = 1,
+  limit = 20,
+  threshold = 5,
+): Promise<CurrentLowStockProductsResponse> {
+  const response = await apiFetch<ApiSuccess<CurrentLowStockProductsResponse>>(
+    `/api/admin/low-stock-alerts/current-products?page=${page}&limit=${limit}&threshold=${threshold}`,
+    {
+      method: 'GET',
+    }
+  );
+
+  return normalizeCurrentLowStockPayload(response?.data, page, limit, threshold);
 }

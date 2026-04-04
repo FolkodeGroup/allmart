@@ -37,3 +37,20 @@ export async function getByProductId(req: AuthenticatedRequest, res: Response, n
     next(err);
   }
 }
+
+export async function currentProducts(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const parsedPage = parseInt(req.query.page as string, 10);
+    const parsedLimit = parseInt(req.query.limit as string, 10);
+    const parsedThreshold = parseInt(req.query.threshold as string, 10);
+
+    const page = Number.isNaN(parsedPage) ? 1 : parsedPage;
+    const limit = Number.isNaN(parsedLimit) ? 20 : parsedLimit;
+    const threshold = Number.isNaN(parsedThreshold) ? 5 : parsedThreshold;
+
+    const products = await lowStockAlertsService.getCurrentLowStockProducts(page, limit, threshold);
+    sendSuccess(res, products);
+  } catch (err) {
+    next(err);
+  }
+}
