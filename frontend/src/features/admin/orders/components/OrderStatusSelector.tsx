@@ -15,18 +15,23 @@ export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value,
   const [pendingStatus, setPendingStatus] = useState<OrderStatus>(value);
 
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setPendingStatus(e.target.value as OrderStatus);
+    const newStatus = e.target.value as OrderStatus;
+    setPendingStatus(newStatus);
     setShowConfirm(true);
+
+    // Notificar al padre inmediatamente para que pueda marcar isDirty
+    // aunque el usuario todavía no confirmó, el valor cambió
+    if (newStatus !== value) onChange(newStatus);
   };
 
   const handleConfirm = () => {
     setShowConfirm(false);
-    if (pendingStatus !== value) onChange(pendingStatus);
   };
 
   const handleCancel = () => {
     setPendingStatus(value);
     setShowConfirm(false);
+    onChange(value);
   };
 
   return (

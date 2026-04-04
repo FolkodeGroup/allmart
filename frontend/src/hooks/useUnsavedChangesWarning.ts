@@ -1,80 +1,60 @@
-import { useEffect, useCallback, useState } from 'react';
+// hooks/useUnsavedChangesWarning.ts — reemplazar completo
+
+import { useEffect, useCallback, useState, useRef } from 'react';
 
 interface UseUnsavedChangesWarningOptions {
   active: boolean;
   onConfirmExit?: () => void;
 }
 
-/**
- * Hook para detectar cambios no guardados y bloquear navegación accidental.
- *
- * @param options.active Si la protección está activa
- * @param options.onConfirmExit Callback opcional al confirmar salida
- * @returns {Object} isDirty, setIsDirty, showWarning, interceptNavigation, confirmNavigation, cancelNavigation
- *
- * Uso típico:
- * const { setIsDirty, showWarning, confirmNavigation, cancelNavigation } = useUnsavedChangesWarning({ active: true });
- */
 export function useUnsavedChangesWarning({ active }: UseUnsavedChangesWarningOptions) {
   const [showWarning, setShowWarning] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<null | (() => void)>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const pendingNavigation = useRef<null | (() => void)>(null);
 
-  // Handler for browser unload
+  // ← Ref para que interceptNavigation siempre lea el valor actual
+  const isDirtyRef = useRef(isDirty);
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+    console.log('[UnsavedChangesWarning] isDirtyRef actualizado a:', isDirty);
+  }, [isDirty]);
+
   useEffect(() => {
     if (!active || !isDirty) return;
-
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = '';
-      return '';
     };
-
     window.addEventListener('beforeunload', handler);
-
-    return () => {
-      window.removeEventListener('beforeunload', handler);
-    };
+    return () => window.removeEventListener('beforeunload', handler);
   }, [active, isDirty]);
 
-  // Handler for router navigation
+  // ← Ya no depende de isDirty en el closure, lee la ref
   const interceptNavigation = useCallback((callback: () => void) => {
+    console.log('[interceptNavigation] llamado. active:', active, '| isDirtyRef.current:', isDirtyRef.current);
     if (!active || !isDirty) {
+      console.log('[interceptNavigation] → navegando directo (no dirty)');
       callback();
       return;
     }
-
+    console.log('[interceptNavigation] → mostrando warning');
     setShowWarning(true);
-    setPendingNavigation(() => callback);
-  }, [active, isDirty]);
+    pendingNavigation.current = callback;
+  }, [active, isDirty]); // ← solo depende de active
 
-  const confirmNavigation = () => {
+  const confirmNavigation = useCallback(() => {
     setShowWarning(false);
-    if (pendingNavigation) {
-      pendingNavigation();
-      setPendingNavigation(null);
-    }
-  };
+    setIsDirty(false);
+    isDirtyRef.current = false;
+    pendingNavigation.current?.();
+    pendingNavigation.current = null;
+  }, []);
 
-  const cancelNavigation = () => {
+  const cancelNavigation = useCallback(() => {
     setShowWarning(false);
-    setPendingNavigation(null);
-  };
-  /*
-    // Confirm exit
-    const confirmExit = useCallback(() => {
-      setShowWarning(false);
-      setPendingNavigation(null);
-      if (onConfirmExit) onConfirmExit();
-      if (pendingNavigation) pendingNavigation();
-    }, [onConfirmExit, pendingNavigation]);
-  
-    // Cancel exit
-    const cancelExit = useCallback(() => {
-      setShowWarning(false);
-      setPendingNavigation(null);
-    }, []);
-  */
+    pendingNavigation.current = null;
+  }, []);
+
   return {
     isDirty,
     setIsDirty,
