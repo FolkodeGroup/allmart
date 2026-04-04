@@ -5,6 +5,7 @@
 
 import { apiFetch } from '../utils/apiClient';
 import { normalizeImageUrl } from '../utils/imageUrl';
+import type { ImageUrlCandidate } from '../utils/imageUrl';
 
 export interface PublicCollection {
   id: string;
@@ -31,11 +32,11 @@ export interface PublicCollection {
 type PublicCollectionProduct = NonNullable<PublicCollection['products']>[number];
 
 interface RawPublicCollectionProduct extends Omit<PublicCollectionProduct, 'imageUrl'> {
-  imageUrl?: unknown;
+  imageUrl?: ImageUrlCandidate;
 }
 
 interface RawPublicCollection extends Omit<PublicCollection, 'imageUrl' | 'products'> {
-  imageUrl?: unknown;
+  imageUrl?: ImageUrlCandidate;
   products?: RawPublicCollectionProduct[];
 }
 

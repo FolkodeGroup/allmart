@@ -488,14 +488,14 @@ export function AdminProducts() {
                       padding: '5px 10px',
                       borderRadius: 6,
                       border: 'none',
-                      background: viewMode === 'list' ? '#769282' : '#fff',
-                      color: viewMode === 'list' ? '#fff' : '#666',
+                      background: '#fff',
+                      color: '#666',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 4,
                       fontSize: 12,
-                      fontWeight: viewMode === 'list' ? 600 : 500,
+                      fontWeight: 500,
                       transition: 'all 200ms'
                     }}
                     title="Vista en lista"
@@ -666,14 +666,14 @@ export function AdminProducts() {
                     padding: '5px 10px',
                     borderRadius: 6,
                     border: 'none',
-                    background: viewMode === 'grid' ? '#769282' : '#fff',
-                    color: viewMode === 'grid' ? '#fff' : '#666',
+                    background: '#fff',
+                    color: '#666',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 4,
                     fontSize: 12,
-                    fontWeight: viewMode === 'grid' ? 600 : 500,
+                    fontWeight: 500,
                     transition: 'all 200ms',
                   }}
                   title="Vista en cuadrícula"

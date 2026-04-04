@@ -66,7 +66,6 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     loadDiscount();
   }, [product.id, product.price, product.category?.id, product.categoryIds]);
 
-  const hasDiscount = Boolean(product.discount && product.discount > 0);
   const isNew = product.tags.includes("nuevo");
   const isFeatured = variant === 'featured';
   const hasGallery = isFeatured && galleryImages.length > 1;
