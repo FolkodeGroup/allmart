@@ -281,12 +281,8 @@ export function AdminProducts() {
       className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
       aria-label="Gestión de productos"
     >
-      {/* Header + Exportación */}
+      {/* Header */}
       <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button className="export-btn" onClick={handleExportCSV} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>Exportar CSV</button>
-        <button className="export-btn" onClick={handleExportExcel} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d0ccc7'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e2dd'; e.currentTarget.style.boxShadow = 'none'; }}>Exportar Excel</button>
-      </div>
       {/* Filtros */}
       <ProductFilters
         search={search}
@@ -385,9 +381,9 @@ export function AdminProducts() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                marginTop: 20,
-                marginBottom: 16,
-                padding: '12px 16px',
+                marginTop: 8,
+                marginBottom: 8,
+                padding: '8px 12px',
                 background: '#fafaf8',
                 borderRadius: 10,
                 border: '1px solid #e5e2dd',
@@ -407,13 +403,47 @@ export function AdminProducts() {
               </div>
 
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Exportación */}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button
+                    className="export-btn"
+                    onClick={handleExportCSV}
+                    style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#d0ccc7';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e2dd';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    Exportar CSV
+                  </button>
+                  <button
+                    className="export-btn"
+                    onClick={handleExportExcel}
+                    style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#d0ccc7';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e2dd';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    Exportar Excel
+                  </button>
+                </div>
+
                 {/* Ordenamiento */}
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 12px', background: '#fff', borderRadius: 8, border: '1px solid #e5e2dd' }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '6px 10px', background: '#fff', borderRadius: 8, border: '1px solid #e5e2dd' }}>
                   <label style={{ fontSize: 12, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ordenar:</label>
                   <select
                     value={sortField}
                     onChange={(e) => setSortField(e.target.value as SortField)}
-                    style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #e5e2dd', background: '#fff', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}
+                    style={{ padding: '5px 6px', borderRadius: 6, border: '1px solid #e5e2dd', background: '#fff', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}
                   >
                     <option value="name">Nombre</option>
                     <option value="price">Precio</option>
@@ -423,7 +453,7 @@ export function AdminProducts() {
                   </select>
                   <button
                     onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                    style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #e5e2dd', background: sortDirection === 'asc' ? '#769282' : '#fff', color: sortDirection === 'asc' ? '#fff' : '#666', cursor: 'pointer', fontWeight: 600, fontSize: 11, transition: 'all 0.2s', minWidth: 35 }}
+                    style={{ padding: '5px 8px', borderRadius: 6, border: '1px solid #e5e2dd', background: sortDirection === 'asc' ? '#769282' : '#fff', color: sortDirection === 'asc' ? '#fff' : '#666', cursor: 'pointer', fontWeight: 600, fontSize: 11, transition: 'all 0.2s', minWidth: 35 }}
                     title={`Ordenar ${sortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
                   >
                     {sortDirection === 'asc' ? '▲' : '▼'}
@@ -435,17 +465,17 @@ export function AdminProducts() {
                   <button
                     onClick={() => setViewMode('grid')}
                     style={{
-                      padding: '6px 12px',
+                      padding: '5px 10px',
                       borderRadius: 6,
                       border: 'none',
-                      background: '#769282',
-                      color: '#fff',
+                      background: viewMode === 'grid' ? '#769282' : '#fff',
+                      color: viewMode === 'grid' ? '#fff' : '#666',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 4,
                       fontSize: 12,
-                      fontWeight: 600,
+                      fontWeight: viewMode === 'grid' ? 600 : 500,
                       transition: 'all 200ms'
                     }}
                     title="Vista en cuadrícula"
@@ -455,17 +485,17 @@ export function AdminProducts() {
                   <button
                     onClick={() => setViewMode('list')}
                     style={{
-                      padding: '6px 12px',
+                      padding: '5px 10px',
                       borderRadius: 6,
                       border: 'none',
-                      background: '#769282',
-                      color: '#fff',
+                      background: '#fff',
+                      color: '#666',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 4,
                       fontSize: 12,
-                      fontWeight: 400,
+                      fontWeight: 500,
                       transition: 'all 200ms'
                     }}
                     title="Vista en lista"
@@ -513,18 +543,52 @@ export function AdminProducts() {
                 alignItems: 'center',
                 justifyContent: 'flex-end',
                 flexWrap: 'wrap',
-                marginTop: 20,
-                marginBottom: 12,
-                padding: '8px 12px',
+                marginTop: 8,
+                marginBottom: 6,
+                padding: '6px 10px',
               }}
             >
+              {/* Exportación */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  className="export-btn"
+                  onClick={handleExportCSV}
+                  style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#d0ccc7';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#e5e2dd';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  Exportar CSV
+                </button>
+                <button
+                  className="export-btn"
+                  onClick={handleExportExcel}
+                  style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e2dd', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#d0ccc7';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#e5e2dd';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  Exportar Excel
+                </button>
+              </div>
+
               {/* Ordenamiento */}
               <div
                 style={{
                   display: 'flex',
                   gap: 8,
                   alignItems: 'center',
-                  padding: '8px 12px',
+                  padding: '6px 10px',
                   background: '#fafaf8',
                   borderRadius: 8,
                   border: '1px solid #e5e2dd',
@@ -545,7 +609,7 @@ export function AdminProducts() {
                   value={sortField}
                   onChange={(e) => setSortField(e.target.value as SortField)}
                   style={{
-                    padding: '6px 8px',
+                    padding: '5px 6px',
                     borderRadius: 6,
                     border: '1px solid #e5e2dd',
                     background: '#fff',
@@ -566,7 +630,7 @@ export function AdminProducts() {
                     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
                   }
                   style={{
-                    padding: '6px 10px',
+                    padding: '5px 8px',
                     borderRadius: 6,
                     border: '1px solid #e5e2dd',
                     background: sortDirection === 'asc' ? '#769282' : '#fff',
@@ -599,17 +663,17 @@ export function AdminProducts() {
                 <button
                   onClick={() => setViewMode('grid')}
                   style={{
-                    padding: '6px 12px',
+                    padding: '5px 10px',
                     borderRadius: 6,
                     border: 'none',
-                    background: '#769282',
-                    color: '#fff',
+                    background: '#fff',
+                    color: '#666',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 4,
                     fontSize: 12,
-                    fontWeight: 600,
+                    fontWeight: 500,
                     transition: 'all 200ms',
                   }}
                   title="Vista en cuadrícula"
@@ -619,17 +683,17 @@ export function AdminProducts() {
                 <button
                   onClick={() => setViewMode('list')}
                   style={{
-                    padding: '6px 12px',
+                    padding: '5px 10px',
                     borderRadius: 6,
                     border: 'none',
-                    background: '#769282',
-                    color: '#fff',
+                    background: viewMode === 'list' ? '#769282' : '#fff',
+                    color: viewMode === 'list' ? '#fff' : '#666',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 4,
                     fontSize: 12,
-                    fontWeight: 400,
+                    fontWeight: viewMode === 'list' ? 600 : 500,
                     transition: 'all 200ms',
                   }}
                   title="Vista en lista"

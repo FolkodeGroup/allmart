@@ -71,8 +71,9 @@ async function seed() {
     console.log('Usuarios insertados correctamente.');
 
     // ── Categorías ──
+    const categoryIdBySlug = new Map<string, string>();
     for (const cat of categories) {
-      await prisma.category.upsert({
+      const row = await prisma.category.upsert({
         where: { slug: cat.slug },
         update: {},
         create: {
@@ -81,7 +82,20 @@ async function seed() {
           description: cat.description || null,
           imageUrl: cat.image,
           itemCount: cat.itemCount || 0,
+          parentId: null,
         },
+      });
+      categoryIdBySlug.set(cat.slug, row.id);
+    }
+
+    for (const cat of categories) {
+      if (!cat.parentSlug) continue;
+      const parentId = categoryIdBySlug.get(cat.parentSlug);
+      const categoryId = categoryIdBySlug.get(cat.slug);
+      if (!parentId || !categoryId) continue;
+      await prisma.category.update({
+        where: { id: categoryId },
+        data: { parentId },
       });
     }
 
@@ -91,44 +105,78 @@ async function seed() {
     const productsToInsert = products.slice(0, 5); // primeros 5 productos del mock
 
     for (const prod of productsToInsert) {
-      // Buscar el UUID real de la categoría por slug
-      const dbCategory = await prisma.category.findUnique({ where: { slug: prod.category.slug } });
-      if (!dbCategory) {
+      const categorySlugs = Array.isArray(prod.categorySlugs)
+        ? prod.categorySlugs
+        : Array.isArray(prod.categories)
+          ? prod.categories.map((cat: any) => cat.slug)
+          : prod.category?.slug
+            ? [prod.category.slug]
+            : [];
+
+      const categoryIds = categorySlugs
+        .map((slug: string) => categoryIdBySlug.get(slug))
+        .filter((id: string | undefined): id is string => Boolean(id));
+
+      if (categoryIds.length === 0) {
         console.warn(`Categoría no encontrada para el producto: ${prod.name}`);
         continue;
       }
-      await prisma.product.upsert({
+
+      const primaryCategoryId = categoryIds[0];
+
+      const updateData = {
+        images: prod.images,
+        shortDescription: prod.shortDescription || null,
+        description: prod.description || null,
+        price: prod.price,
+        originalPrice: prod.originalPrice || null,
+        discount: prod.discount || null,
+        tags: prod.tags || [],
+        features: prod.features || [],
+        status: ProductStatus.ACTIVE,
+        categoryId: primaryCategoryId,
+      };
+
+      const createData = {
+        name: prod.name,
+        slug: prod.slug,
+        description: prod.description || null,
+        shortDescription: prod.shortDescription || null,
+        price: prod.price,
+        originalPrice: prod.originalPrice || null,
+        discount: prod.discount || null,
+        images: prod.images,
+        categoryId: primaryCategoryId,
+        tags: prod.tags || [],
+        rating: prod.rating || 0,
+        reviewCount: prod.reviewCount || 0,
+        inStock: prod.inStock ?? true,
+        stock: 0,
+        sku: prod.sku || null,
+        features: prod.features || [],
+        status: ProductStatus.ACTIVE,
+      };
+
+      const existingBySlug = await prisma.product.findUnique({
         where: { slug: prod.slug },
-        update: {
-          images: prod.images,
-          shortDescription: prod.shortDescription || null,
-          description: prod.description || null,
-          price: prod.price,
-          originalPrice: prod.originalPrice || null,
-          discount: prod.discount || null,
-          tags: prod.tags || [],
-          features: prod.features || [],
-          status: ProductStatus.ACTIVE,
-        },
-        create: {
-          name: prod.name,
-          slug: prod.slug,
-          description: prod.description || null,
-          shortDescription: prod.shortDescription || null,
-          price: prod.price,
-          originalPrice: prod.originalPrice || null,
-          discount: prod.discount || null,
-          images: prod.images,
-          categoryId: dbCategory.id,
-          tags: prod.tags || [],
-          rating: prod.rating || 0,
-          reviewCount: prod.reviewCount || 0,
-          inStock: prod.inStock ?? true,
-          stock: 0,
-          sku: prod.sku || null,
-          features: prod.features || [],
-          status: ProductStatus.ACTIVE,
-        },
+        select: { id: true },
+      });
+      const existingBySku = prod.sku
+        ? await prisma.product.findUnique({ where: { sku: prod.sku }, select: { id: true } })
+        : null;
+
+      const productRow = existingBySlug
+        ? await prisma.product.update({ where: { id: existingBySlug.id }, data: updateData })
+        : existingBySku
+          ? await prisma.product.update({ where: { id: existingBySku.id }, data: updateData })
+          : await prisma.product.create({ data: createData });
+
+      await prisma.productCategory.createMany({
+        data: categoryIds.map((categoryId: string) => ({
+          productId: productRow.id,
+          categoryId,
+        })),
+        skipDuplicates: true,
       });
     }
 

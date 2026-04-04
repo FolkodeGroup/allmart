@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CircleUserRound, Menu, Search, ShoppingCart, X } from 'lucide-react';
-import { navigation } from '../../../data/mock';
+import type { NavigationItem } from '../../../types';
+import { fetchPublicCategories } from '../../../services/categoriesService';
+import { buildNavigationFromCategories, fallbackNavigation } from '../navigation/publicNavigation';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
 
@@ -9,6 +11,7 @@ export function Header() {
   const { totalItems } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(fallbackNavigation);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -21,6 +24,27 @@ export function Header() {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    fetchPublicCategories()
+      .then((categories) => {
+        if (!ignore && categories.length > 0) {
+          setNavigationItems(buildNavigationFromCategories(categories));
+        }
+      })
+      .catch((err) => {
+        console.error('Error loading navigation categories:', err);
+        if (!ignore) {
+          setNavigationItems(fallbackNavigation);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <header
@@ -81,19 +105,18 @@ export function Header() {
       <div className={styles.navBarStrip}>
         <div className={styles.inner}>
           <nav className={styles.nav} role="navigation" aria-label="Navegación principal">
-            {navigation.map((item) => (
-              <div className={styles.navItem} key={item.label}>
+            {navigationItems.map((item) => (
+              <div className={styles.navItem} key={item.href}>
                 {item.children ? (
                   <>
-                    <button
+                    <Link
+                      to={item.href}
                       className={styles.navLink}
-                      aria-expanded="false"
                       aria-haspopup="true"
-                      type="button"
                     >
                       {item.label}
                       <span className={styles.chevron} aria-hidden="true">▾</span>
-                    </button>
+                    </Link>
                     <div className={styles.dropdown} role="menu">
                       {item.children.map((child) => (
                         <Link
@@ -123,8 +146,8 @@ export function Header() {
         role="navigation"
         aria-label="Navegación móvil"
       >
-        {navigation.map((item) => (
-          <div key={item.label}>
+        {navigationItems.map((item) => (
+          <div key={item.href}>
             <Link
               to={item.href}
               className={styles.mobileNavLink}

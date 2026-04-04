@@ -6,6 +6,7 @@ interface AdminAuthContextType {
   token: string | null;
   user: string | null;
   role: Role | null;
+  isReady: boolean;
   login: (user: string, token: string, role: Role) => void;
   logout: () => void;
   isAuthenticated: boolean;
@@ -19,12 +20,21 @@ const USER_KEY = 'allmart_admin_user';
 const ROLE_KEY = 'allmart_admin_role';
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY));
-  const [user, setUser] = useState<string | null>(() => localStorage.getItem(USER_KEY));
-  const [role, setRole] = useState<Role | null>(() => {
-    const stored = localStorage.getItem(ROLE_KEY);
-    return stored === 'admin' || stored === 'editor' ? stored : null;
-  });
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<string | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem(STORAGE_KEY);
+    const storedUser = localStorage.getItem(USER_KEY);
+    const storedRole = localStorage.getItem(ROLE_KEY);
+
+    setToken(storedToken);
+    setUser(storedUser);
+    setRole(storedRole === 'admin' || storedRole === 'editor' ? storedRole : null);
+    setIsReady(true);
+  }, []);
 
   const login = (u: string, t: string, r: Role) => {
     setToken(t);
@@ -57,7 +67,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const can = (permission: Permission) => hasPermission(role, permission);
 
   return (
-    <AdminAuthContext.Provider value={{ token, user, role, login, logout, isAuthenticated: !!token, can }}>
+    <AdminAuthContext.Provider value={{ token, user, role, isReady, login, logout, isAuthenticated: !!token, can }}>
       {children}
     </AdminAuthContext.Provider>
   );

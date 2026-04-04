@@ -55,6 +55,12 @@
   text-decoration: none;
 }
 
+.socialIcon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
 .socialLink:hover {
   background: var(--color-primary);
   border-color: var(--color-primary);

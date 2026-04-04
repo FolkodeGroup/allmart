@@ -4,6 +4,7 @@ export interface Category {
   description?: string;
   image?: string;
   slug: string;
+  parentId?: string | null;
   itemCount?: number;
   isVisible: boolean;
 }

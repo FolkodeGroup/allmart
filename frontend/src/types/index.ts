@@ -12,6 +12,9 @@ export interface Product {
   discount?: number;
   images: string[];
   category: Category;
+  categoryId?: string; // Helper property for convenience
+  categoryIds?: string[];
+  categories?: Category[];
   tags: string[];
   rating: number;
   reviewCount: number;
@@ -27,6 +30,7 @@ export interface Category {
   slug: string;
   description?: string;
   image?: string;
+  parentId?: string | null;
   itemCount?: number;
   isVisible: boolean;
 }

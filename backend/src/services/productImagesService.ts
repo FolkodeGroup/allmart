@@ -5,6 +5,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { createHash } from 'crypto';
 import { prisma } from '../config/prisma';
 import { ProductImage, CreateProductImageDTO, UpdateProductImageDTO } from '../models/ProductImage';
 import { createError } from '../middlewares/errorHandler';
@@ -18,13 +19,98 @@ interface StoredImage {
   updatedAt: string;
 }
 
+const LEGACY_ID_PREFIX = 'legacy-';
+
+function buildLegacyId(url: string, position: number): string {
+  const hash = createHash('sha1')
+    .update(`${url}|${position}`)
+    .digest('hex');
+  return `${LEGACY_ID_PREFIX}${hash}`;
+}
+
+function normalizeStoredImages(raw: unknown): { images: StoredImage[]; changed: boolean } {
+  if (!Array.isArray(raw)) {
+    return { images: [], changed: raw != null };
+  }
+
+  const now = new Date().toISOString();
+  let changed = false;
+
+  const normalized = raw
+    .map((entry, index) => {
+      if (typeof entry === 'string') {
+        changed = true;
+        return {
+          id: buildLegacyId(entry, index),
+          url: entry,
+          position: index,
+          createdAt: now,
+          updatedAt: now,
+        } satisfies StoredImage;
+      }
+
+      if (!entry || typeof entry !== 'object') {
+        changed = true;
+        return null;
+      }
+
+      const record = entry as Record<string, unknown>;
+      const url = typeof record.url === 'string'
+        ? record.url
+        : typeof record.imageUrl === 'string'
+          ? record.imageUrl
+          : typeof record.src === 'string'
+            ? record.src
+            : '';
+
+      if (!url) {
+        changed = true;
+        return null;
+      }
+
+      const id = typeof record.id === 'string' && record.id.trim().length > 0
+        ? record.id
+        : buildLegacyId(url, index);
+      const position = typeof record.position === 'number' ? record.position : index;
+      const altText = typeof record.altText === 'string' ? record.altText : undefined;
+      const createdAt = typeof record.createdAt === 'string' ? record.createdAt : now;
+      const updatedAt = typeof record.updatedAt === 'string' ? record.updatedAt : now;
+
+      if (id !== record.id || position !== record.position || createdAt !== record.createdAt || updatedAt !== record.updatedAt) {
+        changed = true;
+      }
+
+      return {
+        id,
+        url,
+        altText,
+        position,
+        createdAt,
+        updatedAt,
+      } satisfies StoredImage;
+    })
+    .filter((value): value is StoredImage => Boolean(value));
+
+  return { images: normalized, changed };
+}
+
 async function getProductImages(productId: string): Promise<StoredImage[]> {
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { images: true },
   });
   if (!product) throw createError('Producto no encontrado', 404);
-  return ((product.images as unknown) as StoredImage[]) ?? [];
+
+  const { images, changed } = normalizeStoredImages(product.images as unknown);
+
+  if (changed) {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { images: images as never },
+    });
+  }
+
+  return images;
 }
 
 function toProductImage(img: StoredImage, productId: string): ProductImage {
@@ -65,13 +151,14 @@ export async function getImageById(id: string): Promise<ProductImage> {
 
 export async function createImage(dto: CreateProductImageDTO): Promise<ProductImage> {
   const images = await getProductImages(dto.productId);
+  const position = dto.position ?? images.length;
 
   const now = new Date().toISOString();
   const newImage: StoredImage = {
     id: uuidv4(),
     url: dto.url,
     altText: dto.altText,
-    position: dto.position,
+    position,
     createdAt: now,
     updatedAt: now,
   };

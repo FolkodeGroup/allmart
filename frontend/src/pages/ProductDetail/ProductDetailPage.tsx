@@ -8,10 +8,12 @@ import {
   mapApiProductToProduct,
 } from '../../services/productsService';
 import { fetchPublicCategories } from '../../services/categoriesService';
+import { publicCollectionsService } from '../../services/publicCollectionsService';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
+
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 
@@ -34,35 +36,104 @@ export function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [addedFeedback, setAddedFeedback] = useState(false);
+  const [dynamicDiscount, setDynamicDiscount] = useState<any>(null);
 
   /* Cargar producto por slug */
   useEffect(() => {
     if (!slug) return;
+
+    let cancelled = false;
+
     setLoading(true);
     setError(null);
     setSelectedImage(0);
+    setRelatedProducts([]);
 
-    Promise.all([fetchPublicProductBySlug(slug), fetchPublicCategories()])
-      .then(([apiProduct, categories]) => {
+    const loadProduct = async () => {
+      try {
+        const [apiProduct, categories] = await Promise.all([
+          fetchPublicProductBySlug(slug),
+          fetchPublicCategories(),
+        ]);
+
+        if (cancelled) return;
+
         const mappedProduct = mapApiProductToProduct(apiProduct, categories);
         setProduct(mappedProduct);
+        setLoading(false);
 
         // Cargar productos relacionados de la misma categoría
-        const categorySlugs = categories.find((c) => c.id === apiProduct.categoryId)?.slug;
-        return fetchPublicProducts({ category: categorySlugs, limit: 5 }).then(({ data }) => {
+        const primaryCategoryId = apiProduct.categoryId || apiProduct.categoryIds?.[0];
+        const category = categories.find((c) => c.id === primaryCategoryId);
+        
+        if (!category) {
+          setRelatedProducts([]);
+          return;
+        }
+
+        try {
+          // Cargar más productos para filtrar mejor
+          const { data } = await fetchPublicProducts({ 
+            category: category.slug, 
+            limit: 8 // Cargar más para tener mejor selección
+          });
+          
+          if (cancelled) return;
+
+          // Filtrar: excluir el producto actual y tomar los primeros 4
           const related = data
-            .map((p) => mapApiProductToProduct(p, categories))
             .filter((p) => p.id !== apiProduct.id)
-            .slice(0, 4);
+            .slice(0, 4)
+            .map((p) => mapApiProductToProduct(p, categories));
+
           setRelatedProducts(related);
-        });
-      })
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
+        } catch {
+          if (!cancelled) {
+            setRelatedProducts([]);
+          }
+        }
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : 'Error al cargar el producto');
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
+  /* Cargar descuento dinámico desde API */
+  useEffect(() => {
+    if (!product) return;
+    
+    const loadDiscount = async () => {
+      try {
+        const categoryIds = Array.isArray(product.categoryIds)
+          ? product.categoryIds
+          : product.categoryId
+            ? [product.categoryId]
+            : [];
+        const discount = await publicCollectionsService.getProductDiscount(
+          product.id,
+          product.price,
+          categoryIds
+        );
+        setDynamicDiscount(discount);
+      } catch (error) {
+        console.error('Error loading discount:', error);
+        setDynamicDiscount(null);
+      }
+    };
+
+    loadDiscount();
+  }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
+
   const variantGroups: VariantGroup[] = product ? (product as any).variants ?? [] : [];
-  const hasDiscount = product ? product.discount && product.discount > 0 : false;
+  const hasDiscount = product ? Boolean(product.discount && product.discount > 0) : false;
   const isNew = product ? product.tags.includes('nuevo') : false;
 
   const handleAddToCart = () => {
@@ -173,13 +244,35 @@ export function ProductDetailPage() {
 
           {/* Price */}
           <div className={styles.priceBlock}>
-            <ProductPrice
-              price={product.price}
-              originalPrice={product.originalPrice}
-              discount={product.discount}
-              size="lg"
-            />
+            {dynamicDiscount ? (
+              <ProductPrice
+                price={dynamicDiscount.finalPrice}
+                originalPrice={dynamicDiscount.originalPrice}
+                discount={dynamicDiscount.discountPercentage}
+                size="lg"
+              />
+            ) : (
+              <ProductPrice
+                price={product.price}
+                originalPrice={product.originalPrice}
+                discount={product.discount}
+                size="lg"
+              />
+            )}
           </div>
+
+          {/* Promotion Information */}
+          {dynamicDiscount && dynamicDiscount.promotionName && (
+            <div className={styles.promotionInfo}>
+              <strong>Promoción: {dynamicDiscount.promotionName}</strong>
+              {dynamicDiscount.validUntil && (
+                <p>Válida hasta: {new Date(dynamicDiscount.validUntil).toLocaleDateString('es-AR')}</p>
+              )}
+              {dynamicDiscount.minPurchase && (
+                <p>Compra mínima: ${dynamicDiscount.minPurchase.toLocaleString('es-AR')}</p>
+              )}
+            </div>
+          )}
 
 
           {/* Variantes (si existen) */}

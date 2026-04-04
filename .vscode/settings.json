@@ -1,0 +1,46 @@
+{
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/node_modules/**": true,
+    "**/.vite/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/coverage/**": true,
+    "**/test-results/**": true,
+    "**/playwright-report/**": true,
+    "**/frontend/allmart@0.0.0/**": true,
+    "**/.cache/**": true,
+    "**/.turbo/**": true
+  },
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/.vite": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/test-results": true,
+    "**/playwright-report": true,
+    "**/frontend/allmart@0.0.0": true,
+    "**/.cache": true,
+    "**/.turbo": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/.vite": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/test-results": true,
+    "**/playwright-report": true,
+    "**/frontend/allmart@0.0.0": true,
+    "**/.cache": true,
+    "**/.turbo": true
+  },
+  "eslint.workingDirectories": [
+    { "directory": "frontend", "changeProcessCWD": true },
+    { "directory": "backend", "changeProcessCWD": true }
+  ],
+  "typescript.tsserver.maxTsServerMemory": 4096
+}

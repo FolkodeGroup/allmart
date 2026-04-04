@@ -1,0 +1,124 @@
+.actionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.primaryButton,
+.secondaryButton {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-md);
+  padding: 0.72rem 1.05rem;
+  transition: all var(--transition-base);
+}
+
+.primaryButton {
+  background: #2f5f46;
+  color: #fff;
+  border: 1px solid #2f5f46;
+}
+
+.primaryButton:hover {
+  background: #244a37;
+  border-color: #244a37;
+}
+
+.secondaryButton {
+  background: #fff;
+  color: #244a37;
+  border: 1px solid rgba(47, 95, 70, 0.35);
+}
+
+.secondaryButton:hover {
+  background: #eef5f0;
+}
+
+.statusBox {
+  margin-top: var(--space-4);
+  border: 1px solid #c8d8cf;
+  background: #f2f9f5;
+  color: #1f3d2e;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.formGrid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.fieldGroup {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.fieldLabel {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: #253a2f;
+  font-weight: var(--font-medium);
+}
+
+.fieldInput,
+.fieldTextarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.68rem 0.8rem;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: #1b2c22;
+  background: #fff;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.fieldInput:focus,
+.fieldTextarea:focus {
+  border-color: #2f5f46;
+  box-shadow: 0 0 0 3px rgba(47, 95, 70, 0.14);
+}
+
+.fieldTextarea {
+  min-height: 132px;
+  resize: vertical;
+  line-height: var(--leading-relaxed);
+}
+
+.helperText {
+  font-family: var(--font-body);
+  color: #41584b;
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.emailText {
+  color: #1d3f2f;
+  font-weight: var(--font-semibold);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 520px) {
+  .actionsRow {
+    width: 100%;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+}

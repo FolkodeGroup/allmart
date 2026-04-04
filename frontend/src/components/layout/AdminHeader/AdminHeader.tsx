@@ -1,5 +1,6 @@
 //src/components/layout/Admin/AdminHeader.tsx
 import { useLocation } from "react-router-dom";
+import { useAdminCategories } from "../../../context/AdminCategoriesContext";
 import styles from "./AdminHeader.module.css";
 
 interface Breadcrumb {
@@ -51,7 +52,32 @@ function generateBreadcrumbs(pathname: string): Breadcrumb[] {
 
 export function AdminHeader() {
   const location = useLocation();
-  const breadcrumbs = generateBreadcrumbs(location.pathname);
+  const { categories } = useAdminCategories();
+
+  const categoryNameForPath = (() => {
+    const match = location.pathname.match(/^\/admin\/categorias\/([^/]+)$/i);
+    if (!match) return null;
+
+    const rawParam = decodeURIComponent(match[1]);
+    const category = categories.find(
+      (item) =>
+        item.id === rawParam ||
+        item.slug?.toLowerCase() === rawParam.toLowerCase()
+    );
+
+    return category?.name ?? null;
+  })();
+
+  const breadcrumbs = generateBreadcrumbs(location.pathname).map((crumb, index, all) => {
+    const isLast = index === all.length - 1;
+    if (!isLast || !categoryNameForPath) return crumb;
+    if (!crumb.path.startsWith('/admin/categorias/')) return crumb;
+
+    return {
+      ...crumb,
+      label: categoryNameForPath,
+    };
+  });
   const currentSection =
     breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard";
   const todayLabel = new Intl.DateTimeFormat("es-CO", {

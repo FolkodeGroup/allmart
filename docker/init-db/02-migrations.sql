@@ -558,6 +558,44 @@ CREATE TRIGGER trg_register_sale_on_delivery
   FOR EACH ROW EXECUTE FUNCTION register_sale_on_delivery();
 
 -- =============================================================================
+-- Migration: 014_create_banners
+-- Tabla de banners con almacenamiento de imágenes binarias en DB
+-- =============================================================================
+
+-- ─── Tabla banners ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS banners (
+  id                UUID          NOT NULL DEFAULT gen_random_uuid(),
+  title             VARCHAR(255)  NOT NULL,
+  description       TEXT,
+  data              BYTEA         NOT NULL,  -- Imagen WebP completa
+  width             INTEGER       NOT NULL,
+  height            INTEGER       NOT NULL,
+  thumbnail         BYTEA,                   -- Miniatura WebP (~600px)
+  thumb_width       INTEGER,
+  thumb_height      INTEGER,
+  mime_type         VARCHAR(50)   NOT NULL DEFAULT 'image/webp',
+  original_filename VARCHAR(255),
+  size_bytes        INTEGER       NOT NULL,
+  alt_text          VARCHAR(500),
+  display_order     INTEGER       NOT NULL DEFAULT 0,
+  is_active         BOOLEAN       NOT NULL DEFAULT true,
+  created_at        TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT banners_pkey PRIMARY KEY (id)
+);
+
+-- ─── Índices para queries frecuentes ──────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_banners_is_active ON banners (is_active);
+CREATE INDEX IF NOT EXISTS idx_banners_display_order ON banners (display_order);
+
+-- ─── Trigger: actualizar updated_at automáticamente ──────────────────────────
+DROP TRIGGER IF EXISTS trg_banners_updated_at ON banners;
+CREATE TRIGGER trg_banners_updated_at
+  BEFORE UPDATE ON banners
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- =============================================================================
 -- ROLLBACK (ejecutar manualmente si se necesita revertir):
 --   DROP TRIGGER IF EXISTS trg_register_sale_on_delivery ON orders;
 --   DROP FUNCTION IF EXISTS register_sale_on_delivery();

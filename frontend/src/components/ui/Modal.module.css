@@ -7,6 +7,25 @@
   justify-content: center;
   z-index: 1000;
   animation: fadeIn 0.2s;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2rem 1.25rem;
+  box-sizing: border-box;
+}
+
+.overlayFull {
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.overlayClose {
+  position: fixed;
+  inset: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 0;
 }
 
 @keyframes fadeIn {
@@ -19,11 +38,17 @@
   color: #222;
   border-radius: 10px;
   min-width: 320px;
-  max-width: 95vw;
+  width: min(680px, 95vw);
+  max-height: 90vh;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  padding: 1.75rem 1.5rem 1.5rem 1.5rem;
   position: relative;
   animation: slideUp 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+  z-index: 1;
 }
 
 @keyframes slideUp {
@@ -34,15 +59,87 @@
 .title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .body {
-  margin-bottom: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.25rem;
+  scrollbar-gutter: stable;
+  overflow-anchor: none;
 }
 
 .actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #f6f6f6;
+  color: #333;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+
+.closeButton:hover {
+  background: #ededed;
+  color: #111;
+  transform: translateY(-1px);
+}
+
+.modalSm {
+  width: min(420px, 92vw);
+}
+
+.modalMd {
+  width: min(680px, 95vw);
+}
+
+.modalLg {
+  width: min(900px, 96vw);
+}
+
+.modalXl {
+  width: min(1100px, 96vw);
+}
+
+.modalFull {
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.modalFlush {
+  padding: 0;
+  gap: 0;
+}
+
+@media (max-width: 520px) {
+  .overlay {
+    padding: 1.25rem 0.75rem;
+    align-items: flex-end;
+  }
+
+  .modal {
+    padding: 1.4rem 1rem 1rem 1rem;
+    border-radius: 16px 16px 0 0;
+    max-height: 92dvh;
+  }
 }

@@ -8,6 +8,7 @@ import { useAdminImages } from '../../../context/AdminImagesContext';
 import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
+import { Modal } from '../../../components/ui/Modal';
 import { ProductImage } from '../../../components/ui/ProductImage';
 
 const EMPTY: Omit<AdminProduct, 'id'> = {
@@ -20,6 +21,7 @@ const EMPTY: Omit<AdminProduct, 'id'> = {
   discount: undefined,
   images: [''],
   category: { id: '', name: '', slug: '', isVisible: true, },
+  categoryIds: [],
   tags: [],
   rating: 0,
   reviewCount: 0,
@@ -89,8 +91,14 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
           // Cargamos variantes por separado si es edición
           const variants = await loadProductVariants(productId);
           const loadedForm = { ...rest, variants: variants || [] };
-          setForm(loadedForm);
-          setInitialForm(loadedForm);
+          const normalizedCategoryIds = Array.isArray(loadedForm.categoryIds) && loadedForm.categoryIds.length > 0
+            ? loadedForm.categoryIds
+            : loadedForm.category?.id
+              ? [loadedForm.category.id]
+              : [];
+          const formWithCategories = { ...loadedForm, categoryIds: normalizedCategoryIds };
+          setForm(formWithCategories);
+          setInitialForm(formWithCategories);
           // Cargar imágenes vía API para modo edición
           loadImages(productId);
         }
@@ -325,23 +333,71 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
   const addImageSlot = () => set('images', [...form.images, '']);
   const removeImageSlot = (i: number) => set('images', form.images.filter((_, idx) => idx !== i));
 
-  return (
-    <div
-      className={`${styles.backdrop} dark:bg-black/60`}
-      onClick={e => e.target === e.currentTarget && onClose()}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && onClose()}
-    >
-      <div className={`${styles.panel} dark:bg-gray-800 dark:text-gray-100`}>
-        <div className={styles.panelHeader}>
-          <h2 className={styles.panelTitle}>
-            {isEdit ? 'Editar producto' : 'Nuevo producto'}
-          </h2>
-          <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="Cerrar">✕</button>
-        </div>
+  const getCategoryLabel = (category: { id: string; name: string; parentId?: string | null }) => {
+    if (!category.parentId) return category.name;
+    const parent = categories.find((item) => item.id === category.parentId);
+    return parent ? `${parent.name} > ${category.name}` : category.name;
+  };
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+  const handlePrimaryCategoryChange = (value: string) => {
+    if (!value) {
+      setForm((prev) => ({
+        ...prev,
+        category: { id: '', name: '', slug: '', isVisible: true },
+        categoryIds: [],
+      }));
+      return;
+    }
+
+    const category = categories.find((item) => item.id === value);
+    if (!category) return;
+
+    setForm((prev) => {
+      const existing = Array.isArray(prev.categoryIds)
+        ? prev.categoryIds.filter((id) => id !== prev.category.id)
+        : [];
+      const nextIds = [category.id, ...existing.filter((id) => id !== category.id)];
+      return {
+        ...prev,
+        category,
+        categoryIds: nextIds,
+      };
+    });
+  };
+
+  const handleAdditionalCategoriesChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = Array.from(event.target.selectedOptions).map((option) => option.value);
+    setForm((prev) => {
+      const primaryId = prev.category.id;
+      const nextIds = primaryId
+        ? [primaryId, ...selected.filter((id) => id !== primaryId)]
+        : selected;
+      return { ...prev, categoryIds: nextIds };
+    });
+  };
+
+  const additionalCategoryIds = Array.isArray(form.categoryIds)
+    ? form.categoryIds.filter((id) => id !== form.category.id)
+    : [];
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      disableClose={saving}
+      size="lg"
+      layout="flush"
+      className={`${styles.panel} dark:bg-gray-800 dark:text-gray-100`}
+      ariaLabelledBy="admin-product-form-title"
+    >
+      <div className={styles.panelHeader}>
+        <h2 className={styles.panelTitle} id="admin-product-form-title">
+          {isEdit ? 'Editar producto' : 'Nuevo producto'}
+        </h2>
+        <button className={styles.closeBtn} onClick={onClose} type="button" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
 
           {/* ── Información básica ── */}
           <fieldset className={styles.fieldset}>
@@ -425,16 +481,35 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
             <div className={styles.field}>
               <label className={styles.label} htmlFor="product-category">Categoría *</label>
               <select className={`${styles.input} ${fieldErrors.category ? styles.inputError : ''}`} id="product-category" value={form.category.id}
-                onChange={e => {
-                  const cat = categories.find(c => c.id === e.target.value);
-                  if (cat) set('category', cat);
-                }}>
+                onChange={e => handlePrimaryCategoryChange(e.target.value)}>
                 <option value="">Seleccioná una categoría...</option>
                 {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>{getCategoryLabel(c)}</option>
                 ))}
               </select>
               {fieldErrors.category && <span className={styles.errorText}>{fieldErrors.category}</span>}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="product-categories">Categorías adicionales</label>
+              <select
+                className={styles.input}
+                id="product-categories"
+                multiple
+                size={Math.min(Math.max(categories.length - 1, 3), 6)}
+                value={additionalCategoryIds}
+                onChange={handleAdditionalCategoriesChange}
+                disabled={categories.length === 0}
+              >
+                {categories
+                  .filter((c) => c.id !== form.category.id)
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {getCategoryLabel(c)}
+                    </option>
+                  ))}
+              </select>
+              <span className={styles.fieldHint}>Usá Ctrl/Cmd para seleccionar varias.</span>
             </div>
 
             <div className={styles.field}>
@@ -688,9 +763,8 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
               {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear producto'}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }
 

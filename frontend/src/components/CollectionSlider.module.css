@@ -1,0 +1,395 @@
+/** ═════════════════════════════════════════════════════════════════
+   CollectionSlider.module.css
+   Estilos para colecciones con layout adaptativo
+   - Detección de overflow
+   - Centrado de items cuando son pocos
+   - Responsive design consistente
+ ═════════════════════════════════════════════════════════════════ */
+
+.container {
+  width: 100%;
+  margin: 0;
+}
+
+/* ── Banner ── */
+.banner {
+  width: 100%;
+  height: 240px;
+  margin-bottom: var(--space-6);
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Header (Título y Descripción) ── */
+.header {
+  margin-bottom: var(--space-5);
+}
+
+.titleSection {
+  margin-bottom: 0;
+}
+
+.titleSection h2 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: -0.5px;
+}
+
+.titleSection p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ── Slider Wrapper - Contenedor Principal ── */
+.sliderWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0;
+}
+
+.sliderWrapper.centered {
+  justify-content: center;
+}
+
+.sliderWrapper.centered .slider {
+  justify-content: center;
+}
+
+/* ── Slider Track ── */
+.slider {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-width: 0;
+  
+  /* Hide scrollbar */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.slider::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Product Card ── */
+.productCard {
+  flex: 0 0 200px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.productCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.15);
+}
+
+.productCard:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ── Image Wrapper ── */
+.imageWrapper {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.productCard:hover .productImage {
+  transform: scale(1.08);
+}
+
+/* ── Product Info ── */
+.productInfo {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.productInfo h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.price {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-top: auto;
+}
+
+/* ── Navigation Buttons ── */
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 18px;
+  color: #374151;
+  font-weight: bold;
+  z-index: 10;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.navButton:hover:not(:disabled) {
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #1f2937;
+}
+
+.navButton:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.navButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.navButton:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.navLeft {
+  left: 0;
+}
+
+.navRight {
+  right: 0;
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   Responsive Design
+ ═════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .productCard {
+    flex: 0 0 180px;
+  }
+
+  .imageWrapper {
+    height: 160px;
+  }
+
+  .titleSection h2 {
+    font-size: 24px;
+  }
+
+  .slider {
+    gap: 16px;
+  }
+
+  .navButton {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin: 0;
+  }
+
+  .banner {
+    height: 180px;
+    margin-bottom: var(--space-5);
+  }
+
+  .titleSection h2 {
+    font-size: 22px;
+  }
+
+  .titleSection p {
+    font-size: 14px;
+  }
+
+  .header {
+    margin-bottom: var(--space-4);
+  }
+
+  .slider {
+    gap: var(--space-3);
+  }
+
+  .productCard {
+    flex: 0 0 160px;
+  }
+
+  .imageWrapper {
+    height: 144px;
+  }
+
+  .productInfo {
+    padding: 10px;
+  }
+
+  .productInfo h3 {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+
+  .navButton {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .sliderWrapper {
+    gap: var(--space-2);
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    height: 140px;
+    margin-bottom: var(--space-4);
+  }
+
+  .titleSection h2 {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .titleSection p {
+    font-size: 13px;
+  }
+
+  .header {
+    margin-bottom: var(--space-3);
+  }
+
+  .slider {
+    gap: var(--space-2);
+  }
+
+  .productCard {
+    flex: 0 0 140px;
+  }
+
+  .imageWrapper {
+    height: 126px;
+  }
+
+  .productInfo {
+    padding: 8px;
+  }
+
+  .productInfo h3 {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .price {
+    font-size: 13px;
+  }
+
+  .navButton {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .sliderWrapper {
+    gap: var(--space-1);
+  }
+}
+
+@media (max-width: 480px) {
+  .sliderWrapper {
+    padding: 0 8px;
+    gap: 6px;
+  }
+
+  .navButton {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .slider {
+    gap: 8px;
+  }
+
+  .productCard {
+    flex: 0 0 130px;
+  }
+
+  .imageWrapper {
+    height: 130px;
+  }
+
+  .productInfo {
+    padding: 8px;
+  }
+
+  .productInfo h3 {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+}

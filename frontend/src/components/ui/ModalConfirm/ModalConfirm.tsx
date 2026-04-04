@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import styles from './ModalConfirm.module.css';
+import { Modal } from '../Modal';
 
 interface ModalConfirmProps {
   open: boolean;
@@ -20,55 +21,29 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const dialogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-      dialogRef.current?.focus();
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-      if (e.key === 'Enter') onConfirm();
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [open, onCancel, onConfirm]);
-
   if (!open) return null;
 
-  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
-    if (e.target === e.currentTarget) onCancel();
-  }
-
   return (
-    <div
-      className={styles.backdrop}
-      onClick={handleBackdropClick}
-      onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
-      role="dialog"
-      tabIndex={0}
-      aria-modal="true"
-      aria-labelledby="modal-confirm-title"
-      ref={dialogRef}
+    <Modal
+      open={open}
+      onClose={onCancel}
+      title={title}
+      size="sm"
+      actionsClassName={styles.actions}
+      actions={
+        <>
+          <button className={styles.confirmBtn} onClick={onConfirm} aria-label={confirmText}>
+            {confirmText}
+          </button>
+          <button className={styles.cancelBtn} onClick={onCancel} aria-label={cancelText}>
+            {cancelText}
+          </button>
+        </>
+      }
     >
-      <div className={styles.panel}>
-        {title && <h2 id="modal-confirm-title" className={styles.title}>{title}</h2>}
-        <div className={styles.message} aria-live="polite">{message}</div>
-        <div className={styles.actions}>
-          <button className={styles.confirmBtn} onClick={onConfirm} aria-label={confirmText}>{confirmText}</button>
-          <button className={styles.cancelBtn} onClick={onCancel} aria-label={cancelText}>{cancelText}</button>
-        </div>
+      <div className={styles.message} aria-live="polite">
+        {message}
       </div>
-    </div>
+    </Modal>
   );
 };

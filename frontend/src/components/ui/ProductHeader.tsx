@@ -11,10 +11,9 @@ export const ProductHeader: React.FC<ProductHeaderProps> = ({ canCreate, onNew }
   <header className={sectionStyles.header}>
     <div className={styles.headerTop}>
       <div>
-        <span className={sectionStyles.label} id="admin-label">Administración</span>
-        <h1 className={sectionStyles.title} aria-labelledby="admin-label">
+        {/* <h1 className={sectionStyles.title}>
           <span className={sectionStyles.icon} aria-hidden="true">📦</span> Productos
-        </h1>
+        </h1> */}
         <p className={sectionStyles.subtitle}>
           Gestioná el catálogo de productos, precios y disponibilidad.
         </p>

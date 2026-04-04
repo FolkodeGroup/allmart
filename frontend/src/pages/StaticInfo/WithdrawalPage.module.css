@@ -1,0 +1,131 @@
+.introCard {
+  border: 1px dashed rgba(47, 95, 70, 0.45);
+  background: #f4faf6;
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.introText {
+  font-family: var(--font-body);
+  color: #2c4538;
+  line-height: var(--leading-relaxed);
+}
+
+.formCard {
+  margin-top: var(--space-5);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-xs);
+}
+
+.formTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  color: #22362b;
+  margin-bottom: var(--space-4);
+}
+
+.formGrid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.fieldGroup {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.fieldLabel {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: #23382c;
+}
+
+.fieldInput,
+.fieldTextarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.66rem 0.78rem;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: #1c2e24;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.fieldInput:focus,
+.fieldTextarea:focus {
+  border-color: #2f5f46;
+  box-shadow: 0 0 0 3px rgba(47, 95, 70, 0.15);
+}
+
+.fieldTextarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: var(--leading-relaxed);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submitButton {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border: 1px solid #2f5f46;
+  background: #2f5f46;
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 0.72rem 1.05rem;
+  transition: all var(--transition-base);
+}
+
+.submitButton:hover {
+  background: #244a37;
+  border-color: #244a37;
+}
+
+.errorBox,
+.successBox {
+  margin-top: var(--space-4);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.errorBox {
+  border: 1px solid #f2c0c0;
+  background: #fff3f3;
+  color: #8f2b2b;
+}
+
+.successBox {
+  border: 1px solid #c8d8cf;
+  background: #f2f9f5;
+  color: #1f3d2e;
+}
+
+.code {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-family: var(--font-ui);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.04em;
+  color: #193628;
+}
+
+@media (max-width: 520px) {
+  .formActions {
+    justify-content: stretch;
+  }
+
+  .submitButton {
+    width: 100%;
+  }
+}

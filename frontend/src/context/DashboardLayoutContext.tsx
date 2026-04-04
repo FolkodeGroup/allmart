@@ -45,15 +45,97 @@ const DashboardLayoutContext = createContext<
 
 export { DashboardLayoutContext };
 
-const DEFAULT_WIDGETS: Widget[] = [
-    { id: 'quick_access', order: 0, enabled: true },
-    { id: 'activity_feed', order: 1, enabled: true },
-    { id: 'critical_stock', order: 2, enabled: true },
-    { id: 'staff_notes', order: 3, enabled: true },
-    { id: 'metrics', order: 4, enabled: true },
-    { id: 'charts', order: 5, enabled: true },
-    { id: 'recent_orders', order: 6, enabled: true },
+const ALL_WIDGET_IDS: WidgetId[] = [
+    'metrics',
+    'critical_stock',
+    'quick_access',
+    'activity_feed',
+    'staff_notes',
+    'charts',
+    'recent_orders',
 ];
+
+const REGRESSED_WIDGET_ORDER: WidgetId[] = [
+    'quick_access',
+    'activity_feed',
+    'critical_stock',
+    'staff_notes',
+    'metrics',
+    'charts',
+    'recent_orders',
+];
+
+const REGRESSED_WIDGET_ORDER_LEGACY: WidgetId[] = [
+    'quick_access',
+    'activity_feed',
+    'critical_stock',
+    'metrics',
+    'charts',
+    'recent_orders',
+];
+
+const DEFAULT_WIDGETS: Widget[] = ALL_WIDGET_IDS.map((id, order) => ({
+    id,
+    order,
+    enabled: true,
+}));
+
+function areOrdersEqual(a: WidgetId[], b: WidgetId[]) {
+    if (a.length !== b.length) return false;
+    return a.every((id, index) => id === b[index]);
+}
+
+function normalizeLayout(layout: Widget[] | null): Widget[] {
+    if (!layout || !Array.isArray(layout) || layout.length === 0) {
+        return DEFAULT_WIDGETS;
+    }
+
+    const validWidgets = layout.filter((widget): widget is Widget => {
+        return ALL_WIDGET_IDS.includes(widget.id);
+    });
+
+    if (validWidgets.length === 0) {
+        return DEFAULT_WIDGETS;
+    }
+
+    const sortedSaved = [...validWidgets].sort((a, b) => a.order - b.order);
+    const savedOrder = sortedSaved.map((widget) => widget.id);
+
+    if (
+        areOrdersEqual(savedOrder, REGRESSED_WIDGET_ORDER) ||
+        areOrdersEqual(savedOrder, REGRESSED_WIDGET_ORDER_LEGACY)
+    ) {
+        return DEFAULT_WIDGETS;
+    }
+
+    const savedWidgetMap = new Map(sortedSaved.map((widget) => [widget.id, widget]));
+    const mergedOrder: WidgetId[] = [
+        ...savedOrder,
+        ...ALL_WIDGET_IDS.filter((id) => !savedWidgetMap.has(id)),
+    ];
+
+    return mergedOrder.map((id, order) => ({
+        id,
+        order,
+        enabled: savedWidgetMap.get(id)?.enabled ?? true,
+    }));
+}
+
+function areLayoutsEqual(a: Widget[] | null, b: Widget[]) {
+    if (!a || a.length !== b.length) return false;
+
+    const aSorted = [...a].sort((x, y) => x.order - y.order);
+    const bSorted = [...b].sort((x, y) => x.order - y.order);
+
+    return aSorted.every((widget, index) => {
+        const other = bSorted[index];
+        return (
+            widget.id === other.id &&
+            widget.order === other.order &&
+            widget.enabled === other.enabled
+        );
+    });
+}
 
 export function DashboardLayoutProvider({
     children,
@@ -69,7 +151,14 @@ export function DashboardLayoutProvider({
             try {
                 setIsLoading(true);
                 const savedLayout = await dashboardLayoutService.loadLayout();
-                setWidgets(savedLayout || DEFAULT_WIDGETS);
+                const normalizedLayout = normalizeLayout(savedLayout);
+
+                setWidgets(normalizedLayout);
+
+                // Persist migrated layouts only when the stored value differs.
+                if (!areLayoutsEqual(savedLayout, normalizedLayout)) {
+                    await dashboardLayoutService.saveLayout(normalizedLayout);
+                }
             } catch (error) {
                 console.error('Failed to load dashboard layout:', error);
                 setWidgets(DEFAULT_WIDGETS);

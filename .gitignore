@@ -129,6 +129,9 @@ db.local/
 
 # VS Code settings
 .vscode/
+!.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
 
 # JetBrains IDEs
 .idea/

@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import type { Order } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminReports.module.css';
 import { createdAtToMs, getDayKeyLocalFromMs } from '../../../../utils/date';
+import { Modal } from '../../../../components/ui/Modal';
 
 type Props = {
     orders: Order[];
@@ -161,37 +162,23 @@ export function SalesTableView({ orders, formatPrice, dayKeys }: Props) {
                     })}
                 </div>
 
-                {/* Modal igual que antes */}
+                {/* Modal de detalle */}
                 {selectedDay && (
-                    <div className={styles.modalOverlay}>
-                        <div
-                            className={styles.modalContent}
-                            role="dialog"
-                            aria-modal="true"
-                        >
-                            <div className={styles.modalHeader}>
-                                <h3>
-                                    📅 {formatDate(selectedDay.dateKey)} — {formatPrice(selectedDay.total)}
-                                </h3>
-
-                                <button
-                                    className={styles.modalClose}
-                                    onClick={() => setSelectedDay(null)}
-                                >
-                                    ✕
-                                </button>
+                    <Modal
+                        open={!!selectedDay}
+                        onClose={() => setSelectedDay(null)}
+                        title={`📅 ${formatDate(selectedDay.dateKey)} — ${formatPrice(selectedDay.total)}`}
+                        size="sm"
+                        showCloseButton
+                        bodyClassName={styles.modalBody}
+                    >
+                        {selectedDay.products.map((p, i) => (
+                            <div key={i} className={styles.modalRow}>
+                                <span>{p.name}</span>
+                                <strong>x{p.qty}</strong>
                             </div>
-
-                            <div className={styles.modalBody}>
-                                {selectedDay.products.map((p, i) => (
-                                    <div key={i} className={styles.modalRow}>
-                                        <span>{p.name}</span>
-                                        <strong>x{p.qty}</strong>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                        ))}
+                    </Modal>
                 )}
             </>
         );
@@ -252,35 +239,21 @@ export function SalesTableView({ orders, formatPrice, dayKeys }: Props) {
 
             {/* MODAL */}
             {selectedDay && (
-                <div className={styles.modalOverlay}>
-                    <div
-                        className={styles.modalContent}
-                        role="dialog"
-                        aria-modal="true"
-                    >
-                        <div className={styles.modalHeader}>
-                            <h3>
-                                📅 {formatDate(selectedDay.dateKey)} — {formatPrice(selectedDay.total)}
-                            </h3>
-
-                            <button
-                                className={styles.modalClose}
-                                onClick={() => setSelectedDay(null)}
-                            >
-                                ✕
-                            </button>
+                <Modal
+                    open={!!selectedDay}
+                    onClose={() => setSelectedDay(null)}
+                    title={`📅 ${formatDate(selectedDay.dateKey)} — ${formatPrice(selectedDay.total)}`}
+                    size="sm"
+                    showCloseButton
+                    bodyClassName={styles.modalBody}
+                >
+                    {selectedDay.products.map((p, i) => (
+                        <div key={i} className={styles.modalRow}>
+                            <span>{p.name}</span>
+                            <strong>x{p.qty}</strong>
                         </div>
-
-                        <div className={styles.modalBody}>
-                            {selectedDay.products.map((p, i) => (
-                                <div key={i} className={styles.modalRow}>
-                                    <span>{p.name}</span>
-                                    <strong>x{p.qty}</strong>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                    ))}
+                </Modal>
             )}
         </>
     );

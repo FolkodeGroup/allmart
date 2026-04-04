@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
 import { ProductPrice } from '../../../components/ui/ProductPrice/ProductPrice';
+import DiscountBadge from '../../../components/DiscountBadge';
+import { publicCollectionsService } from '../../../services/publicCollectionsService';
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
@@ -30,16 +32,40 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   const galleryImages = product.images?.length ? product.images : [undefined];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorito, setIsFavorito] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false; // Seguridad por si usas SSR (Next.js)
+    if (typeof window === "undefined") return false;
     const saved = localStorage.getItem(storageKey);
     return saved === "true";
   });
+  const [dynamicDiscount, setDynamicDiscount] = useState<any>(null);
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(isFavorito));
   }, [isFavorito, storageKey]);
 
-  const hasDiscount = product.discount && product.discount > 0;
+  // Cargar descuento dinámico desde API
+  useEffect(() => {
+    const loadDiscount = async () => {
+      try {
+        const categoryIds = Array.isArray(product.categoryIds)
+          ? product.categoryIds
+          : product.category?.id
+            ? [product.category.id]
+            : [];
+        const discount = await publicCollectionsService.getProductDiscount(
+          product.id,
+          product.price,
+          categoryIds
+        );
+        setDynamicDiscount(discount);
+      } catch (error) {
+        // Silent error - fallback a descuento estático
+        console.error('Error loading discount:', error);
+      }
+    };
+    
+    loadDiscount();
+  }, [product.id, product.price, product.category?.id, product.categoryIds]);
+
   const isNew = product.tags.includes("nuevo");
   const isFeatured = variant === 'featured';
   const hasGallery = isFeatured && galleryImages.length > 1;
@@ -86,8 +112,8 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
             src={galleryImages[currentImageIndex]}
             alt={`${product.name}${hasGallery ? ` - imagen ${currentImageIndex + 1} de ${galleryImages.length}` : ''}`}
             className={styles.image}
-            width={isFeatured ? 420 : 240}
-            height={isFeatured ? 320 : 180}
+            width={isFeatured ? 420 : undefined}
+            height={isFeatured ? 320 : undefined}
             placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
             loading={isFeatured ? 'eager' : 'lazy'}
             fetchPriority={isFeatured ? 'high' : 'auto'}
@@ -95,6 +121,15 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           />
         </Link>
 
+        {/* Mostrar DiscountBadge si hay descuento dinámico o estático */}
+        {(dynamicDiscount || (product.discount && product.discount > 0)) && (
+          <DiscountBadge
+            discountPercentage={dynamicDiscount?.discountPercentage || product.discount}
+            originalPrice={dynamicDiscount?.originalPrice || product.originalPrice || product.price}
+            finalPrice={dynamicDiscount?.finalPrice || (product.price * (1 - (product.discount || 0) / 100))}
+            promotionType={dynamicDiscount?.promotionType || (product.discount ? 'percentage' : undefined)}
+          />
+        )}
         {hasGallery && (
           <>
             <button
@@ -138,11 +173,6 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         )}
 
         <div className={styles.badges}>
-          {hasDiscount && (
-            <Badge className={styles.badge} variant="discount">
-              -{product.discount}%
-            </Badge>
-          )}
           {isNew && <Badge variant="new">Nuevo</Badge>}
           {typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
             <Badge className={`${styles.badge} ${styles.lowStockBadge}`}>
@@ -173,12 +203,21 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-            <ProductPrice
-              price={product.price}
-              originalPrice={product.originalPrice}
-              discount={product.discount}
-              size="md"
-            />
+            {dynamicDiscount ? (
+              <ProductPrice
+                price={dynamicDiscount.finalPrice}
+                originalPrice={dynamicDiscount.originalPrice}
+                discount={dynamicDiscount.discountPercentage}
+                size="md"
+              />
+            ) : (
+              <ProductPrice
+                price={product.price}
+                originalPrice={product.originalPrice}
+                discount={product.discount}
+                size="md"
+              />
+            )}
         </div>
       </div>
       <Link

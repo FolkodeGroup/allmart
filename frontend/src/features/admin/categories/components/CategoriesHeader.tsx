@@ -11,10 +11,9 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({ canCreate, o
   <div className={sectionStyles.header}>
     <div className={styles.headerTop}>
       <div>
-        <span className={sectionStyles.label}>Administración</span>
-        <h1 className={sectionStyles.title}>
+        {/* <h1 className={sectionStyles.title}>
           <span className={sectionStyles.icon}>📁</span> Categorías
-        </h1>
+        </h1> */}
         <p className={sectionStyles.subtitle}>
           Gestioná las categorías del catálogo para organizar tus productos.
         </p>

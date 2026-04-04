@@ -16,6 +16,7 @@ export interface ApiCategory {
   slug: string;
   description?: string;
   imageUrl?: string;
+  parentId?: string | null;
   itemCount: number;
   isVisible: boolean;
 }
@@ -32,6 +33,7 @@ export interface CategoryPayload {
   name: string;
   description?: string;
   imageUrl?: string;
+  parentId?: string | null;
   isVisible?: boolean;
 }
 
@@ -66,6 +68,7 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
     slug: api.slug,
     description: api.description,
     image: api.imageUrl,
+    parentId: api.parentId ?? null,
     itemCount: api.itemCount,
     isVisible: api.isVisible,
   };
@@ -77,6 +80,7 @@ export function mapCategoryToPayload(category: Partial<Category>): CategoryPaylo
     name: category.name ?? '',
     description: category.description,
     imageUrl: category.image,
+    parentId: category.parentId ?? null,
     isVisible: category.isVisible,
   };
 }
@@ -139,7 +143,7 @@ export async function uploadAdminCategoryImage(token: string, id: string, file: 
   const formData = new FormData();
   formData.append('image', file);
 
-  const body = await apiFetch<ApiSuccess<{ imageUrl: string }>>(`/api/admin/categories/${id}/image`, {
+  const body = await apiFetch<ApiSuccess<{ imageUrl: string }>>(`/api/admin/categories/${id}/image/upload`, {
     method: 'POST',
     body: formData,
   }, token);

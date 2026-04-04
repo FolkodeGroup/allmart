@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface ProductImageProps {
-  src?: string;
+  src?: string | null;
   alt: string;
   className?: string;
   width?: number;
@@ -20,8 +20,8 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   src,
   alt,
   className,
-  width = 240,
-  height = 180,
+  width,
+  height,
   placeholder = 'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E',
   style,
   loading = 'lazy',
@@ -29,7 +29,9 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   sizes,
 }) => {
   const [loaded, setLoaded] = useState(false);
-  if (!src) {
+  const safeSrc = typeof src === 'string' ? src : '';
+
+  if (!safeSrc) {
     // Si no hay imagen, mostrar placeholder
     return (
       <img
@@ -38,19 +40,19 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         className={className}
         width={width}
         height={height}
-        style={{ objectFit: 'cover', ...style }}
+        style={{ width: width ? width : '100%', height: height ? height : '100%', objectFit: 'cover', ...style }}
         aria-label={alt}
       />
     );
   }
   // Derivar WebP si es posible
-  const webpSrc = src.endsWith('.jpg') || src.endsWith('.jpeg')
-    ? src.replace(/\.(jpg|jpeg)$/i, '.webp')
-    : src.endsWith('.png')
-      ? src.replace(/\.png$/i, '.webp')
+  const webpSrc = safeSrc.endsWith('.jpg') || safeSrc.endsWith('.jpeg')
+    ? safeSrc.replace(/\.(jpg|jpeg)$/i, '.webp')
+    : safeSrc.endsWith('.png')
+      ? safeSrc.replace(/\.png$/i, '.webp')
       : undefined;
   return (
-    <div style={{ position: 'relative', width, height, ...style }} className={className}>
+    <div style={{ position: 'relative', width: width || '100%', height: height || '100%', ...style }} className={className}>
       {/* Placeholder blur/liviano */}
       <img
         src={placeholder}
@@ -76,7 +78,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
           <source srcSet={webpSrc} type="image/webp" />
         )}
         <img
-          src={src}
+          src={safeSrc}
           alt={alt}
           loading={loading}
           decoding="async"

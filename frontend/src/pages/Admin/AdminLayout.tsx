@@ -1,14 +1,12 @@
 // src/pages/Admin/AdminLayout.tsx
-import { useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { Suspense, useState, useEffect, useRef } from "react";
+import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
 import { useAdminProducts } from "../../context/AdminProductsContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
 import { Button } from '../../components/ui/Button/Button';
+import { AdminLoadingFallback } from '../../components/ui/AdminLoadingFallback';
 import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 import { ModalConfirm } from "../../components/ui/ModalConfirm";
@@ -61,6 +59,27 @@ const navItems = [
     to: "/admin/reportes",
     icon: "📊",
     permission: "reports.view" as const,
+    badge: null,
+  },
+  {
+    label: "Promociones",
+    to: "/admin/promociones",
+    icon: "🎉",
+    permission: null,
+    badge: null,
+  },
+  {
+    label: "Colecciones",
+    to: "/admin/colecciones",
+    icon: "📚",
+    permission: null,
+    badge: null,
+  },
+  {
+    label: "Banners",
+    to: "/admin/banners",
+    icon: "📣",
+    permission: null,
     badge: null,
   },
 ] as const;
@@ -136,46 +155,6 @@ export function AdminLayout() {
 
   return (
     <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'dark' : ''}`}>
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        gutter={12}
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: "var(--color-neutral-dark)",
-            color: "var(--color-neutral-light)",
-            borderRadius: "var(--radius-lg, 8px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            padding: "16px",
-            fontFamily: "var(--font-ui)",
-            fontSize: "var(--text-sm)",
-            boxShadow: "var(--shadow-lg)",
-          },
-          success: {
-            style: {
-              background: "rgba(118, 146, 130, 0.15)",
-              borderColor: "rgba(118, 146, 130, 0.4)",
-              color: "var(--color-primary)",
-            },
-            iconTheme: {
-              primary: "var(--color-primary)",
-              secondary: "rgba(118, 146, 130, 0.15)",
-            },
-          },
-          error: {
-            style: {
-              background: "rgba(220, 100, 100, 0.15)",
-              borderColor: "rgba(220, 100, 100, 0.4)",
-              color: "#dc6464",
-            },
-            iconTheme: {
-              primary: "#dc6464",
-              secondary: "rgba(220, 100, 100, 0.15)",
-            },
-          },
-        }}
-      />
       <Button
         className={styles.mobileToggle}
         onClick={() => setIsMobileOpen(true)}
@@ -349,25 +328,19 @@ export function AdminLayout() {
           className={styles.content}
           style={{ display: "flex", flexDirection: "column" }}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {" "}
-            {/* initial={false} evita el parpadeo al cargar la primera vez */}
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }} // Muy rápido para evitar que el ojo note el cambio
-              style={{
-                flex: 1,
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+          <div
+            key={location.pathname}
+            style={{
+              flex: 1,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Suspense fallback={<AdminLoadingFallback />}>
               <Outlet />
-            </motion.div>
-          </AnimatePresence>
+            </Suspense>
+          </div>
         </div>
       </main>
       <ModalConfirm

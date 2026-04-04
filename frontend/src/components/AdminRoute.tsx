@@ -9,7 +9,10 @@ interface AdminRouteProps {
 }
 
 export function AdminRoute({ children, requiredPermission }: AdminRouteProps) {
-  const { isAuthenticated, can } = useAdminAuth();
+  const { isAuthenticated, isReady, can } = useAdminAuth();
+  if (!isReady) {
+    return <div style={{ padding: '1rem' }}>Cargando...</div>;
+  }
   if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
   if (requiredPermission && !can(requiredPermission)) {
     return <Navigate to="/admin/dashboard" replace />;

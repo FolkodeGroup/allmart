@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './ConfirmModal.module.css';
+import { Modal } from './Modal';
 
 export interface ConfirmModalProps {
     open: boolean;
@@ -33,17 +34,15 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
     if (!open) return null;
     return (
-        <div
-            className={styles.overlay}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={title ? 'modal-title' : undefined}
-            aria-describedby="modal-desc"
-        >
-            <div className={styles.modal}>
-                {title && <h3 id="modal-title" className={styles.title}>{title}</h3>}
-                <div id="modal-desc" className={styles.message}>{message}</div>
-                <div className={styles.actions}>
+        <Modal
+            open={open}
+            onClose={onCancel}
+            title={title}
+            disableClose={loading}
+            size="sm"
+            actionsClassName={styles.actions}
+            actions={
+                <>
                     <button
                         className={styles.cancelBtn}
                         onClick={onCancel}
@@ -61,8 +60,10 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     >
                         {loading ? 'Procesando...' : confirmLabel}
                     </button>
-                </div>
-            </div>
-        </div>
+                </>
+            }
+        >
+            <div id="modal-desc" className={styles.message}>{message}</div>
+        </Modal>
     );
 };

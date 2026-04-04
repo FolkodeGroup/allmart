@@ -8,15 +8,25 @@ export const create = async (req: Request, res: Response) => {
 
     // validaciones básicas de request
     if (!body.customer || !body.items?.length) {
-      return res.status(400).json({ message: "Datos inválidos" });
+      return res.status(400).json({
+        success: false,
+        message: 'Datos inválidos',
+      });
     }
 
     const orderId = await publicOrdersService.createPublicOrder(body);
 
-    return res.status(201).json({ orderId });
+    return res.status(201).json({
+      success: true,
+      data: { orderId },
+      message: 'Pedido creado correctamente',
+    });
 
   } catch (error: any) {
     console.error(error);
-    return res.status(500).json({ message: error.message || "Error al crear pedido" });
+    return res.status(error?.status || 500).json({
+      success: false,
+      message: error?.message || 'Error al crear pedido',
+    });
   }
 };

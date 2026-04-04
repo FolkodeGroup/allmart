@@ -11,6 +11,7 @@ export interface Category {
   slug:        string;
   description: string | null;
   imageUrl:    string | null;
+  parentId:    string | null;
   itemCount:   number;
   isVisible:   boolean;
   createdAt:   Date;
@@ -32,6 +33,7 @@ export interface PublicCategoryDTO {
   slug:        string;
   description: string | null;
   image:       string | null;
+  parentId:    string | null;
   itemCount:   number;
   isVisible:   boolean;
 }
@@ -44,6 +46,7 @@ export function toPublicDTO(c: Category): PublicCategoryDTO {
     slug:        c.slug,
     description: c.description,
     image:       c.imageUrl,
+    parentId:    c.parentId,
     itemCount:   c.itemCount,
     isVisible:   c.isVisible,
   };

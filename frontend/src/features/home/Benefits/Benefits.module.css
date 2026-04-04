@@ -1,11 +1,13 @@
 .section {
-  padding: var(--space-20) 0;
+  padding: var(--space-16) 0;
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-bg-secondary) 100%);
+  border-top: none;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-8);
+  gap: var(--space-6);
   max-width: var(--container-2xl);
   margin: 0 auto;
   padding: 0 var(--space-6);
@@ -17,7 +19,7 @@
   align-items: center;
   text-align: center;
   gap: var(--space-4);
-  padding: var(--space-8) var(--space-4);
+  padding: var(--space-6) var(--space-4);
 }
 
 .iconWrapper {
@@ -69,7 +71,7 @@
   }
 
   .section {
-    padding: var(--space-12) 0;
+    padding: var(--space-8) 0;
   }
 }
 

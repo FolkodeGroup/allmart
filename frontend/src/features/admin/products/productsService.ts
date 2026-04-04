@@ -19,8 +19,9 @@ export interface ApiProduct {
   price: number;
   compareAtPrice?: number;
   discount?: number;
-  images: string[];
+  images: Array<string | { url?: string } | null>;
   categoryId: string;
+  categoryIds?: string[];
   tags: string[];
   status: string;
   sku?: string;
@@ -49,6 +50,7 @@ export interface ApiCategory {
   slug: string;
   description?: string;
   imageUrl?: string;
+  parentId?: string | null;
   itemCount: number;
 }
 
@@ -78,6 +80,7 @@ export interface ProductPayload {
   discount?: number;
   images?: string[];
   categoryId: string;
+  categoryIds?: string[];
   status?: string;
   sku?: string;
   stock?: number;
@@ -122,6 +125,7 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
     slug: api.slug,
     description: api.description,
     image: api.imageUrl,
+    parentId: api.parentId ?? null,
     itemCount: api.itemCount,
     isVisible: true,
   };
@@ -129,12 +133,34 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
 
 /** Convierte un ApiProduct del backend al tipo Product del frontend */
 export function mapApiProductToProduct(api: ApiProduct, categories: Category[]): Product {
-  const category = categories.find((c) => c.id === api.categoryId) ?? {
-    id: api.categoryId,
+  const categoryIds = Array.isArray(api.categoryIds)
+    ? api.categoryIds
+    : api.categoryId
+      ? [api.categoryId]
+      : [];
+  const resolvedCategories = categoryIds
+    .map((id) => categories.find((c) => c.id === id))
+    .filter((value): value is Category => Boolean(value));
+  const fallbackCategory: Category = {
+    id: api.categoryId || (categoryIds[0] ?? ''),
     name: 'Sin categoría',
     slug: '',
     isVisible: true,
   };
+  const primaryCategory =
+    categories.find((c) => c.id === api.categoryId) ??
+    resolvedCategories[0] ??
+    fallbackCategory;
+
+  const normalizedImages = Array.isArray(api.images)
+    ? api.images
+        .map((img) => {
+          if (typeof img === 'string') return img;
+          if (img && typeof img === 'object' && typeof img.url === 'string') return img.url;
+          return '';
+        })
+        .filter(Boolean)
+    : [];
 
   return {
     id: api.id,
@@ -149,8 +175,11 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
         ? Math.round(((api.compareAtPrice - api.price) / api.compareAtPrice) * 100)
         : undefined
     ),
-    images: Array.isArray(api.images) ? api.images : [],
-    category,
+    images: normalizedImages,
+    category: primaryCategory,
+    categoryId: primaryCategory.id || api.categoryId,
+    categoryIds: categoryIds.length > 0 ? categoryIds : (primaryCategory.id ? [primaryCategory.id] : []),
+    categories: resolvedCategories,
     tags: Array.isArray(api.tags) ? api.tags : [],
     rating: api.rating,
     reviewCount: api.reviewCount ?? 0,
@@ -162,6 +191,13 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
 
 /** Convierte un AdminProduct del frontend al payload que acepta el backend */
 export function mapAdminProductToPayload(product: any): ProductPayload {
+  const primaryCategoryId = product.category?.id ?? product.categoryId ?? '';
+  const normalizedCategoryIds = Array.isArray(product.categoryIds)
+    ? product.categoryIds
+    : primaryCategoryId
+      ? [primaryCategoryId]
+      : [];
+
   return {
     name: product.name,
     description: product.description,
@@ -170,7 +206,8 @@ export function mapAdminProductToPayload(product: any): ProductPayload {
     compareAtPrice: product.originalPrice,
     discount: product.discount,
     images: product.images,
-    categoryId: product.category.id,
+    categoryId: primaryCategoryId,
+    categoryIds: normalizedCategoryIds,
     status: product.status ?? (product.inStock ? 'active' : 'inactive'),
     sku: product.sku,
     stock: product.stock ?? 0,

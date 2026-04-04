@@ -1,11 +1,12 @@
 .bulkEditBar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, minmax(180px, 1fr)) auto;
   align-items: center;
   gap: 12px;
 
-  width: 60%;
-  margin: 0 auto 18px auto; /* lo centra */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 18px auto;
 
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-primary-light);
@@ -13,9 +14,28 @@
   padding: 12px 20px;
 }
 
+@media (min-width: 1200px) {
+  .bulkEditBar {
+    max-width: 1400px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .bulkEditBar {
+    max-width: 1200px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .bulkEditBar {
+    max-width: 900px;
+  }
+}
+
 @media (max-width: 900px) {
   .bulkEditBar {
     width: 100%;
+    max-width: 100vw;
     grid-template-columns: 1fr;
     padding: 14px;
   }
@@ -58,7 +78,7 @@
 .input {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
-  padding: 6px 10px;
+  padding: 8px 10px;
   border: 1px solid var(--color-primary-light);
   border-radius: 6px;
   min-width: 110px;
@@ -68,7 +88,7 @@
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 .applyBtn {
@@ -76,11 +96,12 @@
   color: var(--color-neutral-light);
   border: none;
   border-radius: 8px;
-  padding: 7px 18px;
+  padding: 8px 14px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
-  width: 50%;
+  width: auto;
+  min-width: 140px;
 }
 
 .applyBtn:hover { background: var(--color-primary-dark); }
@@ -94,11 +115,12 @@
   color: var(--color-text-secondary);
   border: none;
   border-radius: 8px;
-  padding: 7px 14px;
+  padding: 8px 12px;
   font-weight: 500;
   cursor: pointer;
   transition: color 0.15s;
-  width: 50%;
+  width: auto;
+  min-width: 96px;
 }
 
 .cancelBtn:hover { background: rgba(199, 80, 80, 0.1); border: #92400e 1px solid; }
