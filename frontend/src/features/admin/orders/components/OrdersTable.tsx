@@ -1,5 +1,6 @@
 import { formatDate, formatPrice } from '../utils/ordersHelpers';
 import { OrderStatusBadge } from './OrderStatusBadge';
+import { OrderStatusTag } from './OrderStatusTag';
 import { OrderStatusSelector } from './OrderStatusSelector';
 import React, { useState } from 'react';
 import { useAdminOrders } from '../../../../context/AdminOrdersContext';
@@ -139,7 +140,7 @@ export function OrderItem({ order, selected, onSelect, onDetail }: OrderItemProp
             aria-label="Cambiar estado"
             role="button"
           >
-            <OrderStatusBadge status={localStatus} />
+            <OrderStatusTag status={localStatus} />
             {loading && <span className={styles.statusLoading} style={{marginLeft: 6}}>⏳</span>}
           </span>
         )}

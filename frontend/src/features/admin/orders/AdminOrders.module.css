@@ -1,3 +1,40 @@
+/* Indicadores visuales para estados problemáticos */
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2em 0.7em;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.97em;
+  background: var(--color-bg-secondary);
+}
+
+.statusDanger {
+  border: 2px solid #e53935;
+  background: #fff5f5;
+  color: #b71c1c;
+}
+
+.statusWarning {
+  border: 2px solid #ffb300;
+  background: #fffbe5;
+  color: #b26a00;
+}
+
+.statusDangerIcon {
+  font-size: 1.1em;
+  margin-right: 0.2em;
+}
+
+.statusWarningIcon {
+  font-size: 1.1em;
+  margin-right: 0.2em;
+}
+
+.statusTagText {
+  vertical-align: middle;
+}
 /* ── Paginación ── */
 .paginationWrap {
   display: flex;
