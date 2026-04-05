@@ -1,7 +1,7 @@
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-import type { Order, OrderStatus, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
+import type { Order, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
 import { STATUS_LABELS, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS } from './utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -15,6 +15,92 @@ import { useReportsExport } from '../reports/hooks/useReportsExport';
 import { OrdersFiltersBar } from './components/OrdersFiltersBar';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
 import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
+
+// MOCK ORDERS para desarrollo (OrderStatus: 'pendiente' | 'confirmado' | 'en-preparacion' | 'enviado' | 'entregado' | 'cancelado')
+import type { OrderStatus, PaymentStatus } from '../../../context/AdminOrdersContext';
+const MOCK_ORDERS = [
+  {
+    id: 'order-001',
+    createdAt: '2026-04-01T10:00:00Z',
+    customer: {
+      firstName: 'Juan',
+      lastName: 'Pérez',
+      email: 'juan.perez@email.com',
+    },
+    items: [
+      {
+        productId: 'prod-001',
+        productName: 'Camiseta Básica',
+        productImage: '',
+        quantity: 2,
+        unitPrice: 15.99,
+      },
+    ],
+    total: 31.98,
+    status: 'entregado' as OrderStatus,
+    paymentStatus: 'abonado' as PaymentStatus,
+    paidAt: '2026-04-01T12:00:00Z',
+    notes: 'Entregado sin inconvenientes',
+    statusHistory: [
+      { status: 'pendiente' as OrderStatus, changedAt: '2026-04-01T10:00:00Z' },
+      { status: 'confirmado' as OrderStatus, changedAt: '2026-04-01T10:10:00Z' },
+      { status: 'en-preparacion' as OrderStatus, changedAt: '2026-04-01T10:30:00Z' },
+      { status: 'enviado' as OrderStatus, changedAt: '2026-04-01T11:00:00Z' },
+      { status: 'entregado' as OrderStatus, changedAt: '2026-04-01T12:00:00Z' },
+    ],
+  },
+  {
+    id: 'order-002',
+    createdAt: '2026-04-02T09:30:00Z',
+    customer: {
+      firstName: 'María',
+      lastName: 'Gómez',
+      email: 'maria.gomez@email.com',
+    },
+    items: [
+      {
+        productId: 'prod-002',
+        productName: 'Pantalón Jeans',
+        productImage: '',
+        quantity: 1,
+        unitPrice: 39.99,
+      },
+    ],
+    total: 39.99,
+    status: 'pendiente' as OrderStatus,
+    paymentStatus: 'no-abonado' as PaymentStatus,
+    notes: 'Cliente pidió cambio de talla',
+    statusHistory: [
+      { status: 'pendiente' as OrderStatus, changedAt: '2026-04-02T09:30:00Z', note: 'Pedido recibido' },
+    ],
+  },
+  {
+    id: 'order-003',
+    createdAt: '2026-04-03T14:20:00Z',
+    customer: {
+      firstName: 'Carlos',
+      lastName: 'López',
+      email: 'carlos.lopez@email.com',
+    },
+    items: [
+      {
+        productId: 'prod-003',
+        productName: 'Zapatillas Running',
+        productImage: '',
+        quantity: 1,
+        unitPrice: 59.99,
+      },
+    ],
+    total: 59.99,
+    status: 'cancelado' as OrderStatus,
+    paymentStatus: 'no-abonado' as PaymentStatus,
+    notes: 'Cancelado por falta de stock',
+    statusHistory: [
+      { status: 'pendiente' as OrderStatus, changedAt: '2026-04-03T14:20:00Z' },
+      { status: 'cancelado' as OrderStatus, changedAt: '2026-04-03T15:00:00Z', note: 'Sin stock disponible' },
+    ],
+  },
+];
 import { useUnsavedChanges } from '../../../context/useUnsavedChanges';
 import OrderDetailModal from './components/OrderDetailModal';
 // Helpers y constantes extraídos a utils/ordersHelpers.ts
@@ -67,7 +153,8 @@ function AdminOrders() {
   const { token } = useAdminAuth();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   // Estado para modales globales
-  const [orders, setOrders] = useState<Order[]>([]);
+  // Para desarrollo: inicializar con MOCK_ORDERS
+  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
   const [isLoading, setIsLoading] = useState(false);
   // const [isLoadingMore, setIsLoadingMore] = useState(false); // No se usa
   // const [hasMore, setHasMore] = useState(true); // No se usa
