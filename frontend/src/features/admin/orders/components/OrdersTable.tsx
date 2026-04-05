@@ -1,5 +1,4 @@
 import { formatDate, formatPrice } from '../utils/ordersHelpers';
-import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderStatusTag } from './OrderStatusTag';
 import { OrderStatusSelector } from './OrderStatusSelector';
 import React, { useState } from 'react';
