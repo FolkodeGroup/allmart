@@ -233,10 +233,10 @@ function AdminOrders() {
   }, [token, page, PAGE_SIZE]);
 
   // Cargar pedidos al montar y al cambiar filtros
-  useEffect(() => {
-    fetchOrders(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  // useEffect(() => {
+  //   fetchOrders(true);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [token]);
 
   // Cargar más
   // const handleLoadMore = useCallback(() => {
