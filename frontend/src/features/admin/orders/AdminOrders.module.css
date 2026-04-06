@@ -1,3 +1,15 @@
+/* ── Accesibilidad: reducir movimiento ── */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Indicadores visuales para estados problemáticos */
 .statusTag {
   display: inline-flex;
@@ -35,6 +47,7 @@
 .statusTagText {
   vertical-align: middle;
 }
+
 /* ── Paginación ── */
 .paginationWrap {
   display: flex;
@@ -55,12 +68,18 @@
   border-radius: 8px;
   padding: var(--space-2) var(--space-5);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, transform 0.12s ease;
 }
 
 .paginationBtn:hover:not(:disabled) {
   background: var(--color-primary);
   color: #fff;
+  transform: translateY(-1px);
+}
+
+.paginationBtn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .paginationBtn:disabled {
@@ -84,13 +103,21 @@
   border-radius: 6px;
   padding: var(--space-1) var(--space-3);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, transform 0.12s ease;
 }
 
 .paginationPage:hover {
   background: var(--color-primary);
   color: #fff;
+  transform: translateY(-1px);
 }
+
+.paginationPage:active {
+  transform: translateY(0) scale(0.96);
+}
+
+
 
 .paginationPageActive {
   background: var(--color-primary);
@@ -149,12 +176,19 @@
   gap: var(--space-1);
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.15s, transform 0.15s;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  animation: fadeSlideUp 0.3s ease both;
 }
 
 .summaryCard:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: var(--color-primary-light, #6ee7b7);
+}
+
+.summaryCard:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .summaryCard::before {
@@ -234,19 +268,32 @@
 }
 
 /* ── Filtros ── */
-.filters {
+.filtersWrap {
   display: flex;
-  gap: var(--space-3);
-  align-items: end;
-  flex-wrap: wrap;
+  flex-direction: column;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: var(--space-4) var(--space-5);
 }
 
+.filtersTitle {
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.filtersControls {
+  display: flex;
+  gap: var(--space-3);
+  align-items: end;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 639px) {
-  .filters {
+  .filtersControls {
     flex-direction: column;
     align-items: stretch;
     gap: var(--space-2);
@@ -357,6 +404,13 @@
   border: 1px solid var(--color-border);
   border-radius: 999px;
   padding: 4px 10px;
+  animation: chipAppear 0.18s ease both;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.chip:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary));
+  transform: scale(1.03);
 }
 
 
@@ -495,6 +549,7 @@
   border-collapse: collapse;
   font-family: var(--font-ui);
   font-size: var(--text-sm);
+  overflow: hidden;
 }
 
 .table thead tr {
@@ -516,7 +571,7 @@
 .row {
   border-bottom: 1px solid var(--color-border-light);
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .row:last-child {
@@ -525,6 +580,13 @@
 
 .row:hover {
   background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg-secondary));
+  transform: translateX(2px);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .table td {
@@ -608,7 +670,8 @@
   border-radius: 14px;
   padding: var(--space-4);
   cursor: pointer;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  animation: fadeSlideUp 0.28s ease both;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -617,7 +680,12 @@
 .mobileCard:hover,
 .mobileCard:active {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.mobileCard:active {
+  transform: scale(0.99);
 }
 
 .mobileCardTop {
@@ -717,6 +785,12 @@
   border-radius: 999px;
   padding: 4px 10px;
   white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.statusBadge:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
 .statusPendiente {
@@ -880,12 +954,10 @@
   z-index: 1000;
   display: flex;
   align-items: center;
-  /* Centrar el modal verticalmente */
   justify-content: center;
-  /* Centrar el modal horizontalmente */
   overflow-y: auto;
-  /* Permitir desplazamiento interno */
   padding: 0;
+  animation: backdropFadeIn 0.2s ease both;
 }
 
 @media (max-width: 639px) {
@@ -1175,7 +1247,8 @@
 }
 
 .exportSelect:focus {
-  box-shadow: 0 0 0 2px #76928233;
+  outline: none;
+  border: none;
 }
 
 .exportBtn {
@@ -1264,6 +1337,7 @@
   justify-content: center;
   pointer-events: none;
   padding: 0 0 8px 0;
+  animation: bulkSlideUp 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Caja principal */
@@ -1283,6 +1357,11 @@
   width: 100%;
   margin: 0 8px;
   flex-wrap: wrap;
+  transition: box-shadow 0.2s ease;
+}
+
+.bulkActionsBox:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
 }
 
 /* Texto */
@@ -1461,6 +1540,7 @@
 /* ── Cambio de estado con nota ── */
 .statusChangeBox {
   margin-top: var(--space-3);
+  animation: expandDown 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -1468,6 +1548,7 @@
   border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
   border-radius: 10px;
   padding: var(--space-3) var(--space-4);
+
 }
 
 .statusNoteInput {
@@ -1529,16 +1610,21 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  animation: growLine 0.3s ease both;
+  transform-origin: top center;
 }
 
 .timelineItem {
   display: flex;
   gap: var(--space-3);
   align-items: flex-start;
+  animation: fadeSlideUp 0.25s ease both;
+  /* El delay se aplica inline desde React (ver sección 2) */
 }
 
 .timelineItemCurrent .timelineDot {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  transform: scale(1.08);
 }
 
 .timelineDotWrap {
@@ -1561,7 +1647,8 @@
   justify-content: center;
   font-size: 0.85rem;
   flex-shrink: 0;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+
 }
 
 .timelineLine {
@@ -1763,4 +1850,77 @@
   /* composes: skeletonBase; */
   height: 14px;
   width: 120px;
+}
+
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes expandDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.95);
+    transform-origin: top center;
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes bulkSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes growLine {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes chipAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

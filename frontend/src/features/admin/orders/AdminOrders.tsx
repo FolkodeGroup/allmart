@@ -119,7 +119,7 @@ export function OrderTimeline({ history, currentStatus }: { history: OrderHistor
         const isCurrent = entry.status === currentStatus && idx === 0;
         const isLast = idx === sorted.length - 1;
         return (
-          <li key={entry.changedAt + idx} className={`${styles.timelineItem} ${isCurrent ? styles.timelineItemCurrent : ''}`}>
+          <li key={entry.changedAt + idx} className={`${styles.timelineItem} ${isCurrent ? styles.timelineItemCurrent : ''}`} style={{ animationDelay: `${idx * 60}ms` }}>
             <div className={styles.timelineDotWrap}>
               <span className={styles.timelineDot}>
                 {STATUS_ICONS[entry.status]}

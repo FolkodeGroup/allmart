@@ -19,7 +19,7 @@ interface OrderListProps {
 export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderListProps) {
   return (
     <div className={styles.mobileList}>
-      {orders.map(order => {
+      {orders.map((order, index) => {
         const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
         const totalQty = order.items.reduce((s: number, i: any) => s + i.quantity, 0);
         return (
@@ -30,7 +30,11 @@ export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderList
             role="button"
             tabIndex={0}
             onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
-            style={{ marginBottom: 16, background: '#fff' }}
+            style={{
+              marginBottom: 16,
+              background: '#fff',
+              animationDelay: `${index * 40}ms`,   // ← añadir index al .map()
+            }}
           >
             <div className={styles.mobileCardTop}>
               <input
@@ -42,7 +46,7 @@ export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderList
                 style={{ marginRight: 8, minWidth: 24, minHeight: 24 }}
               />
               <span className={styles.mobileCardId}>
-                #{order.id.slice(0,8).toUpperCase()}
+                #{order.id.slice(0, 8).toUpperCase()}
               </span>
               <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
             </div>
@@ -117,7 +121,7 @@ function OrderStatusMobile({ order }: { order: Order }) {
           role="button"
         >
           <OrderStatusTag status={localStatus} />
-          {loading && <span className={styles.statusLoading} style={{marginLeft: 6}}>⏳</span>}
+          {loading && <span className={styles.statusLoading} style={{ marginLeft: 6 }}>⏳</span>}
         </span>
       )}
       {error && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</div>}
