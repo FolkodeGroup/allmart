@@ -1,12 +1,25 @@
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OrdersFiltersBar.tsx
+// Barra de filtros avanzada para la tabla de pedidos.
+// Versión actual (reemplaza a OrdersFilters legacy).
+//
+// Diferencias con OrdersFilters (legacy):
+//  - Recibe un objeto `filters` unificado en lugar de props individuales.
+//  - Usa StatusChipSelect para selección múltiple de estados.
+//  - Incluye filtros de rango de total ($ mín / $ máx).
+//  - El debounce y el reset de página se manejan en AdminOrders, no aquí.
+// ─────────────────────────────────────────────────────────────────────────────
 // components/OrdersFiltersBar.tsx
 import { StatusChipSelect } from './StatusChipSelect';
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
 
+// Definidos localmente para no depender del helper global en este componente de UI puro
 const STATUS_OPTIONS: OrderStatus[] = [
     'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
-];; // los mismos de siempre
+];
 const STATUS_LABELS = {
     pendiente: 'Pendiente',
     confirmado: 'Confirmado',
@@ -16,6 +29,16 @@ const STATUS_LABELS = {
     cancelado: 'Cancelado',
 } as Record<OrderStatus, string>;
 
+/**
+ * Props de OrdersFiltersBar.
+ *
+ * @param filters          - Estado actual de todos los filtros (del hook useOrdersFilters).
+ * @param onChange         - Callback para actualizar cualquier campo del filtro.
+ *                           Siempre recibe el objeto completo con spread: `{ ...filters, campo: valor }`.
+ * @param onReset          - Resetea todos los filtros a sus valores vacíos.
+ * @param hasActiveFilters - True si hay al menos un filtro activo; controla visibilidad del botón "Limpiar".
+ * @param disabled         - Deshabilita todos los inputs durante un fetch en curso.
+ */
 interface Props {
     filters: OrdersFiltersState;
     onChange: (filters: OrdersFiltersState) => void;
@@ -24,6 +47,18 @@ interface Props {
     disabled?: boolean;
 }
 
+/**
+ * OrdersFiltersBar — barra de filtros completa para la gestión de pedidos.
+ *
+ * Campos disponibles:
+ *  - Búsqueda libre (cliente, email, N° de pedido)
+ *  - Estado (selección múltiple via StatusChipSelect)
+ *  - Rango de fechas (desde / hasta)
+ *  - Rango de total ($ mín / $ máx)
+ *
+ * Patrón de actualización: cada input llama a `onChange({ ...filters, campo: nuevoValor })`.
+ * Esto garantiza que siempre se envía el objeto completo, sin perder otros campos activos.
+ */
 export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters, disabled }: Props) {
     return (
 
@@ -49,6 +84,12 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     </div>
                 </div>
 
+                {/*
+                  StatusChipSelect: selector múltiple de estados.
+                  `selected` recibe el array de estados activos; `onChange` actualiza solo `statuses`.
+                  chipClose no tiene clase específica (chipCloseClassName recibe styles.chipClose
+                  que puede no existir; es intencional para dejarlo sin estilo forzado).
+                */}
                 <StatusChipSelect
                     options={STATUS_OPTIONS.map(s => ({ value: s, label: STATUS_LABELS[s] }))}
                     selected={filters.statuses}
@@ -61,6 +102,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     chipCloseClassName={styles.chipClose}
                 />
 
+                {/* ── Rango de fechas ── */}
                 <div className={styles.dateFilters}>
                     <div className={styles.dateFiltersSeparation}>
                         <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
@@ -88,6 +130,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     </div>
                 </div>
 
+                {/* ── Rango de total ── */}
                 <div className={styles.totalFilters}>
                     <div className={styles.totalFiltersSeparation}>
                         <label className={styles.totalLabel} htmlFor="order-total-min">$ Mín</label>
@@ -119,6 +162,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     </div>
                 </div>
 
+                {/* Botón "Limpiar": solo visible cuando hay algún filtro activo */}
                 {
                     hasActiveFilters && (
                         <button className={styles.clearBtn} type="button" onClick={onReset} aria-label="Limpiar filtros">
