@@ -1,3 +1,23 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// AdminOrders.tsx
+// Página principal de gestión de pedidos del panel de administración.
+//
+// Responsabilidades:
+//  - Renderizar métricas de resumen por estado
+//  - Orquestar filtros, paginación y selección múltiple
+//  - Gestionar acciones masivas (confirmar / enviar / cancelar)
+//  - Exportar pedidos en distintos formatos
+//  - Abrir el modal de detalle de un pedido
+//
+// Flujo general:
+//  1. Al montar, los pedidos se inicializan con MOCK_ORDERS (modo dev).
+//  2. El hook useOrdersFilters filtra `orders` según los filtros activos.
+//  3. La tabla y la lista mobile consumen `filtered` (no `orders` directamente).
+//  4. La paginación opera sobre `orders` completo; el slice lo hace el backend
+//     cuando el fetch real esté activo.
+// ─────────────────────────────────────────────────────────────────────────────
+
+
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -16,7 +36,14 @@ import { OrdersFiltersBar } from './components/OrdersFiltersBar';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
 import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
 
-// MOCK ORDERS para desarrollo (OrderStatus: 'pendiente' | 'confirmado' | 'en-preparacion' | 'enviado' | 'entregado' | 'cancelado')
+/**
+ * MOCK_ORDERS — datos de ejemplo para desarrollo local.
+ * Reemplazar por el fetch real cuando el backend esté disponible
+ * (descomentar el useEffect de fetchOrders más abajo).
+ *
+ * Estructura mínima esperada por el tipo Order:
+ *  id, createdAt, customer, items, total, status, paymentStatus, statusHistory
+ */
 import type { OrderStatus, PaymentStatus } from '../../../context/AdminOrdersContext';
 const MOCK_ORDERS = [
   {
@@ -105,25 +132,40 @@ import { useUnsavedChanges } from '../../../context/useUnsavedChanges';
 import OrderDetailModal from './components/OrderDetailModal';
 // Helpers y constantes extraídos a utils/ordersHelpers.ts
 
+
+
 /* ── Componente Timeline de estados ─────────────────────────────── */
+// ─────────────────────────────────────────────────────────────────────────────
+// OrderTimeline
+// Muestra el historial cronológico de cambios de estado de un pedido.
+// Se exporta para poder usarse también dentro de OrderDetailModal.
+//
+// Props:
+//  @param history       - Array de entradas del historial (puede estar vacío)
+//  @param currentStatus - Estado actual del pedido; se usa para marcar el ítem activo
+// ─────────────────────────────────────────────────────────────────────────────
 export function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[]; currentStatus: OrderStatus }) {
   if (history.length === 0) {
     return (
       <p className={styles.timelineEmpty}>No hay registros de cambios de estado aún.</p>
     );
   }
+  // Invertimos para mostrar el estado más reciente primero (índice 0 = actual)
   const sorted: OrderHistoryEntry[] = [...history].reverse();
   return (
     <ol className={styles.timeline}>
       {sorted.map((entry: OrderHistoryEntry, idx: number) => {
+        // El primer ítem del array invertido es el estado actual del pedido
         const isCurrent = entry.status === currentStatus && idx === 0;
+        // El último ítem no necesita la línea vertical que conecta con el siguiente
         const isLast = idx === sorted.length - 1;
         return (
-          <li key={entry.changedAt + idx} className={`${styles.timelineItem} ${isCurrent ? styles.timelineItemCurrent : ''}`}>
+          <li key={entry.changedAt + idx} className={`${styles.timelineItem} ${isCurrent ? styles.timelineItemCurrent : ''}`} style={{ animationDelay: `${idx * 60}ms` }}>
             <div className={styles.timelineDotWrap}>
               <span className={styles.timelineDot}>
                 {STATUS_ICONS[entry.status]}
               </span>
+              {/* La línea vertical se omite en el último ítem para no "colgar" */}
               {!isLast && <span className={styles.timelineLine} />}
             </div>
             <div className={styles.timelineContent}>
@@ -136,6 +178,7 @@ export function OrderTimeline({ history, currentStatus }: { history: OrderHistor
                 )}
               </div>
               <time className={styles.timelineDate}>{formatDateTime(entry.changedAt)}</time>
+              {/* La nota es opcional; solo se muestra si el operador la registró */}
               {entry.note && (
                 <p className={styles.timelineNote}>{entry.note}</p>
               )}
@@ -151,17 +194,26 @@ export function OrderTimeline({ history, currentStatus }: { history: OrderHistor
 
 function AdminOrders() {
   const { token } = useAdminAuth();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  // Estado para modales globales
-  // Para desarrollo: inicializar con MOCK_ORDERS
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null); // Pedido actualmente abierto en el modal de detalle (null = modal cerrado)
+
+  /**
+   * Lista completa de pedidos cargados.
+   * En desarrollo se inicializa con MOCK_ORDERS.
+   * En producción, se pobla via fetchOrders (ver useEffect comentado más abajo).
+   */
   const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
   const [isLoading, setIsLoading] = useState(false);
-  // const [isLoadingMore, setIsLoadingMore] = useState(false); // No se usa
-  // const [hasMore, setHasMore] = useState(true); // No se usa
+
+  // ── Paginación ──────────────────────────────────────────────────
+  // `page` determina qué página se solicita al backend.
+  // PAGE_SIZE define cuántos registros por página.
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
+
+  // IDs de pedidos seleccionados para acciones masivas
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  // Acceso al contexto global de cambios sin guardar
   const { setIsDirty: setGlobalDirty } = useUnsavedChanges();
 
   // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
@@ -173,9 +225,33 @@ function AdminOrders() {
   //const deleteOrder = (..._args: any[]) => Promise.resolve();
   //const markAsPaid = (..._args: any[]) => Promise.resolve();
 
+  // ── Filtros ─────────────────────────────────────────────────────
+  /**
+   * useOrdersFilters devuelve:
+   *  - filters: estado actual de todos los filtros
+   *  - setFilters: setter para actualizar filtros
+   *  - hasActiveFilters: true si hay algún filtro activo (para mostrar "Limpiar")
+   *  - filtered: subconjunto de `orders` que pasa todos los filtros activos
+   *  - reset: resetea todos los filtros a sus valores vacíos
+   */
   const { filters, setFilters, hasActiveFilters, filtered, reset } = useOrdersFilters(orders)
+
+  /**
+   * debouncedFilters: copia de `filters` que se actualiza con 400ms de delay.
+   * Se usa para resetear la página solo cuando el usuario deja de escribir,
+   * evitando resets en cada keystroke.
+   */
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
+  /**
+   * adaptedFilters: transforma el estado de filtros al formato que espera
+   * useReportsExport para saber qué tipo de filtro aplicar en la exportación.
+   *
+   * Lógica:
+   *  - Si hay rango de fechas → type: 'custom'
+   *  - Si hay exactamente 1 estado seleccionado → type: 'predefined', period: ese estado
+   *  - En cualquier otro caso → type: 'predefined', period: 'todos'
+   */
   const adaptedFilters = useMemo(() => {
     if (filters.dateFrom || filters.dateTo) {
       return { type: 'custom' } as const;
@@ -194,6 +270,7 @@ function AdminOrders() {
     } as const;
   }, [filters]);
 
+  // Debounce de 400ms sobre los filtros para evitar resets de página continuos
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedFilters(filters);
@@ -201,14 +278,32 @@ function AdminOrders() {
 
     return () => clearTimeout(t);
   }, [filters]);
-  // Resetear lista al cambiar filtros
+
+  // Volver a la primera página cada vez que los filtros (debounced) cambien
   useEffect(() => {
     setPage(1);
   }, [debouncedFilters]);
-  // Fetch paginado
+
+  // ── Fetch paginado ──────────────────────────────────────────────
+  /**
+   * abortRef almacena el AbortController del fetch en curso.
+   * Si se dispara un nuevo fetch antes de que termine el anterior,
+   * se aborta el anterior para evitar race conditions.
+   */
   const abortRef = useRef<AbortController | null>(null);
+
+  /**
+   * fetchOrders — obtiene pedidos del backend con paginación.
+   *
+   * @param reset - Si true, reemplaza la lista; si false, agrega al final (infinite scroll).
+   *
+   * NOTA: El useEffect que llama a fetchOrders(true) está comentado porque
+   * actualmente se usan MOCK_ORDERS. Descomentar para activar el fetch real.
+   */
   const fetchOrders = useCallback(async (reset = false) => {
     if (!token) return;
+
+    // Abortar fetch anterior si todavía está en curso
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -223,8 +318,11 @@ function AdminOrders() {
       const res = await fetchAdminOrders(token, params);
       // setHasMore(res.data.length === PAGE_SIZE);
       const normalized = res.data.map(mapApiOrderToOrder);
+
+      // reset=true reemplaza la lista; reset=false acumula (para infinite scroll)
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
     } catch (e: any) {
+      // Ignorar errores de abort; solo mostrar toast si fue un error real
       if (e.name !== 'AbortError') toast.error('Error al cargar pedidos');
     } finally {
       setIsLoading(false);
@@ -238,12 +336,7 @@ function AdminOrders() {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [token]);
 
-  // Cargar más
-  // const handleLoadMore = useCallback(() => {
-  //   setPage(p => p + 1);
-  // }, []); // No se usa
-
-  // Cargar más cuando cambia page
+  // Cargar más cuando el usuario avanza de página (solo si page > 1)
   useEffect(() => {
     if (page === 1) return;
     fetchOrders(false);
@@ -251,11 +344,26 @@ function AdminOrders() {
   }, [page]);
 
   // Helpers selección múltiple
+  // ── Selección múltiple ──────────────────────────────────────────
+  /**
+   * handleSelectOne — agrega o quita un ID de la selección (toggle).
+   * useCallback evita recrear la función en cada render; es estable mientras
+   * no cambien sus dependencias (ninguna en este caso).
+   */
   const handleSelectOne = useCallback((id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   }, []);
+
+  /** Limpia toda la selección. Llamado tras ejecutar una acción masiva. */
   const clearSelection = useCallback(() => setSelectedIds([]), []);
 
+  // ── Métricas de resumen ─────────────────────────────────────────
+  /**
+   * summary — cuenta pedidos por estado para las tarjetas de métricas.
+   * useMemo evita recalcular en cada render; se actualiza solo cuando `orders` cambia.
+   *
+   * Resultado: { pendiente: N, confirmado: N, 'en-preparacion': N, ... }
+   */
   // Resumen por estado
   const summary = useMemo(() => {
     return STATUS_OPTIONS.reduce((acc, s) => {
@@ -264,9 +372,12 @@ function AdminOrders() {
     }, {} as Record<OrderStatus, number>);
   }, [orders]);
 
+  /** Total de pedidos con paymentStatus === 'abonado' para la tarjeta de pagos. */
   const totalAbonados = useMemo(() => orders.filter(o => o.paymentStatus === 'abonado').length, [orders]);
 
-  // Skeletons
+  // ── Skeletons de carga ──────────────────────────────────────────
+  // Definidos como componentes locales para mantener el JSX del return limpio.
+  // No reciben props; solo replican la estructura visual con placeholders animados.
   const SummarySkeleton = () => (
     <div className={styles.summaryCard}>
       <div className={styles.skeletonSummaryIcon}></div>
@@ -312,7 +423,12 @@ function AdminOrders() {
   );
 
 
-  // ModalConfirm global
+  // ── Modal de confirmación global ────────────────────────────────
+  /**
+   * `modal` centraliza el estado del ModalConfirm reutilizable.
+   * `type` determina qué mensaje y título se muestran.
+   * `payload` transporta datos extra (ej: el nuevo status a aplicar).
+   */
   const [modal, setModal] = useState<{
     open: boolean;
     type: 'delete' | 'status' | 'paid' | null;
@@ -322,14 +438,26 @@ function AdminOrders() {
     message?: string;
   }>({ open: false, type: null, order: null });
 
-  // Acciones masivas
+  // ── Acciones masivas ────────────────────────────────────────────
+  /**
+   * BulkAction — acciones disponibles para pedidos seleccionados en bloque.
+   *  - 'confirm': pendiente → confirmado
+   *  - 'ship':    confirmado/en-preparacion → enviado
+   *  - 'cancel':  cualquier estado excepto enviado/entregado/cancelado
+   */
   type BulkAction = 'confirm' | 'ship' | 'cancel';
   const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
 
-  // ── Export ──────────────────────────────────────────────────────
-  // Pasamos `orders` (ya filtrado por los filtros de UI) al hook
+  // ── Exportación ─────────────────────────────────────────────────
+  /**
+   * useReportsExport gestiona el flujo completo de exportación:
+   *  - `filtered`: pedidos a exportar (ya filtrados por la UI)
+   *  - `adaptedFilters`: metadata del filtro para el reporte
+   *
+   * Expone: notif, exportLoading, showExportModal, exportFormat, handleExport
+   */
   const {
     notif, setNotif,
     exportLoading,
@@ -338,23 +466,42 @@ function AdminOrders() {
     handleExport,
   } = useReportsExport(filtered, adaptedFilters);
 
-  // Validaciones de compatibilidad de acción
+  // ── Validaciones de acciones masivas ───────────────────────────
+  /**
+   * canBulkAction — valida si una acción masiva es aplicable a los pedidos seleccionados.
+   * Devuelve false si alguno de los pedidos seleccionados tiene un estado incompatible.
+   *
+   * Reglas:
+   *  - 'confirm': todos deben estar en 'pendiente'
+   *  - 'ship':    todos deben estar en 'confirmado' o 'en-preparacion'
+   *  - 'cancel':  ninguno puede estar en 'enviado', 'entregado' o 'cancelado'
+   */
   const canBulkAction = useCallback((action: BulkAction, orders: Order[]): boolean => {
     if (action === 'confirm') return orders.every(o => o.status === 'pendiente');
     if (action === 'ship') return orders.every(o => o.status === 'confirmado' || o.status === 'en-preparacion');
     if (action === 'cancel') return orders.every(o => o.status !== 'enviado' && o.status !== 'entregado' && o.status !== 'cancelado');
     return false;
   }, []);
+
+  /** Texto legible para mostrar en el modal de confirmación de acción masiva. */
   const getBulkActionLabel = (action: BulkAction): string => {
     if (action === 'confirm') return 'Confirmar';
     if (action === 'ship') return 'Marcar como Enviado';
     if (action === 'cancel') return 'Cancelar';
     return '';
   };
+
+  /** Abre el modal de confirmación de acción masiva con la acción seleccionada. */
   const handleBulkAction = useCallback((action: BulkAction) => {
     setBulkAction(action);
     setBulkModalOpen(true);
   }, []);
+
+  /**
+   * executeBulkAction — ejecuta la acción masiva confirmada.
+   * TODO: reemplazar el setTimeout simulado por la llamada real al contexto
+   * (ej: bulkUpdateOrderStatus de AdminOrdersContext).
+   */
   const executeBulkAction = useCallback(async () => {
     if (!bulkAction) return;
     setBulkLoading(true);
@@ -369,10 +516,15 @@ function AdminOrders() {
     }, 1000);
   }, [bulkAction, clearSelection]);
 
-  // Modals críticos
+  // ── Handlers del modal global ───────────────────────────────────
   const handleCloseModal = useCallback(() => {
     setModal({ open: false, type: null, order: null });
   }, []);
+
+  /**
+   * handleConfirmModal — simula la confirmación de una acción en el modal global.
+   * TODO: conectar con la acción real según modal.type (delete / status / paid).
+   */
   const handleConfirmModal = useCallback(async () => {
     setModal(m => ({ ...m, isLoading: true }));
     setTimeout(() => {
@@ -381,6 +533,7 @@ function AdminOrders() {
     }, 1000);
   }, []);
 
+  // ── Render ──────────────────────────────────────────────────────
   return (
     <main className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`} tabIndex={-1} aria-label="Gestión de pedidos">
       {/* Header */}
@@ -389,6 +542,7 @@ function AdminOrders() {
       {/* Resumen / Métricas rápidas */}
       <section className={styles.summary} aria-label="Resumen de pedidos">
         {isLoading ? (
+          // Mostrar 6 skeletons mientras carga (uno por cada tarjeta de estado)
           <>
             <SummarySkeleton />
             <SummarySkeleton />
@@ -453,6 +607,7 @@ function AdminOrders() {
               type="button"
               className={styles.exportBtn}
               onClick={() => {
+                // Validar antes de abrir el modal: no exportar si no hay pedidos
                 if (!filtered.length) {
                   setNotif({ open: true, type: 'error', message: 'No hay pedidos para exportar.' });
                   return;
@@ -468,6 +623,7 @@ function AdminOrders() {
           </div>
         </div>
 
+        {/* Modal de confirmación antes de exportar */}
         <ModalConfirm
           open={showExportModal}
           title="Exportar pedidos"
@@ -478,6 +634,7 @@ function AdminOrders() {
           onCancel={() => setShowExportModal(false)}
         />
 
+        {/* Notificación de resultado de exportación (éxito o error) */}
         <Notification
           open={notif.open}
           type={notif.type}
@@ -486,7 +643,11 @@ function AdminOrders() {
         />
       </section>
 
-      {/* Filtros */}
+      {/* ── Barra de filtros ── */}
+      {/*
+        onChange actualiza `filters` inmediatamente (sin debounce).
+        El debounce se aplica internamente en AdminOrders para el reset de página.
+      */}
       <OrdersFiltersBar
         filters={filters}
         onChange={setFilters}
@@ -495,15 +656,9 @@ function AdminOrders() {
         disabled={isLoading}
       />
 
-      {/* CANTIDAD DE PEDIDOS, COMENTADO PORQUE YA SE MUESTRA EN LAS MÉTRICAS RÁPIDAS
-        !isLoading && (
-          <p className={styles.resultsCount} id="orders-count" aria-live="polite">
-            {orders.length} pedido{orders.length !== 1 ? 's' : ''}
-          </p>
-        )
-      */}
-      {/* Lista de pedidos */}
+      {/* ── Lista de pedidos ── */}
       {isLoading ? (
+        // Estado de carga: skeleton de tabla + skeleton de cards mobile
         <>
           <SummarySkeleton />
           {/* Aquí puedes agregar skeletons para tabla y mobile si lo deseas */}
@@ -536,12 +691,18 @@ function AdminOrders() {
           </div>
         </>
       ) : orders.length === 0 ? (
+        // Estado vacío: no hay pedidos que coincidan con los filtros activos
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>🛒</span>
           <p className={sectionStyles.emptyText}>No se encontraron pedidos con los filtros aplicados.</p>
         </div>
       ) : (
         <>
+          {/*
+            OrdersTable: vista de escritorio (oculta en mobile via CSS).
+            OrderList:   vista de tarjetas para mobile (oculta en desktop via CSS).
+            Ambas consumen `filtered`, no `orders`, para respetar los filtros activos.
+          */}
           <OrdersTable
             orders={filtered}
             selectedIds={selectedIds}
@@ -554,10 +715,12 @@ function AdminOrders() {
             onSelect={handleSelectOne}
             onDetail={setSelectedOrder}
           />
-          {/* Acciones masivas y modals pueden ir aquí */}
-
-          {/* Controles de paginación */}
-          {/* Paginación simple basada en page y PAGE_SIZE */}
+          {/* ── Paginación ── */}
+          {/*
+            La paginación calcula el total de páginas en base a `orders.length` y PAGE_SIZE.
+            Al cambiar de página, el useEffect de fetchOrders(false) se dispara
+            para cargar la siguiente página desde el backend.
+          */}
           <nav className={styles.paginationWrap} aria-label="Paginación de pedidos">
             <button
               className={styles.paginationBtn}
@@ -594,7 +757,12 @@ function AdminOrders() {
             </button>
           </nav>
 
-          {/* Acciones masivas */}
+          {/* ── Toolbar de acciones masivas ── */}
+          {/*
+            Solo visible cuando hay al menos un pedido seleccionado.
+            Aparece como barra fija en la parte inferior de la pantalla (posición fixed en CSS).
+            Los botones se deshabilitan si la acción no es compatible con la selección actual.
+          */}
           {
             selectedIds.length > 0 && (
               <div className={styles.bulkActionsContainer}>
@@ -606,6 +774,7 @@ function AdminOrders() {
                   <Tooltip content="Confirmar todos los pedidos seleccionados">
                     <button
                       type="button"
+                      // Solo habilitado si TODOS los seleccionados están en 'pendiente'
                       disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
                       onClick={() => handleBulkAction('confirm')}
                       className={`${styles.bulkBtn} ${styles.bulkBtnConfirm}`}
@@ -618,6 +787,7 @@ function AdminOrders() {
                   <Tooltip content="Marcar como enviados los pedidos seleccionados">
                     <button
                       type="button"
+                      // Solo habilitado si TODOS están en 'confirmado' o 'en-preparacion'
                       disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
                       onClick={() => handleBulkAction('ship')}
                       className={`${styles.bulkBtn} ${styles.bulkBtnShip}`}
@@ -630,6 +800,7 @@ function AdminOrders() {
                   <Tooltip content="Cancelar todos los pedidos seleccionados">
                     <button
                       type="button"
+                      // Bloqueado si alguno ya está en 'enviado', 'entregado' o 'cancelado'
                       disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
                       onClick={() => handleBulkAction('cancel')}
                       className={`${styles.bulkBtn} ${styles.bulkBtnCancel}`}
@@ -660,6 +831,7 @@ function AdminOrders() {
                 message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction!)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
                 confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
                 cancelText={'Cancelar'}
+                // Bloquear los handlers mientras carga para evitar doble envío
                 onConfirm={bulkLoading ? () => { } : executeBulkAction}
                 onCancel={bulkLoading ? () => { } : () => setBulkModalOpen(false)}
               />
@@ -669,7 +841,12 @@ function AdminOrders() {
       )
       }
 
-      {/* ModalConfirm global */}
+      {/* ── Modal global de confirmación (delete / status / paid) ── */}
+      {/*
+        Modal reutilizable para acciones críticas individuales.
+        El título y mensaje se derivan de `modal.type` y `modal.payload`.
+        Los handlers se bloquean durante modal.isLoading para evitar doble envío.
+      */}
       <ModalConfirm
         open={modal.open}
         title={
@@ -693,6 +870,13 @@ function AdminOrders() {
         onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
 
+      {/* ── Modal de detalle del pedido ── */}
+      {/*
+        Solo se monta cuando hay un pedido seleccionado.
+        `orders.find(...)` garantiza que se pasa la versión más reciente del pedido
+        (por si fue modificado mientras el modal estaba cerrado), usando `selectedOrder`
+        como fallback en caso de que ya no exista en la lista.
+      */}
       {selectedOrder && (
         <OrderDetailModal
           order={(orders.find(o => o.id === selectedOrder!.id) ?? selectedOrder!)}
