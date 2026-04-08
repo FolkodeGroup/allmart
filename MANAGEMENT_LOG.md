@@ -1394,3 +1394,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #722: 425 mejorar la gestión de estados de pedidos pendiente confirmado enviado entregado cancelado abonado | 2026-04-03 |
 | dgimenezdeveloper | 3 | Asignación de issue a agustin-ovejero | Issue #426: Añadir indicadores de pedidos con problemas (cancelados, pendientes de pago) | 2026-04-04 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #726: 682 implementar sistema de ofertas y promociones dinámico para ecommerce | 2026-04-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #757: 429 documentar componentes y flujos de la vista de pedidos | 2026-04-08 |
