@@ -123,22 +123,22 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
       <aside ref={ref || containerRef} className={styles.panel} onScroll={handleScroll}>
         <div className={styles.listContainer}>
           {products.map((product) => (
-            <article
+            <div
               key={product.id}
               data-product-id={product.id}
               className={`${styles.productWrapper} ${
                 selectedProductId === product.id ? styles.selected : ''
               }`}
-              onClick={() => handleSelectProduct(product.id)}
               role="button"
               tabIndex={0}
+              aria-label={`Seleccionar producto ${product.name}`}
+              onClick={() => handleSelectProduct(product.id)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
                   handleSelectProduct(product.id);
                 }
               }}
-              aria-label={`Seleccionar producto ${product.name}`}
             >
               <div className={styles.mainRow}>
                 {showCheckbox && onSelectChange && (
@@ -199,7 +199,7 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
               </div>
 
               {expandedId === product.id && (
-                <div className={styles.accordion} onClick={event => event.stopPropagation()}>
+                <div className={styles.accordion}>
                   <div className={styles.quickStats}>
                     <span className={styles.statPill}>Precio: {currencyFormatter.format(product.price)}</span>
                     <span className={styles.statPill}>Stock: {product.stock}</span>
@@ -228,7 +228,7 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                   </div>
                 </div>
               )}
-            </article>
+            </div>
           ))}
         </div>
       </aside>
