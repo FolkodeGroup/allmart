@@ -1435,7 +1435,29 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #725: 🔄 Registrar puntaje de gestión | 2026-04-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #724: 433 expandir vista de pedidos a toda la pantalla usando gridflexbox | 2026-04-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #723: 432 implementar confirmación de cambios antes de salir de la vista de pedidos | 2026-04-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #730: 🔄 Registrar puntaje de gestión | 2026-04-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #729: 🔄 Actualización automática de puntajes semanal | 2026-04-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #728: 426 añadir indicadores de pedidos con problemas cancelados pendientes de pago | 2026-04-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #727: 🔄 Registrar puntaje de gestión | 2026-04-05 |
+| dgimenezdeveloper | 5 | Creación de milestone | Milestone: REFACTORIZACIÓN IA (INFRAESTRUCTURA DE ARQUITECTURA) | 2026-04-06 |
+| dgimenezdeveloper | 3 | Creación de issue | Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-06 |
+| dgimenezdeveloper | 2 | Etiquetado de issue (FULLSTACK) | Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #756: Optimización de animación en OrdersTable para mejorar la experiencia visual al cargar la tabla de pedidos. | 2026-04-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #748: Borré y ejecuté las migraciones devuelta y ajusté el CSS para que el diseño  | 2026-04-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #730: 🔄 Registrar puntaje de gestión | 2026-04-08 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #772: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #771: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #777: 758 implementar vista master detail de productos con layout reorganizado | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #776: 734 rediseñar dashboard con nueva jerarquía de kpis accionables | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #775: Se actualiza copy y labels del formulario de productos para flujo uni… | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #774: Se implementa redirects legacy para rutas antiguas sin romper bookmarks | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #773: Se refactoriza navegación del Admin Panel según nueva IA | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #771: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #729: 🔄 Actualización automática de puntajes semanal | 2026-04-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #677: 🔄 Actualización automática de puntajes semanal | 2026-03-29 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #688: Se implementan botones de exportacion Excel y CSV de Categorias | 2026-03-29 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #692: 411 optimizar animaciones y transiciones en la UI de categorías | 2026-03-29 |

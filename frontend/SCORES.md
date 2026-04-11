@@ -1,16 +1,52 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 16629 |
-| FedericoPaal | 3410 |
-| Mau-bar-iva | 1785 |
+| dgimenezdeveloper | 16864 |
+| FedericoPaal | 3800 |
+| Mau-bar-iva | 1925 |
 | Nahuel-Dalesio | 1630 |
 | CelinaJP | 1280 |
-| agustin-ovejero | 1060 |
+| agustin-ovejero | 1100 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #772: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #771: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #777: 758 implementar vista master detail de productos con layout reorganizado | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #776: 734 rediseñar dashboard con nueva jerarquía de kpis accionables | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #775: Se actualiza copy y labels del formulario de productos para flujo uni… | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #774: Se implementa redirects legacy para rutas antiguas sin romper bookmarks | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #773: Se refactoriza navegación del Admin Panel según nueva IA | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #771: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #729: 🔄 Actualización automática de puntajes semanal | 2026-04-11 |
+| FedericoPaal | 60 | Issue | Implementar vista master-detail de productos con layout reorganizado | 2026-04-11 |
+| FedericoPaal | 50 | Issue | Limitar cantidad agregada al carrito según stock disponible | 2026-04-11 |
+| FedericoPaal | 40 | Issue | Funcionalidad para elegir variantes en la vista de producto | 2026-04-11 |
+| FedericoPaal | 50 | Issue | Mostrar disponibilidad, variantes y botón "Me gusta" en la vista de producto | 2026-04-11 |
+| FedericoPaal | 40 | Issue | Funcionamiento correcto de filtros en "Ver Todos" | 2026-04-11 |
+| FedericoPaal | 30 | Issue | Mostrar botón "Me gusta" en Productos Destacados | 2026-04-11 |
+| FedericoPaal | 50 | Issue | Rediseñar Dashboard con nueva jerarquía de KPIs accionables | 2026-04-11 |
+| FedericoPaal | 15 | Issue | Actualizar copy y labels del formulario de productos para flujo unificado | 2026-04-11 |
+| FedericoPaal | 20 | Issue | Implementar redirects legacy para rutas antiguas sin romper bookmarks | 2026-04-11 |
+| FedericoPaal | 35 | Issue | Refactorizar navegación del Admin Panel según nueva IA | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #756: Optimización de animación en OrdersTable para mejorar la experiencia visual al cargar la tabla de pedidos. | 2026-04-08 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #748: Borré y ejecuté las migraciones devuelta y ajusté el CSS para que el diseño | 2026-04-08 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #730: 🔄 Registrar puntaje de gestión | 2026-04-08 |
+| Mau-bar-iva | 60 | Issue | Mejorar layout responsivo de pedidos con Grid/Flexbox | 2026-04-08 |
+| Mau-bar-iva | 40 | Issue | Optimizar animaciones y transiciones en la UI de pedidos | 2026-04-08 |
+| Mau-bar-iva | 40 | Issue | Documentar componentes y flujos de la vista de pedidos | 2026-04-08 |
+| dgimenezdeveloper | 5 | Gestión | Creación de milestone — Milestone: REFACTORIZACIÓN IA (INFRAESTRUCTURA DE ARQUITECTURA) | 2026-04-06 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-06 |
+| dgimenezdeveloper | 2 | Gestión | Etiquetado de issue (FULLSTACK) — Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-06 |
+| agustin-ovejero | 40 | Issue | Añadir indicadores de pedidos con problemas (cancelados, pendientes de pago) | 2026-04-05 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #730: 🔄 Registrar puntaje de gestión | 2026-04-05 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #729: 🔄 Actualización automática de puntajes semanal | 2026-04-05 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #728: 426 añadir indicadores de pedidos con problemas cancelados pendientes de pago | 2026-04-05 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #727: 🔄 Registrar puntaje de gestión | 2026-04-05 |
 | dgimenezdeveloper | 600 | Issue | Implementar Sistema de Ofertas y Promociones Dinámico para Ecommerce | 2026-04-04 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #727: 🔄 Registrar puntaje de gestión | 2026-04-04 |
