@@ -298,7 +298,14 @@ export function AdminDashboard() {
         <section className={styles.section}>
           <div
             className={styles.sectionHeaderClickable}
+            role="button"
+            tabIndex={0}
             onClick={() => setIsAnalyticsExpanded(!isAnalyticsExpanded)}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                setIsAnalyticsExpanded(!isAnalyticsExpanded);
+              }
+            }}
           >
             <h2 className={styles.sectionTitle}>📊 Analítica Avanzada</h2>
             <span className={styles.expandIcon}>{isAnalyticsExpanded ? "▼" : "▶"}</span>
