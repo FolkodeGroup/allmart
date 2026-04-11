@@ -712,7 +712,7 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
           {/* ── Variantes ── */}
           <fieldset className={styles.fieldset}>
             <legend className={styles.legend}>Variantes</legend>
-            <p className={styles.fieldHint}>Agrupá opciones como Color o Tamaño. Podés gestionar variantes en detalle desde la sección <em>Variantes</em> del menú.</p>
+            <p className={styles.fieldHint}>Agrupá opciones como Color o Tamaño. Gestiona todas tus variantes desde la pestaña de Variantes en esta vista.</p>
 
             {/* Agregar nuevo grupo */}
             <div className={styles.tagRow}>
