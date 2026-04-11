@@ -39,7 +39,11 @@ export function buildNavigationFromCategories(categories: Category[]): Navigatio
     }
   }
 
-  const rootItems: NavigationItem[] = roots.map((category) => {
+  // Limitar a máximo 6 categorías principales en el navbar (mantener limpio el header)
+  const mainNavCategoryLimit = 6;
+  const mainNavRoots = roots.slice(0, mainNavCategoryLimit);
+
+  const rootItems: NavigationItem[] = mainNavRoots.map((category) => {
     const children = childrenByParent.get(category.id) ?? [];
     return {
       label: getCategoryLabel(category),
@@ -56,6 +60,5 @@ export function buildNavigationFromCategories(categories: Category[]): Navigatio
   return [
     ...baseNavigation,
     ...rootItems,
-    { label: 'Ver todo el catalogo', href: '/productos' },
   ];
 }

@@ -1,0 +1,62 @@
+.loaderOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, #fff 60%, #f7f7f7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.loaderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.logo {
+  width: 120px;
+  max-width: 60vw;
+  filter: drop-shadow(0 4px 24px rgba(0,0,0,0.08));
+  animation: logoPop 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes logoPop {
+  0% { opacity: 0; transform: scale(0.8); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #ffe6a1;
+  border-top: 4px solid #ffc13d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-top: 1.5rem;
+}
+
+.loadingText {
+  margin-top: 2.2rem;
+  font-family: var(--font-heading, 'Montserrat', Arial, sans-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #bfa14a;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  animation: fadeIn 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

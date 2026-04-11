@@ -412,3 +412,37 @@
     font-size: 0.61rem;
   }
 }
+
+/* Estilos para Todas las Categorías en móvil */
+.mobileCategory {
+  padding: 0;
+  margin: 1rem 0 0;
+  border-top: 1px solid rgba(47, 95, 70, 0.15);
+}
+
+.mobileCategorySummary {
+  display: block;
+  padding: 0.95rem 0.25rem;
+  cursor: pointer;
+  color: #2c4135;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: var(--font-medium);
+  user-select: none;
+  list-style: none;
+}
+
+.mobileCategorySummary::marker {
+  display: none;
+}
+
+.mobileCategorySummary::-webkit-details-marker {
+  display: none;
+}
+
+.mobileCategoryList {
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
