@@ -1,5 +1,6 @@
 // src/pages/Admin/AdminLayout.tsx
 import { Suspense, useState, useEffect, useRef } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
@@ -10,8 +11,20 @@ import { AdminLoadingFallback } from '../../components/ui/AdminLoadingFallback';
 import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 import { ModalConfirm } from "../../components/ui/ModalConfirm";
+import type { Permission } from "../../utils/permissions";
 
-const navItems = [
+type NavBadge = "pending" | "lowStock" | null;
+
+interface NavItem {
+  label: string;
+  to: string;
+  icon: string;
+  permission: Permission | null;
+  badge: NavBadge;
+  children?: NavItem[];
+}
+
+const navItems: NavItem[] = [
   {
     label: "Dashboard",
     to: "/admin/dashboard",
@@ -20,32 +33,43 @@ const navItems = [
     badge: null,
   },
   {
-    label: "Productos",
+    label: "Catalogo",
     to: "/admin/productos",
-    icon: "📦",
-    permission: null,
-    badge: "lowStock",
-  },
-  {
-    label: "Imágenes",
-    to: "/admin/imagenes",
-    icon: "🖼️",
-    permission: null,
-    badge: null,
-  },
-  {
-    label: "Variantes",
-    to: "/admin/variantes",
-    icon: "🎨",
-    permission: null,
-    badge: null,
-  },
-  {
-    label: "Categorías",
-    to: "/admin/categorias",
     icon: "🗂️",
     permission: null,
     badge: null,
+    children: [
+      {
+        label: "Producto",
+        to: "/admin/productos",
+        icon: "📦",
+        permission: null,
+        badge: "lowStock",
+        children: [
+          {
+            label: "Imágenes",
+            to: "/admin/imagenes",
+            icon: "🖼️",
+            permission: null,
+            badge: null,
+          },
+          {
+            label: "Variantes",
+            to: "/admin/variantes",
+            icon: "🎨",
+            permission: null,
+            badge: null,
+          },
+        ],
+      },
+      {
+        label: "Categorías",
+        to: "/admin/categorias",
+        icon: "🏷️",
+        permission: null,
+        badge: null,
+      },
+    ],
   },
   {
     label: "Pedidos",
@@ -55,34 +79,43 @@ const navItems = [
     badge: "pending",
   },
   {
-    label: "Reportes",
-    to: "/admin/reportes",
-    icon: "📊",
-    permission: "reports.view" as const,
-    badge: null,
-  },
-  {
-    label: "Promociones",
+    label: "Marketing",
     to: "/admin/promociones",
-    icon: "🎉",
-    permission: null,
-    badge: null,
-  },
-  {
-    label: "Colecciones",
-    to: "/admin/colecciones",
-    icon: "📚",
-    permission: null,
-    badge: null,
-  },
-  {
-    label: "Banners",
-    to: "/admin/banners",
     icon: "📣",
     permission: null,
     badge: null,
+    children: [
+      {
+        label: "Promociones",
+        to: "/admin/promociones",
+        icon: "🎉",
+        permission: null,
+        badge: null,
+      },
+      {
+        label: "Colecciones",
+        to: "/admin/colecciones",
+        icon: "📚",
+        permission: null,
+        badge: null,
+      },
+      {
+        label: "Banners",
+        to: "/admin/banners",
+        icon: "🖼️",
+        permission: null,
+        badge: null,
+      },
+    ],
   },
-] as const;
+  {
+    label: "Reportes",
+    to: "/admin/reportes",
+    icon: "📊",
+    permission: "reports.view",
+    badge: null,
+  },
+];
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",
@@ -153,6 +186,72 @@ export function AdminLayout() {
     window.location.replace('/');
   };
 
+  const getBadgeCount = (badge: NavBadge) => {
+    if (badge === 'pending') return getPendingOrdersCount();
+    if (badge === 'lowStock') return getLowStockCount();
+    return null;
+  };
+
+  const hasActiveChild = (children: NavItem[] | undefined): boolean => {
+    if (!children?.length) return false;
+    return children.some((child) => {
+      if (location.pathname === child.to) return true;
+      return hasActiveChild(child.children);
+    });
+  };
+
+  const handleNavItemClick =
+    (to: string) => (e: ReactMouseEvent<HTMLAnchorElement>) => {
+      setIsMobileOpen(false);
+      if (isDirty) {
+        e.preventDefault();
+        interceptNavigation(() => navigate(to));
+      }
+    };
+
+  const renderNavItem = (item: NavItem, level = 0, parentLabel = '') => {
+    const locked = item.permission !== null && !can(item.permission);
+    const badgeCount = getBadgeCount(item.badge);
+    const activeInTree = location.pathname === item.to || hasActiveChild(item.children);
+    const breadcrumbLabel = parentLabel ? `${parentLabel} / ${item.label}` : item.label;
+
+    return (
+      <div key={item.to} className={level > 0 ? styles.navBranch : styles.navSection}>
+        <NavLink
+          title={isCollapsed ? breadcrumbLabel : ''}
+          data-label={breadcrumbLabel}
+          to={item.to}
+          onClick={handleNavItemClick(item.to)}
+          className={({ isActive }) => {
+            const currentActive = isActive || activeInTree;
+            return [
+              styles.navItem,
+              level > 0 ? styles.navItemNested : '',
+              level > 1 ? styles.navItemDeepNested : '',
+              currentActive ? styles.navItemActive : '',
+              locked ? styles.navItemLocked : '',
+            ]
+              .filter(Boolean)
+              .join(' ');
+          }}
+          aria-label={breadcrumbLabel}
+        >
+          <span className={styles.navIcon}>{item.icon}</span>
+          <span className={styles.navLabel}>{item.label}</span>
+          {locked && <span className={styles.navLockIcon}>🔒</span>}
+          {badgeCount !== null && badgeCount > 0 && (
+            <span className={styles.navBadge}>{badgeCount}</span>
+          )}
+        </NavLink>
+        {!isCollapsed && item.children && item.children.length > 0 && (
+          <div className={styles.navChildren} role="group" aria-label={item.label}>
+            {item.children.map((child) => renderNavItem(child, level + 1, breadcrumbLabel))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'dark' : ''}`}>
       <Button
@@ -204,71 +303,7 @@ export function AdminLayout() {
             {theme === 'dark' ? '🌙' : '☀️'}
           </Button>
           <nav className={styles.nav}>
-            {navItems.map(item => {
-              const locked = item.permission !== null && !can(item.permission);
-              let badgeCount: number | null = null;
-              if (item.badge === 'pending') {
-                badgeCount = getPendingOrdersCount();
-              } else if (item.badge === 'lowStock') {
-                badgeCount = getLowStockCount();
-              }
-              const commonProps = {
-                title: isCollapsed ? item.label : '',
-                'data-label': item.label,
-                onClick: () => setIsMobileOpen(false)
-              };
-              if (locked) {
-                return (
-                  <NavLink
-                    key={item.to}
-                    {...commonProps}
-                    to={item.to}
-                    onClick={(e) => {
-                      console.log('[NavLink onClick] isDirty del contexto:', isDirty);
-                      setIsMobileOpen(false);
-                      if (isDirty) {
-                        e.preventDefault(); // bloquea la navegación de React Router
-                        console.log('[NavLink onClick] → llamando interceptNavigation');
-                        interceptNavigation(() => navigate(item.to)); // ← usar navigate, no window.location.href
-                      }
-                    }}
-                    className={({ isActive }) =>
-                      `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
-                    }
-                  >
-                    <span className={styles.navIcon}>{item.icon}</span>
-                    <span className={styles.navLabel}>{item.label}</span>
-                    <span className={styles.navLockIcon}>🔒</span>
-                    {badgeCount !== null && badgeCount > 0 && (
-                      <span className={styles.navBadge}>{badgeCount}</span>
-                    )}
-                  </NavLink>
-                );
-              }
-              return (
-                <NavLink
-                  key={item.to}
-                  {...commonProps}
-                  to={item.to}
-                  onClick={(e) => {
-                    setIsMobileOpen(false);
-                    if (isDirty) {
-                      e.preventDefault(); // bloquea React Router
-                      interceptNavigation(() => navigate(item.to)); // ← navigate SPA, no hard reload
-                    }
-                  }}
-                  className={({ isActive }) =>
-                    `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
-                  }
-                >
-                  <span className={styles.navIcon}>{item.icon}</span>
-                  <span className={styles.navLabel}>{item.label}</span>
-                  {badgeCount !== null && badgeCount > 0 && (
-                    <span className={styles.navBadge}>{badgeCount}</span>
-                  )}
-                </NavLink>
-              );
-            })}
+            {navItems.map((item) => renderNavItem(item))}
           </nav>
         </div>
 
