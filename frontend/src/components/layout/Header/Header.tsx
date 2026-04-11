@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CircleUserRound, Menu, Search, ShoppingCart, X } from 'lucide-react';
-import type { NavigationItem } from '../../../types';
+import type { NavigationItem, Category } from '../../../types';
 import { fetchPublicCategories } from '../../../services/categoriesService';
 import { buildNavigationFromCategories, fallbackNavigation } from '../navigation/publicNavigation';
+import { CategoryMegaMenu } from './CategoryMegaMenu';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
 
@@ -11,7 +12,9 @@ export function Header() {
   const { totalItems } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(fallbackNavigation);
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -31,6 +34,7 @@ export function Header() {
     fetchPublicCategories()
       .then((categories) => {
         if (!ignore && categories.length > 0) {
+          setAllCategories(categories);
           setNavigationItems(buildNavigationFromCategories(categories));
         }
       })
@@ -137,6 +141,18 @@ export function Header() {
                 )}
               </div>
             ))}
+
+            {/* Mega Menu para todas las categorías */}
+            {allCategories.length > 0 && (
+              <div className={styles.navItem}>
+                <CategoryMegaMenu
+                  categories={allCategories}
+                  isOpen={megaMenuOpen}
+                  onToggle={() => setMegaMenuOpen(!megaMenuOpen)}
+                  onClose={() => setMegaMenuOpen(false)}
+                />
+              </div>
+            )}
           </nav>
         </div>
       </div>
@@ -171,6 +187,30 @@ export function Header() {
             )}
           </div>
         ))}
+
+        {/* Todas las Categorías en menú móvil */}
+        {allCategories.length > 0 && (
+          <details className={styles.mobileCategory}>
+            <summary className={styles.mobileCategorySummary}>
+              Todas las Categorías
+            </summary>
+            <div className={styles.mobileCategoryList}>
+              {allCategories
+                .filter(cat => !cat.parentId && cat.isVisible)
+                .map((category) => (
+                  <div key={category.id}>
+                    <Link
+                      to={`/productos?category=${encodeURIComponent(category.slug)}`}
+                      className={styles.mobileSubLink}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {category.name || category.slug}
+                    </Link>
+                  </div>
+                ))}
+            </div>
+          </details>
+        )}
       </nav>
     </header>
   );

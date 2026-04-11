@@ -23,6 +23,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AdminLoadingFallback } from './components/ui/AdminLoadingFallback';
 import { AdminProvidersWrapper } from './components/AdminProvidersWrapper';
 import { RouteErrorBoundary } from './components/RouteErrorBoundary';
+import FullScreenLoader from './components/ui/FullScreenLoader';
+import { useAppReady } from './hooks/useAppReady';
 
 // Lazy load admin feature components for better code splitting
 const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts').then(m => ({ default: m.AdminProducts })));
@@ -182,16 +184,22 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const ready = useAppReady();
   return (
-    <ErrorBoundary>
-      <NotificationProvider>
-        <AdminAuthProvider>
-          <CartProvider>
-            <RouterProvider router={router} />
-          </CartProvider>
-        </AdminAuthProvider>
-      </NotificationProvider>
-    </ErrorBoundary>
+    <>
+      {!ready && <FullScreenLoader />}
+      {ready && (
+        <ErrorBoundary>
+          <NotificationProvider>
+            <AdminAuthProvider>
+              <CartProvider>
+                <RouterProvider router={router} />
+              </CartProvider>
+            </AdminAuthProvider>
+          </NotificationProvider>
+        </ErrorBoundary>
+      )}
+    </>
   );
 }
 
