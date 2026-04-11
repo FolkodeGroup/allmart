@@ -1,4 +1,21 @@
-// 1. Agregar al import de react
+// ─────────────────────────────────────────────────────────────────────────────
+// OrderDetailModal.tsx
+// Modal de detalle completo de un pedido. Se abre al hacer clic en una fila
+// de la tabla o en una tarjeta mobile.
+//
+// Responsabilidades:
+//  - Mostrar y editar el estado del pedido (con nota opcional)
+//  - Mostrar el historial de estados (OrderTimeline)
+//  - Confirmar el pago del pedido (marcado como "abonado")
+//  - Mostrar y editar notas internas
+//  - Eliminar el pedido (con doble confirmación)
+//
+// Integración con useUnsavedChanges:
+//  El modal marca el contexto global como "dirty" cuando hay cambios sin guardar
+//  (estado o notas modificados). Al cerrar, interceptNavigation pregunta al usuario
+//  si realmente quiere descartar los cambios.
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useState, useCallback, useEffect, useRef } from 'react'; // useCallback es nuevo si no estaba
 import { useAdminOrders } from '../../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../../context/AdminAuthContext';
@@ -21,20 +38,56 @@ interface OrderDetailModalProps {
     onClose: () => void;
 }
 
+/**
+ * OrderDetailModal — panel de detalle completo de un pedido.
+ *
+ * Renderiza como un fullscreen modal (backdrop + panel).
+ * En desktop: slide-in desde la derecha.
+ * En mobile: slide-up desde abajo (bottom sheet).
+ *
+ * Permisos requeridos (via `can()` de AdminAuthContext):
+ *  - 'orders.edit':     editar estado y notas
+ *  - 'orders.markPaid': marcar como abonado
+ *  - 'orders.delete':   eliminar pedido
+ */
 /* ── Modal de detalle ───────────────────────────────────────────── */
 function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
     const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
     const { can } = useAdminAuth();
+
+    // ── Estado local del modal ──────────────────────────────────────
     const [notes, setNotes] = useState(order.notes ?? '');
+
+    // `confirmDelete`: muestra el paso de confirmación antes de eliminar
     const [confirmDelete, setConfirmDelete] = useState(false);
+    // `confirmPaid`: muestra el paso de confirmación antes de marcar como abonado
     const [confirmPaid, setConfirmPaid] = useState(false);
+
+    // Nota opcional que acompaña al cambio de estado (ej: "enviado por OCA #123")
     const [statusNote, setStatusNote] = useState('');
+
+    /**
+     * `pendingStatus`: estado seleccionado en el selector, pendiente de confirmar.
+     * No se aplica hasta que el usuario hace clic en "Guardar cambio".
+     */
     const [pendingStatus, setPendingStatus] = useState<OrderStatus>(order.status);
     const [statusLoading, setStatusLoading] = useState(false);
     const [statusError, setStatusError] = useState<string | null>(null);
+
+    // ── Detección de cambios sin guardar (isDirty) ──────────────────
+    /**
+     * originalStatusRef y originalNotesRef almacenan los valores al momento
+     * de abrir el modal (o al guardar exitosamente).
+     * Se usan para comparar y determinar si hay cambios pendientes.
+     * Se usan refs (no state) para no provocar re-renders en cada comparación.
+     */
     const originalStatusRef = useRef(order.status);
     const originalNotesRef = useRef(order.notes ?? '');
 
+    /**
+     * isDirty: true si el usuario modificó el estado o las notas sin guardar.
+     * Se recalcula en cada render comparando los valores actuales con los originales.
+     */
     const isDirty =
         notes !== originalNotesRef.current ||
         pendingStatus !== originalStatusRef.current;
@@ -42,11 +95,17 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
     const { setIsDirty: setGlobalDirty, interceptNavigation } =
         useUnsavedChanges();
 
+    // Sincroniza el flag global cada vez que isDirty cambia localmente
     useEffect(() => {
         console.log('[OrderDetailModal] isDirty local:', isDirty, '→ llamando setGlobalDirty');
         setGlobalDirty(isDirty);
     }, [isDirty, setGlobalDirty]);
 
+    /**
+    * handleClose — cierre controlado del modal.
+    * `interceptNavigation` pregunta al usuario si hay cambios sin guardar
+    * antes de ejecutar `onClose`. Si no hay cambios, cierra directamente.
+    */
     const handleClose = useCallback(() => {
         interceptNavigation(onClose);
     }, [interceptNavigation, onClose]);
@@ -55,10 +114,24 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
     const paymentStatus: PaymentStatus = order.paymentStatus ?? 'no-abonado';
     const isAbonado = paymentStatus === 'abonado';
 
+    // `hasStatusChange`: true si el status pendiente difiere del status actual del pedido
     const hasStatusChange = pendingStatus !== order.status;
 
+    // Email del usuario admin para el log de actividad
     const auth = useAdminAuth();
     const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
+
+    // ── Handlers de acciones ────────────────────────────────────────
+
+    /**
+     * handleStatusApply — persiste el cambio de estado en la API.
+     *
+     * Flujo:
+     *  1. Llama a updateOrderStatus con el nuevo estado y la nota opcional.
+     *  2. Registra la actividad en el log de auditoría.
+     *  3. Actualiza `originalStatusRef` para limpiar el isDirty.
+     *  4. Si falla: muestra error y revierte `pendingStatus`.
+     */
     const handleStatusApply = async () => {
         setStatusLoading(true);
         setStatusError(null);
@@ -85,9 +158,13 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
         }
     };
 
-    // Sync local pendingStatus if order.status changes externally
+    // `currentStatus` se usa para revertir el selector si el usuario cancela
     const currentStatus = order.status;
 
+    /**
+     * handleSaveNotes — persiste las notas internas en la API.
+     * Actualiza `originalNotesRef` para limpiar el isDirty tras guardar.
+     */
     const handleSaveNotes = async () => {
         try {
             await updateOrder(order.id, { notes });
@@ -99,6 +176,10 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
         }
     };
 
+    /**
+    * handleDelete — elimina el pedido y cierra el modal.
+    * Solo se llega aquí tras pasar por el paso de confirmación (`confirmDelete`).
+    */
     const handleDelete = async () => {
         try {
             await deleteOrder(order.id);
@@ -118,6 +199,7 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
         }
     };
 
+    /** handleMarkAsPaid — marca el pedido como abonado en la API. */
     const handleMarkAsPaid = async (orderId: string) => {
         try {
             await markAsPaid(orderId);
@@ -127,9 +209,14 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
         }
     };
 
+    // Iniciales del cliente para el avatar (ej: "JP")
     const initials = `${order.customer?.firstName?.[0] ?? ''}${order.customer?.lastName?.[0] ?? ''}`;
 
     return (
+        /*
+          Backdrop: clic fuera del panel (e.target === e.currentTarget) cierra el modal.
+          Escape también lo cierra via onKeyDown.
+        */
         <div
             className={styles.backdrop}
             onClick={e => e.target === e.currentTarget && handleClose()}
@@ -138,7 +225,7 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
             onKeyDown={e => (e.key === 'Escape' || e.key === 'Enter') && handleClose()}
         >
             <div className={styles.detailPanel} role="dialog" aria-modal="true">
-                {/* Header */}
+                {/* ── Header: ID del pedido + fecha + botón cerrar ── */}
                 <div className={styles.detailHeader}>
                     <div className={styles.detailHeaderInfo}>
                         <h2 className={styles.detailTitle}>Pedido #{order.id.slice(0, 8).toUpperCase()}</h2>
@@ -147,11 +234,13 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                     <button className={styles.closeBtn} onClick={handleClose} type="button" aria-label="Cerrar">✕</button>
                 </div>
 
+                {/* ── Cuerpo scrolleable ── */}
                 <div className={styles.detailBody}>
-                    {/* Estado */}
+                    {/* ── Sección: Estado del pedido ── */}
                     <section className={styles.detailSection}>
                         <h3 className={styles.detailSectionTitle}>Estado del pedido</h3>
                         <div className={styles.statusRow}>
+                            {/* Badge de solo lectura que refleja pendingStatus en tiempo real */}
                             <OrderStatusBadge status={pendingStatus} />
                             {can('orders.edit') && (
                                 <OrderStatusSelector
@@ -168,6 +257,10 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                             )}
                             {statusLoading && <span className={styles.statusLoading} style={{ marginLeft: 6 }}>⏳</span>}
                         </div>
+                        {/*
+                          Panel de confirmación de cambio de estado.
+                          Solo visible si hay un cambio pendiente Y el usuario tiene permiso.
+                        */}
                         {can('orders.edit') && hasStatusChange && (
                             <div className={styles.statusChangeBox}>
                                 <input
@@ -183,6 +276,7 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                                     <button className={styles.applyStatusBtn} type="button" onClick={handleStatusApply} disabled={statusLoading}>
                                         {statusLoading ? 'Guardando...' : 'Guardar cambio'}
                                     </button>
+                                    {/* Cancelar revierte pendingStatus al valor actual del pedido */}
                                     <button className={styles.cancelBtn} type="button" onClick={() => { setPendingStatus(currentStatus); setStatusNote(''); }} disabled={statusLoading}>
                                         Cancelar
                                     </button>
@@ -192,12 +286,13 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                         )}
                     </section>
 
-                    {/* Historial de estados */}
+                    {/* ── Sección: Historial de estados ── */}
                     <section className={styles.detailSection}>
                         <h3 className={styles.detailSectionTitle}>Historial de estados</h3>
                         <OrderTimeline history={order.statusHistory ?? []} currentStatus={order.status} />
                     </section>
 
+                    {/* ── Sección: Pago ── (solo si tiene permiso) */}
                     {/* Pago / Confirmación WhatsApp */}
                     {can('orders.markPaid') && (
                         <section className={styles.detailSection}>
@@ -212,6 +307,11 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                                     </span>
                                 )}
                             </div>
+                            {/*
+                              Flujo de confirmación de pago (dos pasos):
+                               1. Clic en "Marcar como abonado" → muestra panel de confirmación
+                               2. Clic en "Sí, confirmar pago" → llama handleMarkAsPaid
+                            */}
                             {!isAbonado && (
                                 <div className={styles.whatsappActions}>
                                     {!confirmPaid ? (
@@ -251,7 +351,7 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                         </section>
                     )}
 
-                    {/* Datos del cliente */}
+                    {/* ── Sección: Datos del cliente ── */}
                     <section className={styles.detailSection}>
                         <h3 className={styles.detailSectionTitle}>Datos del cliente</h3>
                         <div className={styles.customerCard}>
@@ -265,7 +365,7 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                         </div>
                     </section>
 
-                    {/* Productos */}
+                    {/* ── Sección: Productos ── */}
                     <section className={styles.detailSection}>
                         <h3 className={styles.detailSectionTitle}>
                             Productos · {order.items.reduce((s, i) => s + i.quantity, 0)} ítems
@@ -281,6 +381,7 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                             </thead>
                             <tbody>
                                 {order.items.map(item => (
+                                    // Key compuesta para manejar casos donde productId podría repetirse
                                     <tr key={item.productId + item.productName}>
                                         <td>{item.productName}</td>
                                         <td className={styles.tdCenter}>{item.quantity}</td>
@@ -298,7 +399,7 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                         </table>
                     </section>
 
-                    {/* Notas */}
+                    {/* ── Sección: Notas internas ── (solo si tiene permiso) */}
                     {can('orders.edit') && (
                         <section className={styles.detailSection}>
                             <h3 className={styles.detailSectionTitle}>Notas internas</h3>
@@ -315,11 +416,16 @@ function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
                         </section>
                     )}
 
-                    {/* Zona peligrosa */}
+                    {/* ── Sección: Zona peligrosa ── (solo si tiene permiso) */}
                     {can('orders.delete') && (
                         <section className={styles.detailSection}>
                             <h3 className={styles.detailSectionTitle}>Zona peligrosa</h3>
                             <div className={styles.dangerSection}>
+                                {/*
+                                  Flujo de eliminación (dos pasos):
+                                   1. Clic en "Eliminar este pedido" → muestra confirmación
+                                   2. Clic en "Sí, eliminar" → llama handleDelete
+                                */}
                                 {!confirmDelete ? (
                                     <Tooltip content="Eliminar este pedido. Esta acción no se puede deshacer.">
                                         <button className={styles.deleteBtn} type="button" onClick={() => setConfirmDelete(true)} aria-label="Eliminar pedido">
