@@ -1,0 +1,170 @@
+.section {
+  background: #fff;
+  border-radius: 12px;
+  border: 2px solid #f0f0f0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.section:hover {
+  border-color: #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafc 100%);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.icon {
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  background: #e8e8e8;
+  color: #666;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badgeAlert {
+  background: #bfdbfe;
+  color: #1e3a8a;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+.emptyState {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.emptyText {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.ordersList {
+  padding: 0.5rem;
+}
+
+.orderItem {
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 4px solid #60a5fa;
+  transition: all 0.2s ease;
+}
+
+.orderItem:hover {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-left-color: #3b82f6;
+}
+
+.orderHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.orderInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.orderId {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.9rem;
+}
+
+.orderDate {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.customerInfo strong {
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.email {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.orderMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.total {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 0.75rem 0;
+}
+
+.footer {
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  text-align: center;
+}
