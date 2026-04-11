@@ -1,0 +1,202 @@
+/* ============================================
+   ALLMART — PRODUCT DETAIL PRICING TAB
+   ============================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Cards Grid */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  padding: var(--space-4);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+}
+
+.cardValue {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.cardValue.critical {
+  color: #dc2626;
+}
+
+.cardMeta {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* Sections */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border-light);
+}
+
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Detail Grid */
+.detailGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.detailLabel {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+
+.detailValue {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+}
+
+/* In Stock / Out of Stock */
+.inStock {
+  color: #059669;
+}
+
+.outOfStock {
+  color: #dc2626;
+}
+
+/* Warnings and Critical */
+.warning {
+  padding: var(--space-3) var(--space-4);
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.critical {
+  padding: var(--space-3) var(--space-4);
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+/* Status Row */
+.statusRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.statusItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.statusLabel {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-text-tertiary);
+}
+
+/* Stock Bar */
+.stockBar {
+  width: 100%;
+  height: 12px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.stockBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #10b981);
+  border-radius: 6px;
+  transition: width 0.3s ease-out;
+}
+
+.stockText {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardValue {
+    font-size: var(--text-xl);
+  }
+
+  .detailRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+}

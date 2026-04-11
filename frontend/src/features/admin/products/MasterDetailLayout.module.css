@@ -1,0 +1,109 @@
+/* ============================================
+   ALLMART — MASTER-DETAIL LAYOUT
+   ============================================ */
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  height: calc(100vh - 200px);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.emptyDetail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-tertiary);
+}
+
+.emptyDetailContent {
+  text-align: center;
+}
+
+.emptyDetailContent p {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  margin: 0;
+}
+
+.loadingDetail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.toolbarArea {
+  grid-column: 1 / -1;
+  padding: var(--space-4);
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: 80vh;
+    gap: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: calc(100vh - 150px);
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: calc(100vh - 100px);
+    border-radius: 4px;
+  }
+
+  .emptyDetail {
+    min-height: 300px;
+  }
+
+  .emptyDetailContent p {
+    font-size: var(--text-sm);
+  }
+}
