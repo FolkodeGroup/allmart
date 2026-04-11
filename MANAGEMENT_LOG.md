@@ -1455,3 +1455,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #757: 429 documentar componentes y flujos de la vista de pedidos | 2026-04-08 |
 | dgimenezdeveloper | 3 | Asignación de issue a FedericoPaal | Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-11 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #777: 758 implementar vista master detail de productos con layout reorganizado | 2026-04-11 |
