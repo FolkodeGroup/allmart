@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, Suspense as ReactSuspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 // import { useNavigate } from 'react-router-dom';
@@ -39,7 +40,31 @@ import type { ExportableProduct } from '../../../utils/exportProducts';
 import { sortProducts } from '../../../utils/sortProducts';
 import type { SortField, SortDirection } from '../../../utils/sortProducts';
 
+// Lazy load tab components
+const AdminImages = React.lazy(() => import('../images/AdminImages').then(m => ({ default: m.AdminImages })));
+const AdminVariants = React.lazy(() => import('../variants/AdminVariants').then(m => ({ default: m.AdminVariants })));
+
 export function AdminProducts() {
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
+  // Si viene con un tab parameter, cambiar a esa vista
+  if (tabParam === 'imagenes') {
+    return (
+      <ReactSuspense fallback={<div className="flex items-center justify-center h-96"><span>Cargando...</span></div>}>
+        <AdminImages />
+      </ReactSuspense>
+    );
+  }
+
+  if (tabParam === 'variantes') {
+    return (
+      <ReactSuspense fallback={<div className="flex items-center justify-center h-96"><span>Cargando...</span></div>}>
+        <AdminVariants />
+      </ReactSuspense>
+    );
+  }
+
   // Estado de ordenamiento
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');

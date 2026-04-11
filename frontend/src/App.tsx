@@ -17,6 +17,7 @@ import { AdminLogin } from './pages/AdminLogin/AdminLogin';
 import { AdminLayout } from './pages/Admin/AdminLayout';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
 import { AdminRoute } from './components/AdminRoute';
+import { LegacyRedirect } from './components/LegacyRedirect';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -32,8 +33,6 @@ const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders'));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
 const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
-const AdminVariants = lazy(() => import('./features/admin/variants/AdminVariants').then(m => ({ default: m.AdminVariants })));
-const AdminImages = lazy(() => import('./features/admin/images/AdminImages').then(m => ({ default: m.AdminImages })));
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
 const BannersAdmin = lazy(() => import('./features/admin/banners/BannersAdmin').then(m => ({ default: m.BannersAdmin })));
@@ -69,45 +68,41 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
-      { 
-        path: 'productos', 
+      {
+        path: 'productos',
         element: (
           <AdminRoute requiredPermission="products.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminProducts />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'imagenes', 
+      {
+        path: 'imagenes',
         element: (
           <AdminRoute requiredPermission="products.edit">
-            <Suspense fallback={<AdminLoadingFallback />}>
-              <AdminImages />
-            </Suspense>
+            <LegacyRedirect to="/admin/productos" tab="imagenes" />
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'variantes', 
+      {
+        path: 'variantes',
         element: (
           <AdminRoute requiredPermission="variants.view">
-            <Suspense fallback={<AdminLoadingFallback />}>
-              <AdminVariants />
-            </Suspense>
+            <LegacyRedirect to="/admin/productos" tab="variantes" />
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'categorias', 
+      {
+        path: 'categorias',
         element: (
           <AdminRoute requiredPermission="categories.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminCategories />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
       {
         path: 'categorias/:categoryId',
@@ -119,65 +114,65 @@ const router = createBrowserRouter([
           </AdminRoute>
         )
       },
-      { 
-        path: 'pedidos', 
+      {
+        path: 'pedidos',
         element: (
           <AdminRoute requiredPermission="orders.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminOrders />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'alertas-stock', 
+      {
+        path: 'alertas-stock',
         element: (
           <AdminRoute requiredPermission="orders.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <LowStockAlerts />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'reportes', 
+      {
+        path: 'reportes',
         element: (
           <AdminRoute requiredPermission="reports.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminReports />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'promociones', 
+      {
+        path: 'promociones',
         element: (
           <AdminRoute requiredPermission="products.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminPromotions />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'colecciones', 
+      {
+        path: 'colecciones',
         element: (
           <AdminRoute requiredPermission="products.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminCollections />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
-      { 
-        path: 'banners', 
+      {
+        path: 'banners',
         element: (
           <AdminRoute requiredPermission="products.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <BannersAdmin />
             </Suspense>
           </AdminRoute>
-        ) 
+        )
       },
     ],
   },
