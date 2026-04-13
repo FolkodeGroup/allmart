@@ -1462,3 +1462,24 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #729: 🔄 Actualización automática de puntajes semanal | 2026-04-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #677: 🔄 Actualización automática de puntajes semanal | 2026-03-29 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #688: Se implementan botones de exportacion Excel y CSV de Categorias | 2026-03-29 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #692: 411 optimizar animaciones y transiciones en la UI de categorías | 2026-03-29 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #694: 416 optimizar visualización de pedidos en tabla | 2026-03-30 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #696: comentarios agregados | 2026-03-30 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #701: 450 expandir vista de reportes a toda la pantalla usando gridflexbox | 2026-03-31 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #703: 453 mejorar visualización de gráficos comparativos y tendencias | 2026-03-31 |
+| dgimenezdeveloper | 3 | Asignación de issue a FedericoPaal | Issue #422: Optimizar carga de datos y rendimiento en pedidos | 2026-03-31 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #707: 453 mejorar visualización de gráficos comparativos y tendencias | 2026-04-01 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #709: 453 mejorar visualización de gráficos comparativos y tendencias | 2026-04-02 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #711: 420 adaptar la interfaz de pedidos para dispositivos móviles | 2026-04-02 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #717: 423 añadir tooltips y ayuda contextual en acciones de pedidos | 2026-04-02 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #716: 430 añadir filtro avanzado por estado fecha y total | 2026-04-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #722: 425 mejorar la gestión de estados de pedidos pendiente confirmado enviado entregado cancelado abonado | 2026-04-03 |
+| dgimenezdeveloper | 3 | Asignación de issue a agustin-ovejero | Issue #426: Añadir indicadores de pedidos con problemas (cancelados, pendientes de pago) | 2026-04-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #726: 682 implementar sistema de ofertas y promociones dinámico para ecommerce | 2026-04-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #757: 429 documentar componentes y flujos de la vista de pedidos | 2026-04-08 |
+| dgimenezdeveloper | 3 | Asignación de issue a FedericoPaal | Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #777: 758 implementar vista master detail de productos con layout reorganizado | 2026-04-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #781: Instale dependencias y hice las migraciones para la base de datos | 2026-04-13 |
