@@ -1,6 +1,6 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 16864 |
+| dgimenezdeveloper | 16904 |
 | FedericoPaal | 3800 |
 | Mau-bar-iva | 1925 |
 | Nahuel-Dalesio | 1630 |
@@ -11,15 +11,19 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #779: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #778: 🔄 Actualización automática de puntajes semanal | 2026-04-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #772: 🔄 Registrar puntaje de gestión | 2026-04-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #771: 🔄 Registrar puntaje de gestión | 2026-04-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #778: 🔄 Actualización automática de puntajes semanal | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #777: 758 implementar vista master detail de productos con layout reorganizado | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #776: 734 rediseñar dashboard con nueva jerarquía de kpis accionables | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #775: Se actualiza copy y labels del formulario de productos para flujo uni… | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #774: Se implementa redirects legacy para rutas antiguas sin romper bookmarks | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #773: Se refactoriza navegación del Admin Panel según nueva IA | 2026-04-11 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #772: 🔄 Registrar puntaje de gestión | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #771: 🔄 Registrar puntaje de gestión | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
