@@ -1,0 +1,99 @@
+/* src/components/ui/TabsWrapper.module.css */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.tabBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    border-bottom: 2px solid var(--color-border, #e5e7eb);
+    padding: 0 0 0 4px;
+    background: var(--color-surface-alt, #f9fafb);
+    border-radius: 8px 8px 0 0;
+}
+
+.tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--color-text-muted, #6b7280);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    color: var(--color-text, #111827);
+}
+
+.tabActive {
+    color: var(--color-primary, #2563eb);
+    border-bottom-color: var(--color-primary, #2563eb);
+    background: transparent;
+}
+
+.tabError {
+    color: var(--color-danger, #dc2626);
+}
+
+.tabIcon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.tabLabel {
+    line-height: 1;
+}
+
+.tabErrorDot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-danger, #dc2626);
+    margin-left: 2px;
+    flex-shrink: 0;
+}
+
+.tabContent {
+    flex: 1;
+    min-height: 0;
+}
+
+.tabPanel {
+    padding: 20px 0 0 0;
+}
+
+.tabPanel[hidden] {
+    display: none;
+}
+
+/* Dark mode support */
+:global(.dark) .tabBar {
+    background: var(--color-surface-dark, #1f2937);
+    border-bottom-color: var(--color-border-dark, #374151);
+}
+
+:global(.dark) .tab {
+    color: var(--color-text-muted-dark, #9ca3af);
+}
+
+:global(.dark) .tab:hover {
+    color: var(--color-text-dark, #f9fafb);
+}
+
+:global(.dark) .tabActive {
+    color: var(--color-primary-light, #60a5fa);
+    border-bottom-color: var(--color-primary-light, #60a5fa);
+}
