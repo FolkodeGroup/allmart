@@ -1486,3 +1486,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #780: 🔄 Actualización automática de puntajes semanal | 2026-04-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #786: 759 dividir adminproductform en tabs reutilizables para master detail | 2026-04-14 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #783: 760 integrar gestión de variantes dentro de tab de producto | 2026-04-14 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #785: Integre la  gestión de imágenes dentro de tab de Producto | 2026-04-14 |
