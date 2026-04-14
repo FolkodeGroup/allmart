@@ -159,4 +159,3 @@ ENV/
 
 # Reporte temporal generado por check_missing_puntajes.cjs
 .missing_puntajes_report.md
- 
