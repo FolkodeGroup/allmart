@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'; // 1. Cambié useState por useEffect aquí
+import { useState, useRef, useEffect } from 'react';
 import { useAdminImages } from '../../../../context/AdminImagesContext';
 import styles from './ProductDetailImages.module.css';
 
@@ -13,7 +13,6 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
   const [imgError, setImgError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 2. CORRECCIÓN: Se usa useEffect para cargar imágenes cuando cambia el productId
   useEffect(() => { 
     loadImages(productId); 
   }, [productId, loadImages]); 
@@ -47,11 +46,23 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Imágenes del producto</h3>
         <div className={styles.uploadRow}>
-          <input type="file" accept="image/*" ref={fileInputRef} onChange={e => setImgFile(e.target.files?.[0] || null)} />
-          <input type="text" placeholder="Texto alternativo" value={imgAlt} onChange={e => setImgAlt(e.target.value)} />
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={e => setImgFile(e.target.files?.[0] || null)} 
+          />
+          <input 
+            type="text" 
+            placeholder="Texto alternativo" 
+            value={imgAlt} 
+            onChange={e => setImgAlt(e.target.value)} 
+          />
           <button type="button" onClick={handleUpload}>Subir imagen</button>
         </div>
+        
         {imgError && <div className={styles.error}>{imgError}</div>}
+        
         {isLoading ? (
           <div>Cargando imágenes...</div>
         ) : error ? (
