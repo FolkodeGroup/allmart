@@ -1484,3 +1484,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #777: 758 implementar vista master detail de productos con layout reorganizado | 2026-04-11 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #781: Instale dependencias y hice las migraciones para la base de datos | 2026-04-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #780: 🔄 Actualización automática de puntajes semanal | 2026-04-13 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #786: 759 dividir adminproductform en tabs reutilizables para master detail | 2026-04-14 |
