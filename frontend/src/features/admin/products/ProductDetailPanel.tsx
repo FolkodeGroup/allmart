@@ -16,9 +16,7 @@ const ProductDetailVariants = React.lazy(() =>
 const ProductDetailImages = React.lazy(() =>
   import('./tabs/ProductDetailImages').then(m => ({ default: m.ProductDetailImages }))
 );
-const ProductDetailSEO = React.lazy(() =>
-  import('./tabs/ProductDetailSEO').then(m => ({ default: m.ProductDetailSEO }))
-);
+// ...existing code...
 
 type TabName = 'basic' | 'pricing' | 'variants' | 'images' | 'seo';
 
