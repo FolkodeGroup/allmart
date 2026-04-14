@@ -1491,3 +1491,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #415: Mejorar filtro de búsqueda por cliente, email y número de pedido | 2026-04-14 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #793: se cierra issue | 2026-04-14 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #795: 415 mejorar filtro de búsqueda por cliente email y número de pedido | 2026-04-14 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #797: se cierra issue | 2026-04-14 |
