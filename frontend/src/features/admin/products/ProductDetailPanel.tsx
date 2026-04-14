@@ -16,9 +16,7 @@ const ProductDetailVariants = React.lazy(() =>
 const ProductDetailImages = React.lazy(() =>
   import('./tabs/ProductDetailImages').then(m => ({ default: m.ProductDetailImages }))
 );
-const ProductDetailSEO = React.lazy(() =>
-  import('./tabs/ProductDetailSEO').then(m => ({ default: m.ProductDetailSEO }))
-);
+// ...existing code...
 
 type TabName = 'basic' | 'pricing' | 'variants' | 'images' | 'seo';
 
@@ -31,15 +29,14 @@ interface ProductDetailPanelProps {
   canDelete?: boolean;
 }
 
-const TAB_LABELS: Record<TabName, string> = {
+const TAB_LABELS: Record<Exclude<TabName, 'seo'>, string> = {
   basic: 'Básico',
   pricing: 'Precios e inventario',
   variants: 'Variantes',
   images: 'Imágenes',
-  seo: 'SEO y publicación',
 };
 
-const TAB_ORDER: TabName[] = ['basic', 'pricing', 'variants', 'images', 'seo'];
+const TAB_ORDER: Exclude<TabName, 'seo'>[] = ['basic', 'pricing', 'variants', 'images'];
 
 export function ProductDetailPanel({
   product,
@@ -78,12 +75,12 @@ export function ProductDetailPanel({
             <ProductDetailImages productId={product.id} />
           </Suspense>
         );
-      case 'seo':
-        return (
-          <Suspense fallback={<TabLoadingFallback />}>
-            <ProductDetailSEO product={product} />
-          </Suspense>
-        );
+      // case 'seo':
+      //   return (
+      //     <Suspense fallback={<TabLoadingFallback />}>
+      //       <ProductDetailSEO product={product} />
+      //     </Suspense>
+      //   );
       default:
         return null;
     }
