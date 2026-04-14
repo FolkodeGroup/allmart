@@ -32,12 +32,6 @@ interface VariantGroupCardProps {
 
 /**
  * VariantGroupCard - Tarjeta que representa un grupo de variantes.
- *
- * Responsabilidades:
- * - Mostrar nombre del grupo (editable inline).
- * - Lista de valores como chips.
- * - Input para agregar nuevos valores.
- * - Botones para editar/eliminar grupo.
  */
 export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   group,
@@ -52,7 +46,9 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   newValue,
   setNewValue,
   error,
-  setIsDirty
+  setIsDirty,
+  onOpenEditModal, // Agregado para resolver error TS2304
+  onDuplicate      // Agregado para resolver error TS2304
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(group.name);
@@ -208,7 +204,6 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               onChange={e => {
                 setNewValue(e.target.value);
                 setIsDirty?.(true);
-                // Limpiar error
               }}
               onKeyDown={handleValueKeyDown}
             />

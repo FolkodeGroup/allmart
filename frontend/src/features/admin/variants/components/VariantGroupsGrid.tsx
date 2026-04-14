@@ -32,11 +32,6 @@ interface VariantGroupsGridProps {
 
 /**
  * VariantGroupsGrid - Contenedor para la lista de grupos de variantes.
- *
- * Responsabilidades:
- * - Renderizar cada grupo como tarjeta.
- * - Mostrar estado vacío si no hay grupos.
- * - Gestionar inputs y errores por grupo.
  */
 export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
   groups,
@@ -53,6 +48,8 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
   errors,
   isPendingNavigation,
   setIsDirty,
+  onDuplicate,      // Agregado para resolver error TS2304
+  onOpenEditModal,  // Agregado para resolver error TS2304
 }) => {
 
   if (groups.length === 0) {
