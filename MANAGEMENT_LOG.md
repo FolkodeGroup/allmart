@@ -1489,3 +1489,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #785: Integre la  gestión de imágenes dentro de tab de Producto | 2026-04-14 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #789: Se cierra issue | 2026-04-14 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #415: Mejorar filtro de búsqueda por cliente, email y número de pedido | 2026-04-14 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #793: se cierra issue | 2026-04-14 |
