@@ -14,7 +14,7 @@ import { TabsWrapper } from '../../../components/ui/TabsWrapper';
 import type { TabDefinition } from '../../../components/ui/TabsWrapper';
 
 import { TabBasico } from './tabs/TabBasico';
-import { TabPreciosInventario } from './tabs/TabPreciosInventario';
+import { TabPreciosInventario } from './tabs/TabPreciosinventario';
 import { TabCategorias } from './tabs/TabCategorias';
 import { TabVariantes } from './tabs/TabVariantes';
 import { TabImagenes } from './tabs/TabImagenes';
