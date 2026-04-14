@@ -64,7 +64,7 @@ interface AdminProductsContextType {
   totalPages: number;
   error: string | null;
   refreshProducts: (params?: AdminProductsParams) => Promise<void>;
-  addProduct: (p: Omit<AdminProduct, 'id'>) => Promise<void>;
+  addProduct: (p: Omit<AdminProduct, 'id'>) => Promise<AdminProduct>;
   updateProduct: (id: string, p: Partial<AdminProduct>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   getProduct: (id: string) => AdminProduct | undefined;
@@ -141,6 +141,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       setProducts((prev) => [newProduct, ...prev]);
       showNotification('success', 'Producto creado exitosamente');
       await refreshProducts();
+      return newProduct;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al crear producto';
       showNotification('error', msg);
@@ -211,9 +212,9 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       showNotification('success', 'Producto eliminado exitosamente');
       await refreshProducts();
     } catch (err) {
-       const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
-       showNotification('error', msg);
-       throw err;
+      const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
+      showNotification('error', msg);
+      throw err;
     }
   };
 
