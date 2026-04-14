@@ -15,6 +15,7 @@ interface VariantGroupCardProps {
   group: VariantGroup;
   onEditName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (group: VariantGroup) => void;
   onEditValue: (groupId: string, oldValue: string, newValue: string) => void;
   onToggleStatus: (id: string, newStatus: boolean) => void;
   onAddValue: (groupId: string, value: string) => void;
@@ -26,16 +27,11 @@ interface VariantGroupCardProps {
   error: string;
   isPendingNavigation: boolean;
   setIsDirty?: (value: boolean) => void;
+  onOpenEditModal: (groupId: string) => void;
 }
 
 /**
  * VariantGroupCard - Tarjeta que representa un grupo de variantes.
- *
- * Responsabilidades:
- * - Mostrar nombre del grupo (editable inline).
- * - Lista de valores como chips.
- * - Input para agregar nuevos valores.
- * - Botones para editar/eliminar grupo.
  */
 export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   group,
@@ -50,7 +46,9 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   newValue,
   setNewValue,
   error,
-  setIsDirty
+  setIsDirty,
+  onOpenEditModal, // Agregado para resolver error TS2304
+  onDuplicate      // Agregado para resolver error TS2304
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(group.name);
@@ -136,6 +134,24 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
           </Tooltip>
         )}
         <div className={styles.groupActions}>
+          <Tooltip title="Editar grupo (avanzado)" placement="top" arrow>
+            <button
+              className={styles.editGroupBtn}
+              onClick={() => onOpenEditModal(group.id)}
+              type="button"
+            >
+              🛠️
+            </button>
+          </Tooltip>
+          <Tooltip title="Duplicar grupo de variantes" placement="top" arrow>
+            <button
+              className={styles.duplicateGroupBtn}
+              onClick={() => onDuplicate(group)}
+              type="button"
+            >
+              ⧉
+            </button>
+          </Tooltip>
           <Tooltip title={group.isActive ? 'Desactivar variante' : 'Activar variante'} placement="top" arrow>
             <button
               className={`${styles.statusToggleBtn} ${group.isActive ? styles.statusActive : styles.statusInactive}`}
@@ -188,7 +204,6 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               onChange={e => {
                 setNewValue(e.target.value);
                 setIsDirty?.(true);
-                // Limpiar error
               }}
               onKeyDown={handleValueKeyDown}
             />

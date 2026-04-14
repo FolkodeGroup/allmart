@@ -15,6 +15,7 @@ interface VariantGroupsGridProps {
   groups: VariantGroup[];
   onEditName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (group: VariantGroup) => void;
   onEditValue: (groupId: string, oldValue: string, newValue: string) => void;
   onToggleStatus: (id: string, newStatus: boolean) => void;
   onAddValue: (groupId: string, value: string) => void;
@@ -25,16 +26,12 @@ interface VariantGroupsGridProps {
   setNewValue: (groupId: string, value: string) => void;
   errors: Record<string, string>;
   isPendingNavigation: boolean;
-  setIsDirty?: (value: boolean) => void; // Se agrega setIsDirty para manejar estado de cambios no guardados
+  setIsDirty?: (value: boolean) => void;
+  onOpenEditModal: (groupId: string) => void;
 }
 
 /**
  * VariantGroupsGrid - Contenedor para la lista de grupos de variantes.
- *
- * Responsabilidades:
- * - Renderizar cada grupo como tarjeta.
- * - Mostrar estado vacío si no hay grupos.
- * - Gestionar inputs y errores por grupo.
  */
 export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
   groups,
@@ -51,6 +48,8 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
   errors,
   isPendingNavigation,
   setIsDirty,
+  onDuplicate,      // Agregado para resolver error TS2304
+  onOpenEditModal,  // Agregado para resolver error TS2304
 }) => {
 
   if (groups.length === 0) {
@@ -75,6 +74,7 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
             group={group}
             onEditName={onEditName}
             onDelete={onDelete}
+            onDuplicate={onDuplicate}
             onEditValue={onEditValue}
             onToggleStatus={onToggleStatus}
             onAddValue={onAddValue}
@@ -86,6 +86,7 @@ export const VariantGroupsGrid: React.FC<VariantGroupsGridProps> = ({
             error={errors[`value-${group.id}`] || ''}
             isPendingNavigation={isPendingNavigation}
             setIsDirty={setIsDirty}
+            onOpenEditModal={onOpenEditModal}
           />
         </div>
       ))}

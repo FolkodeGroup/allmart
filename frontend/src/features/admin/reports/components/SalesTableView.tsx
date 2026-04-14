@@ -1,260 +1,65 @@
-import { useMemo, useState, useEffect } from 'react';
-import type { Order } from '../../../../context/AdminOrdersContext';
-import styles from '../AdminReports.module.css';
-import { createdAtToMs, getDayKeyLocalFromMs } from '../../../../utils/date';
-import { Modal } from '../../../../components/ui/Modal';
+import React from 'react';
 
-type Props = {
-    orders: Order[];
+interface SalesTableViewProps {
+    orders: any[];
     formatPrice: (n: number) => string;
-    dayKeys: string[];
-};
-
-type Product = {
-    name: string;
-    qty: number;
-};
-
-type DayData = {
-    dateKey: string;
-    total: number;
-    products: Product[];
-};
-
-function useIsMobile() {
-    const [isMobile, setIsMobile] = useState(() =>
-        typeof window !== 'undefined' ? window.innerWidth <= 600 : false
-    );
-    useEffect(() => {
-        const handler = () => setIsMobile(window.innerWidth <= 600);
-        window.addEventListener('resize', handler);
-        return () => window.removeEventListener('resize', handler);
-    }, []);
-    return isMobile;
+    dayKeys?: string[];
 }
 
-export function SalesTableView({ orders, formatPrice, dayKeys }: Props) {
-    const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
-    const isMobile = useIsMobile();
+export const SalesTableView: React.FC<SalesTableViewProps> = ({ orders, formatPrice, dayKeys }) => {
+    if (!orders || orders.length === 0) {
+        return <p style={{ padding: 16, textAlign: 'center', color: '#888' }}>Sin ventas en este período.</p>;
+    }
 
-    const data = useMemo(() => {
-        const map = new Map<string, DayData>();
-
-        // 1. Agrupar datos reales
+    // Si dayKeys está presente, mostrar tabla por días (resumen)
+    if (dayKeys && dayKeys.length > 0) {
+        // Agrupar ventas por día
+        const salesByDay: Record<string, number> = {};
         orders.forEach(order => {
-            if (order.status === 'cancelado') return;
-
-            const dateKey = getDayKeyLocalFromMs(createdAtToMs(order.createdAt));
-
-            if (!map.has(dateKey)) {
-                map.set(dateKey, {
-                    dateKey,
-                    total: 0,
-                    products: [],
-                });
-            }
-
-            const day = map.get(dateKey)!;
-            day.total += order.total;
-
-            order.items.forEach(item => {
-                const existing = day.products.find(p => p.name === item.productName);
-
-                if (existing) {
-                    existing.qty += item.quantity;
-                } else {
-                    day.products.push({
-                        name: item.productName,
-                        qty: item.quantity,
-                    });
-                }
-            });
+            const key = order.createdAt?.slice(0, 10) || '';
+            salesByDay[key] = (salesByDay[key] || 0) + order.total;
         });
-
-
-        // ✅ CASO 1: TODO EL TIEMPO (sin dayKeys)
-        if (!dayKeys || dayKeys.length === 0) {
-            return Array.from(map.values()).sort((a, b) =>
-                a.dateKey.localeCompare(b.dateKey)
-            );
-        }
-
-        // ✅ CASO 2: rango (7d, 30d, 90d, custom)
-        return dayKeys.map(dateKey => {
-            if (map.has(dateKey)) {
-                return map.get(dateKey)!;
-            }
-
-            return {
-                dateKey,
-                total: 0,
-                products: [],
-            };
-        });
-
-    }, [orders, dayKeys]);
-
-
-    const formatDate = (dateKey: string) => {
-        const [y, m, d] = dateKey.split('-').map(Number);
-        const date = new Date(y, m - 1, d);
-
-        return date.toLocaleDateString('es-AR', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
-    };
-
-    useEffect(() => {
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                setSelectedDay(null);
-            }
-        };
-
-        document.addEventListener('keydown', handleEsc);
-        return () => document.removeEventListener('keydown', handleEsc);
-    }, []);
-
-
-    // Vista mobile: cards
-    if (isMobile) {
         return (
-            <>
-                <div className={styles.salesCardsWrap}>
-                    {data.map(day => {
-                        const hasMore = day.products.length > 3;
-                        const visibleProducts = day.products.slice(0, 3);
-
-                        return (
-                            <div key={day.dateKey} className={styles.salesCard}>
-                                <div className={styles.salesCardHeader}>
-                                    <span className={styles.salesCardDate}>
-                                        📅 {formatDate(day.dateKey)}
-                                    </span>
-                                    <span className={styles.salesCardTotal}>
-                                        {formatPrice(day.total)}
-                                    </span>
-                                </div>
-                                <div className={styles.salesCardProducts}>
-                                    {day.products.length === 0 ? (
-                                        <span className={styles.noDataProducts}>Sin ventas</span>
-                                    ) : (
-                                        visibleProducts.map((p, i) => (
-                                            <span key={i} className={styles.salesCardProduct}>
-                                                {p.name}
-                                                <span className={styles.salesCardQty}>x{p.qty}</span>
-                                            </span>
-                                        ))
-                                    )}
-                                    {hasMore && (
-                                        <button
-                                            className={styles.viewMoreBtn}
-                                            onClick={() => setSelectedDay(day)}
-                                        >
-                                            Ver más ({day.products.length})
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Modal de detalle */}
-                {selectedDay && (
-                    <Modal
-                        open={!!selectedDay}
-                        onClose={() => setSelectedDay(null)}
-                        title={`📅 ${formatDate(selectedDay.dateKey)} — ${formatPrice(selectedDay.total)}`}
-                        size="sm"
-                        showCloseButton
-                        bodyClassName={styles.modalBody}
-                    >
-                        {selectedDay.products.map((p, i) => (
-                            <div key={i} className={styles.modalRow}>
-                                <span>{p.name}</span>
-                                <strong>x{p.qty}</strong>
-                            </div>
-                        ))}
-                    </Modal>
-                )}
-            </>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th style={{ textAlign: 'left', padding: 8 }}>Día</th>
+                        <th style={{ textAlign: 'right', padding: 8 }}>Ventas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {dayKeys.map(day => (
+                        <tr key={day}>
+                            <td style={{ padding: 8 }}>{day}</td>
+                            <td style={{ padding: 8, textAlign: 'right' }}>{formatPrice(salesByDay[day] || 0)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         );
     }
 
+    // Tabla detallada de pedidos
     return (
-        <>
-            <div className={styles.tableResponsive}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Día</th>
-                            <th>Ganancias</th>
-                            <th>Productos vendidos</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.map(day => {
-                            const hasMore = day.products.length > 10;
-                            const visibleProducts = day.products.slice(0, 10);
-
-                            return (
-                                <tr key={day.dateKey}>
-                                    <td><div className={styles.tableCell}>{formatDate(day.dateKey)}</div></td>
-
-                                    <td><div className={styles.tableCell}>{formatPrice(day.total)}</div></td>
-
-                                    <td>
-                                        <div className={styles.tableCell}>
-                                            {day.products.length === 0 ? (
-                                                <span className={styles.noDataProducts}>Sin ventas</span>
-                                            ) : (
-                                                visibleProducts.map((p, i) => (
-                                                    <span key={i}>
-                                                        {p.name} (x{p.qty})
-                                                    </span>
-                                                ))
-                                            )}
-                                        </div>
-                                        {hasMore && (
-                                            <>
-                                                {' '}
-                                                <button
-                                                    className={styles.viewMoreBtn}
-                                                    onClick={() => setSelectedDay(day)}
-                                                >
-                                                    Ver más ({day.products.length})
-                                                </button>
-                                            </>
-                                        )}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* MODAL */}
-            {selectedDay && (
-                <Modal
-                    open={!!selectedDay}
-                    onClose={() => setSelectedDay(null)}
-                    title={`📅 ${formatDate(selectedDay.dateKey)} — ${formatPrice(selectedDay.total)}`}
-                    size="sm"
-                    showCloseButton
-                    bodyClassName={styles.modalBody}
-                >
-                    {selectedDay.products.map((p, i) => (
-                        <div key={i} className={styles.modalRow}>
-                            <span>{p.name}</span>
-                            <strong>x{p.qty}</strong>
-                        </div>
-                    ))}
-                </Modal>
-            )}
-        </>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+                <tr>
+                    <th style={{ textAlign: 'left', padding: 8 }}>Fecha</th>
+                    <th style={{ textAlign: 'left', padding: 8 }}>Cliente</th>
+                    <th style={{ textAlign: 'right', padding: 8 }}>Total</th>
+                    <th style={{ textAlign: 'left', padding: 8 }}>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {orders.map(order => (
+                    <tr key={order.id}>
+                        <td style={{ padding: 8 }}>{order.createdAt?.slice(0, 10)}</td>
+                        <td style={{ padding: 8 }}>{order.clientName || order.clientEmail || '-'}</td>
+                        <td style={{ padding: 8, textAlign: 'right' }}>{formatPrice(order.total)}</td>
+                        <td style={{ padding: 8 }}>{order.status}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
     );
-}
+};
