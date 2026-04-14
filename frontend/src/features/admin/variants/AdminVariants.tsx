@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Palette, AlertCircle } from 'lucide-react';
-// ...existing code...
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
@@ -17,6 +16,7 @@ import {
   VariantHeader,
   VariantForm,
   VariantGroupsGrid,
+  VariantEditModal,
 } from './components';
 import { VariantsFilters } from './components/VariantFilters';
 import { useUnsavedChanges } from '../../../context/useUnsavedChanges';
@@ -26,6 +26,9 @@ export function AdminVariants() {
   const [notif, setNotif] = useState<{ open: boolean, type: 'success' | 'error', message: string }>({ open: false, type: 'success', message: '' });
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  // Modal avanzado para editar variantes
+  const [editModal, setEditModal] = useState<{ open: boolean; groupId: string | null }>({ open: false, groupId: null });
+  const [editModalData, setEditModalData] = useState<{ name: string; values: string[] }>({ name: '', values: [] });
   const { products } = useAdminProducts();
   const {
     variants,
@@ -139,15 +142,57 @@ export function AdminVariants() {
     }
   };
 
-  // Nuevas funciones para resolver errores de TS
-  const handleDuplicateGroup = (group: any) => {
-    console.log("Duplicando grupo:", group);
-    // Aquí puedes implementar la lógica de duplicación más tarde
+  // Nuevas funciones para edición avanzada
+  const handleDuplicateGroup = async (group: any) => {
+    if (!selectedProductId) return;
+    let baseName = group.name + ' (Copia)';
+    let name = baseName;
+    let i = 2;
+    while (variants.some((v: any) => v.name === name)) {
+      name = `${baseName} ${i++}`;
+    }
+    try {
+      await addVariant(selectedProductId, name, group.values);
+      setNotif({ open: true, type: 'success', message: 'Variante duplicada correctamente.' });
+      const userEmail = user ?? 'desconocido';
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'create',
+        entity: 'variant',
+        entityId: '', // Se generará en el backend
+        details: { productId: selectedProductId, name, baseGroupId: group.id },
+      });
+    } catch {
+      setNotif({ open: true, type: 'error', message: 'Error al duplicar variante.' });
+    }
   };
 
   const handleOpenEditModal = (groupId: string) => {
-    console.log("Abriendo modal para:", groupId);
-    // Aquí puedes implementar la lógica del modal más tarde
+    const group = variants.find((v: any) => v.id === groupId);
+    if (!group) return;
+    setEditModalData({ name: group.name, values: group.values });
+    setEditModal({ open: true, groupId });
+  };
+
+  const handleSaveEditModal = async (name: string, values: string[]) => {
+    if (!editModal.groupId || !selectedProductId) return;
+    try {
+      await updateVariant(selectedProductId, editModal.groupId, { name, values });
+      setNotif({ open: true, type: 'success', message: 'Variante actualizada correctamente.' });
+      const userEmail = user ?? 'desconocido';
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'update',
+        entity: 'variant',
+        entityId: editModal.groupId,
+        details: { productId: selectedProductId, name, values },
+      });
+    } catch {
+      setNotif({ open: true, type: 'error', message: 'Error al actualizar variante.' });
+    }
+    setEditModal({ open: false, groupId: null });
   };
 
   // ── CRUD de valores ───────────────────────────────────────────────
@@ -359,6 +404,13 @@ export function AdminVariants() {
                   onCancel={cancelNavigation}
                 />
               )}
+              <VariantEditModal
+                open={editModal.open}
+                initialName={editModalData.name}
+                initialValues={editModalData.values}
+                onClose={() => setEditModal({ open: false, groupId: null })}
+                onSave={handleSaveEditModal}
+              />
             </>
           )}
         </main>
