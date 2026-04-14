@@ -99,8 +99,8 @@ export function AdminProductForm({
   const [editingImgAlt, setEditingImgAlt] = useState('');
   const [savingImgId, setSavingImgId] = useState<string | null>(null);
   const [deletingImgId, setDeletingImgId] = useState<string | null>(null);
-  // FIX: useRef<HTMLInputElement>(null) tipado correctamente — sin `| null` extra
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // FIX: useRef<HTMLInputElement | null>(null) — puede ser null
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // ── Inicialización ───────────────────────────────────────────────────────
   useEffect(() => {

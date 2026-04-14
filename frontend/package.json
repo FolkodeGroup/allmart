@@ -25,6 +25,7 @@
     "lucide-react": "^0.564.0",
     "node-fetch": "^2.7.0",
     "react": "^19.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.72.0",
     "react-hot-toast": "^2.6.0",
