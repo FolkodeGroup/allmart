@@ -1,7 +1,12 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { RefObject } from 'react';
 import styles from '../AdminProductForm.module.css';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {
+    DragDropContext,
+    Droppable,
+    Draggable,
+    type DropResult,
+} from '@hello-pangea/dnd';
 import { Delete, Star } from 'lucide-react';
 
 /** Imagen de producto en el frontend */
@@ -117,7 +122,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
         }
     };
 
-    const handleDragEnd = (result: any) => {
+    const handleDragEnd = (result: DropResult) => {
         const { source, destination } = result;
         if (!destination) return;
         if (source.index === destination.index) return;
