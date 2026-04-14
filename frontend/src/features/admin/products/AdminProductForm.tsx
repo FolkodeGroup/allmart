@@ -67,6 +67,7 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
   const [newGroupValues, setNewGroupValues] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const { products } = useAdminProducts();
   const [saving, setSaving] = useState(false);
 
   // ── Estado para gestión de imágenes via API (solo cuando se edita) ──────────
@@ -176,6 +177,7 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
     }
   };
 
+  // Validación de SKU único en frontend
   const set = <K extends keyof typeof form>(key: K, value: typeof form[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
     // Limpiar error del campo cuando cambia
@@ -185,6 +187,18 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
         delete next[key];
         return next;
       });
+    }
+    // Validar SKU único en tiempo real
+    if (key === 'sku') {
+      const newSku = String(value).trim();
+      if (newSku) {
+        const exists = products.some(
+          p => p.sku === newSku && (!isEdit || p.id !== productId)
+        );
+        if (exists) {
+          setFieldErrors(prev => ({ ...prev, sku: 'El SKU ya existe en otro producto' }));
+        }
+      }
     }
   };
 
@@ -236,6 +250,16 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+    // Validación extra de SKU único antes de enviar
+    if (form.sku) {
+      const exists = products.some(
+        p => p.sku === form.sku && (!isEdit || p.id !== productId)
+      );
+      if (exists) {
+        setFieldErrors(prev => ({ ...prev, sku: 'El SKU ya existe en otro producto' }));
+        return;
+      }
+    }
 
     setError('');
     setSaving(true);
@@ -412,8 +436,9 @@ export function AdminProductForm({ productId, onClose, onUnsavedChanges, resetUn
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-sku">SKU</label>
-                <input className={styles.input} id="product-sku" value={form.sku}
+                <input className={`${styles.input} ${fieldErrors.sku ? styles.inputError : ''}`} id="product-sku" value={form.sku}
                   onChange={e => set('sku', e.target.value)} />
+                {fieldErrors.sku && <span className={styles.errorText}>{fieldErrors.sku}</span>}
               </div>
             </div>
 
