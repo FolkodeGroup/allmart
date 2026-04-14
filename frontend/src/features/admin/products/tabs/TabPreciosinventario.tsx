@@ -1,4 +1,3 @@
-// src/features/admin/products/components/tabs/TabPreciosInventario.tsx
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { TabPreciosInventarioProps } from '../components/types';
 
