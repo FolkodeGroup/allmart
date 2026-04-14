@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react'; // 1. Cambié useState por useEffect aquí
 import { useAdminImages } from '../../../../context/AdminImagesContext';
 import styles from './ProductDetailImages.module.css';
 
@@ -13,8 +13,10 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
   const [imgError, setImgError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Cargar imágenes al montar
-  useState(() => { loadImages(productId); }, [productId]);
+  // 2. CORRECCIÓN: Se usa useEffect para cargar imágenes cuando cambia el productId
+  useEffect(() => { 
+    loadImages(productId); 
+  }, [productId, loadImages]); 
 
   const handleUpload = async () => {
     setImgError('');
