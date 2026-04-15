@@ -268,22 +268,29 @@ export function ProductWizard({
           />
         </div>
         <div className={styles.steps}>
-          {stepTitles.map((title, idx) => (
-            <div
-              key={idx}
-              className={`${styles.step} ${idx + 1 === currentStep ? styles.active : ''} ${
-                idx + 1 < currentStep ? styles.completed : ''
-              }`}
-              onClick={() => {
-                if (idx + 1 < currentStep) {
-                  setCurrentStep(idx + 1);
-                }
-              }}
-            >
-              <div className={styles.stepNumber}>{idx + 1}</div>
-              <span className={styles.stepLabel}>{title}</span>
-            </div>
-          ))}
+          {stepTitles.map((title, idx) => {
+            const isClickable = idx + 1 < currentStep;
+            return (
+              <div
+                key={idx}
+                className={`${styles.step} ${idx + 1 === currentStep ? styles.active : ''} ${
+                  idx + 1 < currentStep ? styles.completed : ''
+                }`}
+                role={isClickable ? 'button' : undefined}
+                tabIndex={isClickable ? 0 : -1}
+                onClick={isClickable ? () => setCurrentStep(idx + 1) : undefined}
+                onKeyDown={isClickable ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setCurrentStep(idx + 1);
+                  }
+                } : undefined}
+                aria-disabled={!isClickable}
+              >
+                <div className={styles.stepNumber}>{idx + 1}</div>
+                <span className={styles.stepLabel}>{title}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
