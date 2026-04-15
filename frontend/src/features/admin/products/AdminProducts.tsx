@@ -187,7 +187,7 @@ export function AdminProducts() {
   const handleWizardPublish = async (wizardProduct: WizardProduct) => {
     try {
       // Validación previa de campos requeridos
-      if (!wizardProduct.name || !wizardProduct.price || !wizardProduct.sku || !(wizardProduct.categoryId || (wizardProduct.categoryIds && wizardProduct.categoryIds.length > 0))) {
+      if (!wizardProduct.name || !wizardProduct.price || !wizardProduct.sku || !wizardProduct.categoryId) {
         toast.error('Completa todos los campos requeridos: nombre, precio, categoría y SKU');
         return;
       }
