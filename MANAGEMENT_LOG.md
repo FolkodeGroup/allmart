@@ -1494,3 +1494,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #797: se cierra issue | 2026-04-14 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #799: se cierra issue | 2026-04-14 |
 | dgimenezdeveloper | 3 | Asignación de issue a FedericoPaal | Issue #763: Implementar defaults inteligentes y autocompletado en formulario de producto | 2026-04-15 |
+| dgimenezdeveloper | 3 | Asignación de issue a FedericoPaal | Issue #764: Implementar wizard de nuevo producto en 3 pasos | 2026-04-15 |
