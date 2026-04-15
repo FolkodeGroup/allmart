@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint . --ext .ts,.tsx",
+    "test": "vitest",
+    "test:run": "vitest --run",
     "preview": "vite preview"
   },
   "dependencies": {

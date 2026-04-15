@@ -6,6 +6,7 @@ import { useAdminProducts } from '../../../context/AdminProductsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminImages } from '../../../context/AdminImagesContext';
+import { useProductDefaults } from '../../../hooks/useProductDefaults';
 import { sanitizeObject } from '../../../utils/security';
 import type { ProductImageItem } from '../../../context/AdminImagesContext';
 import styles from './AdminProductForm.module.css';
@@ -72,6 +73,7 @@ export function AdminProductForm({
     deleteImage,
     clearImages,
   } = useAdminImages();
+  const { getDefaults: _unused, getMostRecentDefaults, setDefaults: setProductDefaults } = useProductDefaults();
 
   const isEdit = !!productId;
 
@@ -124,8 +126,18 @@ export function AdminProductForm({
           loadImages(productId);
         }
       } else {
-        setForm(EMPTY);
-        setInitialForm(EMPTY);
+        // Crear nuevo producto: aplicar defaults persistentes por categoría
+        let newForm = { ...EMPTY };
+
+        // Buscar defaults de la categoría más reciente
+        const recentDefaults = getMostRecentDefaults();
+        if (recentDefaults) {
+          newForm.stock = recentDefaults.stock;
+          newForm.inStock = recentDefaults.visible;
+        }
+
+        setForm(newForm);
+        setInitialForm(newForm);
         clearImages();
       }
       setError('');
@@ -241,6 +253,15 @@ export function AdminProductForm({
     const sanitizedForm = sanitizeObject(form);
 
     try {
+      // Guardar defaults para la categoría seleccionada
+      if (form.category?.id) {
+        setProductDefaults(form.category.id, {
+          stock: form.stock,
+          visible: form.inStock,
+          currency: 'ARS', // Default currency
+        });
+      }
+
       if (isEdit && productId) {
         const { images: _omitted, ...formWithoutImages } = sanitizedForm;
         void _omitted;
