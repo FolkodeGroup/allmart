@@ -11,6 +11,8 @@ import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 import { AdminProductForm } from './AdminProductForm';
 import { MasterDetailLayout } from './MasterDetailLayout';
 import { BulkEditBar } from './BulkEditBar';
+import { ProductWizard } from './productWizard/ProductWizard';
+import type { WizardProduct } from './productWizard/types';
 import * as productsService from './productsService';
 
 // UI Components
@@ -50,6 +52,7 @@ export function AdminProducts() {
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const resetUnsavedChangesFn = () => { };
@@ -64,7 +67,7 @@ export function AdminProducts() {
   const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
 
   // Context and hooks
-  const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
+  const { products, deleteProduct, loading, error, refreshProducts, addProduct, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
   const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
   const token = localStorage.getItem('token') || '';
@@ -179,6 +182,61 @@ export function AdminProducts() {
     }
   }, [deleteProduct]);
 
+  // === WIZARD HANDLERS ===
+
+  const handleWizardPublish = async (wizardProduct: WizardProduct) => {
+    try {
+      // Validación previa de campos requeridos
+      if (!wizardProduct.name || !wizardProduct.price || !wizardProduct.sku || !(wizardProduct.categoryId || (wizardProduct.categoryIds && wizardProduct.categoryIds.length > 0))) {
+        toast.error('Completa todos los campos requeridos: nombre, precio, categoría y SKU');
+        return;
+      }
+
+      // Convert wizard data to admin product format
+      const payload = {
+        name: wizardProduct.name,
+        description: wizardProduct.description,
+        categoryId: wizardProduct.categoryId,
+        price: wizardProduct.price,
+        stock: wizardProduct.stock,
+        inStock: true,
+        shortDescription: wizardProduct.shortDescription,
+        tags: wizardProduct.tags || [],
+        images: wizardProduct.images,
+        sku: wizardProduct.sku,
+        variants: wizardProduct.variants || [],
+      };
+
+      // Create the product through the context
+      await addProduct({
+        name: payload.name || 'Sin nombre',
+        slug: (payload.name || 'sin-nombre').toLowerCase().replace(/\s+/g, '-'),
+        description: payload.description || '',
+        shortDescription: payload.shortDescription || '',
+        price: payload.price || 0,
+        stock: payload.stock || 0,
+        inStock: payload.inStock || false,
+        images: payload.images || [],
+        category: categories.find(c => c.id === payload.categoryId) || { id: payload.categoryId, name: 'Unnamed', slug: '', isVisible: true },
+        categoryIds: payload.categoryId ? [payload.categoryId] : [],
+        tags: payload.tags || [],
+        features: [],
+        rating: 0,
+        reviewCount: 0,
+        sku: payload.sku || '',
+        variants: [],
+      });
+
+      toast.success('¡Producto creado exitosamente!');
+      refreshProducts({ page: 1, limit: 10 });
+      setShowWizard(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al crear producto';
+      toast.error(`Error: ${message}`);
+      throw err;
+    }
+  };
+
   // === BULK EDIT HANDLERS ===
 
   const handleBulkEdit = (data: { price?: number; stock?: number; inStock?: boolean }) => {
@@ -225,7 +283,7 @@ export function AdminProducts() {
       aria-label="Gestión de productos"
     >
       {/* Header */}
-      <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
+      <ProductHeader canCreate={can('products.create')} onNew={handleNew} onWizard={() => setShowWizard(true)} />
 
       {/* Filters */}
       <ProductFilters
@@ -346,6 +404,16 @@ export function AdminProducts() {
           }}
           onUnsavedChanges={setUnsavedChanges}
           resetUnsavedChanges={resetUnsavedChangesFn}
+        />
+      )}
+
+      {/* Product Wizard Modal */}
+      {showWizard && (
+        <ProductWizard
+          open={showWizard}
+          onClose={() => setShowWizard(false)}
+          categories={categories.map(c => ({ id: c.id, name: c.name || 'Unnamed' }))}
+          onPublish={handleWizardPublish}
         />
       )}
 
