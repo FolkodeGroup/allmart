@@ -228,12 +228,50 @@ export function mapAdminProductToPayload(product: any): ProductPayload {
  * - mantiene imágenes, variantes, etc.
  */
 export function getDuplicateProductPayload(product: any): ProductPayload {
-  const payload = mapAdminProductToPayload(product);
+  // Helper para limpiar id/_id
+  const cleanIds = (obj: any) => {
+    const { id, _id, ...rest } = obj;
+    return rest;
+  };
+
+  // SKU temporal único
+  const tempSku = (sku: string | undefined | null) => {
+    if (!sku || sku === '') return `COPY-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    return `${sku}-COPY`;
+  };
+
+  // Limpiar variantes
+  let cleanedVariants = undefined;
+  if (Array.isArray(product.variants)) {
+    cleanedVariants = product.variants.map((variant: any) => {
+      const v = cleanIds(variant);
+      return {
+        ...v,
+        sku: tempSku(v.sku),
+      };
+    });
+  }
+
+  // Limpiar producto principal
+  const cleanedProduct = cleanIds(product);
+
+  // Construir el payload
+  const payload = mapAdminProductToPayload({
+    ...cleanedProduct,
+    name: `${product.name} (Copia)`,
+    sku: tempSku(product.sku),
+    slug: '', // dejar vacío para que el backend genere uno nuevo
+    variants: cleanedVariants,
+  });
+
+  // Asegurar campos requeridos y mantener los datos solicitados
   return {
     ...payload,
     name: `${product.name} (Copia)`,
-    // slug: undefined, // el backend debe generar uno nuevo si se omite
+    sku: tempSku(product.sku),
+    // slug: '',
     status: 'inactive',
+    // price, categoryId/categoryIds, images, description, collections se mantienen por mapAdminProductToPayload
   };
 }
 
