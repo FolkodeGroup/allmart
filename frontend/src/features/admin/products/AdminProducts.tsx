@@ -64,7 +64,17 @@ export function AdminProducts() {
   const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
 
   // Context and hooks
-  const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
+  const { products, deleteProduct, duplicateProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
+    // Duplicar producto
+    const handleDuplicate = useCallback(async (product: any) => {
+      try {
+        await duplicateProduct(product);
+        toast.success('Producto duplicado con éxito');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al duplicar: ${message}`);
+      }
+    }, [duplicateProduct]);
   const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
   const token = localStorage.getItem('token') || '';
@@ -317,6 +327,7 @@ export function AdminProducts() {
             onSelectChange={handleSelectProduct}
             onEdit={can('products.edit') ? handleEdit : undefined}
             onDelete={can('products.delete') ? handleDelete : undefined}
+            onDuplicate={can('products.create') ? handleDuplicate : undefined}
             canEdit={can('products.edit')}
             canDelete={can('products.delete')}
             showCheckbox={can('products.edit') || can('products.delete')}

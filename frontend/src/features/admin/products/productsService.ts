@@ -220,6 +220,22 @@ export function mapAdminProductToPayload(product: any): ProductPayload {
 }
 
 // ─── API pública ──────────────────────────────────────────────────────────────
+/**
+ * Construye el payload para duplicar un producto.
+ * - name: agrega " (Copia)"
+ * - slug: vacío (deja que el backend lo genere)
+ * - status: "inactive"
+ * - mantiene imágenes, variantes, etc.
+ */
+export function getDuplicateProductPayload(product: any): ProductPayload {
+  const payload = mapAdminProductToPayload(product);
+  return {
+    ...payload,
+    name: `${product.name} (Copia)`,
+    // slug: undefined, // el backend debe generar uno nuevo si se omite
+    status: 'inactive',
+  };
+}
 
 /** GET /api/products — Lista paginada de productos activos */
 export async function fetchPublicProducts(
