@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 /**
  * Integration Tests for Public Collections & Promotions API Endpoints
- * 
+ *
  * These tests verify that:
  * 1. API endpoints return correct data structures
  * 2. Query parameters are properly handled
@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('API Integration Tests - Collections & Promotions', () => {
   // Base URL for API - configure via environment variable if needed
-  const API_BASE_URL = 'http://localhost:3000/api';
+  const API_BASE_URL = 'http://localhost:3001/api';
 
   describe('GET /api/collections', () => {
     it('should return array of collections for home display', async () => {
