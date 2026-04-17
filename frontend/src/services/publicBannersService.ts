@@ -24,13 +24,40 @@ export interface PublicBanner {
   updatedAt: string;
 }
 
+// Caché de módulo: evita re-fetches cuando el dato ya fue cargado
+let _bannersCache: PublicBanner[] | null = null;
+let _bannersInflight: Promise<PublicBanner[]> | null = null;
+
 export const publicBannersService = {
   /**
-   * Obtiene todos los banners activos
+   * Obtiene todos los banners activos.
+   * La primera llamada fetcha desde la API; las siguientes devuelven el caché.
    */
   async getActiveBanners(): Promise<PublicBanner[]> {
-    const body = await apiFetch<ApiSuccess<PublicBanner[]>>('/api/banners');
-    return body.data ?? [];
+    if (_bannersCache) return _bannersCache;
+    if (_bannersInflight) return _bannersInflight;
+    _bannersInflight = apiFetch<ApiSuccess<PublicBanner[]>>('/api/banners')
+      .then((body) => {
+        _bannersCache = body.data ?? [];
+        _bannersInflight = null;
+        return _bannersCache;
+      })
+      .catch(() => {
+        _bannersInflight = null;
+        return [];
+      });
+    return _bannersInflight;
+  },
+
+  /** Devuelve el caché actual de forma síncrona (null si aún no se cargó) */
+  getCached(): PublicBanner[] | null {
+    return _bannersCache;
+  },
+
+  /** Fuerza refetch ignorando caché (útil en el admin) */
+  invalidateCache() {
+    _bannersCache = null;
+    _bannersInflight = null;
   },
 
   /**

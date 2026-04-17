@@ -26,6 +26,9 @@ import publicImagesRouter from './public/images';
 import publicCollectionsRouter from './public/collections';
 import publicPromotionsRouter from './public/promotions';
 import publicBannersRouter from './public/banners';
+import publicReviewsRouter from './public/reviews';
+import publicFavoritesRouter from './public/favorites';
+import publicConfigRouter from './public/config';
 import { adminMiddleware } from '../middlewares/auth';
 
 const adminRouter = Router();
@@ -57,6 +60,9 @@ publicRouter.use('/images', publicImagesRouter);
 publicRouter.use('/collections', publicCollectionsRouter);
 publicRouter.use('/promotions', publicPromotionsRouter);
 publicRouter.use('/banners', publicBannersRouter);
+publicRouter.use('/', publicReviewsRouter);     // /api/products/:id/reviews y /api/reviews/:id
+publicRouter.use('/favorites', publicFavoritesRouter);
+publicRouter.use('/config', publicConfigRouter);
 
 // Router principal de la API
 const apiRouter = Router();

@@ -26,6 +26,10 @@ app.get('/', (_req, res) => {
   res.json({ success: true, message: 'Backend Allmart funcionando' });
 });
 
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true, timestamp: new Date().toISOString() });
+});
+
 // ─── Rutas de la API ──────────────────────────────────────────────────────────
 app.use('/api', apiRouter);
 

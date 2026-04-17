@@ -11,9 +11,18 @@ import { Benefits } from '../../features/home/Benefits/Benefits';
 import { AboutSection } from '../../features/home/AboutSection/AboutSection';
 
 export function HomePage() {
-  const [collections, setCollections] = useState<PublicCollection[]>([]);
-  const [banners, setBanners] = useState<PublicBanner[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [collections, setCollections] = useState<PublicCollection[]>(
+    () => publicCollectionsService.getCached() ?? []
+  );
+  const [banners, setBanners] = useState<PublicBanner[]>(
+    () => {
+      const cached = publicBannersService.getCached();
+      return cached ? cached.sort((a, b) => a.displayOrder - b.displayOrder) : [];
+    }
+  );
+  const [loading, setLoading] = useState(
+    () => publicCollectionsService.getCached() === null
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

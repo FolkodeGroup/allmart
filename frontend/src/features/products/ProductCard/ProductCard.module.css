@@ -309,4 +309,23 @@
   .exploreButton {
     width: calc(100% - (2 * var(--space-4)));
   }
+
+  .wishlistBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .body {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .name {
+    font-size: var(--text-base);
+  }
+}
+
+@media (max-width: 375px) {
+  .body {
+    padding: var(--space-2) var(--space-3);
+  }
 }
