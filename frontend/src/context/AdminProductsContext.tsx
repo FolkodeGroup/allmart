@@ -4,7 +4,7 @@
  * Usa llamadas HTTP al backend — sin mocks ni localStorage.
  */
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
@@ -117,12 +117,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     }
   }, [token, categories, showNotification]);
 
-  /* Carga inicial cuando el token o las categorías están disponibles/ comentado porque genera un re-render */
-  //useEffect(() => {
-  //  if (token && categories.length > 0) {
-  //    refreshProducts();
-  //  }
-  //}, [token, categories.length, refreshProducts]);
+  // Carga inicial deshabilitada para evitar doble fetch. El componente principal controla la carga de productos.
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 

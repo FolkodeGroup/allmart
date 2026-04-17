@@ -70,44 +70,12 @@ export function AdminProducts() {
   // Context and hooks
   const { products, deleteProduct, duplicateProduct, addProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
   // Duplicar producto
-  const handleDuplicate = useCallback(async (product: any) => {
-    // Deep copy y generación de SKU irrepetible
-    const uniqueSku = (sku: string | undefined | null) => {
-      const rand = Math.floor(Math.random() * 10000);
-      if (!sku || sku === '') return `COPY-${rand}`;
-      return `${sku}-COPY-${rand}`;
-    };
-    // Limpia id/_id recursivamente
-    const cleanIdsDeep = (obj: any): any => {
-      if (Array.isArray(obj)) return obj.map(cleanIdsDeep);
-      if (obj && typeof obj === 'object') {
-        const { id, _id, ...rest } = obj;
-        Object.keys(rest).forEach(key => {
-          rest[key] = cleanIdsDeep(rest[key]);
-        });
-        return rest;
-      }
-      return obj;
-    };
+  const handleDuplicate = useCallback(async (product: import('../../../context/AdminProductsContext').AdminProduct) => {
     try {
-      // Deep copy y limpieza
-      const baseProduct = cleanIdsDeep(product);
-      // Duplicar variantes con SKU único
-      let cleanedVariants = undefined;
-      if (Array.isArray(baseProduct.variants)) {
-        cleanedVariants = baseProduct.variants.map((variant: any) => ({
-          ...variant,
-          sku: uniqueSku(variant.sku),
-        }));
-      }
-      const duplicated = {
-        ...baseProduct,
-        name: `${product.name} (Copia)`,
-        sku: uniqueSku(product.sku),
-        slug: '',
-        variants: cleanedVariants,
-      };
-      await duplicateProduct(duplicated);
+      // Utiliza el helper oficial para duplicar productos
+      const { getDuplicateProductPayload } = await import('./productsService');
+      const payload = getDuplicateProductPayload(product);
+      await duplicateProduct({ ...product, ...payload });
       toast.success('Producto duplicado con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';

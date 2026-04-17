@@ -88,6 +88,7 @@ export function ProductWizard({
       DraftService.savePersistentDraft(data);
       toast.success('Borrador guardado correctamente');
     } catch (err) {
+      console.error('Error al guardar el borrador', err);
       toast.error('Error al guardar el borrador');
     } finally {
       setIsSavingDraft(false);
@@ -273,9 +274,8 @@ export function ProductWizard({
             return (
               <div
                 key={idx}
-                className={`${styles.step} ${idx + 1 === currentStep ? styles.active : ''} ${
-                  idx + 1 < currentStep ? styles.completed : ''
-                }`}
+                className={`${styles.step} ${idx + 1 === currentStep ? styles.active : ''} ${idx + 1 < currentStep ? styles.completed : ''
+                  }`}
                 role={isClickable ? 'button' : undefined}
                 tabIndex={isClickable ? 0 : -1}
                 onClick={isClickable ? () => setCurrentStep(idx + 1) : undefined}
