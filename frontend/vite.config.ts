@@ -37,12 +37,12 @@ export default defineConfig({
           'vendor-ui': ['@mui/material', '@emotion/react', '@emotion/styled', 'framer-motion'],
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'vendor-charts': ['recharts'],
-          
+
           // Admin feature chunks for better lazy loading
           'admin-products': [
             './src/features/admin/products/AdminProducts',
             './src/features/admin/products/AdminProductCard',
-            './src/features/admin/products/AdminProductForm',
+            './src/features/admin/products/AdminProductFormPage',
           ],
           'admin-categories': ['./src/features/admin/categories/AdminCategories'],
           'admin-orders': ['./src/features/admin/orders/AdminOrders'],

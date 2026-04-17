@@ -1,10 +1,3 @@
-// src/features/admin/products/hooks/useProductForm.ts
-//
-// Extracted from AdminProductForm to decouple form logic from UI.
-// This is the PRIMARY fix for the input-focus bug: by living in a stable
-// hook (not recreated on tab switch), all callbacks keep the same reference
-// across renders, preventing unnecessary child remounts.
-
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { VariantGroup } from '../context/AdminProductsContext';
 import type { AdminProduct } from '../context/AdminProductsContext';
