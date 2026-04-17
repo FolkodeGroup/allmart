@@ -40,6 +40,41 @@
   }
 }
 
+@media (max-width: 480px) {
+  .item {
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .itemImage {
+    width: 80px;
+    height: 80px;
+  }
+
+  .itemRight {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  .heading {
+    font-size: var(--text-xl);
+  }
+
+  .checkoutBtn,
+  .clearBtn {
+    min-height: 48px;
+  }
+
+  .qtyBtn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 /* ── Item List ── */
 .itemList {
   display: flex;

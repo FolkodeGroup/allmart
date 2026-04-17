@@ -14,7 +14,7 @@
 import { prisma } from './config/prisma';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { categories, products } from './moks/mock';
+import { categories, products } from './seeds/mock';
 import { UserRole, ProductStatus, CategoryStatus } from './types';
 
 dotenv.config();

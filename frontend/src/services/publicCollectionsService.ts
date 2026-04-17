@@ -99,13 +99,40 @@ function normalizeCollection(collection: RawPublicCollection): PublicCollection 
   };
 }
 
+// Caché de módulo para colecciones del home
+let _collectionsCache: PublicCollection[] | null = null;
+let _collectionsInflight: Promise<PublicCollection[]> | null = null;
+
 export const publicCollectionsService = {
   /**
-   * Obtiene colecciones para mostrar en home
+   * Obtiene colecciones para mostrar en home.
+   * La primera llamada fetcha desde la API; las siguientes devuelven el caché.
    */
   async getHomeCollections(): Promise<PublicCollection[]> {
-    const collections = await apiFetch<RawPublicCollection[]>('/api/collections');
-    return collections.map(normalizeCollection);
+    if (_collectionsCache) return _collectionsCache;
+    if (_collectionsInflight) return _collectionsInflight;
+    _collectionsInflight = apiFetch<RawPublicCollection[]>('/api/collections')
+      .then((collections) => {
+        _collectionsCache = collections.map(normalizeCollection);
+        _collectionsInflight = null;
+        return _collectionsCache;
+      })
+      .catch(() => {
+        _collectionsInflight = null;
+        return [];
+      });
+    return _collectionsInflight;
+  },
+
+  /** Devuelve el caché actual de forma síncrona (null si aún no se cargó) */
+  getCached(): PublicCollection[] | null {
+    return _collectionsCache;
+  },
+
+  /** Invalida caché (usar tras editar colecciones en el admin) */
+  invalidateCache() {
+    _collectionsCache = null;
+    _collectionsInflight = null;
   },
 
   /**

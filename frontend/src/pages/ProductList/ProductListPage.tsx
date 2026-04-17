@@ -8,12 +8,11 @@ import {
 } from '../../services/productsService';
 import { fetchPublicCategories } from '../../services/categoriesService';
 import { publicCollectionsService } from '../../services/publicCollectionsService';
+import { configService, type SortOption } from '../../services/configService';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductListPage.module.css';
 
-type SortOption = { label: string; value: string };
-
-const SORT_OPTIONS: SortOption[] = [
+const FALLBACK_SORT_OPTIONS: SortOption[] = [
   { label: 'Relevancia', value: 'relevance' },
   { label: 'Menor precio', value: 'price_asc' },
   { label: 'Mayor precio', value: 'price_desc' },
@@ -42,6 +41,7 @@ export function ProductListPage() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [sortOptions, setSortOptions] = useState<SortOption[]>(FALLBACK_SORT_OPTIONS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeDiscounts, setActiveDiscounts] = useState<Set<string>>(new Set());
@@ -51,6 +51,13 @@ export function ProductListPage() {
     const next = urlSubCategory || urlCategory;
     setSelectedCategory((prev) => (prev === next ? prev : next));
   }, [urlCategory, urlSubCategory]);
+
+  /* Cargar sort options dinámicas */
+  useEffect(() => {
+    configService.getSortOptions()
+      .then(setSortOptions)
+      .catch(() => setSortOptions(FALLBACK_SORT_OPTIONS));
+  }, []);
 
   /* Cargar categorías una sola vez */
   useEffect(() => {
@@ -300,7 +307,7 @@ export function ProductListPage() {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                {SORT_OPTIONS.map((opt) => (
+                {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>

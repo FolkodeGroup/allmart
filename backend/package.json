@@ -17,7 +17,10 @@
     "seed": "ts-node-dev --transpile-only src/seed.ts",
     "seed:demo": "ts-node-dev --transpile-only src/seed_demo.ts",
     "seed:prod": "node dist/seed.js",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
@@ -52,6 +55,7 @@
     "jiti": "^2.6.1",
     "prisma": "^7.4.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.4"
   }
 }
