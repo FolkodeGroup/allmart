@@ -312,7 +312,7 @@ export function ProductWizard({
           >
             {currentStep === 1 && (
               <Step1BasicInfo
-                ref={step1Ref as any}
+                ref={step1Ref}
                 data={data}
                 onDataChange={handleDataChange}
                 categories={categories}
@@ -321,7 +321,7 @@ export function ProductWizard({
 
             {currentStep === 2 && (
               <Step2VariantsImages
-                ref={step2Ref as any}
+                ref={step2Ref}
                 data={data}
                 onDataChange={handleDataChange}
                 categories={categories}
