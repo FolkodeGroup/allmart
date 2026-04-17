@@ -4,14 +4,13 @@
  */
 
 import { Decimal } from '@prisma/client/runtime/client';
-import { Promotion, PromotionType, PromotionRule, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
 
 export interface CreatePromotionDTO {
   name: string;
   description?: string;
-  type: PromotionType;
+  type: string;
   value: number;
   startDate: Date;
   endDate: Date;
@@ -28,7 +27,7 @@ export interface CreatePromotionDTO {
 export interface UpdatePromotionDTO {
   name?: string;
   description?: string;
-  type?: PromotionType;
+  type?: string;
   value?: number;
   startDate?: Date;
   endDate?: Date;
@@ -62,7 +61,7 @@ export interface PromotionResponseDTO {
   };
 }
 
-function toPromotionDTO(promotion: Promotion): PromotionResponseDTO {
+function toPromotionDTO(promotion: any): PromotionResponseDTO {
   return {
     id: promotion.id,
     name: promotion.name,
@@ -91,7 +90,7 @@ export async function getAllPromotions(
   data: PromotionResponseDTO[];
   total: number;
 }> {
-  const where: Prisma.PromotionWhereInput = {};
+  const where: Record<string, any> = {};
 
   if (filters?.isActive !== undefined) {
     where.isActive = filters.isActive;
@@ -135,11 +134,11 @@ export async function getPromotionById(id: string): Promise<any> {
 
   const dto = toPromotionDTO(promotion);
   const productIds = promotion.promotionRules
-    .filter((r) => r.productId)
-    .map((r) => r.productId!) as string[];
+    .filter((r: any) => r.productId)
+    .map((r: any) => r.productId!) as string[];
   const categoryIds = promotion.promotionRules
-    .filter((r) => r.categoryId)
-    .map((r) => r.categoryId!) as string[];
+    .filter((r: any) => r.categoryId)
+    .map((r: any) => r.categoryId!) as string[];
 
   return { ...dto, rules: { productIds, categoryIds } };
 }
@@ -182,7 +181,7 @@ export async function createPromotion(dto: CreatePromotionDTO): Promise<any> {
     data: {
       name: dto.name,
       description: dto.description ?? null,
-      type: dto.type,
+      type: dto.type as any,
       value: new Decimal(dto.value),
       startDate: new Date(dto.startDate),
       endDate: new Date(dto.endDate),
@@ -252,7 +251,7 @@ export async function updatePromotion(
     data: {
       name: dto.name,
       description: dto.description,
-      type: dto.type,
+      type: dto.type ? (dto.type as any) : undefined,
       value: dto.value !== undefined ? new Decimal(dto.value) : undefined,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
@@ -305,11 +304,11 @@ export async function updatePromotion(
 
   const result = toPromotionDTO(updated);
   const productIds = updated.promotionRules
-    .filter((r) => r.productId)
-    .map((r) => r.productId!) as string[];
+    .filter((r: any) => r.productId)
+    .map((r: any) => r.productId!) as string[];
   const categoryIds = updated.promotionRules
-    .filter((r) => r.categoryId)
-    .map((r) => r.categoryId!) as string[];
+    .filter((r: any) => r.categoryId)
+    .map((r: any) => r.categoryId!) as string[];
 
   return { ...result, rules: { productIds, categoryIds } };
 }
@@ -381,11 +380,11 @@ export async function duplicatePromotion(id: string): Promise<any> {
 
   const dto = toPromotionDTO(result);
   const productIds = result.promotionRules
-    .filter((r) => r.productId)
-    .map((r) => r.productId!) as string[];
+    .filter((r: any) => r.productId)
+    .map((r: any) => r.productId!) as string[];
   const categoryIds = result.promotionRules
-    .filter((r) => r.categoryId)
-    .map((r) => r.categoryId!) as string[];
+    .filter((r: any) => r.categoryId)
+    .map((r: any) => r.categoryId!) as string[];
 
   return { ...dto, rules: { productIds, categoryIds } };
 }
@@ -409,12 +408,12 @@ export async function getProductsByPromotion(promotionId: string): Promise<{
   }
 
   const directProductIds = promotion.promotionRules
-    .filter((r) => r.productId)
-    .map((r) => r.productId!) as string[];
+    .filter((r: any) => r.productId)
+    .map((r: any) => r.productId!) as string[];
 
   const categoryIds = promotion.promotionRules
-    .filter((r) => r.categoryId)
-    .map((r) => r.categoryId!) as string[];
+    .filter((r: any) => r.categoryId)
+    .map((r: any) => r.categoryId!) as string[];
 
   const directProducts = directProductIds.length > 0
     ? await prisma.product.findMany({
@@ -437,15 +436,15 @@ export async function getProductsByPromotion(promotionId: string): Promise<{
         where: { categoryId: { in: categoryIds }, id: { notIn: directProductIds } },
         select: { id: true, name: true, slug: true, price: true, status: true, categoryId: true },
         orderBy: { name: 'asc' },
-      })).map((p) => ({
+      })).map((p: any) => ({
         ...p,
-        assignedViaCategory: categories.find((c) => c.id === p.categoryId)?.name ?? '',
+        assignedViaCategory: categories.find((c: any) => c.id === p.categoryId)?.name ?? '',
       }))
     : [];
 
   return {
-    directProducts: directProducts.map((p) => ({ ...p, price: p.price.toNumber() })),
-    categoryProducts: categoryProducts.map((p) => ({ ...p, price: p.price.toNumber() })),
+    directProducts: directProducts.map((p: any) => ({ ...p, price: p.price.toNumber() })),
+    categoryProducts: categoryProducts.map((p: any) => ({ ...p, price: p.price.toNumber() })),
     categories,
   };
 }
@@ -513,11 +512,11 @@ export async function getPromotionsMatrix(): Promise<Array<{
     orderBy: [{ isActive: 'desc' }, { priority: 'desc' }, { startDate: 'asc' }],
   });
 
-  return promotions.map((p) => {
-    const directRules = p.promotionRules.filter((r) => r.productId);
-    const categoryRules = p.promotionRules.filter((r) => r.categoryId);
+  return promotions.map((p: any) => {
+    const directRules = p.promotionRules.filter((r: any) => r.productId);
+    const categoryRules = p.promotionRules.filter((r: any) => r.categoryId);
     const productsViaCategories = categoryRules.reduce(
-      (sum, r) => sum + (r.category?._count?.products ?? 0), 0
+      (sum: number, r: any) => sum + (r.category?._count?.products ?? 0), 0
     );
     return {
       id: p.id, name: p.name, type: p.type, value: p.value.toNumber(),
