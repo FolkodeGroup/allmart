@@ -236,8 +236,24 @@ jobs:
             docker pull ${{ env.BACKEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
             docker pull ${{ env.FRONTEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
 
+            echo "Limpiando contenedores y redes huérfanos..."
+            # Eliminar contenedores específicos si existen para evitar conflictos
+            if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-db$'; then
+              docker rm -f allmart-prod-db 2>/dev/null || true
+            fi
+            if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-backend$'; then
+              docker rm -f allmart-prod-backend 2>/dev/null || true
+            fi
+            if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-frontend$'; then
+              docker rm -f allmart-prod-frontend 2>/dev/null || true
+            fi
+            # Eliminar red si existe
+            if docker network ls --format '{{.Name}}' | grep -q '^allmart_allmart-prod-network$'; then
+              docker network rm allmart_allmart-prod-network 2>/dev/null || true
+            fi
+
             echo "Reiniciando contenedores..."
-            docker compose -f docker-compose.prod.yml down --remove-orphans || true
+            docker compose -f docker-compose.prod.yml down --remove-orphans -v 2>/dev/null || true
             docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 240
 
             echo "Estado final:"
