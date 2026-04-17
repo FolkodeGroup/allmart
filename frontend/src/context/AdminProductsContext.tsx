@@ -4,7 +4,7 @@
  * Usa llamadas HTTP al backend — sin mocks ni localStorage.
  */
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
@@ -78,7 +78,7 @@ interface AdminProductsContextType {
 // ─── Contexto ─────────────────────────────────────────────────────────────────
 
 const AdminProductsContext = createContext<AdminProductsContextType | undefined>(undefined);
-
+export default AdminProductsContext
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AdminProductsProvider({ children }: { children: ReactNode }) {
@@ -291,10 +291,3 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAdminProducts() {
-  const context = useContext(AdminProductsContext);
-  if (context === undefined) {
-    throw new Error('useAdminProducts debe usarse dentro de un AdminProductsProvider');
-  }
-  return context;
-}
