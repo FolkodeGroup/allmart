@@ -1,6 +1,6 @@
 import React from 'react';
 import type { AdminActivityLog } from '../services/adminActivityLogService';
-import { useAdminProducts } from '../context/AdminProductsContext';
+import { useAdminProducts } from '../context/useAdminProductsContext';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 interface ActivityItemProps {

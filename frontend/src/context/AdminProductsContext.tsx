@@ -290,4 +290,3 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     </AdminProductsContext.Provider>
   );
 }
-

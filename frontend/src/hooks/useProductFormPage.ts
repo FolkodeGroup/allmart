@@ -9,7 +9,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { VariantGroup } from '../context/AdminProductsContext';
 import type { AdminProduct } from '../context/AdminProductsContext';
 import type { ProductImageItem } from '../context/AdminImagesContext';
-import { useAdminProducts } from '../context/useAdminProductContext';
+import { useAdminProducts } from '../context/useAdminProductsContext';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useAdminCategories } from '../context/AdminCategoriesContext';
 import { useAdminImages } from '../context/AdminImagesContext';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Palette, AlertCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
@@ -145,7 +145,7 @@ export function AdminVariants() {
   // Nuevas funciones para edición avanzada
   const handleDuplicateGroup = async (group: any) => {
     if (!selectedProductId) return;
-    let baseName = group.name + ' (Copia)';
+    const baseName = group.name + ' (Copia)';
     let name = baseName;
     let i = 2;
     while (variants.some((v: any) => v.name === name)) {

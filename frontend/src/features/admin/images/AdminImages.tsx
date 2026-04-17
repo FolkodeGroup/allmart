@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Image as ImageIcon, Search, Plus, AlertCircle, Trash2, Edit2, X, Check } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { useAdminImages } from '../../../context/AdminImagesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
@@ -11,8 +11,8 @@ import styles from './AdminImages.module.css';
 
 export function AdminImages() {
   const { products } = useAdminProducts();
-    // Estado de carga manual (usa el de contexto)
-    // Si quieres forzar skeletons, cambia el valor de isLoading en el contexto o usa una variable local diferente.
+  // Estado de carga manual (usa el de contexto)
+  // Si quieres forzar skeletons, cambia el valor de isLoading en el contexto o usa una variable local diferente.
   const {
     images,
     selectedProductId,
@@ -96,7 +96,7 @@ export function AdminImages() {
       setUploadError('El archivo debe ser una imagen');
       return;
     }
-    
+
     // Validación de tamaño (ej: 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setUploadError('La imagen no debe superar los 5MB');
@@ -189,9 +189,9 @@ export function AdminImages() {
           <span>🖼️</span> Imágenes de producto
         </h1>
         </div> */}
-        <p className={sectionStyles.subtitle}>
-          Subí imágenes desde tu dispositivo — el backend las convierte a WebP y genera miniatura automáticamente.
-        </p>
+      <p className={sectionStyles.subtitle}>
+        Subí imágenes desde tu dispositivo — el backend las convierte a WebP y genera miniatura automáticamente.
+      </p>
 
       <div className={styles.layout}>
         {/* ── Panel izquierdo: selector de producto ── */}
@@ -209,7 +209,7 @@ export function AdminImages() {
           />
           <ul role="listbox" aria-label="Seleccionar producto" className={styles.productList}>
             {filtered.length === 0 ? (
-              <EmptyState 
+              <EmptyState
                 icon={<Search size={32} />}
                 title="Sin resultados"
                 description="No hay productos con ese nombre o SKU."
@@ -313,8 +313,8 @@ export function AdminImages() {
                             className={`${styles.editInput} ${editError ? styles.inputError : ''}`}
                             value={editingAlt}
                             onChange={e => {
-                                setEditingAlt(e.target.value);
-                                if (editError) setEditError('');
+                              setEditingAlt(e.target.value);
+                              if (editError) setEditError('');
                             }}
                             placeholder="Texto alternativo (alt)"
                             ref={editInputRef}

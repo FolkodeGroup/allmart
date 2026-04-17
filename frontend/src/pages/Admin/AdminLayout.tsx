@@ -4,7 +4,7 @@ import type { MouseEvent as ReactMouseEvent } from "react";
 import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
-import { useAdminProducts } from "../../context/AdminProductsContext";
+import { useAdminProducts } from "../../context/useAdminProductsContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
 import { Button } from '../../components/ui/Button/Button';
 import { AdminLoadingFallback } from '../../components/ui/AdminLoadingFallback';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styles from './ProductDetailVariants.module.css';
 import { useAdminVariants } from '../../../../context/AdminVariantsContext';
-import { useAdminProducts } from '../../../../context/AdminProductsContext';
+import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
 import { VariantForm } from '../../variants/components/VariantForm';
 import { VariantHeader } from '../../variants/components/VariantHeader';
@@ -43,7 +43,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   // Handlers para acciones inline
   type VariantGroup = { name: string; values: string[] };
   const handleDuplicate = async (group: VariantGroup) => {
-    let baseName = group.name + ' (Copia)';
+    const baseName = group.name + ' (Copia)';
     let name = baseName;
     let i = 2;
     while (variants.some((v: VariantGroup) => v.name === name)) {

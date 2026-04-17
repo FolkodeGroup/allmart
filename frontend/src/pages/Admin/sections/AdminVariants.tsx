@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Palette, Box, Search, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { useAdminVariants } from '../../../context/AdminVariantsContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';

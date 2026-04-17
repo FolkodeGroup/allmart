@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
-import { useAdminProducts } from "../../context/AdminProductsContext";
+import { useAdminProducts } from "../../context/useAdminProductsContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
 
 // UI Components
