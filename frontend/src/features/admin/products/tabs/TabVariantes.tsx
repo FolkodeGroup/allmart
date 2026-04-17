@@ -5,7 +5,7 @@ import type { TabVariantesProps } from '../components/types';
 export type TabVariantesRef = {
     validate: () => Record<string, string>;
 };
-import styles from '../AdminProductForm.module.css';
+import styles from '../AdminProductFormPage.module.css';
 
 export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(function TabVariantes({
     form,

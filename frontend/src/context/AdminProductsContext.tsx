@@ -117,12 +117,12 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     }
   }, [token, categories, showNotification]);
 
-  /* Carga inicial cuando el token o las categorías están disponibles */
-  useEffect(() => {
-    if (token && categories.length > 0) {
-      refreshProducts();
-    }
-  }, [token, categories.length, refreshProducts]);
+  /* Carga inicial cuando el token o las categorías están disponibles/ comentado porque genera un re-render */
+  //useEffect(() => {
+  //  if (token && categories.length > 0) {
+  //    refreshProducts();
+  //  }
+  //}, [token, categories.length, refreshProducts]);
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 
