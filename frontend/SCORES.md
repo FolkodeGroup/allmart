@@ -1,16 +1,91 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 16904 |
-| FedericoPaal | 3800 |
-| Mau-bar-iva | 1925 |
+| dgimenezdeveloper | 18636 |
+| FedericoPaal | 4095 |
+| Mau-bar-iva | 2040 |
 | Nahuel-Dalesio | 1630 |
-| CelinaJP | 1280 |
-| agustin-ovejero | 1100 |
+| CelinaJP | 1378 |
+| agustin-ovejero | 1132 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| agustin-ovejero | 32 | Issue | Implementar atajos de productividad (duplicar producto) | 2026-04-17 |
+| dgimenezdeveloper | 1000 | Issue | Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #811: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #809: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #811: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #809: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #807: 762 implementar atajos de productividad duplicar producto | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #806: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 3 | Gestión | Creación de issue — Issue #808: Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #808: Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #807: 762 implementar atajos de productividad duplicar producto | 2026-04-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #806: 🔄 Registrar puntaje de gestión | 2026-04-15 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #805: 🔄 Registrar puntaje de gestión | 2026-04-15 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #803: 🔄 Registrar puntaje de gestión | 2026-04-15 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #801: 🔄 Registrar puntaje de gestión | 2026-04-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #805: 🔄 Registrar puntaje de gestión | 2026-04-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #804: 764 implementar wizard de nuevo producto en 3 pasos | 2026-04-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #803: 🔄 Registrar puntaje de gestión | 2026-04-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #802: 763 implementar defaults inteligentes y autocompletado en formulario de producto | 2026-04-15 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #801: 🔄 Registrar puntaje de gestión | 2026-04-15 |
+| FedericoPaal | 70 | Issue | Implementar wizard de nuevo producto en 3 pasos | 2026-04-15 |
+| FedericoPaal | 45 | Issue | Implementar defaults inteligentes y autocompletado en formulario de producto | 2026-04-15 |
+| CelinaJP | 48 | Issue | Integrar gestión de imágenes dentro de tab de Producto | 2026-04-14 |
+| CelinaJP | 50 | Issue | Integrar gestión de variantes dentro de tab de Producto | 2026-04-14 |
+| dgimenezdeveloper | 80 | Issue | Mejorar filtro de búsqueda por cliente, email y número de pedido | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #800: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #799: se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #798: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #797: se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #796: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #795: 415 mejorar filtro de búsqueda por cliente email y número de pedido | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #794: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #793: se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #792: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #791: Se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #790: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #789: Se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #788: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #787: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #784: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #800: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #799: se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #798: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #797: se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #796: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #795: 415 mejorar filtro de búsqueda por cliente email y número de pedido | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #794: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #793: se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #792: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #791: Se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #790: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #789: Se cierra issue | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #788: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #787: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #786: 759 dividir adminproductform en tabs reutilizables para master detail | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #785: Integre la  gestión de imágenes dentro de tab de Producto | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #784: 🔄 Registrar puntaje de gestión | 2026-04-14 |
+| dgimenezdeveloper | 10 | Gestión | Revisión de PR — Solicitud de cambios — PR #783: 760 integrar gestión de variantes dentro de tab de producto | 2026-04-14 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #783: 760 integrar gestión de variantes dentro de tab de producto | 2026-04-14 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #415: Mejorar filtro de búsqueda por cliente, email y número de pedido | 2026-04-14 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a FolkodeGroup — Issue #415: Mejorar filtro de búsqueda por cliente, email y número de pedido | 2026-04-14 |
+| FedericoPaal | 60 | Issue | Permitir edición rápida de datos de pedido (cliente, productos, total) | 2026-04-14 |
+| FedericoPaal | 70 | Issue | Expandir vista de categorías a toda la pantalla usando Grid/Flexbox | 2026-04-14 |
+| FedericoPaal | 50 | Issue | Implementar confirmación de cambios antes de salir de la vista de categorías | 2026-04-14 |
+| Mau-bar-iva | 55 | Issue | Dividir AdminProductForm en tabs reutilizables para master-detail | 2026-04-14 |
+| Mau-bar-iva | 60 | Issue | Mejorar layout responsivo de reportes con Grid/Flexbox | 2026-04-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #782: 🔄 Registrar puntaje de gestión | 2026-04-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #782: 🔄 Registrar puntaje de gestión | 2026-04-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #781: Instale dependencias y hice las migraciones para la base de datos | 2026-04-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #780: 🔄 Actualización automática de puntajes semanal | 2026-04-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #780: 🔄 Actualización automática de puntajes semanal | 2026-04-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #779: 🔄 Registrar puntaje de gestión | 2026-04-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #780: 🔄 Actualización automática de puntajes semanal | 2026-04-12 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #779: 🔄 Registrar puntaje de gestión | 2026-04-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #778: 🔄 Actualización automática de puntajes semanal | 2026-04-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #772: 🔄 Registrar puntaje de gestión | 2026-04-11 |
