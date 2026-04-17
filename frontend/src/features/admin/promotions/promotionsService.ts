@@ -35,14 +35,41 @@ export interface PaginatedPromotions {
   };
 }
 
+export interface PromotionProduct {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  status: string;
+  categoryId: string | null;
+}
+
+export interface PromotionProductsResult {
+  directProducts: PromotionProduct[];
+  categoryProducts: (PromotionProduct & { assignedViaCategory: string })[];
+  categories: { id: string; name: string; slug: string }[];
+}
+
+export interface PromotionMatrixItem {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  priority: number;
+  directProductCount: number;
+  categoryCount: number;
+  totalAffectedProducts: number;
+}
+
 export const promotionsService = {
   async getAll(page = 1, limit = 10, search?: string, isActive?: boolean): Promise<PaginatedPromotions> {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (search) params.append('q', search);
     if (isActive !== undefined) params.append('isActive', String(isActive));
     const response = await apiFetch<any>(`/api/admin/promotions?${params}`);
-    // El servidor devuelve { success: true, data: { data: [...], pagination: {...} } }
-    // Extraemos el contenido de data
     return response.data;
   },
 
@@ -75,6 +102,27 @@ export const promotionsService = {
 
   async duplicate(id: string): Promise<Promotion> {
     const response = await apiFetch<any>(`/api/admin/promotions/${id}/duplicate`, { method: 'POST' });
+    return response.data;
+  },
+
+  async getProducts(id: string): Promise<PromotionProductsResult> {
+    const response = await apiFetch<any>(`/api/admin/promotions/${id}/products`);
+    return response.data;
+  },
+
+  async assign(
+    id: string,
+    payload: { mode: 'add' | 'remove' | 'replace'; productIds?: string[]; categoryIds?: string[] }
+  ): Promise<void> {
+    await apiFetch(`/api/admin/promotions/${id}/assign`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  },
+
+  async getMatrix(): Promise<PromotionMatrixItem[]> {
+    const response = await apiFetch<any>('/api/admin/promotions/matrix');
     return response.data;
   },
 };

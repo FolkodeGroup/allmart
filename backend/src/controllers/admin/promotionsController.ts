@@ -111,3 +111,60 @@ export async function duplicate(
     next(err);
   }
 }
+
+/**
+ * GET /api/admin/promotions/:id/products
+ * Devuelve los productos asignados (directo y vía categoría) a una promoción.
+ */
+export async function getProducts(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await promotionsService.getProductsByPromotion(req.params.id);
+    sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/admin/promotions/:id/assign
+ * Body: { mode: 'add'|'remove'|'replace', productIds?: string[], categoryIds?: string[] }
+ * Asigna/desasigna productos o categorías a una promoción en bloque.
+ */
+export async function assignProducts(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { mode, productIds, categoryIds } = req.body;
+    if (!['add', 'remove', 'replace'].includes(mode)) {
+      res.status(400).json({ message: 'mode debe ser add, remove o replace' });
+      return;
+    }
+    await promotionsService.bulkAssignToPromotion(req.params.id, { mode, productIds, categoryIds });
+    sendSuccess(res, null, 200, 'Asignación actualizada');
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/admin/promotions/matrix
+ * Resumen de todas las promociones con conteos de productos afectados.
+ */
+export async function matrix(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await promotionsService.getPromotionsMatrix();
+    sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+}

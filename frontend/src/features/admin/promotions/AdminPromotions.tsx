@@ -1,17 +1,22 @@
 /**
  * features/admin/promotions/AdminPromotions.tsx
- * Página principal de gestión de promociones.
+ * Página principal de gestión de promociones — layout de 2 pestañas:
+ *   Pestaña 1: Campañas (CRUD de promociones)
+ *   Pestaña 2: Matriz de Productos (vista de qué productos cubre cada promo)
  */
 
 import React, { useState, useEffect } from 'react';
 import type { Promotion } from './promotionsService';
 import { promotionsService } from './promotionsService';
 import AdminPromotionForm from './AdminPromotionForm';
+import AdminPromotionMatrix from './AdminPromotionMatrix';
 import styles from './AdminPromotions.module.css';
 
 type ViewMode = 'list' | 'form';
+type MainTab = 'campaigns' | 'matrix';
 
 const AdminPromotions: React.FC = () => {
+  const [mainTab, setMainTab] = useState<MainTab>('campaigns');
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
@@ -99,121 +104,146 @@ const AdminPromotions: React.FC = () => {
         </button>
       </div>
 
-      <div className={styles.filters}>
-        <input
-          type="text"
-          placeholder="Buscar promociones..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className={styles.searchInput}
-        />
-        <select
-          value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
-          onChange={(e) => {
-            setFilterActive(
-              e.target.value === '' ? undefined : e.target.value === 'true'
-            );
-            setPage(1);
-          }}
-          className={styles.selectFilter}
+      {/* ─── Main Tabs ─────────────────────────────────────────────── */}
+      <div className={styles.mainTabs}>
+        <button
+          className={mainTab === 'campaigns' ? styles.mainTabActive : styles.mainTab}
+          onClick={() => setMainTab('campaigns')}
         >
-          <option value="">Todas</option>
-          <option value="true">Activas</option>
-          <option value="false">Inactivas</option>
-        </select>
+          📣 Campañas
+        </button>
+        <button
+          className={mainTab === 'matrix' ? styles.mainTabActive : styles.mainTab}
+          onClick={() => setMainTab('matrix')}
+        >
+          🗂️ Matriz de Productos
+        </button>
       </div>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {/* ─── Tab: Campaigns ────────────────────────────────────────── */}
+      {mainTab === 'campaigns' && (
+        <>
+          <div className={styles.filters}>
+            <input
+              type="text"
+              placeholder="Buscar promociones..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className={styles.searchInput}
+            />
+            <select
+              value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
+              onChange={(e) => {
+                setFilterActive(
+                  e.target.value === '' ? undefined : e.target.value === 'true'
+                );
+                setPage(1);
+              }}
+              className={styles.selectFilter}
+            >
+              <option value="">Todas</option>
+              <option value="true">Activas</option>
+              <option value="false">Inactivas</option>
+            </select>
+          </div>
 
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Tipo</th>
-              <th>Valor</th>
-              <th>Inicio</th>
-              <th>Fin</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7} className={styles.loading}>
-                  Cargando...
-                </td>
-              </tr>
-            ) : promotions.length === 0 ? (
-              <tr>
-                <td colSpan={7} className={styles.empty}>
-                  No hay promociones
-                </td>
-              </tr>
-            ) : (
-              promotions.map((promo) => (
-                <tr key={promo.id}>
-                  <td>
-                    <strong>{promo.name}</strong>
-                  </td>
-                  <td>{promo.type === 'percentage' ? '%' : promo.type === 'fixed' ? '$' : 'BOGO'}</td>
-                  <td>{promo.value}</td>
-                  <td>{new Date(promo.startDate).toLocaleDateString()}</td>
-                  <td>{new Date(promo.endDate).toLocaleDateString()}</td>
-                  <td>
-                    <span
-                      className={promo.isActive ? styles.badgeActive : styles.badgeInactive}
-                    >
-                      {promo.isActive ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </td>
-                  <td className={styles.actions}>
-                    <button onClick={() => handleEdit(promo)} className={styles.btnSmall}>
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDuplicate(promo.id)}
-                      className={styles.btnSmallSecondary}
-                    >
-                      Duplicar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(promo.id)}
-                      className={styles.btnSmallDanger}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
+          {error && <div className={styles.error}>{error}</div>}
+
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                  <th>Inicio</th>
+                  <th>Fin</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className={styles.loading}>
+                      Cargando...
+                    </td>
+                  </tr>
+                ) : promotions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className={styles.empty}>
+                      No hay promociones
+                    </td>
+                  </tr>
+                ) : (
+                  promotions.map((promo) => (
+                    <tr key={promo.id}>
+                      <td>
+                        <strong>{promo.name}</strong>
+                        {promo.description && (
+                          <div className={styles.tableSubtext}>{promo.description}</div>
+                        )}
+                      </td>
+                      <td>{promo.type === 'percentage' ? '%' : promo.type === 'fixed' ? '$' : 'BOGO'}</td>
+                      <td>{promo.value}</td>
+                      <td>{new Date(promo.startDate).toLocaleDateString()}</td>
+                      <td>{new Date(promo.endDate).toLocaleDateString()}</td>
+                      <td>
+                        <span className={promo.isActive ? styles.badgeActive : styles.badgeInactive}>
+                          {promo.isActive ? 'Activa' : 'Inactiva'}
+                        </span>
+                      </td>
+                      <td className={styles.actions}>
+                        <button onClick={() => handleEdit(promo)} className={styles.btnSmall}>
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDuplicate(promo.id)}
+                          className={styles.btnSmallSecondary}
+                        >
+                          Duplicar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(promo.id)}
+                          className={styles.btnSmallDanger}
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      <div className={styles.pagination}>
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-          className={styles.btnSmall}
-        >
-          Anterior
-        </button>
-        <span>
-          Página {page} de {pages}
-        </span>
-        <button
-          disabled={page === pages}
-          onClick={() => setPage(page + 1)}
-          className={styles.btnSmall}
-        >
-          Siguiente
-        </button>
-      </div>
+          <div className={styles.pagination}>
+            <button
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              className={styles.btnSmall}
+            >
+              Anterior
+            </button>
+            <span>
+              Página {page} de {pages}
+            </span>
+            <button
+              disabled={page === pages}
+              onClick={() => setPage(page + 1)}
+              className={styles.btnSmall}
+            >
+              Siguiente
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ─── Tab: Matrix ───────────────────────────────────────────── */}
+      {mainTab === 'matrix' && <AdminPromotionMatrix />}
     </div>
   );
 };
