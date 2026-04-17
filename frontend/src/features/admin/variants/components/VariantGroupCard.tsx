@@ -4,12 +4,7 @@ import { AlertTriangle } from 'lucide-react';
 import { VariantValueChip } from './VariantValueChip';
 import styles from '../AdminVariants.module.css';
 
-interface VariantGroup {
-  id: string;
-  name: string;
-  values: string[];
-  isActive: boolean;
-}
+import type { VariantGroup } from '../../../../context/AdminVariantsContext';
 
 interface VariantGroupCardProps {
   group: VariantGroup;

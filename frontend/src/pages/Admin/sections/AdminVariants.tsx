@@ -208,7 +208,7 @@ export function AdminVariants() {
   return (
     <div className={sectionStyles.page} role="main" aria-label="Gestión de variantes">
       <div className={sectionStyles.header}>
-        <h1 className={sectionStyles.title} tabIndex={0} aria-label="Variantes, administración de grupos y valores">
+        <h1 className={sectionStyles.title} aria-label="Variantes, administración de grupos y valores">
           <span role="img" aria-label="Paleta de colores">🎨</span> Variantes
         </h1>
         <p className={sectionStyles.subtitle}>
@@ -305,7 +305,7 @@ export function AdminVariants() {
                   {showBulkEdit && (
                     <div className={styles.bulkEditModalOverlay} role="dialog" aria-modal="true" aria-label="Edición masiva de variantes">
                       <div className={styles.bulkEditModal}>
-                        <h3 tabIndex={0}>Edición masiva de variantes</h3>
+                        <h3>Edición masiva de variantes</h3>
                         <form onSubmit={handleBulkEditSubmit}>
                           <div className={styles.bulkEditField}>
                             <label htmlFor="bulk-edit-name">Nombre (opcional):</label>
@@ -500,7 +500,7 @@ export function AdminVariants() {
                           <span className={styles.noValues}>Sin valores aún</span>
                         )}
                         {group.values.map(val => (
-                          <span key={val} className={styles.valueChip} aria-label={`Valor ${val}`} tabIndex={0}>
+                          <span key={val} className={styles.valueChip} aria-label={`Valor ${val}`}>
                             {val}
                             {can('variants.delete') && (
                               <Button

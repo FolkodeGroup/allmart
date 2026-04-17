@@ -20,6 +20,7 @@ import {
 } from './components';
 import { VariantsFilters } from './components/VariantFilters';
 import { useUnsavedChanges } from '../../../context/useUnsavedChanges';
+import type { VariantGroup } from '../../../context/AdminVariantsContext';
 
 export function AdminVariants() {
   // Estados para feedback UX
@@ -143,12 +144,12 @@ export function AdminVariants() {
   };
 
   // Nuevas funciones para edición avanzada
-  const handleDuplicateGroup = async (group: any) => {
+  const handleDuplicateGroup = async (group: VariantGroup) => {
     if (!selectedProductId) return;
     const baseName = group.name + ' (Copia)';
     let name = baseName;
     let i = 2;
-    while (variants.some((v: any) => v.name === name)) {
+    while (variants.some((v) => v.name === name)) {
       name = `${baseName} ${i++}`;
     }
     try {
@@ -169,7 +170,7 @@ export function AdminVariants() {
   };
 
   const handleOpenEditModal = (groupId: string) => {
-    const group = variants.find((v: any) => v.id === groupId);
+    const group = variants.find((v) => v.id === groupId);
     if (!group) return;
     setEditModalData({ name: group.name, values: group.values });
     setEditModal({ open: true, groupId });

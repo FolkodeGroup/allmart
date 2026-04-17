@@ -7,6 +7,7 @@ import { VariantForm } from '../../variants/components/VariantForm';
 import { VariantHeader } from '../../variants/components/VariantHeader';
 import { VariantEditModal } from '../../variants/components/VariantEditModal';
 
+
 interface ProductDetailVariantsProps {
   productId: string;
 }
@@ -62,6 +63,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       setNewGroupName('');
       setErrors(e => ({ ...e, group: '' }));
     } catch (err) {
+      console.error('Error adding variant group:', err);
       setErrors(e => ({ ...e, group: 'Error al crear grupo' }));
     }
   };
@@ -91,14 +93,14 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   const handleEditValue = async (groupId: string, oldValue: string, newValue: string) => {
     if (!newValue.trim()) return;
-    const group = variants.find((v: any) => v.id === groupId);
+    const group = variants.find((v) => v.id === groupId);
     if (!group) return;
     const values = group.values.map((val: string) => (val === oldValue ? newValue.trim() : val));
     await updateVariant(productId, groupId, { values });
   };
 
   const handleOpenEditModal = (groupId: string) => {
-    const group = variants.find((v: any) => v.id === groupId);
+    const group = variants.find((v) => v.id === groupId);
     if (!group) return;
     setEditModalData({ name: group.name, values: group.values });
     setEditModal({ open: true, groupId });
