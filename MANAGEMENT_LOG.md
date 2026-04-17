@@ -1497,3 +1497,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 3 | Asignación de issue a FedericoPaal | Issue #764: Implementar wizard de nuevo producto en 3 pasos | 2026-04-15 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #804: 764 implementar wizard de nuevo producto en 3 pasos | 2026-04-15 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #807: 762 implementar atajos de productividad duplicar producto | 2026-04-17 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #808: Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
