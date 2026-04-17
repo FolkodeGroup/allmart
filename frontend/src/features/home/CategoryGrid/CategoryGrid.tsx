@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import type { Category } from '../../../types';
 import * as categoriesService from '../../../services/categoriesService';
+import { getCachedPublicCategories } from '../../../services/categoriesService';
 import { Button } from '../../../components/ui/Button/Button';
 import styles from './CategoryGrid.module.css';
 
@@ -38,8 +39,12 @@ function splitCategoryName(name: string): { prefix: string; bold: string } {
 }
 
 export function CategoryGrid() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(
+    () => getCachedPublicCategories() ?? []
+  );
+  const [isLoading, setIsLoading] = useState(
+    () => getCachedPublicCategories() === null
+  );
 
   useEffect(() => {
     categoriesService.fetchPublicCategories()

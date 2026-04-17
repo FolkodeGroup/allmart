@@ -38,13 +38,17 @@ docker compose up --build
 # 3. Abrir en el navegador: http://localhost:8080
 ```
 
-> 📖 **Guía completa con instrucciones detalladas para Windows, Linux y Mac:** consulta [DOCKER.md](DOCKER.md)
+> 📖 **Guía completa con instrucciones detalladas para Windows, Linux y Mac:** consulta [DOCKER.md](docs/deployment/DOCKER.md)
 
 ## Documentación
 
-- [Estructura del Proyecto y Arquitectura](ARCHITECTURE.md): Detalles sobre la comunicación frontend-backend y seguridad (JWT).
+Toda la documentación está organizada en la carpeta [`docs/`](docs/README.md).
+
+- [Arquitectura del Proyecto](docs/architecture/ARCHITECTURE.md): Detalles sobre la comunicación frontend-backend y seguridad (JWT).
 - [Gestión de Entidades](frontend/docs/ENTITY_MANAGEMENT.md): Guía técnica y de usuario para Productos, Categorías, Variantes e Imágenes.
-- [DOCKER.md](DOCKER.md): Guía completa de Docker (instalación, uso, troubleshooting).
+- [Docker](docs/deployment/DOCKER.md): Guía completa de Docker (instalación, uso, troubleshooting).
+- [Despliegue](docs/deployment/DEPLOY.md): Guía de despliegue.
+- [Testing](docs/testing/TESTING_VALIDATION_GUIDE.md): Guía de testing y validación.
 - Consulta `frontend/README.md` y `backend/README.md` para instrucciones específicas de cada parte.
 
 ## Calidad de Código y Git Hooks

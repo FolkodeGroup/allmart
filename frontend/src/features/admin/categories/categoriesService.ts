@@ -87,10 +87,36 @@ export function mapCategoryToPayload(category: Partial<Category>): CategoryPaylo
 
 // ─── API pública ──────────────────────────────────────────────────────────────
 
-/** GET /api/categories — Obtiene todas las categorías del catálogo */
+// Caché de módulo: evita re-fetches redundantes en el mismo ciclo de vida de la app
+let _categoriesCache: Category[] | null = null;
+let _categoriesInflight: Promise<Category[]> | null = null;
+
+/** GET /api/categories — Obtiene todas las categorías del catálogo (con caché de módulo) */
 export async function fetchPublicCategories(): Promise<Category[]> {
-  const body = await apiFetch<ApiSuccess<ApiCategory[]>>('/api/categories');
-  return (body.data || []).map(mapApiCategoryToCategory);
+  if (_categoriesCache) return _categoriesCache;
+  if (_categoriesInflight) return _categoriesInflight;
+  _categoriesInflight = apiFetch<ApiSuccess<ApiCategory[]>>('/api/categories')
+    .then((body) => {
+      _categoriesCache = (body.data || []).map(mapApiCategoryToCategory);
+      _categoriesInflight = null;
+      return _categoriesCache;
+    })
+    .catch(() => {
+      _categoriesInflight = null;
+      return [];
+    });
+  return _categoriesInflight;
+}
+
+/** Invalida caché de categorías públicas (usar tras crear/editar/borrar categorías en el admin) */
+export function invalidatePublicCategoriesCache(): void {
+  _categoriesCache = null;
+  _categoriesInflight = null;
+}
+
+/** Devuelve el caché actual de forma síncrona (null si aún no se cargó) */
+export function getCachedPublicCategories(): Category[] | null {
+  return _categoriesCache;
 }
 
 // ─── API admin (requieren token de autenticación) ─────────────────────────────

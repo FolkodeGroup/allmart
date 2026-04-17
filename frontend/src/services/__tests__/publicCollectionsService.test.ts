@@ -13,6 +13,8 @@ const mockApiFetch = apiClient.apiFetch as any;
 describe('publicCollectionsService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Limpiar el caché de módulo entre tests para que cada test trabaje con datos frescos
+    publicCollectionsService.invalidateCache();
   });
 
   describe('getHomeCollections', () => {
