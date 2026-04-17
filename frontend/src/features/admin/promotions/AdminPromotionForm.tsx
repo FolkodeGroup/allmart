@@ -90,7 +90,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         apiFetch<any>('/api/admin/products?limit=500', {}, token ?? undefined),
         fetchAdminCategories(token ?? '', { limit: 200 }),
       ]);
-      const rawProducts = productsRes?.data?.products ?? productsRes?.data ?? [];
+      const rawProducts = productsRes?.data?.data ?? [];
       setAllProducts(
         rawProducts.map((p: any) => ({
           id: p.id,
@@ -102,14 +102,17 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         }))
       );
       setAllCategories(categoriesRes.data.map((c) => ({ id: c.id, name: c.name })));
-    } catch {
+    } catch (err) {
+      console.error('Error loading selectors:', err);
       // Silencioso: los selectores son opcionales
     } finally {
       setLoadingSelectors(false);
     }
   }, [token]);
 
-  useEffect(() => { loadSelectors(); }, [loadSelectors]);
+  useEffect(() => {
+    loadSelectors();
+  }, [loadSelectors]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────
   function toggleProduct(id: string) {
@@ -265,14 +268,26 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               Seleccioná los productos específicos a los que aplica esta promoción.
               También podés aplicarla a categorías enteras en la pestaña <strong>Categorías</strong>.
             </p>
-            <input type="text" className={styles.searchInput} placeholder="Buscar producto..." value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Buscar producto..."
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+            />
             {loadingSelectors ? (
               <p className={styles.loading}>Cargando productos...</p>
+            ) : allProducts.length === 0 ? (
+              <p className={styles.empty}>No hay productos disponibles</p>
             ) : (
               <>
                 <div className={styles.selectorActions}>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds(filteredProducts.map((p) => p.id))}>Seleccionar todos</button>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds([])}>Deseleccionar todos</button>
+                  <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds(filteredProducts.map((p) => p.id))}>
+                    ✓ Seleccionar todos
+                  </button>
+                  <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds([])}>
+                    ✗ Deseleccionar todos
+                  </button>
                   <span className={styles.selectorCount}>{selectedProductIds.length} seleccionados</span>
                 </div>
                 <div className={styles.selectorList}>
@@ -286,7 +301,9 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
                       </label>
                     );
                   })}
-                  {filteredProducts.length === 0 && <p className={styles.empty}>No se encontraron productos</p>}
+                  {filteredProducts.length === 0 && allProducts.length > 0 && (
+                    <p className={styles.empty}>No hay resultados de búsqueda</p>
+                  )}
                 </div>
               </>
             )}
@@ -300,14 +317,26 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               Al seleccionar una categoría, <strong>todos sus productos actuales y futuros</strong> quedan
               incluidos en la promoción automáticamente.
             </p>
-            <input type="text" className={styles.searchInput} placeholder="Buscar categoría..." value={categorySearch} onChange={(e) => setCategorySearch(e.target.value)} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Buscar categoría..."
+              value={categorySearch}
+              onChange={(e) => setCategorySearch(e.target.value)}
+            />
             {loadingSelectors ? (
               <p className={styles.loading}>Cargando categorías...</p>
+            ) : allCategories.length === 0 ? (
+              <p className={styles.empty}>No hay categorías disponibles</p>
             ) : (
               <>
                 <div className={styles.selectorActions}>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds(filteredCategories.map((c) => c.id))}>Seleccionar todas</button>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds([])}>Deseleccionar todas</button>
+                  <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds(filteredCategories.map((c) => c.id))}>
+                    ✓ Seleccionar todas
+                  </button>
+                  <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds([])}>
+                    ✗ Deseleccionar todas
+                  </button>
                   <span className={styles.selectorCount}>{selectedCategoryIds.length} seleccionadas</span>
                 </div>
                 <div className={styles.selectorList}>
@@ -322,7 +351,9 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
                       </label>
                     );
                   })}
-                  {filteredCategories.length === 0 && <p className={styles.empty}>No se encontraron categorías</p>}
+                  {filteredCategories.length === 0 && allCategories.length > 0 && (
+                    <p className={styles.empty}>No hay resultados de búsqueda</p>
+                  )}
                 </div>
               </>
             )}

@@ -289,10 +289,11 @@ button:disabled {
   border-top: 1px solid #e5e7eb;
 }
 
-.btnPrimary,
-.btnSecondary {
+.formActions .btnPrimary,
+.formActions .btnSecondary {
   flex: 1;
-  padding: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -404,14 +405,16 @@ button:disabled {
   padding: 10px 14px;
   border-radius: 6px;
   border-left: 3px solid #3b82f6;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 }
 
 .selectorActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  margin-bottom: 12px;
   font-size: 13px;
+  flex-wrap: wrap;
 }
 
 .selectorCount {
@@ -419,6 +422,7 @@ button:disabled {
   font-size: 13px;
   color: #374151;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .btnLink {
@@ -427,29 +431,48 @@ button:disabled {
   color: #3b82f6;
   font-size: 13px;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 0;
   text-decoration: underline;
+  white-space: nowrap;
 }
 
 .btnLink:hover {
   color: #1d4ed8;
 }
 
+.searchInput {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 .selectorList {
-  max-height: 320px;
+  max-height: 400px;
   overflow-y: auto;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
+  background: white;
 }
 
 .selectorItem {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   cursor: pointer;
   border-bottom: 1px solid #f3f4f6;
   transition: background 0.15s;
+  user-select: none;
 }
 
 .selectorItem:last-child {
@@ -473,17 +496,20 @@ button:disabled {
   width: 16px;
   height: 16px;
   accent-color: #3b82f6;
+  cursor: pointer;
 }
 
 .selectorItemName {
   flex: 1;
-  font-size: 14px;
+  font-size: 13px;
   color: #1f2937;
+  font-weight: 500;
 }
 
 .selectorItemMeta {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: 12px;
+  color: #9ca3af;
+  flex-shrink: 0;
 }
 
 .checkboxLabel {
