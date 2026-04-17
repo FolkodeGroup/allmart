@@ -81,7 +81,7 @@ export function Footer() {
               <InstagramIcon />
             </a>
             <a
-              href="https://wa.me/5491100000000"
+              href="https://wa.me/+5491165891091"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
