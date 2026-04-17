@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { PackageSearch, AlertCircle, ChevronDown, Pencil, Trash2 } from 'lucide-react';
+import { PackageSearch, AlertCircle, ChevronDown, Pencil, Trash2, Copy } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
+
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../../../utils/imageUrl';
 import styles from './ProductListPanel.module.css';
 
@@ -13,6 +14,7 @@ interface ProductListPanelProps {
   onSelectProduct: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDuplicate?: (product: AdminProduct) => void;
   canEdit?: boolean;
   canDelete?: boolean;
   showCheckbox?: boolean;
@@ -30,6 +32,7 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
     onSelectProduct,
     onEdit,
     onDelete,
+    onDuplicate,
     canEdit = true,
     canDelete = true,
     showCheckbox = false,
@@ -214,6 +217,19 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                         onClick={() => onEdit(product.id)}
                       >
                         <Pencil size={14} /> Editar
+                      </button>
+                    )}
+                    {onDuplicate && (
+                      <button
+                        type="button"
+                        className={styles.secondaryBtn}
+                        onClick={e => {
+                          e.stopPropagation();
+                          onDuplicate(product);
+                        }}
+                        title="Duplicar producto"
+                      >
+                        <Copy size={14} /> Duplicar
                       </button>
                     )}
                     {canDelete && onDelete && (

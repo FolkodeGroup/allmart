@@ -70,7 +70,10 @@ interface AdminProductsContextType {
   getProduct: (id: string) => AdminProduct | undefined;
   loadProductVariants: (productId: string) => Promise<VariantGroup[]>;
   getLowStockCount: () => number;
+  duplicateProduct: (product: AdminProduct) => Promise<void>;
 }
+
+
 
 // ─── Contexto ─────────────────────────────────────────────────────────────────
 
@@ -242,6 +245,30 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
   const getProduct = (id: string) => products.find((p) => p.id === id);
 
+
+  const duplicateProduct = async (product: AdminProduct) => {
+    if (!token) throw new Error('No autenticado');
+    try {
+      // Construir payload base
+      const { getDuplicateProductPayload } = await import('../features/admin/products/productsService');
+      const payload = getDuplicateProductPayload(product);
+      // Crear producto duplicado
+      const created = await createAdminProduct(payload, token);
+      // Duplicar variantes si existen
+      if (product.variants && product.variants.length > 0) {
+        for (const v of product.variants) {
+          await createVariant(token, created.id, { name: v.name, values: v.values });
+        }
+      }
+      showNotification('success', 'Producto duplicado exitosamente');
+      await refreshProducts();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Error al duplicar producto';
+      showNotification('error', msg);
+      throw err;
+    }
+  };
+
   const getLowStockCount = () => products.filter((p) => p.stock < 5).length;
 
   return (
@@ -261,6 +288,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         getProduct,
         getLowStockCount,
         loadProductVariants,
+        duplicateProduct,
       }}
     >
       {children}

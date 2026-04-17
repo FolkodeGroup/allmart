@@ -67,7 +67,52 @@ export function AdminProducts() {
   const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
 
   // Context and hooks
-  const { products, deleteProduct, loading, error, refreshProducts, addProduct, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
+  const { products, deleteProduct, duplicateProduct,addProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
+    // Duplicar producto
+    const handleDuplicate = useCallback(async (product: any) => {
+      // Deep copy y generación de SKU irrepetible
+      const uniqueSku = (sku: string | undefined | null) => {
+        const rand = Math.floor(Math.random() * 10000);
+        if (!sku || sku === '') return `COPY-${rand}`;
+        return `${sku}-COPY-${rand}`;
+      };
+      // Limpia id/_id recursivamente
+      const cleanIdsDeep = (obj: any): any => {
+        if (Array.isArray(obj)) return obj.map(cleanIdsDeep);
+        if (obj && typeof obj === 'object') {
+          const { id, _id, ...rest } = obj;
+          Object.keys(rest).forEach(key => {
+            rest[key] = cleanIdsDeep(rest[key]);
+          });
+          return rest;
+        }
+        return obj;
+      };
+      try {
+        // Deep copy y limpieza
+        const baseProduct = cleanIdsDeep(product);
+        // Duplicar variantes con SKU único
+        let cleanedVariants = undefined;
+        if (Array.isArray(baseProduct.variants)) {
+          cleanedVariants = baseProduct.variants.map((variant: any) => ({
+            ...variant,
+            sku: uniqueSku(variant.sku),
+          }));
+        }
+        const duplicated = {
+          ...baseProduct,
+          name: `${product.name} (Copia)`,
+          sku: uniqueSku(product.sku),
+          slug: '',
+          variants: cleanedVariants,
+        };
+        await duplicateProduct(duplicated);
+        toast.success('Producto duplicado con éxito');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error desconocido';
+        toast.error(`Error al duplicar: ${message}`);
+      }
+    }, [duplicateProduct]);
   const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
   const token = localStorage.getItem('token') || '';
@@ -375,6 +420,7 @@ export function AdminProducts() {
             onSelectChange={handleSelectProduct}
             onEdit={can('products.edit') ? handleEdit : undefined}
             onDelete={can('products.delete') ? handleDelete : undefined}
+            onDuplicate={can('products.create') ? handleDuplicate : undefined}
             canEdit={can('products.edit')}
             canDelete={can('products.delete')}
             showCheckbox={can('products.edit') || can('products.delete')}

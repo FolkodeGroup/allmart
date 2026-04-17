@@ -12,6 +12,7 @@ interface MasterDetailLayoutProps {
   onSelectChange?: (id: string, checked: boolean) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDuplicate?: (product: AdminProduct) => void;
   canEdit: boolean;
   canDelete: boolean;
   showCheckbox?: boolean;
@@ -26,6 +27,7 @@ export function MasterDetailLayout({
   onSelectChange,
   onEdit,
   onDelete,
+  onDuplicate,
   canEdit,
   canDelete,
   showCheckbox = false,
@@ -65,6 +67,7 @@ export function MasterDetailLayout({
         onSelectProduct={handleSelectProduct}
         onEdit={onEdit}
         onDelete={onDelete}
+        onDuplicate={onDuplicate}
         canEdit={canEdit && !!onEdit}
         canDelete={canDelete && !!onDelete}
         showCheckbox={showCheckbox}
@@ -79,6 +82,7 @@ export function MasterDetailLayout({
           onClose={handleCloseDetail}
           onEdit={onEdit}
           onDelete={onDelete}
+          onDuplicate={onDuplicate}
           canEdit={canEdit}
           canDelete={canDelete}
         />
