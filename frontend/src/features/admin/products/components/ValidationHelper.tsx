@@ -3,7 +3,7 @@
  * Soporta validación en tiempo real, sugerencias y helpers
  */
 import type { FC, ReactNode } from 'react';
-import styles from '../AdminProductForm.module.css';
+import styles from '../AdminProductFormPage.module.css';
 
 export interface ValidationHelperProps {
   error?: string;

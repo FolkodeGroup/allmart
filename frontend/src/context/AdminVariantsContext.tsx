@@ -21,6 +21,10 @@ export interface VariantGroup {
   values: string[];
   isActive: boolean;
 }
+export type VariantGroupsGridProps = {
+  groups: VariantGroup[];
+  onDuplicate: (group: VariantGroup) => void;
+};
 
 interface AdminVariantsContextType {
   /** Variantes del producto actualmente seleccionado */
@@ -109,7 +113,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
       setVariants(data.map(apiToVariantGroup));
       setSelectedProductId(productId);
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const clearVariants = useCallback(() => {

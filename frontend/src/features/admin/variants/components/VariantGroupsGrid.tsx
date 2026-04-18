@@ -3,13 +3,7 @@ import { Box } from 'lucide-react';
 import { VariantGroupCard } from './VariantGroupCard';
 import { EmptyState } from '../../../../components/ui/EmptyState';
 import styles from '../AdminVariants.module.css';
-
-interface VariantGroup {
-  id: string;
-  name: string;
-  values: string[];
-  isActive: boolean;
-}
+import type { VariantGroup } from '../../../../context/AdminVariantsContext';
 
 interface VariantGroupsGridProps {
   groups: VariantGroup[];

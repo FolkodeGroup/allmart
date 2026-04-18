@@ -4,7 +4,7 @@ import type { TabFormState, SetField } from '../components/types';
 // FIX: importar Category desde los tipos del dominio, no AdminCategory del contexto
 // (AdminCategoriesContext no exporta `AdminCategory`)
 import type { Category } from '../../../../types';
-import styles from '../AdminProductForm.module.css';
+import styles from '../AdminProductFormPage.module.css';
 
 interface TabCategoriasProps extends TabFormState {
     setField: SetField;

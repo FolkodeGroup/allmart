@@ -6,7 +6,7 @@ import { ValidationHelper } from '../components/ValidationHelper';
 export type TabPreciosInventarioRef = {
     validate: () => Record<string, string>;
 };
-import styles from '../AdminProductForm.module.css';
+import styles from '../AdminProductFormPage.module.css';
 
 export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreciosInventarioProps>(function TabPreciosInventario({
     form,

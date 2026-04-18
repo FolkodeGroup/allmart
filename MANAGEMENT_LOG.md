@@ -1527,3 +1527,5 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #808: Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
