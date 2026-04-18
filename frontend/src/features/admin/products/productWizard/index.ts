@@ -4,4 +4,8 @@ export { Step2VariantsImages } from './Step2VariantsImages';
 export { Step3ReviewPublish } from './Step3ReviewPublish';
 export { DraftService } from './draftService';
 export { ReadyToPublishChecklist, useReadyToPublish } from './ReadyToPublishChecklist';
+export { useFieldValidation, fieldValidators } from './useFieldValidation';
+export { ValidationField } from './ValidationField';
+export * from './validationService';
 export type { WizardProduct, WizardVariant, WizardDraft, StepProps } from './types';
+export type { FieldValidationState, FieldValidator, FieldError } from './useFieldValidation';
