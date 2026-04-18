@@ -624,6 +624,26 @@
   background: #f0fdf4;
 }
 
+.checklistItem.warning {
+  border-color: #fbbf24;
+  background: #fef9c3;
+}
+
+.checklistItem.incomplete {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.checklistItem.warning .checklistIcon {
+  background: #fde68a;
+  color: #b45309;
+}
+
+.checklistItem.incomplete .checklistIcon {
+  background: #fecaca;
+  color: #b91c1c;
+}
+
 .checklistIcon {
   display: flex;
   align-items: center;
