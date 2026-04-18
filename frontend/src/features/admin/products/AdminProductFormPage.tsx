@@ -75,7 +75,7 @@ export function AdminProductFormPage({
             }
         }
         return true;
-    }, [formProps]);
+    }, []); // stable — pure comparison function needs no deps
     const isDirty = useMemo(
         () => !shallowCompareRelevantFields(formProps.form, formProps.initialForm),
         [formProps.form, formProps.initialForm, shallowCompareRelevantFields]
