@@ -207,3 +207,66 @@
     font-size: 0.75rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .container {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+:global(.dark) .header {
+  border-bottom-color: rgba(211, 47, 47, 0.3);
+}
+:global(.dark) .header h2 {
+  color: #ef5350;
+}
+:global(.dark) .badge {
+  background: rgba(198, 40, 40, 0.15);
+  color: #ef9a9a;
+}
+:global(.dark) .loading {
+  color: #9ca3af;
+}
+:global(.dark) .empty {
+  background: var(--color-bg-secondary, #181c1f);
+  color: #6b7280;
+}
+:global(.dark) .table thead {
+  background: var(--color-bg-secondary, #181c1f);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table th {
+  color: #d1d5db;
+}
+:global(.dark) .table td {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table tbody tr:hover {
+  background: rgba(255,255,255,0.03);
+}
+:global(.dark) .table tbody tr.warning {
+  background: rgba(245, 158, 11, 0.08);
+}
+:global(.dark) .table tbody tr.critical {
+  background: rgba(239, 68, 68, 0.08);
+}
+:global(.dark) .productName {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .email {
+  color: #9ca3af;
+}
+:global(.dark) .number {
+  color: #d1d5db;
+}
+:global(.dark) .date {
+  color: #6b7280;
+}
+:global(.dark) .pageInfo {
+  color: #9ca3af;
+}
+:global(.dark) .pageBtn:disabled {
+  background: #374151;
+  color: #6b7280;
+}

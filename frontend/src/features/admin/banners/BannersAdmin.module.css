@@ -234,3 +234,68 @@
     flex: 1;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .formContainer {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+:global(.dark) .formTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .formGroup label {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .formGroup input,
+:global(.dark) .formGroup textarea {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .formActions {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .bannerCard {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+:global(.dark) .bannerCard:hover {
+  border-color: var(--color-primary, #a3c9a8);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+:global(.dark) .bannerImageWrapper {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .bannerTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .bannerDescription {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .bannerMeta {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .order {
+  background: rgba(255,255,255,0.08);
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .bannerActions {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .actionBtn {
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .actionBtn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .actionBtnDanger:hover {
+  background: rgba(239,68,68,0.15);
+  color: #ef6b6b;
+  border-color: #ef6b6b;
+}

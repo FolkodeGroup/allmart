@@ -807,3 +807,192 @@
     flex: 1;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .progressBar {
+  background: #2d3a3f;
+}
+:global(.dark) .stepNumber {
+  background: #374151;
+  color: #9ca3af;
+}
+:global(.dark) .stepLabel {
+  color: #9ca3af;
+}
+:global(.dark) .step.active .stepLabel {
+  color: #60a5fa;
+}
+:global(.dark) .stepTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .stepDescription {
+  color: #9ca3af;
+}
+:global(.dark) .label {
+  color: #d1d5db;
+}
+:global(.dark) .input,
+:global(.dark) .textarea {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .input:focus,
+:global(.dark) .textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+:global(.dark) .section {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .sectionTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .variantCard {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .variantCard:hover {
+  border-color: #60a5fa;
+}
+:global(.dark) .variantInfo strong {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .variantMeta {
+  color: #9ca3af;
+}
+:global(.dark) .removeBtn {
+  background: rgba(239, 68, 68, 0.1);
+}
+:global(.dark) .removeBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+:global(.dark) .addBtn {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--color-border, #2d3a3f);
+  color: #60a5fa;
+}
+:global(.dark) .addBtn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: #60a5fa;
+}
+:global(.dark) .formCard {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .imageCard {
+  border-color: var(--color-border, #2d3a3f);
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .uploadArea {
+  border-color: var(--color-border, #2d3a3f);
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .uploadArea:hover {
+  border-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.05);
+}
+:global(.dark) .uploadText {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .previewSection {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .previewCard {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .previewImageArea {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .mainImage {
+  background: var(--color-bg-card, #232a2f);
+}
+:global(.dark) .thumb {
+  border-color: var(--color-border, #2d3a3f);
+  background: var(--color-bg-card, #232a2f);
+  color: #9ca3af;
+}
+:global(.dark) .previewTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .previewShortDesc {
+  color: #d1d5db;
+}
+:global(.dark) .previewDescription {
+  color: #9ca3af;
+}
+:global(.dark) .variantsPreview {
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .variantsPreview h5 {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .variantName {
+  color: #d1d5db;
+}
+:global(.dark) .variantPrice {
+  color: #60a5fa;
+}
+:global(.dark) .variantStock {
+  color: #9ca3af;
+}
+:global(.dark) .statusSection {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .checklistSection {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .checklistItem {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .checklistItem.complete {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+:global(.dark) .checklistIcon {
+  background: #374151;
+  color: #9ca3af;
+}
+:global(.dark) .checklistContent strong {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .checklistContent p {
+  color: #9ca3af;
+}
+:global(.dark) .btnSecondary,
+:global(.dark) .btnDraft {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .btnSecondary:hover:not(:disabled),
+:global(.dark) .btnDraft:hover:not(:disabled) {
+  background: rgba(255,255,255,0.12);
+  border-color: #6b7280;
+}
+:global(.dark) .modalActions {
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .errorBox {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+:global(.dark) .successBox {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+:global(.dark) .warningBox {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+:global(.dark) .info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
+}

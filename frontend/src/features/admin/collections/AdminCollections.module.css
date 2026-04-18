@@ -300,3 +300,95 @@ button:disabled {
   flex: 1;
   padding: 10px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .container {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+:global(.dark) .header {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .header h1,
+:global(.dark) .formHeader h1 {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .searchInput,
+:global(.dark) .selectFilter {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .table thead {
+  background-color: var(--color-bg-secondary, #181c1f);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table th {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .table td {
+  color: var(--color-text-primary, #f3f3f3);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table tbody tr:hover {
+  background-color: rgba(255,255,255,0.04);
+}
+:global(.dark) .monospace {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .loading,
+:global(.dark) .empty {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .badgeActive {
+  background-color: rgba(163,201,168,0.2);
+  color: #a3c9a8;
+}
+:global(.dark) .badgeInactive {
+  background-color: rgba(239,107,107,0.2);
+  color: #ef6b6b;
+}
+:global(.dark) .btnSmallSecondary,
+:global(.dark) .btnSecondary {
+  background-color: rgba(255,255,255,0.1);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .btnSmallSecondary:hover:not(:disabled),
+:global(.dark) .btnSecondary:hover:not(:disabled) {
+  background-color: rgba(255,255,255,0.15);
+}
+:global(.dark) .btnSmallDanger {
+  background-color: rgba(239,68,68,0.2);
+  color: #fca5a5;
+}
+:global(.dark) .btnSmallDanger:hover:not(:disabled) {
+  background-color: rgba(239,68,68,0.3);
+}
+:global(.dark) .pagination {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .error {
+  background-color: rgba(239,68,68,0.15);
+  color: #fca5a5;
+}
+:global(.dark) .formHeader {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .formGroup label {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .formGroup small {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .formGroup input,
+:global(.dark) .formGroup select,
+:global(.dark) .formGroup textarea {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .formActions {
+  border-top-color: var(--color-border, #2d3a3f);
+}

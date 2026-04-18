@@ -568,3 +568,51 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .filters {
+  background-color: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .searchInput,
+:global(.dark) .select {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .searchInput::placeholder {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .searchInput:hover,
+:global(.dark) .select:hover {
+  border-color: #3a4a50;
+}
+:global(.dark) .searchInput:focus,
+:global(.dark) .select:focus {
+  border-color: var(--color-primary, #a3c9a8);
+  box-shadow: 0 4px 12px rgba(163,201,168,0.12);
+}
+:global(.dark) .table {
+  background: var(--color-bg-card, #232a2f);
+}
+:global(.dark) .th {
+  background: var(--color-bg-secondary, #181c1f);
+  color: var(--color-text-tertiary, #b6a68a);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .row:hover {
+  background: rgba(255,255,255,0.04);
+}
+:global(.dark) .suggestionsList {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .suggestionItem:hover {
+  background: rgba(255,255,255,0.06);
+}
+:global(.dark) .suggestionActive {
+  background: var(--color-bg-secondary, #181c1f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+

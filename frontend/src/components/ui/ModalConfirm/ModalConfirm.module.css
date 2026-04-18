@@ -87,3 +87,24 @@
 .cancelBtn:hover {
   background: #ccc;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .panel {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+:global(.dark) .title {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .message {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .cancelBtn {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .cancelBtn:hover {
+  background: rgba(255,255,255,0.15);
+}

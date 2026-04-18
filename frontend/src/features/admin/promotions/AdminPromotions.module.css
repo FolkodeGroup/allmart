@@ -823,3 +823,242 @@ button:disabled {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .container {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+:global(.dark) .header {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .header h1,
+:global(.dark) .formHeader h1 {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .searchInput,
+:global(.dark) .selectFilter {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .searchInput::placeholder {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .table thead {
+  background-color: var(--color-bg-secondary, #181c1f);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table th {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .table td {
+  color: var(--color-text-primary, #f3f3f3);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table tbody tr:hover {
+  background-color: rgba(255,255,255,0.04);
+}
+:global(.dark) .loading,
+:global(.dark) .empty {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .badgeActive {
+  background-color: rgba(163,201,168,0.2);
+  color: #a3c9a8;
+}
+:global(.dark) .badgeInactive {
+  background-color: rgba(239,107,107,0.2);
+  color: #ef6b6b;
+}
+:global(.dark) .badgeExpired {
+  background-color: rgba(255,255,255,0.08);
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .badgeUpcoming {
+  background-color: rgba(59,130,246,0.2);
+  color: #93c5fd;
+}
+:global(.dark) .btnSmallSecondary,
+:global(.dark) .btnSecondary {
+  background-color: rgba(255,255,255,0.1);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .btnSmallSecondary:hover:not(:disabled),
+:global(.dark) .btnSecondary:hover:not(:disabled) {
+  background-color: rgba(255,255,255,0.15);
+}
+:global(.dark) .btnSmallDanger {
+  background-color: rgba(239,68,68,0.2);
+  color: #fca5a5;
+}
+:global(.dark) .btnSmallDanger:hover:not(:disabled) {
+  background-color: rgba(239,68,68,0.3);
+}
+:global(.dark) .pagination {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .error {
+  background-color: rgba(239,68,68,0.15);
+  color: #fca5a5;
+}
+:global(.dark) .formHeader {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .formGroup label {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .formGroup small {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .formGroup input,
+:global(.dark) .formGroup select,
+:global(.dark) .formGroup textarea {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .formActions {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .mainTabs {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .mainTab {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .mainTab:hover {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .mainTabActive {
+  color: var(--color-primary, #a3c9a8);
+  border-bottom-color: var(--color-primary, #a3c9a8);
+}
+:global(.dark) .formTabs {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .formTab {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .formTab:hover {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .formTabActive {
+  color: var(--color-primary, #a3c9a8);
+  border-bottom-color: var(--color-primary, #a3c9a8);
+}
+:global(.dark) .formSubtitle {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .selectorHint {
+  background-color: rgba(255,255,255,0.05);
+  color: var(--color-text-secondary, #cbe7c9);
+  border-left-color: var(--color-primary, #a3c9a8);
+}
+:global(.dark) .selectorCount {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .btnLink {
+  color: var(--color-primary, #a3c9a8);
+}
+:global(.dark) .btnLink:hover {
+  color: var(--color-primary-light, #cbe7c9);
+}
+:global(.dark) .selectorList {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .selectorItem {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .selectorItem:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+:global(.dark) .selectorItemSelected {
+  background-color: rgba(163,201,168,0.1);
+}
+:global(.dark) .selectorItemSelected:hover {
+  background-color: rgba(163,201,168,0.15);
+}
+:global(.dark) .selectorItemName {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .selectorItemMeta {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .tableSubtext {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .statCard {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .statNumber {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .statLabel {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .matrixRow {
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .matrixRowHeader {
+  background: var(--color-bg-card, #232a2f);
+}
+:global(.dark) .matrixRowHeader:hover {
+  background: rgba(255,255,255,0.04);
+}
+:global(.dark) .matrixRowName {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .matrixRowDiscount {
+  color: var(--color-text-tertiary, #b6a68a);
+  background: rgba(255,255,255,0.08);
+}
+:global(.dark) .matrixCount {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .matrixCountTotal {
+  color: #93c5fd;
+  background: rgba(59,130,246,0.2);
+}
+:global(.dark) .matrixDates,
+:global(.dark) .matrixChevron {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .matrixDetail {
+  background: var(--color-bg-secondary, #181c1f);
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .matrixDetailSection {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .matrixDetailTitle {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .matrixTag {
+  background: rgba(163,201,168,0.15);
+  color: #a3c9a8;
+}
+:global(.dark) .matrixTagRemove {
+  color: #a3c9a8;
+}
+:global(.dark) .matrixProductRow {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .matrixProductName {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .matrixProductCategory {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .matrixProductPrice {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .matrixMoreText,
+:global(.dark) .matrixEmptySection {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+

@@ -1319,3 +1319,75 @@
         gap: 8px;
     }
 }
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .page {
+  background: var(--color-bg-primary, #151a1e);
+}
+:global(.dark) .pageHeader {
+  background: var(--color-bg-card, #232a2f);
+  border-bottom-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+:global(.dark) .pageTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .backBtn {
+  border-color: var(--color-border, #2d3a3f);
+  color: #9ca3af;
+}
+:global(.dark) .backBtn:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .sidebar {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+:global(.dark) .sidebarItem {
+  color: #9ca3af;
+}
+:global(.dark) .sidebarItem:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .sidebarItemActive {
+  background: rgba(37, 99, 235, 0.15);
+  color: #60a5fa;
+}
+:global(.dark) .section {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .section:focus-within {
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+:global(.dark) .sectionTitle {
+  color: var(--color-text-primary, #f3f3f3);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .globalError {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+:global(.dark) .bottomBar {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .cancelBtn {
+  border-color: var(--color-border, #2d3a3f);
+  color: #9ca3af;
+}
+:global(.dark) .cancelBtn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05);
+}
+:global(.dark) .headerCancelBtn {
+  background: rgba(255,255,255,0.08);
+  color: #d1d5db;
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .loadingContainer {
+  color: #9ca3af;
+}

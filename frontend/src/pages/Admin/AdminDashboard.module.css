@@ -2,17 +2,29 @@
 :global(.dark) {
   --color-bg-primary: #232a2f;
   --color-bg-secondary: #181c1f;
+  --color-bg-tertiary: #1e2428;
   --color-bg-card: #232a2f;
   --color-border: #2d3a3f;
+  --color-border-light: #253035;
   --color-neutral-dark: #181c1f;
   --color-neutral-light: #f3f3f3;
   --color-primary: #a3c9a8;
   --color-primary-light: #cbe7c9;
+  --color-primary-dark: #7aab82;
   --color-accent: #ddb08c;
+  --color-accent-light: #e8c5a8;
+  --color-accent-dark: #c89a70;
   --color-warm-gray: #b6a68a;
+  --color-warm-gray-light: #c4b8a8;
+  --color-soft-gray: #6b7280;
   --color-text-primary: #f3f3f3;
   --color-text-secondary: #cbe7c9;
   --color-text-tertiary: #b6a68a;
+  --color-text-inverse: #1a1a1a;
+  --color-success: #a3c9a8;
+  --color-error: #ef6b6b;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.15);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.25);
   --shadow-xl: 0 12px 48px rgba(0,0,0,0.35);
 }
