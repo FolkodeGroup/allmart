@@ -16,8 +16,8 @@ const MAX_WIDTH   = 1200;
 const THUMB_WIDTH = 300;
 const WEBP_QUALITY = 85;
 
-const CAT_COCINA = '53a1e661-b0e3-418f-a727-e5a04968078a';
-const CAT_BANO   = '13ea2212-6c85-4d5f-803d-986b62d6a9a1';
+const CAT_COCINA = 'b1474299-7b91-4432-b3c7-7a41e1575065';
+const CAT_BANO   = 'dba8161a-48b8-428c-90de-cd99a69eb138';
 
 interface ProductDef {
   name: string;
