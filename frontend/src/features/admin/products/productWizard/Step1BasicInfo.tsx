@@ -90,11 +90,10 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
     };
 
     // Referencias para inputs
-    const nameInputRef = useRef<HTMLInputElement>(null);
-    const shortDescInputRef = useRef<HTMLInputElement>(null);
 
-    // Evita que el input de descripción corta autoenfoque el de nombre
-    // (no se agrega ningún handler que cambie el focus)
+    // Solo se asigna ref si se necesita focus inicial, nunca para focus cruzado
+    // y nunca se reasigna en rerenders
+    const nameInputRef = useRef<HTMLInputElement>(null);
 
     return (
       <div className={styles.stepContent}>
@@ -107,6 +106,7 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
           </label>
           <input
             id="name"
+            // ref solo si se requiere focus inicial, nunca para focus cruzado
             ref={nameInputRef}
             type="text"
             placeholder="Ej: Zapatillas Running Pro"
@@ -114,6 +114,7 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
             onChange={handleNameChange}
             className={`${styles.input} ${validationErrors.name ? styles.inputError : ''}`}
             maxLength={100}
+            autoComplete="off"
           />
           {validationErrors.name && (
             <span className={styles.errorMessage}>{validationErrors.name}</span>
@@ -169,7 +170,6 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
           </label>
           <input
             id="shortDescription"
-            ref={shortDescInputRef}
             type="text"
             placeholder="Resumen en una línea"
             value={localShortDescription}
@@ -177,6 +177,7 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
             onBlur={handleShortDescriptionBlur}
             className={styles.input}
             maxLength={150}
+            autoComplete="off"
           />
           <small className={styles.charCount}>{(localShortDescription || '').length}/150</small>
         </div>
