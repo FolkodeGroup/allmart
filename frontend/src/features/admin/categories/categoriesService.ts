@@ -30,7 +30,7 @@ interface ApiSuccess<T> {
 
 /** Payload compatible con el backend para crear/actualizar una categoría */
 export interface CategoryPayload {
-  name: string;
+  name?: string;
   description?: string;
   imageUrl?: string;
   parentId?: string | null;
@@ -76,13 +76,15 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
 
 /** Convierte una Category del frontend al payload que acepta el backend */
 export function mapCategoryToPayload(category: Partial<Category>): CategoryPayload {
-  return {
-    name: category.name ?? '',
-    description: category.description,
-    imageUrl: category.image,
-    parentId: category.parentId ?? null,
-    isVisible: category.isVisible,
-  };
+  const payload: any = {};
+  
+  if (category.name !== undefined) payload.name = category.name;
+  if (category.description !== undefined) payload.description = category.description;
+  if (category.image !== undefined) payload.imageUrl = category.image;
+  if (category.parentId !== undefined) payload.parentId = category.parentId;
+  if (category.isVisible !== undefined) payload.isVisible = category.isVisible;
+  
+  return payload as CategoryPayload;
 }
 
 // ─── API pública ──────────────────────────────────────────────────────────────
