@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import styles from './ProductWizard.module.css';
 import type { StepProps } from './types';
 
@@ -89,6 +89,13 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
       }
     };
 
+    // Referencias para inputs
+    const nameInputRef = useRef<HTMLInputElement>(null);
+    const shortDescInputRef = useRef<HTMLInputElement>(null);
+
+    // Evita que el input de descripción corta autoenfoque el de nombre
+    // (no se agrega ningún handler que cambie el focus)
+
     return (
       <div className={styles.stepContent}>
         <h2 className={styles.stepTitle}>Información Básica del Producto</h2>
@@ -100,6 +107,7 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
           </label>
           <input
             id="name"
+            ref={nameInputRef}
             type="text"
             placeholder="Ej: Zapatillas Running Pro"
             value={data.name || ''}
@@ -161,6 +169,7 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
           </label>
           <input
             id="shortDescription"
+            ref={shortDescInputRef}
             type="text"
             placeholder="Resumen en una línea"
             value={localShortDescription}
