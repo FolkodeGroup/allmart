@@ -7,6 +7,7 @@ import { Step1BasicInfo } from './Step1BasicInfo';
 import { Step2VariantsImages } from './Step2VariantsImages';
 import { Step3ReviewPublish } from './Step3ReviewPublish';
 import { DraftService } from './draftService';
+import { useReadyToPublish } from './ReadyToPublishChecklist';
 import styles from './ProductWizard.module.css';
 import type { WizardProduct } from './types';
 
@@ -34,6 +35,9 @@ export function ProductWizard({
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const step1Ref = useRef<{ validate: () => boolean }>(null);
   const step2Ref = useRef<{ validate: () => boolean }>(null);
+
+  // Use the ready to publish hook to validate in real-time
+  const { isReady } = useReadyToPublish(data);
 
   // Load draft if editing
   useEffect(() => {
@@ -235,8 +239,9 @@ export function ProductWizard({
         {currentStep === 3 && (
           <button
             onClick={handlePublish}
-            disabled={isPublishing}
+            disabled={isPublishing || !isReady}
             className={styles.btnPublish}
+            title={!isReady ? 'Completa todos los requisitos para publicar' : 'Publicar producto'}
           >
             {isPublishing ? (
               <>

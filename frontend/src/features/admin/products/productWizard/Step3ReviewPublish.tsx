@@ -1,4 +1,4 @@
-import { Check, AlertCircle } from 'lucide-react';
+import { ReadyToPublishChecklist } from './ReadyToPublishChecklist';
 import styles from './ProductWizard.module.css';
 import type { StepProps } from './types';
 
@@ -6,53 +6,13 @@ export function Step3ReviewPublish({ data, categories }: Omit<StepProps, 'onData
 
   const categoryName = categories.find((c) => c.id === data.categoryId)?.name || 'N/A';
 
-  // Checklist items
-  const basicInfoComplete = !!(data.name && data.categoryId && data.description);
-  const variantsComplete = !!(data.variants && data.variants.length > 0);
-  const imagesComplete = !!(data.images && data.images.filter((img) => img).length > 0);
-
-  const allFieldsComplete = basicInfoComplete && variantsComplete && imagesComplete;
-
   return (
     <div className={styles.stepContent}>
       <h2 className={styles.stepTitle}>Revisar y Publicar</h2>
       <p className={styles.stepDescription}>Verifica que todo esté correcto antes de publicar</p>
 
       {/* Checklist */}
-      <div className={styles.checklistSection}>
-        <h3 className={styles.sectionTitle}>Checklist de Completitud</h3>
-        <div className={styles.checklist}>
-          <div className={`${styles.checklistItem} ${basicInfoComplete ? styles.complete : ''}`}>
-            <div className={styles.checklistIcon}>
-              {basicInfoComplete && <Check size={18} />}
-            </div>
-            <div className={styles.checklistContent}>
-              <strong>Información Básica</strong>
-              <p>Nombre, categoría y descripción</p>
-            </div>
-          </div>
-
-          <div className={`${styles.checklistItem} ${variantsComplete ? styles.complete : ''}`}>
-            <div className={styles.checklistIcon}>
-              {variantsComplete && <Check size={18} />}
-            </div>
-            <div className={styles.checklistContent}>
-              <strong>Variantes ({data.variants?.length || 0})</strong>
-              <p>Precio y stock configurados</p>
-            </div>
-          </div>
-
-          <div className={`${styles.checklistItem} ${imagesComplete ? styles.complete : ''}`}>
-            <div className={styles.checklistIcon}>
-              {imagesComplete && <Check size={18} />}
-            </div>
-            <div className={styles.checklistContent}>
-              <strong>Imágenes ({data.images?.filter((img) => img).length || 0})</strong>
-              <p>Al menos una imagen cargada</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ReadyToPublishChecklist data={data} showDetails={true} />
 
       {/* Product Preview */}
       <div className={styles.previewSection}>
@@ -120,23 +80,7 @@ export function Step3ReviewPublish({ data, categories }: Omit<StepProps, 'onData
         </div>
       </div>
 
-      {/* Status */}
-      <div className={styles.statusSection}>
-        {!allFieldsComplete && (
-          <div className={styles.warningBox}>
-            <AlertCircle size={20} />
-            <p>Completá todos los campos requeridos (*) para publicar el producto</p>
-          </div>
-        )}
-
-        {allFieldsComplete && (
-          <div className={styles.successBox}>
-            <Check size={20} />
-            <p>¡Todo listo! El producto está listo para ser publicado</p>
-          </div>
-        )}
-      </div>
-
+      {/* Info */}
       <div className={styles.info}>
         <p>💡 Una vez publicado, el producto será visible en el catálogo. Puedes editarlo después si lo necesitas.</p>
       </div>
