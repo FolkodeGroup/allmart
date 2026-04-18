@@ -1,4 +1,4 @@
-import { useAdminProducts } from '../../context/AdminProductsContext';
+import { useAdminProducts } from '../../context/useAdminProductsContext';
 import styles from './IncompleteProductsWidget.module.css';
 import { Link } from 'react-router-dom';
 import { Button } from './Button/Button';

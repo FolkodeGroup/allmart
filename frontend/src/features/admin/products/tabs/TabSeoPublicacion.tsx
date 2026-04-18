@@ -1,7 +1,7 @@
 // src/features/admin/products/components/tabs/TabSEOPublicacion.tsx
 import { memo } from 'react';
 import type { TabSEOPublicacionProps } from '../components/types';
-import styles from '../AdminProductForm.module.css';
+import styles from '../AdminProductFormPage.module.css';
 
 export const TabSEOPublicacion = memo(function TabSEOPublicacion({
     form,

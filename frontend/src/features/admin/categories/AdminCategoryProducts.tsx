@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, PackageSearch, AlertCircle } from 'lucide-react';
-import { useAdminProducts } from '../../../context/AdminProductsContext';
+import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useNotification } from '../../../context/NotificationContext';
 import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
@@ -138,8 +138,14 @@ export function AdminCategoryProducts() {
       showNotification('success', successMessage);
       setSelectedIds([]);
       await refreshCurrentCategoryProducts();
-    } catch (err: any) {
-      showNotification('error', err?.message || 'No se pudo aplicar la acción masiva.');
+    } catch (err: unknown) {
+      let message = 'No se pudo aplicar la acción masiva.';
+
+      if (err instanceof Error) {
+        message = err.message;
+      }
+
+      showNotification('error', message);
     } finally {
       setBulkLoading(false);
     }

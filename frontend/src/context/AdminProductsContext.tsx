@@ -4,7 +4,7 @@
  * Usa llamadas HTTP al backend — sin mocks ni localStorage.
  */
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
@@ -78,7 +78,7 @@ interface AdminProductsContextType {
 // ─── Contexto ─────────────────────────────────────────────────────────────────
 
 const AdminProductsContext = createContext<AdminProductsContextType | undefined>(undefined);
-
+export default AdminProductsContext
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AdminProductsProvider({ children }: { children: ReactNode }) {
@@ -117,12 +117,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     }
   }, [token, categories, showNotification]);
 
-  /* Carga inicial cuando el token o las categorías están disponibles */
-  useEffect(() => {
-    if (token && categories.length > 0) {
-      refreshProducts();
-    }
-  }, [token, categories.length, refreshProducts]);
+  // Carga inicial deshabilitada para evitar doble fetch. El componente principal controla la carga de productos.
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 
@@ -294,12 +289,4 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       {children}
     </AdminProductsContext.Provider>
   );
-}
-
-export function useAdminProducts() {
-  const context = useContext(AdminProductsContext);
-  if (context === undefined) {
-    throw new Error('useAdminProducts debe usarse dentro de un AdminProductsProvider');
-  }
-  return context;
 }

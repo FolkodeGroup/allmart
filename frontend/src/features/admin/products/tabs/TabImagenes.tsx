@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { RefObject } from 'react';
-import styles from '../AdminProductForm.module.css';
+import styles from '../AdminProductFormPage.module.css';
 import {
     DragDropContext,
     Droppable,
@@ -11,15 +11,15 @@ import { Delete, Star } from 'lucide-react';
 
 /** Imagen de producto en el frontend */
 export interface ProductImageItem {
-  id: string;
-  productId: string;
-  url: string;
-  thumbUrl?: string;
-  altText?: string | null;
-  position: number;
-  width?: number;
-  height?: number;
-  sizeBytes?: number;
+    id: string;
+    productId: string;
+    url: string;
+    thumbUrl?: string;
+    altText?: string | null;
+    position: number;
+    width?: number;
+    height?: number;
+    sizeBytes?: number;
 }
 
 export type TabImagenesRef = {
@@ -138,7 +138,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
         return (
             <fieldset className={styles.fieldset}>
                 <legend className={styles.legend}>Imágenes del producto</legend>
-                
+
                 {imagesError && <div className={styles.errorText}>{imagesError}</div>}
 
                 {!showAddImgForm ? (
@@ -296,7 +296,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 ref={provided.innerRef}
                                 className={`${styles.imagesGrid} ${snapshot.isDraggingOver ? styles.dragActive : ''}`}
                             >
-                                {images.map((url: string, index: number) => 
+                                {images.map((url: string, index: number) =>
                                     url.trim() ? (
                                         <Draggable key={`${url}-${index}`} draggableId={`${url}-${index}`} index={index}>
                                             {(dragProvided: any, dragSnapshot: any) => (

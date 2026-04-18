@@ -1,8 +1,8 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import styles from './ProductWizard.module.css';
 import type { StepProps } from './types';
 
-export const Step1BasicInfo = forwardRef<{ validate: () => boolean }, StepProps>(
+export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean }, StepProps>(
   ({ data, onDataChange, categories }, ref) => {
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -47,9 +47,18 @@ export const Step1BasicInfo = forwardRef<{ validate: () => boolean }, StepProps>
       }
     };
 
+
+    // Estado local para descripción
+    const [localDescription, setLocalDescription] = useState(data.description || '');
+
+    // Sincroniza el estado local si cambia el prop externo (ej: draft)
+    useEffect(() => {
+      setLocalDescription(data.description || '');
+    }, [data.description]);
+
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      onDataChange({ ...data, description: value });
+      setLocalDescription(value);
       if (validationErrors.description && value.trim()) {
         const newErrors = { ...validationErrors };
         delete newErrors.description;
@@ -57,91 +66,126 @@ export const Step1BasicInfo = forwardRef<{ validate: () => boolean }, StepProps>
       }
     };
 
-  return (
-    <div className={styles.stepContent}>
-      <h2 className={styles.stepTitle}>Información Básica del Producto</h2>
-      <p className={styles.stepDescription}>Completá los datos esenciales de tu producto</p>
+    const handleDescriptionBlur = () => {
+      if (localDescription !== data.description) {
+        onDataChange({ ...data, description: localDescription });
+      }
+    };
 
-      <div className={styles.formGroup}>
-        <label htmlFor="name" className={styles.label}>
-          Nombre del Producto <span className={styles.required}>*</span>
-        </label>
-        <input
-          id="name"
-          type="text"
-          placeholder="Ej: Zapatillas Running Pro"
-          value={data.name || ''}
-          onChange={handleNameChange}
-          className={`${styles.input} ${validationErrors.name ? styles.inputError : ''}`}
-          maxLength={100}
-        />
-        {validationErrors.name && (
-          <span className={styles.errorMessage}>{validationErrors.name}</span>
-        )}
-        <small className={styles.charCount}>{(data.name || '').length}/100</small>
-      </div>
+    // Estado local para shortDescription
+    const [localShortDescription, setLocalShortDescription] = useState(data.shortDescription || '');
 
-      <div className={styles.formGroup}>
-        <label htmlFor="categoryId" className={styles.label}>
-          Categoría <span className={styles.required}>*</span>
-        </label>
-        <select
-          id="categoryId"
-          value={data.categoryId || ''}
-          onChange={handleCategoryChange}
-          className={`${styles.input} ${validationErrors.categoryId ? styles.inputError : ''}`}
-        >
-          <option value="">Seleccionar categoría...</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        {validationErrors.categoryId && (
-          <span className={styles.errorMessage}>{validationErrors.categoryId}</span>
-        )}
-      </div>
+    useEffect(() => {
+      setLocalShortDescription(data.shortDescription || '');
+    }, [data.shortDescription]);
 
-      <div className={styles.formGroup}>
-        <label htmlFor="description" className={styles.label}>
-          Descripción <span className={styles.required}>*</span>
-        </label>
-        <textarea
-          id="description"
-          placeholder="Describe las características principales del producto..."
-          value={data.description || ''}
-          onChange={handleDescriptionChange}
-          className={`${styles.textarea} ${validationErrors.description ? styles.inputError : ''}`}
-          rows={5}
-          maxLength={500}
-        />
-        {validationErrors.description && (
-          <span className={styles.errorMessage}>{validationErrors.description}</span>
-        )}
-        <small className={styles.charCount}>{(data.description || '').length}/500</small>
-      </div>
+    const handleShortDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLocalShortDescription(e.target.value);
+    };
 
-      <div className={styles.formGroup}>
-        <label htmlFor="shortDescription" className={styles.label}>
-          Descripción Corta (opcional)
-        </label>
-        <input
-          id="shortDescription"
-          type="text"
-          placeholder="Resumen en una línea"
-          value={data.shortDescription || ''}
-          onChange={(e) => onDataChange({ ...data, shortDescription: e.target.value })}
-          className={styles.input}
-          maxLength={150}
-        />
-        <small className={styles.charCount}>{(data.shortDescription || '').length}/150</small>
-      </div>
+    const handleShortDescriptionBlur = () => {
+      if (localShortDescription !== data.shortDescription) {
+        onDataChange({ ...data, shortDescription: localShortDescription });
+      }
+    };
 
-      <div className={styles.info}>
-        <p>✓ Completá estos campos para continuar al siguiente paso</p>
+    // Referencias para inputs
+
+    // Solo se asigna ref si se necesita focus inicial, nunca para focus cruzado
+    // y nunca se reasigna en rerenders
+    const nameInputRef = useRef<HTMLInputElement>(null);
+
+    return (
+      <div className={styles.stepContent}>
+        <h2 className={styles.stepTitle}>Información Básica del Producto</h2>
+        <p className={styles.stepDescription}>Completá los datos esenciales de tu producto</p>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="name" className={styles.label}>
+            Nombre del Producto <span className={styles.required}>*</span>
+          </label>
+          <input
+            id="name"
+            // ref solo si se requiere focus inicial, nunca para focus cruzado
+            ref={nameInputRef}
+            type="text"
+            placeholder="Ej: Zapatillas Running Pro"
+            value={data.name || ''}
+            onChange={handleNameChange}
+            className={`${styles.input} ${validationErrors.name ? styles.inputError : ''}`}
+            maxLength={100}
+            autoComplete="off"
+          />
+          {validationErrors.name && (
+            <span className={styles.errorMessage}>{validationErrors.name}</span>
+          )}
+          <small className={styles.charCount}>{(data.name || '').length}/100</small>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="categoryId" className={styles.label}>
+            Categoría <span className={styles.required}>*</span>
+          </label>
+          <select
+            id="categoryId"
+            value={data.categoryId || ''}
+            onChange={handleCategoryChange}
+            className={`${styles.input} ${validationErrors.categoryId ? styles.inputError : ''}`}
+          >
+            <option value="">Seleccionar categoría...</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+          {validationErrors.categoryId && (
+            <span className={styles.errorMessage}>{validationErrors.categoryId}</span>
+          )}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="description" className={styles.label}>
+            Descripción <span className={styles.required}>*</span>
+          </label>
+          <textarea
+            id="description"
+            placeholder="Describe las características principales del producto..."
+            value={localDescription}
+            onChange={handleDescriptionChange}
+            onBlur={handleDescriptionBlur}
+            className={`${styles.textarea} ${validationErrors.description ? styles.inputError : ''}`}
+            rows={5}
+            maxLength={500}
+          />
+          {validationErrors.description && (
+            <span className={styles.errorMessage}>{validationErrors.description}</span>
+          )}
+          <small className={styles.charCount}>{(localDescription || '').length}/500</small>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="shortDescription" className={styles.label}>
+            Descripción Corta (opcional)
+          </label>
+          <input
+            id="shortDescription"
+            type="text"
+            placeholder="Resumen en una línea"
+            value={localShortDescription}
+            onChange={handleShortDescriptionChange}
+            onBlur={handleShortDescriptionBlur}
+            className={styles.input}
+            maxLength={150}
+            autoComplete="off"
+          />
+          <small className={styles.charCount}>{(localShortDescription || '').length}/150</small>
+        </div>
+
+        <div className={styles.info}>
+          <p>✓ Completá estos campos para continuar al siguiente paso</p>
+        </div>
       </div>
-    </div>
-  );
-}
-);
+    );
+  }
+));
