@@ -4,7 +4,7 @@
  * Usa llamadas HTTP al backend — sin mocks ni localStorage.
  */
 
-import { createContext, useState, useCallback, useRef } from 'react';
+import { createContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
@@ -135,7 +135,14 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     await refreshProducts(lastParamsRef.current);
   }, [refreshProducts]);
 
-  // Carga inicial deshabilitada para evitar doble fetch. El componente principal controla la carga de productos.
+  // Carga inicial: se ejecuta automáticamente al montar el contexto (cuando hay token disponible).
+  // Esto garantiza que el Dashboard y cualquier componente vean los datos correctos sin necesidad
+  // de visitar primero la página de productos.
+  useEffect(() => {
+    if (token) {
+      refreshProducts({ page: 1, limit: 500 });
+    }
+  }, [token, refreshProducts]);
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 
