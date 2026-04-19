@@ -171,6 +171,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     const validateForm = useCallback((): boolean => {
         const errors: Record<string, string> = {};
         if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
+        if (!form.sku?.trim()) errors.sku = 'El SKU es obligatorio';
         if (!form.price || form.price <= 0) errors.price = 'El precio debe ser mayor a 0';
         if (!form.category.id) errors.category = 'Seleccioná una categoría';
         if (form.discount !== undefined && (form.discount < 0 || form.discount > 100)) {
@@ -444,10 +445,12 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
 
     // ── Derived error flags per section ───────────────────────────────────
     const sectionErrors = useMemo(() => ({
-        basic: !!fieldErrors.name,
-        pricing: !!(fieldErrors.price || fieldErrors.discount || fieldErrors.originalPrice || fieldErrors.stock),
-        categories: !!fieldErrors.category,
-        images: !!fieldErrors.images,
+        basico: !!(fieldErrors.name || fieldErrors.sku),
+        precios: !!(fieldErrors.price || fieldErrors.discount || fieldErrors.originalPrice || fieldErrors.stock),
+        categorias: !!fieldErrors.category,
+        imagenes: !!fieldErrors.images,
+        variantes: false,
+        seo: false,
     }), [fieldErrors]);
 
     return {

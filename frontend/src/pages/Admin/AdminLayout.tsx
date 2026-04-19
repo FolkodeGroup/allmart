@@ -45,22 +45,6 @@ const navItems: NavItem[] = [
         icon: "📦",
         permission: null,
         badge: "lowStock",
-        children: [
-          {
-            label: "Imágenes",
-            to: "/admin/imagenes",
-            icon: "🖼️",
-            permission: null,
-            badge: null,
-          },
-          {
-            label: "Variantes",
-            to: "/admin/variantes",
-            icon: "🎨",
-            permission: null,
-            badge: null,
-          },
-        ],
       },
       {
         label: "Categorías",
