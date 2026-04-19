@@ -29,7 +29,7 @@ import { logAdminActivity } from '../../../../services/adminActivityLogService';
 import { useUnsavedChanges } from '../../../../context/useUnsavedChanges';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderStatusSelector } from '../components/OrderStatusSelector';
-import { OrderTimeline } from '../AdminOrders';
+import { OrderTimeline } from './OrderTimeline';
 
 // 3. Agregar prop opcional para notificar dirty state al padre
 
@@ -51,7 +51,7 @@ interface OrderDetailModalProps {
  *  - 'orders.delete':   eliminar pedido
  */
 /* ── Modal de detalle ───────────────────────────────────────────── */
-function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
+const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
     const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
     const { can } = useAdminAuth();
 
