@@ -38,13 +38,18 @@
   transition: background 0.15s, border-color 0.15s;
 }
 
+/* Filas alternas con tono sutil de identidad de marca */
+.productWrapper:nth-child(even) {
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-bg-primary));
+}
+
 .productWrapper:hover {
-  background: var(--color-bg-secondary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-primary));
   border-color: var(--color-border);
 }
 
 .productWrapper.selected {
-  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-primary));
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-primary));
   border-color: var(--color-primary);
   outline-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
 }

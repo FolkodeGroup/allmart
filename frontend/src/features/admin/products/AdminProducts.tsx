@@ -23,6 +23,7 @@ import { ProductPagination } from '../../../components/ui/ProductPagination';
 
 // Styles
 import sectionStyles from '../shared/AdminSection.module.css';
+import styles from './AdminProducts.module.css';
 
 type ViewMode = 'list' | 'form';
 
@@ -189,7 +190,7 @@ export function AdminProducts() {
   return (
     <main
       ref={containerRef}
-      className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}
+      className={`${sectionStyles.page} ${styles.productsPage} dark:bg-gray-900 dark:text-gray-100`}
       aria-label="Gestión de productos"
     >
       {viewMode === 'list' && (
@@ -247,7 +248,7 @@ export function AdminProducts() {
           )}
 
           {!loading && !error && products.length > 0 && (
-            <>
+            <div className={styles.contentArea}>
               <MasterDetailLayout
                 products={products}
                 loading={loading}
@@ -266,7 +267,7 @@ export function AdminProducts() {
                   onPageChange={handlePageChange}
                 />
               )}
-            </>
+            </div>
           )}
 
           {showWizard && (
