@@ -18,6 +18,10 @@ import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
 import { ActivityFeed } from '../../components/ActivityFeed';
 import { DashboardWidgetSettings } from '../../components/ui/DashboardWidgetSettings';
 import StaffNotes from '../../components/StaffNotes';
+import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
+import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
+import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
+import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 
 import styles from './AdminDashboard.module.css';
 
@@ -31,6 +35,8 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   staff_notes: 'Notas del Equipo',
   charts: 'Analítica',
   recent_orders: 'Pedidos Recientes',
+  weekly_sales: 'Ventas Semanales',
+  sales_heatmap: 'Mapa de Actividad de Ventas',
 };
 
 const CATEGORY_COLORS = [
@@ -49,7 +55,7 @@ function getGreeting(): { greeting: string; emoji: string } {
 
 export function AdminDashboard() {
   const { orders } = useAdminOrders();
-  const { products } = useAdminProducts();
+  const { products, total: totalProducts } = useAdminProducts();
   const { can } = useAdminAuth();
   const { widgets, reorderWidgets, toggleWidget, resetLayout } = useDashboardLayout();
   const { greeting, emoji } = getGreeting();
@@ -152,7 +158,13 @@ export function AdminDashboard() {
     return Object.values(clientMap).sort((a, b) => b.total - a.total).slice(0, 5);
   }, [orders]);
 
-  const monthlyGoal = 500000; // ARS - objetivo mensual configurable
+  const MONTHLY_GOAL_KEY = 'allmart_monthly_goal';
+  const [monthlyGoal, setMonthlyGoal] = useState(() => {
+    const saved = localStorage.getItem(MONTHLY_GOAL_KEY);
+    return saved ? Number(saved) : 500000;
+  });
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState('');
   const currentMonthRevenue = useMemo(() => {
     const now = new Date();
     return orders
@@ -168,6 +180,41 @@ export function AdminDashboard() {
     () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
     [orders],
   );
+
+  // ─── Weekly sales data ──────────────────────────────────────────────────────
+
+  const weeklySalesData = useMemo<WeeklySalesData[]>(() => {
+    const now = new Date();
+    const days: WeeklySalesData[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toLocaleDateString('es-AR', { weekday: 'short' });
+      const count = orders.filter((o) => {
+        const od = new Date(o.createdAt);
+        return od.toDateString() === d.toDateString();
+      }).length;
+      days.push({ day: dayStr, sales: count });
+    }
+    return days;
+  }, [orders]);
+
+  const weeklyTotalSales = useMemo(() => weeklySalesData.reduce((s, d) => s + d.sales, 0), [weeklySalesData]);
+
+  // ─── Sales heatmap data ─────────────────────────────────────────────────────
+
+  const heatmapData = useMemo(() => {
+    const dayLabels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const hourLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+    const matrix: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+    orders.forEach((o) => {
+      const d = new Date(o.createdAt);
+      const day = (d.getDay() + 6) % 7; // Monday = 0
+      const hour = d.getHours();
+      matrix[day][hour]++;
+    });
+    return { data: matrix, dayLabels, hourLabels };
+  }, [orders]);
 
   // ─── Drag handlers ─────────────────────────────────────────────────────────
 
@@ -228,7 +275,7 @@ export function AdminDashboard() {
             <MetricCard title="Clientes" icon={<span>👥</span>} value={clientesUnicos} variation={0} />
             <MetricCard title="Ticket Promedio" icon={<span>🎫</span>} value={ticketPromedio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })} variation={0} />
             <MetricCard title="Conversión" icon={<span>📊</span>} value={tasaConversion.toFixed(1) + '%'} variation={0} />
-            <MetricCard title="Productos" icon={<span>📦</span>} value={products.length} variation={0} />
+            <MetricCard title="Productos" icon={<span>📦</span>} value={totalProducts || products.length} variation={0} />
           </div>
         );
 
@@ -269,11 +316,50 @@ export function AdminDashboard() {
             <div className={styles.analyticsTopRow}>
               {/* Monthly Goal */}
               <div className={styles.goalCard}>
-                <h4 className={styles.chartTitle}>Objetivo Mensual</h4>
-                <div className={styles.goalValue}>
-                  {currentMonthRevenue.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-                  <span className={styles.goalTarget}> / {monthlyGoal.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
+                <div className={styles.goalHeader}>
+                  <h4 className={styles.chartTitle}>Objetivo Mensual</h4>
+                  <button
+                    className={styles.goalEditBtn}
+                    onClick={() => { setGoalInput(String(monthlyGoal)); setEditingGoal(true); }}
+                    title="Editar objetivo"
+                  >
+                    ✏️
+                  </button>
                 </div>
+                {editingGoal ? (
+                  <div className={styles.goalEditForm}>
+                    <input
+                      type="number"
+                      className={styles.goalEditInput}
+                      value={goalInput}
+                      onChange={(e) => setGoalInput(e.target.value)}
+                      min={0}
+                      autoFocus
+                    />
+                    <button
+                      className={styles.goalEditSave}
+                      onClick={() => {
+                        const val = Math.max(0, Number(goalInput) || 0);
+                        setMonthlyGoal(val);
+                        localStorage.setItem(MONTHLY_GOAL_KEY, String(val));
+                        setEditingGoal(false);
+                      }}
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      className={styles.goalEditCancel}
+                      onClick={() => setEditingGoal(false)}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.goalValue}>
+                    {currentMonthRevenue.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
+                    <span className={styles.goalTarget}> / {monthlyGoal.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
+                  </div>
+                )}
                 <div className={styles.goalBarOuter}>
                   <div className={styles.goalBarInner} style={{ width: `${goalProgress}%` }} />
                 </div>
@@ -343,25 +429,16 @@ export function AdminDashboard() {
         );
 
       case 'recent_orders':
-        if (!can('orders.view') || recentOrders.length === 0) return null;
-        return (
-          <div className={styles.ordersTable}>
-            <div className={styles.ordersHeader}>
-              <span>Cliente</span>
-              <span>Total</span>
-              <span>Estado</span>
-              <span>Fecha</span>
-            </div>
-            {recentOrders.map((o) => (
-              <Link key={o.id} to="/admin/pedidos" className={styles.ordersRow}>
-                <span className={styles.orderCustomer}>{o.customer.firstName} {o.customer.lastName}</span>
-                <span className={styles.orderTotal}>{o.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
-                <span className={`${styles.orderStatus} ${styles['status_' + o.status]}`}>{o.status}</span>
-                <span className={styles.orderDate}>{new Date(o.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}</span>
-              </Link>
-            ))}
-          </div>
-        );
+        if (!can('orders.view')) return null;
+        return <RecentOrdersWidget />;
+
+      case 'weekly_sales':
+        if (!can('reports.view')) return null;
+        return <WeeklySalesWidget data={weeklySalesData} totalSales={weeklyTotalSales} />;
+
+      case 'sales_heatmap':
+        if (!can('reports.view')) return null;
+        return <SalesActivityHeatmap data={heatmapData.data} dayLabels={heatmapData.dayLabels} hourLabels={heatmapData.hourLabels} />;
 
       case 'staff_notes':
         return <StaffNotes />;
@@ -403,7 +480,7 @@ export function AdminDashboard() {
             </div>
             <div className={styles.bannerStatDivider} />
             <div className={styles.bannerStat}>
-              <span className={styles.bannerStatValue}>{products.length}</span>
+              <span className={styles.bannerStatValue}>{totalProducts || products.length}</span>
               <span className={styles.bannerStatLabel}>Productos</span>
             </div>
             <div className={styles.bannerStatDivider} />
