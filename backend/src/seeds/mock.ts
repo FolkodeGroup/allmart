@@ -1,5 +1,8 @@
 // backend/src/mocks/mock.ts
-// Mock de datos iniciales para seed.ts
+// ⚠️  DEPRECATED — SOLO REFERENCIA HISTÓRICA. NO IMPORTAR NI USAR.
+// Las categorías y productos de producción se gestionan desde el admin panel.
+// Importar este archivo en seed.ts o cualquier otro script causará duplicados en BD.
+// Ver seed.ts — actualmente solo crea usuarios.
 
 type MockCategory = {
   id: string;
