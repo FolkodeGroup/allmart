@@ -149,23 +149,6 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
         )}
       </section>
 
-      {/* Stock vs Availability */}
-      <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Resumen de disponibilidad</h3>
-
-        <div className={styles.statusRow}>
-          <div className={styles.statusItem}>
-            <span className={styles.statusLabel}>Cantidad en stock</span>
-            <div className={styles.stockBar}>
-              <div
-                className={styles.stockBarFill}
-                style={{ width: Math.min(product.stock / 100 * 100, 100) + '%' }}
-              />
-            </div>
-            <span className={styles.stockText}>{product.stock} unidades</span>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

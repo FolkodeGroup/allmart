@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from '../../features/admin/products/AdminProducts.module.css';
 
 interface ProductPaginationProps {
@@ -7,36 +8,39 @@ interface ProductPaginationProps {
   onPageChange: (page: number) => void;
 }
 
-
 export const ProductPagination: React.FC<ProductPaginationProps> = ({ page, totalPages, onPageChange }) => {
   const handleKeyDown = (e: React.KeyboardEvent, pageNum: number) => {
-    // Space and Enter trigger page change
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       onPageChange(pageNum);
     }
   };
 
-  const handlePrevious = () => {
-    if (page > 1) {
-      onPageChange(page - 1);
-    }
-  };
+  // Show limited page range around current page
+  const getPageNumbers = () => {
+    const delta = 2;
+    const pages: (number | 'ellipsis')[] = [];
+    const left = Math.max(1, page - delta);
+    const right = Math.min(totalPages, page + delta);
 
-  const handleNext = () => {
-    if (page < totalPages) {
-      onPageChange(page + 1);
+    if (left > 1) {
+      pages.push(1);
+      if (left > 2) pages.push('ellipsis');
     }
+    for (let i = left; i <= right; i++) pages.push(i);
+    if (right < totalPages) {
+      if (right < totalPages - 1) pages.push('ellipsis');
+      pages.push(totalPages);
+    }
+    return pages;
   };
 
   return (
     <nav
       className={styles.pagination}
-      style={{ marginTop: 12, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}
       aria-label="Paginación de productos"
       role="navigation"
     >
-      {/* ARIA live region for page change announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         Página {page} de {totalPages}
       </div>
@@ -44,39 +48,42 @@ export const ProductPagination: React.FC<ProductPaginationProps> = ({ page, tota
       <button
         className={styles.pageBtn}
         disabled={page === 1}
-        onClick={handlePrevious}
+        onClick={() => onPageChange(page - 1)}
         onKeyDown={(e) => handleKeyDown(e, page - 1)}
         aria-label="Página anterior"
-        title="Ir a la página anterior (Flecha izquierda)"
       >
-        ← Anterior
+        <ChevronLeft size={16} />
+        <span>Anterior</span>
       </button>
 
       <div className={styles.pageNumbers} role="group" aria-label="Números de página">
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button
-            key={i + 1}
-            className={styles.pageBtn + (page === i + 1 ? ' ' + styles.pageActive : '')}
-            onClick={() => onPageChange(i + 1)}
-            onKeyDown={(e) => handleKeyDown(e, i + 1)}
-            aria-current={page === i + 1 ? 'page' : undefined}
-            aria-label={`Ir a la página ${i + 1}${page === i + 1 ? ' (actual)' : ''}`}
-            title={`Página ${i + 1}`}
-          >
-            {i + 1}
-          </button>
-        ))}
+        {getPageNumbers().map((p, idx) =>
+          p === 'ellipsis' ? (
+            <span key={`ellipsis-${idx}`} style={{ padding: '0 4px', color: 'var(--color-text-tertiary)', alignSelf: 'center' }}>…</span>
+          ) : (
+            <button
+              key={p}
+              className={`${styles.pageBtn} ${page === p ? styles.pageActive : ''}`}
+              onClick={() => onPageChange(p)}
+              onKeyDown={(e) => handleKeyDown(e, p)}
+              aria-current={page === p ? 'page' : undefined}
+              aria-label={`Ir a la página ${p}${page === p ? ' (actual)' : ''}`}
+            >
+              {p}
+            </button>
+          )
+        )}
       </div>
 
       <button
         className={styles.pageBtn}
         disabled={page === totalPages}
-        onClick={handleNext}
+        onClick={() => onPageChange(page + 1)}
         onKeyDown={(e) => handleKeyDown(e, page + 1)}
         aria-label="Página siguiente"
-        title="Ir a la página siguiente (Flecha derecha)"
       >
-        Siguiente →
+        <span>Siguiente</span>
+        <ChevronRight size={16} />
       </button>
     </nav>
   );

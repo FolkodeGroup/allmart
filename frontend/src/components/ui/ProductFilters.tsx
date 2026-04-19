@@ -43,10 +43,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   total,
 }) => (
   <nav className={styles.filters} aria-label="Filtros de productos">
-    {/* Barra de búsqueda moderna */}
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center', position: 'relative', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-      <div style={{ position: 'relative', flex: 1, minWidth: 280, display: 'flex', alignItems: 'center' }}>
-        <Search size={18} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#999', pointerEvents: 'none' }} />
+    {/* Buscador full-width */}
+    <div className={styles.searchRow}>
+      <div className={styles.searchWrapper}>
+        <Search size={16} className={styles.searchIcon} />
         <label htmlFor="search-products" className="sr-only">Buscar productos</label>
         <input
           ref={inputRef}
@@ -84,14 +84,13 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           aria-autocomplete="list"
           aria-controls="suggestions-list"
           aria-activedescendant={highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined}
-          style={{ paddingLeft: 40, width: '100%' }}
         />
-        {/* Sugerencias de autocompletado */}
+        <span className={styles.count} aria-live="polite">{total} productos</span>
+
         {showSuggestions && suggestions.length > 0 && (
           <ul
             id="suggestions-list"
             className={styles.suggestionsList}
-            style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, marginTop: 4 }}
             role="listbox"
             aria-label="Sugerencias de productos"
           >
@@ -99,8 +98,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
               <li
                 key={s.id}
                 id={`suggestion-${idx}`}
-                className={styles.suggestionItem + (idx === highlightedIndex ? ' ' + styles.suggestionActive : '')}
-                style={{ cursor: 'pointer', background: idx === highlightedIndex ? '#f0ede8' : undefined, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderRadius: 6, margin: '2px 2px' }}
+                className={`${styles.suggestionItem} ${idx === highlightedIndex ? styles.suggestionActive : ''}`}
                 role="option"
                 aria-selected={idx === highlightedIndex}
                 tabIndex={0}
@@ -114,19 +112,18 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                   }
                 }}
               >
-                <Search size={14} color="#999" />
-                <span style={{ fontWeight: 500, flex: 1 }}>{s.name}</span>
-                {s.sku && <span style={{ color: '#999', fontSize: 12 }}>SKU: {s.sku}</span>}
+                <Search size={13} style={{ color: '#aaa', flexShrink: 0 }} />
+                <span style={{ flex: 1, fontWeight: 500 }}>{s.name}</span>
+                {s.sku && <span style={{ color: '#aaa', fontSize: 11 }}>{s.sku}</span>}
               </li>
             ))}
           </ul>
         )}
       </div>
-      <span className={styles.count} aria-live="polite">{total} productos</span>
     </div>
 
     {/* Filtros */}
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+    <div className={styles.filtersRow}>
       <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
       <select
         id="category-filter"

@@ -10,10 +10,8 @@ import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 // Components
 import { AdminProductFormPage } from './AdminProductFormPage';
 import { MasterDetailLayout } from './MasterDetailLayout';
-import { BulkEditBar } from './BulkEditBar';
 import { ProductWizard } from './productWizard/ProductWizard';
 import type { WizardProduct } from './productWizard/types';
-import * as productsService from './productsService';
 
 // UI Components
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -21,41 +19,20 @@ import { PackageSearch, AlertCircle } from 'lucide-react';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductHeader } from '../../../components/ui/ProductHeader';
 import { ProductFilters } from '../../../components/ui/ProductFilters';
-import { ProductFeedbackSection } from '../../../components/ui/ProductFeedbackSection';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
 
 // Styles
 import sectionStyles from '../shared/AdminSection.module.css';
 
-// Utils
-
-// Utility for maintaining selection across pages
-function usePersistentSelection() {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const add = (ids: string[]) => setSelectedIds(prev => Array.from(new Set([...prev, ...ids])));
-  const remove = (ids: string[]) => setSelectedIds(prev => prev.filter(id => !ids.includes(id)));
-  const toggle = (id: string) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  const clear = () => setSelectedIds([]);
-  return { selectedIds, add, remove, toggle, clear, setSelectedIds };
-}
-
 type ViewMode = 'list' | 'form';
 
 export function AdminProducts() {
-  // === STATE MANAGEMENT ===
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  // Bulk editing
-  const [bulkEditLoading, setBulkEditLoading] = useState(false);
-  const [bulkEditSuccess, setBulkEditSuccess] = useState<string | null>(null);
-  const [bulkEditError, setBulkEditError] = useState<string | null>(null);
-  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
-  const [bulkEditData, setBulkEditData] = useState<{ price?: number; stock?: number; inStock?: boolean } | null>(null);
 
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
-  const [editPage, setEditPage] = useState<number>(1); // Track page when editing
+  const [editPage, setEditPage] = useState<number>(1);
   const [showWizard, setShowWizard] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const resetUnsavedChangesFn = () => { };
 
@@ -85,15 +62,6 @@ export function AdminProducts() {
   }, [duplicateProduct]);
   const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
-  const token = localStorage.getItem('token') || '';
-
-  // Selection management
-  const {
-    selectedIds,
-    add,
-    remove,
-    clear
-  } = usePersistentSelection();
 
   // Scroll preservation
   const containerRef = useRef<HTMLElement>(null);
@@ -114,18 +82,7 @@ export function AdminProducts() {
     },
   });
 
-  // === SELECTION LOGIC ===
-
-  const handleSelectProduct = useCallback((id: string, checked: boolean) => {
-    if (checked) {
-      add([id]);
-    } else {
-      remove([id]);
-    }
-  }, [add, remove]);
-
-  // === SEARCH AND FILTER LOGIC ===
-
+  // Search & filter
   useEffect(() => {
     const timer = setTimeout(() => {
       refreshProducts({
@@ -175,14 +132,10 @@ export function AdminProducts() {
 
   const handleEdit = useCallback((id: string) => {
     if (unsavedChanges) {
-      interceptNavigation(() => {
-        setEditId(id);
-        setEditPage(apiPage); // Capture current page
-        setViewMode('form');
-      });
+      interceptNavigation(() => { setEditId(id); setEditPage(apiPage); setViewMode('form'); });
     } else {
       setEditId(id);
-      setEditPage(apiPage); // Capture current page
+      setEditPage(apiPage);
       setViewMode('form');
     }
   }, [unsavedChanges, interceptNavigation, apiPage]);
@@ -191,58 +144,38 @@ export function AdminProducts() {
     try {
       deleteProduct(id);
       toast.success('Producto eliminado con éxito');
-      setDeleteConfirm(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al eliminar: ${message}`);
     }
   }, [deleteProduct]);
 
-  // === WIZARD HANDLERS ===
+  // === WIZARD HANDLER ===
 
   const handleWizardPublish = async (wizardProduct: WizardProduct) => {
     try {
-      // Validación previa de campos requeridos
       if (!wizardProduct.name || !wizardProduct.price || !wizardProduct.sku || !wizardProduct.categoryId) {
-        toast.error('Completa todos los campos requeridos: nombre, precio, categoría y SKU');
+        toast.error('Completa todos los campos requeridos: nombre, precio, categóría y SKU');
         return;
       }
-
-      // Convert wizard data to admin product format
-      const payload = {
-        name: wizardProduct.name,
-        description: wizardProduct.description,
-        categoryId: wizardProduct.categoryId,
-        price: wizardProduct.price,
-        stock: wizardProduct.stock,
-        inStock: true,
-        shortDescription: wizardProduct.shortDescription,
-        tags: wizardProduct.tags || [],
-        images: wizardProduct.images,
-        sku: wizardProduct.sku,
-        variants: wizardProduct.variants || [],
-      };
-
-      // Create the product through the context
       await addProduct({
-        name: payload.name || 'Sin nombre',
-        slug: (payload.name || 'sin-nombre').toLowerCase().replace(/\s+/g, '-'),
-        description: payload.description || '',
-        shortDescription: payload.shortDescription || '',
-        price: payload.price || 0,
-        stock: payload.stock || 0,
-        inStock: payload.inStock || false,
-        images: payload.images || [],
-        category: categories.find(c => c.id === payload.categoryId) || { id: payload.categoryId, name: 'Unnamed', slug: '', isVisible: true },
-        categoryIds: payload.categoryId ? [payload.categoryId] : [],
-        tags: payload.tags || [],
+        name: wizardProduct.name || 'Sin nombre',
+        slug: (wizardProduct.name || 'sin-nombre').toLowerCase().replace(/\s+/g, '-'),
+        description: wizardProduct.description || '',
+        shortDescription: wizardProduct.shortDescription || '',
+        price: wizardProduct.price || 0,
+        stock: wizardProduct.stock || 0,
+        inStock: true,
+        images: wizardProduct.images || [],
+        category: categories.find(c => c.id === wizardProduct.categoryId) || { id: wizardProduct.categoryId, name: 'Unnamed', slug: '', isVisible: true },
+        categoryIds: wizardProduct.categoryId ? [wizardProduct.categoryId] : [],
+        tags: wizardProduct.tags || [],
         features: [],
         rating: 0,
         reviewCount: 0,
-        sku: payload.sku || '',
+        sku: wizardProduct.sku || '',
         variants: [],
       });
-
       toast.success('¡Producto creado exitosamente!');
       refreshProducts({ page: 1, limit: 10 });
       setShowWizard(false);
@@ -253,45 +186,6 @@ export function AdminProducts() {
     }
   };
 
-  // === BULK EDIT HANDLERS ===
-
-  const handleBulkEdit = (data: { price?: number; stock?: number; inStock?: boolean }) => {
-    setBulkEditData(data);
-    setShowBulkConfirm(true);
-  };
-
-  const confirmBulkEdit = async () => {
-    if (!bulkEditData) return;
-    setBulkEditLoading(true);
-    setBulkEditSuccess(null);
-    setBulkEditError(null);
-    try {
-      await Promise.all(selectedIds.map(id =>
-        productsService.updateAdminProduct(id, bulkEditData, token)
-      ));
-      setBulkEditSuccess('¡Productos actualizados correctamente!');
-      clear();
-      refreshProducts({ q: search, categoryId: categoryFilter, page: apiPage, limit: 10 });
-    } catch {
-      setBulkEditError('Error al actualizar productos. Intenta nuevamente.');
-    } finally {
-      setBulkEditLoading(false);
-      setShowBulkConfirm(false);
-      setBulkEditData(null);
-    }
-  };
-
-  const cancelBulkEdit = () => {
-    setBulkEditData(null);
-    setShowBulkConfirm(false);
-  };
-
-  // === EXPORT HANDLERS ===
-
-  // (Export handlers can be added back if needed in the MasterDetailLayout toolbar)
-
-  // === RENDER ===
-
   return (
     <main
       ref={containerRef}
@@ -300,10 +194,8 @@ export function AdminProducts() {
     >
       {viewMode === 'list' && (
         <>
-          {/* Header */}
           <ProductHeader canCreate={can('products.create')} onNew={handleNew} onWizard={() => setShowWizard(true)} />
 
-          {/* Filters */}
           <ProductFilters
             search={search}
             setSearch={setSearch}
@@ -328,33 +220,6 @@ export function AdminProducts() {
             total={total}
           />
 
-          {/* Bulk Edit Bar */}
-          {selectedIds.length > 0 && can('products.edit') && (
-            <BulkEditBar
-              selectedCount={selectedIds.length}
-              onBulkEdit={handleBulkEdit}
-              onCancel={clear}
-              loading={bulkEditLoading}
-            />
-          )}
-
-          {/* Feedback Messages */}
-          <ProductFeedbackSection success={bulkEditSuccess} error={bulkEditError} />
-
-          {/* Bulk Edit Confirmation Modal */}
-          {showBulkConfirm && (
-            <ModalConfirm
-              open={showBulkConfirm}
-              title="Confirmar edición masiva"
-              message={`¿Aplicar los cambios a ${selectedIds.length} productos seleccionados? Esta acción no se puede deshacer.`}
-              confirmText="Aplicar cambios"
-              cancelText="Cancelar"
-              onConfirm={confirmBulkEdit}
-              onCancel={cancelBulkEdit}
-            />
-          )}
-
-          {/* Error State */}
           {!loading && error && (
             <EmptyState
               icon={<AlertCircle size={48} color="#ef4444" />}
@@ -364,15 +229,14 @@ export function AdminProducts() {
             />
           )}
 
-          {/* Empty State */}
           {!loading && !error && products.length === 0 && (
             <EmptyState
               icon={<PackageSearch size={48} color="#94a3b8" />}
               title="No se encontraron productos"
               description={
                 search || categoryFilter
-                  ? "Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás."
-                  : "Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!"
+                  ? 'Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás.'
+                  : 'Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!'
               }
               action={
                 can('products.create')
@@ -382,24 +246,19 @@ export function AdminProducts() {
             />
           )}
 
-          {/* Master-Detail Layout */}
           {!loading && !error && products.length > 0 && (
             <>
               <MasterDetailLayout
                 products={products}
                 loading={loading}
                 error={error}
-                selectedIds={selectedIds}
-                onSelectChange={handleSelectProduct}
                 onEdit={can('products.edit') ? handleEdit : undefined}
                 onDelete={can('products.delete') ? handleDelete : undefined}
                 onDuplicate={can('products.create') ? handleDuplicate : undefined}
                 canEdit={can('products.edit')}
                 canDelete={can('products.delete')}
-                showCheckbox={can('products.edit') || can('products.delete')}
               />
 
-              {/* Pagination */}
               {total > 10 && (
                 <ProductPagination
                   page={apiPage}
@@ -410,23 +269,6 @@ export function AdminProducts() {
             </>
           )}
 
-          {/* Product Form Modal */}
-          {/*showForm && (
-            <AdminProductForm
-              productId={editId}
-              onClose={() => {
-                if (unsavedChanges) {
-                  interceptNavigation(() => setShowForm(false));
-                } else {
-                  setShowForm(false);
-                }
-              }}
-              onUnsavedChanges={setUnsavedChanges}
-              resetUnsavedChanges={resetUnsavedChangesFn}
-            />
-          )*/}
-
-          {/* Product Wizard Modal */}
           {showWizard && (
             <ProductWizard
               open={showWizard}
@@ -436,7 +278,6 @@ export function AdminProducts() {
             />
           )}
 
-          {/* Unsaved Changes Warning Modal */}
           {showWarning && (
             <ModalConfirm
               open={showWarning}
@@ -448,17 +289,6 @@ export function AdminProducts() {
               onCancel={cancelNavigation}
             />
           )}
-
-          {/* Delete Confirmation Modal */}
-          <ModalConfirm
-            open={!!deleteConfirm}
-            title="Eliminar producto"
-            message="¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer."
-            confirmText="Eliminar"
-            cancelText="Cancelar"
-            onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
-            onCancel={() => setDeleteConfirm(null)}
-          />
         </>
       )}
 
@@ -469,19 +299,18 @@ export function AdminProducts() {
           onSuccess={() => {
             setViewMode('list');
             setEditId(null);
-            refreshProducts({ 
+            refreshProducts({
               q: search,
               categoryId: categoryFilter,
               status: statusFilter,
               stockLevel: stockLevelFilter,
-              page: editPage, // Use saved page
-              limit: 10 
+              page: editPage,
+              limit: 10,
             });
           }}
           onUnsavedChanges={setUnsavedChanges}
         />
       )}
-
     </main>
   );
 }

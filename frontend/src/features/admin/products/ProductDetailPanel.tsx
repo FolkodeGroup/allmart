@@ -1,6 +1,5 @@
 import React, { useState, Suspense } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { X } from 'lucide-react';
 import styles from './ProductDetailPanel.module.css';
 
 // Lazy load tab components
@@ -22,7 +21,6 @@ type TabName = 'basic' | 'pricing' | 'variants' | 'images' | 'seo';
 
 interface ProductDetailPanelProps {
   product: AdminProduct;
-  onClose: () => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDuplicate?: (product: AdminProduct) => void;
@@ -41,7 +39,6 @@ const TAB_ORDER: Exclude<TabName, 'seo'>[] = ['basic', 'pricing', 'variants', 'i
 
 export function ProductDetailPanel({
   product,
-  onClose,
   onEdit,
   onDelete,
   onDuplicate,
@@ -107,9 +104,6 @@ export function ProductDetailPanel({
             </div>
           </div>
         </div>
-        <button onClick={onClose} className={styles.closeBtn} title="Cerrar">
-          <X size={20} />
-        </button>
       </div>
 
       {/* Tabs */}
