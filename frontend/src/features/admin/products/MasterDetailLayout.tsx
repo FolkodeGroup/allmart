@@ -56,6 +56,11 @@ export function MasterDetailLayout({
         error={error}
         selectedProductId={selectedProductId}
         onSelectProduct={handleSelectProduct}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onDuplicate={onDuplicate}
+        canEdit={canEdit && !!onEdit}
+        canDelete={canDelete && !!onDelete}
       />
 
       {/* Detail Panel (Right) - Only show when product is selected */}

@@ -89,7 +89,7 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
           {product.originalPrice && product.originalPrice > 0 && (
             <div className={styles.detailRow}>
               <span className={styles.detailLabel}>Precio original</span>
-              <span className={styles.detailValue}>${product.originalPrice.toFixed(2)}</span>
+              <span className={`${styles.detailValue} ${styles.strikethrough}`}>${product.originalPrice.toFixed(2)}</span>
             </div>
           )}
 
@@ -102,14 +102,14 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
 
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Precio con descuento</span>
-                <span className={styles.detailValue} style={{ color: '#059669' }}>
+                <span className={`${styles.detailValue} ${styles.discountGreen}`}>
                   ${discountedPrice.toFixed(2)}
                 </span>
               </div>
 
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Ahorro total</span>
-                <span className={styles.detailValue} style={{ color: '#dc2626' }}>
+                <span className={`${styles.detailValue} ${styles.savingsRed}`}>
                   ${savings.toFixed(2)}
                 </span>
               </div>

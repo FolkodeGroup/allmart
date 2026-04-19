@@ -114,6 +114,9 @@
   background: var(--color-bg-primary);
   overflow-x: auto;
   overflow-y: hidden;
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .tabsList {
@@ -144,10 +147,16 @@
   background: var(--color-bg-tertiary);
 }
 
+.tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  color: var(--color-primary);
+}
+
 .tabActive {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
-  background: var(--color-bg-tertiary);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-bg-primary));
   font-weight: var(--font-semibold);
 }
 
@@ -231,6 +240,11 @@
   transform: translateY(-1px);
 }
 
+.btnEdit:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .btnEdit:active {
   transform: translateY(0);
 }
@@ -252,6 +266,11 @@
 .btnDelete:hover {
   background: #b91c1c;
   transform: translateY(-1px);
+}
+
+.btnDelete:focus-visible {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
 }
 
 .btnDelete:active {

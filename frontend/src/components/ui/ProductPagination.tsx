@@ -59,7 +59,7 @@ export const ProductPagination: React.FC<ProductPaginationProps> = ({ page, tota
       <div className={styles.pageNumbers} role="group" aria-label="Números de página">
         {getPageNumbers().map((p, idx) =>
           p === 'ellipsis' ? (
-            <span key={`ellipsis-${idx}`} style={{ padding: '0 4px', color: 'var(--color-text-tertiary)', alignSelf: 'center' }}>…</span>
+            <span key={`ellipsis-${idx}`} className={styles.ellipsis} aria-hidden="true">…</span>
           ) : (
             <button
               key={p}

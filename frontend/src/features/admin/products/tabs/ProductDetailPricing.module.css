@@ -111,6 +111,23 @@
   color: var(--color-primary);
 }
 
+/* Semantic price colors */
+.strikethrough {
+  text-decoration: line-through;
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-medium);
+}
+
+.discountGreen {
+  color: #059669;
+  font-weight: var(--font-bold);
+}
+
+.savingsRed {
+  color: #dc2626;
+  font-weight: var(--font-bold);
+}
+
 /* In Stock / Out of Stock */
 .inStock {
   color: #059669;

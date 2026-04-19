@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { PackageSearch, AlertCircle } from 'lucide-react';
+import { PackageSearch, AlertCircle, Pencil, Copy, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../../../utils/imageUrl';
@@ -12,6 +12,11 @@ interface ProductListPanelProps {
   error: string | null;
   selectedProductId?: string;
   onSelectProduct: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onDuplicate?: (product: AdminProduct) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
   scrollPreserveKey?: string;
 }
 
@@ -22,6 +27,11 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
     error,
     selectedProductId,
     onSelectProduct,
+    onEdit,
+    onDelete,
+    onDuplicate,
+    canEdit = true,
+    canDelete = true,
     scrollPreserveKey = 'product-list-scroll',
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -41,6 +51,24 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
 
     const handleSelectProduct = (id: string) => {
       onSelectProduct(id);
+    };
+
+    // Keyboard navigation: arrow keys to move between products
+    const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleSelectProduct(products[index].id);
+      } else if (event.key === 'ArrowDown' && index < products.length - 1) {
+        event.preventDefault();
+        const nextEl = (event.currentTarget.parentElement?.children[index + 1] as HTMLElement);
+        nextEl?.focus();
+        handleSelectProduct(products[index + 1].id);
+      } else if (event.key === 'ArrowUp' && index > 0) {
+        event.preventDefault();
+        const prevEl = (event.currentTarget.parentElement?.children[index - 1] as HTMLElement);
+        prevEl?.focus();
+        handleSelectProduct(products[index - 1].id);
+      }
     };
 
     const handleScroll = () => {
@@ -98,7 +126,7 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
     return (
       <aside ref={ref || containerRef} className={styles.panel} onScroll={handleScroll}>
         <div className={styles.listContainer}>
-          {products.map((product) => (
+          {products.map((product, index) => (
             <div
               key={product.id}
               data-product-id={product.id}
@@ -108,13 +136,9 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
               role="button"
               tabIndex={0}
               aria-label={`Seleccionar producto ${product.name}`}
+              aria-selected={selectedProductId === product.id}
               onClick={() => handleSelectProduct(product.id)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  handleSelectProduct(product.id);
-                }
-              }}
+              onKeyDown={(event) => handleKeyDown(event, index)}
             >
               <div className={styles.mainRow}>
                 <img
@@ -136,19 +160,56 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                   </div>
 
                   <div className={styles.metaLine}>
-                    <span className={styles.sku}>{product.sku || 'Sin SKU'}</span>
+                    <span className={styles.sku} title={`SKU: ${product.sku || 'Sin SKU'}`}>{product.sku || 'Sin SKU'}</span>
                     <span className={styles.separator}>·</span>
-                    <span>{product.category?.name || 'Sin categoría'}</span>
+                    <span title={product.category?.name || 'Sin categoría'}>{product.category?.name || 'Sin categoría'}</span>
                   </div>
 
                   <div className={styles.priceLine}>
                     <strong>{currencyFormatter.format(product.price)}</strong>
+                    {!!product.discount && product.discount > 0 && product.originalPrice && (
+                      <span className={styles.originalPrice}>{currencyFormatter.format(product.originalPrice)}</span>
+                    )}
                     {!!product.discount && product.discount > 0 && (
                       <span className={styles.discount}>-{product.discount}%</span>
                     )}
                     <span className={styles.stockText}>Stock: {product.stock}</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Quick actions on hover */}
+              <div className={styles.quickActions}>
+                {canEdit && onEdit && (
+                  <button
+                    className={styles.quickBtn}
+                    title="Editar"
+                    onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
+                    aria-label={`Editar ${product.name}`}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                )}
+                {onDuplicate && (
+                  <button
+                    className={styles.quickBtn}
+                    title="Duplicar"
+                    onClick={(e) => { e.stopPropagation(); onDuplicate(product); }}
+                    aria-label={`Duplicar ${product.name}`}
+                  >
+                    <Copy size={14} />
+                  </button>
+                )}
+                {canDelete && onDelete && (
+                  <button
+                    className={`${styles.quickBtn} ${styles.quickBtnDanger}`}
+                    title="Eliminar"
+                    onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}
+                    aria-label={`Eliminar ${product.name}`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             </div>
           ))}
