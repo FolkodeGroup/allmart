@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAdminImages } from '../../../../context/AdminImagesContext';
+import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import styles from './ProductDetailImages.module.css';
 
 interface ProductDetailImagesProps {
@@ -8,6 +9,7 @@ interface ProductDetailImagesProps {
 
 export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
   const { images, isLoading, error, uploadImage, deleteImage, loadImages } = useAdminImages();
+  const { refreshProducts } = useAdminProducts();
   const [imgFile, setImgFile] = useState<File | null>(null);
   const [imgAlt, setImgAlt] = useState('');
   const [imgError, setImgError] = useState('');
@@ -26,6 +28,7 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
       setImgAlt('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       loadImages(productId);
+      await refreshProducts(); // <--- refresca la lista
     } catch {
       setImgError('Error al subir la imagen');
     }
@@ -36,6 +39,7 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
     try {
       await deleteImage(productId, id);
       loadImages(productId);
+      await refreshProducts(); // <--- refresca la lista
     } catch {
       setImgError('Error al eliminar la imagen');
     }
