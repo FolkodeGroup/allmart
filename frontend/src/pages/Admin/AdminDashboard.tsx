@@ -176,7 +176,7 @@ export function AdminDashboard() {
   }, [orders]);
   const goalProgress = Math.min(100, (currentMonthRevenue / monthlyGoal) * 100);
 
-  const recentOrders = useMemo(
+  const _recentOrders = useMemo(
     () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
     [orders],
   );

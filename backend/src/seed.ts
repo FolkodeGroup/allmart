@@ -1,9 +1,11 @@
 /**
  * seed.ts
  * Script para poblar la base de datos con:
- * - Usuarios admin/editor
- * - Categorías (6)
- * - Productos (del mock, primeros 5 como ejemplo)
+ * - Usuarios admin/editor SOLO
+ *
+ * ⚠️  IMPORTANTE: Este script NO crea categorías ni productos.
+ * Las categorías deben ser creadas manualmente en el admin panel.
+ * Usar 'npm run seed:demo' solo si se necesita datos de demostración completos.
  *
  * Uso: npm run seed
  * Variables de entorno:
@@ -14,14 +16,13 @@
 import { prisma } from './config/prisma';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { categories, products } from './seeds/mock';
-import { UserRole, ProductStatus, CategoryStatus } from './types';
+import { UserRole } from './types';
 
 dotenv.config();
 
 async function seed() {
   try {
-    console.log('Iniciando seed...');
+    console.log('Iniciando seed (solo usuarios)...');
 
     // ── Usuarios ──
     const adminPassword = process.env.SEED_ADMIN_PASSWORD!;
@@ -68,119 +69,11 @@ async function seed() {
       },
     });
 
-    console.log('Usuarios insertados correctamente.');
-
-    // ── Categorías ──
-    const categoryIdBySlug = new Map<string, string>();
-    for (const cat of categories) {
-      const row = await prisma.category.upsert({
-        where: { slug: cat.slug },
-        update: {},
-        create: {
-          name: cat.name,
-          slug: cat.slug,
-          description: cat.description || null,
-          imageUrl: cat.image,
-          itemCount: cat.itemCount || 0,
-          parentId: null,
-        },
-      });
-      categoryIdBySlug.set(cat.slug, row.id);
-    }
-
-    for (const cat of categories) {
-      if (!cat.parentSlug) continue;
-      const parentId = categoryIdBySlug.get(cat.parentSlug);
-      const categoryId = categoryIdBySlug.get(cat.slug);
-      if (!parentId || !categoryId) continue;
-      await prisma.category.update({
-        where: { id: categoryId },
-        data: { parentId },
-      });
-    }
-
-    console.log('Categorías insertadas correctamente.');
-
-    // ── Productos ──
-    const productsToInsert = products.slice(0, 5); // primeros 5 productos del mock
-
-    for (const prod of productsToInsert) {
-      const categorySlugs = Array.isArray(prod.categorySlugs)
-        ? prod.categorySlugs
-        : Array.isArray(prod.categories)
-          ? prod.categories.map((cat: any) => cat.slug)
-          : prod.category?.slug
-            ? [prod.category.slug]
-            : [];
-
-      const categoryIds = categorySlugs
-        .map((slug: string) => categoryIdBySlug.get(slug))
-        .filter((id: string | undefined): id is string => Boolean(id));
-
-      if (categoryIds.length === 0) {
-        console.warn(`Categoría no encontrada para el producto: ${prod.name}`);
-        continue;
-      }
-
-      const primaryCategoryId = categoryIds[0];
-
-      const updateData = {
-        images: prod.images,
-        shortDescription: prod.shortDescription || null,
-        description: prod.description || null,
-        price: prod.price,
-        originalPrice: prod.originalPrice || null,
-        discount: prod.discount || null,
-        tags: prod.tags || [],
-        features: prod.features || [],
-        status: ProductStatus.ACTIVE,
-        categoryId: primaryCategoryId,
-      };
-
-      const createData = {
-        name: prod.name,
-        slug: prod.slug,
-        description: prod.description || null,
-        shortDescription: prod.shortDescription || null,
-        price: prod.price,
-        originalPrice: prod.originalPrice || null,
-        discount: prod.discount || null,
-        images: prod.images,
-        categoryId: primaryCategoryId,
-        tags: prod.tags || [],
-        rating: prod.rating || 0,
-        reviewCount: prod.reviewCount || 0,
-        inStock: prod.inStock ?? true,
-        stock: 0,
-        sku: prod.sku || null,
-        features: prod.features || [],
-        status: ProductStatus.ACTIVE,
-      };
-
-      const existingBySlug = await prisma.product.findUnique({
-        where: { slug: prod.slug },
-        select: { id: true },
-      });
-      const existingBySku = prod.sku
-        ? await prisma.product.findUnique({ where: { sku: prod.sku }, select: { id: true } })
-        : null;
-
-      const productRow = existingBySlug
-        ? await prisma.product.update({ where: { id: existingBySlug.id }, data: updateData })
-        : existingBySku
-          ? await prisma.product.update({ where: { id: existingBySku.id }, data: updateData })
-          : await prisma.product.create({ data: createData });
-
-      await prisma.productCategory.createMany({
-        data: categoryIds.map((categoryId: string) => ({
-          productId: productRow.id,
-          categoryId,
-        })),
-        skipDuplicates: true,
-      });
-    }
-
-    console.log('Productos insertados correctamente.');
+    console.log('✅ Usuarios insertados correctamente.');
+    console.log('\n⚠️  Recordatorio: Las categorías NO se crean automáticamente.');
+    console.log('   Las categorías deben crearse manualmente en el panel de admin.');
+    console.log('\n   Si necesitas datos demo completos, ejecuta:');
+    console.log('   npm run seed:demo\n');
     console.log('Seed finalizado correctamente.');
   } catch (err) {
     console.error('Error en seed:', err);

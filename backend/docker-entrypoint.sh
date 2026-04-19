@@ -96,15 +96,19 @@ node -e "
   run().catch(err => { console.error('[Migrate] Error:', err.message); process.exit(1); });
 "
 
-echo "[Docker] Migraciones completadas. Ejecutando seed..."
+echo "[Docker] Migraciones completadas."
 
-# Ejecutar seed (upsert de admin, categorías y productos) si se proporcionan las variables
-# Usamos node sobre el archivo compilado en dist/
-if [ -n "$SEED_ADMIN_PASSWORD" ] && [ -n "$SEED_EDITOR_PASSWORD" ]; then
-  npm run seed:prod
-else
-  echo "[Docker] No se detectaron contraseñas de SEED ($SEED_ADMIN_PASSWORD y $SEED_EDITOR_PASSWORD). Saltando paso."
-fi
+# ⚠️  COMENTADO: No ejecutar seed automáticamente
+# El seed regeneraba categorías cada vez que se reiniciaba el contenedor
+# Las categorías deben crearse y mantenerse manualmente en el admin panel
+# Si necesitas datos de demostración completos, ejecuta manualmente:
+#   docker exec allmart-backend npm run seed:demo
+
+# if [ -n "$SEED_ADMIN_PASSWORD" ] && [ -n "$SEED_EDITOR_PASSWORD" ]; then
+#   npm run seed:prod
+# else
+#   echo "[Docker] No se detectaron contraseñas de SEED. Saltando paso."
+# fi
 
 echo "[Docker] Arrancando servidor..."
 

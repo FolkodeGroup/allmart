@@ -1,11 +1,12 @@
 // src/pages/Admin/AdminLayout.tsx
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
 import { useAdminProducts } from "../../context/useAdminProductsContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
+import { UserProfileCard } from "../../components/layout/AdminSidebar/UserProfileCard";
 import { Button } from '../../components/ui/Button/Button';
 import { AdminLoadingFallback } from '../../components/ui/AdminLoadingFallback';
 import styles from "./AdminLayout.module.css";
@@ -101,18 +102,12 @@ const navItems: NavItem[] = [
   },
 ];
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Administrador",
-  editor: "Editor",
-};
-
 type Theme = 'light' | 'dark';
 
 export function AdminLayout() {
-  const { user, role, logout, can } = useAdminAuth();
+  const { can } = useAdminAuth();
   const { getPendingOrdersCount } = useAdminOrders();
   const { getLowStockCount } = useAdminProducts();
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -139,7 +134,6 @@ export function AdminLayout() {
   }, [theme]);
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(
@@ -147,28 +141,6 @@ export function AdminLayout() {
       JSON.stringify(isCollapsed),
     );
   }, [isCollapsed]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isDropdownOpen]);
-
-  const handleLogout = () => {
-    logout();
-    window.location.replace('/');
-  };
 
   const getBadgeCount = (badge: NavBadge) => {
     if (badge === 'pending') return getPendingOrdersCount();
@@ -291,53 +263,7 @@ export function AdminLayout() {
           </nav>
         </div>
 
-        <div className={styles.sidebarFooter} ref={dropdownRef}>
-          <Button
-            className={styles.profileBtn}
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            aria-label="Abrir menú de perfil"
-            variant="ghost"
-            type="button"
-          >
-            <div className={styles.avatar}>👤</div>
-            <div className={styles.userDetails}>
-              <span className={styles.userName}>{user}</span>
-              {role && !isCollapsed && (
-                <span
-                  className={`${styles.roleBadge} ${styles[`roleBadge_${role}`]}`}
-                >
-                  {ROLE_LABELS[role] ?? role}
-                </span>
-              )}
-            </div>
-            <span
-              className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ""}`}
-            >
-              ▼
-            </span>
-          </Button>
-
-          {isDropdownOpen && (
-            <div className={styles.dropdown}>
-              <Button className={styles.dropdownItem} variant="ghost" type="button">
-                <span className={styles.dropdownIcon}>⚙️</span>
-                <span>Configuración</span>
-              </Button>
-              <Button
-                className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
-                variant="ghost"
-                type="button"
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  handleLogout();
-                }}
-              >
-                <span className={styles.dropdownIcon}>🚪</span>
-                <span>Cerrar sesión</span>
-              </Button>
-            </div>
-          )}
-        </div>
+        <UserProfileCard isCollapsed={isCollapsed} />
       </aside>
 
       <main className={styles.main}>
