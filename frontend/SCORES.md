@@ -1,8 +1,8 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 18636 |
-| FedericoPaal | 4095 |
-| Mau-bar-iva | 2040 |
+| dgimenezdeveloper | 18806 |
+| FedericoPaal | 4130 |
+| Mau-bar-iva | 2105 |
 | Nahuel-Dalesio | 1630 |
 | CelinaJP | 1378 |
 | agustin-ovejero | 1132 |
@@ -11,11 +11,29 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #821: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #819: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #820: Se implementa validación por campo en tiempo real sin esperar submit … | 2026-04-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #819: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
+| FedericoPaal | 35 | Issue | Implementar checklist visible de "ready to publish" | 2026-04-18 |
+| Mau-bar-iva | 65 | Issue | Refactorizar creación/edición de producto: reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
 | agustin-ovejero | 32 | Issue | Implementar atajos de productividad (duplicar producto) | 2026-04-17 |
 | dgimenezdeveloper | 1000 | Issue | Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #815: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #813: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #811: 🔄 Registrar puntaje de gestión | 2026-04-17 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #809: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #815: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #813: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #811: 🔄 Registrar puntaje de gestión | 2026-04-17 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #809: 🔄 Registrar puntaje de gestión | 2026-04-17 |
