@@ -39,3 +39,21 @@ export function getAdminActivityLogs(): AdminActivityLog[] {
 export function clearAdminActivityLogs() {
   localStorage.removeItem(STORAGE_KEY);
 }
+
+export function deleteAdminActivityLog(timestamp: string, index: number) {
+  const logs = getLogs();
+  // Find by timestamp and relative position for uniqueness
+  const matches = logs.filter((l) => l.timestamp === timestamp);
+  if (matches.length <= 1) {
+    saveLogs(logs.filter((l) => l.timestamp !== timestamp));
+  } else {
+    let count = 0;
+    saveLogs(logs.filter((l) => {
+      if (l.timestamp === timestamp) {
+        if (count === index) { count++; return false; }
+        count++;
+      }
+      return true;
+    }));
+  }
+}

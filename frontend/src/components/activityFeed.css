@@ -220,103 +220,92 @@
   font-size: 13px;
 }
 
-/* Skeleton Loading */
-.af-skeleton {
-  display: flex;
-  gap: 12px;
-  padding-bottom: 1.1rem;
-  align-items: flex-start;
-  position: relative;
-}
-
-.af-skeleton-icon {
-  position: absolute;
-  left: -28px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #f0f0f0;
-  animation: af-skeleton-pulse 1.5s ease-in-out infinite;
-}
-
-.af-skeleton-card {
-  flex: 1;
-  background: #fff;
+/* ── Table layout ── */
+.af-table-scroll {
+  max-height: 280px;
+  overflow-y: auto;
   border: 0.5px solid #e5e5e5;
   border-radius: 8px;
-  padding: 10px 14px;
-  animation: af-skeleton-pulse 1.5s ease-in-out infinite;
 }
 
-.af-skeleton-line {
-  height: 12px;
-  background: #f0f0f0;
+.af-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.af-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.af-table th {
+  background: #f7f7f7;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.af-table th:last-child {
+  width: 36px;
+}
+
+.af-row td {
+  padding: 8px 12px;
+  border-bottom: 0.5px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.af-row:hover {
+  background: #fafafa;
+}
+
+.af-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.af-desc {
+  color: #333;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.af-user {
+  color: #888;
+  font-size: 12px;
+}
+
+.af-time {
+  color: #aaa;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.af-delete-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
   border-radius: 4px;
-  margin-bottom: 8px;
-  animation: af-skeleton-pulse 1.5s ease-in-out infinite;
+  transition: color 0.15s, background 0.15s;
 }
 
-.af-skeleton-line:last-child {
-  margin-bottom: 0;
-}
-
-.af-skeleton-line.short {
-  width: 60%;
-}
-
-@keyframes af-skeleton-pulse {
-
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-/* Loading state */
-.af-loading {
-  padding-left: 28px;
-}
-
-/* Accessibility */
-.af-event-icon[aria-label],
-.af-card-name[role="heading"],
-.af-tag[role="status"] {
-  position: relative;
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-  .af-wrapper {
-    padding: 0.75rem 0;
-  }
-
-  .af-filter-bar {
-    gap: 4px;
-  }
-
-  .af-filter-btn {
-    font-size: 11px;
-    padding: 3px 10px;
-  }
-
-  .af-card {
-    padding: 8px 12px;
-  }
-
-  .af-card-name {
-    font-size: 12px;
-  }
-
-  .af-card-desc {
-    font-size: 11px;
-  }
-
-  .af-tag {
-    font-size: 10px;
-    padding: 2px 6px;
-  }
+.af-delete-btn:hover {
+  color: #e53935;
+  background: #fef0f0;
 }
