@@ -155,8 +155,14 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             ref={fileInputRef}
-                            onChange={e => setImgFile(e.target.files?.[0] || null)}
+                            onChange={e => {
+                                const files = e.target.files;
+                                if (files && files.length > 0) {
+                                    setImgFile(files[0]);
+                                }
+                            }}
                             style={{ display: 'none' }}
                         />
                         <button
@@ -164,9 +170,9 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                             onClick={() => fileInputRef.current?.click()}
                             className={styles.uploadButton}
                         >
-                            Seleccionar archivo
+                            📁 Seleccionar archivo(s)
                         </button>
-                        {imgFile && <p>{imgFile.name}</p>}
+                        {imgFile && <p style={{ fontSize: '13px', color: '#6b7280' }}>Archivo: {imgFile.name}</p>}
                         <input
                             type="text"
                             placeholder="Texto alternativo (opcional)"
@@ -181,14 +187,18 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 disabled={!imgFile}
                                 className={styles.submitBtn}
                             >
-                                Subir
+                                ✓ Subir
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setShowAddImgForm(false)}
+                                onClick={() => {
+                                    setShowAddImgForm(false);
+                                    setImgFile(null);
+                                    setImgNewAlt('');
+                                }}
                                 className={styles.cancelBtn}
                             >
-                                Cancelar
+                                ✕ Cancelar
                             </button>
                         </div>
                         {imgError && <div className={styles.errorText}>{imgError}</div>}

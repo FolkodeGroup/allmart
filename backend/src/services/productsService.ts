@@ -114,6 +114,26 @@ export async function getProductById(id: string): Promise<Product> {
     include: { productCategories: { select: { categoryId: true } } },
   });
   if (!row) throw createError('Producto no encontrado', 404);
+  
+  // Sincronizar imágenes si el producto tiene imágenes en storage pero product.images está vacío
+  const imagesArray = Array.isArray(row.images) ? row.images : [];
+  const hasStorageImages = imagesArray.length === 0;
+  if (hasStorageImages) {
+    const storageImages = await prisma.productImageStorage.findMany({
+      where: { productId: id },
+      select: { id: true },
+      orderBy: { position: 'asc' },
+    });
+    if (storageImages.length > 0) {
+      const syncedImages = storageImages.map(img => `/api/images/products/${img.id}`);
+      await prisma.product.update({
+        where: { id },
+        data: { images: syncedImages as any },
+      });
+      (row as any).images = syncedImages;
+    }
+  }
+  
   return toProduct(row);
 }
 
@@ -285,9 +305,52 @@ export async function getAdminProducts(query: {
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit,
-      include: { productCategories: { select: { categoryId: true } } },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        shortDescription: true,
+        price: true,
+        originalPrice: true,
+        discount: true,
+        images: true,
+        categoryId: true,
+        tags: true,
+        rating: true,
+        reviewCount: true,
+        inStock: true,
+        stock: true,
+        sku: true,
+        features: true,
+        isFeatured: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        productCategories: { select: { categoryId: true } },
+      },
     }),
   ]);
+
+  // Sincronizar imágenes para productos que tienen storage pero producto.images está vacío
+  for (const row of rows) {
+    const imagesArray = Array.isArray(row.images) ? row.images : [];
+    if (imagesArray.length === 0) {
+      const storageImages = await prisma.productImageStorage.findMany({
+        where: { productId: row.id },
+        select: { id: true },
+        orderBy: { position: 'asc' },
+      });
+      if (storageImages.length > 0) {
+        const syncedImages = storageImages.map(img => `/api/images/products/${img.id}`);
+        await prisma.product.update({
+          where: { id: row.id },
+          data: { images: syncedImages as any },
+        });
+        (row as any).images = syncedImages;
+      }
+    }
+  }
 
   return {
     data: rows.map(toProduct),

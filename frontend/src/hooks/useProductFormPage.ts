@@ -42,7 +42,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     const auth = useAdminAuth();
     const userEmail = (auth.user as { email?: string } | null)?.email ?? 'desconocido';
 
-    const { addProduct, updateProduct, getProduct, loadProductVariants } = useAdminProducts();
+    const { addProduct, updateProduct, getProduct, loadProductVariants, refreshProducts } = useAdminProducts();
     const { categories } = useAdminCategories();
     const {
         images: apiImages,
@@ -340,10 +340,11 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             setImgNewAlt('');
             setShowAddImgForm(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
+            await refreshProducts();
         } catch {
             setImgError('Error al subir la imagen');
         }
-    }, [imgFile, imgNewAlt, productId, uploadImage]);
+    }, [imgFile, imgNewAlt, productId, uploadImage, refreshProducts]);
 
     const handleApiStartEdit = useCallback((img: ProductImageItem) => {
         setEditingImgId(img.id);
@@ -380,13 +381,14 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
                     entityId: imageId,
                     details: { productId },
                 });
+                await refreshProducts();
             } catch {
                 // error surfaced via context
             } finally {
                 setDeletingImgId(null);
             }
         },
-        [productId, userEmail, deleteImage]
+        [productId, userEmail, deleteImage, refreshProducts]
     );
 
     // ── Category handlers ──────────────────────────────────────────────────
