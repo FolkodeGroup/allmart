@@ -161,7 +161,6 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                   className={styles.thumbnail}
                   loading="lazy"
                   onError={(event) => {
-                    console.warn(`[DEBUG] Falló carga de imagen para ${product.id}:`, normalizeImageUrl(product.images?.[0]), 'Images array:', product.images);
                     event.currentTarget.src = DEFAULT_IMAGE_PLACEHOLDER;
                   }}
                 />

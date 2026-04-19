@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAdminImages } from '../../../../context/AdminImagesContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
+import { Upload, Trash2 } from 'lucide-react';
 import styles from './ProductDetailImages.module.css';
 
 interface ProductDetailImagesProps {
@@ -9,10 +10,11 @@ interface ProductDetailImagesProps {
 
 export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
   const { images, isLoading, error, uploadImage, deleteImage, loadImages } = useAdminImages();
-  const { refreshProducts } = useAdminProducts();
+  const { refreshCurrentPage } = useAdminProducts();
   const [imgFile, setImgFile] = useState<File | null>(null);
   const [imgAlt, setImgAlt] = useState('');
   const [imgError, setImgError] = useState('');
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { 
@@ -22,15 +24,18 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
   const handleUpload = async () => {
     setImgError('');
     if (!imgFile) return setImgError('Seleccioná un archivo');
+    setUploading(true);
     try {
       await uploadImage(productId, imgFile, imgAlt.trim() || undefined);
       setImgFile(null);
       setImgAlt('');
       if (fileInputRef.current) fileInputRef.current.value = '';
       loadImages(productId);
-      await refreshProducts(); // <--- refresca la lista
+      await refreshCurrentPage();
     } catch {
       setImgError('Error al subir la imagen');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -39,7 +44,7 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
     try {
       await deleteImage(productId, id);
       loadImages(productId);
-      await refreshProducts(); // <--- refresca la lista
+      await refreshCurrentPage();
     } catch {
       setImgError('Error al eliminar la imagen');
     }
@@ -49,38 +54,70 @@ export function ProductDetailImages({ productId }: ProductDetailImagesProps) {
     <div className={styles.container}>
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Imágenes del producto</h3>
+
+        {/* Upload row */}
         <div className={styles.uploadRow}>
-          <input 
-            type="file" 
-            accept="image/*" 
-            ref={fileInputRef} 
-            onChange={e => setImgFile(e.target.files?.[0] || null)} 
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={e => setImgFile(e.target.files?.[0] || null)}
           />
-          <input 
-            type="text" 
-            placeholder="Texto alternativo" 
-            value={imgAlt} 
-            onChange={e => setImgAlt(e.target.value)} 
-          />
-          <button type="button" onClick={handleUpload}>Subir imagen</button>
+          <button
+            type="button"
+            className={styles.selectBtn}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Seleccionar archivo
+          </button>
+          <span className={styles.fileName}>
+            {imgFile ? imgFile.name : 'Ningún archivo seleccionado'}
+          </span>
         </div>
-        
+
+        <input
+          type="text"
+          placeholder="Texto alternativo (opcional)"
+          value={imgAlt}
+          onChange={e => setImgAlt(e.target.value)}
+          className={styles.altInput}
+        />
+
+        <button
+          type="button"
+          className={styles.uploadBtn}
+          onClick={handleUpload}
+          disabled={!imgFile || uploading}
+        >
+          <Upload size={14} />
+          {uploading ? 'Subiendo...' : 'Subir imagen'}
+        </button>
+
         {imgError && <div className={styles.error}>{imgError}</div>}
-        
+      </section>
+
+      {/* Images grid */}
+      <section className={styles.section}>
         {isLoading ? (
-          <div>Cargando imágenes...</div>
+          <div className={styles.info}>Cargando imágenes...</div>
         ) : error ? (
           <div className={styles.error}>{error}</div>
+        ) : images.length === 0 ? (
+          <div className={styles.info}>No hay imágenes para este producto.</div>
         ) : (
           <div className={styles.imagesGrid}>
-            {images.length === 0 && <div>No hay imágenes para este producto.</div>}
             {images.map(img => (
               <div key={img.id} className={styles.imageItem}>
                 <img src={img.url} alt={img.altText || ''} className={styles.image} />
-                <div className={styles.imageActions}>
-                  <button type="button" onClick={() => handleDelete(img.id)}>Eliminar</button>
-                  {img.altText && <span className={styles.altText}>Alt: {img.altText}</span>}
-                </div>
+                <button
+                  type="button"
+                  className={styles.deleteBtn}
+                  onClick={() => handleDelete(img.id)}
+                  title="Eliminar imagen"
+                >
+                  <Trash2 size={12} />
+                </button>
               </div>
             ))}
           </div>

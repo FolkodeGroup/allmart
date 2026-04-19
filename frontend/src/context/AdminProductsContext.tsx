@@ -4,7 +4,7 @@
  * Usa llamadas HTTP al backend — sin mocks ni localStorage.
  */
 
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
@@ -64,6 +64,7 @@ interface AdminProductsContextType {
   totalPages: number;
   error: string | null;
   refreshProducts: (params?: AdminProductsParams) => Promise<void>;
+  refreshCurrentPage: () => Promise<void>;
   addProduct: (p: Omit<AdminProduct, 'id'>) => Promise<AdminProduct>;
   updateProduct: (id: string, p: Partial<AdminProduct>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -86,6 +87,8 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   const { categories } = useAdminCategories();
   const { showNotification } = useNotification();
 
+  const lastParamsRef = useRef<AdminProductsParams | undefined>(undefined);
+
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,10 +101,12 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   /** Carga (o recarga) los productos desde el backend con paginación y búsqueda */
   const refreshProducts = useCallback(async (params?: AdminProductsParams) => {
     if (!token) return;
+    // Persist last used params so refreshCurrentPage can reuse them
+    if (params !== undefined) lastParamsRef.current = params;
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchAdminProducts(token, params);
+      const response = await fetchAdminProducts(token, params ?? lastParamsRef.current);
       setProducts(response.data.map((p) => apiToAdminProduct(p, categories)));
       setPagination({
         total: response.total,
@@ -116,6 +121,11 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, [token, categories, showNotification]);
+
+  /** Recarga usando los últimos parámetros (página, filtros, búsqueda) */
+  const refreshCurrentPage = useCallback(async () => {
+    await refreshProducts(lastParamsRef.current);
+  }, [refreshProducts]);
 
   // Carga inicial deshabilitada para evitar doble fetch. El componente principal controla la carga de productos.
 
@@ -277,6 +287,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         totalPages: pagination.totalPages,
         error,
         refreshProducts,
+        refreshCurrentPage,
         addProduct,
         updateProduct,
         deleteProduct,

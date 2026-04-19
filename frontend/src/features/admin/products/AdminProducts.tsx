@@ -53,6 +53,7 @@ export function AdminProducts() {
 
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
+  const [editPage, setEditPage] = useState<number>(1); // Track page when editing
   const [showWizard, setShowWizard] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -176,13 +177,15 @@ export function AdminProducts() {
     if (unsavedChanges) {
       interceptNavigation(() => {
         setEditId(id);
+        setEditPage(apiPage); // Capture current page
         setViewMode('form');
       });
     } else {
       setEditId(id);
+      setEditPage(apiPage); // Capture current page
       setViewMode('form');
     }
-  }, [unsavedChanges, interceptNavigation]);
+  }, [unsavedChanges, interceptNavigation, apiPage]);
 
   const handleDelete = useCallback((id: string) => {
     try {
@@ -466,7 +469,14 @@ export function AdminProducts() {
           onSuccess={() => {
             setViewMode('list');
             setEditId(null);
-            refreshProducts({ page: 1, limit: 10 });
+            refreshProducts({ 
+              q: search,
+              categoryId: categoryFilter,
+              status: statusFilter,
+              stockLevel: stockLevelFilter,
+              page: editPage, // Use saved page
+              limit: 10 
+            });
           }}
           onUnsavedChanges={setUnsavedChanges}
         />
