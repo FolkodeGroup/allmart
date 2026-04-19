@@ -76,6 +76,9 @@
   overflow-y: hidden;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
   flex: 1;
   min-width: 0;
   
@@ -91,6 +94,7 @@
 /* ── Product Card ── */
 .productCard {
   flex: 0 0 200px;
+  scroll-snap-align: start;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
@@ -267,6 +271,8 @@
 
   .slider {
     gap: var(--space-3);
+    /* Peek effect: muestra el borde del próximo item */
+    padding-right: 2.5rem;
   }
 
   .productCard {
@@ -290,14 +296,13 @@
     font-size: 14px;
   }
 
+  /* Ocultar botones de nav en mobile — el usuario desliza */
   .navButton {
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
+    display: none;
   }
 
   .sliderWrapper {
-    gap: var(--space-2);
+    gap: 0;
   }
 }
 
@@ -322,58 +327,11 @@
 
   .slider {
     gap: var(--space-2);
+    padding-right: 2rem;
   }
 
   .productCard {
     flex: 0 0 140px;
-  }
-
-  .imageWrapper {
-    height: 126px;
-  }
-
-  .productInfo {
-    padding: 8px;
-  }
-
-  .productInfo h3 {
-    font-size: 12px;
-    margin-bottom: 4px;
-  }
-
-  .price {
-    font-size: 13px;
-  }
-
-  .navButton {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-  }
-
-  .sliderWrapper {
-    gap: var(--space-1);
-  }
-}
-
-@media (max-width: 480px) {
-  .sliderWrapper {
-    padding: 0 8px;
-    gap: 6px;
-  }
-
-  .navButton {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-
-  .slider {
-    gap: 8px;
-  }
-
-  .productCard {
-    flex: 0 0 130px;
   }
 
   .imageWrapper {
@@ -390,6 +348,15 @@
   }
 
   .price {
-    font-size: 14px;
+    font-size: 13px;
+  }
+
+  .navButton {
+    display: none;
+  }
+
+  .sliderWrapper {
+    gap: 0;
+    padding: 0;
   }
 }

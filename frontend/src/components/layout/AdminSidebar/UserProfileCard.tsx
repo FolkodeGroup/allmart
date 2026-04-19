@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { Button } from '../../ui/Button/Button';
 import styles from './UserProfileCard.module.css';
@@ -28,6 +29,7 @@ interface UserProfileCardProps {
 
 export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
   const { user, role, logout } = useAdminAuth();
+  const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -52,6 +54,11 @@ export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
     setIsDropdownOpen(false);
     logout();
     window.location.replace('/');
+  };
+
+  const handleSettings = () => {
+    setIsDropdownOpen(false);
+    navigate('/admin/configuracion');
   };
 
   const handleDropdownToggle = (e: ReactMouseEvent<HTMLButtonElement>) => {
@@ -144,7 +151,7 @@ export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
 
           <div className={styles.divider} />
 
-          <button className={styles.dropdownItem} type="button" role="menuitem">
+          <button className={styles.dropdownItem} onClick={handleSettings} type="button" role="menuitem">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -156,9 +163,8 @@ export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <circle cx="12" cy="12" r="1" />
-              <circle cx="19" cy="12" r="1" />
-              <circle cx="5" cy="12" r="1" />
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
             <span>Configuración</span>
           </button>

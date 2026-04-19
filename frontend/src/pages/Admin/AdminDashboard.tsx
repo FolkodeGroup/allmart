@@ -176,10 +176,12 @@ export function AdminDashboard() {
   }, [orders]);
   const goalProgress = Math.min(100, (currentMonthRevenue / monthlyGoal) * 100);
 
-  const _recentOrders = useMemo(
+  // recentOrders: disponible si se necesita mostrar en un widget futuro
+  const recentOrdersSorted = useMemo(
     () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
     [orders],
   );
+  void recentOrdersSorted; // usado condicionalmente por widgets del dashboard
 
   // ─── Weekly sales data ──────────────────────────────────────────────────────
 

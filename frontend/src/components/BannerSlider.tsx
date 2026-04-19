@@ -3,7 +3,7 @@
  * Componente para mostrar banners en un carrusel automático en la homepage.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './BannerSlider.module.css';
 import type { PublicBanner } from '../services/publicBannersService';
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../utils/imageUrl';
@@ -14,6 +14,9 @@ interface Props {
 
 const BannerSlider: React.FC<Props> = ({ banners }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
     const target = event.currentTarget;
@@ -25,27 +28,56 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
     target.src = DEFAULT_IMAGE_PLACEHOLDER;
   };
 
-  // Auto-advance slides every 5 seconds
-  useEffect(() => {
+  const startAutoAdvance = useCallback(() => {
     if (banners.length <= 1) return;
-
-    const interval = setInterval(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % banners.length);
     }, 5000);
-
-    return () => clearInterval(interval);
   }, [banners.length]);
+
+  // Auto-advance slides every 5 seconds
+  useEffect(() => {
+    startAutoAdvance();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [startAutoAdvance]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
+    startAutoAdvance();
   };
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
+    startAutoAdvance();
   };
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % banners.length);
+    startAutoAdvance();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+    // Solo horizontal (mayor movimiento en X que en Y)
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY) {
+      if (deltaX < 0) {
+        goToNext();
+      } else {
+        goToPrevious();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
   };
 
   if (!banners || banners.length === 0) {
@@ -54,7 +86,13 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
 
   return (
     <div className={styles.slider}>
-      <div className={styles.slidesContainer}>
+      <div
+        className={styles.slidesContainer}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        role="region"
+        aria-label="Carrusel de banners"
+      >
         {banners.map((banner, index) => {
           const imageUrl = normalizeImageUrl(banner.imageUrl) ?? DEFAULT_IMAGE_PLACEHOLDER;
 
@@ -62,6 +100,7 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
             <div
               key={banner.id}
               className={`${styles.slide} ${index === currentIndex ? styles.active : ''}`}
+              aria-hidden={index !== currentIndex}
             >
               <div className={styles.slideContent}>
                 <img

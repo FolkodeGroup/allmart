@@ -51,6 +51,36 @@ export async function login(username: string, password: string): Promise<LoginRe
 }
 
 /**
+ * changePassword
+ * Permite al usuario autenticado cambiar su propia contraseña.
+ */
+export async function changePassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, passwordHash: true },
+  });
+
+  if (!user) {
+    throw Object.assign(new Error('Usuario no encontrado'), { statusCode: 404 });
+  }
+
+  const valid = await comparePassword(currentPassword, user.passwordHash);
+  if (!valid) {
+    throw Object.assign(new Error('La contraseña actual es incorrecta'), { statusCode: 400 });
+  }
+
+  const hashed = await hashPassword(newPassword);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: hashed },
+  });
+}
+
+/**
  * loginCustomer (Público)
  * Valida credenciales para clientes. El token expira en 24h.
  */

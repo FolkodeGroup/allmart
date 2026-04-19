@@ -181,7 +181,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       const { variants, ...updateData } = data;
       const merged = { ...current, ...updateData };
       const payload = mapAdminProductToPayload(merged);
-      const _updated = await updateAdminProduct(id, payload, token);
+      await updateAdminProduct(id, payload, token);
 
       // Gestión de variantes si se proporcionan
       if (variants) {
