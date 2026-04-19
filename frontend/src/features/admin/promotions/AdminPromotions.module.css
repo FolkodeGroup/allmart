@@ -42,8 +42,8 @@
 .searchInput:focus,
 .selectFilter:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #769282;
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .tableWrapper {
@@ -125,26 +125,28 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  width: auto;
+  flex-shrink: 0;
 }
 
 .btnPrimary {
-  background-color: #3b82f6;
+  background-color: #769282;
   color: white;
 }
 
 .btnPrimary:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #5d7568;
 }
 
 .btnSmall {
-  background-color: #3b82f6;
+  background-color: #769282;
   color: white;
   padding: 6px 10px;
   font-size: 12px;
 }
 
 .btnSmall:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #5d7568;
 }
 
 .btnSmallSecondary {
@@ -159,14 +161,14 @@
 }
 
 .btnSmallDanger {
-  background-color: #fecaca;
-  color: #7f1d1d;
+  background-color: #f5d4d4;
+  color: #C75050;
   padding: 6px 10px;
   font-size: 12px;
 }
 
 .btnSmallDanger:hover:not(:disabled) {
-  background-color: #fca5a5;
+  background-color: #eba5a5;
 }
 
 .btnSecondary {
@@ -255,8 +257,8 @@ button:disabled {
 .formGroup select:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #769282;
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .formRow {
@@ -287,11 +289,12 @@ button:disabled {
   margin-top: 24px;
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
+  justify-content: flex-start;
 }
 
 .formActions .btnPrimary,
 .formActions .btnSecondary {
-  flex: 1;
+  width: auto;
   padding: 10px 16px;
   font-size: 14px;
 }
@@ -322,8 +325,8 @@ button:disabled {
 }
 
 .mainTabActive {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: #769282;
+  border-bottom-color: #769282;
 }
 
 .mainTab:hover {
@@ -366,8 +369,8 @@ button:disabled {
 }
 
 .formTabActive {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: #769282;
+  border-bottom-color: #769282;
 }
 
 .formTab:hover {
@@ -381,7 +384,7 @@ button:disabled {
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background-color: #3b82f6;
+  background-color: #769282;
   color: white;
   border-radius: 9px;
   font-size: 11px;
@@ -404,7 +407,7 @@ button:disabled {
   background-color: #f9fafb;
   padding: 10px 14px;
   border-radius: 6px;
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid #769282;
   margin-bottom: 12px;
 }
 
@@ -428,7 +431,7 @@ button:disabled {
 .btnLink {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: #769282;
   font-size: 13px;
   cursor: pointer;
   padding: 4px 0;
@@ -452,8 +455,8 @@ button:disabled {
 
 .searchInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #769282;
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .selectorList {
@@ -495,7 +498,7 @@ button:disabled {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: #769282;
   cursor: pointer;
 }
 
@@ -524,7 +527,7 @@ button:disabled {
 .checkboxLabel input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: #769282;
 }
 
 .tableSubtext {
@@ -569,7 +572,7 @@ button:disabled {
 }
 
 .statCardBlue {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #769282;
 }
 
 .statCardGray {
