@@ -88,6 +88,7 @@ success "Imágenes descargadas correctamente"
 
 # ─── Detener contenedores viejos (sin eliminar volúmenes) ─────────────────────
 log "Deteniendo contenedores anteriores (si existen)..."
+# ⚠️  NO usar -v: destruiría el volumen allmart_pgdata y se perderían todos los datos
 docker compose -f "$COMPOSE_FILE" down --remove-orphans || warn "No había contenedores en ejecución"
 
 # ─── Levantar los nuevos contenedores ─────────────────────────────────────────

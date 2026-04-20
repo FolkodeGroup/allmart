@@ -26,11 +26,11 @@ export function sanitizeString(str: string): string {
  * Valida un objeto completo (ej. payload de formulario) sanitizando sus strings.
  */
 export function sanitizeObject<T extends object>(obj: T): T {
-  const sanitized = { ...obj } as any;
+  const sanitized = { ...obj } as Record<string, unknown>;
   for (const key in sanitized) {
     if (typeof sanitized[key] === 'string') {
-      sanitized[key] = sanitizeString(sanitized[key]);
+      sanitized[key] = sanitizeString(sanitized[key] as string);
     }
   }
-  return sanitized;
+  return sanitized as T;
 }

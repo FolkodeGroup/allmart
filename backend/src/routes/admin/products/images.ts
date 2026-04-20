@@ -27,7 +27,7 @@ import { UserRole } from '../../../types';
 // multer en memoria (sin tocar disco) — la imagen se pasa directo a sharp/DB
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
   fileFilter: (_req, file, cb) => {
     const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff'];
     if (allowed.includes(file.mimetype)) {

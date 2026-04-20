@@ -43,7 +43,7 @@ export function useOrders(token: string | undefined, filters: {
     if (reset) setIsLoading(true);
     else setIsLoadingMore(true);
     try {
-      const params: any = {
+      const params: Record<string, string | number> = {
         page,
         limit: PAGE_SIZE,
       };
@@ -55,8 +55,8 @@ export function useOrders(token: string | undefined, filters: {
       setHasMore(res.data.length === PAGE_SIZE);
       const normalized = res.data.map(mapApiOrderToOrder);
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
-    } catch (e: any) {
-      if (e.name !== 'AbortError') toast.error('Error al cargar pedidos');
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== 'AbortError') toast.error('Error al cargar pedidos');
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);

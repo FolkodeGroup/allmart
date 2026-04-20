@@ -125,7 +125,7 @@ export const handlers = [
       return new HttpResponse(null, { status: 401 });
     }
 
-    const body = await request.json() as any;
+    const body = await request.json() as Record<string, unknown>;
     return HttpResponse.json({
       success: true,
       data: {
@@ -140,7 +140,7 @@ export const handlers = [
 
   // Mock para crear categoría
   http.post('/api/admin/categories', async ({ request }) => {
-    const body = await request.json() as any;
+    const body = await request.json() as Record<string, unknown>;
     return HttpResponse.json({
       success: true,
       data: { id: 'new-cat', ...body, slug: 'new-cat', itemCount: 0 }

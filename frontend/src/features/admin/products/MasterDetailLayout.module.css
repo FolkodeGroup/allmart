@@ -6,7 +6,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  height: calc(100vh - 200px);
+  flex: 1;
+  min-height: 0;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -76,17 +77,14 @@
 @media (max-width: 1200px) {
   .container {
     grid-template-columns: 1fr;
-    height: auto;
-    max-height: 80vh;
-    gap: 0;
+    flex: 1;
+    min-height: 0;
   }
 }
 
 @media (max-width: 768px) {
   .container {
     grid-template-columns: 1fr;
-    height: auto;
-    max-height: calc(100vh - 150px);
     border-radius: 8px;
   }
 }
@@ -94,8 +92,6 @@
 @media (max-width: 640px) {
   .container {
     grid-template-columns: 1fr;
-    height: auto;
-    max-height: calc(100vh - 100px);
     border-radius: 4px;
   }
 

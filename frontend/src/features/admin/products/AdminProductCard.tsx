@@ -54,9 +54,7 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = memo(({
   return (
     <section
       className={styles.card}
-      role="region"
       aria-label={`Producto: ${name}${category ? ', categoría ' + category : ''}`}
-      tabIndex={0}
     >
       {showCheckbox && onSelectChange && (
         <ProductCardCheckbox

@@ -46,8 +46,9 @@
 
 /* ── Grid ── */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-4);
   max-width: var(--container-2xl);
   margin: 0 auto;
@@ -60,9 +61,13 @@
   overflow: hidden;
   border-radius: var(--radius-2xl);
   aspect-ratio: 3/4;
+  width: calc((100% - var(--space-4) * 5) / 6);
+  min-width: 160px;
+  max-width: 220px;
   cursor: pointer;
   text-decoration: none;
   display: block;
+  flex-shrink: 0;
   /* Token de sombra base del sistema Allmart */
   box-shadow: var(--shadow-md);
   /* Transición definida en tokens: fast para la elevación */
@@ -238,16 +243,16 @@
 
 /* ── Responsive ── */
 @media (max-width: 1280px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-4);
+  .card {
+    width: calc((100% - var(--space-4) * 2) / 3);
+    max-width: 260px;
   }
 }
 
 @media (max-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-4);
+  .card {
+    width: calc((100% - var(--space-4) * 2) / 3);
+    max-width: 260px;
   }
 }
 
@@ -257,7 +262,6 @@
   }
 
   .grid {
-    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-3);
     padding: 0 var(--space-4);
   }
@@ -267,18 +271,22 @@
   }
 
   .card {
+    width: calc((100% - var(--space-3)) / 2);
+    min-width: 140px;
+    max-width: none;
     aspect-ratio: 4/5;
   }
 }
 
 @media (max-width: 480px) {
   .grid {
-    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-3);
     padding: 0 var(--space-3);
   }
 
   .card {
+    width: calc((100% - var(--space-3)) / 2);
+    min-width: 120px;
     aspect-ratio: 3/4;
   }
 

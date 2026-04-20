@@ -942,7 +942,8 @@
 .page {
     display: flex;
     flex-direction: column;
-    max-height: 80vh;
+    height: 100%;
+    min-height: 0;
     background: var(--color-bg, #f8fafc);
     font-family: inherit;
     overflow: auto;
@@ -1049,23 +1050,23 @@
     /* offset = pageHeader height */
     top: 61px;
     align-self: flex-start;
-    width: 200px;
+    width: 188px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 12px 0;
+    padding: 8px;
     background: var(--color-surface, #fff);
     border: 1px solid var(--color-border, #e2e8f0);
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     overflow: hidden;
 }
 
 .sidebarList {
     list-style: none;
     margin: 0;
-    padding: 0 8px;
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1075,11 +1076,11 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     width: 100%;
-    padding: 8px 10px;
+    padding: 9px 10px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     background: transparent;
     color: var(--color-text-muted, #64748b);
     font-size: 0.82rem;
@@ -1101,8 +1102,12 @@
 }
 
 .sidebarIcon {
-    font-size: 0.9rem;
     flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.sidebarItemActive .sidebarIcon {
+    opacity: 1;
 }
 
 .sidebarLabel {
@@ -1119,6 +1124,12 @@
     border-radius: 50%;
     background: var(--color-error, #ef4444);
     flex-shrink: 0;
+}
+
+.errorDotIcon {
+    flex-shrink: 0;
+    color: var(--color-error, #ef4444);
+    margin-left: auto;
 }
 
 /* Vertical progress bar on sidebar right edge */
@@ -1176,12 +1187,17 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--color-text, #1e293b);
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.sectionTitle svg {
+    color: var(--color-text-muted, #64748b);
+    flex-shrink: 0;
 }
 
 .section .suggestionBox {
@@ -1318,4 +1334,195 @@
         flex-wrap: wrap;
         gap: 8px;
     }
+}
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .page {
+  background: var(--color-bg-primary, #151a1e);
+}
+:global(.dark) .pageHeader {
+  background: var(--color-bg-card, #232a2f);
+  border-bottom-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+:global(.dark) .pageTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .backBtn {
+  border-color: var(--color-border, #2d3a3f);
+  color: #9ca3af;
+}
+:global(.dark) .backBtn:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .sidebar {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+:global(.dark) .sidebarItem {
+  color: #9ca3af;
+}
+:global(.dark) .sidebarItem:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .sidebarItemActive {
+  background: rgba(37, 99, 235, 0.15);
+  color: #60a5fa;
+}
+:global(.dark) .section {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .section:focus-within {
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+:global(.dark) .sectionTitle {
+  color: var(--color-text-primary, #f3f3f3);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .globalError {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+:global(.dark) .bottomBar {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .cancelBtn {
+  border-color: var(--color-border, #2d3a3f);
+  color: #9ca3af;
+}
+:global(.dark) .cancelBtn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05);
+}
+:global(.dark) .headerCancelBtn {
+  background: rgba(255,255,255,0.08);
+  color: #d1d5db;
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .loadingContainer {
+  color: #9ca3af;
+}
+
+/* ── Image Manager Edit Mode Styles ── */
+.imagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.imageCard {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.imageCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.imagePreview {
+  aspect-ratio: 1;
+  width: 100%;
+  background: var(--color-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.imagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageActions {
+  padding: var(--space-2);
+  display: flex;
+  gap: var(--space-1);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.editBtn,
+.deleteBtn {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+  color: var(--color-primary);
+  flex: 1;
+  min-width: 40px;
+}
+
+.editBtn:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.deleteBtn {
+  color: var(--color-error);
+}
+
+.deleteBtn:hover {
+  background: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-2) 0;
+}
+
+.editForm .inputField {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.uploadLabel {
+  cursor: pointer;
+  display: block;
+}
+
+.inputField {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  width: 100%;
 }

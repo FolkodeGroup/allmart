@@ -81,7 +81,7 @@ export async function listProductImages(
   try {
     const productId = req.params.productId;
     const storageImages = await imgStorage.getProductImages(productId);
-    const storageUrls = new Set(storageImages.map((img) => img.url));
+    const storageUrls = new Set(storageImages.map((img: any) => img.url));
 
     const legacyImagesList = await legacyImages.getImagesByProduct(productId);
     const legacyImagesMapped = legacyImagesList

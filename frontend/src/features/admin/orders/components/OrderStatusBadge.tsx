@@ -47,7 +47,6 @@ export const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({ status, clas
     aria-label={`Estado: ${STATUS_LABELS[status]}`}
     role="status"
     aria-live="polite"
-    tabIndex={0}
   >
     {STATUS_LABELS[status]}
   </span>

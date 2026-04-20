@@ -34,8 +34,28 @@ function WhatsAppIcon() {
   );
 }
 
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className={`${styles.chevronIcon} ${open ? styles.chevronOpen : ''}`}
+      aria-hidden="true"
+      width="16"
+      height="16"
+    >
+      <path
+        fillRule="evenodd"
+        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 export function Footer() {
   const [productLinks, setProductLinks] = useState<NavigationItem[]>(fallbackNavigation);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let ignore = false;
@@ -56,6 +76,10 @@ export function Footer() {
       ignore = true;
     };
   }, []);
+
+  const toggleSection = (key: string) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
     <footer className={styles.footer} role="contentinfo">
@@ -94,29 +118,59 @@ export function Footer() {
 
         {/* Productos */}
         <div className={styles.linksCol}>
-          <h3 className={styles.colTitle}>Productos</h3>
-          {productLinks.map((item) => (
-            <Link key={item.href} to={item.href} className={styles.colLink}>
-              {item.label}
-            </Link>
-          ))}
+          <button
+            className={styles.colTitleBtn}
+            onClick={() => toggleSection('productos')}
+            aria-expanded={openSections['productos']}
+            type="button"
+          >
+            <span>Productos</span>
+            <ChevronIcon open={!!openSections['productos']} />
+          </button>
+          <div className={`${styles.colLinks} ${openSections['productos'] ? styles.colLinksOpen : ''}`}>
+            {productLinks.map((item) => (
+              <Link key={item.href} to={item.href} className={styles.colLink}>
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Ayuda */}
         <div className={styles.linksCol}>
-          <h3 className={styles.colTitle}>Ayuda</h3>
-          <Link to="/como-comprar" className={styles.colLink}>Cómo comprar</Link>
-          <Link to="/envios" className={styles.colLink}>Envíos</Link>
-          <Link to="/preguntas-frecuentes" className={styles.colLink}>Preguntas frecuentes</Link>
-          <Link to="/contacto" className={styles.colLink}>Contacto</Link>
+          <button
+            className={styles.colTitleBtn}
+            onClick={() => toggleSection('ayuda')}
+            aria-expanded={openSections['ayuda']}
+            type="button"
+          >
+            <span>Ayuda</span>
+            <ChevronIcon open={!!openSections['ayuda']} />
+          </button>
+          <div className={`${styles.colLinks} ${openSections['ayuda'] ? styles.colLinksOpen : ''}`}>
+            <Link to="/como-comprar" className={styles.colLink}>Cómo comprar</Link>
+            <Link to="/envios" className={styles.colLink}>Envíos</Link>
+            <Link to="/preguntas-frecuentes" className={styles.colLink}>Preguntas frecuentes</Link>
+            <Link to="/contacto" className={styles.colLink}>Contacto</Link>
+          </div>
         </div>
 
         {/* Legal */}
         <div className={styles.linksCol}>
-          <h3 className={styles.colTitle}>Legal</h3>
-          <Link to="/terminos" className={styles.colLink}>Términos y condiciones</Link>
-          <Link to="/privacidad" className={styles.colLink}>Política de privacidad</Link>
-          <Link to="/arrepentimiento" className={styles.colLink}>Botón de arrepentimiento</Link>
+          <button
+            className={styles.colTitleBtn}
+            onClick={() => toggleSection('legal')}
+            aria-expanded={openSections['legal']}
+            type="button"
+          >
+            <span>Legal</span>
+            <ChevronIcon open={!!openSections['legal']} />
+          </button>
+          <div className={`${styles.colLinks} ${openSections['legal'] ? styles.colLinksOpen : ''}`}>
+            <Link to="/terminos" className={styles.colLink}>Términos y condiciones</Link>
+            <Link to="/privacidad" className={styles.colLink}>Política de privacidad</Link>
+            <Link to="/arrepentimiento" className={styles.colLink}>Botón de arrepentimiento</Link>
+          </div>
         </div>
       </div>
 

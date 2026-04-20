@@ -102,8 +102,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
-          <label>Nombre *</label>
+          <label htmlFor="collection-name">Nombre *</label>
           <input
+            id="collection-name"
             type="text"
             value={formData.name}
             onChange={(e) => {
@@ -119,8 +120,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
 
         <div className={styles.formGroup}>
-          <label>Slug *</label>
+          <label htmlFor="collection-slug">Slug *</label>
           <input
+            id="collection-slug"
             type="text"
             value={formData.slug}
             onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
@@ -130,8 +132,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
 
         <div className={styles.formGroup}>
-          <label>Descripción</label>
+          <label htmlFor="collection-desc">Descripción</label>
           <textarea
+            id="collection-desc"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Detalles y descripción"
@@ -141,13 +144,14 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
 
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>Posición de Display *</label>
+            <label htmlFor="collection-display-pos">Posición de Display *</label>
             <select
+              id="collection-display-pos"
               value={formData.displayPosition}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  displayPosition: e.target.value as any,
+                  displayPosition: e.target.value as Collection['displayPosition'],
                 })
               }
             >
@@ -157,8 +161,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           </div>
 
           <div className={styles.formGroup}>
-            <label>Orden de Display</label>
+            <label htmlFor="collection-display-order">Orden de Display</label>
             <input
+              id="collection-display-order"
               type="number"
               value={formData.displayOrder}
               onChange={(e) =>
@@ -171,8 +176,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
 
         <div className={styles.formGroup}>
-          <label>URL de Imagen</label>
+          <label htmlFor="collection-image">URL de Imagen</label>
           <input
+            id="collection-image"
             type="url"
             value={formData.imageUrl}
             onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}

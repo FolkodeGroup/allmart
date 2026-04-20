@@ -51,19 +51,19 @@ export const collectionsService = {
     if (search) params.append('q', search);
     if (displayPosition) params.append('displayPosition', displayPosition);
     if (isActive !== undefined) params.append('isActive', String(isActive));
-    const response = await apiFetch<any>(`/api/admin/collections?${params}`);
+    const response = await apiFetch<{ data: PaginatedCollections }>(`/api/admin/collections?${params}`);
     // El servidor devuelve { success: true, data: { data: [...], pagination: {...} } }
     // Extraemos el contenido de data
     return response.data;
   },
 
   async getById(id: string): Promise<Collection> {
-    const response = await apiFetch<any>(`/api/admin/collections/${id}`);
+    const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}`);
     return response.data;
   },
 
   async create(data: Partial<Collection> & { productIds?: string[] }): Promise<Collection> {
-    const response = await apiFetch<any>('/api/admin/collections', {
+    const response = await apiFetch<{ data: Collection }>('/api/admin/collections', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
@@ -75,7 +75,7 @@ export const collectionsService = {
     id: string,
     data: Partial<Collection> & { productIds?: string[] }
   ): Promise<Collection> {
-    const response = await apiFetch<any>(`/api/admin/collections/${id}`, {
+    const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
@@ -96,7 +96,7 @@ export const collectionsService = {
   },
 
   async addProduct(id: string, productId: string): Promise<Collection> {
-    const response = await apiFetch<any>(`/api/admin/collections/${id}/products`, {
+    const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}/products`, {
       method: 'POST',
       body: JSON.stringify({ productId }),
       headers: { 'Content-Type': 'application/json' },
@@ -105,7 +105,7 @@ export const collectionsService = {
   },
 
   async removeProduct(id: string, productId: string): Promise<Collection> {
-    const response = await apiFetch<any>(`/api/admin/collections/${id}/products/${productId}`, { method: 'DELETE' });
+    const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}/products/${productId}`, { method: 'DELETE' });
     return response.data;
   },
 };

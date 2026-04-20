@@ -8,7 +8,7 @@ import {
   mapApiProductToProduct,
 } from '../../services/productsService';
 import { fetchPublicCategories } from '../../services/categoriesService';
-import { publicCollectionsService } from '../../services/publicCollectionsService';
+import { publicCollectionsService, type ProductDiscount } from '../../services/publicCollectionsService';
 import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
@@ -36,7 +36,7 @@ export function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [addedFeedback, setAddedFeedback] = useState(false);
-  const [dynamicDiscount, setDynamicDiscount] = useState<any>(null);
+  const [dynamicDiscount, setDynamicDiscount] = useState<ProductDiscount | null>(null);
 
   /* Cargar producto por slug */
   useEffect(() => {
@@ -130,9 +130,10 @@ export function ProductDetailPage() {
     };
 
     loadDiscount();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
 
-  const variantGroups: VariantGroup[] = product ? (product as any).variants ?? [] : [];
+  const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
   const hasDiscount = product ? Boolean(product.discount && product.discount > 0) : false;
   const isNew = product ? product.tags.includes('nuevo') : false;
 

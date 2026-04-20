@@ -75,6 +75,7 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
           type="text"
           className={`${styles.valueChipInput} ${editError ? styles.inputError : ''}`}
           value={editValue}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           onChange={e => {
             setEditValue(e.target.value);

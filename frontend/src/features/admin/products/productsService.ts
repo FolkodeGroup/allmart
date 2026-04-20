@@ -189,8 +189,33 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
   };
 }
 
+/** Tipo intermedio para el mapeo de producto admin a payload */
+interface AdminProductInput {
+  name: string;
+  description?: string;
+  shortDescription?: string;
+  price: number;
+  originalPrice?: number;
+  compareAtPrice?: number;
+  discount?: number;
+  images?: string[];
+  category?: { id: string };
+  categoryId?: string;
+  categoryIds?: string[];
+  status?: string;
+  sku?: string;
+  stock?: number;
+  rating?: number;
+  reviewCount?: number;
+  inStock?: boolean;
+  tags?: string[];
+  features?: string[];
+  slug?: string;
+  variants?: { id?: string; _id?: string; sku?: string; name?: string; values?: string[] }[];
+}
+
 /** Convierte un AdminProduct del frontend al payload que acepta el backend */
-export function mapAdminProductToPayload(product: any): ProductPayload {
+export function mapAdminProductToPayload(product: AdminProductInput): ProductPayload {
   const primaryCategoryId = product.category?.id ?? product.categoryId ?? '';
   const normalizedCategoryIds = Array.isArray(product.categoryIds)
     ? product.categoryIds
@@ -227,10 +252,10 @@ export function mapAdminProductToPayload(product: any): ProductPayload {
  * - status: "inactive"
  * - mantiene imágenes, variantes, etc.
  */
-export function getDuplicateProductPayload(product: any): ProductPayload {
+export function getDuplicateProductPayload(product: AdminProductInput): ProductPayload {
   // Helper para limpiar id/_id
-  const cleanIds = (obj: any) => {
-    const { id, _id, ...rest } = obj;
+  const cleanIds = (obj: Record<string, unknown>) => {
+    const { id: _id, _id: _rid, ...rest } = obj;
     return rest;
   };
 
@@ -241,19 +266,19 @@ export function getDuplicateProductPayload(product: any): ProductPayload {
   };
 
   // Limpiar variantes
-  let cleanedVariants = undefined;
+  let cleanedVariants: AdminProductInput['variants'] = undefined;
   if (Array.isArray(product.variants)) {
-    cleanedVariants = product.variants.map((variant: any) => {
-      const v = cleanIds(variant);
+    cleanedVariants = product.variants.map((variant) => {
+      const { id: _id, _id: _rid, ...rest } = variant;
       return {
-        ...v,
-        sku: tempSku(v.sku),
+        ...rest,
+        sku: tempSku(rest.sku),
       };
     });
   }
 
   // Limpiar producto principal
-  const cleanedProduct = cleanIds(product);
+  const cleanedProduct = cleanIds({ ...product });
 
   // Construir el payload
   const payload = mapAdminProductToPayload({
@@ -262,7 +287,7 @@ export function getDuplicateProductPayload(product: any): ProductPayload {
     sku: tempSku(product.sku),
     slug: '', // dejar vacío para que el backend genere uno nuevo
     variants: cleanedVariants,
-  });
+  } as AdminProductInput);
 
   // Asegurar campos requeridos y mantener los datos solicitados
   return {

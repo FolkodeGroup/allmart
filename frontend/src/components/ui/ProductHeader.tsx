@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Plus, ChevronDown, FileText, Zap } from 'lucide-react';
 import sectionStyles from '../../features/admin/shared/AdminSection.module.css';
-import styles from '../../features/admin/products/AdminProducts.module.css';
+import styles from './ProductHeader.module.css';
 
 interface ProductHeaderProps {
   canCreate: boolean;
@@ -11,85 +11,76 @@ interface ProductHeaderProps {
 
 export const ProductHeader: React.FC<ProductHeaderProps> = ({ canCreate, onNew, onWizard }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
 
   return (
     <header className={sectionStyles.header}>
-      <div className={styles.headerTop}>
-        <div>
-          {/* <h1 className={sectionStyles.title}>
-            <span className={sectionStyles.icon} aria-hidden="true">📦</span> Productos
-          </h1> */}
-          <p className={sectionStyles.subtitle}>
-            Gestioná el catálogo de productos, precios y disponibilidad.
-          </p>
-        </div>
+      <div className={styles.headerRow}>
+        <p className={sectionStyles.subtitle}>
+          Gestioná el catálogo de productos, precios y disponibilidad.
+        </p>
+
         {canCreate && (
-          <div style={{ position: 'relative' }}>
+          <div className={styles.btnGroup} ref={menuRef}>
             <button
-              className={styles.newBtn}
-              onClick={() => setShowMenu(!showMenu)}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              className={styles.primaryBtn}
+              onClick={() => { onNew(); setShowMenu(false); }}
               aria-label="Crear nuevo producto"
             >
-              + Nuevo producto
-              {onWizard && <ChevronDown size={18} />}
+              <Plus size={16} strokeWidth={2.5} />
+              Nuevo producto
             </button>
-            {onWizard && showMenu && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '0.5rem',
-                  background: 'white',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '6px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  zIndex: 1000,
-                  minWidth: '200px',
-                  overflow: 'hidden',
-                }}
-              >
+
+            {onWizard && (
+              <>
                 <button
-                  onClick={() => {
-                    onNew();
-                    setShowMenu(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    border: 'none',
-                    background: 'transparent',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontSize: '0.95rem',
-                    borderBottom: '1px solid #f0f0f0',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f9f9f9')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  className={styles.splitBtn}
+                  onClick={() => setShowMenu(prev => !prev)}
+                  aria-label="Más opciones"
+                  aria-expanded={showMenu}
+                  aria-haspopup="menu"
                 >
-                  Formulario Completo
+                  <ChevronDown size={15} strokeWidth={2} className={showMenu ? styles.chevronOpen : ''} />
                 </button>
-                <button
-                  onClick={() => {
-                    onWizard();
-                    setShowMenu(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    border: 'none',
-                    background: 'transparent',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontSize: '0.95rem',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f9f9f9')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  ✨ Wizard Rápido (3 pasos)
-                </button>
-              </div>
+
+                {showMenu && (
+                  <div className={styles.dropdown} role="menu">
+                    <button
+                      className={styles.dropdownItem}
+                      role="menuitem"
+                      onClick={() => { onNew(); setShowMenu(false); }}
+                    >
+                      <FileText size={15} />
+                      <span>
+                        <strong>Formulario completo</strong>
+                        <small>Todos los campos de una vez</small>
+                      </span>
+                    </button>
+                    <button
+                      className={styles.dropdownItem}
+                      role="menuitem"
+                      onClick={() => { onWizard(); setShowMenu(false); }}
+                    >
+                      <Zap size={15} />
+                      <span>
+                        <strong>Alta rápida</strong>
+                        <small>3 pasos guiados</small>
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

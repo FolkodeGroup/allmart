@@ -222,3 +222,48 @@
     border-radius: 10px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .card {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+:global(.dark) .card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+:global(.dark) .image {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .imageWrapper {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .noImage {
+  color: #666;
+}
+:global(.dark) .name {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .sku {
+  color: #999;
+}
+:global(.dark) .discount {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+:global(.dark) .editBtn:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+:global(.dark) .deleteBtn:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+:global(.dark) .cancelDeleteBtn {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .lowStockBadge {
+  background: rgba(250, 204, 21, 0.15);
+  color: #fcd34d;
+}

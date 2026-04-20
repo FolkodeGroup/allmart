@@ -71,15 +71,15 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
                     }}
                 >
                     {[
-                        { label: 'Nombre', ok: !!form.name },
-                        { label: 'Descripción completa', ok: !!form.description },
-                        { label: 'Descripción corta', ok: !!form.shortDescription },
-                        { label: 'Categoría', ok: !!form.category?.id },
-                        { label: 'Precio', ok: form.price > 0 },
-                        { label: 'SKU', ok: !!form.sku },
-                        { label: 'Etiquetas', ok: form.tags.length > 0 },
-                        { label: 'Características', ok: (form.features ?? []).length > 0 },
-                    ].map(({ label, ok }) => (
+                        { label: 'Nombre', ok: !!form.name, hint: '' },
+                        { label: 'Descripción completa', ok: !!form.description, hint: '' },
+                        { label: 'Descripción corta', ok: !!form.shortDescription, hint: '' },
+                        { label: 'Categoría', ok: !!form.category?.id, hint: '' },
+                        { label: 'Precio', ok: form.price > 0, hint: '' },
+                        { label: 'SKU', ok: !!form.sku, hint: '' },
+                        { label: 'Etiquetas', ok: form.tags.length > 0, hint: '' },
+                        { label: 'Características', ok: (form.features ?? []).length > 0, hint: 'Agregar en sección Básico' },
+                    ].map(({ label, ok, hint }) => (
                         <div
                             key={label}
                             style={{
@@ -93,7 +93,14 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
                                 fontSize: '0.82rem',
                             }}
                         >
-                            <span style={{ color: '#374151' }}>{label}</span>
+                            <span style={{ color: '#374151' }}>
+                                {label}
+                                {!ok && hint && (
+                                    <span style={{ color: '#92400e', fontSize: '0.73rem', marginLeft: '6px', opacity: 0.85 }}>
+                                        — {hint}
+                                    </span>
+                                )}
+                            </span>
                             <span style={{ fontWeight: 700, color: ok ? '#059669' : '#d97706' }}>
                                 {ok ? '✓' : '⚠'}
                             </span>

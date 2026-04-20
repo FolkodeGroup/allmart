@@ -22,12 +22,12 @@ const FRONTEND_URL = 'http://localhost:5173';
 const API_URL = 'http://localhost:3000/api';
 
 // Wait for element with text
-async function waitForText(page: Page, text: string, timeout = 5000) {
+async function _waitForText(page: Page, text: string, timeout = 5000) {
   await page.waitForSelector(`text=${text}`, { timeout });
 }
 
 // Wait for element to be visible
-async function waitForVisible(page: Page, selector: string, timeout = 5000) {
+async function _waitForVisible(page: Page, selector: string, timeout = 5000) {
   await page.waitForSelector(selector, { state: 'visible', timeout });
 }
 
@@ -66,7 +66,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
       await page.waitForLoadState('networkidle');
       
       const firstProductLink = page.locator('a[href*="/producto/"]').first();
-      const href = await firstProductLink.getAttribute('href');
+      const _href = await firstProductLink.getAttribute('href');
 
       // Click on product
       await firstProductLink.click();
@@ -129,7 +129,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
     test('should filter products when "En Oferta" checkbox is checked', async ({ page }: { page: Page }) => {
       // Get initial product count
       const allProducts = page.locator('article[aria-label*="Product"]');
-      const initialCount = await allProducts.count();
+      const _initialCount = await allProducts.count();
 
       // Find and click "En Oferta" checkbox
       const enOfertaLabel = page.locator('span', { hasText: 'En oferta' });
@@ -150,7 +150,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
       const filteredCount = await filteredProducts.count();
 
       // Should either have same count (all have discounts) or fewer
-      expect(filteredCount).toBeLessThanOrEqual(initialCount);
+      expect(filteredCount).toBeLessThanOrEqual(_initialCount);
 
       // All remaining products should have discount badges
       const discountBadges = page.locator('text=/^-\\d+%$/');
@@ -161,7 +161,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
     test('should filter by category and "En Oferta" together', async ({ page }: { page: Page }) => {
       // Find first category checkbox
       const categoryCheckbox = page.locator('input[type="checkbox"][aria-label]').first();
-      const categoryLabel = await categoryCheckbox.getAttribute('aria-label');
+      const _categoryLabel = await categoryCheckbox.getAttribute('aria-label');
 
       // Check category
       await categoryCheckbox.click();
@@ -178,7 +178,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
 
       // Should show filtered products
       const products = page.locator('article[aria-label*="Product"]');
-      const productCount = await products.count();
+      const _productCount = await products.count();
 
       // Result count should be updated
       const resultText = page.locator('text=/Mostrando \\d+ productos/');
@@ -213,7 +213,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
       const resultText = page.locator('text=/Mostrando (\\d+) productos/');
       const initialText = await resultText.textContent();
       const initialMatch = initialText?.match(/(\d+)/);
-      const initialCount = parseInt(initialMatch?.[1] || '0');
+      const _initialCount2 = parseInt(initialMatch?.[1] || '0');
 
       // Apply filter
       const enOfertaLabel = page.locator('span', { hasText: 'En oferta' });
@@ -417,7 +417,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
 
     test('should handle network errors gracefully', async ({ page }: { page: Page }) => {
       // Simulate slow network
-      await page.route(`${API_URL}/**`, (route: any) => {
+      await page.route(`${API_URL}/**`, (route: { abort: () => void }) => {
         setTimeout(() => route.abort(), 5000);
       });
 
@@ -460,7 +460,7 @@ test.describe('Dynamic Promotions & Collections E2E Tests', () => {
 
       // Check for main heading
       const mainHeading = page.locator('h1');
-      const count = await mainHeading.count();
+      const _count = await mainHeading.count();
       // May or may not have h1 depending on layout
 
       // Should have readable structure

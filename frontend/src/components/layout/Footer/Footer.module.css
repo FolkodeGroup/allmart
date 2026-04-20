@@ -71,17 +71,56 @@
 .linksCol {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
 }
 
-.colTitle {
+/* Desktop: links siempre visibles */
+.colLinks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.colTitleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: var(--space-4);
+  cursor: default;
+  text-align: left;
   font-family: var(--font-heading);
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wider);
   color: var(--color-neutral-light);
-  margin-bottom: var(--space-2);
+  pointer-events: none;
+}
+
+.colTitle {
+  /* Alias - ya no se usa en JSX pero se mantiene por compatibilidad */
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-neutral-light);
+  margin-bottom: var(--space-4);
+}
+
+/* El chevron está oculto en desktop */
+.chevronIcon {
+  display: none;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
 }
 
 .colLink {
@@ -141,11 +180,56 @@
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: 1fr;
-    gap: var(--space-8);
+    gap: 0;
+    padding: 0 var(--space-5);
   }
 
   .footer {
-    padding-top: var(--space-12);
+    padding-top: var(--space-8);
+  }
+
+  .brandCol {
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: var(--space-2);
+  }
+
+  /* En mobile, cada linksCol es una sección colapsable */
+  .linksCol {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* En mobile el botón del título es interactivo */
+  .colTitleBtn {
+    margin-bottom: 0;
+    padding: var(--space-4) 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  /* Mostrar chevron en mobile */
+  .chevronIcon {
+    display: block;
+  }
+
+  /* El colTitle h3 (desktop) se oculta en mobile */
+  .colTitle {
+    display: none;
+  }
+
+  /* Links colapsados por defecto en mobile */
+  .colLinks {
+    max-height: 0;
+    overflow: hidden;
+    gap: 0;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+
+  /* Links expandidos */
+  .colLinks.colLinksOpen {
+    max-height: 400px;
+    padding-bottom: var(--space-4);
+    gap: var(--space-2);
   }
 
   .bottomInner {

@@ -9,8 +9,8 @@ export function sortProducts<T extends ExportableProduct>(
   direction: SortDirection
 ): T[] {
   const sorted = [...products].sort((a, b) => {
-    let aValue: any = a[field];
-    let bValue: any = b[field];
+    let aValue: string | number | boolean | undefined = a[field] as string | number | boolean | undefined;
+    let bValue: string | number | boolean | undefined = b[field] as string | number | boolean | undefined;
 
     // Para categoría, comparar por nombre
     if (field === 'category') {
@@ -33,8 +33,8 @@ export function sortProducts<T extends ExportableProduct>(
       bValue = Number(bValue);
     }
 
-    if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+    if ((aValue ?? '') < (bValue ?? '')) return direction === 'asc' ? -1 : 1;
+    if ((aValue ?? '') > (bValue ?? '')) return direction === 'asc' ? 1 : -1;
     return 0;
   });
   return sorted;

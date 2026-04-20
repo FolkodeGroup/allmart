@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../../types';
 import {
@@ -27,6 +27,8 @@ export function FeaturedProducts({
   const [cardsPerView, setCardsPerView] = useState(4);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     Promise.all([fetchPublicProducts({ sort: 'newest', limit }), fetchPublicCategories()])
@@ -99,6 +101,26 @@ export function FeaturedProducts({
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY) {
+      if (deltaX < 0) {
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+        setCurrentIndex((prev) => prev - 1);
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   return (
     <section className={styles.section} aria-label={title}>
       <div className={styles.header}>
@@ -121,6 +143,8 @@ export function FeaturedProducts({
             transition: transitionEnabled ? 'transform 520ms ease' : 'none',
           }}
           onTransitionEnd={handleTrackTransitionEnd}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {clonedSlides.map((product, index) => (
             <div

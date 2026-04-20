@@ -996,3 +996,29 @@
   width: 30%;
   margin-top: 0.5rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .cancelBtn {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .cancelBtn:hover {
+  background: rgba(255,255,255,0.15);
+}
+:global(.dark) .filters {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .exportBtn {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .exportBtn:hover {
+  border-color: var(--color-primary, #a3c9a8);
+}
+:global(.dark) .exportBtn:active {
+  background: var(--color-bg-secondary, #181c1f);
+}

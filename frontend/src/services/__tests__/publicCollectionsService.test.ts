@@ -8,7 +8,7 @@ vi.mock('../../utils/apiClient', () => ({
   apiFetch: vi.fn(),
 }));
 
-const mockApiFetch = apiClient.apiFetch as any;
+const mockApiFetch = apiClient.apiFetch as ReturnType<typeof vi.fn>;
 
 describe('publicCollectionsService', () => {
   beforeEach(() => {

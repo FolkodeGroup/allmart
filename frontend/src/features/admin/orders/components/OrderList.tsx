@@ -44,7 +44,7 @@ export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderList
       {orders.map((order, index) => {
         // Iniciales del cliente para el avatar (ej: "JP" para Juan Pérez)
         const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
-        const totalQty = order.items.reduce((s: number, i: any) => s + i.quantity, 0);
+        const totalQty = order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0);
         return (
           <div
             key={order.id}
@@ -138,9 +138,9 @@ function OrderStatusMobile({ order }: { order: Order }) {
     try {
       await updateOrderStatus(order.id, newStatus as typeof localStatus);
       toast.success('Estado actualizado');
-    } catch (e: any) {
+    } catch (e: unknown) {
       setLocalStatus(prev);
-      setError(e?.message || 'Error al actualizar');
+      setError(e instanceof Error ? e.message : 'Error al actualizar');
       toast.error('No se pudo actualizar el estado');
     } finally {
       setLoading(false);

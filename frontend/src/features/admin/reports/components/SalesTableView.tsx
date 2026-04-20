@@ -1,7 +1,16 @@
 import React from 'react';
 
+interface OrderRecord {
+    id?: string;
+    createdAt?: string;
+    total?: number;
+    clientName?: string;
+    clientEmail?: string;
+    status?: string;
+}
+
 interface SalesTableViewProps {
-    orders: any[];
+    orders: OrderRecord[];
     formatPrice: (n: number) => string;
     dayKeys?: string[];
 }
@@ -17,7 +26,7 @@ export const SalesTableView: React.FC<SalesTableViewProps> = ({ orders, formatPr
         const salesByDay: Record<string, number> = {};
         orders.forEach(order => {
             const key = order.createdAt?.slice(0, 10) || '';
-            salesByDay[key] = (salesByDay[key] || 0) + order.total;
+            salesByDay[key] = (salesByDay[key] || 0) + (order.total ?? 0);
         });
         return (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -55,7 +64,7 @@ export const SalesTableView: React.FC<SalesTableViewProps> = ({ orders, formatPr
                     <tr key={order.id}>
                         <td style={{ padding: 8 }}>{order.createdAt?.slice(0, 10)}</td>
                         <td style={{ padding: 8 }}>{order.clientName || order.clientEmail || '-'}</td>
-                        <td style={{ padding: 8, textAlign: 'right' }}>{formatPrice(order.total)}</td>
+                        <td style={{ padding: 8, textAlign: 'right' }}>{formatPrice(order.total ?? 0)}</td>
                         <td style={{ padding: 8 }}>{order.status}</td>
                     </tr>
                 ))}

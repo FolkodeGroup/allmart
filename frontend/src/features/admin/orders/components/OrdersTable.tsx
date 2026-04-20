@@ -100,7 +100,7 @@ interface OrderItemProps {
  */
 
 export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderItemProps) {
-  const totalQty = order.items.reduce((s: number, i: any) => s + i.quantity, 0); // Cantidad total de ítems sumando todas las líneas del pedido
+  const totalQty = order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0); // Cantidad total de ítems sumando todas las líneas del pedido
 
   const { updateOrderStatus } = useAdminOrders();
 
@@ -138,9 +138,9 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
     try {
       await updateOrderStatus(order.id, newStatus as typeof localStatus);
       toast.success('Estado actualizado');
-    } catch (e: any) {
+    } catch (e: unknown) {
       setLocalStatus(prev);
-      setError(e?.message || 'Error al actualizar');
+      setError(e instanceof Error ? e.message : 'Error al actualizar');
       toast.error('No se pudo actualizar el estado');
     } finally {
       setLoading(false);

@@ -21,8 +21,8 @@
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-import type { Order, OrderHistoryEntry } from '../../../context/AdminOrdersContext';
-import { STATUS_LABELS, STATUS_OPTIONS, statusClass, formatDateTime, STATUS_ICONS } from './utils/ordersHelpers';
+import type { Order } from '../../../context/AdminOrdersContext';
+import { STATUS_LABELS, STATUS_OPTIONS } from './utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
@@ -44,151 +44,12 @@ import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
  * Estructura mínima esperada por el tipo Order:
  *  id, createdAt, customer, items, total, status, paymentStatus, statusHistory
  */
-import type { OrderStatus, PaymentStatus } from '../../../context/AdminOrdersContext';
-const MOCK_ORDERS = [
-  {
-    id: 'order-001',
-    createdAt: '2026-04-01T10:00:00Z',
-    customer: {
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      email: 'juan.perez@email.com',
-    },
-    items: [
-      {
-        productId: 'prod-001',
-        productName: 'Camiseta Básica',
-        productImage: '',
-        quantity: 2,
-        unitPrice: 15.99,
-      },
-    ],
-    total: 31.98,
-    status: 'entregado' as OrderStatus,
-    paymentStatus: 'abonado' as PaymentStatus,
-    paidAt: '2026-04-01T12:00:00Z',
-    notes: 'Entregado sin inconvenientes',
-    statusHistory: [
-      { status: 'pendiente' as OrderStatus, changedAt: '2026-04-01T10:00:00Z' },
-      { status: 'confirmado' as OrderStatus, changedAt: '2026-04-01T10:10:00Z' },
-      { status: 'en-preparacion' as OrderStatus, changedAt: '2026-04-01T10:30:00Z' },
-      { status: 'enviado' as OrderStatus, changedAt: '2026-04-01T11:00:00Z' },
-      { status: 'entregado' as OrderStatus, changedAt: '2026-04-01T12:00:00Z' },
-    ],
-  },
-  {
-    id: 'order-002',
-    createdAt: '2026-04-02T09:30:00Z',
-    customer: {
-      firstName: 'María',
-      lastName: 'Gómez',
-      email: 'maria.gomez@email.com',
-    },
-    items: [
-      {
-        productId: 'prod-002',
-        productName: 'Pantalón Jeans',
-        productImage: '',
-        quantity: 1,
-        unitPrice: 39.99,
-      },
-    ],
-    total: 39.99,
-    status: 'pendiente' as OrderStatus,
-    paymentStatus: 'no-abonado' as PaymentStatus,
-    notes: 'Cliente pidió cambio de talla',
-    statusHistory: [
-      { status: 'pendiente' as OrderStatus, changedAt: '2026-04-02T09:30:00Z', note: 'Pedido recibido' },
-    ],
-  },
-  {
-    id: 'order-003',
-    createdAt: '2026-04-03T14:20:00Z',
-    customer: {
-      firstName: 'Carlos',
-      lastName: 'López',
-      email: 'carlos.lopez@email.com',
-    },
-    items: [
-      {
-        productId: 'prod-003',
-        productName: 'Zapatillas Running',
-        productImage: '',
-        quantity: 1,
-        unitPrice: 59.99,
-      },
-    ],
-    total: 59.99,
-    status: 'cancelado' as OrderStatus,
-    paymentStatus: 'no-abonado' as PaymentStatus,
-    notes: 'Cancelado por falta de stock',
-    statusHistory: [
-      { status: 'pendiente' as OrderStatus, changedAt: '2026-04-03T14:20:00Z' },
-      { status: 'cancelado' as OrderStatus, changedAt: '2026-04-03T15:00:00Z', note: 'Sin stock disponible' },
-    ],
-  },
-];
-import { useUnsavedChanges } from '../../../context/useUnsavedChanges';
+import type { OrderStatus } from '../../../context/AdminOrdersContext';
+
+// Importar componentes y hooks faltantes
+import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
 import OrderDetailModal from './components/OrderDetailModal';
-// Helpers y constantes extraídos a utils/ordersHelpers.ts
 
-
-
-/* ── Componente Timeline de estados ─────────────────────────────── */
-// ─────────────────────────────────────────────────────────────────────────────
-// OrderTimeline
-// Muestra el historial cronológico de cambios de estado de un pedido.
-// Se exporta para poder usarse también dentro de OrderDetailModal.
-//
-// Props:
-//  @param history       - Array de entradas del historial (puede estar vacío)
-//  @param currentStatus - Estado actual del pedido; se usa para marcar el ítem activo
-// ─────────────────────────────────────────────────────────────────────────────
-export function OrderTimeline({ history, currentStatus }: { history: OrderHistoryEntry[]; currentStatus: OrderStatus }) {
-  if (history.length === 0) {
-    return (
-      <p className={styles.timelineEmpty}>No hay registros de cambios de estado aún.</p>
-    );
-  }
-  // Invertimos para mostrar el estado más reciente primero (índice 0 = actual)
-  const sorted: OrderHistoryEntry[] = [...history].reverse();
-  return (
-    <ol className={styles.timeline}>
-      {sorted.map((entry: OrderHistoryEntry, idx: number) => {
-        // El primer ítem del array invertido es el estado actual del pedido
-        const isCurrent = entry.status === currentStatus && idx === 0;
-        // El último ítem no necesita la línea vertical que conecta con el siguiente
-        const isLast = idx === sorted.length - 1;
-        return (
-          <li key={entry.changedAt + idx} className={`${styles.timelineItem} ${isCurrent ? styles.timelineItemCurrent : ''}`} style={{ animationDelay: `${idx * 60}ms` }}>
-            <div className={styles.timelineDotWrap}>
-              <span className={styles.timelineDot}>
-                {STATUS_ICONS[entry.status]}
-              </span>
-              {/* La línea vertical se omite en el último ítem para no "colgar" */}
-              {!isLast && <span className={styles.timelineLine} />}
-            </div>
-            <div className={styles.timelineContent}>
-              <div className={styles.timelineHeader}>
-                <span className={`${styles.statusBadge} ${statusClass(entry.status, styles)}`}>
-                  {STATUS_LABELS[entry.status]}
-                </span>
-                {isCurrent && (
-                  <span className={styles.timelineCurrentTag}>Estado actual</span>
-                )}
-              </div>
-              <time className={styles.timelineDate}>{formatDateTime(entry.changedAt)}</time>
-              {/* La nota es opcional; solo se muestra si el operador la registró */}
-              {entry.note && (
-                <p className={styles.timelineNote}>{entry.note}</p>
-              )}
-            </div>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 
 
@@ -201,7 +62,7 @@ function AdminOrders() {
    * En desarrollo se inicializa con MOCK_ORDERS.
    * En producción, se pobla via fetchOrders (ver useEffect comentado más abajo).
    */
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // ── Paginación ──────────────────────────────────────────────────
@@ -310,7 +171,7 @@ function AdminOrders() {
     if (reset) setIsLoading(true);
     else setIsLoading(true);
     try {
-      const params: Record<string, any> = {
+      const params: Record<string, string | number> = {
         page,
         limit: PAGE_SIZE,
       };
@@ -321,9 +182,9 @@ function AdminOrders() {
 
       // reset=true reemplaza la lista; reset=false acumula (para infinite scroll)
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Ignorar errores de abort; solo mostrar toast si fue un error real
-      if (e.name !== 'AbortError') toast.error('Error al cargar pedidos');
+      if (e instanceof Error && e.name !== 'AbortError') toast.error('Error al cargar pedidos');
     } finally {
       setIsLoading(false);
       setIsLoading(false);
@@ -331,10 +192,10 @@ function AdminOrders() {
   }, [token, page, PAGE_SIZE]);
 
   // Cargar pedidos al montar y al cambiar filtros
-  // useEffect(() => {
-  //   fetchOrders(true);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [token]);
+  useEffect(() => {
+    fetchOrders(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   // Cargar más cuando el usuario avanza de página (solo si page > 1)
   useEffect(() => {

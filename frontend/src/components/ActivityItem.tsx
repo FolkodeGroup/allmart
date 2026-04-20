@@ -42,16 +42,16 @@ function buildDescription(
         name = getProductName(log.entityId) || `Producto #${log.entityId}`;
         entity = 'el producto';
     } else if (log.entity === 'category' && log.entityId) {
-        name = log.details?.name || `Categoría #${log.entityId}`;
+        name = (log.details?.name as string) || `Categoría #${log.entityId}`;
         entity = 'la categoría';
     } else if (log.entity === 'order' && log.entityId) {
         name = `Pedido #${log.entityId}`;
         entity = 'el pedido';
     } else if (log.entity === 'user' && log.entityId) {
-        name = log.details?.name || `Usuario #${log.entityId}`;
+        name = (log.details?.name as string) || `Usuario #${log.entityId}`;
         entity = 'el usuario';
     } else {
-        name = log.details?.name || '';
+        name = (log.details?.name as string) || '';
         entity = log.entity || '';
     }
     if (action === 'Nuevo pedido') {

@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react';
-import { useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -69,33 +69,52 @@ export const Modal: FC<ModalProps> = ({
     };
   }, [open]);
 
-  // Focus trap and restore
+  const focusableSelectors = [
+    'button:not([disabled])',
+    '[href]',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ];
+  const getFocusableEls = useCallback(() =>
+    modalRef.current?.querySelectorAll<HTMLElement>(focusableSelectors.join(',')) ?? [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // Focus first element ONLY when modal opens (not on every re-render)
   useEffect(() => {
     if (!open) return;
 
-    // Save last focused element
+    // Save last focused element for restoring on close
     lastFocusedElement.current = document.activeElement as HTMLElement;
 
-    // Focus first focusable element in modal
-    const focusableSelectors = [
-      'button:not([disabled])',
-      '[href]',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      'textarea:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ];
-    const getFocusableEls = () =>
-      modalRef.current?.querySelectorAll<HTMLElement>(focusableSelectors.join(',')) ?? [];
+    // Small delay to ensure modal content is rendered
+    const raf = requestAnimationFrame(() => {
+      const focusableEls = getFocusableEls();
+      if (focusableEls.length > 0) {
+        focusableEls[0].focus();
+      } else if (modalRef.current) {
+        modalRef.current.focus();
+      }
+    });
 
-    const focusableEls = getFocusableEls();
-    if (focusableEls.length > 0) {
-      focusableEls[0].focus();
-    } else if (modalRef.current) {
-      modalRef.current.focus();
-    }
+    return () => {
+      cancelAnimationFrame(raf);
+      // Restore focus when modal closes
+      if (lastFocusedElement.current) {
+        lastFocusedElement.current.focus();
+      }
+    };
+  // Only depend on `open` — focus should only be set when modal opens/closes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
-    // Trap focus inside modal
+  // Focus trap (keyboard navigation) — separate from initial focus
+  useEffect(() => {
+    if (!open) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !disableClose) {
         onClose();
@@ -121,12 +140,8 @@ export const Modal: FC<ModalProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      // Restore focus
-      if (lastFocusedElement.current) {
-        lastFocusedElement.current.focus();
-      }
     };
-  }, [open, onClose, disableClose]);
+  }, [open, onClose, disableClose, getFocusableEls]);
 
   const isFull = size === 'full';
   const sizeClass =
