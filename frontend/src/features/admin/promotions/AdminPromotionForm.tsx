@@ -87,12 +87,12 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     setLoadingSelectors(true);
     try {
       const [productsRes, categoriesRes] = await Promise.all([
-        apiFetch<any>('/api/admin/products?limit=500', {}, token ?? undefined),
+        apiFetch<{ data: { data: Array<{ id: string; name: string; slug: string; price: number; status: string; categoryId: string | null }> } }>('/api/admin/products?limit=500', {}, token ?? undefined),
         fetchAdminCategories(token ?? '', { limit: 200 }),
       ]);
       const rawProducts = productsRes?.data?.data ?? [];
       setAllProducts(
-        rawProducts.map((p: any) => ({
+        rawProducts.map((p) => ({
           id: p.id,
           name: p.name,
           slug: p.slug,
@@ -205,50 +205,50 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         {activeTab === 'details' && (
           <div className={styles.formBody}>
             <div className={styles.formGroup}>
-              <label>Nombre *</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Black Friday 50%, Cyber Week..." autoFocus />
+              <label htmlFor="promo-name">Nombre *</label>
+              <input id="promo-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Black Friday 50%, Cyber Week..." />
             </div>
             <div className={styles.formGroup}>
-              <label>Descripción</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles para el administrador" rows={2} />
+              <label htmlFor="promo-desc">Descripción</label>
+              <textarea id="promo-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles para el administrador" rows={2} />
             </div>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label>Tipo de Descuento *</label>
-                <select value={type} onChange={(e) => setType(e.target.value as any)}>
+                <label htmlFor="promo-type">Tipo de Descuento *</label>
+                <select id="promo-type" value={type} onChange={(e) => setType(e.target.value as Promotion['type'])}>
                   {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label>Valor *</label>
-                <input type="number" value={value} onChange={(e) => setValue(e.target.value)} placeholder={type === 'percentage' ? '0 – 100' : '0'} min="0" step={type === 'percentage' ? '0.01' : '1'} />
+                <label htmlFor="promo-value">Valor *</label>
+                <input id="promo-value" type="number" value={value} onChange={(e) => setValue(e.target.value)} placeholder={type === 'percentage' ? '0 – 100' : '0'} min="0" step={type === 'percentage' ? '0.01' : '1'} />
                 <small>{type === 'percentage' ? 'Porcentaje de descuento' : type === 'fixed' ? 'Pesos de descuento' : 'Aplica al 2do artículo'}</small>
               </div>
             </div>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label>Fecha de Inicio *</label>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <label htmlFor="promo-start">Fecha de Inicio *</label>
+                <input id="promo-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
               </div>
               <div className={styles.formGroup}>
-                <label>Fecha de Fin *</label>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </div>
-            </div>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Compra Mínima ($)</label>
-                <input type="number" value={minPurchase} onChange={(e) => setMinPurchase(e.target.value)} placeholder="Sin mínimo" min="0" step="0.01" />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Descuento Máximo ($)</label>
-                <input type="number" value={maxDiscount} onChange={(e) => setMaxDiscount(e.target.value)} placeholder="Sin tope" min="0" step="0.01" />
+                <label htmlFor="promo-end">Fecha de Fin *</label>
+                <input id="promo-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </div>
             </div>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label>Prioridad</label>
-                <input type="number" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="0" />
+                <label htmlFor="promo-min">Compra Mínima ($)</label>
+                <input id="promo-min" type="number" value={minPurchase} onChange={(e) => setMinPurchase(e.target.value)} placeholder="Sin mínimo" min="0" step="0.01" />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="promo-max">Descuento Máximo ($)</label>
+                <input id="promo-max" type="number" value={maxDiscount} onChange={(e) => setMaxDiscount(e.target.value)} placeholder="Sin tope" min="0" step="0.01" />
+              </div>
+            </div>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label htmlFor="promo-priority">Prioridad</label>
+                <input id="promo-priority" type="number" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="0" />
                 <small>Mayor número = se aplica primero cuando hay conflictos</small>
               </div>
               <div className={styles.formGroup}>

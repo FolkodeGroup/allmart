@@ -65,6 +65,8 @@ export interface ProductDiscount {
   discountPercentage: number;
   promotionType: string;
   priority: number;
+  validUntil?: string;
+  minPurchase?: number;
 }
 
 function isValidProductDiscount(value: unknown): value is ProductDiscount {
@@ -180,7 +182,7 @@ export const publicCollectionsService = {
     try {
       const result = await apiFetch(`/api/promotions/product-discount/${productId}?${params}`) as unknown;
       return isValidProductDiscount(result) ? result : null;
-    } catch (error) {
+    } catch {
       return null;
     }
   },

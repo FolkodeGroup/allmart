@@ -25,7 +25,7 @@ export function ProductRankingList({
     const percentage = Math.max((product.revenue / maxRevenue) * 100, 4);
 
     return (
-        <div className={styles.reportCardModern} tabIndex={0} aria-label={`Producto #${position}: ${product.name}`}>
+        <div className={styles.reportCardModern} role="listitem" aria-label={`Producto #${position}: ${product.name}`}>
             {/* Mobile-first: separa imagen, ranking y título */}
             <div className={styles.productRankingMobileRow}>
                 <div className={styles.productRankingImageCol}>

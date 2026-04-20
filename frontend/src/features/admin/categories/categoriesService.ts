@@ -76,7 +76,7 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
 
 /** Convierte una Category del frontend al payload que acepta el backend */
 export function mapCategoryToPayload(category: Partial<Category>): CategoryPayload {
-  const payload: any = {};
+  const payload: Partial<CategoryPayload> = {};
   
   if (category.name !== undefined) payload.name = category.name;
   if (category.description !== undefined) payload.description = category.description;

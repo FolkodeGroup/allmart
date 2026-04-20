@@ -267,8 +267,8 @@ export function AdminCategories() {
         maxProducts: maxProducts === '' ? undefined : maxProducts,
         isVisible: isVisible === 'all' ? undefined : isVisible === 'visible' ? true : false,
       });
-    } catch (err: any) {
-      setFormError(err?.message || 'No se pudo guardar la categoría.');
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo guardar la categoría.');
     } finally {
       setFormSubmitting(false);
     }
@@ -291,8 +291,8 @@ export function AdminCategories() {
       });
       showNotification('success', 'Categoría eliminada correctamente');
       refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
-    } catch (err: any) {
-      const msg = err?.message || 'Error al eliminar la categoría';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al eliminar la categoría';
       showNotification('error', msg);
     } finally {
       setDeleting(false);
@@ -324,9 +324,9 @@ export function AdminCategories() {
         details: { isVisible: newVisible },
       });
       showNotification('success', newVisible ? 'Categoría visible' : 'Categoría oculta');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setOptimisticVis(prev => ({ ...prev, [id]: !newVisible }));
-      showNotification('error', err?.message || 'Error al cambiar visibilidad');
+      showNotification('error', err instanceof Error ? err.message : 'Error al cambiar visibilidad');
     } finally {
       setTogglingId(null);
       setToggleConfirm(null);
@@ -985,8 +985,8 @@ export function AdminCategories() {
                   clearSelection();
                   refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
                   setBulkAction({ type: null });
-                } catch (err: any) {
-                  showNotification('error', err?.message || 'Error al eliminar categorías');
+                } catch (err: unknown) {
+                  showNotification('error', err instanceof Error ? err.message : 'Error al eliminar categorías');
                 } finally {
                   setBulkActionLoading(false);
                 }
@@ -1027,8 +1027,8 @@ export function AdminCategories() {
                   clearSelection();
                   refreshCategories({ q: selectedSuggestion || debouncedSearch, page, limit });
                   setBulkAction({ type: null });
-                } catch (err: any) {
-                  showNotification('error', err?.message || 'Error al cambiar visibilidad de categorías');
+                } catch (err: unknown) {
+                  showNotification('error', err instanceof Error ? err.message : 'Error al cambiar visibilidad de categorías');
                 } finally {
                   setBulkActionLoading(false);
                 }

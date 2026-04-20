@@ -158,7 +158,6 @@ export function AdminLayout() {
       });
       return next;
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   const toggleGroup = useCallback((to: string) => {

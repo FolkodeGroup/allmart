@@ -178,8 +178,9 @@ export function AdminLogin() {
 
       {/* Modal de reset de contraseña */}
       {showResetModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowResetModal(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className={styles.modalBackdrop} onClick={() => setShowResetModal(false)} onKeyDown={(e) => e.key === 'Escape' && setShowResetModal(false)} role="button" tabIndex={0} aria-label="Cerrar modal">
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <h3 className={styles.modalTitle}>Restablecer contraseña</h3>
             <p className={styles.modalText}>
               Para restablecer tu contraseña, contactá al equipo de soporte de FolKode. 

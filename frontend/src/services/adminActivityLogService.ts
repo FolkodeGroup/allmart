@@ -7,7 +7,7 @@ export type AdminActivityLog = {
   action: string; // 'create', 'edit', 'delete', etc.
   entity: string; // 'product', 'category', etc.
   entityId?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 };
 
 const STORAGE_KEY = 'admin_activity_logs';

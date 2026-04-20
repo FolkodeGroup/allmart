@@ -27,6 +27,7 @@ const AdminCollections: React.FC = () => {
 
   useEffect(() => {
     loadCollections();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, filterActive, displayPosition]);
 
   async function loadCollections() {

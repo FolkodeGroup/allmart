@@ -23,7 +23,6 @@ export const ProductCardImage: React.FC<ProductCardImageProps> = ({ src, alt }) 
         className={styles.noImage}
         role="img"
         aria-label={`Sin imagen de ${alt}`}
-        tabIndex={0}
       >Sin imagen</div>
     )}
   </div>

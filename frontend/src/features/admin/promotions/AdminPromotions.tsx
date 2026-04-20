@@ -31,6 +31,7 @@ const AdminPromotions: React.FC = () => {
 
   useEffect(() => {
     loadPromotions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, filterActive]);
 
   async function loadPromotions() {

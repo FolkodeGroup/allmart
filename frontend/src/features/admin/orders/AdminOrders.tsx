@@ -171,7 +171,7 @@ function AdminOrders() {
     if (reset) setIsLoading(true);
     else setIsLoading(true);
     try {
-      const params: Record<string, any> = {
+      const params: Record<string, string | number> = {
         page,
         limit: PAGE_SIZE,
       };
@@ -182,9 +182,9 @@ function AdminOrders() {
 
       // reset=true reemplaza la lista; reset=false acumula (para infinite scroll)
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Ignorar errores de abort; solo mostrar toast si fue un error real
-      if (e.name !== 'AbortError') toast.error('Error al cargar pedidos');
+      if (e instanceof Error && e.name !== 'AbortError') toast.error('Error al cargar pedidos');
     } finally {
       setIsLoading(false);
       setIsLoading(false);

@@ -450,6 +450,7 @@ export function AdminVariants() {
                             <input
                               className={`${styles.groupNameEdit} ${editGroupError ? styles.inputError : ''}`}
                               value={editingGroupName}
+                              // eslint-disable-next-line jsx-a11y/no-autofocus
                               autoFocus
                               onChange={e => {
                                 setEditingGroupName(e.target.value);

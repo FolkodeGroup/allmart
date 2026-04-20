@@ -125,7 +125,7 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
 
     return (
       <aside ref={ref || containerRef} className={styles.panel} onScroll={handleScroll}>
-        <div className={styles.listContainer}>
+        <div className={styles.listContainer} role="listbox" aria-label="Lista de productos">
           {products.map((product, index) => (
             <div
               key={product.id}
@@ -133,7 +133,7 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
               className={`${styles.productWrapper} ${
                 selectedProductId === product.id ? styles.selected : ''
               }`}
-              role="button"
+              role="option"
               tabIndex={0}
               aria-label={`Seleccionar producto ${product.name}`}
               aria-selected={selectedProductId === product.id}

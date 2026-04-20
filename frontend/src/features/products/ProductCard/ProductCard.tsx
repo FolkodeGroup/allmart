@@ -6,7 +6,7 @@ import type { Product } from "../../../types";
 import { Badge } from "../../../components/ui/Badge/Badge";
 import { ProductPrice } from '../../../components/ui/ProductPrice/ProductPrice';
 import DiscountBadge from '../../../components/DiscountBadge';
-import { publicCollectionsService } from '../../../services/publicCollectionsService';
+import { publicCollectionsService, type ProductDiscount } from '../../../services/publicCollectionsService';
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
@@ -36,7 +36,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     const saved = localStorage.getItem(storageKey);
     return saved === "true";
   });
-  const [dynamicDiscount, setDynamicDiscount] = useState<any>(null);
+  const [dynamicDiscount, setDynamicDiscount] = useState<ProductDiscount | null>(null);
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(isFavorito));
@@ -99,13 +99,13 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     <article
       className={`${styles.card} ${isFeatured ? styles.featuredCard : ''}`}
       aria-label={product.name}
-      onKeyDown={handleGalleryKeyDown}
     >
       <div
         className={`${styles.imageWrapper} ${isFeatured ? styles.featuredImageWrapper : ''}`}
         role={hasGallery ? 'group' : undefined}
         aria-roledescription={hasGallery ? 'carousel' : undefined}
         aria-label={hasGallery ? `Galería de imágenes de ${product.name}` : undefined}
+        onKeyDown={hasGallery ? handleGalleryKeyDown : undefined}
       >
         <Link to={`/producto/${product.slug}`}>
           <ProductImage

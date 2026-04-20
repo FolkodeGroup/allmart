@@ -78,6 +78,7 @@ export function useAutocomplete({
   );
 
   // Debounced version of performSearch
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce(performSearch, debounceDelay),
     [performSearch, debounceDelay]
@@ -115,9 +116,10 @@ export function useAutocomplete({
 
   // Cleanup
   useEffect(() => {
+    const timeoutId = searchTimeoutRef.current;
     return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
   }, []);

@@ -119,7 +119,7 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
 
     // Email del usuario admin para el log de actividad
     const auth = useAdminAuth();
-    const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
+    const userEmail = (auth && (auth.user as string)) || 'desconocido';
 
     // ── Handlers de acciones ────────────────────────────────────────
 

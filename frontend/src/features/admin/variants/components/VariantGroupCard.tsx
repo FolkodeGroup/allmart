@@ -98,6 +98,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
             <input
               className={`${styles.groupNameEdit} ${editError ? styles.inputError : ''}`}
               value={editName}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               onChange={e => {
                 setEditName(e.target.value);

@@ -28,7 +28,7 @@ export function VariantsFilters({
 }: Props) {
 
     // helper para actualizar filtros
-    const update = (key: keyof Filters, value: any) => {
+    const update = (key: keyof Filters, value: Filters[keyof Filters]) => {
         onChange({
             ...filters,
             [key]: value,

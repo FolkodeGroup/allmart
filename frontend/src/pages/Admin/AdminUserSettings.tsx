@@ -199,14 +199,14 @@ export function AdminUserSettings() {
             </div>
             <div className={styles.profileInfo}>
               <div className={styles.fieldGroup}>
-                <label className={styles.fieldLabel}>Correo electrónico</label>
+                <span className={styles.fieldLabel}>Correo electrónico</span>
                 <div className={styles.readonlyField}>
                   <span>{user}</span>
                   <span className={styles.readonlyBadge}>Solo lectura</span>
                 </div>
               </div>
               <div className={styles.fieldGroup}>
-                <label className={styles.fieldLabel}>Rol</label>
+                <span className={styles.fieldLabel}>Rol</span>
                 <div className={styles.readonlyField}>
                   <span
                     className={styles.rolePill}
@@ -361,7 +361,7 @@ export function AdminUserSettings() {
           }
         >
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>Registros por página (tablas)</label>
+            <span className={styles.fieldLabel}>Registros por página (tablas)</span>
             <div className={styles.radioGroup}>
               {ITEMS_PER_PAGE_OPTIONS.map((n) => (
                 <button
@@ -377,7 +377,7 @@ export function AdminUserSettings() {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>Vista predeterminada</label>
+            <span className={styles.fieldLabel}>Vista predeterminada</span>
             <div className={styles.radioGroup}>
               <button
                 type="button"

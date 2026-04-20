@@ -15,19 +15,19 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
           <h3 className={styles.sectionTitle}>Información general</h3>
           <div className={styles.infoGrid}>
             <div className={styles.field}>
-              <label className={styles.label}>Nombre</label>
+              <span className={styles.label}>Nombre</span>
               <p className={styles.value}>{product.name}</p>
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>SKU</label>
+              <span className={styles.label}>SKU</span>
               <p className={`${styles.value} ${styles.mono}`}>{product.sku || '-'}</p>
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Categoría</label>
+              <span className={styles.label}>Categoría</span>
               <p className={styles.value}>{product.category?.name || '-'}</p>
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Slug</label>
+              <span className={styles.label}>Slug</span>
               <p className={`${styles.value} ${styles.mono} ${styles.muted}`}>{product.slug || '-'}</p>
             </div>
           </div>
@@ -37,13 +37,13 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
           <h3 className={styles.sectionTitle}>Descripción</h3>
           {product.shortDescription && (
             <div className={styles.field}>
-              <label className={styles.label}>Corta</label>
+              <span className={styles.label}>Corta</span>
               <p className={styles.value}>{product.shortDescription}</p>
             </div>
           )}
           {product.description && (
             <div className={styles.field}>
-              <label className={styles.label}>Completa</label>
+              <span className={styles.label}>Completa</span>
               <p className={styles.valueText}>{product.description}</p>
             </div>
           )}

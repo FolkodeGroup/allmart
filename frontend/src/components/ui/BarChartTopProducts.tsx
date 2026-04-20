@@ -10,6 +10,12 @@ export interface TopProductData {
   sales: number;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
+export function truncateLabel(text: string, maxLength: number = 13): string {
+  if (!text) return '';
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+}
+
 
 interface Props {
   data: TopProductData[];
@@ -27,13 +33,13 @@ const ORANGE_PALETTE = [
  * @param maxLength Máximo de caracteres permitidos
  * @returns Texto truncado
  */
-export function truncateLabel(text: string, maxLength: number = 13): string {
-  if (!text) return '';
-  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+
+
+interface TooltipPayloadEntry {
+  payload: { name: string; sku: string; sales: number };
 }
 
-
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayloadEntry[] }) => {
   if (active && payload && payload.length) {
     const { name, sku, sales } = payload[0].payload;
     return (

@@ -124,22 +124,22 @@ const AdminPromotionMatrix: React.FC = () => {
     <div className={styles.matrixContainer}>
       {/* ─── Stats row ───────────────────────────────────────────────── */}
       <div className={styles.matrixStats}>
-        <div className={styles.statCard} onClick={() => setFilterStatus('all')}>
+        <button type="button" className={styles.statCard} onClick={() => setFilterStatus('all')}>
           <span className={styles.statNumber}>{matrix.length}</span>
           <span className={styles.statLabel}>Total</span>
-        </div>
-        <div className={`${styles.statCard} ${styles.statCardGreen}`} onClick={() => setFilterStatus('active')}>
+        </button>
+        <button type="button" className={`${styles.statCard} ${styles.statCardGreen}`} onClick={() => setFilterStatus('active')}>
           <span className={styles.statNumber}>{activeCount}</span>
           <span className={styles.statLabel}>Activas</span>
-        </div>
-        <div className={`${styles.statCard} ${styles.statCardBlue}`} onClick={() => setFilterStatus('upcoming')}>
+        </button>
+        <button type="button" className={`${styles.statCard} ${styles.statCardBlue}`} onClick={() => setFilterStatus('upcoming')}>
           <span className={styles.statNumber}>{upcomingCount}</span>
           <span className={styles.statLabel}>Próximas</span>
-        </div>
-        <div className={`${styles.statCard} ${styles.statCardGray}`} onClick={() => setFilterStatus('expired')}>
+        </button>
+        <button type="button" className={`${styles.statCard} ${styles.statCardGray}`} onClick={() => setFilterStatus('expired')}>
           <span className={styles.statNumber}>{expiredCount}</span>
           <span className={styles.statLabel}>Vencidas</span>
-        </div>
+        </button>
       </div>
 
       {/* ─── Filters ─────────────────────────────────────────────────── */}
@@ -154,7 +154,7 @@ const AdminPromotionMatrix: React.FC = () => {
         <select
           className={styles.selectFilter}
           value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value as any)}
+          onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
         >
           <option value="all">Todos los estados</option>
           <option value="active">Activas</option>
@@ -185,7 +185,7 @@ const AdminPromotionMatrix: React.FC = () => {
               return (
                 <div key={item.id} className={`${styles.matrixRow} ${isExpanded ? styles.matrixRowExpanded : ''}`}>
                   {/* ─── Row header ──────────────────────────────────── */}
-                  <div className={styles.matrixRowHeader} onClick={() => handleExpand(item.id)}>
+                  <button type="button" className={styles.matrixRowHeader} onClick={() => handleExpand(item.id)}>
                     <div className={styles.matrixRowInfo}>
                       <span className={styles.matrixRowName}>{item.name}</span>
                       <span className={styles.matrixRowDiscount}>{formatTypeLabel(item.type, item.value)}</span>
@@ -206,7 +206,7 @@ const AdminPromotionMatrix: React.FC = () => {
                       </span>
                       <span className={styles.matrixChevron}>{isExpanded ? '▲' : '▼'}</span>
                     </div>
-                  </div>
+                  </button>
 
                   {/* ─── Expanded detail ─────────────────────────────── */}
                   {isExpanded && (

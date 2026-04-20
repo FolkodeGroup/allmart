@@ -69,17 +69,17 @@ export const promotionsService = {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (search) params.append('q', search);
     if (isActive !== undefined) params.append('isActive', String(isActive));
-    const response = await apiFetch<any>(`/api/admin/promotions?${params}`);
+    const response = await apiFetch<{ data: PaginatedPromotions }>(`/api/admin/promotions?${params}`);
     return response.data;
   },
 
   async getById(id: string): Promise<Promotion> {
-    const response = await apiFetch<any>(`/api/admin/promotions/${id}`);
+    const response = await apiFetch<{ data: Promotion }>(`/api/admin/promotions/${id}`);
     return response.data;
   },
 
   async create(data: Partial<Promotion>): Promise<Promotion> {
-    const response = await apiFetch<any>('/api/admin/promotions', {
+    const response = await apiFetch<{ data: Promotion }>('/api/admin/promotions', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
@@ -88,7 +88,7 @@ export const promotionsService = {
   },
 
   async update(id: string, data: Partial<Promotion>): Promise<Promotion> {
-    const response = await apiFetch<any>(`/api/admin/promotions/${id}`, {
+    const response = await apiFetch<{ data: Promotion }>(`/api/admin/promotions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
@@ -101,12 +101,12 @@ export const promotionsService = {
   },
 
   async duplicate(id: string): Promise<Promotion> {
-    const response = await apiFetch<any>(`/api/admin/promotions/${id}/duplicate`, { method: 'POST' });
+    const response = await apiFetch<{ data: Promotion }>(`/api/admin/promotions/${id}/duplicate`, { method: 'POST' });
     return response.data;
   },
 
   async getProducts(id: string): Promise<PromotionProductsResult> {
-    const response = await apiFetch<any>(`/api/admin/promotions/${id}/products`);
+    const response = await apiFetch<{ data: PromotionProductsResult }>(`/api/admin/promotions/${id}/products`);
     return response.data;
   },
 
@@ -122,7 +122,7 @@ export const promotionsService = {
   },
 
   async getMatrix(): Promise<PromotionMatrixItem[]> {
-    const response = await apiFetch<any>('/api/admin/promotions/matrix');
+    const response = await apiFetch<{ data: PromotionMatrixItem[] }>('/api/admin/promotions/matrix');
     return response.data;
   },
 };

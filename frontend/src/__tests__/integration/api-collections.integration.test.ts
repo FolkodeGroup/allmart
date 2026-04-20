@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Integration Tests for Public Collections & Promotions API Endpoints
  *
@@ -258,7 +260,7 @@ describe('API Integration Tests - Collections & Promotions', () => {
         if (collections.length > 0 && collections[0].products && collections[0].products.length > 0) {
           testProductId = collections[0].products[0].id;
         }
-      } catch (e) {
+      } catch {
         // Use default if API call fails
       }
     });

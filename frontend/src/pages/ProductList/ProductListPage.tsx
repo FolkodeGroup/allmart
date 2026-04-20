@@ -72,7 +72,7 @@ export function ProductListPage() {
       try {
         const discounts = await publicCollectionsService.getActiveDiscounts();
         const productIds = new Set(
-          discounts.map((item: any) => item.productId)
+          discounts.map((item: { productId: string }) => item.productId)
         );
         setActiveDiscounts(productIds);
       } catch (error) {

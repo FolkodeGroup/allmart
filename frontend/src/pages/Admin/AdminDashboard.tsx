@@ -336,6 +336,7 @@ export function AdminDashboard() {
                       value={goalInput}
                       onChange={(e) => setGoalInput(e.target.value)}
                       min={0}
+                      // eslint-disable-next-line jsx-a11y/no-autofocus
                       autoFocus
                     />
                     <button

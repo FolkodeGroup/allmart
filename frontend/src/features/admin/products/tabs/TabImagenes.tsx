@@ -6,6 +6,10 @@ import {
     Droppable,
     Draggable,
     type DropResult,
+    type DroppableProvided,
+    type DroppableStateSnapshot,
+    type DraggableProvided,
+    type DraggableStateSnapshot,
 } from '@hello-pangea/dnd';
 import { Delete, Star } from 'lucide-react';
 
@@ -300,7 +304,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
             {images.filter(img => img.trim()).length > 0 ? (
                 <DragDropContext onDragEnd={handleDragEnd}>
                     <Droppable droppableId="images">
-                        {(provided: any, snapshot: any) => (
+                        {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
@@ -309,7 +313,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 {images.map((url: string, index: number) =>
                                     url.trim() ? (
                                         <Draggable key={`${url}-${index}`} draggableId={`${url}-${index}`} index={index}>
-                                            {(dragProvided: any, dragSnapshot: any) => (
+                                            {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
                                                 <div
                                                     ref={dragProvided.innerRef}
                                                     {...dragProvided.draggableProps}
