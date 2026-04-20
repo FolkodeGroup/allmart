@@ -7,6 +7,7 @@ import { useAdminAuth } from '../../context/AdminAuthContext';
 import { handleResponse } from '../../utils/apiErrorHandler';
 import type { Role } from '../../utils/permissions';
 import styles from './AdminLogin.module.css';
+import logoSrc from '../../assets/images/logos/Allmart (7).svg';
 
 export function AdminLogin() {
   const { login } = useAdminAuth();
@@ -47,7 +48,9 @@ export function AdminLogin() {
 
   return (
     <div className={styles.backdrop}>
-      <form className={styles.panel} onSubmit={handleSubmit(onSubmit)} noValidate>
+      <div className={styles.loginStack}>
+        <img src={logoSrc} alt="Allmart" className={styles.bgLogo} />
+        <form className={styles.panel} onSubmit={handleSubmit(onSubmit)} noValidate>
         <h2 className={styles.heading}>Panel de Administración</h2>
         <label className={styles.label} htmlFor="user">Usuario</label>
         <input
@@ -72,7 +75,8 @@ export function AdminLogin() {
         <button className={styles.button} type="submit" disabled={!isValid || isSubmitting}>
           {isSubmitting ? 'Ingresando...' : 'Ingresar'}
         </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

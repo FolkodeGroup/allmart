@@ -5,13 +5,32 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: var(--color-overlay, rgba(0,0,0,0.15));
+  background: var(--color-primary-light, rgba(118, 146, 130, 0.8));
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: var(--space-4);
   animation: fadeIn var(--transition-base, 0.3s) both;
+  overflow: hidden;
+}
+
+.bgLogo {
+  width: min(240px, 55vw);
+  opacity: 0.55;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  user-select: none;
+  display: block;
+  margin-bottom: var(--space-6);
+}
+
+.loginStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
 }
 
 @keyframes fadeIn {
