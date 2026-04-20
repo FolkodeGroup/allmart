@@ -1515,9 +1515,17 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #802: 763 implementar defaults inteligentes y autocompletado en formulario de producto | 2026-04-15 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #801: 🔄 Registrar puntaje de gestión | 2026-04-15 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #807: 762 implementar atajos de productividad duplicar producto | 2026-04-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #815: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #813: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #811: 🔄 Registrar puntaje de gestión | 2026-04-17 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #809: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #815: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #813: 🔄 Registrar puntaje de gestión | 2026-04-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #811: 🔄 Registrar puntaje de gestión | 2026-04-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #809: 🔄 Registrar puntaje de gestión | 2026-04-17 |
@@ -1525,6 +1533,14 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #806: 🔄 Registrar puntaje de gestión | 2026-04-17 |
 | dgimenezdeveloper | 3 | Creación de issue | Issue #808: Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #808: Refactor integral: ejecución de objetivos críticos usando prompt para Claude Opus 4.6 | 2026-04-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #821: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #819: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #820: Se implementa validación por campo en tiempo real sin esperar submit … | 2026-04-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #819: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
