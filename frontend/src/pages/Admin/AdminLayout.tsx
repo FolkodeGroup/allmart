@@ -1,5 +1,5 @@
 // src/pages/Admin/AdminLayout.tsx
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
@@ -104,6 +104,15 @@ const navItems: NavItem[] = [
 
 type Theme = 'light' | 'dark';
 
+/** Función pura para verificar si algún hijo (o descendiente) tiene la ruta activa */
+function hasActiveChildPath(children: NavItem[], pathname: string): boolean {
+  return children.some((child) => {
+    if (pathname === child.to || pathname.startsWith(child.to + '/')) return true;
+    if (child.children) return hasActiveChildPath(child.children, pathname);
+    return false;
+  });
+}
+
 export function AdminLayout() {
   const { can } = useAdminAuth();
   const { getPendingOrdersCount } = useAdminOrders();
@@ -135,6 +144,35 @@ export function AdminLayout() {
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  // Grupos colapsables: set de `to` de items padre que están abiertos
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
+
+  // Auto-expandir grupos que tienen un hijo activo según la ruta actual
+  useEffect(() => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      navItems.forEach((item) => {
+        if (item.children && hasActiveChildPath(item.children, location.pathname)) {
+          next.add(item.to);
+        }
+      });
+      return next;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  const toggleGroup = useCallback((to: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(to)) {
+        next.delete(to);
+      } else {
+        next.add(to);
+      }
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(
       "admin-sidebar-collapsed",
@@ -148,14 +186,6 @@ export function AdminLayout() {
     return null;
   };
 
-  const hasActiveChild = (children: NavItem[] | undefined): boolean => {
-    if (!children?.length) return false;
-    return children.some((child) => {
-      if (location.pathname === child.to) return true;
-      return hasActiveChild(child.children);
-    });
-  };
-
   const handleNavItemClick =
     (to: string) => (e: ReactMouseEvent<HTMLAnchorElement>) => {
       setIsMobileOpen(false);
@@ -165,12 +195,67 @@ export function AdminLayout() {
       }
     };
 
+  const hasActiveChild = (children: NavItem[] | undefined): boolean => {
+    if (!children?.length) return false;
+    return children.some((child) => {
+      if (location.pathname === child.to || location.pathname.startsWith(child.to + '/')) return true;
+      return hasActiveChild(child.children);
+    });
+  };
+
   const renderNavItem = (item: NavItem, level = 0, parentLabel = '') => {
     const locked = item.permission !== null && !can(item.permission);
     const badgeCount = getBadgeCount(item.badge);
     const activeInTree = location.pathname === item.to || hasActiveChild(item.children);
     const breadcrumbLabel = parentLabel ? `${parentLabel} / ${item.label}` : item.label;
+    const hasChildren = !!item.children?.length;
+    const isExpanded = expandedGroups.has(item.to);
 
+    // Items padre con hijos: botón de toggle (no navega)
+    if (hasChildren && level === 0) {
+      return (
+        <div key={item.to} className={styles.navSection}>
+          <button
+            type="button"
+            title={isCollapsed ? breadcrumbLabel : undefined}
+            data-label={breadcrumbLabel}
+            className={[
+              styles.navItem,
+              styles.navGroupToggle,
+              activeInTree ? styles.navItemActive : '',
+              locked ? styles.navItemLocked : '',
+            ].filter(Boolean).join(' ')}
+            onClick={() => !isCollapsed && toggleGroup(item.to)}
+            aria-expanded={isExpanded}
+            aria-label={breadcrumbLabel}
+          >
+            <span className={styles.navIcon}>{item.icon}</span>
+            <span className={styles.navLabel}>{item.label}</span>
+            {locked && <span className={styles.navLockIcon}>🔒</span>}
+            {badgeCount !== null && badgeCount > 0 && (
+              <span className={styles.navBadge}>{badgeCount}</span>
+            )}
+            <span className={`${styles.navChevron} ${isExpanded ? styles.navChevronOpen : ''}`} aria-hidden="true">
+              ›
+            </span>
+          </button>
+
+          {!isCollapsed && (
+            <div
+              className={`${styles.navChildrenCollapsible} ${isExpanded ? styles.navChildrenOpen : ''}`}
+              role="group"
+              aria-label={item.label}
+            >
+              <div className={styles.navChildrenInner}>
+                {item.children!.map((child) => renderNavItem(child, level + 1, breadcrumbLabel))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Items normales (sin hijos o anidados): NavLink
     return (
       <div key={item.to} className={level > 0 ? styles.navBranch : styles.navSection}>
         <NavLink
