@@ -6,6 +6,8 @@ export { DraftService } from './draftService';
 export { ReadyToPublishChecklist, useReadyToPublish } from './ReadyToPublishChecklist';
 export { useFieldValidation, fieldValidators } from './useFieldValidation';
 export { ValidationField } from './ValidationField';
+export { useKeyboardShortcuts } from './useKeyboardShortcuts';
+export { QuickActionsToolbar } from './QuickActionsToolbar';
 export * from './validationService';
 export type { WizardProduct, WizardVariant, WizardDraft, StepProps } from './types';
 export type { FieldValidationState, FieldValidator, FieldError } from './useFieldValidation';
