@@ -55,6 +55,7 @@ export interface Order {
 }
 
 // Se conserva por compatibilidad con imports legacy.
+// eslint-disable-next-line react-refresh/only-export-components
 export const ORDERS_STORAGE_KEY = 'allmart_orders';
 
 interface AdminOrdersContextType {
@@ -188,6 +189,7 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAdminOrders() {
   const context = useContext(AdminOrdersContext);
   if (context === undefined) {

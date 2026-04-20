@@ -128,3 +128,32 @@
   border-color: #e5e7eb;
   cursor: not-allowed;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .bulkEditBar {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+:global(.dark) .label {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .visibilityBtn {
+  background: rgba(255,255,255,0.08);
+  color: #d1d5db;
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .visibilityBtn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.12);
+  border-color: #6b7280;
+}
+:global(.dark) .cancelBtn {
+  color: #d1d5db;
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .cancelBtn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05);
+  border-color: #6b7280;
+}

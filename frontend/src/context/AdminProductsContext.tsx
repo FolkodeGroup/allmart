@@ -4,7 +4,7 @@
  * Usa llamadas HTTP al backend — sin mocks ni localStorage.
  */
 
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
@@ -64,6 +64,7 @@ interface AdminProductsContextType {
   totalPages: number;
   error: string | null;
   refreshProducts: (params?: AdminProductsParams) => Promise<void>;
+  refreshCurrentPage: () => Promise<void>;
   addProduct: (p: Omit<AdminProduct, 'id'>) => Promise<AdminProduct>;
   updateProduct: (id: string, p: Partial<AdminProduct>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -86,6 +87,16 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   const { categories } = useAdminCategories();
   const { showNotification } = useNotification();
 
+  const lastParamsRef = useRef<AdminProductsParams | undefined>(undefined);
+
+  // Refs to stabilize refreshProducts identity and avoid double-fetch
+  const categoriesRef = useRef(categories);
+  categoriesRef.current = categories;
+  const tokenRef = useRef(token);
+  tokenRef.current = token;
+  const showNotificationRef = useRef(showNotification);
+  showNotificationRef.current = showNotification;
+
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,12 +108,14 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
   /** Carga (o recarga) los productos desde el backend con paginación y búsqueda */
   const refreshProducts = useCallback(async (params?: AdminProductsParams) => {
-    if (!token) return;
+    if (!tokenRef.current) return;
+    // Persist last used params so refreshCurrentPage can reuse them
+    if (params !== undefined) lastParamsRef.current = params;
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchAdminProducts(token, params);
-      setProducts(response.data.map((p) => apiToAdminProduct(p, categories)));
+      const response = await fetchAdminProducts(tokenRef.current, params ?? lastParamsRef.current);
+      setProducts(response.data.map((p) => apiToAdminProduct(p, categoriesRef.current)));
       setPagination({
         total: response.total,
         page: response.page,
@@ -111,13 +124,25 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al cargar productos';
       setError(msg);
-      showNotification('error', msg);
+      showNotificationRef.current('error', msg);
     } finally {
       setLoading(false);
     }
-  }, [token, categories, showNotification]);
+  }, []);
 
-  // Carga inicial deshabilitada para evitar doble fetch. El componente principal controla la carga de productos.
+  /** Recarga usando los últimos parámetros (página, filtros, búsqueda) */
+  const refreshCurrentPage = useCallback(async () => {
+    await refreshProducts(lastParamsRef.current);
+  }, [refreshProducts]);
+
+  // Carga inicial: se ejecuta automáticamente al montar el contexto (cuando hay token disponible).
+  // Esto garantiza que el Dashboard y cualquier componente vean los datos correctos sin necesidad
+  // de visitar primero la página de productos.
+  useEffect(() => {
+    if (token) {
+      refreshProducts({ page: 1, limit: 500 });
+    }
+  }, [token, refreshProducts]);
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 
@@ -135,14 +160,13 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const newProduct = apiToAdminProduct(created, categories);
-      setProducts((prev) => [newProduct, ...prev]);
-      showNotification('success', 'Producto creado exitosamente');
-      await refreshProducts();
+      const newProduct = apiToAdminProduct(created, categoriesRef.current);
+      showNotificationRef.current('success', 'Producto creado exitosamente');
+      await refreshCurrentPage();
       return newProduct;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al crear producto';
-      showNotification('error', msg);
+      showNotificationRef.current('error', msg);
       throw err;
     }
   };
@@ -157,7 +181,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       const { variants, ...updateData } = data;
       const merged = { ...current, ...updateData };
       const payload = mapAdminProductToPayload(merged);
-      const updated = await updateAdminProduct(id, payload, token);
+      await updateAdminProduct(id, payload, token);
 
       // Gestión de variantes si se proporcionan
       if (variants) {
@@ -188,16 +212,11 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === id ? apiToAdminProduct(updated, categories) : p
-        )
-      );
-      showNotification('success', 'Producto actualizado exitosamente');
-      await refreshProducts();
+      showNotificationRef.current('success', 'Producto actualizado exitosamente');
+      await refreshCurrentPage();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al actualizar producto';
-      showNotification('error', msg);
+      showNotificationRef.current('error', msg);
       throw err;
     }
   };
@@ -205,13 +224,12 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   const deleteProduct = async (id: string) => {
     if (!token) throw new Error('No autenticado');
     try {
-      await deleteAdminProduct(id, token);
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-      showNotification('success', 'Producto eliminado exitosamente');
-      await refreshProducts();
+      await deleteAdminProduct(id, tokenRef.current!);
+      showNotificationRef.current('success', 'Producto eliminado exitosamente');
+      await refreshCurrentPage();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
-      showNotification('error', msg);
+      showNotificationRef.current('error', msg);
       throw err;
     }
   };
@@ -255,11 +273,11 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
           await createVariant(token, created.id, { name: v.name, values: v.values });
         }
       }
-      showNotification('success', 'Producto duplicado exitosamente');
-      await refreshProducts();
+      showNotificationRef.current('success', 'Producto duplicado exitosamente');
+      await refreshCurrentPage();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al duplicar producto';
-      showNotification('error', msg);
+      showNotificationRef.current('error', msg);
       throw err;
     }
   };
@@ -277,6 +295,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         totalPages: pagination.totalPages,
         error,
         refreshProducts,
+        refreshCurrentPage,
         addProduct,
         updateProduct,
         deleteProduct,

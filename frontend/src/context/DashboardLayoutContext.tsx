@@ -23,7 +23,9 @@ export type WidgetId =
     | 'critical_stock'
     | 'recent_orders'
     | 'quick_access'
-    | 'staff_notes';
+    | 'staff_notes'
+    | 'weekly_sales'
+    | 'sales_heatmap';
 
 export interface Widget {
     id: WidgetId;
@@ -53,6 +55,8 @@ const ALL_WIDGET_IDS: WidgetId[] = [
     'staff_notes',
     'charts',
     'recent_orders',
+    'weekly_sales',
+    'sales_heatmap',
 ];
 
 const REGRESSED_WIDGET_ORDER: WidgetId[] = [

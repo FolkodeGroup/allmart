@@ -135,6 +135,7 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAdminCategories() {
   const context = useContext(AdminCategoriesContext);
   if (context === undefined) {

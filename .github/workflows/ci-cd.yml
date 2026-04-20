@@ -236,11 +236,25 @@ jobs:
             docker pull ${{ env.BACKEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
             docker pull ${{ env.FRONTEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
 
-            echo "Limpiando contenedores y redes huérfanos..."
-            # Eliminar contenedores específicos si existen para evitar conflictos
-            if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-db$'; then
-              docker rm -f allmart-prod-db 2>/dev/null || true
+            # ─── Backup de la BD antes de tocar contenedores ─────────────────
+            echo "Haciendo backup de la BD antes del deploy..."
+            BACKUP_DIR="/opt/allmart/backups"
+            BACKUP_FILE="$BACKUP_DIR/pre-deploy-$(date +%Y%m%d-%H%M%S).sql.gz"
+            mkdir -p "$BACKUP_DIR"
+            if docker ps --format '{{.Names}}' | grep -q '^allmart-prod-db$'; then
+              DB_USER_VAL=$(grep '^DB_USER=' .env | cut -d= -f2 | tr -d '"')
+              DB_NAME_VAL=$(grep '^DB_NAME=' .env | cut -d= -f2 | tr -d '"')
+              docker exec allmart-prod-db pg_dump -U "$DB_USER_VAL" "$DB_NAME_VAL" | gzip > "$BACKUP_FILE" && \
+                echo "Backup guardado: $BACKUP_FILE" || \
+                echo "WARN: No se pudo hacer backup (primer deploy o BD no disponible)"
+              # Mantener solo los últimos 10 backups
+              ls -t "$BACKUP_DIR"/pre-deploy-*.sql.gz 2>/dev/null | tail -n +11 | xargs rm -f || true
+            else
+              echo "INFO: Contenedor DB no corriendo — saltando backup (primer deploy)"
             fi
+
+            echo "Limpiando contenedores y redes huérfanos..."
+            # ⚠️  Solo eliminar backend y frontend, NUNCA la DB con -f (el volumen persiste igual)
             if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-backend$'; then
               docker rm -f allmart-prod-backend 2>/dev/null || true
             fi
@@ -253,7 +267,8 @@ jobs:
             fi
 
             echo "Reiniciando contenedores..."
-            docker compose -f docker-compose.prod.yml down --remove-orphans -v 2>/dev/null || true
+            # ⚠️  NUNCA usar -v aquí: destruiría el volumen allmart_pgdata y se perderían todos los datos
+            docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
             docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 240
 
             echo "Estado final:"

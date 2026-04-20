@@ -65,7 +65,7 @@ export const generateSkuSuggestion = (
  * @example
  * const debouncedSearch = debounce((term: string) => search(term), 300);
  */
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: Parameters<T>) => ReturnType<T>>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {

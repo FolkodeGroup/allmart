@@ -10,6 +10,7 @@ interface UnsavedChangesContextType {
     cancelNavigation: () => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const UnsavedChangesContext = createContext<UnsavedChangesContextType | null>(null);
 
 export const UnsavedChangesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

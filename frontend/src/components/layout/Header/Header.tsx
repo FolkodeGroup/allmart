@@ -51,6 +51,7 @@ export function Header() {
   }, []);
 
   return (
+    <>
     <header
       className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}
       role="banner"
@@ -157,11 +158,22 @@ export function Header() {
         </div>
       </div>
 
+    </header>
+
       <nav
         className={`${styles.mobileNav} ${mobileMenuOpen ? styles.open : ''}`}
         role="navigation"
         aria-label="Navegación móvil"
+        aria-hidden={!mobileMenuOpen}
       >
+        {/* Backdrop: clic para cerrar */}
+        <div
+          className={styles.mobileNavBackdrop}
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+
+        <div className={styles.mobileNavPanel}>
         {navigationItems.map((item) => (
           <div key={item.href}>
             <Link
@@ -211,7 +223,8 @@ export function Header() {
             </div>
           </details>
         )}
+        </div>
       </nav>
-    </header>
+    </>
   );
 }

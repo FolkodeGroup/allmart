@@ -86,7 +86,7 @@ export function ProductWizard({
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   }, []);
 
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = useCallback(async () => {
     setIsSavingDraft(true);
     try {
       DraftService.savePersistentDraft(data);
@@ -97,7 +97,7 @@ export function ProductWizard({
     } finally {
       setIsSavingDraft(false);
     }
-  };
+  }, [data]);
 
   const handlePublish = async () => {
     // Final validation
@@ -161,7 +161,7 @@ export function ProductWizard({
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (Object.keys(data).length > 0 && (data.name || data.variants?.length || data.images?.length)) {
       if (confirm('¿Deseas guardar este borrador antes de salir?')) {
         handleSaveDraft();
@@ -171,7 +171,7 @@ export function ProductWizard({
     setCurrentStep(1);
     setData({ variants: [], images: [] });
     onClose();
-  };
+  }, [data, onClose, handleSaveDraft]);
 
   const stepTitles = [
     'Información Básica',

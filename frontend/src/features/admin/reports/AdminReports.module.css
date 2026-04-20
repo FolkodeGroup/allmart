@@ -2290,3 +2290,155 @@ ALLMART — ADMIN REPORTS
   height: 44px;
   width: 100%;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .reportsPage {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .reportCardModern {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+:global(.dark) .reportCard {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+:global(.dark) .metricCard {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+:global(.dark) .table {
+  background: var(--color-bg-card, #232a2f);
+}
+:global(.dark) .table thead {
+  background: var(--color-bg-secondary, #181c1f);
+}
+:global(.dark) .table th {
+  color: var(--color-text-tertiary, #b6a68a);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table td {
+  color: var(--color-text-primary, #f3f3f3);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table td:first-child {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .table td:nth-child(2) {
+  color: #86efac;
+}
+:global(.dark) .table td:nth-child(3) {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .table tbody tr:hover {
+  background: rgba(255,255,255,0.04);
+}
+:global(.dark) .modalContent {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+:global(.dark) .modalHeader {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .modalHeader h3 {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .modalClose {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .modalClose:hover {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .modalRow {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .modalRow:hover {
+  background: rgba(255,255,255,0.05);
+}
+:global(.dark) .modalRow strong {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .productNameModern {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .statModernLabel {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .statModernValue {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .progressBarModern {
+  background: rgba(255,255,255,0.1);
+}
+:global(.dark) .productImage,
+:global(.dark) .productImagePlaceholder {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .productImagePlaceholder {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .advancedInput,
+:global(.dark) .advancedMultiSelect {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .advancedLabel {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .chip {
+  background: rgba(163,201,168,0.15);
+  color: #a3c9a8;
+}
+:global(.dark) .chipClose {
+  color: #a3c9a8;
+}
+:global(.dark) .viewMoreBtn {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .orderCard {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .orderCardClient {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .salesCard {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .salesCardDate {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .salesCardProduct {
+  color: var(--color-text-primary, #f3f3f3);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .dateInputMobile {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .filtersSelectMobile {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .noDataProducts {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .pageBtn {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .clearBtn {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}

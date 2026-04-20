@@ -8,14 +8,11 @@ interface MasterDetailLayoutProps {
   products: AdminProduct[];
   loading: boolean;
   error: string | null;
-  selectedIds?: string[];
-  onSelectChange?: (id: string, checked: boolean) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDuplicate?: (product: AdminProduct) => void;
   canEdit: boolean;
   canDelete: boolean;
-  showCheckbox?: boolean;
   children?: React.ReactNode;
 }
 
@@ -23,14 +20,11 @@ export function MasterDetailLayout({
   products,
   loading,
   error,
-  selectedIds = [],
-  onSelectChange,
   onEdit,
   onDelete,
   onDuplicate,
   canEdit,
   canDelete,
-  showCheckbox = false,
   children,
 }: MasterDetailLayoutProps) {
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(undefined);
@@ -52,9 +46,6 @@ export function MasterDetailLayout({
     setSelectedProductId(id);
   }, []);
 
-  const handleCloseDetail = useCallback(() => {
-    setSelectedProductId(undefined);
-  }, []);
 
   return (
     <div className={styles.container}>
@@ -70,16 +61,12 @@ export function MasterDetailLayout({
         onDuplicate={onDuplicate}
         canEdit={canEdit && !!onEdit}
         canDelete={canDelete && !!onDelete}
-        showCheckbox={showCheckbox}
-        selectedIds={selectedIds}
-        onSelectChange={onSelectChange}
       />
 
       {/* Detail Panel (Right) - Only show when product is selected */}
       {selectedProduct && (
         <ProductDetailPanel
           product={selectedProduct}
-          onClose={handleCloseDetail}
           onEdit={onEdit}
           onDelete={onDelete}
           onDuplicate={onDuplicate}

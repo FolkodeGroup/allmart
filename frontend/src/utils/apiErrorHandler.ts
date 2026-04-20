@@ -5,9 +5,9 @@
 
 export class ApiError extends Error {
   status: number;
-  data: any;
+  data: unknown;
 
-  constructor(message: string, status: number, data?: any) {
+  constructor(message: string, status: number, data?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -34,7 +34,7 @@ export async function handleResponse<T>(res: Response): Promise<T> {
       }
     }
 
-    const errorData = await res.json().catch(() => ({})) as { message?: string, errors?: any };
+    const errorData = await res.json().catch(() => ({})) as { message?: string, errors?: unknown };
     const errorMessage = errorData.message ?? `Error en la solicitud: ${res.status} ${res.statusText}`;
     
     // Loguear error para debugging centralizado

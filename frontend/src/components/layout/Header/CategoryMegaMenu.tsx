@@ -3,48 +3,12 @@ import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronDown,
-  Sofa,
-  Users,
-  Coffee,
-  Utensils,
-  Lightbulb,
-  Shirt,
-  Wrench,
-  Home,
-  Package,
+  ChevronRight,
   ArrowRight,
 } from 'lucide-react';
 import type { Category } from '../../../types';
 import styles from './CategoryMegaMenu.module.css';
 
-// Map category names to icons
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  hogar: <Home size={20} />,
-  sala: <Sofa size={20} />,
-  dormitorio: <Sofa size={20} />,
-  cocina: <Utensils size={20} />,
-  baño: <Users size={20} />,
-  comedor: <Utensils size={20} />,
-  'cafe y mate': <Coffee size={20} />,
-  bebidas: <Coffee size={20} />,
-  reposteria: <Utensils size={20} />,
-  iluminacion: <Lightbulb size={20} />,
-  textiles: <Shirt size={20} />,
-  herramientas: <Wrench size={20} />,
-  organizacion: <Package size={20} />,
-  jardineria: <Home size={20} />,
-  ferreria: <Wrench size={20} />,
-};
-
-function getCategoryIcon(categoryName: string): React.ReactNode {
-  const lowerName = categoryName.toLowerCase().trim();
-  for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
-    if (lowerName.includes(key) || key.includes(lowerName)) {
-      return icon;
-    }
-  }
-  return <Package size={20} />;
-}
 
 interface CategoryMegaMenuProps {
   categories: Category[];
@@ -169,23 +133,12 @@ export function CategoryMegaMenu({
           style={menuPanelStyle}
           role="menu"
         >
-          <div className={styles.megaMenuHeader}>
-            <h2 className={styles.megaMenuTitle}>Explora nuestras categorías</h2>
-            <p className={styles.megaMenuSubtitle}>
-              Encuentra todo lo que necesitas
-            </p>
-          </div>
-
           <div className={styles.megaMenuContent}>
-            {/* Main categories with children */}
             {roots.map((root) => {
               const children = childrenByParent.get(root.id) ?? [];
               return (
                 <div key={root.id} className={styles.menuColumn}>
                   <div className={styles.columnHeader}>
-                    <div className={styles.iconWrapper}>
-                      {getCategoryIcon(root.name)}
-                    </div>
                     <h3 className={styles.columnTitle}>
                       <Link
                         to={`/productos?category=${encodeURIComponent(root.slug)}`}
@@ -193,6 +146,7 @@ export function CategoryMegaMenu({
                         onClick={onClose}
                       >
                         {getCategoryLabel(root)}
+                        <ChevronRight size={14} className={styles.columnArrow} aria-hidden="true" />
                       </Link>
                     </h3>
                   </div>
@@ -209,31 +163,34 @@ export function CategoryMegaMenu({
                             <span className={styles.subCategoryName}>
                               {getCategoryLabel(child)}
                             </span>
-                            {child.itemCount ? (
-                              <span className={styles.itemCount}>
-                                {child.itemCount}
-                              </span>
-                            ) : null}
                           </Link>
                         </li>
                       ))}
+                      <li>
+                        <Link
+                          to={`/productos?category=${encodeURIComponent(root.slug)}`}
+                          className={styles.viewAllLink}
+                          onClick={onClose}
+                        >
+                          Ver todo
+                        </Link>
+                      </li>
                     </ul>
                   )}
                 </div>
               );
             })}
+          </div>
 
-            {/* "All Products" section */}
-            <div className={styles.menuColumn}>
-              <Link
-                to="/productos"
-                className={styles.allProductsLink}
-                onClick={onClose}
-              >
-                <span className={styles.allProductsText}>Ver catálogo completo</span>
-                <ArrowRight size={18} className={styles.allProductsIcon} />
-              </Link>
-            </div>
+          <div className={styles.megaMenuFooter}>
+            <Link
+              to="/productos"
+              className={styles.allProductsLink}
+              onClick={onClose}
+            >
+              <span className={styles.allProductsText}>Ver todo</span>
+              <ArrowRight size={16} className={styles.allProductsIcon} />
+            </Link>
           </div>
         </div>
       )}

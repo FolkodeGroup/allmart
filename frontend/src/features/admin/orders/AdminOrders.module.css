@@ -1937,3 +1937,71 @@
     transform: scale(1);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .statusPendiente {
+  background: rgba(254,243,199,0.15);
+  color: #fbbf24;
+}
+:global(.dark) .statusConfirmado {
+  background: rgba(219,234,254,0.15);
+  color: #93c5fd;
+}
+:global(.dark) .statusPreparacion {
+  background: rgba(237,233,254,0.15);
+  color: #c4b5fd;
+}
+:global(.dark) .statusEnviado {
+  background: rgba(209,250,229,0.15);
+  color: #6ee7b7;
+}
+:global(.dark) .statusEntregado {
+  background: rgba(220,252,231,0.15);
+  color: #86efac;
+}
+:global(.dark) .statusCancelado {
+  background: rgba(254,226,226,0.15);
+  color: #fca5a5;
+}
+:global(.dark) .paymentAbonado {
+  background: rgba(220,252,231,0.15);
+  color: #86efac;
+}
+:global(.dark) .paymentNoAbonado {
+  background: rgba(255,255,255,0.08);
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .statusDanger {
+  border-color: #ef6b6b;
+  background: rgba(239,107,107,0.1);
+  color: #fca5a5;
+}
+:global(.dark) .statusWarning {
+  border-color: #fbbf24;
+  background: rgba(251,191,36,0.1);
+  color: #fbbf24;
+}
+:global(.dark) .dangerSection {
+  background: rgba(239,68,68,0.08);
+  border-color: rgba(239,68,68,0.2);
+}
+:global(.dark) .clearBtn:hover {
+  background: rgba(239,68,68,0.15);
+}
+:global(.dark) .bulkActionsBox {
+  background: var(--color-bg-card, #232a2f);
+  border-color: var(--color-border, #2d3a3f);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+:global(.dark) .bulkActionsTitle {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .bulkBtnClear {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .confirmPaidBox {
+  background: rgba(37,211,102,0.08);
+  border-color: rgba(37,211,102,0.2);
+}

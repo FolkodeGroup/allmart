@@ -160,6 +160,59 @@
   gap: 2px;
   margin-top: 2px;
 }
+
+/* ── Botón de toggle para grupos colapsables ── */
+.navGroupToggle {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.navGroupToggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+/* ── Chevron (›) rotado 90° al abrir ── */
+.navChevron {
+  margin-left: auto;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.navChevronOpen {
+  transform: rotate(90deg);
+  color: var(--color-accent);
+}
+
+/* ── Contenedor colapsable animado con grid ── */
+.navChildrenCollapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.navChildrenOpen {
+  grid-template-rows: 1fr;
+}
+
+.navChildrenInner {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+
 .darkToggleExpanded {
   width: 100%;
   margin-bottom: var(--space-3);

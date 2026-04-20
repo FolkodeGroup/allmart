@@ -6,6 +6,10 @@ import {
     Droppable,
     Draggable,
     type DropResult,
+    type DroppableProvided,
+    type DroppableStateSnapshot,
+    type DraggableProvided,
+    type DraggableStateSnapshot,
 } from '@hello-pangea/dnd';
 import { Delete, Star } from 'lucide-react';
 
@@ -155,8 +159,14 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             ref={fileInputRef}
-                            onChange={e => setImgFile(e.target.files?.[0] || null)}
+                            onChange={e => {
+                                const files = e.target.files;
+                                if (files && files.length > 0) {
+                                    setImgFile(files[0]);
+                                }
+                            }}
                             style={{ display: 'none' }}
                         />
                         <button
@@ -164,9 +174,9 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                             onClick={() => fileInputRef.current?.click()}
                             className={styles.uploadButton}
                         >
-                            Seleccionar archivo
+                            📁 Seleccionar archivo(s)
                         </button>
-                        {imgFile && <p>{imgFile.name}</p>}
+                        {imgFile && <p style={{ fontSize: '13px', color: '#6b7280' }}>Archivo: {imgFile.name}</p>}
                         <input
                             type="text"
                             placeholder="Texto alternativo (opcional)"
@@ -181,14 +191,18 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 disabled={!imgFile}
                                 className={styles.submitBtn}
                             >
-                                Subir
+                                ✓ Subir
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setShowAddImgForm(false)}
+                                onClick={() => {
+                                    setShowAddImgForm(false);
+                                    setImgFile(null);
+                                    setImgNewAlt('');
+                                }}
                                 className={styles.cancelBtn}
                             >
-                                Cancelar
+                                ✕ Cancelar
                             </button>
                         </div>
                         {imgError && <div className={styles.errorText}>{imgError}</div>}
@@ -290,7 +304,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
             {images.filter(img => img.trim()).length > 0 ? (
                 <DragDropContext onDragEnd={handleDragEnd}>
                     <Droppable droppableId="images">
-                        {(provided: any, snapshot: any) => (
+                        {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
@@ -299,7 +313,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 {images.map((url: string, index: number) =>
                                     url.trim() ? (
                                         <Draggable key={`${url}-${index}`} draggableId={`${url}-${index}`} index={index}>
-                                            {(dragProvided: any, dragSnapshot: any) => (
+                                            {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
                                                 <div
                                                     ref={dragProvided.innerRef}
                                                     {...dragProvided.draggableProps}

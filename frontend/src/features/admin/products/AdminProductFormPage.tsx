@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { FileText, DollarSign, Tag, Image, Layers, Globe, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useProductForm } from '../../../hooks/useProductFormPage';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -21,12 +22,12 @@ interface Props {
 
 // ── Section definitions ────────────────────────────────────────────────────
 const SECTIONS = [
-    { id: 'basico', label: 'Básico', icon: '📝' },
-    { id: 'precios', label: 'Precios', icon: '💰' },
-    { id: 'categorias', label: 'Categorías', icon: '🗂️' },
-    { id: 'imagenes', label: 'Imágenes', icon: '🖼️' },
-    { id: 'variantes', label: 'Variantes', icon: '🔄' },
-    { id: 'seo', label: 'SEO / Publicación', icon: '🌐' },
+    { id: 'basico',     label: 'Básico',           Icon: FileText   },
+    { id: 'precios',    label: 'Precios',           Icon: DollarSign },
+    { id: 'categorias', label: 'Categorías',        Icon: Tag        },
+    { id: 'imagenes',   label: 'Imágenes',          Icon: Image      },
+    { id: 'variantes',  label: 'Variantes',         Icon: Layers     },
+    { id: 'seo',        label: 'SEO / Publicación', Icon: Globe      },
 ] as const;
 
 type SectionId = typeof SECTIONS[number]['id'];
@@ -75,7 +76,7 @@ export function AdminProductFormPage({
             }
         }
         return true;
-    }, [formProps]);
+    }, [formProps]); // stable — pure comparison function needs no deps
     const isDirty = useMemo(
         () => !shallowCompareRelevantFields(formProps.form, formProps.initialForm),
         [formProps.form, formProps.initialForm, shallowCompareRelevantFields]
@@ -145,7 +146,7 @@ export function AdminProductFormPage({
     }
 
     return (
-        <div className={styles.page} style={{ maxHeight: '80vh' }}>
+        <div className={styles.page}>
             {/* ── Page header ──────────────────────────────────────────────── */}
             <header className={styles.pageHeader}>
                 <div className={styles.pageHeaderInner}>
@@ -155,7 +156,8 @@ export function AdminProductFormPage({
                         className={styles.backBtn}
                         aria-label="Volver al listado"
                     >
-                        ← Productos
+                        <ArrowLeft size={14} />
+                        Productos
                     </button>
                     <h1 className={styles.pageTitle}>
                         {isEdit ? 'Editar producto' : 'Nuevo producto'}
@@ -185,22 +187,32 @@ export function AdminProductFormPage({
                 {/* ── Sticky sidebar nav ───────────────────────────────────── */}
                 <nav className={styles.sidebar} aria-label="Secciones del formulario">
                     <ul className={styles.sidebarList}>
-                        {SECTIONS.map(section => (
-                            <li key={section.id}>
-                                <button
-                                    type="button"
-                                    className={`${styles.sidebarItem} ${activeSection === section.id ? styles.sidebarItemActive : ''}`}
-                                    onClick={() => scrollToSection(section.id)}
-                                >
-                                    <span className={styles.sidebarIcon}>{section.icon}</span>
-                                    <span className={styles.sidebarLabel}>{section.label}</span>
-                                    {/* Error dot indicator */}
-                                    {sectionErrors[section.id as keyof typeof sectionErrors] && (
-                                        <span className={styles.errorDot} aria-label="Sección con errores" />
-                                    )}
-                                </button>
-                            </li>
-                        ))}
+                        {SECTIONS.map(section => {
+                            const hasError = sectionErrors[section.id as keyof typeof sectionErrors];
+                            return (
+                                <li key={section.id}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.sidebarItem} ${activeSection === section.id ? styles.sidebarItemActive : ''}`}
+                                        onClick={() => scrollToSection(section.id)}
+                                    >
+                                        <section.Icon
+                                            size={15}
+                                            className={styles.sidebarIcon}
+                                            strokeWidth={activeSection === section.id ? 2.5 : 1.8}
+                                        />
+                                        <span className={styles.sidebarLabel}>{section.label}</span>
+                                        {hasError && (
+                                            <AlertCircle
+                                                size={13}
+                                                className={styles.errorDotIcon}
+                                                aria-label="Sección con errores"
+                                            />
+                                        )}
+                                    </button>
+                                </li>
+                            );
+                        })}
                     </ul>
 
                     {/* Progress indicator */}
@@ -231,7 +243,7 @@ export function AdminProductFormPage({
                         className={styles.section}
                     >
                         <h2 className={styles.sectionTitle}>
-                            <span>📝</span> Información básica
+                            <FileText size={17} strokeWidth={1.8} /> Información básica
                         </h2>
                         <TabBasico
                             form={formProps.form}
@@ -256,7 +268,7 @@ export function AdminProductFormPage({
                         className={styles.section}
                     >
                         <h2 className={styles.sectionTitle}>
-                            <span>💰</span> Precios e inventario
+                            <DollarSign size={17} strokeWidth={1.8} /> Precios e inventario
                         </h2>
                         <TabPreciosInventario
                             form={formProps.form}
@@ -273,7 +285,7 @@ export function AdminProductFormPage({
                         className={styles.section}
                     >
                         <h2 className={styles.sectionTitle}>
-                            <span>🗂️</span> Categorías
+                            <Tag size={17} strokeWidth={1.8} /> Categorías
                         </h2>
                         <TabCategorias
                             form={formProps.form}
@@ -295,7 +307,7 @@ export function AdminProductFormPage({
                         className={styles.section}
                     >
                         <h2 className={styles.sectionTitle}>
-                            <span>🖼️</span> Imágenes
+                            <Image size={17} strokeWidth={1.8} /> Imágenes
                         </h2>
                         <TabImagenes
                             isEdit={formProps.isEdit}
@@ -336,7 +348,7 @@ export function AdminProductFormPage({
                         className={styles.section}
                     >
                         <h2 className={styles.sectionTitle}>
-                            <span>🔄</span> Variantes
+                            <Layers size={17} strokeWidth={1.8} /> Variantes
                         </h2>
                         <TabVariantes
                             form={formProps.form}
@@ -361,7 +373,7 @@ export function AdminProductFormPage({
                         className={styles.section}
                     >
                         <h2 className={styles.sectionTitle}>
-                            <span>🌐</span> SEO / Publicación
+                            <Globe size={17} strokeWidth={1.8} /> SEO / Publicación
                         </h2>
                         <TabSEOPublicacion
                             form={formProps.form}

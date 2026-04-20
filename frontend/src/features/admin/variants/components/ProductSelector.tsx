@@ -99,7 +99,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     }
   });
 
-  const handleSelect = (_: any, value: string | Option | null) => {
+  const handleSelect = (_evt: React.SyntheticEvent, value: string | Option | null) => {
     if (!value) return;
     if (typeof value === 'string') {
       setSearch(value);
@@ -129,9 +129,9 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             return `${opt.value} [${opt.group}]`;
           }}
           inputValue={inputValue}
-          onInputChange={(_: any, value: string) => setInputValue(value)}
+          onInputChange={(_evt: React.SyntheticEvent, value: string) => setInputValue(value)}
           onChange={handleSelect}
-          renderInput={(params: any) => (
+          renderInput={(params: object) => (
             <TextField {...params} label="Buscar por nombre o SKU..." variant="outlined" size="small" />
           )}
         />

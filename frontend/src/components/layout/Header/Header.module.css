@@ -284,14 +284,46 @@
   inset: 0;
   top: var(--header-height);
   z-index: var(--z-overlay);
-  padding: 1.1rem 1rem 2.25rem;
-  background: #f8faf8;
-  overflow-y: auto;
-  border-top: 1px solid rgba(47, 95, 70, 0.15);
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .mobileNav.open {
   display: block;
+  pointer-events: auto;
+}
+
+.mobileNavBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  animation: fadeIn 0.25s ease forwards;
+}
+
+.mobileNavPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  background: #f8faf8;
+  padding: 0.5rem 1.25rem 2rem;
+  border-bottom: 1px solid rgba(47, 95, 70, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.28s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .mobileNavLink {
@@ -380,6 +412,15 @@
   .cartCount {
     right: -3px;
   }
+
+  /* Ajustar top del menú móvil para el header de 2 filas (~116px) */
+  .mobileNav {
+    top: 116px;
+  }
+
+  .mobileNavPanel {
+    max-height: calc(100vh - 116px);
+  }
 }
 
 @media (max-width: 520px) {
@@ -410,6 +451,15 @@
     min-width: 17px;
     height: 17px;
     font-size: 0.61rem;
+  }
+
+  /* Header más compacto en mobile pequeño: ~104px */
+  .mobileNav {
+    top: 104px;
+  }
+
+  .mobileNavPanel {
+    max-height: calc(100vh - 104px);
   }
 }
 

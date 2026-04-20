@@ -16,6 +16,7 @@ import { WithdrawalPage } from './pages/StaticInfo/WithdrawalPage';
 import { AdminLogin } from './pages/AdminLogin/AdminLogin';
 import { AdminLayout } from './pages/Admin/AdminLayout';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
+import { AdminUserSettings } from './pages/Admin/AdminUserSettings';
 import { AdminRoute } from './components/AdminRoute';
 import { LegacyRedirect } from './components/LegacyRedirect';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -68,6 +69,7 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
     children: [
       { path: 'dashboard', element: <AdminDashboard /> },
+      { path: 'configuracion', element: <AdminUserSettings /> },
       {
         path: 'productos',
         element: (

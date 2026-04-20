@@ -42,8 +42,8 @@
 .searchInput:focus,
 .selectFilter:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #769282;
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .tableWrapper {
@@ -131,26 +131,28 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  width: auto;
+  flex-shrink: 0;
 }
 
 .btnPrimary {
-  background-color: #3b82f6;
+  background-color: #769282;
   color: white;
 }
 
 .btnPrimary:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #5d7568;
 }
 
 .btnSmall {
-  background-color: #3b82f6;
+  background-color: #769282;
   color: white;
   padding: 6px 10px;
   font-size: 12px;
 }
 
 .btnSmall:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #5d7568;
 }
 
 .btnSmallSecondary {
@@ -165,14 +167,14 @@
 }
 
 .btnSmallDanger {
-  background-color: #fecaca;
-  color: #7f1d1d;
+  background-color: #f5d4d4;
+  color: #C75050;
   padding: 6px 10px;
   font-size: 12px;
 }
 
 .btnSmallDanger:hover:not(:disabled) {
-  background-color: #fca5a5;
+  background-color: #eba5a5;
 }
 
 .btnSecondary {
@@ -261,8 +263,8 @@ button:disabled {
 .formGroup select:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #769282;
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .formRow {
@@ -293,10 +295,103 @@ button:disabled {
   margin-top: var(--space-4);
   padding-top: var(--space-3);
   border-top: 1px solid #e5e7eb;
+  justify-content: flex-start;
 }
 
 .btnPrimary,
 .btnSecondary {
-  flex: 1;
-  padding: 10px;
+  width: auto;
+  padding: 10px 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════════════════════════════ */
+:global(.dark) .container {
+  background: var(--color-bg-card, #232a2f);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+:global(.dark) .header {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .header h1,
+:global(.dark) .formHeader h1 {
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .searchInput,
+:global(.dark) .selectFilter {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .table thead {
+  background-color: var(--color-bg-secondary, #181c1f);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table th {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .table td {
+  color: var(--color-text-primary, #f3f3f3);
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .table tbody tr:hover {
+  background-color: rgba(255,255,255,0.04);
+}
+:global(.dark) .monospace {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .loading,
+:global(.dark) .empty {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .badgeActive {
+  background-color: rgba(163,201,168,0.2);
+  color: #a3c9a8;
+}
+:global(.dark) .badgeInactive {
+  background-color: rgba(239,107,107,0.2);
+  color: #ef6b6b;
+}
+:global(.dark) .btnSmallSecondary,
+:global(.dark) .btnSecondary {
+  background-color: rgba(255,255,255,0.1);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .btnSmallSecondary:hover:not(:disabled),
+:global(.dark) .btnSecondary:hover:not(:disabled) {
+  background-color: rgba(255,255,255,0.15);
+}
+:global(.dark) .btnSmallDanger {
+  background-color: rgba(239,68,68,0.2);
+  color: #fca5a5;
+}
+:global(.dark) .btnSmallDanger:hover:not(:disabled) {
+  background-color: rgba(239,68,68,0.3);
+}
+:global(.dark) .pagination {
+  border-top-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .error {
+  background-color: rgba(239,68,68,0.15);
+  color: #fca5a5;
+}
+:global(.dark) .formHeader {
+  border-bottom-color: var(--color-border, #2d3a3f);
+}
+:global(.dark) .formGroup label {
+  color: var(--color-text-secondary, #cbe7c9);
+}
+:global(.dark) .formGroup small {
+  color: var(--color-text-tertiary, #b6a68a);
+}
+:global(.dark) .formGroup input,
+:global(.dark) .formGroup select,
+:global(.dark) .formGroup textarea {
+  background: var(--color-bg-secondary, #181c1f);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-primary, #f3f3f3);
+}
+:global(.dark) .formActions {
+  border-top-color: var(--color-border, #2d3a3f);
 }

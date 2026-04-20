@@ -601,3 +601,147 @@ CREATE TRIGGER trg_banners_updated_at
 --   DROP FUNCTION IF EXISTS register_sale_on_delivery();
 --   DROP TABLE IF EXISTS sales;
 -- =============================================================================
+
+-- =============================================================================
+-- Migration: 018_create_collections
+-- Tablas para colecciones de productos
+-- =============================================================================
+
+-- ─── Tipo enum para posición de visualización ────────────────────────────────
+DO $$ BEGIN
+  CREATE TYPE collection_display_position AS ENUM ('home', 'category');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+-- ─── Tabla collections ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS collections (
+  id                UUID                        NOT NULL DEFAULT gen_random_uuid(),
+  name              VARCHAR(255)                NOT NULL,
+  slug              VARCHAR(255)                NOT NULL,
+  description       TEXT,
+  display_order     INTEGER                     NOT NULL DEFAULT 0,
+  display_position  collection_display_position NOT NULL,
+  image_url         TEXT,
+  is_active         BOOLEAN                     NOT NULL DEFAULT true,
+  created_at        TIMESTAMPTZ                 NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ                 NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT collections_pkey        PRIMARY KEY (id),
+  CONSTRAINT collections_slug_unique UNIQUE (slug)
+);
+
+-- ─── Índices para queries frecuentes ──────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_collections_slug            ON collections(slug);
+CREATE INDEX IF NOT EXISTS idx_collections_is_active       ON collections(is_active);
+CREATE INDEX IF NOT EXISTS idx_collections_display_position ON collections(display_position);
+
+-- ─── Trigger: actualizar updated_at automáticamente ──────────────────────────
+DROP TRIGGER IF EXISTS trg_collections_updated_at ON collections;
+CREATE TRIGGER trg_collections_updated_at
+  BEFORE UPDATE ON collections
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- ─── Tabla collection_items ───────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS collection_items (
+  id             UUID         NOT NULL DEFAULT gen_random_uuid(),
+  collection_id  UUID         NOT NULL,
+  product_id     UUID         NOT NULL,
+  position       INTEGER      NOT NULL DEFAULT 0,
+  created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT collection_items_pkey PRIMARY KEY (id),
+  CONSTRAINT collection_items_collection_fk FOREIGN KEY (collection_id)
+    REFERENCES collections (id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT collection_items_product_fk FOREIGN KEY (product_id)
+    REFERENCES products (id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT collection_items_unique UNIQUE (collection_id, product_id)
+);
+
+-- ─── Índices ──────────────────────────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_collection_items_collection_id ON collection_items(collection_id);
+CREATE INDEX IF NOT EXISTS idx_collection_items_product_id    ON collection_items(product_id);
+
+-- =============================================================================
+-- ROLLBACK (ejecutar manualmente si se necesita revertir):
+--   DROP TRIGGER IF EXISTS trg_collections_updated_at ON collections;
+--   DROP TABLE IF EXISTS collection_items;
+--   DROP TABLE IF EXISTS collections;
+--   DROP TYPE IF EXISTS collection_display_position;
+-- =============================================================================
+
+-- =============================================================================
+-- Migration: 019_create_promotions
+-- Tablas para el sistema de promociones y reglas de descuento
+-- =============================================================================
+
+DO $$ BEGIN
+  CREATE TYPE promotion_type AS ENUM ('percentage', 'fixed', 'bogo');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS promotions (
+  id                  UUID            NOT NULL DEFAULT gen_random_uuid(),
+  name                VARCHAR(255)    NOT NULL,
+  description         TEXT,
+  type                promotion_type  NOT NULL,
+  value               NUMERIC(12, 2)  NOT NULL CHECK (value >= 0),
+  start_date          TIMESTAMPTZ     NOT NULL,
+  end_date            TIMESTAMPTZ     NOT NULL,
+  min_purchase_amount NUMERIC(12, 2)  CHECK (min_purchase_amount >= 0),
+  max_discount        NUMERIC(12, 2)  CHECK (max_discount >= 0),
+  is_active           BOOLEAN         NOT NULL DEFAULT true,
+  priority            INTEGER         NOT NULL DEFAULT 0,
+  created_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT promotions_pkey PRIMARY KEY (id),
+  CONSTRAINT promotions_dates_check CHECK (end_date > start_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_promotions_is_active ON promotions(is_active);
+CREATE INDEX IF NOT EXISTS idx_promotions_dates     ON promotions(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_promotions_priority  ON promotions(priority);
+
+DROP TRIGGER IF EXISTS trg_promotions_updated_at ON promotions;
+CREATE TRIGGER trg_promotions_updated_at
+  BEFORE UPDATE ON promotions
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TABLE IF NOT EXISTS promotion_rules (
+  id             UUID         NOT NULL DEFAULT gen_random_uuid(),
+  promotion_id   UUID         NOT NULL,
+  product_id     UUID,
+  category_id    UUID,
+  created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT promotion_rules_pkey PRIMARY KEY (id),
+  CONSTRAINT promotion_rules_promotion_fk FOREIGN KEY (promotion_id)
+    REFERENCES promotions (id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT promotion_rules_product_fk FOREIGN KEY (product_id)
+    REFERENCES products (id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT promotion_rules_category_fk FOREIGN KEY (category_id)
+    REFERENCES categories (id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT promotion_rules_target_check CHECK (
+    product_id IS NOT NULL OR category_id IS NOT NULL
+  ),
+  CONSTRAINT promotion_rules_unique UNIQUE (promotion_id, product_id, category_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_promotion_rules_promotion_id ON promotion_rules(promotion_id);
+CREATE INDEX IF NOT EXISTS idx_promotion_rules_product_id   ON promotion_rules(product_id);
+CREATE INDEX IF NOT EXISTS idx_promotion_rules_category_id  ON promotion_rules(category_id);
+
+DROP TRIGGER IF EXISTS trg_promotion_rules_updated_at ON promotion_rules;
+CREATE TRIGGER trg_promotion_rules_updated_at
+  BEFORE UPDATE ON promotion_rules
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- =============================================================================
+-- ROLLBACK:
+--   DROP TABLE IF EXISTS promotion_rules;
+--   DROP TABLE IF EXISTS promotions;
+--   DROP TYPE IF EXISTS promotion_type;
+-- =============================================================================

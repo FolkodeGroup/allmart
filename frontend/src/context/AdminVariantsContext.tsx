@@ -204,6 +204,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAdminVariants() {
   const ctx = useContext(AdminVariantsContext);
   if (!ctx) throw new Error('useAdminVariants debe usarse dentro de AdminVariantsProvider');

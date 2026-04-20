@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useMemo, useState } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { PackageSearch, AlertCircle, ChevronDown, Pencil, Trash2, Copy } from 'lucide-react';
+import { PackageSearch, AlertCircle, Pencil, Copy, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../../../utils/imageUrl';
@@ -17,9 +17,6 @@ interface ProductListPanelProps {
   onDuplicate?: (product: AdminProduct) => void;
   canEdit?: boolean;
   canDelete?: boolean;
-  showCheckbox?: boolean;
-  selectedIds?: string[];
-  onSelectChange?: (id: string, checked: boolean) => void;
   scrollPreserveKey?: string;
 }
 
@@ -35,13 +32,9 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
     onDuplicate,
     canEdit = true,
     canDelete = true,
-    showCheckbox = false,
-    selectedIds = [],
-    onSelectChange,
     scrollPreserveKey = 'product-list-scroll',
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [expandedId, setExpandedId] = useState<string | null>(null);
     const currencyFormatter = useMemo(
       () => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }),
       []
@@ -55,25 +48,33 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
       }
     }, [scrollPreserveKey]);
 
+
+    const handleSelectProduct = (id: string) => {
+      onSelectProduct(id);
+    };
+
+    // Keyboard navigation: arrow keys to move between products
+    const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleSelectProduct(products[index].id);
+      } else if (event.key === 'ArrowDown' && index < products.length - 1) {
+        event.preventDefault();
+        const nextEl = (event.currentTarget.parentElement?.children[index + 1] as HTMLElement);
+        nextEl?.focus();
+        handleSelectProduct(products[index + 1].id);
+      } else if (event.key === 'ArrowUp' && index > 0) {
+        event.preventDefault();
+        const prevEl = (event.currentTarget.parentElement?.children[index - 1] as HTMLElement);
+        prevEl?.focus();
+        handleSelectProduct(products[index - 1].id);
+      }
+    };
+
     const handleScroll = () => {
       if (containerRef.current) {
         sessionStorage.setItem(scrollPreserveKey, containerRef.current.scrollTop.toString());
       }
-    };
-
-    const handleSelectProduct = (id: string) => {
-      onSelectProduct(id);
-      // Scroll the selected product into view
-      const productElement = containerRef.current?.querySelector(
-        `[data-product-id="${id}"]`
-      ) as HTMLElement;
-      if (productElement) {
-        productElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    };
-
-    const handleToggleAccordion = (id: string) => {
-      setExpandedId(current => (current === id ? null : id));
     };
 
     if (error) {
@@ -124,37 +125,22 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
 
     return (
       <aside ref={ref || containerRef} className={styles.panel} onScroll={handleScroll}>
-        <div className={styles.listContainer}>
-          {products.map((product) => (
+        <div className={styles.listContainer} role="listbox" aria-label="Lista de productos">
+          {products.map((product, index) => (
             <div
               key={product.id}
               data-product-id={product.id}
               className={`${styles.productWrapper} ${
                 selectedProductId === product.id ? styles.selected : ''
               }`}
-              role="button"
+              role="option"
               tabIndex={0}
               aria-label={`Seleccionar producto ${product.name}`}
+              aria-selected={selectedProductId === product.id}
               onClick={() => handleSelectProduct(product.id)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  handleSelectProduct(product.id);
-                }
-              }}
+              onKeyDown={(event) => handleKeyDown(event, index)}
             >
               <div className={styles.mainRow}>
-                {showCheckbox && onSelectChange && (
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(product.id)}
-                    className={styles.checkbox}
-                    aria-label={`Seleccionar ${product.name}`}
-                    onClick={event => event.stopPropagation()}
-                    onChange={event => onSelectChange(product.id, event.target.checked)}
-                  />
-                )}
-
                 <img
                   src={normalizeImageUrl(product.images?.[0]) ?? DEFAULT_IMAGE_PLACEHOLDER}
                   alt={product.name}
@@ -174,76 +160,57 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                   </div>
 
                   <div className={styles.metaLine}>
-                    <span>{product.sku || 'Sin SKU'}</span>
-                    <span>{product.category?.name || 'Sin categoría'}</span>
+                    <span className={styles.sku} title={`SKU: ${product.sku || 'Sin SKU'}`}>{product.sku || 'Sin SKU'}</span>
+                    <span className={styles.separator}>·</span>
+                    <span title={product.category?.name || 'Sin categoría'}>{product.category?.name || 'Sin categoría'}</span>
                   </div>
 
                   <div className={styles.priceLine}>
                     <strong>{currencyFormatter.format(product.price)}</strong>
+                    {!!product.discount && product.discount > 0 && product.originalPrice && (
+                      <span className={styles.originalPrice}>{currencyFormatter.format(product.originalPrice)}</span>
+                    )}
                     {!!product.discount && product.discount > 0 && (
                       <span className={styles.discount}>-{product.discount}%</span>
                     )}
                     <span className={styles.stockText}>Stock: {product.stock}</span>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  className={`${styles.expandButton} ${expandedId === product.id ? styles.expanded : ''}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleToggleAccordion(product.id);
-                  }}
-                  aria-label={`Mostrar más acciones de ${product.name}`}
-                  aria-expanded={expandedId === product.id}
-                >
-                  <ChevronDown size={16} />
-                </button>
               </div>
 
-              {expandedId === product.id && (
-                <div className={styles.accordion}>
-                  <div className={styles.quickStats}>
-                    <span className={styles.statPill}>Precio: {currencyFormatter.format(product.price)}</span>
-                    <span className={styles.statPill}>Stock: {product.stock}</span>
-                    <span className={styles.statPill}>{product.category?.name || 'Sin categoría'}</span>
-                  </div>
-
-                  <div className={styles.quickActions}>
-                    {canEdit && onEdit && (
-                      <button
-                        type="button"
-                        className={styles.secondaryBtn}
-                        onClick={() => onEdit(product.id)}
-                      >
-                        <Pencil size={14} /> Editar
-                      </button>
-                    )}
-                    {onDuplicate && (
-                      <button
-                        type="button"
-                        className={styles.secondaryBtn}
-                        onClick={e => {
-                          e.stopPropagation();
-                          onDuplicate(product);
-                        }}
-                        title="Duplicar producto"
-                      >
-                        <Copy size={14} /> Duplicar
-                      </button>
-                    )}
-                    {canDelete && onDelete && (
-                      <button
-                        type="button"
-                        className={styles.dangerBtn}
-                        onClick={() => onDelete(product.id)}
-                      >
-                        <Trash2 size={14} /> Eliminar
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Quick actions on hover */}
+              <div className={styles.quickActions}>
+                {canEdit && onEdit && (
+                  <button
+                    className={styles.quickBtn}
+                    title="Editar"
+                    onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
+                    aria-label={`Editar ${product.name}`}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                )}
+                {onDuplicate && (
+                  <button
+                    className={styles.quickBtn}
+                    title="Duplicar"
+                    onClick={(e) => { e.stopPropagation(); onDuplicate(product); }}
+                    aria-label={`Duplicar ${product.name}`}
+                  >
+                    <Copy size={14} />
+                  </button>
+                )}
+                {canDelete && onDelete && (
+                  <button
+                    className={`${styles.quickBtn} ${styles.quickBtnDanger}`}
+                    title="Eliminar"
+                    onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}
+                    aria-label={`Eliminar ${product.name}`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
