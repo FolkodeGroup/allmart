@@ -624,6 +624,26 @@
   background: #f0fdf4;
 }
 
+.checklistItem.warning {
+  border-color: #fbbf24;
+  background: #fef9c3;
+}
+
+.checklistItem.incomplete {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.checklistItem.warning .checklistIcon {
+  background: #fde68a;
+  color: #b45309;
+}
+
+.checklistItem.incomplete .checklistIcon {
+  background: #fecaca;
+  color: #b91c1c;
+}
+
 .checklistIcon {
   display: flex;
   align-items: center;
@@ -995,4 +1015,94 @@
 :global(.dark) .info {
   background: rgba(59, 130, 246, 0.1);
   color: #93c5fd;
+}
+
+/* Field Validation Styles */
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputWrapper .input {
+  flex: 1;
+  padding-right: 2.5rem;
+}
+
+.inputIndicators {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  pointer-events: none;
+}
+
+.input.inputSuccess {
+  border-color: #10b981;
+  background-color: #f0fdf4;
+}
+
+.input.inputValidating {
+  border-color: #fbbf24;
+  background-color: #fef9c3;
+}
+
+.successIcon {
+  color: #10b981;
+  animation: slideIn 0.2s ease-out;
+}
+
+.errorIcon {
+  color: #ef4444;
+  animation: slideIn 0.2s ease-out;
+}
+
+.loaderIcon {
+  color: #fbbf24;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hint {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.suggestionBox {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #92400e;
+  align-items: flex-start;
+}
+
+.suggestionBox strong {
+  color: #b45309;
 }

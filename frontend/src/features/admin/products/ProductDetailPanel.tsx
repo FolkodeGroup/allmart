@@ -1,5 +1,7 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useMemo } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
+import { ReadyToPublishChecklist } from './productWizard/ReadyToPublishChecklist';
+import type { WizardProduct } from './productWizard/types';
 import styles from './ProductDetailPanel.module.css';
 
 // Lazy load tab components
@@ -46,6 +48,21 @@ export function ProductDetailPanel({
   canDelete = true,
 }: ProductDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<TabName>('basic');
+
+  // Adapt AdminProduct to WizardProduct format for the checklist
+  // Note: AdminProduct.variants are VariantGroups, not individual variants with price/stock
+  const adaptedProduct = useMemo<Partial<WizardProduct>>(() => ({
+    name: product.name,
+    description: product.description,
+    categoryId: product.category?.id,
+    sku: product.sku,
+    price: product.price,
+    variants: (product.variants && product.variants.length > 0) ? [
+      // Create a minimal variant structure for checklist validation
+      { id: '1', name: 'Variantes disponibles', price: product.price, stock: product.stock }
+    ] : [],
+    images: product.images || [],
+  }), [product]);
 
   // Render tab content with suspense fallback
   const renderTabContent = () => {
@@ -104,6 +121,11 @@ export function ProductDetailPanel({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Ready to Publish Checklist */}
+      <div className={styles.checklistContainer}>
+        <ReadyToPublishChecklist data={adaptedProduct} showDetails={false} compact={true} />
       </div>
 
       {/* Tabs */}

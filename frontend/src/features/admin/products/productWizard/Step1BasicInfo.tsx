@@ -1,10 +1,44 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import styles from './ProductWizard.module.css';
+import { useFieldValidation, fieldValidators } from './useFieldValidation';
+import { checkSkuAvailability } from './validationService';
+import { ValidationField } from './ValidationField';
 import type { StepProps } from './types';
 
 export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean }, StepProps>(
   ({ data, onDataChange, categories }, ref) => {
-    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    // Validaciones por campo con hooks
+    const nameValidation = useFieldValidation(
+      useCallback(async (value: string) => await fieldValidators.name(value), [])
+    );
+
+    const descriptionValidation = useFieldValidation(
+      useCallback(async (value: string) => await fieldValidators.description(value), [])
+    );
+
+    const categoryValidation = useFieldValidation(
+      useCallback(async (value: string) => await fieldValidators.category(value), [])
+    );
+
+    const skuValidation = useFieldValidation(
+      useCallback(
+        async (value: string) => {
+          const basicError = await fieldValidators.sku(value);
+          if (basicError) return basicError;
+
+          // Validar unicidad contra API
+          const isAvailable = await checkSkuAvailability(value);
+          if (!isAvailable) {
+            return {
+              message: 'Este SKU ya está en uso',
+              suggestion: `${value}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+            };
+          }
+          return null;
+        },
+        []
+      )
+    );
 
     const validateStep = (): boolean => {
       const newErrors: Record<string, string> = {};
@@ -19,7 +53,6 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
         newErrors.description = 'La descripción es obligatoria';
       }
 
-      setValidationErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
 
@@ -27,24 +60,31 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
       validate: validateStep,
     }));
 
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
+    const handleNameChange = (value: string) => {
       onDataChange({ ...data, name: value });
-      if (validationErrors.name && value.trim()) {
-        const newErrors = { ...validationErrors };
-        delete newErrors.name;
-        setValidationErrors(newErrors);
-      }
+      nameValidation.clearError();
     };
 
-    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const value = e.target.value;
+    const handleNameBlur = async () => {
+      await nameValidation.validate(data.name || '');
+    };
+
+    const handleCategoryChange = (value: string) => {
       onDataChange({ ...data, categoryId: value });
-      if (validationErrors.categoryId && value) {
-        const newErrors = { ...validationErrors };
-        delete newErrors.categoryId;
-        setValidationErrors(newErrors);
-      }
+      categoryValidation.clearError();
+    };
+
+    const handleCategoryBlur = async () => {
+      await categoryValidation.validate(data.categoryId || '');
+    };
+
+    const handleSkuChange = (value: string) => {
+      onDataChange({ ...data, sku: value });
+      skuValidation.clearError();
+    };
+
+    const handleSkuBlur = async () => {
+      await skuValidation.validate(data.sku || '');
     };
 
 
@@ -59,17 +99,14 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
       setLocalDescription(value);
-      if (validationErrors.description && value.trim()) {
-        const newErrors = { ...validationErrors };
-        delete newErrors.description;
-        setValidationErrors(newErrors);
-      }
+      descriptionValidation.clearError();
     };
 
-    const handleDescriptionBlur = () => {
+    const handleDescriptionBlur = async () => {
       if (localDescription !== data.description) {
         onDataChange({ ...data, description: localDescription });
       }
+      await descriptionValidation.validate(localDescription);
     };
 
     // Estado local para shortDescription
@@ -89,11 +126,7 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
       }
     };
 
-    // Referencias para inputs
-
-    // Solo se asigna ref si se necesita focus inicial, nunca para focus cruzado
-    // y nunca se reasigna en rerenders
-    const nameInputRef = useRef<HTMLInputElement>(null);
+    // ...existing code...
 
     return (
       <div className={styles.stepContent}>
@@ -101,25 +134,20 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
         <p className={styles.stepDescription}>Completá los datos esenciales de tu producto</p>
 
         <div className={styles.formGroup}>
-          <label htmlFor="name" className={styles.label}>
-            Nombre del Producto <span className={styles.required}>*</span>
-          </label>
-          <input
+          <ValidationField
             id="name"
-            // ref solo si se requiere focus inicial, nunca para focus cruzado
-            ref={nameInputRef}
-            type="text"
+            label="Nombre del Producto"
             placeholder="Ej: Zapatillas Running Pro"
             value={data.name || ''}
             onChange={handleNameChange}
-            className={`${styles.input} ${validationErrors.name ? styles.inputError : ''}`}
+            onBlur={handleNameBlur}
+            required
             maxLength={100}
+            validation={nameValidation}
+            showCharCount
+            hint="Nombre descriptivo del producto (3-100 caracteres)"
             autoComplete="off"
           />
-          {validationErrors.name && (
-            <span className={styles.errorMessage}>{validationErrors.name}</span>
-          )}
-          <small className={styles.charCount}>{(data.name || '').length}/100</small>
         </div>
 
         <div className={styles.formGroup}>
@@ -129,8 +157,9 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
           <select
             id="categoryId"
             value={data.categoryId || ''}
-            onChange={handleCategoryChange}
-            className={`${styles.input} ${validationErrors.categoryId ? styles.inputError : ''}`}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            onBlur={handleCategoryBlur}
+            className={`${styles.input} ${categoryValidation.isValid === false ? styles.inputError : ''} ${categoryValidation.isValid === true ? styles.inputSuccess : ''}`}
           >
             <option value="">Seleccionar categoría...</option>
             {categories.map((cat) => (
@@ -139,8 +168,8 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
               </option>
             ))}
           </select>
-          {validationErrors.categoryId && (
-            <span className={styles.errorMessage}>{validationErrors.categoryId}</span>
+          {categoryValidation.error && (
+            <span className={styles.errorMessage}>{categoryValidation.error.message}</span>
           )}
         </div>
 
@@ -154,14 +183,29 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
             value={localDescription}
             onChange={handleDescriptionChange}
             onBlur={handleDescriptionBlur}
-            className={`${styles.textarea} ${validationErrors.description ? styles.inputError : ''}`}
+            className={`${styles.textarea} ${descriptionValidation.isValid === false ? styles.inputError : ''} ${descriptionValidation.isValid === true ? styles.inputSuccess : ''}`}
             rows={5}
             maxLength={500}
           />
-          {validationErrors.description && (
-            <span className={styles.errorMessage}>{validationErrors.description}</span>
+          {descriptionValidation.error && (
+            <span className={styles.errorMessage}>{descriptionValidation.error.message}</span>
           )}
           <small className={styles.charCount}>{(localDescription || '').length}/500</small>
+        </div>
+
+        <div className={styles.formGroup}>
+          <ValidationField
+            id="sku"
+            label="SKU (Código Único)"
+            placeholder="Ej: ZAPA-RUN-001"
+            value={data.sku || ''}
+            onChange={handleSkuChange}
+            onBlur={handleSkuBlur}
+            maxLength={50}
+            validation={skuValidation}
+            hint="Código único para este producto en el inventario"
+            autoComplete="off"
+          />
         </div>
 
         <div className={styles.formGroup}>
@@ -183,7 +227,7 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
         </div>
 
         <div className={styles.info}>
-          <p>✓ Completá estos campos para continuar al siguiente paso</p>
+          <p>✓ La validación en tiempo real te mostrará errores al salir de cada campo</p>
         </div>
       </div>
     );
