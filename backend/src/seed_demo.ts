@@ -1313,4 +1313,7 @@ async function seedDemo() {
   }
 }
 
-seedDemo();
+// Solo ejecutar si se invoca directamente (npm run seed:demo)
+if (require.main === module) {
+  seedDemo();
+}

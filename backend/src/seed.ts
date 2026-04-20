@@ -82,5 +82,7 @@ async function seed() {
   }
 }
 
-// Ejecutar
-seed();
+// Solo ejecutar si se invoca directamente (npm run seed)
+if (require.main === module) {
+  seed();
+}

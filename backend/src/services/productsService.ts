@@ -234,7 +234,13 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
       rating: dto.rating !== undefined ? dto.rating : existing.rating,
       reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : existing.reviewCount,
-      inStock: dto.inStock !== undefined ? dto.inStock : existing.inStock,
+      // Si el admin actualiza stock, sincronizar inStock automáticamente
+      // (explícito > derivado del stock > valor actual)
+      inStock: dto.inStock !== undefined
+        ? dto.inStock
+        : dto.stock !== undefined
+          ? dto.stock > 0
+          : existing.inStock,
       tags: Array.isArray(dto.tags) ? dto.tags : (existing.tags ?? Prisma.JsonNull),
       features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
       isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : existing.isFeatured,
@@ -373,7 +379,7 @@ type ProductQuery = {
 export async function getPublicProducts(query: ProductQuery) {
   const { category, q, sort, page = 1, limit = 12 } = query;
 
-  const where: Record<string, unknown> = { status: 'active' };
+  const where: Record<string, unknown> = { status: 'active', stock: { gt: 0 } };
 
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
