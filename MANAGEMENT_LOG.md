@@ -1547,3 +1547,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
