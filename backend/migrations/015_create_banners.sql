@@ -1,7 +1,5 @@
--- Drop and recreate banners table with binary image storage
-DROP TABLE IF EXISTS banners CASCADE;
-
-CREATE TABLE banners (
+-- Create banners table with binary image storage (idempotent)
+CREATE TABLE IF NOT EXISTS banners (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title VARCHAR(255) NOT NULL,
   description TEXT,
@@ -22,6 +20,6 @@ CREATE TABLE banners (
 );
 
 -- Create indexes
-CREATE INDEX idx_banners_is_active ON banners(is_active);
-CREATE INDEX idx_banners_display_order ON banners(display_order);
+CREATE INDEX IF NOT EXISTS idx_banners_is_active ON banners(is_active);
+CREATE INDEX IF NOT EXISTS idx_banners_display_order ON banners(display_order);
 
