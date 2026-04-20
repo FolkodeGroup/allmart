@@ -51,6 +51,7 @@ export function Header() {
   }, []);
 
   return (
+    <>
     <header
       className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}
       role="banner"
@@ -157,6 +158,8 @@ export function Header() {
         </div>
       </div>
 
+    </header>
+
       <nav
         className={`${styles.mobileNav} ${mobileMenuOpen ? styles.open : ''}`}
         role="navigation"
@@ -222,6 +225,6 @@ export function Header() {
         )}
         </div>
       </nav>
-    </header>
+    </>
   );
 }
