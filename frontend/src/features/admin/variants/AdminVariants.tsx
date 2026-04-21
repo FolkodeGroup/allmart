@@ -9,7 +9,7 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminVariants.module.css';
-import { ModalConfirm } from '../../../components/ui/ModalConfirm';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { Notification } from '../../../components/ui/Notification';
 import {
   ProductSelector,

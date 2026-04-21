@@ -5,7 +5,7 @@ import type { Category } from '../../../types';
 import styles from './AdminCategories.module.css';
 import { Image as ImageIcon, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { ProductImage } from '../../../components/ui/ProductImage';
-import { Tooltip } from '../../../components/ui/Tooltip';
+import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 
 interface CategoryCardProps {
   category: Category;

@@ -5,7 +5,9 @@ import { Modal } from '../Modal';
 interface ModalConfirmProps {
   open: boolean;
   title?: string;
-  message: string;
+  /** Texto del cuerpo del modal. También acepta `description` como alias. */
+  message?: string;
+  description?: string;
   confirmText?: string;
   cancelText?: string;
   onConfirm: () => void;
@@ -16,6 +18,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
   open,
   title = 'Confirmar acción',
   message,
+  description,
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
   onConfirm,
@@ -42,7 +45,7 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
       }
     >
       <div className={styles.message} aria-live="polite">
-        {message}
+        {message ?? description}
       </div>
     </Modal>
   );

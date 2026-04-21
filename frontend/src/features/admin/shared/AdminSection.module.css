@@ -13,6 +13,11 @@
   box-sizing: border-box;
 }
 
+/* Alias para componentes que usan la clase .container */
+.container {
+  composes: page;
+}
+
 @media (max-width: 700px) {
   .page {
     padding-left: 4vw;

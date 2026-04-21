@@ -11,7 +11,7 @@ import { Button } from '../../../components/ui/Button/Button';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import styles from './BannersAdmin.module.css';
-import sectionStyles from '../../../pages/Admin/sections/AdminSection.module.css';
+import sectionStyles from '../shared/AdminSection.module.css';
 
 interface FormData {
   title: string;
