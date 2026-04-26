@@ -1,6 +1,6 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 18806 |
+| dgimenezdeveloper | 18931 |
 | FedericoPaal | 4130 |
 | Mau-bar-iva | 2105 |
 | Nahuel-Dalesio | 1630 |
@@ -11,6 +11,17 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #826: 🔄 Registrar puntaje de gestión | 2026-04-21 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #826: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #824: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #825: 768 agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #824: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #821: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-19 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #821: 🔄 Registrar puntaje de gestión | 2026-04-18 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #819: 🔄 Registrar puntaje de gestión | 2026-04-18 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
