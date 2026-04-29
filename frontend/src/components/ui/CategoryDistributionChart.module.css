@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
   min-width: 280px;
-  min-height: 340px;
+  min-height: 360px;
 }
 .title {
   font-size: 1.25rem;
@@ -23,3 +23,14 @@
   font-size: 1rem;
   padding: 2rem;
 }
+.tooltip {
+  background: #ffffff;
+  border: 2px solid #ff9800;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+}
+
