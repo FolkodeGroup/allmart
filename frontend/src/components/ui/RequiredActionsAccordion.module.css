@@ -1,0 +1,369 @@
+/* ─── Accordion Container ─────────────────────────────────────────────────── */
+
+.accordion {
+  background: #fff;
+  border-radius: 12px;
+  border: 2px solid #f0f0f0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.accordion:hover {
+  border-color: #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Accordion Header ────────────────────────────────────────────────────── */
+
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafc 100%);
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+  text-align: left;
+}
+
+.accordionHeader:hover {
+  background: linear-gradient(135deg, #f0f3f7 0%, #f5f8fb 100%);
+}
+
+.accordionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.accordionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: #666;
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.accordionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.titleIcon {
+  font-size: 1.25rem;
+}
+
+.accordionBadges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  background: #e8e8e8;
+  color: #666;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badgeAlert {
+  background: #fee2e2;
+  color: #b91c1c;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+/* ─── Accordion Content ───────────────────────────────────────────────────── */
+
+.accordionContent {
+  padding: 1.5rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Tab Content ─────────────────────────────────────────────────────────── */
+
+.tabContent {
+  width: 100%;
+}
+
+/* ─── Table Styles ────────────────────────────────────────────────────────── */
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tableHeader {
+  background: #f5f5f5;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tableHeaderCell {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tableRow {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.15s ease;
+}
+
+.tableRow:hover {
+  background: #fafafa;
+}
+
+.tableCell {
+  padding: 0.75rem 1rem;
+  color: #333;
+}
+
+.tableCellAmount {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.tableCellAction {
+  padding: 0.75rem 1rem;
+  text-align: right;
+}
+
+.tableCellAction a {
+  display: inline-block;
+}
+
+/* ─── Empty State ─────────────────────────────────────────────────────────── */
+
+.emptyState {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #666;
+  background: #fafafa;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* ─── Total Bar ───────────────────────────────────────────────────────────── */
+
+.totalBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #f0f9ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.totalBar span {
+  color: #666;
+}
+
+.totalBar strong {
+  color: #1a1a1a;
+  font-size: 1.1rem;
+}
+
+/* ─── Responsive Design ───────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .accordionHeader {
+    padding: 0.75rem 1rem;
+  }
+
+  .accordionTitle {
+    font-size: 1rem;
+  }
+
+  .accordionContent {
+    padding: 1rem;
+  }
+
+  .tableHeaderCell {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tableCell {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tableCellAmount {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tableCellAction {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tableWrapper {
+    margin-top: 0.75rem;
+  }
+
+  .table {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .accordionHeader {
+    padding: 0.75rem;
+  }
+
+  .accordionTitle {
+    font-size: 0.95rem;
+  }
+
+  .titleIcon {
+    font-size: 1rem;
+  }
+
+  .accordionContent {
+    padding: 0.75rem;
+  }
+
+  .tableHeaderCell {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .tableCell,
+  .tableCellAmount,
+  .tableCellAction {
+    padding: 0.5rem;
+  }
+
+  .table {
+    font-size: 0.75rem;
+  }
+}
+
+/* ─── Dark mode support ───────────────────────────────────────────────────── */
+
+:global(.dark) .accordion {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+:global(.dark) .accordion:hover {
+  border-color: #4b5563;
+}
+
+:global(.dark) .accordionHeader {
+  background: linear-gradient(135deg, #111827 0%, #1a202c 100%);
+  border-bottom-color: #374151;
+}
+
+:global(.dark) .accordionHeader:hover {
+  background: linear-gradient(135deg, #1a202c 0%, #1f2937 100%);
+}
+
+:global(.dark) .accordionTitle {
+  color: #f9fafb;
+}
+
+:global(.dark) .accordionIcon {
+  color: #9ca3af;
+}
+
+:global(.dark) .tableHeader {
+  background: #111827;
+  border-bottom-color: #374151;
+}
+
+:global(.dark) .tableHeaderCell {
+  color: #9ca3af;
+}
+
+:global(.dark) .tableRow {
+  border-bottom-color: #374151;
+}
+
+:global(.dark) .tableRow:hover {
+  background: #252f3f;
+}
+
+:global(.dark) .tableCell {
+  color: #e5e7eb;
+}
+
+:global(.dark) .tableCellAmount {
+  color: #f3f4f6;
+}
+
+:global(.dark) .emptyState {
+  background: #111827;
+  color: #9ca3af;
+  border-color: #374151;
+}
+
+:global(.dark) .totalBar {
+  background: #1e3a5f;
+  border-color: #1e40af;
+}
+
+:global(.dark) .totalBar span {
+  color: #9ca3af;
+}
+
+:global(.dark) .totalBar strong {
+  color: #f3f4f6;
+}

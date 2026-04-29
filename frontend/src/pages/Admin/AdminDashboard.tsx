@@ -9,10 +9,8 @@ import type { WidgetId } from '../../context/DashboardLayoutContext';
 // Widgets
 import MetricCard from '../../components/ui/MetricCard';
 import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
-import PendingOrdersAlert from '../../components/ui/PendingOrdersAlert';
-import PaymentAlertsWidget from '../../components/ui/PaymentAlertsWidget';
-import ShippingAlertsWidget from '../../components/ui/ShippingAlertsWidget';
 import IncompleteProductsWidget from '../../components/ui/IncompleteProductsWidget';
+import RequiredActionsAccordion from '../../components/ui/RequiredActionsAccordion';
 import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
 import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
 import { ActivityFeed } from '../../components/ActivityFeed';
@@ -284,15 +282,10 @@ export function AdminDashboard() {
       case 'critical_stock':
         return (
           <div className={styles.alertsSplit}>
-            {/* Alertas de Pedidos */}
+            {/* Acordeón de Acciones Requeridas */}
             {can('orders.view') && (
               <div className={styles.alertsColumn}>
-                <h4 className={styles.alertsColumnTitle}>📋 Pedidos y Pagos</h4>
-                <div className={styles.alertsColumnGrid}>
-                  <div className={styles.alertCard}><PendingOrdersAlert /></div>
-                  <div className={styles.alertCard}><ShippingAlertsWidget /></div>
-                  <div className={styles.alertCard}><PaymentAlertsWidget /></div>
-                </div>
+                <RequiredActionsAccordion />
               </div>
             )}
             {/* Alertas de Stock y Productos */}
