@@ -258,6 +258,7 @@ export function AdminProducts() {
                 onDuplicate={can('products.create') ? handleDuplicate : undefined}
                 canEdit={can('products.edit')}
                 canDelete={can('products.delete')}
+                defaultSelectedProductId={editId || undefined}
               />
 
               {total > 10 && (
@@ -296,10 +297,13 @@ export function AdminProducts() {
       {viewMode === 'form' && (
         <AdminProductFormPage
           productId={editId}
-          onBack={() => setViewMode('list')}
-          onSuccess={() => {
+          onBack={() => {
             setViewMode('list');
             setEditId(null);
+          }}
+          onSuccess={() => {
+            // Keep editId to maintain product selection after save
+            setViewMode('list');
             refreshProducts({
               q: search,
               categoryId: categoryFilter,
