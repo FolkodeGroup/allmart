@@ -44,9 +44,9 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
     const { name, sku, sales } = payload[0].payload;
     return (
       <div className={styles.tooltip}>
-        <div><strong>{name}</strong></div>
-        <div>SKU: <span>{sku}</span></div>
-        <div>Vendidos: <span>{sales}</span></div>
+        <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{name}</div>
+        <div>SKU: <span style={{ fontWeight: 600 }}>{sku}</span></div>
+        <div>Vendidos: <span style={{ fontWeight: 600, color: '#ff9800' }}>{sales}</span></div>
       </div>
     );
   }
@@ -65,27 +65,28 @@ const BarChartTopProducts: React.FC<Props> = ({ data }) => {
   return (
     <div className={styles.card}>
       <h2 className={styles.title}>Top 10 Productos Más Vendidos</h2>
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={400}>
         <BarChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 0, bottom: 50 }}
+          margin={{ top: 30, right: 30, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis
             dataKey="truncatedName"
-            tick={{ fontSize: 12, fill: '#000000', fontWeight: 500 }}
-            angle={0}
-            textAnchor="middle"
+            tick={{ fontSize: 12, fill: '#1a1a1a', fontWeight: 500 }}
+            angle={-90}
+            textAnchor="end"
+            height={160}
             interval={0}
-            height={50}
+            dy={95}
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fontSize: 13 }}
-            label={{ value: 'Cantidad Vendida', angle: -90, position: 'insideLeft', fontSize: 14, fill: '#000000' }}
+            tick={{ fontSize: 13, fill: '#1a1a1a' }}
+            label={{ value: 'Cantidad Vendida', angle: -90, position: 'insideLeft', fontSize: 13, fill: '#1a1a1a', offset: 10 }}
           />
-          <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="sales" radius={[6, 6, 0, 0]}>
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 152, 0, 0.1)' }} />
+          <Bar dataKey="sales" radius={[6, 6, 0, 0]} barSize={36} label={{ position: 'top', fill: '#1a1a1a', fontWeight: 600 }}>
             {chartData.map((_, idx) => (
               <Cell key={idx} fill={ORANGE_PALETTE[idx % ORANGE_PALETTE.length]} />
             ))}
