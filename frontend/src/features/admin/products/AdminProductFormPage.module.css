@@ -1036,6 +1036,7 @@
 /* ── Main layout: sidebar + scrollable content ───────────────────────────── */
 .layout {
     display: flex;
+    align-items: flex-start;
     flex: 1;
     max-width: 1280px;
     width: 100%;
@@ -1164,6 +1165,8 @@
     flex-direction: column;
     gap: 0;
     padding-bottom: 80px;
+    height: calc(100vh - 61px); /* restás el header */
+    overflow-y: auto;
     /* room for bottom bar */
 }
 
