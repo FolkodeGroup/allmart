@@ -504,6 +504,7 @@ export function AdminDashboard() {
         widgets={widgets.map((w) => ({ id: w.id, label: WIDGET_LABELS[w.id], enabled: w.enabled }))}
         onToggleWidget={toggleWidget}
         onResetLayout={resetLayout}
+        onReorderWidgets={reorderWidgets}
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
