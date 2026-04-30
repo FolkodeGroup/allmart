@@ -7,10 +7,11 @@
 }
 
 /* ── Split button group ─────────────────────────────────────────────────── */
-.btnGroup {
+.btnContainer {
   position: relative;
   display: flex;
   align-items: stretch;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -22,7 +23,7 @@
   background: var(--color-primary, #2d6a4f);
   color: #fff;
   border: none;
-  border-radius: 8px 0 0 8px;
+  border-radius: 8px;
   font-family: var(--font-ui);
   font-size: 0.9rem;
   font-weight: 600;
@@ -37,102 +38,31 @@
   box-shadow: 0 2px 8px rgba(45, 106, 79, 0.25);
 }
 
-/* When there's no split button, round all corners */
-.btnGroup:not(:has(.splitBtn)) .primaryBtn {
-  border-radius: 8px;
-}
-
-.splitBtn {
+/* ── Wizard Button ──────────────────────────────────────────────────────── */
+.wizardBtn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 10px;
-  background: var(--color-primary, #2d6a4f);
+  gap: 7px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color: #fff;
   border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.splitBtn:hover {
-  background: var(--color-primary-dark, #1b4332);
-}
-
-.chevronOpen {
-  transform: rotate(180deg);
-  transition: transform 0.2s ease;
-}
-
-/* ── Dropdown menu ──────────────────────────────────────────────────────── */
-.dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  min-width: 220px;
-  background: #fff;
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
-  z-index: 200;
-  overflow: hidden;
-  animation: dropIn 0.15s ease;
-}
-
-@keyframes dropIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.dropdownItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 16px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  color: var(--color-text-primary, #1e293b);
-  transition: background 0.12s;
-}
-
-.dropdownItem:not(:last-child) {
-  border-bottom: 1px solid var(--color-border-light, #f1f5f9);
-}
-
-.dropdownItem:hover {
-  background: var(--color-bg, #f8fafc);
-}
-
-.dropdownItem svg {
-  flex-shrink: 0;
-  color: var(--color-text-muted, #64748b);
-}
-
-.dropdownItem span {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.dropdownItem strong {
-  font-size: 0.88rem;
+  border-radius: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
   font-weight: 600;
-  line-height: 1.2;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  line-height: 1;
 }
 
-.dropdownItem small {
-  font-size: 0.76rem;
-  color: var(--color-text-muted, #94a3b8);
-  font-weight: 400;
-  line-height: 1.3;
+.wizardBtn:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
+}
+
+.wizardBtn:active {
+  transform: translateY(0);
 }
