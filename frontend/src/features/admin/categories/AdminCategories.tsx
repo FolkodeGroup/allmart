@@ -4,6 +4,7 @@ import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Modal } from '../../../components/ui/Modal';
 import { useNotification } from '../../../context/NotificationContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
@@ -29,6 +30,7 @@ type CategorySortDirection = 'asc' | 'desc';
 
 
 export function AdminCategories() {
+  const navigate = useNavigate();
   const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory, uploadCategoryImage } = useAdminCategories();
   // Local state for pagination
   const [page, setPage] = useState(1);
@@ -139,25 +141,11 @@ export function AdminCategories() {
   };
 
   const handleNew = () => {
-    setEditId(null);
-    resetFormState();
-    setShowForm(true);
+    navigate('/admin/categorias/nueva');
   };
 
   const handleEdit = (id: string) => {
-    const category = categories.find((cat) => cat.id === id);
-    setEditId(id);
-    setFormError(null);
-    setFormSubmitting(false);
-    setFormData({
-      name: category?.name ?? '',
-      description: category?.description ?? '',
-      parentId: category?.parentId ?? '',
-      isVisible: category?.isVisible ?? true,
-    });
-    setFormImageFile(null);
-    setFormImagePreview(category?.image ?? '');
-    setShowForm(true);
+    navigate(`/admin/categorias/${id}/editar`);
   };
 
   const validateImageFile = (file: File) => {
