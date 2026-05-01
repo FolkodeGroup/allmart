@@ -46,21 +46,46 @@ export function AdminProducts() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
 
+  // Duplicate confirmation modal
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [productToDuplicate, setProductToDuplicate] = useState<import('../../../context/AdminProductsContext').AdminProduct | null>(null);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+
   // Context and hooks
   const { products, deleteProduct, duplicateProduct, addProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
-  // Duplicar producto
-  const handleDuplicate = useCallback(async (product: import('../../../context/AdminProductsContext').AdminProduct) => {
+
+  // Mostrar modal de confirmación de duplicación
+  const handleDuplicateRequest = useCallback((product: import('../../../context/AdminProductsContext').AdminProduct) => {
+    setProductToDuplicate(product);
+    setShowDuplicateModal(true);
+  }, []);
+
+  // Confirmar y ejecutar duplicación
+  const handleConfirmDuplicate = useCallback(async () => {
+    if (!productToDuplicate) return;
+
+    setIsDuplicating(true);
     try {
       // Utiliza el helper oficial para duplicar productos
       const { getDuplicateProductPayload } = await import('./productsService');
-      const payload = getDuplicateProductPayload(product);
-      await duplicateProduct({ ...product, ...payload });
+      const payload = getDuplicateProductPayload(productToDuplicate);
+      await duplicateProduct({ ...productToDuplicate, ...payload });
       toast.success('Producto duplicado con éxito');
+      setShowDuplicateModal(false);
+      setProductToDuplicate(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al duplicar: ${message}`);
+    } finally {
+      setIsDuplicating(false);
     }
-  }, [duplicateProduct]);
+  }, [productToDuplicate, duplicateProduct]);
+
+  // Cancelar duplicación
+  const handleCancelDuplicate = useCallback(() => {
+    setShowDuplicateModal(false);
+    setProductToDuplicate(null);
+  }, []);
   const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
 
@@ -255,7 +280,7 @@ export function AdminProducts() {
                 error={error}
                 onEdit={can('products.edit') ? handleEdit : undefined}
                 onDelete={can('products.delete') ? handleDelete : undefined}
-                onDuplicate={can('products.create') ? handleDuplicate : undefined}
+                onDuplicate={can('products.create') ? handleDuplicateRequest : undefined}
                 canEdit={can('products.edit')}
                 canDelete={can('products.delete')}
                 defaultSelectedProductId={editId || undefined}
@@ -289,6 +314,18 @@ export function AdminProducts() {
               cancelText="Cancelar"
               onConfirm={confirmNavigation}
               onCancel={cancelNavigation}
+            />
+          )}
+
+          {showDuplicateModal && productToDuplicate && (
+            <ModalConfirm
+              open={showDuplicateModal}
+              title="Duplicar Producto"
+              message={`¿Estás seguro de que deseas duplicar el producto "${productToDuplicate.name}"? Se creará una nueva copia con los mismos datos.`}
+              confirmText={isDuplicating ? "Duplicando..." : "Duplicar"}
+              cancelText="Cancelar"
+              onConfirm={handleConfirmDuplicate}
+              onCancel={handleCancelDuplicate}
             />
           )}
         </>
