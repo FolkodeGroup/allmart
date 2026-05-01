@@ -4,7 +4,7 @@
  * Verifica que aparece un modal de confirmación antes de eliminar un producto desde el detalle.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { ProductDetailPanel } from '../ProductDetailPanel';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
@@ -27,7 +27,6 @@ const mockProduct: AdminProduct = {
   reviewCount: 10,
   slug: 'test-product',
   variants: [],
-  isActive: true,
   isFeatured: false,
 };
 
