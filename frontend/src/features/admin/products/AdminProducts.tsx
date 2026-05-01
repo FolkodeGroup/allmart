@@ -51,6 +51,11 @@ export function AdminProducts() {
   const [productToDuplicate, setProductToDuplicate] = useState<import('../../../context/AdminProductsContext').AdminProduct | null>(null);
   const [isDuplicating, setIsDuplicating] = useState(false);
 
+  // Delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<import('../../../context/AdminProductsContext').AdminProduct | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Context and hooks
   const { products, deleteProduct, duplicateProduct, addProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
 
@@ -166,7 +171,17 @@ export function AdminProducts() {
     }
   }, [unsavedChanges, interceptNavigation, apiPage]);
 
+  // Solicitar confirmación de eliminación (usado en el listado)
   const handleDelete = useCallback((id: string) => {
+    const productToDelete = products.find(p => p.id === id);
+    if (productToDelete) {
+      setProductToDelete(productToDelete);
+      setShowDeleteModal(true);
+    }
+  }, [products]);
+
+  // Ejecutar eliminación directamente sin modal (usado en el panel de detalle)
+  const handleDirectDelete = useCallback((id: string) => {
     try {
       deleteProduct(id);
       toast.success('Producto eliminado con éxito');
@@ -175,6 +190,30 @@ export function AdminProducts() {
       toast.error(`Error al eliminar: ${message}`);
     }
   }, [deleteProduct]);
+
+  // Confirmar y ejecutar eliminación
+  const handleConfirmDelete = useCallback(async () => {
+    if (!productToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      deleteProduct(productToDelete.id);
+      toast.success('Producto eliminado con éxito');
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al eliminar: ${message}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [productToDelete, deleteProduct]);
+
+  // Cancelar eliminación
+  const handleCancelDelete = useCallback(() => {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
+  }, []);
 
   // === WIZARD HANDLER ===
 
@@ -280,6 +319,7 @@ export function AdminProducts() {
                 error={error}
                 onEdit={can('products.edit') ? handleEdit : undefined}
                 onDelete={can('products.delete') ? handleDelete : undefined}
+                onDeleteDirect={can('products.delete') ? handleDirectDelete : undefined}
                 onDuplicate={can('products.create') ? handleDuplicateRequest : undefined}
                 canEdit={can('products.edit')}
                 canDelete={can('products.delete')}
@@ -326,6 +366,18 @@ export function AdminProducts() {
               cancelText="Cancelar"
               onConfirm={handleConfirmDuplicate}
               onCancel={handleCancelDuplicate}
+            />
+          )}
+
+          {showDeleteModal && productToDelete && (
+            <ModalConfirm
+              open={showDeleteModal}
+              title="Eliminar Producto"
+              message={`¿Estás seguro de que deseas eliminar el producto "${productToDelete.name}"? Esta acción no se puede deshacer.`}
+              confirmText={isDeleting ? "Eliminando..." : "Eliminar"}
+              cancelText="Cancelar"
+              onConfirm={handleConfirmDelete}
+              onCancel={handleCancelDelete}
             />
           )}
         </>

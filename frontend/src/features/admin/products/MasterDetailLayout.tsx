@@ -10,6 +10,7 @@ interface MasterDetailLayoutProps {
   error: string | null;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDeleteDirect?: (id: string) => void;
   onDuplicate?: (product: AdminProduct) => void;
   canEdit: boolean;
   canDelete: boolean;
@@ -23,6 +24,7 @@ export function MasterDetailLayout({
   error,
   onEdit,
   onDelete,
+  onDeleteDirect,
   onDuplicate,
   canEdit,
   canDelete,
@@ -83,7 +85,7 @@ export function MasterDetailLayout({
         <ProductDetailPanel
           product={selectedProduct}
           onEdit={onEdit}
-          onDelete={onDelete}
+          onDelete={onDeleteDirect || onDelete}
           onDuplicate={onDuplicate}
           canEdit={canEdit}
           canDelete={canDelete}
