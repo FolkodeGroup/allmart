@@ -1,7 +1,8 @@
-import React, { useState, Suspense, useMemo } from 'react';
+import React, { useState, Suspense, useMemo, useCallback } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { ReadyToPublishChecklist } from './productWizard/ReadyToPublishChecklist';
 import type { WizardProduct } from './productWizard/types';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import styles from './ProductDetailPanel.module.css';
 
 // Lazy load tab components
@@ -48,6 +49,33 @@ export function ProductDetailPanel({
   canDelete = true,
 }: ProductDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<TabName>('basic');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Solicitar confirmación de eliminación
+  const handleDeleteClick = useCallback(() => {
+    setShowDeleteModal(true);
+  }, []);
+
+  // Confirmar y ejecutar eliminación
+  const handleConfirmDelete = useCallback(async () => {
+    if (!onDelete) return;
+
+    setIsDeleting(true);
+    try {
+      onDelete(product.id);
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error('Error al eliminar:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [product.id, onDelete]);
+
+  // Cancelar eliminación
+  const handleCancelDelete = useCallback(() => {
+    setShowDeleteModal(false);
+  }, []);
 
   // Adapt AdminProduct to WizardProduct format for the checklist
   // Note: AdminProduct.variants are VariantGroups, not individual variants with price/stock
@@ -171,7 +199,7 @@ export function ProductDetailPanel({
             )}
             {canDelete && onDelete && (
               <button
-                onClick={() => onDelete(product.id)}
+                onClick={handleDeleteClick}
                 className={styles.btnDelete}
               >
                 Eliminar
@@ -179,6 +207,19 @@ export function ProductDetailPanel({
             )}
           </div>
         </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <ModalConfirm
+          open={showDeleteModal}
+          title="Eliminar Producto"
+          message={`¿Estás seguro de que deseas eliminar el producto "${product.name}"? Esta acción no se puede deshacer.`}
+          confirmText={isDeleting ? "Eliminando..." : "Eliminar"}
+          cancelText="Cancelar"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
       )}
     </div>
   );

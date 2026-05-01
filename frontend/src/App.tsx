@@ -34,6 +34,7 @@ const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders'));
 const OrderDetailPage = lazy(() => import('./features/admin/orders/pages/OrderDetailPage'));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
+const AdminCategoryFormPageWrapper = lazy(() => import('./features/admin/categories/AdminCategoryFormPageWrapper').then(m => ({ default: m.AdminCategoryFormPageWrapper })));
 const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
@@ -103,6 +104,26 @@ const router = createBrowserRouter([
           <AdminRoute requiredPermission="categories.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminCategories />
+            </Suspense>
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'categorias/nueva',
+        element: (
+          <AdminRoute requiredPermission="categories.edit">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCategoryFormPageWrapper />
+            </Suspense>
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'categorias/:categoryId/editar',
+        element: (
+          <AdminRoute requiredPermission="categories.edit">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCategoryFormPageWrapper />
             </Suspense>
           </AdminRoute>
         )
