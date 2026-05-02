@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import type { Category } from '../../../types';
 import { CategoryListPanel } from './Categorylistpanel';
 import { CategoryDetailPanel } from './Categorydetailpanel';
-import styles from './CategoriesMasterDetailLayout.module.css';
+import styles from './Categoriesmasterdetaillayout.module.css';
 
 interface CategoriesMasterDetailLayoutProps {
     categories: Category[];
