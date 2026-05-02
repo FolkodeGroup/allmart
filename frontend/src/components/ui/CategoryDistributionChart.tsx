@@ -20,21 +20,47 @@ interface PieLabelProps {
   cx: number;
   cy: number;
   midAngle: number;
-  innerRadius: number;
   outerRadius: number;
   percent: number;
 }
 
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: PieLabelProps) => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent }: PieLabelProps) => {
   const RADIAN = Math.PI / 180;
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  // Posicionar etiqueta fuera del gráfico para mayor legibilidad
+  const radius = outerRadius + 60;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
   return (
-    <text x={x} y={y} fill="#333" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={14}>
-      {percent > 0 ? `${(percent * 100).toFixed(0)}%` : ''}
+    <text
+      x={x}
+      y={y}
+      fill="#1a1a1a"
+      textAnchor={x > cx ? 'start' : 'end'}
+      dominantBaseline="central"
+      fontSize={13}
+      fontWeight={600}
+      style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
+    >
+      {percent > 0 ? `${(percent * 100).toFixed(1)}%` : ''}
     </text>
   );
+};
+
+interface TooltipPayloadEntry {
+  payload: { category: string; value: number };
+}
+
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayloadEntry[] }) => {
+  if (active && payload && payload.length) {
+    const { category, value } = payload[0].payload;
+    return (
+      <div className={styles.tooltip}>
+        <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{category}</div>
+        <div>Ventas: <span style={{ fontWeight: 600 }}>{value}</span></div>
+      </div>
+    );
+  }
+  return null;
 };
 
 const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
@@ -44,17 +70,17 @@ const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
   return (
     <div className={styles.card}>
       <h2 className={styles.title}>Distribución por Categoría</h2>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={480}>
         <PieChart>
           <Pie
             data={data}
             dataKey="value"
             nameKey="category"
-            cx="50%"
+            cx="45%"
             cy="50%"
             innerRadius={70}
             outerRadius={110}
-            labelLine={false}
+            labelLine={true}
             label={renderCustomizedLabel}
             isAnimationActive={true}
           >
@@ -62,8 +88,14 @@ const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
               <Cell key={`cell-${idx}`} fill={entry.color || COLORS[idx % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value: number, name: string) => [`${value ?? 0} ventas`, String(name)]} />
-          <Legend layout="vertical" align="right" verticalAlign="middle" formatter={(value: string) => <span style={{ fontSize: 14 }}>{value}</span>} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend
+            layout="vertical"
+            align="right"
+            verticalAlign="middle"
+            formatter={(value: string) => <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{value}</span>}
+            wrapperStyle={{ paddingLeft: '10px' }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

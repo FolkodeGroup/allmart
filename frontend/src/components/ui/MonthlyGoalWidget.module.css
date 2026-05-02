@@ -6,8 +6,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-width: 260px;
-  max-width: 260px;
+  min-width: 280px;
+  max-width: 280px;
   width: 100%;
   margin: 2rem 2rem 2rem 0rem;
 }
@@ -15,7 +15,7 @@
   font-size: 1.15rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--color-primary, #3f51b5);
+  color: #1a1a1a;
 }
 .content {
   display: flex;
@@ -29,20 +29,20 @@
   justify-content: center;
 }
 .progressCircle {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
 }
 .bg {
-  stroke: #eee;
+  stroke: #e8e8e8;
 }
 .fg {
-  stroke: var(--color-primary, #3f51b5);
+  stroke: #ff9800;
   transition: stroke-dashoffset 0.5s cubic-bezier(.4,2,.6,1);
 }
 .percentText {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  fill: var(--color-primary, #3f51b5);
+  fill: #ff9800;
 }
 .inputContainer {
   display: flex;
@@ -51,32 +51,34 @@
   gap: 0.3rem;
 }
 .label {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #666;
   margin-bottom: 0.1rem;
+  font-weight: 500;
 }
 .input {
-  width: 110px;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid #ddd;
+  width: 120px;
+  padding: 0.5rem 0.7rem;
+  border: 1.5px solid #ddd;
   border-radius: 6px;
-  font-size: 1rem;
-  color: #222;
+  font-size: 0.95rem;
+  color: #1a1a1a;
   background: #fafbfc;
   outline: none;
-  transition: border 0.2s;
+  transition: border 0.2s, box-shadow 0.2s;
 }
 .input:focus {
-  border: 1.5px solid var(--color-primary, #3f51b5);
+  border: 1.5px solid #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
 }
 .ventasInfo {
-  margin-top: 0.7rem;
-  font-size: 0.98rem;
+  margin-top: 0.8rem;
+  font-size: 0.95rem;
   color: #444;
 }
 .ventas {
   font-weight: 600;
-  color: var(--color-primary, #3f51b5);
+  color: #ff9800;
 }
 @media (max-width: 900px) {
   .widget {
@@ -90,7 +92,7 @@
     gap: 0.7rem;
   }
   .progressCircle {
-    width: 64px;
-    height: 64px;
+    width: 70px;
+    height: 70px;
   }
 }

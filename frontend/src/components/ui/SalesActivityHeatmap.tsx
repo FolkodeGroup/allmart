@@ -13,12 +13,12 @@ export interface SalesActivityHeatmapProps {
 function getCellColor(value: number, max: number) {
   if (max === 0 || value === 0) return 'var(--color-bg-tertiary)';
   const t = value / max;
-  // Paleta naranja: light → accent → dark
-  // #e8c5a8 (light), #ddb08c (accent), #c89a70 (dark)
+  // Paleta naranja mejorada: light → accent → dark
+  // #f4d5b8 (light), #ff9800 (accent), #d97706 (dark)
   const colors = [
-    [232, 197, 168], // light
-    [221, 176, 140], // accent
-    [200, 154, 112], // dark
+    [244, 213, 184], // light
+    [255, 152, 0],   // accent
+    [217, 119, 6],   // dark
   ];
   let r, g, b;
   if (t < 0.5) {
@@ -37,6 +37,13 @@ function getCellColor(value: number, max: number) {
   return `rgb(${r},${g},${b})`;
 }
 
+// Determina si el texto debe ser blanco o negro basado en el brillo del fondo
+function getTextColor(value: number, max: number): string {
+  if (max === 0 || value === 0) return '#666';
+  const t = value / max;
+  // Si es más del 40% de brillo, usa texto oscuro
+  return t > 0.4 ? '#ffffff' : '#1a1a1a';
+}
 
 const SalesActivityHeatmap: React.FC<SalesActivityHeatmapProps> = ({ data, dayLabels, hourLabels }) => {
   const max = Math.max(...data.flat());
@@ -88,7 +95,12 @@ const SalesActivityHeatmap: React.FC<SalesActivityHeatmapProps> = ({ data, dayLa
                 title={`${day}, ${h}: ${data[dayIdx][hourIdx]} pedidos`}
               >
                 {data[dayIdx][hourIdx] > 0 ? (
-                  <span className={styles.heatmapValue}>{data[dayIdx][hourIdx]}</span>
+                  <span
+                    className={styles.heatmapValue}
+                    style={{ color: getTextColor(data[dayIdx][hourIdx], max) }}
+                  >
+                    {data[dayIdx][hourIdx]}
+                  </span>
                 ) : null}
               </div>
             ))}

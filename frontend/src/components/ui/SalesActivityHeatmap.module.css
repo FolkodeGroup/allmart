@@ -54,12 +54,12 @@
   width: 2.2rem;
   height: 2.2rem;
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  border: 1px solid #e6e6f0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #e0d7f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.18s, border-color 0.18s;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s;
   cursor: pointer;
   position: relative;
 }
@@ -67,12 +67,12 @@
   border-color: #8884d8;
   outline: 2px solid #8884d8;
   z-index: 2;
+  transform: scale(1.05);
 }
 .heatmapValue {
-  font-size: var(--text-xs);
-  color: #222;
-  font-weight: var(--font-bold);
-  text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 @media (max-width: 700px) {
   .heatmapCard {

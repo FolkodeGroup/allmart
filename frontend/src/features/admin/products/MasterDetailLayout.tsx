@@ -10,10 +10,12 @@ interface MasterDetailLayoutProps {
   error: string | null;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onDeleteDirect?: (id: string) => void;
   onDuplicate?: (product: AdminProduct) => void;
   canEdit: boolean;
   canDelete: boolean;
   children?: React.ReactNode;
+  defaultSelectedProductId?: string;
 }
 
 export function MasterDetailLayout({
@@ -22,19 +24,34 @@ export function MasterDetailLayout({
   error,
   onEdit,
   onDelete,
+  onDeleteDirect,
   onDuplicate,
   canEdit,
   canDelete,
   children,
+  defaultSelectedProductId,
 }: MasterDetailLayoutProps) {
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(undefined);
 
-  // Auto-select first product if none selected
+  // Auto-select product: prefer defaultSelectedProductId if provided and valid,
+  // otherwise select the first product if none is selected
   React.useEffect(() => {
-    if (!selectedProductId && products.length > 0 && !loading) {
+    if (loading) return;
+
+    if (defaultSelectedProductId) {
+      // Check if the preferred product exists in the list
+      const preferredExists = products.some(p => p.id === defaultSelectedProductId);
+      if (preferredExists) {
+        setSelectedProductId(defaultSelectedProductId);
+        return;
+      }
+    }
+
+    // Fall back to first product if no selection or preferred not found
+    if (!selectedProductId && products.length > 0) {
       setSelectedProductId(products[0].id);
     }
-  }, [products, loading, selectedProductId]);
+  }, [products, loading, selectedProductId, defaultSelectedProductId]);
 
   // Get selected product
   const selectedProduct = useMemo(
@@ -68,7 +85,7 @@ export function MasterDetailLayout({
         <ProductDetailPanel
           product={selectedProduct}
           onEdit={onEdit}
-          onDelete={onDelete}
+          onDelete={onDeleteDirect || onDelete}
           onDuplicate={onDuplicate}
           canEdit={canEdit}
           canDelete={canDelete}

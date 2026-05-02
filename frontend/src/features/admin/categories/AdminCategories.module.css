@@ -1,3 +1,110 @@
+/* Split layout for categories admin */
+.splitContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  min-height: 520px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e2dd;
+  box-shadow: 0 2px 8px rgba(118, 146, 130, 0.04);
+  overflow: hidden;
+}
+
+.splitListPanel {
+  flex: 1 1 340px;
+  min-width: 320px;
+  max-width: 420px;
+  border-right: 1px solid #ece9e2;
+  background: #fafaf8;
+  overflow-y: auto;
+}
+
+.splitDetailPanel {
+  flex: 2 1 0;
+  min-width: 0;
+  background: #fff;
+  padding: 32px 36px 32px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  position: relative;
+}
+
+.emptyDetail {
+  color: #aaa;
+  font-size: 1.1rem;
+  margin: auto;
+  padding: 48px 0;
+  text-align: center;
+}
+
+.detailPanel {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.detailImage {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ece9e2;
+  background: #f3f3f3;
+}
+
+.detailTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.detailSlug {
+  font-size: 0.98rem;
+  color: #888;
+  margin-bottom: 0;
+}
+
+.detailBody {
+  font-size: 1.08rem;
+  color: #444;
+}
+
+.detailDesc {
+  margin-bottom: 12px;
+  color: #666;
+}
+
+.detailMeta {
+  display: flex;
+  gap: 18px;
+  font-size: 0.98rem;
+  color: #888;
+}
+
+.detailMetaItem {
+  background: #f6f6f3;
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+.detailActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
 /* ── Botones de acción en modal ── */
 .deleteBtn {
   background: #ef4444;
@@ -9,10 +116,12 @@
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .deleteBtn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
 .deleteBtn:hover:not(:disabled) {
   background: #dc2626;
 }
@@ -27,13 +136,16 @@
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .cancelBtn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
 .cancelBtn:hover:not(:disabled) {
   background: #d1d5db;
 }
+
 /* ============================================
    ALLMART — ADMIN CATEGORIES
    ============================================ */
@@ -41,50 +153,65 @@
 /* Pagination buttons with visible focus */
 
 .newBtn {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: var(--font-bold);
-  background: var(--color-primary);
-  color: var(--color-neutral-light);
-  border: none;
-  border-radius: 10px;
-  padding: var(--space-3) var(--space-6);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-.newBtn:hover { background: var(--color-primary-dark); }
-
-.pageBtn {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: var(--font-bold);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: var(--color-primary, #2d6a4f);
+  color: #fff;
   border: none;
   border-radius: 8px;
-  padding: var(--space-2) var(--space-5);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  margin: 0 2px;
-  transition: background 0.15s, color 0.15s, box-shadow 0.12s;
-  outline: none;
+  transition: background 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  line-height: 1;
 }
+
+.newBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.pageBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border: 1.5px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+  min-height: 36px;
+  min-width: 36px;
+  justify-content: center;
+}
+
 .pageBtn:focus {
   box-shadow: 0 0 0 3px var(--color-primary-light, #93c5fd);
   z-index: 2;
 }
+
 .pageBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.pageBtn:hover:not(:disabled), .pageActive {
+.pageBtn:hover:not(:disabled),
+.pageActive {
   background: var(--color-primary);
   color: #fff;
 }
 
-.newBtn:hover { background: var(--color-primary-dark); }
+.newBtn:hover {
+  background: var(--color-primary-dark);
+}
 
 /* ── Grid de tarjetas ── */
 
@@ -128,8 +255,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Tarjeta de categoría ── */
@@ -146,15 +280,17 @@
   text-align: left;
   transition: box-shadow 0.15s;
 }
+
 .card:focus {
   box-shadow: 0 0 0 3px var(--color-primary-light);
   z-index: 2;
 }
+
 .card:hover {
   border-color: var(--color-border-hover, #cfc9bc);
-  box-shadow: 0 4px 20px rgba(118,146,130,0.12);
+  box-shadow: 0 4px 20px rgba(118, 146, 130, 0.12);
   transform: translateY(-4px) scale(1.025);
-  transition: box-shadow 0.15s, transform 0.18s cubic-bezier(0.22,1,0.36,1);
+  transition: box-shadow 0.15s, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cardImg {
@@ -197,7 +333,8 @@
   color: var(--color-text-primary);
 }
 
-.cardSlug {  font-family: var(--font-ui);
+.cardSlug {
+  font-family: var(--font-ui);
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);
 }
@@ -210,7 +347,7 @@
 
 .emptyCard:hover {
   border-color: var(--color-border-hover, #cfc9bc);
-  box-shadow: 0 4px 20px rgba(118,146,130,0.12);
+  box-shadow: 0 4px 20px rgba(118, 146, 130, 0.12);
 }
 
 .emptyIcon {
@@ -219,8 +356,10 @@
   vertical-align: middle;
 }
 
-.emptyCount {color: #b45309;
-  font-weight: 600;}
+.emptyCount {
+  color: #b45309;
+  font-weight: 600;
+}
 
 .cardDesc {
   font-family: var(--font-body);
@@ -238,21 +377,31 @@
   flex-shrink: 0;
 }
 
-.editBtn, .deleteBtn {
+.editBtn,
+.deleteBtn {
   border: none;
   cursor: pointer;
   font-size: var(--text-base);
   padding: var(--space-1) var(--space-2);
   border-radius: 6px;
-  transition: background 0.13s, transform 0.15s cubic-bezier(0.22,1,0.36,1);
+  transition: background 0.13s, transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.editBtn:hover, .deleteBtn:hover {
+
+.editBtn:hover,
+.deleteBtn:hover {
   transform: scale(1.08);
 }
-.editBtn:hover { background: var(--color-bg-tertiary); }
-.deleteBtn:hover { background: rgba(199,80,80,0.1); }
 
-.confirmDeleteBtn, .cancelDeleteBtn {
+.editBtn:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.deleteBtn:hover {
+  background: rgba(199, 80, 80, 0.1);
+}
+
+.confirmDeleteBtn,
+.cancelDeleteBtn {
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
@@ -261,9 +410,22 @@
   cursor: pointer;
   border: 1px solid;
 }
-.confirmDeleteBtn { background: var(--color-error); color: white; border-color: var(--color-error); }
-.confirmDeleteBtn:hover { background: #a83d3d; }
-.cancelDeleteBtn { background: var(--color-bg-secondary); color: var(--color-text-secondary); border-color: var(--color-border); }
+
+.confirmDeleteBtn {
+  background: var(--color-error);
+  color: white;
+  border-color: var(--color-error);
+}
+
+.confirmDeleteBtn:hover {
+  background: #a83d3d;
+}
+
+.cancelDeleteBtn {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
 
 /* ── Sección de productos ── */
 .productSection {
@@ -282,7 +444,10 @@
   padding: 0;
   text-align: left;
 }
-.toggleProductsBtn:hover { text-decoration: underline; }
+
+.toggleProductsBtn:hover {
+  text-decoration: underline;
+}
 
 .productList {
   margin-top: var(--space-3);
@@ -330,7 +495,10 @@
   outline: none;
   flex-shrink: 0;
 }
-.reassignSelect:focus { border-color: var(--color-primary); }
+
+.reassignSelect:focus {
+  border-color: var(--color-primary);
+}
 
 /* ── Modal ── */
 .backdrop {
@@ -348,15 +516,22 @@
 .panel {
   background: var(--color-bg-primary);
   border-radius: 16px;
-  box-shadow: 0 8px 48px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.18);
   width: 100%;
   max-width: 480px;
   animation: slideUp 0.25s both;
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .panelHeader {
@@ -384,7 +559,10 @@
   border-radius: 6px;
   transition: background 0.15s;
 }
-.closeBtn:hover { background: var(--color-bg-tertiary); }
+
+.closeBtn:hover {
+  background: var(--color-bg-tertiary);
+}
 
 .inputError {
   border-color: var(--color-error) !important;
@@ -428,7 +606,11 @@
   outline: none;
   transition: border-color 0.15s;
 }
-.input:focus { border-color: var(--color-primary); background: var(--color-bg-primary); }
+
+.input:focus {
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
+}
 
 .imagePreview {
   margin-top: var(--space-2);
@@ -464,7 +646,10 @@
   padding: var(--space-2) var(--space-5);
   cursor: pointer;
 }
-.cancelBtn:hover { background: var(--color-bg-tertiary); }
+
+.cancelBtn:hover {
+  background: var(--color-bg-tertiary);
+}
 
 .submitBtn {
   font-family: var(--font-ui);
@@ -478,7 +663,10 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.submitBtn:hover { background: var(--color-primary-dark); }
+
+.submitBtn:hover {
+  background: var(--color-primary-dark);
+}
 
 /* ── Dropzone para categorías ── */
 .dropZone {
@@ -495,7 +683,8 @@
   gap: var(--space-2);
 }
 
-.dropZone:hover, .dropZoneActive {
+.dropZone:hover,
+.dropZoneActive {
   border-color: var(--color-primary);
   background: var(--color-bg-tertiary);
 }
@@ -536,7 +725,7 @@
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   color: white;
   border: none;
   border-radius: 50%;
@@ -552,13 +741,13 @@
 }
 
 .removeImgBtn:hover {
-  background: rgba(255,0,0,0.7);
+  background: rgba(255, 0, 0, 0.7);
 }
 
 .uploadingOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -580,35 +769,38 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Skeleton Loading Animations ── */
 
 @keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
 }
 
 .skeletonBase {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
 }
 
 .skeletonCardImg {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -624,12 +816,10 @@
 }
 
 .skeletonCardName {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -638,12 +828,10 @@
 }
 
 .skeletonCardSlug {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -652,12 +840,10 @@
 }
 
 .skeletonCardDesc {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -667,12 +853,10 @@
 }
 
 .skeletonProductBtn {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -681,12 +865,22 @@
   margin-top: 0.5rem;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  margin-top: 0;
+}
+
 @media (max-width: 1024px) {
   .pagination {
     flex-direction: column;
     gap: 6px;
     margin-top: 18px;
   }
+
   .pageBtn {
     width: 100%;
     font-size: 1rem;
@@ -703,6 +897,7 @@
     gap: 2px;
     margin-top: 10px;
   }
+
   .pageBtn {
     font-size: 0.98rem;
     padding: 10px 0;
@@ -712,21 +907,56 @@
 }
 
 
-.filters{
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  transition: border-color 0.15s;
+}
+
+.filtersRow {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  background-color: white;
-  border: 1px solid var(--color-border);
-  width: 100%;
-  font-family: var(--font-ui);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-primary-light);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.filtersRowItem {
+  width: 120px;
+  border: 1px solid #e5e2dd;
   border-radius: 8px;
-  background: var(--color-neutral-light);
-  color: var(--color-text-primary);
-  outline: none;
-  transition: border-color 0.15s;
+  padding: 7px 10px;
+  font-size: 14px;
+  background: #fff;
+  min-width: 120px;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.count {
+  margin-top: 0 !important;
+  position: absolute;
+  right: 12px;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 @media (max-width: 1024px) {
@@ -742,16 +972,15 @@
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    padding: 0;
   }
 }
 
 @media (max-width: 480px) {
   .filters {
     gap: 6px;
-    padding: 0;
   }
 }
+
 /* Botones de exportación responsivos */
 .exportBtn {
   padding: 8px 16px;
@@ -764,22 +993,27 @@
   transition: all 0.2s;
   margin-right: 4px;
 }
+
 .exportBtn:last-child {
   margin-right: 0;
 }
+
 .exportBtn:hover {
   border-color: #d0ccc7;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
 .exportBtn:active {
   background: #f3f3f3;
 }
+
 @media (max-width: 1024px) {
   .exportBtn {
     font-size: 12px;
     padding: 7px 12px;
   }
 }
+
 @media (max-width: 700px) {
   .exportBtn {
     width: 100%;
@@ -787,6 +1021,7 @@
     margin-bottom: 6px;
   }
 }
+
 @media (max-width: 480px) {
   .exportBtn {
     font-size: 11px;
@@ -795,45 +1030,70 @@
 }
 
 .count {
-    margin-left: 0;
-    margin-top: 4px;
-    font-size: smaller;
-  }
+  margin-left: 0;
+  margin-top: 4px;
+  font-size: smaller;
+}
 
 /* ===== MOBILE-FIRST RESPONSIVE ADAPTATIONS ===== */
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+@media (max-width: 480px) {
+  .headerTop {
+    gap: 6px;
+  }
+
+  .filtersRow {
+    justify-content: center;
+  }
+}
+
 @media (max-width: 700px) {
   .grid {
     grid-template-columns: 1fr;
     gap: var(--space-3);
   }
+
   .card {
     border-radius: 10px;
     margin-bottom: 10px;
     min-width: 0;
     max-width: max-content;
   }
+
   .cardBody {
     padding: var(--space-3);
     gap: var(--space-2);
   }
-  .cardImg, .cardImgPlaceholder {
+
+  .cardImg,
+  .cardImgPlaceholder {
     height: 100px;
     font-size: 2rem;
   }
+
   .cardTop {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
   }
+
   .panel {
     max-width: 100vw;
     min-height: 90vh;
     border-radius: 0;
     padding: 0;
   }
+
   .panelHeader {
     padding: var(--space-4);
   }
+
   .form {
     padding: var(--space-4);
   }
@@ -846,85 +1106,88 @@
     flex-wrap: wrap;
   }
 
-  @media (max-width: 1024px) {
-    .headerTop {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--space-2);
-    }
+  .newBtn {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    background: var(--color-primary);
+    color: var(--color-neutral-light);
+    border: none;
+    border-radius: 10px;
+    padding: var(--space-3) var(--space-6);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
   }
 
-  @media (max-width: 700px) {
-    .headerTop {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--space-2);
-    }
+  .newBtn:hover {
+    background: var(--color-primary-dark);
+    transform: scale(1.04);
+    transition: background 0.15s, transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  @media (max-width: 480px) {
-    .headerTop {
-      gap: 6px;
-    }
-  }
-
-.newBtn {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: var(--font-bold);
-  background: var(--color-primary);
-  color: var(--color-neutral-light);
-  border: none;
-  border-radius: 10px;
-  padding: var(--space-3) var(--space-6);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-.newBtn:hover {
-  background: var(--color-primary-dark);
-  transform: scale(1.04);
-  transition: background 0.15s, transform 0.15s cubic-bezier(0.22,1,0.36,1);
-}
   .filters {
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    padding: 0;
   }
+
   .count {
     margin-left: 0;
     margin-top: 4px;
   }
 }
 
+@media (max-width: 1024px) {
+  .headerTop {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+}
+
+@media (max-width: 1500px) {
+  .headerTop {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+}
+
+
+
 /* ── Skeleton Loading Animations ── */
 
 @keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
 }
 
 .skeletonBase {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
 }
 
 .skeletonCardImg {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -940,12 +1203,10 @@
 }
 
 .skeletonCardName {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -954,12 +1215,10 @@
 }
 
 .skeletonCardSlug {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -968,12 +1227,10 @@
 }
 
 .skeletonCardDesc {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -983,12 +1240,10 @@
 }
 
 .skeletonProductBtn {
-  background: linear-gradient(
-    90deg,
-    var(--color-bg-card, #f5f5f5) 25%,
-    var(--color-bg-secondary, #efefef) 50%,
-    var(--color-bg-card, #f5f5f5) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-bg-card, #f5f5f5) 25%,
+      var(--color-bg-secondary, #efefef) 50%,
+      var(--color-bg-card, #f5f5f5) 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 8px;
@@ -1001,24 +1256,29 @@
    DARK MODE OVERRIDES
 ═══════════════════════════════════════════════════════════════════ */
 :global(.dark) .cancelBtn {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--color-text-primary, #f3f3f3);
 }
+
 :global(.dark) .cancelBtn:hover {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
 }
+
 :global(.dark) .filters {
   background: var(--color-bg-card, #232a2f);
   border-color: var(--color-border, #2d3a3f);
 }
+
 :global(.dark) .exportBtn {
   background: var(--color-bg-card, #232a2f);
   border-color: var(--color-border, #2d3a3f);
   color: var(--color-text-primary, #f3f3f3);
 }
+
 :global(.dark) .exportBtn:hover {
   border-color: var(--color-primary, #a3c9a8);
 }
+
 :global(.dark) .exportBtn:active {
   background: var(--color-bg-secondary, #181c1f);
 }

@@ -1,0 +1,83 @@
+/* CategoriesMasterDetailLayout.module.css
+   Mirrors MasterDetailLayout.module.css — same two-column structure. */
+
+.container {
+    display: flex;
+    width: 100%;
+    min-height: 500px;
+    border: 1px solid #e5e2dd;
+    border-radius: 12px;
+    background: #fff;
+}
+
+/* ── Detail wrapper ────────────────────────────────────────────── */
+.detailWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ── Empty / loading states ────────────────────────────────────── */
+.emptyDetail {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 14px;
+    padding: 32px;
+    text-align: center;
+}
+
+.loadingDetail {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e2dd;
+    border-top-color: #769282;
+    border-radius: 50%;
+    animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 1200px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .detailWrapper {
+        height: 300px;
+    }
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────── */
+/*@media (prefers-color-scheme: dark) {
+    .container {
+        background: #1e1e1e;
+        border-color: #2d2d2d;
+    }
+
+    .emptyDetail {
+        color: #666;
+    }
+
+    .spinner {
+        border-color: #2d2d2d;
+        border-top-color: #4d7a62;
+    }
+}*/

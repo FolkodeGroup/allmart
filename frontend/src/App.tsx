@@ -31,8 +31,10 @@ import { useAppReady } from './hooks/useAppReady';
 // Lazy load admin feature components for better code splitting
 const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts').then(m => ({ default: m.AdminProducts })));
 const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders'));
+const OrderDetailPage = lazy(() => import('./features/admin/orders/pages/OrderDetailPage'));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
+const AdminCategoryFormPageWrapper = lazy(() => import('./features/admin/categories/AdminCategoryFormPageWrapper').then(m => ({ default: m.AdminCategoryFormPageWrapper })));
 const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
@@ -107,6 +109,26 @@ const router = createBrowserRouter([
         )
       },
       {
+        path: 'categorias/nueva',
+        element: (
+          <AdminRoute requiredPermission="categories.edit">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCategoryFormPageWrapper />
+            </Suspense>
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'categorias/:categoryId/editar',
+        element: (
+          <AdminRoute requiredPermission="categories.edit">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCategoryFormPageWrapper />
+            </Suspense>
+          </AdminRoute>
+        )
+      },
+      {
         path: 'categorias/:categoryId',
         element: (
           <AdminRoute requiredPermission="categories.view">
@@ -122,6 +144,16 @@ const router = createBrowserRouter([
           <AdminRoute requiredPermission="orders.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminOrders />
+            </Suspense>
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'pedidos/:id',
+        element: (
+          <AdminRoute requiredPermission="orders.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <OrderDetailPage />
             </Suspense>
           </AdminRoute>
         )

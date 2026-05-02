@@ -7,68 +7,70 @@
   flex-direction: column;
   gap: 0.7rem;
   min-width: 0;
+  border: 1px solid #f0f0f0;
 }
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 .title {
-  color: var(--color-text-primary, #222);
+  color: var(--color-text-primary, #1a1a1a);
 }
 .icon {
   font-size: 1.6rem;
 }
 .value {
-  font-size: 2.1rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: var(--color-accent, #3b3bff);
+  color: #ff9800;
 }
 .variation {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 .arrowUp {
-  color: #2ecc40;
-  font-size: 1.2rem;
+  color: #22c55e;
+  font-size: 1.1rem;
 }
 .arrowDown {
-  color: #ff4136;
-  font-size: 1.2rem;
+  color: #ef4444;
+  font-size: 1.1rem;
 }
 .positive {
-  color: #2ecc40;
+  color: #22c55e;
   font-weight: 600;
 }
 .negative {
-  color: #ff4136;
+  color: #ef4444;
   font-weight: 600;
 }
 .label {
-  color: #888;
-  font-size: 0.95rem;
+  color: #999;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 @media (max-width: 900px) {
   .card {
     padding: 1rem;
   }
   .value {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 }
 @media (max-width: 600px) {
   .card {
-    padding: 0.7rem;
-    border-radius: 0.7rem;
+    padding: 0.8rem;
+    border-radius: 0.8rem;
   }
   .header {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
   .value {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
 }

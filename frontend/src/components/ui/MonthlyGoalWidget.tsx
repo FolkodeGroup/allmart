@@ -14,22 +14,22 @@ export default function MonthlyGoalWidget({ ventasDelMes }: MonthlyGoalWidgetPro
       <h3 className={styles.title}>Objetivos Mensuales</h3>
       <div className={styles.content}>
         <div className={styles.progressContainer}>
-          <svg className={styles.progressCircle} width="80" height="80" viewBox="0 0 80 80">
+          <svg className={styles.progressCircle} width="90" height="90" viewBox="0 0 90 90">
             <circle
               className={styles.bg}
-              cx="40" cy="40" r="34"
-              strokeWidth="8"
+              cx="45" cy="45" r="38"
+              strokeWidth="6"
               fill="none"
             />
             <circle
               className={styles.fg}
-              cx="40" cy="40" r="34"
-              strokeWidth="8"
+              cx="45" cy="45" r="38"
+              strokeWidth="6"
               fill="none"
-              strokeDasharray={2 * Math.PI * 34}
-              strokeDashoffset={2 * Math.PI * 34 * (1 - porcentaje / 100)}
+              strokeDasharray={2 * Math.PI * 38}
+              strokeDashoffset={2 * Math.PI * 38 * (1 - porcentaje / 100)}
             />
-            <text x="40" y="46" textAnchor="middle" className={styles.percentText}>
+            <text x="45" y="52" textAnchor="middle" className={styles.percentText}>
               {Math.round(porcentaje)}%
             </text>
           </svg>
