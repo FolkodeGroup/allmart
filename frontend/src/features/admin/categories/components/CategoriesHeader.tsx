@@ -10,14 +10,12 @@ interface CategoriesHeaderProps {
 export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({ canCreate, onNew }) => (
   <div className={sectionStyles.header}>
     <div className={styles.headerTop}>
-      <div>
-        {/* <h1 className={sectionStyles.title}>
+      {/* <h1 className={sectionStyles.title}>
           <span className={sectionStyles.icon}>📁</span> Categorías
         </h1> */}
-        <p className={sectionStyles.subtitle}>
-          Gestioná las categorías del catálogo para organizar tus productos.
-        </p>
-      </div>
+      <p className={sectionStyles.subtitle}>
+        Gestioná las categorías del catálogo para organizar tus productos.
+      </p>
       {canCreate && (
         <button className={styles.newBtn} onClick={onNew}>
           + Nueva categoría

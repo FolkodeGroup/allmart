@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import type { Category } from '../../types';
 import styles from './CategorySearchInput.module.css';
+import { Search } from 'lucide-react';
 
 interface CategorySearchInputProps {
   categories: Category[];
@@ -46,11 +47,12 @@ export function CategorySearchInput({
 
   return (
     <div className={styles.wrapper}>
+      <Search size={16} className={styles.searchIcon} />
       <label htmlFor="category-search-input" style={{ display: 'none' }}>Buscar categoría</label>
       <input
         id="category-search-input"
         ref={inputRef}
-        className={styles.input}
+        className={styles.searchInput}
         type="search"
         placeholder={placeholder}
         value={value}
