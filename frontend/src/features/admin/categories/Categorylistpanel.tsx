@@ -3,7 +3,7 @@ import type { Category } from '../../../types';
 import { FolderSearch, AlertCircle, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { ProductImage } from '../../../components/ui/ProductImage';
-import styles from './CategoryListPanel.module.css';
+import styles from './Categorylistpanel.module.css';
 
 interface CategoryListPanelProps {
     categories: Category[];

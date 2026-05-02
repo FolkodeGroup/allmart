@@ -9,7 +9,7 @@ import {
     Layers,
     AlertTriangle,
 } from 'lucide-react';
-import styles from './CategoryDetailPanel.module.css';
+import styles from './Categorydetailpanel.module.css';
 
 interface CategoryDetailPanelProps {
     category: Category;
