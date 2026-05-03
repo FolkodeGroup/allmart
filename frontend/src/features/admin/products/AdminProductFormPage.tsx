@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FileText, DollarSign, Tag, Image, Layers, Globe, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useBlocker } from 'react-router-dom';
 import { useProductForm } from '../../../hooks/useProductFormPage';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -87,10 +88,19 @@ export function AdminProductFormPage({
         confirmNavigation,
         cancelNavigation,
         interceptNavigation,
+        setIsDirty,
     } = useUnsavedChangesWarning({
         active: isDirty,
         onConfirmExit: onBack,
     });
+
+    // Sync external isDirty into the hook's internal state so interceptNavigation fires
+    useEffect(() => {
+        setIsDirty(isDirty);
+    }, [isDirty, setIsDirty]);
+
+    // Block in-app SPA navigation when there are unsaved changes
+    const blocker = useBlocker(isDirty);
 
     const handleCancel = useCallback(() => {
         interceptNavigation(() => {
@@ -413,13 +423,19 @@ export function AdminProductFormPage({
 
             {/* Unsaved changes warning */}
             <ModalConfirm
-                open={showWarning}
+                open={showWarning || blocker.state === 'blocked'}
                 title="Cambios sin guardar"
-                message="¿Salir sin guardar? Los cambios se perderán."
-                confirmText="Salir sin guardar"
-                cancelText="Quedarme"
-                onConfirm={confirmNavigation}
-                onCancel={cancelNavigation}
+                message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
+                confirmText="Sí, abandonar"
+                cancelText="Seguir editando"
+                onConfirm={() => {
+                    if (blocker.state === 'blocked') blocker.proceed();
+                    confirmNavigation();
+                }}
+                onCancel={() => {
+                    if (blocker.state === 'blocked') blocker.reset();
+                    cancelNavigation();
+                }}
             />
         </div>
     );

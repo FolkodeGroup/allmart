@@ -3,8 +3,11 @@
  * Página de administración de banners de la homepage
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useBlocker } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { Trash2, Plus, Edit2, Eye, EyeOff } from 'lucide-react';
 import { bannersAdminService, type AdminBanner } from './bannersAdminService';
 import { Button } from '../../../components/ui/Button/Button';
@@ -35,6 +38,46 @@ export function BannersAdmin() {
     isActive: true,
     altText: '',
   });
+
+  // Unsaved changes detection
+  const initialFormDataRef = useRef<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string }>({
+    title: '',
+    description: '',
+    displayOrder: 0,
+    isActive: true,
+    altText: '',
+  });
+
+  const isDirty = showForm && (
+    formData.title !== initialFormDataRef.current.title ||
+    formData.description !== initialFormDataRef.current.description ||
+    formData.displayOrder !== initialFormDataRef.current.displayOrder ||
+    formData.isActive !== initialFormDataRef.current.isActive ||
+    formData.altText !== initialFormDataRef.current.altText ||
+    formData.imageFile !== null
+  );
+
+  const {
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
+    interceptNavigation,
+    setIsDirty: setHookIsDirty,
+  } = useUnsavedChangesWarning({ active: isDirty });
+
+  useEffect(() => {
+    setHookIsDirty(isDirty);
+  }, [isDirty, setHookIsDirty]);
+
+  const blocker = useBlocker(isDirty);
+
+  function handleCancelForm() {
+    interceptNavigation(() => {
+      setFormData({ title: '', description: '', imageFile: null, displayOrder: 0, isActive: true, altText: '' });
+      setEditingId(null);
+      setShowForm(false);
+    });
+  }
 
   useEffect(() => {
     loadBanners();
@@ -67,6 +110,13 @@ export function BannersAdmin() {
   }
 
   function handleEdit(banner: AdminBanner) {
+    initialFormDataRef.current = {
+      title: banner.title,
+      description: banner.description || '',
+      displayOrder: banner.displayOrder,
+      isActive: banner.isActive,
+      altText: banner.altText || '',
+    };
     setFormData({
       title: banner.title,
       description: banner.description || '',
@@ -81,7 +131,7 @@ export function BannersAdmin() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
       toast.error('Título es requerido');
       return;
@@ -171,6 +221,7 @@ export function BannersAdmin() {
         <Button
           onClick={() => {
             resetForm();
+            initialFormDataRef.current = { title: '', description: '', displayOrder: 0, isActive: true, altText: '' };
             setShowForm(true);
           }}
           variant="primary"
@@ -217,16 +268,16 @@ export function BannersAdmin() {
                 required={!editingId}
               />
               {formData.imageFile && (
-                <img 
-                  src={URL.createObjectURL(formData.imageFile)} 
-                  alt="preview" 
-                  className={styles.preview} 
+                <img
+                  src={URL.createObjectURL(formData.imageFile)}
+                  alt="preview"
+                  className={styles.preview}
                 />
               )}
               {editingId && !formData.imageFile && (
                 <div className={styles.currentImageInfo}>
                   <p>Imagen actual cargada</p>
-                  <img 
+                  <img
                     src={banners.find(b => b.id === editingId)?.thumbUrl}
                     alt="current"
                     className={styles.preview}
@@ -274,7 +325,7 @@ export function BannersAdmin() {
             </div>
 
             <div className={styles.formActions}>
-              <Button type="button" variant="secondary" onClick={resetForm}>
+              <Button type="button" variant="secondary" onClick={handleCancelForm}>
                 Cancelar
               </Button>
               <Button type="submit" variant="primary">
@@ -286,8 +337,8 @@ export function BannersAdmin() {
       )}
 
       {banners.length === 0 ? (
-        <EmptyState 
-          title="No hay banners" 
+        <EmptyState
+          title="No hay banners"
           description="Crea tu primer banner para mostrar en la homepage"
         />
       ) : (
@@ -341,6 +392,23 @@ export function BannersAdmin() {
           ))}
         </div>
       )}
+
+      {/* Unsaved changes warning */}
+      <ModalConfirm
+        open={showWarning || blocker.state === 'blocked'}
+        title="¿Abandonar sin guardar?"
+        message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
+        confirmText="Sí, abandonar"
+        cancelText="Seguir editando"
+        onConfirm={() => {
+          if (blocker.state === 'blocked') blocker.proceed();
+          confirmNavigation();
+        }}
+        onCancel={() => {
+          if (blocker.state === 'blocked') blocker.reset();
+          cancelNavigation();
+        }}
+      />
     </div>
   );
 }

@@ -4,9 +4,12 @@
  * de productos y categorías integrado.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useBlocker } from 'react-router-dom';
 import type { Promotion } from './promotionsService';
 import { promotionsService } from './promotionsService';
+import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { fetchAdminCategories } from '../categories/categoriesService';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { apiFetch } from '../../../utils/apiClient';
@@ -63,6 +66,55 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
   const [activeTab, setActiveTab] = useState<'details' | 'products' | 'categories'>('details');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // ─── Initial state snapshot (for dirty detection) ────────────────────────
+  const [initialState] = useState(() => ({
+    name: promotion?.name ?? '',
+    description: promotion?.description ?? '',
+    type: (promotion?.type ?? 'percentage') as 'percentage' | 'fixed' | 'bogo',
+    value: promotion ? String(promotion.value) : '',
+    startDate: promotion ? promotion.startDate.split('T')[0] : '',
+    endDate: promotion ? promotion.endDate.split('T')[0] : '',
+    minPurchase: promotion?.minPurchaseAmount?.toString() ?? '',
+    maxDiscount: promotion?.maxDiscount?.toString() ?? '',
+    priority: promotion ? String(promotion.priority) : '0',
+    isActive: promotion?.isActive ?? true,
+    selectedProductIds: (promotion?.rules?.productIds ?? []) as string[],
+    selectedCategoryIds: (promotion?.rules?.categoryIds ?? []) as string[],
+  }));
+
+  const isDirty = useMemo(() =>
+    name !== initialState.name ||
+    description !== initialState.description ||
+    type !== initialState.type ||
+    value !== initialState.value ||
+    startDate !== initialState.startDate ||
+    endDate !== initialState.endDate ||
+    minPurchase !== initialState.minPurchase ||
+    maxDiscount !== initialState.maxDiscount ||
+    priority !== initialState.priority ||
+    isActive !== initialState.isActive ||
+    JSON.stringify(selectedProductIds) !== JSON.stringify(initialState.selectedProductIds) ||
+    JSON.stringify(selectedCategoryIds) !== JSON.stringify(initialState.selectedCategoryIds),
+  [name, description, type, value, startDate, endDate, minPurchase, maxDiscount, priority, isActive, selectedProductIds, selectedCategoryIds, initialState]);
+
+  const {
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
+    interceptNavigation,
+    setIsDirty: setHookIsDirty,
+  } = useUnsavedChangesWarning({ active: isDirty });
+
+  useEffect(() => {
+    setHookIsDirty(isDirty);
+  }, [isDirty, setHookIsDirty]);
+
+  const blocker = useBlocker(isDirty);
+
+  const handleCancel = useCallback(() => {
+    interceptNavigation(() => onCancel());
+  }, [interceptNavigation, onCancel]);
 
   // ─── Init from existing promotion ────────────────────────────────────────
   useEffect(() => {
@@ -364,11 +416,28 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
           <button type="submit" className={styles.btnPrimary} disabled={saving}>
             {saving ? 'Guardando...' : promotion ? 'Actualizar Promoción' : 'Crear Promoción'}
           </button>
-          <button type="button" className={styles.btnSecondary} onClick={onCancel} disabled={saving}>
+          <button type="button" className={styles.btnSecondary} onClick={handleCancel} disabled={saving}>
             Cancelar
           </button>
         </div>
       </form>
+
+      {/* Unsaved changes warning */}
+      <ModalConfirm
+        open={showWarning || blocker.state === 'blocked'}
+        title="¿Abandonar sin guardar?"
+        message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
+        confirmText="Sí, abandonar"
+        cancelText="Seguir editando"
+        onConfirm={() => {
+          if (blocker.state === 'blocked') blocker.proceed();
+          confirmNavigation();
+        }}
+        onCancel={() => {
+          if (blocker.state === 'blocked') blocker.reset();
+          cancelNavigation();
+        }}
+      />
     </div>
   );
 };
