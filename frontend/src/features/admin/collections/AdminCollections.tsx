@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import type { Collection } from './collectionsService';
 import { collectionsService } from './collectionsService';
 import AdminCollectionForm from './AdminCollectionForm';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminCollections.module.css';
 
 type ViewMode = 'list' | 'form';
@@ -22,6 +23,9 @@ const AdminCollections: React.FC = () => {
   const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const limit = 10;
 
@@ -51,13 +55,29 @@ const AdminCollections: React.FC = () => {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('¿Está seguro de que desea eliminar esta colección?')) return;
+    setCollectionToDelete(id);
+    setDeleteModalOpen(true);
+  }
+
+  async function handleConfirmDelete() {
+    if (!collectionToDelete) return;
+
+    setDeleting(true);
     try {
-      await collectionsService.delete(id);
+      await collectionsService.delete(collectionToDelete);
+      setDeleteModalOpen(false);
+      setCollectionToDelete(null);
       await loadCollections();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error eliminando colección');
+      setDeleting(false);
     }
+  }
+
+  function handleCancelDelete() {
+    setDeleteModalOpen(false);
+    setCollectionToDelete(null);
+    setDeleting(false);
   }
 
   function handleEdit(collection: Collection) {
@@ -219,6 +239,17 @@ const AdminCollections: React.FC = () => {
           Siguiente
         </button>
       </div>
+
+      <ConfirmModal
+        open={deleteModalOpen}
+        title="Eliminar Colección"
+        message="¿Está seguro de que desea eliminar esta colección? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        loading={deleting}
+      />
     </div>
   );
 };
