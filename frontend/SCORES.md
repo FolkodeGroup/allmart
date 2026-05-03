@@ -1,8 +1,8 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 18806 |
-| FedericoPaal | 4130 |
-| Mau-bar-iva | 2105 |
+| dgimenezdeveloper | 19121 |
+| FedericoPaal | 4570 |
+| Mau-bar-iva | 2165 |
 | Nahuel-Dalesio | 1630 |
 | CelinaJP | 1378 |
 | agustin-ovejero | 1132 |
@@ -11,6 +11,42 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #863: 838 vista de categorías con layout dividido izquierdaderecha | 2026-05-02 |
+| Mau-bar-iva | 60 | Issue | Vista de categorías con layout dividido (izquierda/derecha) | 2026-05-02 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #862: 837 redirección a formulario de nueva categoría | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #861: 836 confirmación al eliminar producto | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #861: 836 confirmación al eliminar producto | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #860: Se implementa confirmación al duplicar producto | 2026-05-01 |
+| FedericoPaal | 40 | Issue | Redirección a formulario de nueva categoría | 2026-05-01 |
+| FedericoPaal | 30 | Issue | Confirmación al eliminar producto | 2026-05-01 |
+| FedericoPaal | 30 | Issue | Confirmación al duplicar producto | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #859: Se mantiene producto editado seleccionado tras guardar cambios | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #858: 833 hacer sticky el cuadro de pasos del formulario de creación de producto | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #857: 832 agregar botón propio para el formulario del wizard alta rápida en productos | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #856: 831 mejorar la visualización de porcentajes y nombres en los gráficos | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #855: 830 habilitar deshabilitar y reordenar widgets en el panel con vista previa en tiempo real | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #854: 829 visualización detallada de información de órdenes y pedidos | 2026-04-30 |
+| FedericoPaal | 40 | Issue | Mantener producto editado seleccionado tras guardar cambios | 2026-04-30 |
+| FedericoPaal | 40 | Issue | Hacer sticky el cuadro de pasos del formulario de creación de producto | 2026-04-30 |
+| FedericoPaal | 30 | Issue | Agregar botón propio para el formulario del wizard (alta rápida) en productos | 2026-04-30 |
+| FedericoPaal | 40 | Issue | Mejorar la visualización de porcentajes y nombres en los gráficos | 2026-04-30 |
+| FedericoPaal | 80 | Issue | Habilitar, deshabilitar y reordenar widgets en el panel con vista previa en tiempo real | 2026-04-30 |
+| FedericoPaal | 50 | Issue | Visualización detallada de información de Órdenes y Pedidos | 2026-04-30 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #853: 🔄 Registrar puntaje de gestión | 2026-04-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #852: Se implementa acordeón en "Acciones Requeridas" con pestañas para Órd… | 2026-04-29 |
+| FedericoPaal | 60 | Issue | Acordeón en "Acciones Requeridas" con pestañas para Órdenes y Pagos | 2026-04-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #827: 🔄 Actualización automática de puntajes semanal | 2026-04-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #826: 🔄 Registrar puntaje de gestión | 2026-04-21 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #826: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #824: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #825: 768 agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #824: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #821: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-19 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #821: 🔄 Registrar puntaje de gestión | 2026-04-18 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #819: 🔄 Registrar puntaje de gestión | 2026-04-18 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
