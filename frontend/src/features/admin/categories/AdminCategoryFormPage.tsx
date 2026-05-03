@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { FileText, Image, ArrowLeft, AlertCircle, Upload } from 'lucide-react';
+import { useBlocker } from 'react-router-dom';
 import { useCategoryForm } from '../../../hooks/useCategoryFormPage';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -90,11 +91,19 @@ export function AdminCategoryFormPage({
         [formProps.form, formProps.initialForm, formProps.imgFile, shallowCompareRelevantFields]
     );
 
-    const { showWarning, confirmNavigation, cancelNavigation, interceptNavigation } =
+    const { showWarning, confirmNavigation, cancelNavigation, interceptNavigation, setIsDirty } =
         useUnsavedChangesWarning({
             active: isDirty,
             onConfirmExit: onBack,
         });
+
+    // Sync external isDirty into the hook's internal state so interceptNavigation fires
+    useEffect(() => {
+        setIsDirty(isDirty);
+    }, [isDirty, setIsDirty]);
+
+    // Block in-app SPA navigation when there are unsaved changes
+    const blocker = useBlocker(isDirty);
 
     const handleCancel = useCallback(() => {
         interceptNavigation(() => {
@@ -323,15 +332,21 @@ export function AdminCategoryFormPage({
                 </form>
             </div>
 
-            {/* ── Unsaved changes warning ───────────────────────────────────── */}
+            {/* ── Unsaved changes warning (cancel button or SPA navigation) ─── */}
             <ModalConfirm
-                open={showWarning}
+                open={showWarning || blocker.state === 'blocked'}
                 title="¿Abandonar sin guardar?"
-                message="Tienes cambios sin guardar. ¿Estás seguro de que deseas abandonar?"
+                message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
                 confirmText="Sí, abandonar"
-                cancelText="Cancelar"
-                onConfirm={confirmNavigation}
-                onCancel={cancelNavigation}
+                cancelText="Seguir editando"
+                onConfirm={() => {
+                    if (blocker.state === 'blocked') blocker.proceed();
+                    confirmNavigation();
+                }}
+                onCancel={() => {
+                    if (blocker.state === 'blocked') blocker.reset();
+                    cancelNavigation();
+                }}
             />
         </div>
     );
