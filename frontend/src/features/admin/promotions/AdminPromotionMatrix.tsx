@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { PromotionMatrixItem, PromotionProductsResult } from './promotionsService';
 import { promotionsService } from './promotionsService';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
@@ -45,6 +46,16 @@ const AdminPromotionMatrix: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'expired' | 'upcoming'>('all');
   const [search, setSearch] = useState('');
 
+  // Confirmation modal
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmData, setDeleteConfirmData] = useState<{
+    type: 'product' | 'category';
+    promotionId: string;
+    itemId: string;
+    itemName: string;
+  } | null>(null);
+  const [deletingLoading, setDeletingLoading] = useState(false);
+
   const loadMatrix = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -79,33 +90,62 @@ const AdminPromotionMatrix: React.FC = () => {
     }
   }
 
-  async function handleRemoveProduct(promotionId: string, productId: string) {
+  async function handleRemoveProduct(promotionId: string, productId: string, productName: string) {
+    setDeleteConfirmData({
+      type: 'product',
+      promotionId,
+      itemId: productId,
+      itemName: productName,
+    });
+    setShowDeleteConfirm(true);
+  }
+
+  async function handleRemoveCategory(promotionId: string, categoryId: string, categoryName: string) {
+    setDeleteConfirmData({
+      type: 'category',
+      promotionId,
+      itemId: categoryId,
+      itemName: categoryName,
+    });
+    setShowDeleteConfirm(true);
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteConfirmData) return;
+
+    setDeletingLoading(true);
     try {
-      await promotionsService.assign(promotionId, { mode: 'remove', productIds: [productId] });
+      if (deleteConfirmData.type === 'product') {
+        await promotionsService.assign(deleteConfirmData.promotionId, {
+          mode: 'remove',
+          productIds: [deleteConfirmData.itemId],
+        });
+      } else {
+        await promotionsService.assign(deleteConfirmData.promotionId, {
+          mode: 'remove',
+          categoryIds: [deleteConfirmData.itemId],
+        });
+      }
+
       // Refresh detail and matrix counts
       const [newDetail, newMatrix] = await Promise.all([
-        promotionsService.getProducts(promotionId),
+        promotionsService.getProducts(deleteConfirmData.promotionId),
         promotionsService.getMatrix(),
       ]);
       setDetail(newDetail);
       setMatrix(newMatrix);
+      setShowDeleteConfirm(false);
+      setDeleteConfirmData(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al remover producto');
+      setError(err instanceof Error ? err.message : 'Error al remover');
+    } finally {
+      setDeletingLoading(false);
     }
   }
 
-  async function handleRemoveCategory(promotionId: string, categoryId: string) {
-    try {
-      await promotionsService.assign(promotionId, { mode: 'remove', categoryIds: [categoryId] });
-      const [newDetail, newMatrix] = await Promise.all([
-        promotionsService.getProducts(promotionId),
-        promotionsService.getMatrix(),
-      ]);
-      setDetail(newDetail);
-      setMatrix(newMatrix);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al remover categoría');
-    }
+  function handleCancelDelete() {
+    setShowDeleteConfirm(false);
+    setDeleteConfirmData(null);
   }
 
   // Filtered list
@@ -230,7 +270,7 @@ const AdminPromotionMatrix: React.FC = () => {
                                     <button
                                       className={styles.matrixTagRemove}
                                       title="Quitar categoría"
-                                      onClick={(e) => { e.stopPropagation(); handleRemoveCategory(item.id, cat.id); }}
+                                      onClick={(e) => { e.stopPropagation(); handleRemoveCategory(item.id, cat.id, cat.name); }}
                                     >✕</button>
                                   </span>
                                 ))}
@@ -275,7 +315,7 @@ const AdminPromotionMatrix: React.FC = () => {
                                     <button
                                       className={styles.btnSmallDanger}
                                       title="Quitar de esta promoción"
-                                      onClick={(e) => { e.stopPropagation(); handleRemoveProduct(item.id, p.id); }}
+                                      onClick={(e) => { e.stopPropagation(); handleRemoveProduct(item.id, p.id, p.name); }}
                                     >✕</button>
                                   </div>
                                 ))}
@@ -299,6 +339,18 @@ const AdminPromotionMatrix: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* ─── Delete confirmation modal ─────────────────────────── */}
+      <ConfirmModal
+        open={showDeleteConfirm}
+        title={deleteConfirmData?.type === 'product' ? 'Eliminar producto' : 'Eliminar categoría'}
+        message={`¿Está seguro de que desea eliminar "${deleteConfirmData?.itemName}" de esta promoción? Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        loading={deletingLoading}
+      />
     </div>
   );
 };

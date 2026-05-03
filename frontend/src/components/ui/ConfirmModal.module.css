@@ -61,7 +61,7 @@
 }
 
 .confirmBtn {
-    background: linear-gradient(90deg, #2ecc40, #27ae60);
+    background: #d83939;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -74,7 +74,7 @@
 }
 
 .confirmBtn:hover:enabled {
-    background: linear-gradient(90deg, #27ae60, #2ecc40);
+    background: #ae2727;
 }
 
 @keyframes fadeIn {
