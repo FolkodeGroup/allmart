@@ -11,7 +11,6 @@
 //  - El debounce y el reset de página se manejan en AdminOrders, no aquí.
 // ─────────────────────────────────────────────────────────────────────────────
 // components/OrdersFiltersBar.tsx
-import { StatusChipSelect } from './StatusChipSelect';
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
@@ -90,17 +89,22 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                   chipClose no tiene clase específica (chipCloseClassName recibe styles.chipClose
                   que puede no existir; es intencional para dejarlo sin estilo forzado).
                 */}
-                <StatusChipSelect
-                    options={STATUS_OPTIONS.map(s => ({ value: s, label: STATUS_LABELS[s] }))}
-                    selected={filters.statuses}
-                    onChange={statuses => onChange({ ...filters, statuses })}
-                    placeholder="Todos los estados"
-                    selectClassName={styles.filterSelect}
-                    label='Estado'
-                    labelClassName={styles.dateLabel}
-                    chipClassName={styles.chip}
-                    chipCloseClassName={styles.chipClose}
-                />
+                <div className={styles.filterSelectWrap}>
+                    <label className={styles.dateLabel} htmlFor="order-status">Estado</label>
+                    <select
+                        className={styles.filterSelect}
+                        id="order-status"
+                        value={filters.status}
+                        onChange={e => onChange({ ...filters, status: e.target.value as OrderStatus | '' })}
+                        disabled={disabled}
+                        aria-label="Filtrar por estado"
+                    >
+                        <option value="">Todos los estados</option>
+                        {STATUS_OPTIONS.map(s => (
+                            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                        ))}
+                    </select>
+                </div>
 
                 {/* ── Rango de fechas ── */}
                 <div className={styles.dateFilters}>

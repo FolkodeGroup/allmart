@@ -4,7 +4,7 @@ import type { Order } from '../../../../context/AdminOrdersContext';
 
 export interface OrdersFiltersState {
     search: string;
-    statuses: string[];
+    status: string | '';
     dateFrom: string;
     dateTo: string;
     totalMin: string;
@@ -13,7 +13,7 @@ export interface OrdersFiltersState {
 
 const INITIAL: OrdersFiltersState = {
     search: '',
-    statuses: [],
+    status: '',
     dateFrom: '',
     dateTo: '',
     totalMin: '',
@@ -34,8 +34,7 @@ export function useOrdersFilters(orders: Order[]) {
                 o.customer.lastName.toLowerCase().includes(q) ||
                 o.customer.email.toLowerCase().includes(q);
 
-            const matchStatus =
-                !filters.statuses.length || filters.statuses.includes(o.status);
+            const matchStatus = !filters.status || o.status === filters.status;
 
             const date = new Date(o.createdAt).getTime();
             const matchFrom = !filters.dateFrom || date >= new Date(filters.dateFrom).getTime();
@@ -47,9 +46,9 @@ export function useOrdersFilters(orders: Order[]) {
         });
     }, [orders, filters]);
 
-    const hasActiveFilters =
+    const hasActiveFilters: boolean =
         !!filters.search ||
-        filters.statuses.length > 0 ||
+        !!filters.status ||
         !!filters.dateFrom ||
         !!filters.dateTo ||
         !!filters.totalMin ||
