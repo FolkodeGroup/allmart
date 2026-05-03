@@ -168,34 +168,37 @@ function AdminOrders() {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    if (reset) setIsLoading(true);
-    else setIsLoading(true);
+    setIsLoading(true);
     try {
       const params: Record<string, string | number> = {
-        page,
+        page: reset ? 1 : page,
         limit: PAGE_SIZE,
       };
 
+      // Pasar búsqueda al backend (server-side)
+      if (debouncedFilters.search) params.q = debouncedFilters.search;
+      // Cuando hay exactamente un estado seleccionado, filtrar en el backend
+      // Con múltiples estados, el filtro client-side en useOrdersFilters se encarga
+      if (debouncedFilters.statuses.length === 1) params.status = debouncedFilters.statuses[0];
+
       const res = await fetchAdminOrders(token, params);
-      // setHasMore(res.data.length === PAGE_SIZE);
       const normalized = res.data.map(mapApiOrderToOrder);
 
-      // reset=true reemplaza la lista; reset=false acumula (para infinite scroll)
+      // reset=true reemplaza la lista; reset=false acumula (para load more)
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
     } catch (e: unknown) {
       // Ignorar errores de abort; solo mostrar toast si fue un error real
       if (e instanceof Error && e.name !== 'AbortError') toast.error('Error al cargar pedidos');
     } finally {
       setIsLoading(false);
-      setIsLoading(false);
     }
-  }, [token, page, PAGE_SIZE]);
+  }, [token, page, PAGE_SIZE, debouncedFilters]);
 
-  // Cargar pedidos al montar y al cambiar filtros
+  // Cargar pedidos al montar y cada vez que cambien los filtros (debounced) o el token
   useEffect(() => {
     fetchOrders(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, debouncedFilters]);
 
   // Cargar más cuando el usuario avanza de página (solo si page > 1)
   useEffect(() => {
@@ -551,7 +554,7 @@ function AdminOrders() {
             ))}
           </div>
         </>
-      ) : orders.length === 0 ? (
+      ) : filtered.length === 0 ? (
         // Estado vacío: no hay pedidos que coincidan con los filtros activos
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>🛒</span>
