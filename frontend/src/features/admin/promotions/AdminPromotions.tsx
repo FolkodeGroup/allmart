@@ -10,6 +10,7 @@ import type { Promotion } from './promotionsService';
 import { promotionsService } from './promotionsService';
 import AdminPromotionForm from './AdminPromotionForm';
 import AdminPromotionMatrix from './AdminPromotionMatrix';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 
 type ViewMode = 'list' | 'form';
@@ -26,6 +27,14 @@ const AdminPromotions: React.FC = () => {
   const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Confirmation modals
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [duplicateConfirmOpen, setDuplicateConfirmOpen] = useState(false);
+  const [deleteConfirmLoading, setDeleteConfirmLoading] = useState(false);
+  const [duplicateConfirmLoading, setDuplicateConfirmLoading] = useState(false);
+  const [actionPromotionId, setActionPromotionId] = useState<string | null>(null);
+  const [actionPromotionName, setActionPromotionName] = useState<string>('');
 
   const limit = 10;
 
@@ -48,23 +57,60 @@ const AdminPromotions: React.FC = () => {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('¿Está seguro de que desea eliminar esta promoción?')) return;
+  function handleDeleteClick(id: string, name: string) {
+    setActionPromotionId(id);
+    setActionPromotionName(name);
+    setDeleteConfirmOpen(true);
+  }
+
+  async function handleConfirmDelete() {
+    if (!actionPromotionId) return;
+    setDeleteConfirmLoading(true);
     try {
-      await promotionsService.delete(id);
+      await promotionsService.delete(actionPromotionId);
       await loadPromotions();
+      setDeleteConfirmOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error eliminando promoción');
+    } finally {
+      setDeleteConfirmLoading(false);
+      setActionPromotionId(null);
+      setActionPromotionName('');
     }
   }
 
-  async function handleDuplicate(id: string) {
+  function handleDuplicateClick(id: string, name: string) {
+    setActionPromotionId(id);
+    setActionPromotionName(name);
+    setDuplicateConfirmOpen(true);
+  }
+
+  async function handleConfirmDuplicate() {
+    if (!actionPromotionId) return;
+    setDuplicateConfirmLoading(true);
     try {
-      await promotionsService.duplicate(id);
+      await promotionsService.duplicate(actionPromotionId);
       await loadPromotions();
+      setDuplicateConfirmOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error duplicando promoción');
+    } finally {
+      setDuplicateConfirmLoading(false);
+      setActionPromotionId(null);
+      setActionPromotionName('');
     }
+  }
+
+  function handleCancelDelete() {
+    setDeleteConfirmOpen(false);
+    setActionPromotionId(null);
+    setActionPromotionName('');
+  }
+
+  function handleCancelDuplicate() {
+    setDuplicateConfirmOpen(false);
+    setActionPromotionId(null);
+    setActionPromotionName('');
   }
 
   function handleEdit(promo: Promotion) {
@@ -202,13 +248,13 @@ const AdminPromotions: React.FC = () => {
                           Editar
                         </button>
                         <button
-                          onClick={() => handleDuplicate(promo.id)}
+                          onClick={() => handleDuplicateClick(promo.id, promo.name)}
                           className={styles.btnSmallSecondary}
                         >
                           Duplicar
                         </button>
                         <button
-                          onClick={() => handleDelete(promo.id)}
+                          onClick={() => handleDeleteClick(promo.id, promo.name)}
                           className={styles.btnSmallDanger}
                         >
                           Eliminar
@@ -245,6 +291,30 @@ const AdminPromotions: React.FC = () => {
 
       {/* ─── Tab: Matrix ───────────────────────────────────────────── */}
       {mainTab === 'matrix' && <AdminPromotionMatrix />}
+
+      {/* ─── Delete Confirmation Modal ─────────────────────────────── */}
+      <ConfirmModal
+        open={deleteConfirmOpen}
+        title="Eliminar Promoción"
+        message={`¿Está seguro de que desea eliminar la promoción "${actionPromotionName}"? Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        loading={deleteConfirmLoading}
+      />
+
+      {/* ─── Duplicate Confirmation Modal ───────────────────────────── */}
+      <ConfirmModal
+        open={duplicateConfirmOpen}
+        title="Duplicar Promoción"
+        message={`¿Desea duplicar la promoción "${actionPromotionName}"? Se creará una copia con el mismo nombre y configuración.`}
+        confirmLabel="Duplicar"
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDuplicate}
+        onCancel={handleCancelDuplicate}
+        loading={duplicateConfirmLoading}
+      />
     </div>
   );
 };
