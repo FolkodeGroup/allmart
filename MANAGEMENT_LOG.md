@@ -1578,3 +1578,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #866: 841 mejorar la visualización del detalle de pedido modal o nueva página | 2026-05-03 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #869: Changes Made: | 2026-05-03 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #870: select de estados en vista de pedidos ajustado | 2026-05-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #874: Cambios Realizados | 2026-05-03 |
