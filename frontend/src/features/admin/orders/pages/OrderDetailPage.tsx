@@ -21,6 +21,7 @@ import toast from 'react-hot-toast';
 import styles from './OrderDetailPage.module.css';
 import { Button } from '../../../../components/ui/Button/Button';
 import { OrderDetailContent } from '../components/OrderDetailContent';
+import { formatDateTime, formatPrice } from '../utils/ordersHelpers';
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -129,21 +130,44 @@ export default function OrderDetailPage() {
 
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <Button
-            variant="secondary"
-            size="sm"
+          <button
+            className={styles.backButton}
             onClick={() => navigate('/admin/pedidos')}
+            title="Volver a la lista de pedidos"
+            aria-label="Volver a la lista de pedidos"
           >
-            ← Volver
-          </Button>
-          <h1 className={styles.title}>
-            Pedido #{order.id.slice(0, 8).toUpperCase()}
-          </h1>
+            <span className={styles.backIcon}>←</span>
+            <span className={styles.backText}>Volver</span>
+          </button>
+
+          <div className={styles.headerInfo}>
+            <h1 className={styles.title}>
+              Pedido #{order.id.slice(0, 8).toUpperCase()}
+            </h1>
+            <div className={styles.headerMeta}>
+              <span className={styles.metaItem}>
+                <span className={styles.metaIcon}>📅</span>
+                {formatDateTime(order.createdAt)}
+              </span>
+              <span className={styles.metaDivider}>•</span>
+              <span className={styles.metaItem}>
+                <span className={styles.metaIcon}>💰</span>
+                {formatPrice(order.total)}
+              </span>
+              <span className={styles.metaDivider}>•</span>
+              <span className={styles.metaItem}>
+                <span className={styles.metaIcon}>📦</span>
+                {order.items.length} producto{order.items.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Main content */}
       <div className={styles.content}>
         <OrderDetailContent order={order} />
       </div>

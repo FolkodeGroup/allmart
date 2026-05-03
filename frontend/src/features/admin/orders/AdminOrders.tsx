@@ -20,6 +20,7 @@
 
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import { STATUS_LABELS, STATUS_OPTIONS } from './utils/ordersHelpers';
@@ -46,16 +47,14 @@ import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
  */
 import type { OrderStatus } from '../../../context/AdminOrdersContext';
 
-// Importar componentes y hooks faltantes
-import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
-import OrderDetailModal from './components/OrderDetailModal';
+// Lazy load OrderDetailModal component (for future modal use if needed)
 
 
 
 
 function AdminOrders() {
   const { token } = useAdminAuth();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null); // Pedido actualmente abierto en el modal de detalle (null = modal cerrado)
+  const navigate = useNavigate();
 
   /**
    * Lista completa de pedidos cargados.
@@ -75,7 +74,8 @@ function AdminOrders() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Acceso al contexto global de cambios sin guardar
-  const { setIsDirty: setGlobalDirty } = useUnsavedChanges();
+  // Ya no es necesario con navegación a página dedicada
+  // const { setIsDirty: setGlobalDirty } = useUnsavedChanges();
 
   // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
 
@@ -571,13 +571,13 @@ function AdminOrders() {
             orders={filtered}
             selectedIds={selectedIds}
             onSelect={handleSelectOne}
-            onDetail={setSelectedOrder}
+            onDetail={(order) => navigate(`/admin/pedidos/${order.id}`)}
           />
           <OrderList
             orders={filtered}
             selectedIds={selectedIds}
             onSelect={handleSelectOne}
-            onDetail={setSelectedOrder}
+            onDetail={(order) => navigate(`/admin/pedidos/${order.id}`)}
           />
           {/* ── Paginación ── */}
           {/*
@@ -733,25 +733,6 @@ function AdminOrders() {
         onConfirm={modal.isLoading ? () => { } : handleConfirmModal}
         onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
-
-      {/* ── Modal de detalle del pedido ── */}
-      {/*
-        Solo se monta cuando hay un pedido seleccionado.
-        `orders.find(...)` garantiza que se pasa la versión más reciente del pedido
-        (por si fue modificado mientras el modal estaba cerrado), usando `selectedOrder`
-        como fallback en caso de que ya no exista en la lista.
-      */}
-      {selectedOrder && (
-        <OrderDetailModal
-          order={(orders.find(o => o.id === selectedOrder!.id) ?? selectedOrder!)}
-          onClose={() => {
-            setSelectedOrder(null);
-            setGlobalDirty(false); // limpiar al cerrar
-          }}
-        />
-      )}
-
-
 
     </main>
   );
