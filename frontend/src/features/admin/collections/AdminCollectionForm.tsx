@@ -3,9 +3,12 @@
  * Formulario para crear/editar colecciones.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useBlocker } from 'react-router-dom';
 import type { Collection } from './collectionsService';
 import { collectionsService } from './collectionsService';
+import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductSelector } from './ProductSelector';
 import styles from './AdminCollections.module.css';
 
@@ -38,6 +41,49 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // ─── Initial state snapshot (for dirty detection) ────────────────────────
+  const [initialFormData] = useState(() => collection ? {
+    name: collection.name,
+    slug: collection.slug,
+    description: collection.description || '',
+    displayPosition: collection.displayPosition,
+    displayOrder: collection.displayOrder,
+    imageUrl: collection.imageUrl || '',
+    isActive: collection.isActive,
+    productIds: collection.products?.map((p) => p.id) ?? [] as string[],
+  } : {
+    name: '',
+    slug: '',
+    description: '',
+    displayPosition: 'home' as 'home' | 'category',
+    displayOrder: 0,
+    imageUrl: '',
+    isActive: true,
+    productIds: [] as string[],
+  });
+
+  const isDirty = useMemo(() =>
+    JSON.stringify(formData) !== JSON.stringify(initialFormData),
+  [formData, initialFormData]);
+
+  const {
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
+    interceptNavigation,
+    setIsDirty: setHookIsDirty,
+  } = useUnsavedChangesWarning({ active: isDirty });
+
+  useEffect(() => {
+    setHookIsDirty(isDirty);
+  }, [isDirty, setHookIsDirty]);
+
+  const blocker = useBlocker(isDirty);
+
+  const handleCancel = useCallback(() => {
+    interceptNavigation(() => onCancel());
+  }, [interceptNavigation, onCancel]);
 
   useEffect(() => {
     if (collection) {
@@ -208,11 +254,28 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           <button type="submit" className={styles.btnPrimary} disabled={loading}>
             {loading ? 'Guardando...' : collection ? 'Actualizar' : 'Crear'}
           </button>
-          <button type="button" className={styles.btnSecondary} onClick={onCancel} disabled={loading}>
+          <button type="button" className={styles.btnSecondary} onClick={handleCancel} disabled={loading}>
             Cancelar
           </button>
         </div>
       </form>
+
+      {/* Unsaved changes warning */}
+      <ModalConfirm
+        open={showWarning || blocker.state === 'blocked'}
+        title="¿Abandonar sin guardar?"
+        message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
+        confirmText="Sí, abandonar"
+        cancelText="Seguir editando"
+        onConfirm={() => {
+          if (blocker.state === 'blocked') blocker.proceed();
+          confirmNavigation();
+        }}
+        onCancel={() => {
+          if (blocker.state === 'blocked') blocker.reset();
+          cancelNavigation();
+        }}
+      />
     </div>
   );
 };

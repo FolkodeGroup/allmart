@@ -1566,3 +1566,13 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #861: 836 confirmación al eliminar producto | 2026-05-01 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #860: Se implementa confirmación al duplicar producto | 2026-05-01 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #863: 838 vista de categorías con layout dividido izquierdaderecha | 2026-05-02 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #825: 768 agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #865: Lo que cambié: | 2026-05-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #866: 841 mejorar la visualización del detalle de pedido modal o nueva página | 2026-05-03 |

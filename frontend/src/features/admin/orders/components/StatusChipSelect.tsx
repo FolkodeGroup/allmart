@@ -60,11 +60,16 @@ export function StatusChipSelect({
 }: StatusChipSelectProps) {
 
     /**
-     * Agrega un valor a la selección.
-     * El guard `!selected.includes(value)` evita duplicados sin lanzar error.
+     * Maneja la selección del dropdown.
+     * Si se selecciona el valor vacío (placeholder "Todos los estados"), limpia la selección.
+     * Si se selecciona un estado, lo agrega a la selección evitando duplicados.
      */
     const handleAdd = (value: string) => {
-        if (!selected.includes(value)) {
+        if (!value) {
+            // El usuario seleccionó "Todos los estados" → limpiar todos los chips
+            onChange([]);
+        } else if (!selected.includes(value)) {
+            // El usuario seleccionó un estado específico → agregarlo
             onChange([...selected, value]);
         }
     };
@@ -91,7 +96,7 @@ export function StatusChipSelect({
                 <select
                     className={styles.filterSelect}
                     value={selected[0] || ''}
-                    onChange={e => { if (e.target.value) handleAdd(e.target.value); }}
+                    onChange={e => handleAdd(e.target.value)}
                     aria-label="Filtrar por estado"
                 >
                     <option value="">{placeholder}</option>

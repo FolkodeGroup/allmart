@@ -16,7 +16,7 @@ import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import { paymentClass, formatDateTime, formatPrice, PAYMENT_LABELS } from '../utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import type { Order, OrderStatus, PaymentStatus } from '../../../../context/AdminOrdersContext';
-import styles from '../AdminOrders.module.css';
+import styles from './OrderDetailContent.module.css';
 import { logAdminActivity } from '../../../../services/adminActivityLogService';
 import { useUnsavedChanges } from '../../../../hooks/useUnsavedChanges';
 import { OrderStatusBadge } from './OrderStatusBadge';

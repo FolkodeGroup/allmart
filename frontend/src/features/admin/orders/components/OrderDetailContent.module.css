@@ -1,0 +1,593 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   OrderDetailContent.module.css
+   Estilos mejorados para presentación clara del contenido de pedidos.
+   Optimizado para páginas dedicadas y una mejor experiencia visual.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.detailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Secciones del detalle ── */
+
+.detailSection {
+  background: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detailSection:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.detailSectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Estado del pedido ── */
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.statusLoading {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.statusChangeBox {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+}
+
+.statusNoteInput {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.statusNoteInput:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.statusNoteInput:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.statusChangeActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.applyStatusBtn,
+.whatsappBtnConfirm,
+.saveNotesBtn,
+.deleteConfirmBtn {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.applyStatusBtn {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.applyStatusBtn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.applyStatusBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.applyStatusBtn:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.cancelBtn:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+/* ── Pago ── */
+
+.paymentRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.paymentBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.paymentAbonado {
+  background: #dcfce7;
+  color: #128c48;
+}
+
+.paymentNoAbonado {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.paidAt {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.whatsappActions {
+  margin-top: 1rem;
+}
+
+.whatsappBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: #25d366;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.2);
+}
+
+.whatsappBtn:hover {
+  background: #128c48;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.whatsappIcon {
+  font-size: 1.1rem;
+}
+
+.confirmPaidBox {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border: 1px solid #b7f0cc;
+  border-radius: 8px;
+}
+
+.confirmPaidText {
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.confirmPaidActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.whatsappBtnConfirm {
+  background: #25d366;
+  color: white;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.2);
+  flex: 1;
+  min-width: 150px;
+}
+
+.whatsappBtnConfirm:hover:not(:disabled) {
+  background: #128c48;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+}
+
+/* ── Cliente ── */
+
+.customerCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.customerAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.customerFullName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.customerEmailText {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* ── Productos ── */
+
+.itemsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.itemsTable thead {
+  border-bottom: 2px solid #e1e8ed;
+  background: #f8fafc;
+}
+
+.itemsTable th {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.itemsTable td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e1e8ed;
+  color: #1a1a1a;
+}
+
+.itemsTable tbody tr:hover {
+  background: #f8fafc;
+}
+
+.tdCenter {
+  text-align: center;
+}
+
+.tdRight {
+  text-align: right;
+}
+
+.totalLabel {
+  font-weight: 600;
+  text-align: right;
+  padding-top: 1rem;
+  border-top: 2px solid #e1e8ed;
+  background: #f8fafc;
+}
+
+.totalValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #059669;
+  background: #f8fafc;
+}
+
+/* ── Notas ── */
+
+.notesInput {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  color: #1a1a1a;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s ease;
+}
+
+.notesInput:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.notesInput:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.saveNotesBtn {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+.saveNotesBtn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.saveNotesBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.saveNotesBtn:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* ── Zona peligrosa ── */
+
+.dangerSection {
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+.deleteBtn {
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+}
+
+.deleteBtn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}
+
+.deleteBtn:active {
+  transform: translateY(0);
+}
+
+.confirmDelete {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: #fecaca;
+  border-radius: 6px;
+}
+
+.confirmDelete span {
+  font-size: 0.95rem;
+  color: #7f1d1d;
+  font-weight: 500;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.deleteConfirmBtn {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+  flex: 1;
+  min-width: 120px;
+}
+
+.deleteConfirmBtn:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}
+
+.deleteConfirmBtn:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .detailContent {
+    gap: 1.5rem;
+  }
+
+  .detailSection {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .detailSectionTitle {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .statusChangeBox,
+  .confirmPaidBox {
+    padding: 0.75rem;
+  }
+
+  .statusNoteInput,
+  .notesInput {
+    font-size: 0.9rem;
+    padding: 0.65rem;
+  }
+
+  .applyStatusBtn,
+  .whatsappBtn,
+  .whatsappBtnConfirm,
+  .saveNotesBtn,
+  .deleteBtn,
+  .deleteConfirmBtn,
+  .cancelBtn {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .itemsTable {
+    font-size: 0.85rem;
+  }
+
+  .itemsTable th,
+  .itemsTable td {
+    padding: 0.5rem;
+  }
+
+  .customerCard {
+    padding: 0.75rem;
+  }
+
+  .customerAvatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .detailContent {
+    gap: 1rem;
+  }
+
+  .detailSection {
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .statusChangeActions,
+  .confirmPaidActions,
+  .confirmActions {
+    flex-direction: column;
+  }
+
+  .applyStatusBtn,
+  .whatsappBtnConfirm,
+  .saveNotesBtn,
+  .deleteConfirmBtn,
+  .cancelBtn {
+    width: 100%;
+  }
+
+  .itemsTable {
+    font-size: 0.75rem;
+  }
+
+  .itemsTable th,
+  .itemsTable td {
+    padding: 0.4rem 0.25rem;
+  }
+}
