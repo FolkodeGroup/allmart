@@ -118,10 +118,10 @@ function AdminOrders() {
       return { type: 'custom' } as const;
     }
 
-    if (filters.statuses.length === 1) {
+    if (filters.status) {
       return {
         type: 'predefined',
-        period: filters.statuses[0],
+        period: filters.status,
       } as const;
     }
 
@@ -179,7 +179,7 @@ function AdminOrders() {
       if (debouncedFilters.search) params.q = debouncedFilters.search;
       // Cuando hay exactamente un estado seleccionado, filtrar en el backend
       // Con múltiples estados, el filtro client-side en useOrdersFilters se encarga
-      if (debouncedFilters.statuses.length === 1) params.status = debouncedFilters.statuses[0];
+      if (debouncedFilters.status.length === 1) params.status = debouncedFilters.status[0];
 
       const res = await fetchAdminOrders(token, params);
       const normalized = res.data.map(mapApiOrderToOrder);
