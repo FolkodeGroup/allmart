@@ -1,0 +1,212 @@
+/* ── ProductRow ── */
+.productRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    width: 100%;
+}
+
+.productRow:hover {
+    background: #f9fafb;
+    border-radius: 6px;
+}
+
+.productRowImage {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid #e5e7eb;
+}
+
+.productRowInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.productRowName {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.productRowSku {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.productRowRemove {
+    background: #f5d4d4;
+    color: #c75050;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.productRowRemove:hover {
+    background: #eba5a5;
+}
+
+/* ── ProductSelector ── */
+.productSelectorSearch {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.productDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 10;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.productDropdownItem {
+    width: 100%;
+    background: white;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    transition: background 0.15s;
+}
+
+.productDropdownItem:last-child {
+    border-bottom: none;
+}
+
+.productDropdownItem:hover {
+    background: #f9fafb;
+}
+
+.productDropdownMessage {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.productDropdownError {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #ef4444;
+}
+
+.selectedProductsList {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.selectedProductsHeader {
+    background: #f9fafb;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.selectedProductsEmpty {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #9ca3af;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.productRowMeta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+/* ID */
+.productRowId {
+    font-size: .7rem;
+    color: #797f89;
+    padding: 0px 0 3px;
+    border-radius: 4px;
+}
+
+/* SKU */
+.productRowSku {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* PRICE */
+.productRowPrice {
+    font-size: 12px;
+    font-weight: 600;
+    color: #059669;
+    /* verde tipo success */
+}
+
+/* Dark mode */
+:global(.dark) .productRowName {
+    color: var(--color-text-primary, #f3f3f3);
+}
+
+:global(.dark) .productRowSku {
+    color: var(--color-text-tertiary, #b6a68a);
+}
+
+:global(.dark) .productRowImage {
+    border-color: var(--color-border, #2d3a3f);
+}
+
+:global(.dark) .productDropdown {
+    background: var(--color-bg-card, #232a2f);
+    border-color: var(--color-border, #2d3a3f);
+}
+
+:global(.dark) .productDropdownItem {
+    background: var(--color-bg-card, #232a2f);
+    border-bottom-color: var(--color-border, #2d3a3f);
+}
+
+:global(.dark) .productDropdownItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark) .productDropdownMessage {
+    color: var(--color-text-tertiary, #b6a68a);
+}
+
+:global(.dark) .selectedProductsList {
+    border-color: var(--color-border, #2d3a3f);
+}
+
+:global(.dark) .selectedProductsHeader {
+    background: var(--color-bg-secondary, #181c1f);
+    color: var(--color-text-tertiary, #b6a68a);
+    border-bottom-color: var(--color-border, #2d3a3f);
+}
+
+:global(.dark) .selectedProductsEmpty {
+    border-color: var(--color-border, #2d3a3f);
+    color: var(--color-text-tertiary, #b6a68a);
+}
