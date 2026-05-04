@@ -29,6 +29,7 @@ export function BannersAdmin() {
   const [banners, setBanners] = useState<AdminBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isAltManuallyEdited, setIsAltManuallyEdited] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -107,6 +108,7 @@ export function BannersAdmin() {
     });
     setEditingId(null);
     setShowForm(false);
+    setIsAltManuallyEdited(false);
   }
 
   function handleEdit(banner: AdminBanner) {
@@ -120,13 +122,17 @@ export function BannersAdmin() {
     setFormData({
       title: banner.title,
       description: banner.description || '',
-      imageFile: null, // No cargar archivo, solo metadatos
+      imageFile: null,
       displayOrder: banner.displayOrder,
       isActive: banner.isActive,
       altText: banner.altText || '',
     });
     setEditingId(banner.id);
     setShowForm(true);
+    // Si el alt existente difiere del título, el usuario lo editó manualmente en algún momento
+    setIsAltManuallyEdited(
+      !!banner.altText && banner.altText !== banner.title
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -242,7 +248,14 @@ export function BannersAdmin() {
                 type="text"
                 placeholder="Título del banner"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) => {
+                  const title = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    title,
+                    altText: isAltManuallyEdited ? prev.altText : title,
+                  }));
+                }}
                 required
               />
             </div>
@@ -293,7 +306,10 @@ export function BannersAdmin() {
                 type="text"
                 placeholder="Descripción para accesibilidad"
                 value={formData.altText}
-                onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
+                onChange={(e) => {
+                  setIsAltManuallyEdited(true); // ← el usuario tomó control
+                  setFormData({ ...formData, altText: e.target.value });
+                }}
               />
             </div>
 
