@@ -98,8 +98,35 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         isActive: collection.isActive,
         productIds: initialProductIds,
       });
+    } else {
+      // Para nueva colección, calcular el siguiente displayOrder disponible
+      calculateNextDisplayOrder();
     }
   }, [collection]);
+
+  async function calculateNextDisplayOrder() {
+    try {
+      const allCollections = await collectionsService.getAllUnpaginated();
+      // Encontrar el primer número disponible
+      let nextOrder = 0;
+      const usedOrders = new Set(allCollections.map(c => c.displayOrder));
+      while (usedOrders.has(nextOrder)) {
+        nextOrder++;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        displayOrder: nextOrder
+      }));
+    } catch (err) {
+      console.error('Error calculating next display order:', err);
+      // Si hay error, dejar el valor por defecto (0)
+      setFormData(prev => ({
+        ...prev,
+        displayOrder: 0
+      }));
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -109,6 +136,19 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
     try {
       if (!formData.name.trim()) {
         setError('El nombre es requerido');
+        setLoading(false);
+        return;
+      }
+
+      // Validar que el displayOrder sea único
+      const allCollections = await collectionsService.getAllUnpaginated();
+      const isDuplicateOrder = allCollections.some(
+        c => c.displayOrder === formData.displayOrder && c.id !== collection?.id
+      );
+
+      if (isDuplicateOrder) {
+        setError(`El orden de display ${formData.displayOrder} ya está en uso. Por favor, elige otro número.`);
+        setLoading(false);
         return;
       }
 

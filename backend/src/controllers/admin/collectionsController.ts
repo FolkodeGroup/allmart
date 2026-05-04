@@ -9,6 +9,19 @@ import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
 import { CreateCollectionDTO, UpdateCollectionDTO } from '../../services/collectionsService';
 
+export async function getAll(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const collections = await collectionsService.getAllCollectionsUnpaginated();
+    sendSuccess(res, collections);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function index(
   req: AuthenticatedRequest,
   res: Response,
