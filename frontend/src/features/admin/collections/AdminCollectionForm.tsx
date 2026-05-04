@@ -65,7 +65,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
 
   const isDirty = useMemo(() =>
     JSON.stringify(formData) !== JSON.stringify(initialFormData),
-  [formData, initialFormData]);
+    [formData, initialFormData]);
 
   const {
     showWarning,
@@ -137,7 +137,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       .replace(/\s+/g, '-')
       .replace(/[^\w-]+/g, '');
   }
-
   return (
     <div className={styles.container}>
       <div className={styles.formHeader}>
@@ -220,22 +219,16 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
             <small>Menor número aparece primero</small>
           </div>
         </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="collection-image">URL de Imagen</label>
-          <input
-            id="collection-image"
-            type="url"
-            value={formData.imageUrl}
-            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-            placeholder="https://..."
-          />
-        </div>
-
         <ProductSelector
           selectedIds={formData.productIds}
-          onProductsChange={(productIds) =>
-            setFormData({ ...formData, productIds })
+          onProductsChange={(productIds) => setFormData({ ...formData, productIds })}
+          initialProducts={
+            collection?.products?.map((p) => ({
+              id: p.id,
+              name: p.name,
+              price: p.price,
+              imageUrl: p.imageUrl,
+            })) ?? []
           }
         />
 
