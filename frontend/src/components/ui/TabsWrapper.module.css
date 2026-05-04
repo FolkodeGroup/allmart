@@ -79,21 +79,3 @@
     display: none;
 }
 
-/* Dark mode support */
-:global(.dark) .tabBar {
-    background: var(--color-surface-dark, #1f2937);
-    border-bottom-color: var(--color-border-dark, #374151);
-}
-
-:global(.dark) .tab {
-    color: var(--color-text-muted-dark, #9ca3af);
-}
-
-:global(.dark) .tab:hover {
-    color: var(--color-text-dark, #f9fafb);
-}
-
-:global(.dark) .tabActive {
-    color: var(--color-primary-light, #60a5fa);
-    border-bottom-color: var(--color-primary-light, #60a5fa);
-}

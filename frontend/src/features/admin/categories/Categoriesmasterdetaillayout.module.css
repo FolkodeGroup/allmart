@@ -66,17 +66,3 @@
     }
 }
 
-/* ── Dark mode ─────────────────────────────────────────────────── */
-:global(.dark) .container {
-    background: var(--color-bg-card, #232a2f);
-    border-color: var(--color-border, #2d3a3f);
-}
-
-:global(.dark) .emptyDetail {
-    color: var(--color-text-tertiary, #b6a68a);
-}
-
-:global(.dark) .spinner {
-    border-color: var(--color-border, #2d3a3f);
-    border-top-color: var(--color-primary, #a3c9a8);
-}

@@ -731,57 +731,7 @@
   text-transform: capitalize;
 }
 
-/* ── Dark Mode ───────────────────────────────────────────────── */
 
-:global(.dark) .widgetSection {
-  background: var(--color-bg-card, #232a2f);
-}
-
-:global(.dark) .widgetHeader {
-  background: color-mix(in srgb, var(--color-bg-secondary) 70%, var(--color-bg-card));
-}
-
-:global(.dark) .chartCard {
-  background: var(--color-bg-secondary, #181c1f);
-}
-
-:global(.dark) .quickCard {
-  background: var(--color-bg-secondary, #181c1f);
-}
-
-:global(.dark) .ordersRow:hover {
-  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
-}
-
-:global(.dark) .status_pendiente {
-  background: rgba(254, 243, 199, 0.12);
-  color: #fcd34d;
-}
-
-:global(.dark) .status_confirmado,
-:global(.dark) .status_procesando {
-  background: rgba(219, 234, 254, 0.12);
-  color: #93c5fd;
-}
-
-:global(.dark) .status_enviado {
-  background: rgba(209, 250, 229, 0.12);
-  color: #6ee7b7;
-}
-
-:global(.dark) .status_entregado {
-  background: rgba(209, 250, 229, 0.12);
-  color: #34d399;
-}
-
-:global(.dark) .status_cancelado {
-  background: rgba(254, 226, 226, 0.12);
-  color: #fca5a5;
-}
-
-:global(.dark) .goalBarInner {
-  background: linear-gradient(90deg, #16a34a, #22c55e);
-}
 
 /* ── Responsive ──────────────────────────────────────────────── */
 

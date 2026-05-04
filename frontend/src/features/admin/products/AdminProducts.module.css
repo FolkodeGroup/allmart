@@ -175,37 +175,6 @@
   }
 }
 
-/* ── Dark mode ── */
-:global(.dark) .filters {
-  background-color: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
-}
-
-:global(.dark) .searchInput,
-:global(.dark) .select {
-  background: var(--color-bg-secondary, #181c1f);
-  border-color: var(--color-border, #2d3a3f);
-  color: var(--color-text-primary, #f3f3f3);
-}
-
-:global(.dark) .searchInput::placeholder {
-  color: var(--color-text-tertiary, #888);
-}
-
-:global(.dark) .searchInput:focus,
-:global(.dark) .select:focus {
-  border-color: var(--color-primary, #a3c9a8);
-}
-
-:global(.dark) .suggestionsList {
-  background: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
-}
-
-:global(.dark) .suggestionItem:hover,
-:global(.dark) .suggestionActive {
-  background: rgba(255, 255, 255, 0.06);
-}
 
 /* ── Paginación ── */
 .pagination {

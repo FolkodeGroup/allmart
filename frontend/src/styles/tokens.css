@@ -126,10 +126,10 @@
    ─────────────────────────────────────────── */
 
 /* ============================================
-   ADMIN DARK MODE — applied when html.dark
+   ADMIN DARK MODE — applied when .dark class is on admin container
    ============================================ */
 
-html.dark {
+:is( .admin-dark) {
   color-scheme: dark;
 
   /* ── Palette overrides ── */
