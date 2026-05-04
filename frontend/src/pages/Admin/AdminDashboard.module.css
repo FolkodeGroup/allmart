@@ -217,6 +217,12 @@
   padding: var(--space-4);
 }
 
+.staff-notes-area {
+  width: 100%;
+  resize: vertical;
+  background: var(--color-bg-tertiary);
+}
+
 /* ── Metrics Grid ────────────────────────────────────────────── */
 
 .metricsGrid {

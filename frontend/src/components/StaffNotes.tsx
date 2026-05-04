@@ -82,7 +82,7 @@ export default function StaffNotes() {
                     onChange={(e) => setNewContent(e.target.value)}
                     placeholder="Escribe una nota..."
                     rows={2}
-                    style={{ width: '100%', resize: 'vertical' }}
+                    className='staff-notes-area'
                     disabled={creating}
                 />
                 <button type="submit" disabled={creating || !newContent.trim()} className="add-btn">
