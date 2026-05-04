@@ -46,7 +46,7 @@ const CollectionSlider: React.FC<Props> = ({
 
     const { scrollWidth, clientWidth, scrollLeft } = sliderRef.current;
     const hasOverflowContent = scrollWidth > clientWidth;
-    
+
     setHasOverflow(hasOverflowContent);
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10); // 10px threshold
@@ -55,7 +55,7 @@ const CollectionSlider: React.FC<Props> = ({
   useEffect(() => {
     checkOverflow();
     window.addEventListener('resize', checkOverflow);
-    
+
     const slider = sliderRef.current;
     if (slider) {
       slider.addEventListener('scroll', checkOverflow);
@@ -76,7 +76,7 @@ const CollectionSlider: React.FC<Props> = ({
       direction === 'left'
         ? sliderRef.current.scrollLeft - scrollAmount
         : sliderRef.current.scrollLeft + scrollAmount;
-    
+
     sliderRef.current.scrollTo({
       left: newPos,
       behavior: 'smooth',
@@ -118,7 +118,7 @@ const CollectionSlider: React.FC<Props> = ({
         </div>
       </div>
 
-      <div 
+      <div
         className={`${styles.sliderWrapper} ${!hasOverflow ? styles.centered : ''}`}
         ref={containerRef}
       >
@@ -130,12 +130,12 @@ const CollectionSlider: React.FC<Props> = ({
             disabled={!canScrollLeft}
             style={{ opacity: canScrollLeft ? 1 : 0.3 }}
           >
-            ◄
+            ‹
           </button>
         )}
 
-        <div 
-          className={styles.slider} 
+        <div
+          className={styles.slider}
           ref={sliderRef}
           role="region"
           aria-label={`Productos de ${title}`}
@@ -185,7 +185,7 @@ const CollectionSlider: React.FC<Props> = ({
             disabled={!canScrollRight}
             style={{ opacity: canScrollRight ? 1 : 0.3 }}
           >
-            ►
+            ›
           </button>
         )}
       </div>
