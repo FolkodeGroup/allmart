@@ -57,6 +57,11 @@ export const collectionsService = {
     return response.data;
   },
 
+  async getAllUnpaginated(): Promise<Collection[]> {
+    const response = await apiFetch<{ data: Collection[] }>('/api/admin/collections/all');
+    return response.data;
+  },
+
   async getById(id: string): Promise<Collection> {
     const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}`);
     return response.data;

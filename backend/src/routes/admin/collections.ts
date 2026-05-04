@@ -8,6 +8,9 @@ import * as controller from '../../controllers/admin/collectionsController';
 
 const router = Router();
 
+// GET /api/admin/collections/all - Obtener todas las colecciones sin paginación
+router.get('/all', controller.getAll);
+
 // GET /api/admin/collections - Listar colecciones con paginación
 router.get('/', controller.index);
 
