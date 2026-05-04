@@ -220,25 +220,27 @@ const AdminCollections: React.FC = () => {
         </table>
       </div>
 
-      <div className={styles.pagination}>
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-          className={styles.btnSmall}
-        >
-          Anterior
-        </button>
-        <span>
-          Página {page} de {pages}
-        </span>
-        <button
-          disabled={page === pages}
-          onClick={() => setPage(page + 1)}
-          className={styles.btnSmall}
-        >
-          Siguiente
-        </button>
-      </div>
+      {collections.length > 0 && pages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className={styles.btnSmall}
+          >
+            Anterior
+          </button>
+          <span>
+            Página {page} de {pages}
+          </span>
+          <button
+            disabled={page === pages}
+            onClick={() => setPage(page + 1)}
+            className={styles.btnSmall}
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
 
       <ConfirmModal
         open={deleteModalOpen}
