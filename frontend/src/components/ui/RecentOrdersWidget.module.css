@@ -1,9 +1,11 @@
 .card {
   padding: 1.5rem;
-  background: white;
+  background: var(--color-bg-card, #fff);
+  border: 1px solid var(--color-border, transparent);
   border-radius: 1rem;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 2rem;
+  transition: background 0.3s;
 }
 .title {
   font-size: 1.2rem;

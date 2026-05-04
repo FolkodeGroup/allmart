@@ -34,13 +34,14 @@
 }
 
 .modal {
-  background: #fff;
-  color: #222;
+  background: var(--color-bg-card, #fff);
+  color: var(--color-text-primary, #222);
   border-radius: 10px;
   min-width: 320px;
   width: min(680px, 95vw);
   max-height: 90vh;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  box-shadow: var(--shadow-xl, 0 8px 32px rgba(0,0,0,0.18));
+  border: 1px solid var(--color-border, transparent);
   padding: 1.75rem 1.5rem 1.5rem 1.5rem;
   position: relative;
   animation: slideUp 0.2s;
@@ -86,9 +87,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #f6f6f6;
-  color: #333;
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+  background: var(--color-bg-tertiary, #f6f6f6);
+  color: var(--color-text-primary, #333);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;

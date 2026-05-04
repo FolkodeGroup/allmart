@@ -1,13 +1,14 @@
 .card {
   background: var(--color-bg-card, #fff);
   border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.06));
   padding: 1.2rem 1.4rem;
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
   min-width: 0;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--color-border, #f0f0f0);
+  transition: background 0.3s, border-color 0.3s;
 }
 .header {
   display: flex;
@@ -25,7 +26,7 @@
 .value {
   font-size: 2.2rem;
   font-weight: 700;
-  color: #ff9800;
+  color: var(--color-accent, #ff9800);
 }
 .variation {
   display: flex;
@@ -50,7 +51,7 @@
   font-weight: 600;
 }
 .label {
-  color: #999;
+  color: var(--color-text-tertiary, #999);
   font-size: 0.9rem;
   font-weight: 500;
 }

@@ -1045,3 +1045,24 @@
     border-radius: 10px;
   }
 }
+
+/* ── Dark mode ─────────────────────────────────────────────────── */
+:global(.dark) .chipConfirmBtn {
+  background: #16a34a;
+}
+
+:global(.dark) .chipConfirmBtn:hover {
+  background: #15803d;
+}
+
+:global(.dark) .chipErrorText {
+  color: #f87171;
+}
+
+:global(.dark) .exportButton {
+  background: #2563eb;
+}
+
+:global(.dark) .exportButton:hover {
+  background: #1d4ed8;
+}

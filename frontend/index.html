@@ -18,6 +18,18 @@
       rel="stylesheet"
     />
     <title>Allmart — Tu hogar, más práctico</title>
+    <!-- Dark mode FOUC prevention: apply stored theme before paint -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('admin-theme');
+          if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

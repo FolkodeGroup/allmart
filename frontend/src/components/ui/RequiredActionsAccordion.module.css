@@ -1,16 +1,16 @@
 /* ─── Accordion Container ─────────────────────────────────────────────────── */
 
 .accordion {
-  background: #fff;
+  background: var(--color-bg-card, #fff);
   border-radius: 12px;
-  border: 2px solid #f0f0f0;
+  border: 2px solid var(--color-border, #f0f0f0);
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .accordion:hover {
-  border-color: #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: var(--color-border, #e0e0e0);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.06));
 }
 
 /* ─── Accordion Header ────────────────────────────────────────────────────── */
@@ -21,9 +21,9 @@
   justify-content: space-between;
   width: 100%;
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafc 100%);
+  background: var(--color-bg-secondary, #f5f7fa);
   border: none;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-body);
@@ -31,7 +31,7 @@
 }
 
 .accordionHeader:hover {
-  background: linear-gradient(135deg, #f0f3f7 0%, #f5f8fb 100%);
+  background: var(--color-bg-tertiary, #f0f3f7);
 }
 
 .accordionHeaderLeft {
@@ -47,7 +47,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   font-size: 0.75rem;
   transition: transform 0.2s ease;
 }
@@ -59,7 +59,7 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
 }
 
 .titleIcon {
@@ -79,8 +79,8 @@
   min-width: 24px;
   height: 24px;
   padding: 0 8px;
-  background: #e8e8e8;
-  color: #666;
+  background: var(--color-bg-tertiary, #e8e8e8);
+  color: var(--color-text-tertiary, #666);
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -140,15 +140,15 @@
 }
 
 .tableHeader {
-  background: #f5f5f5;
-  border-bottom: 2px solid #e0e0e0;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border-bottom: 2px solid var(--color-border, #e0e0e0);
 }
 
 .tableHeaderCell {
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   white-space: nowrap;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -156,23 +156,23 @@
 }
 
 .tableRow {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
   transition: background-color 0.15s ease;
 }
 
 .tableRow:hover {
-  background: #fafafa;
+  background: var(--color-bg-secondary, #fafafa);
 }
 
 .tableCell {
   padding: 0.75rem 1rem;
-  color: #333;
+  color: var(--color-text-secondary, #333);
 }
 
 .tableCellAmount {
   padding: 0.75rem 1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
 }
 
 .tableCellAction {
@@ -189,8 +189,8 @@
 .emptyState {
   padding: 2rem 1rem;
   text-align: center;
-  color: #666;
-  background: #fafafa;
+  color: var(--color-text-tertiary, #666);
+  background: var(--color-bg-secondary, #fafafa);
   border-radius: 8px;
   margin-top: 1rem;
 }
@@ -207,19 +207,19 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: #f0f9ff;
-  border: 1px solid #bfdbfe;
+  background: var(--color-bg-secondary, #f0f9ff);
+  border: 1px solid var(--color-border, #bfdbfe);
   border-radius: 8px;
   margin-bottom: 1rem;
   font-size: 0.95rem;
 }
 
 .totalBar span {
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .totalBar strong {
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
   font-size: 1.1rem;
 }
 

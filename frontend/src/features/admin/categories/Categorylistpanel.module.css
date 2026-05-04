@@ -168,6 +168,19 @@
     color: #b91c1c;
 }
 
+/* ── Dark mode ─────────────────────────────────────────────────── */
+:global(.dark) .visible {
+    color: #4ade80;
+}
+
+:global(.dark) .hidden {
+    color: #f87171;
+}
+
+:global(.dark) .emptyCount {
+    color: #f87171;
+}
+
 /* ── Meta line ─────────────────────────────────────────────────── */
 .metaLine {
     display: flex;

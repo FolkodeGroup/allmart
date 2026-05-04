@@ -1,7 +1,8 @@
 .widget {
   background: var(--color-bg-card, #fff);
   border-radius: var(--radius-lg, 16px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  border: 1px solid var(--color-border, transparent);
   padding: 1.5rem 1.5rem 1rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -10,12 +11,13 @@
   max-width: 280px;
   width: 100%;
   margin: 2rem 2rem 2rem 0rem;
+  transition: background 0.3s;
 }
 .title {
   font-size: 1.15rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
 }
 .content {
   display: flex;
@@ -33,16 +35,16 @@
   height: 90px;
 }
 .bg {
-  stroke: #e8e8e8;
+  stroke: var(--color-bg-tertiary, #e8e8e8);
 }
 .fg {
-  stroke: #ff9800;
+  stroke: var(--color-accent, #ff9800);
   transition: stroke-dashoffset 0.5s cubic-bezier(.4,2,.6,1);
 }
 .percentText {
   font-size: 1.3rem;
   font-weight: 700;
-  fill: #ff9800;
+  fill: var(--color-accent, #ff9800);
 }
 .inputContainer {
   display: flex;
@@ -52,33 +54,33 @@
 }
 .label {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   margin-bottom: 0.1rem;
   font-weight: 500;
 }
 .input {
   width: 120px;
   padding: 0.5rem 0.7rem;
-  border: 1.5px solid #ddd;
+  border: 1.5px solid var(--color-border, #ddd);
   border-radius: 6px;
   font-size: 0.95rem;
-  color: #1a1a1a;
-  background: #fafbfc;
+  color: var(--color-text-primary, #1a1a1a);
+  background: var(--color-bg-secondary, #fafbfc);
   outline: none;
   transition: border 0.2s, box-shadow 0.2s;
 }
 .input:focus {
-  border: 1.5px solid #ff9800;
-  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  border: 1.5px solid var(--color-accent, #ff9800);
+  box-shadow: 0 0 0 3px rgba(221, 176, 140, 0.15);
 }
 .ventasInfo {
   margin-top: 0.8rem;
   font-size: 0.95rem;
-  color: #444;
+  color: var(--color-text-secondary, #444);
 }
 .ventas {
   font-weight: 600;
-  color: #ff9800;
+  color: var(--color-accent, #ff9800);
 }
 @media (max-width: 900px) {
   .widget {

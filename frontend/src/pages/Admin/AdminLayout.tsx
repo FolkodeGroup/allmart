@@ -140,6 +140,8 @@ export function AdminLayout() {
 
   useEffect(() => {
     localStorage.setItem('admin-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
   }, [theme]);
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);

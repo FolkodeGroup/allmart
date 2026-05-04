@@ -482,3 +482,28 @@
     justify-content: center;
   }
 }
+
+/* ── Dark Mode Overrides ── */
+:global(.dark) .status_success {
+  color: #4ade80;
+}
+
+:global(.dark) .status_error {
+  color: #f87171;
+}
+
+:global(.dark) .rolePill[data-role='admin'] {
+  color: var(--color-primary-light, #cbe7c9);
+}
+
+:global(.dark) .rolePill[data-role='editor'] {
+  color: var(--color-accent-light, #e8c5a8);
+}
+
+:global(.dark) .radioChipActive {
+  color: var(--color-primary-light, #cbe7c9);
+}
+
+:global(.dark) .fieldError {
+  color: #f87171;
+}
