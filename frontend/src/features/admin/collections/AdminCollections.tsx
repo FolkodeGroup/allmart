@@ -166,6 +166,7 @@ const AdminCollections: React.FC = () => {
               <th>Nombre</th>
               <th>Slug</th>
               <th>Posición</th>
+              <th>Orden</th>
               <th>Productos</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -174,13 +175,13 @@ const AdminCollections: React.FC = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className={styles.loading}>
+                <td colSpan={7} className={styles.loading}>
                   Cargando...
                 </td>
               </tr>
             ) : collections.length === 0 ? (
               <tr>
-                <td colSpan={6} className={styles.empty}>
+                <td colSpan={7} className={styles.empty}>
                   No hay colecciones
                 </td>
               </tr>
@@ -192,6 +193,9 @@ const AdminCollections: React.FC = () => {
                   </td>
                   <td className={styles.monospace}>{collection.slug}</td>
                   <td>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</td>
+                  <td>
+                    <strong>{collection.displayOrder}</strong>
+                  </td>
                   <td>{collection.productCount}</td>
                   <td>
                     <span
@@ -220,25 +224,27 @@ const AdminCollections: React.FC = () => {
         </table>
       </div>
 
-      <div className={styles.pagination}>
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-          className={styles.btnSmall}
-        >
-          Anterior
-        </button>
-        <span>
-          Página {page} de {pages}
-        </span>
-        <button
-          disabled={page === pages}
-          onClick={() => setPage(page + 1)}
-          className={styles.btnSmall}
-        >
-          Siguiente
-        </button>
-      </div>
+      {collections.length > 0 && pages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className={styles.btnSmall}
+          >
+            Anterior
+          </button>
+          <span>
+            Página {page} de {pages}
+          </span>
+          <button
+            disabled={page === pages}
+            onClick={() => setPage(page + 1)}
+            className={styles.btnSmall}
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
 
       <ConfirmModal
         open={deleteModalOpen}
