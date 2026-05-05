@@ -227,14 +227,14 @@
 .pageActive {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-neutral-light);
   font-weight: var(--font-bold);
 }
 
 .pageActive:hover {
   background: var(--color-primary-dark, #5a7a6a) !important;
   border-color: var(--color-primary-dark, #5a7a6a) !important;
-  color: #fff !important;
+  color: var(--color-neutral-light) !important;
 }
 
 .pageNumbers {

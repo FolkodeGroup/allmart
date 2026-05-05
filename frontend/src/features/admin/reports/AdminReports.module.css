@@ -39,7 +39,7 @@
   }
 
   .orderCard {
-    background: #fff;
+    background: var(--color-bg-primary);
     border-radius: 12px;
     box-shadow: 0 2px 8px #0001;
     padding: 1rem 1.2rem;
@@ -144,8 +144,8 @@
   }
 
   .salesCard {
-    background: #fff;
-    border: 1px solid #e5e2dd;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 0.9rem 1rem;
     display: flex;
@@ -409,7 +409,7 @@
   max-width: 520px;
   max-height: 80vh;
 
-  background: #ffffff;
+  background: var(--color-bg-primary);
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 
@@ -582,7 +582,7 @@
 
 .rankBadgeModern {
   background: var(--color-primary, #ff9800);
-  color: #fff;
+  color: var(--color-neutral-light);
   font-weight: 700;
   font-size: 0.85rem;
   padding: 3px 10px;
@@ -953,12 +953,12 @@
   }
 
   .pageBtn {
-    background: #fff;
-    border: 1.5px solid #e5e2dd;
+    background: var(--color-bg-primary);
+    border: 1.5px solid var(--color-border);
     border-radius: 6px;
     padding: 4px 13px;
     cursor: pointer;
-    color: #1a1a1a;
+    color: var(--color-text-primary);
     font-weight: 600;
     font-family: inherit;
     font-size: 15px;
@@ -966,7 +966,7 @@
     transition: background 0.15s, border-color 0.15s, color 0.15s;
     margin: 0 1px;
     outline: none;
-  }
+  }}
 
   .pageBtn:focus {
     border-color: #769282;
@@ -983,7 +983,7 @@
     transition: background 0.15s, border-color 0.15s, color 0.15s;
     padding: 4px 13px;
     background: #769282;
-    color: #fff;
+    color: var(--color-neutral-light);
     border-color: #769282;
     box-shadow: 0 2px 8px #76928222;
   }
@@ -1237,7 +1237,7 @@
 
 .periodTabActive {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-neutral-light);
   border-color: var(--color-primary);
 }
 
@@ -1681,7 +1681,7 @@ ALLMART — ADMIN REPORTS
   width: 100%;
   border-collapse: collapse;
   min-width: 650px;
-  background: #fff;
+  background: var(--color-bg-primary);
 }
 
 /* Header */
@@ -1793,7 +1793,7 @@ ALLMART — ADMIN REPORTS
 
 .rankBadge {
   background: var(--color-accent, #ff9800);
-  color: #fff;
+  color: var(--color-neutral-light);
   font-weight: 600;
   font-size: 0.75rem;
   padding: 2px 8px;

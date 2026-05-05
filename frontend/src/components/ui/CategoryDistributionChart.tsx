@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from './CategoryDistributionChart.module.css';
 
@@ -24,17 +24,24 @@ interface PieLabelProps {
   percent: number;
 }
 
+// Helper to get CSS variable value
+const getCSSVariableColor = (variableName: string, fallback: string = '#1a1a1a') => {
+  return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim() || fallback;
+};
+
 const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent }: PieLabelProps) => {
   const RADIAN = Math.PI / 180;
   // Posicionar etiqueta fuera del gráfico para mayor legibilidad
   const radius = outerRadius + 60;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const textColor = getCSSVariableColor('--color-text-primary', '#1a1a1a');
+
   return (
     <text
       x={x}
       y={y}
-      fill="#1a1a1a"
+      fill={textColor}
       textAnchor={x > cx ? 'start' : 'end'}
       dominantBaseline="central"
       fontSize={13}
@@ -64,6 +71,8 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
 };
 
 const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
+  const textColor = useMemo(() => getCSSVariableColor('--color-text-primary', '#1a1a1a'), []);
+
   if (!data || data.length === 0) {
     return <div className={styles.empty}>No hay datos para mostrar.</div>;
   }
@@ -93,7 +102,7 @@ const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
             layout="vertical"
             align="right"
             verticalAlign="middle"
-            formatter={(value: string) => <span style={{ fontSize: 13, fontWeight: 500, color: '#1a1a1a' }}>{value}</span>}
+            formatter={(value: string) => <span style={{ fontSize: 13, fontWeight: 500, color: textColor }}>{value}</span>}
             wrapperStyle={{ paddingLeft: '10px' }}
           />
         </PieChart>

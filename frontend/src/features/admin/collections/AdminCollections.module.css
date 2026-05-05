@@ -2,7 +2,7 @@
 
 .container {
   padding: var(--space-5);
-  background: #fff;
+  background: var(--color-bg-primary);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }

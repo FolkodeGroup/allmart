@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import styles from './WeeklySalesWidget.module.css';
 
@@ -16,6 +16,11 @@ interface TooltipPayloadEntry {
   payload: WeeklySalesData;
 }
 
+// Helper to get CSS variable value
+const getCSSVariableColor = (variableName: string, fallback: string = '#1a1a1a') => {
+  return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim() || fallback;
+};
+
 const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayloadEntry[] }) => {
   if (active && payload && payload.length) {
     const { day, sales } = payload[0].payload;
@@ -30,6 +35,8 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
 };
 
 const WeeklySalesWidget: React.FC<WeeklySalesWidgetProps> = ({ data, totalSales }) => {
+  const textColor = useMemo(() => getCSSVariableColor('--color-text-primary', '#1a1a1a'), []);
+
   return (
     <div className={styles['weekly-sales-widget-card']}>
       <div className={styles['weekly-sales-widget-header']}>
@@ -47,12 +54,12 @@ const WeeklySalesWidget: React.FC<WeeklySalesWidgetProps> = ({ data, totalSales 
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis
             dataKey="day"
-            tick={{ fontSize: 12, fill: '#1a1a1a', fontWeight: 500 }}
+            tick={{ fontSize: 12, fill: textColor, fontWeight: 500 }}
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fontSize: 12, fill: '#1a1a1a' }}
-            label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fontSize: 12, fill: '#1a1a1a' }}
+            tick={{ fontSize: 12, fill: textColor }}
+            label={{ value: 'Ventas', angle: -90, position: 'insideLeft', fontSize: 12, fill: textColor }}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 152, 0, 0.1)' }} />
           <Area
