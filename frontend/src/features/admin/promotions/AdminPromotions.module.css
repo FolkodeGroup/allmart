@@ -300,7 +300,7 @@ button:disabled {
   gap: 12px;
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border);
   justify-content: flex-start;
 }
 

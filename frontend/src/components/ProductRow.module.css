@@ -8,7 +8,7 @@
 }
 
 .productRow:hover {
-    background: #f9fafb;
+    background: var(--color-bg-secondary);
     border-radius: 6px;
 }
 
@@ -31,7 +31,7 @@
 .productRowName {
     font-size: 13px;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

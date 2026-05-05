@@ -97,7 +97,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         />
 
         {showDropdown && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #ddd', borderRadius: '4px', maxHeight: '300px', overflowY: 'auto', zIndex: 10, marginTop: '4px' }}>
+          <div className={styles.dropdown}>
             {loading && <div style={{ padding: '8px' }}>Cargando...</div>}
             {error && <div style={{ padding: '8px', color: 'red', fontSize: '12px' }}>{error}</div>}
             {!loading && availableProducts.length === 0 && searchQuery && (
@@ -108,9 +108,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                 key={product.id}
                 type="button"
                 onClick={() => handleSelectProduct(product)}
-                style={{ width: '100%', background: 'white', border: 'none', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', textAlign: 'left', padding: 0 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'white')}
+                className={styles.dropdownItem}
               >
                 <ProductRow product={product} />
               </button>
@@ -120,8 +118,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       </div>
 
       {selectedProducts.length > 0 ? (
-        <div style={{ border: '1px solid #ddd', borderRadius: '4px', overflow: 'hidden' }}>
-          <div style={{ background: '#f5f5f5', padding: '8px 12px', fontSize: '12px', fontWeight: 600, color: '#666' }}>
+        <div className={styles.selectedProducts}>
+          <div className={styles.selectedProductsHeader}>
             {selectedProducts.length} producto(s) seleccionado(s)
           </div>
           {selectedProducts.map((product) => (
@@ -129,7 +127,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           ))}
         </div>
       ) : (
-        <div style={{ padding: '12px', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'var(--color-text-secondary)', fontSize: '14px', textAlign: 'center' }}>
+        <div className={styles.selectedProductsEmpty}>
           Sin productos asignados
         </div>
       )}
