@@ -50,14 +50,14 @@ export default function RecentOrdersWidget() {
         <tbody>
           {recentOrders.map(order => (
             <tr key={order.id}>
-              <td>{order.id}</td>
-              <td>{formatDate(order.createdAt)}</td>
+              <td className={styles.idTd}>{order.id}</td>
+              <td className={styles.dateTd}>{formatDate(order.createdAt)}</td>
               <td>
-                <strong>{order.customer.firstName} {order.customer.lastName}</strong><br />
+                <strong className={styles.nameTd}>{order.customer.firstName} {order.customer.lastName}</strong><br />
                 <span className={styles.email}>{order.customer.email}</span>
               </td>
-              <td>{order.items.reduce((acc, item) => acc + item.quantity, 0)} ítems</td>
-              <td>{formatCurrency(order.total)}</td>
+              <td className={styles.quantityTd}>{order.items.reduce((acc, item) => acc + item.quantity, 0)} ítems</td>
+              <td className={styles.priceTd}>{formatCurrency(order.total)}</td>
               <td>
                 <Badge variant={STATUS_COLORS[order.status as keyof typeof STATUS_COLORS] ?? 'new'}>
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

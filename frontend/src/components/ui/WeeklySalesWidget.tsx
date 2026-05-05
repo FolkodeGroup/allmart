@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
 };
 
 const WeeklySalesWidget: React.FC<WeeklySalesWidgetProps> = ({ data, totalSales }) => {
-  const textColor = useMemo(() => getCSSVariableColor('--color-text-primary', '#1a1a1a'), []);
+  const textColor = useMemo(() => getCSSVariableColor('--color-text-tertiary'), []);
 
   return (
     <div className={styles['weekly-sales-widget-card']}>

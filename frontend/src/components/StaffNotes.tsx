@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useStaffNotes } from '../hooks/useStaffNotes';
 
+import styles from './StaffNotes.module.css'; ;
+
 
 function formatDate(dateStr: string) {
     const d = new Date(dateStr);
@@ -49,10 +51,10 @@ export default function StaffNotes() {
                 >
                     <textarea
                         value={newContent}
+                        className={styles['staff-notes-area']}
                         onChange={(e) => setNewContent(e.target.value)}
                         placeholder="Escribe una nota..."
                         rows={3}
-                        style={{ width: '100%', resize: 'vertical' }}
                         disabled={creating}
                     />
                     <button type="submit" disabled={creating || !newContent.trim()} className="add-btn">

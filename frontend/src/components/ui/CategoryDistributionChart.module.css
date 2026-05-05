@@ -36,3 +36,15 @@
   backdrop-filter: blur(8px);
 }
 
+.pieText {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--color-text-primary);
+}
+
+.legendText {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+

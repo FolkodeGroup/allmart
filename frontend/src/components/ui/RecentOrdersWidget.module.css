@@ -38,3 +38,25 @@
   color: var(--color-text-tertiary);
   padding: 2rem 0;
 }
+
+.idTd {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.dateTd {
+  color: var(--color-soft-gray);
+}
+
+.nameTd {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.quantityTd {
+  color: var(--color-soft-gray);;
+}
+
+.priceTd {
+  color: var(--color-text-primary);
+}

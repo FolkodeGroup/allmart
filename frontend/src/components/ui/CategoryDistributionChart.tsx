@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from './CategoryDistributionChart.module.css';
 
@@ -25,9 +25,6 @@ interface PieLabelProps {
 }
 
 // Helper to get CSS variable value
-const getCSSVariableColor = (variableName: string, fallback: string = '#1a1a1a') => {
-  return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim() || fallback;
-};
 
 const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent }: PieLabelProps) => {
   const RADIAN = Math.PI / 180;
@@ -35,18 +32,16 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent }: PieLa
   const radius = outerRadius + 60;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  const textColor = getCSSVariableColor('--color-text-primary', '#1a1a1a');
 
   return (
     <text
       x={x}
       y={y}
-      fill={textColor}
+      className={styles.pieText}
       textAnchor={x > cx ? 'start' : 'end'}
       dominantBaseline="central"
       fontSize={13}
       fontWeight={600}
-      style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
     >
       {percent > 0 ? `${(percent * 100).toFixed(1)}%` : ''}
     </text>
@@ -71,7 +66,6 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
 };
 
 const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
-  const textColor = useMemo(() => getCSSVariableColor('--color-text-primary', '#1a1a1a'), []);
 
   if (!data || data.length === 0) {
     return <div className={styles.empty}>No hay datos para mostrar.</div>;
@@ -102,7 +96,11 @@ const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
             layout="vertical"
             align="right"
             verticalAlign="middle"
-            formatter={(value: string) => <span style={{ fontSize: 13, fontWeight: 500, color: textColor }}>{value}</span>}
+            formatter={(value: string) => (
+              <span className={styles.legendText}>
+                {value}
+              </span>
+            )}
             wrapperStyle={{ paddingLeft: '10px' }}
           />
         </PieChart>
