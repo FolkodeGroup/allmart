@@ -55,6 +55,7 @@ export function CategoryTabBasico({
                             onChange={e => handleNameChange(e.target.value)}
                             onBlur={() => handleBlur('name')}
                             required
+                            placeholder='Escriba una categoria'
                         />
                         {touched.name && errors.name && (
                             <span className={styles.errorText}>{errors.name}</span>
@@ -76,7 +77,7 @@ export function CategoryTabBasico({
                                 setTouched(prev => ({ ...prev, slug: true }));
                             }}
                             onBlur={() => handleBlur('slug')}
-                            placeholder="se-genera-automaticamente"
+                            placeholder="Se genera automáticamente a partir del nombre"
                         />
                         {touched.slug && errors.slug && (
                             <span className={styles.errorText}>{errors.slug}</span>
@@ -129,7 +130,7 @@ export function CategoryTabBasico({
                             checked={form.isVisible}
                             onChange={e => setField('isVisible', e.target.checked)}
                         />
-                        <span>Visible en el catálogo</span>
+                        <span className={styles.checkboxLabel}>Visible en el catálogo</span>
                     </label>
                 </div>
             </fieldset>

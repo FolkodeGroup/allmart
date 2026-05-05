@@ -4,7 +4,7 @@
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    background: var(--color-bg, #f8fafc);
+    background: var(--color-bg-primary);
     font-family: inherit;
     overflow: auto;
 }
@@ -44,20 +44,21 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
+    padding: 0.5rem 1rem;
     border: 1px solid var(--color-border, #e2e8f0);
     border-radius: 6px;
-    background: transparent;
-    color: var(--color-text-muted, #64748b);
-    font-size: 0.85rem;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.2s ease;
     white-space: nowrap;
 }
 
 .backBtn:hover {
-    background: var(--color-bg, #f1f5f9);
-    color: var(--color-text, #1e293b);
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border);
+    transform: translateX(-2px);
 }
 
 .pageHeaderActions {
@@ -120,6 +121,7 @@
     margin: 0 auto;
     padding: 24px 24px 0;
     gap: 24px;
+    background: var(--color-bg-primary);
 }
 
 /* ── Sticky sidebar ──────────────────────────────────────────────────────── */
@@ -159,7 +161,7 @@
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: var(--color-text-muted, #64748b);
+    color: var(--color-text-primary);
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;
@@ -168,13 +170,13 @@
 }
 
 .sidebarItem:hover {
-    background: var(--color-bg, #f1f5f9);
-    color: var(--color-text, #1e293b);
+    background: var(--color-primary-dark);
+    color: var(--color-neutral-light);
 }
 
 .sidebarItemActive {
-    background: var(--color-primary-light, #eff6ff);
-    color: var(--color-primary, #2563eb);
+    background: var(--color-primary-dark, #eff6ff);
+    color: var(--color-neutral-light);
     font-weight: 600;
 }
 
@@ -358,6 +360,10 @@
     font-size: var(--text-xs, 12px);
     color: var(--color-text-tertiary, #9ca3af);
     margin-top: 4px;
+}
+
+.checkboxLabel {
+    color: var(--color-text-primary);
 }
 
 /* ── Image upload section ────────────────────────────────────────────────── */
