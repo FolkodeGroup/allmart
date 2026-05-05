@@ -33,7 +33,7 @@ export default function RecentOrdersWidget() {
   }
 
   return (
-    <Container className={styles.card}>
+    <div className={styles.card}>
       <h3 className={styles.title}>Pedidos Recientes</h3>
       <table className={styles.table}>
         <thead>
@@ -72,6 +72,6 @@ export default function RecentOrdersWidget() {
           ))}
         </tbody>
       </table>
-    </Container>
+    </div>
   );
 }

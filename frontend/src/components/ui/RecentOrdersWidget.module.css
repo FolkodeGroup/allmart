@@ -14,21 +14,28 @@
 }
 .table {
   width: 100%;
-  border-collapse: collapse;
   font-size: 0.98rem;
+  border: 1px solid var(--color-border);
+  border-collapse: collapse;
 }
 .table th, .table td {
   padding: 0.7rem 0.5rem;
   text-align: left;
 }
 .table th {
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   font-weight: 500;
   border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
 }
 .table tr:not(:last-child) td {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border);
 }
+
+.table tr:hover {
+  background: var(--color-bg-secondary);
+}
+
 .email {
   font-size: 0.85em;
   color: var(--color-text-tertiary);
