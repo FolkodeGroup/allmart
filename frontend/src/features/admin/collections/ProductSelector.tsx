@@ -129,7 +129,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           ))}
         </div>
       ) : (
-        <div style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '4px', color: '#999', fontSize: '14px', textAlign: 'center' }}>
+        <div style={{ padding: '12px', border: '1px solid var(--color-border)', borderRadius: '4px', color: 'var(--color-text-secondary)', fontSize: '14px', textAlign: 'center' }}>
           Sin productos asignados
         </div>
       )}

@@ -12,7 +12,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-4);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--space-3);
 }
 
@@ -20,7 +20,7 @@
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .filters {
@@ -33,7 +33,9 @@
 .searchInput,
 .selectFilter {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border) ;
+  color: var(--color-text-primary);
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -58,25 +60,25 @@
 }
 
 .table thead {
-  background-color: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .table th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-primary);
 }
 
 .table td {
   padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #6b7280;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-bg-secondary);
 }
 
 .monospace {
@@ -136,7 +138,7 @@
 }
 
 .btnPrimary {
-  background-color: #769282;
+  background: var(--color-primary);
   color: white;
 }
 
@@ -178,12 +180,21 @@
 }
 
 .btnSecondary {
-  background-color: #e5e7eb;
-  color: #374151;
+  padding: 8px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted, #64748b);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
 .btnSecondary:hover:not(:disabled) {
-  background-color: #d1d5db;
+  background: var(--color-bg-tertiary, #f3f4f6);
+  color: var(--color-primary, #2563eb);
+  border-color: var(--color-primary, #2563eb);
 }
 
 button:disabled {
@@ -198,7 +209,8 @@ button:disabled {
   gap: var(--space-3);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .error {
@@ -215,14 +227,14 @@ button:disabled {
 .formHeader {
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-3);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .formHeader h1 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .form {
@@ -238,7 +250,7 @@ button:disabled {
 .formGroup label {
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-primary);
   font-size: 14px;
 }
 
@@ -252,7 +264,9 @@ button:disabled {
 .formGroup select,
 .formGroup textarea {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -294,7 +308,7 @@ button:disabled {
   gap: var(--space-3);
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border);
   justify-content: flex-start;
 }
 
