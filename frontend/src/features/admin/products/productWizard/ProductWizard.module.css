@@ -595,7 +595,7 @@
 
 .checklistSection {
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--color-bg-primary);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
