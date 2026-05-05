@@ -37,10 +37,7 @@ const STATUS_LABELS: Record<string, string> = {
     cancelado: 'Cancelado',
 };
 
-// Helper to get CSS variable value
-const getCSSVariableColor = (variableName: string, fallback: string = '#1a1a1a') => {
-  return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim() || fallback;
-};
+
 
 
 /**
@@ -51,8 +48,6 @@ const getCSSVariableColor = (variableName: string, fallback: string = '#1a1a1a')
 const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
     const [hovered, setHovered] = useState<number | null>(null);
     const isMobile = useIsMobile();
-    const primaryTextColor = useMemo(() => getCSSVariableColor('--color-text-primary', '#1a1a1a'), []);
-    const tertiaryTextColor = useMemo(() => getCSSVariableColor('--color-text-tertiary', '#767676'), []);
 
     const total = slices.reduce((sum, s) => sum + s.count, 0);
 
@@ -136,22 +131,22 @@ const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
 
                 {/* 🧠 Centro */}
                 <text
+                    className={styles.donutCenterText}
                     x={cx}
                     y={cy - 5}
                     textAnchor="middle"
                     fontSize={18}
                     fontWeight="700"
-                    fill={primaryTextColor}
                 >
                     {total}
                 </text>
 
                 <text
+                    className={styles.donutCenterLabel}
                     x={cx}
                     y={cy + 13}
                     textAnchor="middle"
                     fontSize={9}
-                    fill={tertiaryTextColor}
                 >
                     pedidos
                 </text>

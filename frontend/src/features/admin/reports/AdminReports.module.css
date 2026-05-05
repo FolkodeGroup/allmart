@@ -1876,6 +1876,7 @@ ALLMART — ADMIN REPORTS
   flex-shrink: 0;
   overflow: visible;
   z-index: 9999;
+  color: var(--color-text-primary);
 }
 
 .donutLegend {
@@ -1920,6 +1921,13 @@ ALLMART — ADMIN REPORTS
   color: var(--color-text-tertiary);
 }
 
+.donutCenterText {
+  fill: var(--color-text-primary);
+}
+
+.donutCenterLabel {
+  fill: var(--color-text-primary);
+}
 
 /* ── Top productos ── */
 .productRanking {
