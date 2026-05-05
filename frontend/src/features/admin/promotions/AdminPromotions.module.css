@@ -12,7 +12,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
   padding-bottom: 16px;
 }
 
@@ -33,7 +33,9 @@
 .searchInput,
 .selectFilter {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -58,25 +60,25 @@
 }
 
 .table thead {
-  background-color: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .table th {
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-primary);
 }
 
 .table td {
   padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #6b7280;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-bg-secondary);
 }
 
 .loading,
@@ -130,12 +132,12 @@
 }
 
 .btnPrimary {
-  background-color: #769282;
+  background: var(--color-primary);
   color: white;
 }
 
 .btnPrimary:hover:not(:disabled) {
-  background-color: #5d7568;
+  background: var(--color-primary-dark);
 }
 
 .btnSmall {
@@ -172,12 +174,21 @@
 }
 
 .btnSecondary {
-  background-color: #e5e7eb;
-  color: #374151;
+  padding: 8px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-muted, #64748b);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
 }
 
 .btnSecondary:hover:not(:disabled) {
-  background-color: #d1d5db;
+  background: var(--color-bg-tertiary, #f3f4f6);
+    color: var(--color-primary, #2563eb);
+    border-color: var(--color-primary, #2563eb);
 }
 
 button:disabled {
@@ -209,7 +220,7 @@ button:disabled {
 .formHeader {
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .formHeader h1 {
@@ -232,7 +243,7 @@ button:disabled {
 .formGroup label {
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-primary);
   font-size: 14px;
 }
 
@@ -246,7 +257,8 @@ button:disabled {
 .formGroup select,
 .formGroup textarea {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -307,7 +319,7 @@ button:disabled {
   display: flex;
   gap: 0;
   margin-bottom: 24px;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .mainTab,
@@ -348,7 +360,7 @@ button:disabled {
   display: flex;
   gap: 0;
   margin-bottom: 0;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .formTab,
@@ -374,7 +386,7 @@ button:disabled {
 }
 
 .formTab:hover {
-  color: #374151;
+  color: var(--color-text-primary);
 }
 
 .tabBadge {
@@ -404,7 +416,7 @@ button:disabled {
 .selectorHint {
   font-size: 13px;
   color: #6b7280;
-  background-color: #f9fafb;
+  background-color: var(--color-bg-tertiary);
   padding: 10px 14px;
   border-radius: 6px;
   border-left: 3px solid #769282;
@@ -447,7 +459,8 @@ button:disabled {
   width: 100%;
   padding: 8px 12px;
   margin-bottom: 12px;
-  border: 1px solid #d1d5db;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -462,9 +475,9 @@ button:disabled {
 .selectorList {
   max-height: 400px;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: white;
+  background: var(--color-bg-secondary);
 }
 
 .selectorItem {
@@ -473,7 +486,7 @@ button:disabled {
   gap: 10px;
   padding: 8px 12px;
   cursor: pointer;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-border);
   transition: background 0.15s;
   user-select: none;
 }
@@ -483,15 +496,15 @@ button:disabled {
 }
 
 .selectorItem:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-bg-primary);
 }
 
 .selectorItemSelected {
-  background-color: #eff6ff;
+  background-color: var(--color-primary);
 }
 
 .selectorItemSelected:hover {
-  background-color: #dbeafe;
+  background-color: var(--color-bg-secondary);
 }
 
 .selectorItem input[type="checkbox"] {
@@ -505,13 +518,13 @@ button:disabled {
 .selectorItemName {
   flex: 1;
   font-size: 13px;
-  color: #1f2937;
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
 .selectorItemMeta {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--color-primary-dark-inverse);
   flex-shrink: 0;
 }
 
@@ -555,8 +568,8 @@ button:disabled {
 
 .statCard {
   padding: 16px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   text-align: center;
   cursor: pointer;
@@ -583,7 +596,7 @@ button:disabled {
   display: block;
   font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .statLabel {
@@ -601,7 +614,7 @@ button:disabled {
 }
 
 .matrixRow {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   overflow: hidden;
   transition: box-shadow 0.2s;
@@ -609,6 +622,7 @@ button:disabled {
 
 .matrixRowExpanded {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-border);
 }
 
 .matrixRowHeader {
@@ -622,7 +636,7 @@ button:disabled {
 }
 
 .matrixRowHeader:hover {
-  background: #f9fafb;
+  background: var(--color-bg-secondary);
 }
 
 .matrixRowInfo {
@@ -634,14 +648,14 @@ button:disabled {
 
 .matrixRowName {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-primary);
   font-size: 14px;
 }
 
 .matrixRowDiscount {
   font-size: 13px;
-  color: #6b7280;
-  background: #f3f4f6;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -685,8 +699,8 @@ button:disabled {
 /* Expanded detail */
 .matrixDetail {
   padding: 16px 18px;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
 }
 
 .matrixDetailGrid {
@@ -706,7 +720,7 @@ button:disabled {
   margin: 0 0 10px 0;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-primary);
 }
 
 .matrixTagList {
@@ -763,7 +777,7 @@ button:disabled {
 
 .matrixProductName {
   flex: 1;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .matrixProductCategory {
@@ -774,7 +788,7 @@ button:disabled {
 .matrixProductPrice {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .matrixMoreText {
