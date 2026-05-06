@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 import styles from '../AdminOrders.module.css';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import type { Order } from '../../../../context/AdminOrdersContext';
+import { Button } from '../../../../components/ui/Button/Button';
 
 /**
  * Props de OrderItem.
@@ -219,14 +220,7 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
       {/* Botón de detalle: stopPropagation para no disparar el onClick del <tr> */}
       <td style={{ padding: '16px 8px', textAlign: 'center' }}>
         <Tooltip content="Ver detalle del pedido">
-          <button
-            className={styles.detailBtn}
-            type="button"
-            onClick={e => { e.stopPropagation(); onDetail(order); }}
-            aria-label="Ver detalle del pedido"
-          >
-            Ver →
-          </button>
+          <Button variant="secondary" size="sm" aria-label="Ver detalle del pedido">Ver →</Button>
         </Tooltip>
       </td>
     </tr>
