@@ -78,7 +78,7 @@
   color: var(--color-text-primary);
 }
 
-.ghost:hover:not(:disabled) {
+.ghost:hover {
   background-color: var(--color-bg-tertiary);
 }
 
