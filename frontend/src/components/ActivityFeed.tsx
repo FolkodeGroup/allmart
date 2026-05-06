@@ -139,8 +139,8 @@ export function ActivityFeed({
           <div className="af-empty">Sin actividad para este filtro.</div>
         ) : (
           <table className="af-table">
-            <thead>
-              <tr>
+            <thead className="af-table-header">
+              <tr className="af-table-tr">
                 <th>Tipo</th>
                 <th>Descripción</th>
                 <th>Usuario</th>

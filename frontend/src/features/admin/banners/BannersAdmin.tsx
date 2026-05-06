@@ -230,9 +230,9 @@ export function BannersAdmin() {
             initialFormDataRef.current = { title: '', description: '', displayOrder: 0, isActive: true, altText: '' };
             setShowForm(true);
           }}
-          variant="primary"
+          className={styles.btnPrimary}
         >
-          <Plus size={20} />
+          <Plus size={16} />
           Nuevo Banner
         </Button>
       </div>
@@ -341,10 +341,10 @@ export function BannersAdmin() {
             </div>
 
             <div className={styles.formActions}>
-              <Button type="button" variant="secondary" onClick={handleCancelForm}>
+              <Button type="button" className={styles.btnSecondary} onClick={handleCancelForm}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary">
+              <Button type="submit" className={styles.btnPrimary}>
                 {editingId ? 'Actualizar' : 'Crear'} Banner
               </Button>
             </div>

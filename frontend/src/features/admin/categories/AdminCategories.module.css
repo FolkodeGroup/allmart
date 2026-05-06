@@ -4,9 +4,9 @@
   flex-direction: row;
   gap: 0;
   min-height: 520px;
-  background: #fff;
+  background: var(--color-bg-primary);
   border-radius: 12px;
-  border: 1px solid #e5e2dd;
+  border: 1px solid var(--color-border);
   box-shadow: 0 2px 8px rgba(118, 146, 130, 0.04);
   overflow: hidden;
 }
@@ -15,15 +15,15 @@
   flex: 1 1 340px;
   min-width: 320px;
   max-width: 420px;
-  border-right: 1px solid #ece9e2;
-  background: #fafaf8;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
   overflow-y: auto;
 }
 
 .splitDetailPanel {
   flex: 2 1 0;
   min-width: 0;
-  background: #fff;
+  background: var(--color-bg-primary);
   padding: 32px 36px 32px 36px;
   display: flex;
   flex-direction: column;
@@ -108,7 +108,7 @@
 /* ── Botones de acción en modal ── */
 .deleteBtn {
   background: #ef4444;
-  color: #fff;
+  color: var(--color-neutral-light);
   border: none;
   border-radius: 8px;
   padding: 0.5rem 1.2rem;
@@ -151,6 +151,14 @@
    ============================================ */
 
 /* Pagination buttons with visible focus */
+.btnContainer {
+  position: relative;
+  align-self: end;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  flex-shrink: 0;
+}
 
 .newBtn {
   display: inline-flex;
@@ -158,7 +166,7 @@
   gap: 7px;
   padding: 9px 18px;
   background: var(--color-primary, #2d6a4f);
-  color: #fff;
+  color: var(--color-neutral-light);
   border: none;
   border-radius: 8px;
   font-family: var(--font-ui);
@@ -206,7 +214,7 @@
 .pageBtn:hover:not(:disabled),
 .pageActive {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-neutral-light);
 }
 
 .newBtn:hover {
@@ -932,11 +940,11 @@
 
 .filtersRowItem {
   width: 120px;
-  border: 1px solid #e5e2dd;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 7px 10px;
   font-size: 14px;
-  background: #fff;
+  background: var(--color-bg-primary);
   min-width: 120px;
 }
 
@@ -985,8 +993,8 @@
 .exportBtn {
   padding: 8px 16px;
   border-radius: 8px;
-  border: 1px solid #e5e2dd;
-  background: #fff;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -1252,33 +1260,73 @@
   margin-top: 0.5rem;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DARK MODE OVERRIDES
-═══════════════════════════════════════════════════════════════════ */
-:global(.dark) .cancelBtn {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--color-text-primary, #f3f3f3);
+.actionsBar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
 }
 
-:global(.dark) .cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.15);
+.exportBtnContainer{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-:global(.dark) .filters {
-  background: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
+.sortContainer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-:global(.dark) .exportBtn {
-  background: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
-  color: var(--color-text-primary, #f3f3f3);
+.sortControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
 }
 
-:global(.dark) .exportBtn:hover {
-  border-color: var(--color-primary, #a3c9a8);
+.sortLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-:global(.dark) .exportBtn:active {
-  background: var(--color-bg-secondary, #181c1f);
+.sortSelect {
+  padding: 5px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sortButton {
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 11px;
+  transition: all 0.2s;
+  min-width: 35px;
 }

@@ -1,14 +1,14 @@
 .section {
-  background: #fff;
+  background: var(--color-bg-card, #fff);
   border-radius: 12px;
-  border: 2px solid #f0f0f0;
+  border: 2px solid var(--color-border, #f0f0f0);
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .section:hover {
-  border-color: #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: var(--color-border, #e0e0e0);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.06));
 }
 
 .header {
@@ -16,8 +16,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafc 100%);
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--color-bg-secondary, linear-gradient(135deg, #f5f7fa 0%, #f9fafc 100%));
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
 }
 
 .title {
@@ -27,7 +27,7 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
 }
 
 .icon {
@@ -43,8 +43,8 @@
   min-width: 24px;
   height: 24px;
   padding: 0 8px;
-  background: #e8e8e8;
-  color: #666;
+  background: var(--color-bg-tertiary, #e8e8e8);
+  color: var(--color-text-tertiary, #666);
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -72,7 +72,7 @@
 
 .emptyText {
   margin: 0;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   font-size: 0.95rem;
 }
 
@@ -83,15 +83,15 @@
 .productItem {
   padding: 1rem;
   margin-bottom: 0.5rem;
-  background: #fafafa;
+  background: var(--color-bg-secondary, #fafafa);
   border-radius: 8px;
   border-left: 4px solid #f87171;
   transition: all 0.2s ease;
 }
 
 .productItem:hover {
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: var(--color-bg-card, white);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
   border-left-color: #dc2626;
 }
 
@@ -109,12 +109,12 @@
 
 .productName {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #1a1a1a);
   font-size: 0.95rem;
 }
 
 .sku {
-  color: #999;
+  color: var(--color-text-tertiary, #999);
   font-size: 0.85rem;
   font-family: 'Menlo', 'Monaco', monospace;
 }
@@ -128,7 +128,7 @@
 }
 
 .label {
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   font-size: 0.85rem;
   font-weight: 500;
   white-space: nowrap;
@@ -158,13 +158,13 @@
 
 .divider {
   height: 1px;
-  background: #e0e0e0;
+  background: var(--color-border, #e0e0e0);
   margin: 0.75rem 0;
 }
 
 .footer {
   padding: 1rem;
-  border-top: 1px solid #e0e0e0;
-  background: #fafafa;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  background: var(--color-bg-secondary, #fafafa);
   text-align: center;
 }

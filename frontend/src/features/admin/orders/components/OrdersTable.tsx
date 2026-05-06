@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 import styles from '../AdminOrders.module.css';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import type { Order } from '../../../../context/AdminOrdersContext';
+import { Button } from '../../../../components/ui/Button/Button';
 
 /**
  * Props de OrderItem.
@@ -153,7 +154,6 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
       className={styles.row}
       style={{
         cursor: 'pointer',
-        background: '#fff',
         animation: `fadeSlideUp 0.22s ease both`,
         animationDelay: `${index * 35}ms`,
       }}
@@ -161,10 +161,6 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
       role="button"
       tabIndex={0}
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
-      onMouseOver={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
-      onMouseOut={e => (e.currentTarget.style.background = '#fff')}
-      onFocus={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.06)')}
-      onBlur={e => (e.currentTarget.style.background = '#fff')}
     >
       {/* Checkbox de selección: stopPropagation evita abrir el modal al hacer clic */}
       <td style={{ padding: '16px 12px' }}>
@@ -183,7 +179,7 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
       </td>
       <td style={{ padding: '16px 20px', color: '#64748b', fontSize: 15 }}>{formatDate(order.createdAt)}</td>
       <td style={{ padding: '16px 20px' }}>
-        <div style={{ fontWeight: 600, fontSize: 16, color: '#111827' }}>{order.customer.firstName} {order.customer.lastName}</div>
+        <div className={styles.customerTd}>{order.customer.firstName} {order.customer.lastName}</div>
         <div style={{ color: '#64748b', fontSize: 14 }}>{order.customer.email}</div>
       </td>
       <td style={{ padding: '16px 20px', color: '#334155', fontSize: 15 }}>
@@ -224,19 +220,7 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
       {/* Botón de detalle: stopPropagation para no disparar el onClick del <tr> */}
       <td style={{ padding: '16px 8px', textAlign: 'center' }}>
         <Tooltip content="Ver detalle del pedido">
-          <button
-            className={styles.detailBtn}
-            type="button"
-            onClick={e => { e.stopPropagation(); onDetail(order); }}
-            aria-label="Ver detalle del pedido"
-            style={{ background: '#f3f4f6', color: '#2563eb', borderRadius: 8, fontWeight: 600, fontSize: 14, padding: '7px 16px', border: 'none', transition: 'background 0.15s' }}
-            onMouseOver={e => (e.currentTarget.style.background = '#e0e7ef')}
-            onMouseOut={e => (e.currentTarget.style.background = '#f3f4f6')}
-            onFocus={e => (e.currentTarget.style.background = '#e0e7ef')}
-            onBlur={e => (e.currentTarget.style.background = '#f3f4f6')}
-          >
-            Ver →
-          </button>
+          <Button variant="secondary" size="sm" aria-label="Ver detalle del pedido">Ver →</Button>
         </Tooltip>
       </td>
     </tr>

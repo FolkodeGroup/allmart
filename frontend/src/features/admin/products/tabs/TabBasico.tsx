@@ -121,6 +121,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             onChange={e => handleNameChange(e.target.value)}
                             onBlur={() => handleBlur('name')}
                             required
+                            placeholder='Escriba un producto'
                         />
                         {touched.name && (
                             <ValidationHelper
@@ -172,7 +173,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         value={form.slug}
                         onChange={e => handleSlugChange(e.target.value)}
                         onBlur={() => handleBlur('slug')}
-                        placeholder="se-genera-automaticamente"
+                        placeholder="Se genera automáticamente a partir del nombre"
                     />
                     {touched.slug && (
                         <ValidationHelper
@@ -208,6 +209,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         rows={5}
                         value={form.description}
                         onChange={e => setField('description', e.target.value)}
+                        placeholder='Descripción del producto (opcional)'
                     />
                     <span className={styles.fieldHint}>
                         {form.description.length} caracteres

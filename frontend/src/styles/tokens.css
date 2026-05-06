@@ -18,8 +18,8 @@
 
   /* ── Semantic Colors ── */
   --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F9F7F4;
-  --color-bg-tertiary: #F2EFEB;
+  --color-bg-secondary: #F2EFEB;
+  --color-bg-tertiary: #F9F7F4;
   --color-text-primary: #1A1A1A;
   --color-text-secondary: #4A4A4A;
   --color-text-tertiary: #767676;
@@ -29,6 +29,13 @@
   --color-success: #769282;
   --color-error: #C75050;
   --color-overlay: rgba(0, 0, 0, 0.4);
+
+  /* ── Inverse Colors (for light mode) ── */
+  --color-primary-light-inverse: #767676;
+  --color-primary-dark-inverse: #4A4A4A;
+
+  --color-accent-light-inverse: #A9A9A9;
+  --color-accent-dark-inverse: #AEA491;
 
   /* ── Typography ── */
    --font-heading: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
@@ -124,3 +131,61 @@
    Desktop: 1024px
    Wide:    1440px
    ─────────────────────────────────────────── */
+
+/* ============================================
+   ADMIN DARK MODE — applied when .dark class is on admin container
+   ============================================ */
+
+:is( .admin-dark) {
+  color-scheme: dark;
+
+  /* ── Palette overrides ── */
+  --color-primary:             #a3c9a8;
+  --color-primary-light:       #cbe7c9;
+  --color-primary-dark:        #7ba882;
+  --color-accent:              #ddb08c;
+  --color-accent-light:        #e8c5a8;
+  --color-accent-dark:         #c89a70;
+  --color-neutral-dark:        #181c1f;
+  --color-neutral-light:       #f3f3f3;
+  --color-warm-gray:           #b6a68a;
+
+  /* ── Semantic background ── */
+  --color-bg-primary:          #232a2f;
+  --color-bg-secondary:        #181c1f;
+  --color-bg-tertiary:         #1e2529;
+  --color-bg-card:             #232a2f;
+
+  /* ── Surface aliases (used by admin form/card components) ── */
+  --color-surface:             #232a2f;
+  --color-surface-subtle:      #1d2328;
+
+  /* ── Text ── */
+  --color-text-primary:        #f3f3f3;
+  --color-text-secondary:      #cbe7c9;
+  --color-text-tertiary:       #b6a68a;
+  --color-text-inverse:        #181c1f;
+
+  /* ── Borders ── */
+  --color-border:              #2d3a3f;
+  --color-border-light:        #263038;
+
+  /* ── Status / Semantic ── */
+  --color-success:             #a3c9a8;
+  --color-error:               #e07070;
+  --color-overlay:             rgba(0, 0, 0, 0.6);
+
+  /* ── Inverse Colors (for dark mode) ── */
+  --color-primary-light-inverse: #8fa99a;
+  --color-primary-dark-inverse: #5d7568;
+
+  --color-accent-light-inverse: #e8c5a8;
+  --color-accent-dark-inverse: #c89a70;
+
+  /* ── Shadows (darker/deeper on dark bg) ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.4);
+}

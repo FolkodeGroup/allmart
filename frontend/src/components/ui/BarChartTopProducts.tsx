@@ -73,7 +73,7 @@ const BarChartTopProducts: React.FC<Props> = ({ data }) => {
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis
             dataKey="truncatedName"
-            tick={{ fontSize: 12, fill: '#1a1a1a', fontWeight: 500 }}
+            tick={{ fontSize: 12, fill: 'var(--color-text-primary)', fontWeight: 500 }}
             angle={-90}
             textAnchor="end"
             height={160}
@@ -82,11 +82,11 @@ const BarChartTopProducts: React.FC<Props> = ({ data }) => {
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fontSize: 13, fill: '#1a1a1a' }}
-            label={{ value: 'Cantidad Vendida', angle: -90, position: 'insideLeft', fontSize: 13, fill: '#1a1a1a', offset: 10 }}
+            tick={{ fontSize: 13, fill: 'var(--color-text-primary)' }}
+            label={{ value: 'Cantidad Vendida', angle: -90, position: 'insideLeft', fontSize: 13, fill: 'var(--color-text-primary)', offset: 10 }}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 152, 0, 0.1)' }} />
-          <Bar dataKey="sales" radius={[6, 6, 0, 0]} barSize={36} label={{ position: 'top', fill: '#1a1a1a', fontWeight: 600 }}>
+          <Bar dataKey="sales" radius={[6, 6, 0, 0]} barSize={36} label={{ position: 'top', fill: 'var(--color-text-primary)', fontWeight: 600 }}>
             {chartData.map((_, idx) => (
               <Cell key={idx} fill={ORANGE_PALETTE[idx % ORANGE_PALETTE.length]} />
             ))}

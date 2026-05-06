@@ -1,5 +1,6 @@
 import React from 'react';
 import { PackageOpen } from 'lucide-react';
+import styles from './EmptyState.module.css';
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -19,20 +20,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '4rem 2rem',
-        textAlign: 'center',
-        backgroundColor: '#f8fafc',
-        borderRadius: '12px',
-        border: '2px dashed #e2e8f0',
-        width: '100%',
-        margin: '1rem 0',
-        maxWidth: '100vw',
-      }}
+      className={styles.emptyState}
       aria-live="polite"
       role="status"
     >
@@ -42,7 +30,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <h3 style={{
         fontSize: '1.25rem',
         fontWeight: 600,
-        color: '#1e293b',
+        color: 'var(--color-text-primary)',
         marginBottom: '0.5rem'
       }}>
         {title}

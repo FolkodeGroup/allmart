@@ -223,7 +223,7 @@
   top: 6px;
   left: 6px;
   background: rgba(0,0,0,0.55);
-  color: #fff;
+  color: var(--color-neutral-light);
   font-family: var(--font-ui);
   font-size: 10px;
   font-weight: var(--font-bold);
@@ -451,7 +451,7 @@
   bottom: 5px;
   right: 5px;
   background: rgba(0,0,0,0.45);
-  color: #fff;
+  color: var(--color-neutral-light);
   font-family: var(--font-ui);
   font-size: 9px;
   border-radius: 999px;

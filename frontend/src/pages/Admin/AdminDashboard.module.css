@@ -217,6 +217,12 @@
   padding: var(--space-4);
 }
 
+.staff-notes-area {
+  width: 100%;
+  resize: vertical;
+  background: var(--color-bg-tertiary);
+}
+
 /* ── Metrics Grid ────────────────────────────────────────────── */
 
 .metricsGrid {
@@ -731,27 +737,7 @@
   text-transform: capitalize;
 }
 
-/* ── Dark Mode ───────────────────────────────────────────────── */
 
-:global(.dark) .widgetSection {
-  background: var(--color-bg-card, #232a2f);
-}
-
-:global(.dark) .widgetHeader {
-  background: color-mix(in srgb, var(--color-bg-secondary) 70%, var(--color-bg-card));
-}
-
-:global(.dark) .chartCard {
-  background: var(--color-bg-secondary, #181c1f);
-}
-
-:global(.dark) .quickCard {
-  background: var(--color-bg-secondary, #181c1f);
-}
-
-:global(.dark) .ordersRow:hover {
-  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
-}
 
 /* ── Responsive ──────────────────────────────────────────────── */
 

@@ -19,7 +19,8 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('admin-theme', theme);
-      document.documentElement.classList.toggle('dark', theme === 'dark');
+      // Nota: La clase 'dark' se aplica al contenedor del AdminLayout, no al html
+      // Esto evita que el modo oscuro del admin afecte el resto del sitio
     }
   }, [theme]);
 

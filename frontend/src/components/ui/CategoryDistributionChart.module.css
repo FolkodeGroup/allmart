@@ -1,7 +1,8 @@
 .card {
   background: var(--color-bg-card, #fff);
   border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  border: 1px solid var(--color-border, transparent);
   padding: 1.5rem 1rem 1rem 1rem;
   display: flex;
   flex-direction: column;
@@ -9,28 +10,41 @@
   justify-content: center;
   min-width: 280px;
   min-height: 360px;
+  transition: background 0.3s;
 }
 .title {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--color-text-title, #222);
+  color: var(--color-text-primary, #222);
   font-family: inherit;
 }
 .empty {
   text-align: center;
-  color: #888;
+  color: var(--color-text-tertiary, #888);
   font-size: 1rem;
   padding: 2rem;
 }
 .tooltip {
-  background: #ffffff;
-  border: 2px solid #ff9800;
+  background: var(--color-bg-card, #ffffff);
+  border: 2px solid var(--color-accent, #ff9800);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
-  color: #1a1a1a;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  color: var(--color-text-primary, #1a1a1a);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.12));
   backdrop-filter: blur(8px);
+}
+
+.pieText {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--color-text-primary);
+}
+
+.legendText {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
