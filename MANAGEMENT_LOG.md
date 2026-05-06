@@ -1580,3 +1580,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #870: select de estados en vista de pedidos ajustado | 2026-05-03 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #874: Cambios Realizados | 2026-05-03 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #877: texto alternativo de imagen ajustado para sincronizarse con el titulo del banner | 2026-05-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #879: 849 optimizar y unificar el soporte de modo oscuroclaro en todos los componentes del panel administrativo | 2026-05-06 |
