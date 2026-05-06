@@ -37,6 +37,13 @@
   --color-accent-light-inverse: #A9A9A9;
   --color-accent-dark-inverse: #AEA491;
 
+  --color-dif-mode: #769282;
+  --color-dif-mode-dark: #5d7568;
+
+  --color-active-mode: rgba(23, 209, 132, 0.12);
+
+  --color-error-mode: #e74c3c;
+
   /* ── Typography ── */
    --font-heading: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
    --font-body: 'Merriweather', Georgia, 'Times New Roman', serif;
@@ -140,7 +147,7 @@
   color-scheme: dark;
 
   /* ── Palette overrides ── */
-  --color-primary:             #a3c9a8;
+  --color-primary:             #5d7568;
   --color-primary-light:       #cbe7c9;
   --color-primary-dark:        #7ba882;
   --color-accent:              #ddb08c;
@@ -181,6 +188,13 @@
 
   --color-accent-light-inverse: #e8c5a8;
   --color-accent-dark-inverse: #c89a70;
+
+  --color-dif-mode: #c89a70;
+  --color-dif-mode-dark: #c89a70d9;
+
+  --color-active-mode: rgba(209, 107, 23, 0.12);
+
+  --color-error-mode: #c91414dc;
 
   /* ── Shadows (darker/deeper on dark bg) ── */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);

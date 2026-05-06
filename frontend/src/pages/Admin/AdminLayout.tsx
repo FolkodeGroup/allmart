@@ -13,6 +13,7 @@ import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 import { ModalConfirm } from "../../components/ui/ModalConfirm";
 import type { Permission } from "../../utils/permissions";
+import { color, hover } from "framer-motion";
 
 type NavBadge = "pending" | "lowStock" | null;
 
@@ -341,9 +342,9 @@ export function AdminLayout() {
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             variant="ghost"
           >
-            <p style={{fontSize: 12}}>
+            <p className={styles.navItem} style={{ color: '#000', background: 'none', width: 48, height: 32 }}>
               {theme === 'dark' ? '🌙' : '☀️'}
-              Modo Claro/ Oscuro
+
             </p>
           </Button>
           <nav className={styles.nav}>
