@@ -13,7 +13,6 @@ import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 import { ModalConfirm } from "../../components/ui/ModalConfirm";
 import type { Permission } from "../../utils/permissions";
-import { color, hover } from "framer-motion";
 
 type NavBadge = "pending" | "lowStock" | null;
 
