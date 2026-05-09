@@ -1,8 +1,398 @@
-.staff-notes-area {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
+/* Main Widget Container */
+.staff-notes-widget {
+    max-width: 100%;
+    width: 100%;
+}
+
+.staff-notes-widget.empty,
+.staff-notes-widget.error {
+    padding: var(--space-3, 20px);
+    background: var(--color-bg-secondary, #f5f5f5);
     border-radius: 8px;
-    padding: var(--space-2);
+    text-align: center;
+}
+
+.staff-notes-widget.error {
+    background-color: #fff0f0;
+    color: #d32f2f;
+    border: 1px solid #f5a6a6;
+}
+
+/* Add Note Form */
+.add-note-form {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.staff-notes-area {
+    background: var(--color-bg-secondary, #ffffff);
+    border: 1px solid var(--color-border, #e0e0e0);
+    border-radius: 8px;
+    padding: var(--space-2, 12px);
     width: 100%;
     resize: vertical;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    color: var(--color-text-primary);
+}
+
+.staff-notes-area:focus {
+    outline: none;
+    border-color: var(--color-dif-mode);
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.1);
+}
+
+.staff-notes-area:disabled {
+    background-color: #f5f5f5;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Notes List Container */
+.notes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+/* Sticky Note Card */
+.sticky-note {
+    background: var(--color-bg-secondary );
+    border: 1px solid var(--color-dif-mode);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 244px;
+    min-height: 120px;
+    padding: 12px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, width 0.2s ease;
+    transform-origin: center;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.sticky-note:hover,
+.sticky-note.expanded {
+    transform: translateY(-5px) scale(1.04);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+    z-index: 5;
+}
+
+
+/* Skeleton Loading */
+.sticky-note.skeleton {
+    background: rgba(247, 224, 126, 0.2);
+    border: none;
+    animation: pulse 1.2s infinite alternate;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Note Content */
+.note-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    max-height: 3.2em;
+    transition: max-height 0.2s ease;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--color-text-primary, #333);
+}
+
+.sticky-note:hover .note-content,
+.sticky-note.expanded .note-content {
+    -webkit-line-clamp: unset;
+    display: block;
+    max-height: none;
+    overflow: visible;
+}
+
+/* Note Metadata */
+.note-metadata {
+    font-size: 12px;
+    color: var(--color-dif-mode-dark);
+    margin-top: 8px;
+    line-height: 1.2;
+}
+
+.note-metadata span {
+    display: block;
+}
+
+/* Note Actions */
+.note-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+}
+
+/* Buttons Base Styles */
+.add-btn,
+.save-btn,
+.cancel-btn,
+.edit-btn,
+.delete-btn,
+.expand-btn,
+.confirm-delete-btn {
+    background: #f7e07e;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-top: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.add-btn {
+    align-self: flex-end;
+}
+
+.add-btn,
+.confirm-delete-btn {
+    background: var(--color-dif-mode);
+    color: var(--color-text-inverse);
+    flex: 1;
+}
+
+.add-btn:hover:not(:disabled),
+.confirm-delete-btn:hover:not(:disabled) {
+    background: var(--color-dif-mode-dark);
+    transform: translateY(-1px);
+}
+
+.save-btn {
+    background: var(--color-primary);
+    color: var(--color-neutral-light);
+}
+
+.save-btn:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
+
+.cancel-btn {
+    background: #eee;
+    color: #888;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: #e0e0e0;
+}
+
+.edit-btn,
+.delete-btn {
+    background: var(--color-bg-tertiary, #fff7c6);
+    border: 1px solid var(--color-border, #e0e0e0);
+    color: #b59d2b;
+    padding: 4px 8px;
+    font-size: 16px;
+}
+
+.edit-btn:hover:not(:disabled),
+.delete-btn:hover:not(:disabled) {
+    background: var(--color-dif-mode-dark);
+    transform: scale(1.1);
+}
+
+.expand-btn {
+    background: #fff7c6;
+    color: #7c6f1c;
+    font-size: 12px;
+    align-self: flex-start;
+    padding: 4px 8px;
+}
+
+.expand-btn:hover {
+    background: #ffe066;
+}
+
+/* Disabled State */
+.add-btn:disabled,
+.save-btn:disabled,
+.cancel-btn:disabled,
+.edit-btn:disabled,
+.delete-btn:disabled,
+.confirm-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Edit Form */
+.edit-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-textarea {
+    width: 100%;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 8px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease;
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+}
+
+.edit-textarea:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.1);
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-buttons button {
+    flex: 1;
+}
+
+/* Delete Confirmation Dialog */
+.delete-confirmation {
+    width: 100%;
+    padding: 12px;
+    background: var(--color-bg-tertiary, #fff7c6);
+    border: 1px solid var(--color-border, #ffe082);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.delete-confirmation p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-text-primary, #333);
+    font-weight: 500;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.confirmation-buttons button {
+    flex: 1;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .notes-list {
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .sticky-note {
+        width: 180px;
+    }
+
+    .sticky-note.expanded {
+        width: 280px;
+    }
+
+    .note-content {
+        -webkit-line-clamp: 1;
+        max-height: 1.6em;
+    }
+}
+
+@media (max-width: 600px) {
+    .notes-list {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sticky-note {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .sticky-note.expanded {
+        width: 100%;
+    }
+
+    .sticky-note:hover,
+    .sticky-note.expanded {
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .note-actions {
+        position: static;
+        margin-top: 8px;
+        gap: 6px;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        flex: 1;
+        padding: 8px 6px;
+    }
+
+    .add-note-form {
+        flex-direction: column;
+    }
+
+    .staff-notes-area {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    .sticky-note {
+        padding: 10px;
+        min-height: 100px;
+    }
+
+    .note-content {
+        font-size: 13px;
+    }
+
+    .note-metadata {
+        font-size: 11px;
+    }
+
+    .add-btn,
+    .save-btn,
+    .cancel-btn,
+    .expand-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
 }
