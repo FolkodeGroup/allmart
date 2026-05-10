@@ -1566,19 +1566,34 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #861: 836 confirmación al eliminar producto | 2026-05-01 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #860: Se implementa confirmación al duplicar producto | 2026-05-01 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #863: 838 vista de categorías con layout dividido izquierdaderecha | 2026-05-02 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #823: Fix collections banner | 2026-04-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #825: 768 agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #865: Lo que cambié: | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #866: 841 mejorar la visualización del detalle de pedido modal o nueva página | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #869: Changes Made: | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #870: select de estados en vista de pedidos ajustado | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #874: Cambios Realizados | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #877: texto alternativo de imagen ajustado para sincronizarse con el titulo del banner | 2026-05-04 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #879: 849 optimizar y unificar el soporte de modo oscuroclaro en todos los componentes del panel administrativo | 2026-05-06 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #881: 850 asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuroclaro | 2026-05-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #873: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #871: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #868: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #867: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #874: Cambios Realizados | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #873: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #872: Cambios Realizados en AdminPromotions.tsx | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #871: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #870: select de estados en vista de pedidos ajustado | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #869: Changes Made: | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #868: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #867: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #866: 841 mejorar la visualización del detalle de pedido modal o nueva página | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #865: Lo que cambié: | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #864: 839 advertencia por cambios no guardados en categorías | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #853: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #827: 🔄 Actualización automática de puntajes semanal | 2026-05-03 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #878: 🔄 Registrar puntaje de gestión | 2026-05-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #878: 🔄 Registrar puntaje de gestión | 2026-05-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #877: texto alternativo de imagen ajustado para sincronizarse con el titulo del banner | 2026-05-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #876: 847 ocultar paginación cuando no hay colecciones | 2026-05-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #875: 845 Eliminación de subida de imagen en formulario de nueva colección, mejora de visualización de productos seleccionados y en vista home de colecciones (flehcas y height de cards) | 2026-05-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #875: 845 Eliminación de subida de imagen en formulario de nueva colección, mejora de visualización de productos seleccionados y en vista home de colecciones (flehcas y height de cards) | 2026-05-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #882: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #880: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #882: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #881: 850 asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuroclaro | 2026-05-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #880: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #879: 849 optimizar y unificar el soporte de modo oscuroclaro en todos los componentes del panel administrativo | 2026-05-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #883: 🔄 Registrar puntaje de gestión | 2026-05-09 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #428: Añadir exportación de pedidos a CSV/Excel | 2026-05-09 |
