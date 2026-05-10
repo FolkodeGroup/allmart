@@ -21,7 +21,7 @@
 }
 /* Header y eje Y usan grid-area, pero mantienen estilos visuales */
 .heatmapCorner {
-  width: 2.5rem;
+  width: 2rem;
   height: 1.8rem;
 }
 .heatmapHour {
@@ -37,13 +37,13 @@
   justify-content: center;
 }
 .heatmapDay {
-  width: 2.5rem;
+  width: 2rem;
   text-align: right;
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);
   font-family: var(--font-ui);
   font-weight: var(--font-medium);
-  padding-right: 0.3rem;
+  padding-right: 0.2rem;
   display: flex;
   align-items: center;
   justify-content: flex-end;
