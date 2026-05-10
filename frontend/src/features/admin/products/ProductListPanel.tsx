@@ -154,9 +154,6 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                 <div className={styles.content}>
                   <div className={styles.headerLine}>
                     <h3 className={styles.title}>{product.name}</h3>
-                    <span className={`${styles.stockBadge} ${product.inStock ? styles.inStock : styles.outOfStock}`}>
-                      {product.inStock ? 'Disponible' : 'Sin stock'}
-                    </span>
                   </div>
 
                   <div className={styles.metaLine}>
@@ -173,7 +170,19 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                     {!!product.discount && product.discount > 0 && (
                       <span className={styles.discount}>-{product.discount}%</span>
                     )}
-                    <span className={styles.stockText}>Stock: {product.stock}</span>
+                    <div className={styles.stockSection}>
+                      <span
+                        className={`${styles.stockBadge} ${
+                          product.inStock ? styles.inStock : styles.outOfStock
+                        }`}
+                      >
+                        {product.inStock ? 'Disponible' : 'Sin stock'}
+                      </span>
+
+                      <span className={styles.stockText}>
+                        Stock: {product.stock}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
