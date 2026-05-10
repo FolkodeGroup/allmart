@@ -946,7 +946,7 @@
     min-height: 0;
     background: var(--color-bg-primary);
     font-family: inherit;
-    overflow: auto;
+    overflow: hidden;
 }
 
 /* ── Sticky page header ──────────────────────────────────────────────────── */
@@ -1039,19 +1039,22 @@
     display: flex;
     align-items: flex-start;
     flex: 1;
+    min-height: 0;
     max-width: 1280px;
     width: 100%;
     margin: 0 auto;
     padding: 24px 24px 0;
     gap: 24px;
     background: var(--color-bg-primary);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* ── Sticky sidebar ──────────────────────────────────────────────────────── */
 .sidebar {
     position: sticky;
-    /* offset = pageHeader height */
-    top: 61px;
+    /* sticky within .layout scroll container */
+    top: 0;
     align-self: flex-start;
     width: 188px;
     flex-shrink: 0;
@@ -1167,9 +1170,7 @@
     flex-direction: column;
     gap: 0;
     padding-bottom: 80px;
-    height: calc(100vh - 61px); /* restás el header */
-    overflow-y: auto;
-    /* room for bottom bar */
+    /* room for bottom bar — scroll is handled by .layout */
 }
 
 /* ── Individual section card ─────────────────────────────────────────────── */
