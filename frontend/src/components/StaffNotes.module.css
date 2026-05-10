@@ -111,7 +111,6 @@
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
     max-height: 3.2em;
     transition: max-height 0.2s ease;
     font-size: 14px;
@@ -121,7 +120,6 @@
 
 .sticky-note:hover .note-content,
 .sticky-note.expanded .note-content {
-    -webkit-line-clamp: unset;
     display: block;
     max-height: none;
     overflow: visible;
@@ -328,7 +326,6 @@
     }
 
     .note-content {
-        -webkit-line-clamp: 1;
         max-height: 1.6em;
     }
 }
