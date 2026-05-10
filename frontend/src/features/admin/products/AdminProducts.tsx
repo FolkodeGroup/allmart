@@ -10,8 +10,6 @@ import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 // Components
 import { AdminProductFormPage } from './AdminProductFormPage';
 import { MasterDetailLayout } from './MasterDetailLayout';
-import { ProductWizard } from './productWizard/ProductWizard';
-import type { WizardProduct } from './productWizard/types';
 
 // UI Components
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -33,7 +31,7 @@ export function AdminProducts() {
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
   const [editPage, setEditPage] = useState<number>(1);
-  const [showWizard, setShowWizard] = useState(false);
+
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const resetUnsavedChangesFn = () => { };
 
@@ -57,7 +55,7 @@ export function AdminProducts() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Context and hooks
-  const { products, deleteProduct, duplicateProduct, addProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
+  const { products, deleteProduct, duplicateProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
 
   // Mostrar modal de confirmación de duplicación
   const handleDuplicateRequest = useCallback((product: import('../../../context/AdminProductsContext').AdminProduct) => {
@@ -215,42 +213,6 @@ export function AdminProducts() {
     setProductToDelete(null);
   }, []);
 
-  // === WIZARD HANDLER ===
-
-  const handleWizardPublish = async (wizardProduct: WizardProduct) => {
-    try {
-      if (!wizardProduct.name || !wizardProduct.price || !wizardProduct.sku || !wizardProduct.categoryId) {
-        toast.error('Completa todos los campos requeridos: nombre, precio, categóría y SKU');
-        return;
-      }
-      await addProduct({
-        name: wizardProduct.name || 'Sin nombre',
-        slug: (wizardProduct.name || 'sin-nombre').toLowerCase().replace(/\s+/g, '-'),
-        description: wizardProduct.description || '',
-        shortDescription: wizardProduct.shortDescription || '',
-        price: wizardProduct.price || 0,
-        stock: wizardProduct.stock || 0,
-        inStock: true,
-        images: wizardProduct.images || [],
-        category: categories.find(c => c.id === wizardProduct.categoryId) || { id: wizardProduct.categoryId, name: 'Unnamed', slug: '', isVisible: true },
-        categoryIds: wizardProduct.categoryId ? [wizardProduct.categoryId] : [],
-        tags: wizardProduct.tags || [],
-        features: [],
-        rating: 0,
-        reviewCount: 0,
-        sku: wizardProduct.sku || '',
-        variants: [],
-      });
-      toast.success('¡Producto creado exitosamente!');
-      refreshProducts({ page: 1, limit: 10 });
-      setShowWizard(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al crear producto';
-      toast.error(`Error: ${message}`);
-      throw err;
-    }
-  };
-
   return (
     <main
       ref={containerRef}
@@ -259,7 +221,7 @@ export function AdminProducts() {
     >
       {viewMode === 'list' && (
         <>
-          <ProductHeader canCreate={can('products.create')} onNew={handleNew} onWizard={() => setShowWizard(true)} />
+          <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
 
           <ProductFilters
             search={search}
@@ -334,15 +296,6 @@ export function AdminProducts() {
                 />
               )}
             </div>
-          )}
-
-          {showWizard && (
-            <ProductWizard
-              open={showWizard}
-              onClose={() => setShowWizard(false)}
-              categories={categories.map(c => ({ id: c.id, name: c.name || 'Unnamed' }))}
-              onPublish={handleWizardPublish}
-            />
           )}
 
           {showWarning && (
