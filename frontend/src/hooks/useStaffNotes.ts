@@ -2,7 +2,17 @@ import { useCallback, useEffect, useState } from 'react';
 import type { StaffNote } from '../types/staffNote';
 import * as staffNotesService from '../services/staffNotesService';
 
-export function useStaffNotes() {
+interface UseStaffNotesReturn {
+    notes: StaffNote[];
+    loading: boolean;
+    error: string | null;
+    fetchNotes: () => Promise<void>;
+    createNote: (content: string) => Promise<StaffNote>;
+    updateNote: (id: string, content: string) => Promise<StaffNote>;
+    deleteNote: (id: string) => Promise<void>;
+}
+
+export function useStaffNotes(): UseStaffNotesReturn {
     const [notes, setNotes] = useState<StaffNote[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -13,8 +23,11 @@ export function useStaffNotes() {
         try {
             const data = await staffNotesService.fetchStaffNotes();
             setNotes(data);
-        } catch {
-            setError('Error al cargar las notas del staff.');
+            setError(null);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error al cargar las notas del staff.';
+            setError(errorMessage);
+            console.error('[useStaffNotes] fetchNotes error:', err);
         } finally {
             setLoading(false);
         }
@@ -24,32 +37,46 @@ export function useStaffNotes() {
         fetchNotes();
     }, [fetchNotes]);
 
-    const createNote = async (content: string) => {
+    const createNote = useCallback(async (content: string): Promise<StaffNote> => {
+        setError(null);
         try {
             const newNote = await staffNotesService.createStaffNote(content);
             setNotes((prev) => [newNote, ...prev]);
-        } catch {
-            setError('Error al crear la nota.');
+            return newNote;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error al crear la nota.';
+            setError(errorMessage);
+            console.error('[useStaffNotes] createNote error:', err);
+            throw err;
         }
-    };
+    }, []);
 
-    const updateNote = async (id: string, content: string) => {
+    const updateNote = useCallback(async (id: string, content: string): Promise<StaffNote> => {
+        setError(null);
         try {
             const updated = await staffNotesService.updateStaffNote(id, content);
             setNotes((prev) => prev.map((n) => (n.id === id ? updated : n)));
-        } catch {
-            setError('Error al actualizar la nota.');
+            return updated;
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error al actualizar la nota.';
+            setError(errorMessage);
+            console.error('[useStaffNotes] updateNote error:', err);
+            throw err;
         }
-    };
+    }, []);
 
-    const deleteNote = async (id: string) => {
+    const deleteNote = useCallback(async (id: string): Promise<void> => {
+        setError(null);
         try {
             await staffNotesService.deleteStaffNote(id);
             setNotes((prev) => prev.filter((n) => n.id !== id));
-        } catch {
-            setError('Error al eliminar la nota.');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error al eliminar la nota.';
+            setError(errorMessage);
+            console.error('[useStaffNotes] deleteNote error:', err);
+            throw err;
         }
-    };
+    }, []);
 
     return { notes, loading, error, fetchNotes, createNote, updateNote, deleteNote };
 }
