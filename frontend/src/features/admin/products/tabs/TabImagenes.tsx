@@ -1,17 +1,7 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { RefObject } from 'react';
 import styles from '../AdminProductFormPage.module.css';
-import {
-    DragDropContext,
-    Droppable,
-    Draggable,
-    type DropResult,
-    type DroppableProvided,
-    type DroppableStateSnapshot,
-    type DraggableProvided,
-    type DraggableStateSnapshot,
-} from '@hello-pangea/dnd';
-import { Delete, Star } from 'lucide-react';
+import { Delete } from 'lucide-react';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 
 /** Imagen de producto en el frontend */
@@ -79,16 +69,9 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
     imgError,
     showAddImgForm,
     setShowAddImgForm,
-    editingImgId,
-    setEditingImgId,
-    editingImgAlt,
-    setEditingImgAlt,
-    savingImgId,
     deletingImgId,
     fileInputRef,
     onApiUploadImage,
-    // onApiStartEdit, // Eliminado porque no se usa
-    onApiCommitEdit,
     onApiDeleteImage,
 }, ref) {
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -118,25 +101,6 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
 
     const handleRemoveImage = (idx: number) => {
         onRemoveImageSlot(idx);
-    };
-
-    // const handleSetThumbnail = (idx: number) => {
-    //     if (idx > 0) {
-    //         const newImages = [...images];
-    //         [newImages[0], newImages[idx]] = [newImages[idx], newImages[0]];
-    //         newImages.forEach((img, i) => onSetImage(i, img));
-    //     }
-    // };
-
-    const handleDragEnd = (result: DropResult) => {
-        const { source, destination } = result;
-        if (!destination) return;
-        if (source.index === destination.index) return;
-
-        const imagesCopy = [...images];
-        const [removed] = imagesCopy.splice(source.index, 1);
-        imagesCopy.splice(destination.index, 0, removed);
-        imagesCopy.forEach((img, i) => onSetImage(i, img));
     };
 
     if (isEdit) {
@@ -223,42 +187,15 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                         <img src={img.url} alt={img.altText || ''} />
                                     </div>
                                     <div className={styles.imageActions}>
-                                        {editingImgId === img.id ? (
-                                            <div className={styles.editForm}>
-                                                <input
-                                                    type="text"
-                                                    value={editingImgAlt}
-                                                    onChange={e => setEditingImgAlt(e.target.value)}
-                                                    placeholder="Texto alternativo"
-                                                    className={styles.inputField}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onApiCommitEdit(img.id)}
-                                                    disabled={savingImgId === img.id}
-                                                    className={styles.submitBtn}
-                                                >
-                                                    {savingImgId === img.id ? 'Guardando...' : 'Guardar'}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setEditingImgId(null)}
-                                                    className={styles.cancelBtn}
-                                                >
-                                                    Cancelar
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <button
-                                                type="button"
-                                                onClick={() => setDeleteConfirmImageId(img.id)}
-                                                disabled={deletingImgId === img.id}
-                                                className={styles.deleteBtn}
-                                                title="Eliminar imagen"
-                                            >
-                                                <Delete size={16} />
-                                            </button>
-                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => setDeleteConfirmImageId(img.id)}
+                                            disabled={deletingImgId === img.id}
+                                            className={styles.deleteBtn}
+                                            title="Eliminar imagen"
+                                        >
+                                            <Delete size={16} />
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -289,8 +226,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
             <fieldset className={styles.fieldset}>
                 <legend className={styles.legend}>Imágenes del producto</legend>
                 <p className={styles.fieldHint}>
-                    Carga imágenes del producto. Arrastra para reordenar. Haz clic en la estrella para establecer como
-                    imagen destacada.
+                    Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                 </p>
                 {/* Upload Input */}
                 <div className={styles.uploadSection}>
@@ -308,55 +244,29 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                     </label>
                 </div>
                 {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
-                {/* Images Grid with Drag & Drop */}
+                {/* Images Grid - Static (no drag & drop) */}
                 {images.filter(img => img.trim()).length > 0 ? (
-                    <DragDropContext onDragEnd={handleDragEnd}>
-                        <Droppable droppableId="images">
-                            {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                    className={`${styles.imagesGrid} ${snapshot.isDraggingOver ? styles.dragActive : ''}`}
-                                >
-                                    {images.map((url: string, index: number) =>
-                                        url.trim() ? (
-                                            <Draggable key={`${url}-${index}`} draggableId={`${url}-${index}`} index={index}>
-                                                {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
-                                                    <div
-                                                        ref={dragProvided.innerRef}
-                                                        {...dragProvided.draggableProps}
-                                                        {...dragProvided.dragHandleProps}
-                                                        className={`${styles.imageCard} ${dragSnapshot.isDragging ? styles.dragging : ''}`}
-                                                    >
-                                                        <div className={styles.imagePreview}>
-                                                            <img src={url} alt={`Imagen ${index + 1}`} />
-                                                            {index === 0 && (
-                                                                <div className={styles.thumbnailBadge}>
-                                                                    <Star size={16} fill="gold" />
-                                                                    Destacada
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className={styles.imageActions}>
-                                                            <button
-                                                                type="button"
-                                                                className={styles.deleteBtn}
-                                                                onClick={() => setDeleteConfirmImageId(index.toString())}
-                                                                title="Eliminar imagen"
-                                                            >
-                                                                <Delete size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ) : null
-                                    )}
-                                    {provided.placeholder}
+                    <div className={styles.imagesGrid}>
+                        {images.map((url: string, index: number) =>
+                            url.trim() ? (
+                                <div key={`${url}-${index}`} className={styles.imageCard}>
+                                    <div className={styles.imagePreview}>
+                                        <img src={url} alt={`Imagen ${index + 1}`} />
+                                    </div>
+                                    <div className={styles.imageActions}>
+                                        <button
+                                            type="button"
+                                            className={styles.deleteBtn}
+                                            onClick={() => setDeleteConfirmImageId(index.toString())}
+                                            title="Eliminar imagen"
+                                        >
+                                            <Delete size={16} />
+                                        </button>
+                                    </div>
                                 </div>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
+                            ) : null
+                        )}
+                    </div>
                 ) : (
                     <div className={styles.emptyState}>
                         <p>No hay imágenes. Carga la primera haciendo clic en el botón de arriba.</p>
