@@ -1,15 +1,14 @@
 import React from 'react';
-import { Plus, Zap } from 'lucide-react';
+import { Plus} from 'lucide-react';
 import sectionStyles from '../../features/admin/shared/AdminSection.module.css';
 import styles from './ProductHeader.module.css';
 
 interface ProductHeaderProps {
   canCreate: boolean;
   onNew: () => void;
-  onWizard?: () => void;
 }
 
-export const ProductHeader: React.FC<ProductHeaderProps> = ({ canCreate, onNew, onWizard }) => {
+export const ProductHeader: React.FC<ProductHeaderProps> = ({ canCreate, onNew}) => {
   return (
     <header className={sectionStyles.header}>
       <div className={styles.headerRow}>
@@ -27,18 +26,6 @@ export const ProductHeader: React.FC<ProductHeaderProps> = ({ canCreate, onNew, 
               <Plus size={16} strokeWidth={2.5} />
               Nuevo producto
             </button>
-
-            {onWizard && (
-              <button
-                className={styles.wizardBtn}
-                onClick={() => { onWizard(); }}
-                aria-label="Crear nuevo producto con alta rápida"
-                title="3 pasos guiados para crear un producto rápidamente"
-              >
-                <Zap size={16} strokeWidth={2.5} />
-                Alta rápida
-              </button>
-            )}
           </div>
         )}
       </div>
