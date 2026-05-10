@@ -55,9 +55,10 @@ const SalesActivityHeatmap: React.FC<SalesActivityHeatmapProps> = ({ data, dayLa
         className={styles.heatmapGrid}
         style={{
           display: 'grid',
-          gridTemplateColumns: `minmax(2.5rem,auto) repeat(${hourLabels.length}, 2.2rem)`,
+          gridTemplateColumns: `2rem repeat(${hourLabels.length}, 2.2rem)`,
           gridTemplateRows: `minmax(1.8rem,auto) repeat(${dayLabels.length}, 2.2rem)`,
           gap: '0.2rem',
+          justifySelf: 'center',
         }}
       >
         {/* Esquina vacía */}
