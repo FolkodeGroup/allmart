@@ -26,7 +26,9 @@ export const getAllStaffNotes = async (): Promise<StaffNoteWithUser[]> => {
         });
     } catch (err) {
         console.error('[staffNotesService] getAllStaffNotes error:', err);
-        throw new Error('Error al obtener las notas del staff.');
+        const error = new Error('Error al obtener las notas del staff.');
+        (error as any).cause = err;
+        throw error;
     }
 };
 
@@ -38,7 +40,9 @@ export const getStaffNoteById = async (id: string): Promise<StaffNoteWithUser | 
         });
     } catch (err) {
         console.error('[staffNotesService] getStaffNoteById error:', err);
-        throw new Error('Error al obtener la nota.');
+        const error = new Error('Error al obtener la nota.');
+        (error as any).cause = err;
+        throw error;
     }
 };
 
@@ -67,7 +71,9 @@ export const createStaffNote = async (content: string, userId: string): Promise<
         });
     } catch (err) {
         console.error('[staffNotesService] createStaffNote error:', err);
-        throw new Error('Error al crear la nota.');
+        const error = new Error('Error al crear la nota.');
+        (error as any).cause = err;
+        throw error;
     }
 };
 
@@ -103,7 +109,9 @@ export const updateStaffNote = async (id: string, content: string): Promise<Staf
         if (err instanceof Error && err.message === 'Nota no encontrada.') {
             throw err;
         }
-        throw new Error('Error al actualizar la nota.');
+        const error = new Error('Error al actualizar la nota.');
+        (error as any).cause = err;
+        throw error;
     }
 };
 
@@ -121,6 +129,8 @@ export const deleteStaffNote = async (id: string): Promise<void> => {
         if (err instanceof Error && err.message === 'Nota no encontrada.') {
             throw err;
         }
-        throw new Error('Error al eliminar la nota.');
+        const error = new Error('Error al eliminar la nota.');
+        (error as any).cause = err;
+        throw error;
     }
 };
