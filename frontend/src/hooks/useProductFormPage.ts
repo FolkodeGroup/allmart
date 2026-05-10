@@ -181,14 +181,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             errors.originalPrice = 'El precio original debe ser mayor a 0';
         }
         if (form.stock < 0) errors.stock = 'El stock no puede ser negativo';
-        if (!isEdit) {
-            const invalidImgs = form.images.filter(
-                url => url.trim() !== '' && !url.startsWith('http')
-            );
-            if (invalidImgs.length > 0) {
-                errors.images = 'Todas las URLs de imágenes deben ser válidas (http/https)';
-            }
-        }
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
     }, [form, isEdit]);
