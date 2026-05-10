@@ -12,6 +12,7 @@ import {
     type DraggableStateSnapshot,
 } from '@hello-pangea/dnd';
 import { Delete, Star } from 'lucide-react';
+import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 
 /** Imagen de producto en el frontend */
 export interface ProductImageItem {
@@ -86,11 +87,12 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
     deletingImgId,
     fileInputRef,
     onApiUploadImage,
-    onApiStartEdit,
+    // onApiStartEdit, // Eliminado porque no se usa
     onApiCommitEdit,
     onApiDeleteImage,
 }, ref) {
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [deleteConfirmImageId, setDeleteConfirmImageId] = useState<string | null>(null);
 
     useImperativeHandle(ref, () => ({
         validate: () => {
@@ -118,13 +120,13 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
         onRemoveImageSlot(idx);
     };
 
-    const handleSetThumbnail = (idx: number) => {
-        if (idx > 0) {
-            const newImages = [...images];
-            [newImages[0], newImages[idx]] = [newImages[idx], newImages[0]];
-            newImages.forEach((img, i) => onSetImage(i, img));
-        }
-    };
+    // const handleSetThumbnail = (idx: number) => {
+    //     if (idx > 0) {
+    //         const newImages = [...images];
+    //         [newImages[0], newImages[idx]] = [newImages[idx], newImages[0]];
+    //         newImages.forEach((img, i) => onSetImage(i, img));
+    //     }
+    // };
 
     const handleDragEnd = (result: DropResult) => {
         const { source, destination } = result;
@@ -140,260 +142,244 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
     if (isEdit) {
         // Modo edición: mostrar imágenes de API
         return (
-            <fieldset className={styles.fieldset}>
-                <legend className={styles.legend}>Imágenes del producto</legend>
+            <>
+                <fieldset className={styles.fieldset}>
+                    <legend className={styles.legend}>Imágenes del producto</legend>
 
-                {imagesError && <div className={styles.errorText}>{imagesError}</div>}
+                    {imagesError && <div className={styles.errorText}>{imagesError}</div>}
 
-                {!showAddImgForm ? (
-                    <button
-                        type="button"
-                        className={styles.uploadButton}
-                        onClick={() => setShowAddImgForm(true)}
-                        disabled={imagesLoading}
-                    >
-                        + Agregar imagen
-                    </button>
-                ) : (
-                    <div className={styles.uploadSection}>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            ref={fileInputRef}
-                            onChange={e => {
-                                const files = e.target.files;
-                                if (files && files.length > 0) {
-                                    setImgFile(files[0]);
-                                }
-                            }}
-                            style={{ display: 'none' }}
-                        />
+                    {!showAddImgForm ? (
                         <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
                             className={styles.uploadButton}
+                            onClick={() => setShowAddImgForm(true)}
+                            disabled={imagesLoading}
                         >
-                            📁 Seleccionar archivo(s)
+                            + Agregar imagen
                         </button>
-                        {imgFile && <p style={{ fontSize: '13px', color: '#6b7280' }}>Archivo: {imgFile.name}</p>}
-                        <input
-                            type="text"
-                            placeholder="Texto alternativo (opcional)"
-                            value={imgNewAlt}
-                            onChange={e => setImgNewAlt(e.target.value)}
-                            className={styles.inputField}
-                        />
-                        <div>
-                            <button
-                                type="button"
-                                onClick={onApiUploadImage}
-                                disabled={!imgFile}
-                                className={styles.submitBtn}
-                            >
-                                ✓ Subir
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setShowAddImgForm(false);
-                                    setImgFile(null);
-                                    setImgNewAlt('');
+                    ) : (
+                        <div className={styles.uploadSection}>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                ref={fileInputRef}
+                                onChange={e => {
+                                    const files = e.target.files;
+                                    if (files && files.length > 0) {
+                                        setImgFile(files[0]);
+                                    }
                                 }}
-                                className={styles.cancelBtn}
+                                style={{ display: 'none' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className={styles.uploadButton}
                             >
-                                ✕ Cancelar
+                                📁 Seleccionar archivo(s)
                             </button>
+                            {imgFile && <p style={{ fontSize: '13px', color: '#6b7280' }}>Archivo: {imgFile.name}</p>}
+                            <input
+                                type="text"
+                                placeholder="Texto alternativo (opcional)"
+                                value={imgNewAlt}
+                                onChange={e => setImgNewAlt(e.target.value)}
+                                className={styles.inputField}
+                            />
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={onApiUploadImage}
+                                    disabled={!imgFile}
+                                    className={styles.submitBtn}
+                                >
+                                    ✓ Subir
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowAddImgForm(false);
+                                        setImgFile(null);
+                                        setImgNewAlt('');
+                                    }}
+                                    className={styles.cancelBtn}
+                                >
+                                    ✕ Cancelar
+                                </button>
+                            </div>
+                            {imgError && <div className={styles.errorText}>{imgError}</div>}
                         </div>
-                        {imgError && <div className={styles.errorText}>{imgError}</div>}
-                    </div>
-                )}
+                    )}
 
-                {imagesLoading ? (
-                    <div>Cargando imágenes...</div>
-                ) : (
-                    <div className={styles.imagesGrid}>
-                        {apiImages.length === 0 && <p>No hay imágenes para este producto.</p>}
-                        {apiImages.map((img) => (
-                            <div key={img.id} className={styles.imageCard}>
-                                <div className={styles.imagePreview}>
-                                    <img src={img.url} alt={img.altText || ''} />
-                                </div>
-                                <div className={styles.imageActions}>
-                                    {editingImgId === img.id ? (
-                                        <div className={styles.editForm}>
-                                            <input
-                                                type="text"
-                                                value={editingImgAlt}
-                                                onChange={e => setEditingImgAlt(e.target.value)}
-                                                placeholder="Texto alternativo"
-                                                className={styles.inputField}
-                                            />
+                    {imagesLoading ? (
+                        <div>Cargando imágenes...</div>
+                    ) : (
+                        <div className={styles.imagesGrid}>
+                            {apiImages.length === 0 && <p>No hay imágenes para este producto.</p>}
+                            {apiImages.map((img) => (
+                                <div key={img.id} className={styles.imageCard}>
+                                    <div className={styles.imagePreview}>
+                                        <img src={img.url} alt={img.altText || ''} />
+                                    </div>
+                                    <div className={styles.imageActions}>
+                                        {editingImgId === img.id ? (
+                                            <div className={styles.editForm}>
+                                                <input
+                                                    type="text"
+                                                    value={editingImgAlt}
+                                                    onChange={e => setEditingImgAlt(e.target.value)}
+                                                    placeholder="Texto alternativo"
+                                                    className={styles.inputField}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onApiCommitEdit(img.id)}
+                                                    disabled={savingImgId === img.id}
+                                                    className={styles.submitBtn}
+                                                >
+                                                    {savingImgId === img.id ? 'Guardando...' : 'Guardar'}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditingImgId(null)}
+                                                    className={styles.cancelBtn}
+                                                >
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        ) : (
                                             <button
                                                 type="button"
-                                                onClick={() => onApiCommitEdit(img.id)}
-                                                disabled={savingImgId === img.id}
-                                                className={styles.submitBtn}
-                                            >
-                                                {savingImgId === img.id ? 'Guardando...' : 'Guardar'}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setEditingImgId(null)}
-                                                className={styles.cancelBtn}
-                                            >
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <button
-                                                type="button"
-                                                onClick={() => onApiStartEdit(img)}
-                                                className={styles.editBtn}
-                                            >
-                                                Editar
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => onApiDeleteImage(img.id)}
+                                                onClick={() => setDeleteConfirmImageId(img.id)}
                                                 disabled={deletingImgId === img.id}
                                                 className={styles.deleteBtn}
                                                 title="Eliminar imagen"
                                             >
                                                 <Delete size={16} />
                                             </button>
-                                        </>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </fieldset>
+                            ))}
+                        </div>
+                    )}
+                </fieldset>
+                <ModalConfirm
+                    open={deleteConfirmImageId !== null}
+                    title="Eliminar imagen"
+                    message="¿Estás seguro de que querés eliminar esta imagen?"
+                    confirmText="Eliminar"
+                    cancelText="Cancelar"
+                    onConfirm={async () => {
+                        if (deleteConfirmImageId) {
+                            await onApiDeleteImage(deleteConfirmImageId);
+                            setDeleteConfirmImageId(null);
+                        }
+                    }}
+                    onCancel={() => setDeleteConfirmImageId(null)}
+                />
+            </>
         );
     }
 
-    // Modo creación: mostrar URLs con drag & drop
+    // Modo creación: solo subida por archivo, todo envuelto en un solo fragmento
     return (
-        <fieldset className={styles.fieldset}>
-            <legend className={styles.legend}>Imágenes del producto</legend>
-            <p className={styles.fieldHint}>
-                Carga imágenes del producto. Arrastra para reordenar. Haz clic en la estrella para establecer como
-                imagen destacada.
-            </p>
-
-            {/* Upload Input */}
-            <div className={styles.uploadSection}>
-                <label className={styles.uploadLabel}>
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileClick}
-                        style={{ display: 'none' }}
-                    />
-                    <span className={styles.uploadButton}>
-                        {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : '+ Agregar imágenes'}
-                    </span>
-                </label>
-            </div>
-            {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
-
-            {/* Images Grid with Drag & Drop */}
-            {images.filter(img => img.trim()).length > 0 ? (
-                <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="images">
-                        {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
-                            <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                                className={`${styles.imagesGrid} ${snapshot.isDraggingOver ? styles.dragActive : ''}`}
-                            >
-                                {images.map((url: string, index: number) =>
-                                    url.trim() ? (
-                                        <Draggable key={`${url}-${index}`} draggableId={`${url}-${index}`} index={index}>
-                                            {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
-                                                <div
-                                                    ref={dragProvided.innerRef}
-                                                    {...dragProvided.draggableProps}
-                                                    {...dragProvided.dragHandleProps}
-                                                    className={`${styles.imageCard} ${dragSnapshot.isDragging ? styles.dragging : ''}`}
-                                                >
-                                                    <div className={styles.imagePreview}>
-                                                        <img src={url} alt={`Imagen ${index + 1}`} />
-                                                        {index === 0 && (
-                                                            <div className={styles.thumbnailBadge}>
-                                                                <Star size={16} fill="gold" />
-                                                                Destacada
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className={styles.imageActions}>
-                                                        {index > 0 && (
+        <>
+            <fieldset className={styles.fieldset}>
+                <legend className={styles.legend}>Imágenes del producto</legend>
+                <p className={styles.fieldHint}>
+                    Carga imágenes del producto. Arrastra para reordenar. Haz clic en la estrella para establecer como
+                    imagen destacada.
+                </p>
+                {/* Upload Input */}
+                <div className={styles.uploadSection}>
+                    <label className={styles.uploadLabel}>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleFileClick}
+                            style={{ display: 'none' }}
+                        />
+                        <span className={styles.uploadButton}>
+                            {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : '+ Agregar imágenes'}
+                        </span>
+                    </label>
+                </div>
+                {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
+                {/* Images Grid with Drag & Drop */}
+                {images.filter(img => img.trim()).length > 0 ? (
+                    <DragDropContext onDragEnd={handleDragEnd}>
+                        <Droppable droppableId="images">
+                            {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                    className={`${styles.imagesGrid} ${snapshot.isDraggingOver ? styles.dragActive : ''}`}
+                                >
+                                    {images.map((url: string, index: number) =>
+                                        url.trim() ? (
+                                            <Draggable key={`${url}-${index}`} draggableId={`${url}-${index}`} index={index}>
+                                                {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
+                                                    <div
+                                                        ref={dragProvided.innerRef}
+                                                        {...dragProvided.draggableProps}
+                                                        {...dragProvided.dragHandleProps}
+                                                        className={`${styles.imageCard} ${dragSnapshot.isDragging ? styles.dragging : ''}`}
+                                                    >
+                                                        <div className={styles.imagePreview}>
+                                                            <img src={url} alt={`Imagen ${index + 1}`} />
+                                                            {index === 0 && (
+                                                                <div className={styles.thumbnailBadge}>
+                                                                    <Star size={16} fill="gold" />
+                                                                    Destacada
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className={styles.imageActions}>
                                                             <button
                                                                 type="button"
-                                                                className={styles.thumbnailBtn}
-                                                                onClick={() => handleSetThumbnail(index)}
-                                                                title="Establecer como destacada"
+                                                                className={styles.deleteBtn}
+                                                                onClick={() => setDeleteConfirmImageId(index.toString())}
+                                                                title="Eliminar imagen"
                                                             >
-                                                                ☆
+                                                                <Delete size={16} />
                                                             </button>
-                                                        )}
-                                                        <button
-                                                            type="button"
-                                                            className={styles.deleteBtn}
-                                                            onClick={() => handleRemoveImage(index)}
-                                                            title="Eliminar imagen"
-                                                        >
-                                                            <Delete size={16} />
-                                                        </button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ) : null
-                                )}
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
-            ) : (
-                <div className={styles.emptyState}>
-                    <p>No hay imágenes. Carga la primera haciendo clic en el botón de arriba.</p>
-                </div>
-            )}
-
-            {/* Input fields for manual URL entry */}
-            <div className={styles.urlInputsSection}>
-                {images.map((url, i) => (
-                    <div key={i} className={styles.urlInput}>
-                        <input
-                            type="text"
-                            placeholder="URL de la imagen (http/https)"
-                            value={url}
-                            onChange={e => onSetImage(i, e.target.value)}
-                            className={styles.inputField}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => handleRemoveImage(i)}
-                            className={styles.deleteBtn}
-                        >
-                            Eliminar
-                        </button>
+                                                )}
+                                            </Draggable>
+                                        ) : null
+                                    )}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
+                ) : (
+                    <div className={styles.emptyState}>
+                        <p>No hay imágenes. Carga la primera haciendo clic en el botón de arriba.</p>
                     </div>
-                ))}
-            </div>
-
-            <button
-                type="button"
-                onClick={onAddImageSlot}
-                className={styles.addSlotBtn}
-            >
-                + Agregar campo para URL
-            </button>
-        </fieldset>
+                )}
+            </fieldset>
+            <ModalConfirm
+                open={deleteConfirmImageId !== null && !isEdit}
+                title="Eliminar imagen"
+                message="¿Estás seguro de que querés eliminar esta imagen?"
+                confirmText="Eliminar"
+                cancelText="Cancelar"
+                onConfirm={() => {
+                    if (deleteConfirmImageId) {
+                        const index = parseInt(deleteConfirmImageId, 10);
+                        if (!isNaN(index)) {
+                            handleRemoveImage(index);
+                        }
+                        setDeleteConfirmImageId(null);
+                    }
+                }}
+                onCancel={() => setDeleteConfirmImageId(null)}
+            />
+        </>
     );
 });
