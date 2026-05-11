@@ -107,23 +107,6 @@ export function CategoryTabBasico({
                 )}
 
                 <div className={styles.field}>
-                    <label className={styles.label} htmlFor="category-desc">
-                        Descripción
-                    </label>
-                    <textarea
-                        className={styles.textarea}
-                        id="category-desc"
-                        rows={4}
-                        value={form.description || ''}
-                        onChange={e => setField('description', e.target.value)}
-                        placeholder="Descripción de la categoría (opcional)"
-                    />
-                    <span className={styles.fieldHint}>
-                        {(form.description || '').length} caracteres
-                    </span>
-                </div>
-
-                <div className={styles.field}>
                     <label className={styles.checkbox}>
                         <input
                             type="checkbox"
