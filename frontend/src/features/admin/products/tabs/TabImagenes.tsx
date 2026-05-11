@@ -39,16 +39,9 @@ interface TabImagenesProps {
     imgError: string;
     showAddImgForm: boolean;
     setShowAddImgForm: (b: boolean) => void;
-    editingImgId: string | null;
-    setEditingImgId: (s: string | null) => void;
-    editingImgAlt: string;
-    setEditingImgAlt: (s: string) => void;
-    savingImgId: string | null;
     deletingImgId: string | null;
     fileInputRef: RefObject<HTMLInputElement | null>;
     onApiUploadImage: () => Promise<void>;
-    onApiStartEdit: (img: ProductImageItem) => void;
-    onApiCommitEdit: (imageId: string) => Promise<void>;
     onApiDeleteImage: (imageId: string) => Promise<void>;
 }
 

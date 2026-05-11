@@ -337,16 +337,9 @@ export function AdminProductFormPage({
                             imgError={formProps.imgError}
                             showAddImgForm={formProps.showAddImgForm}
                             setShowAddImgForm={formProps.setShowAddImgForm}
-                            editingImgId={formProps.editingImgId}
-                            setEditingImgId={formProps.setEditingImgId}
-                            editingImgAlt={formProps.editingImgAlt}
-                            setEditingImgAlt={formProps.setEditingImgAlt}
-                            savingImgId={formProps.savingImgId}
                             deletingImgId={formProps.deletingImgId}
                             fileInputRef={formProps.fileInputRef}
                             onApiUploadImage={formProps.handleApiUploadImage}
-                            onApiStartEdit={formProps.handleApiStartEdit}
-                            onApiCommitEdit={formProps.handleApiCommitEdit}
                             onApiDeleteImage={formProps.handleApiDeleteImage}
                         />
                     </section>
