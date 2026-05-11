@@ -1615,3 +1615,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #881: 850 asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuroclaro | 2026-05-06 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #907: 887 eliminar el formulario de alta rápida wizard en la creación de productos | 2026-05-10 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #916: Comportamiento del Formulario | 2026-05-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #908: 🔄 Actualización automática de puntajes semanal | 2026-05-11 |
