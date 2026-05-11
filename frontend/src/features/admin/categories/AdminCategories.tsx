@@ -4,7 +4,7 @@ import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Modal } from '../../../components/ui/Modal';
 import { useNotification } from '../../../context/NotificationContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
@@ -31,6 +31,7 @@ type CategorySortDirection = 'asc' | 'desc';
 
 export function AdminCategories() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory, uploadCategoryImage } = useAdminCategories();
   // Local state for pagination
   const [page, setPage] = useState(1);
@@ -106,6 +107,19 @@ export function AdminCategories() {
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, minProducts, maxProducts, isVisible]);
+
+  // Cuando se regresa a la página (ej: desde crear/editar categoría), refetch para mostrar cambios
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    refreshCategories({
+      q: selectedSuggestion || debouncedSearch,
+      page,
+      limit,
+      minProducts: minProducts === '' ? undefined : minProducts,
+      maxProducts: maxProducts === '' ? undefined : maxProducts,
+      isVisible: isVisible === 'all' ? undefined : isVisible === 'visible' ? true : false,
+    });
+  }, [location.pathname]);
 
 
   const handlePageChange = useCallback((newPage: number) => {
