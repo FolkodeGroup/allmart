@@ -19,8 +19,17 @@ export const getAll = async (req: Request, res: Response) => {
 
 export const getById = async (req: Request, res: Response) => {
     try {
-        const note = await staffNotesService.getStaffNoteById(req.params.id);
-        if (!note) return res.status(404).json({ error: 'Nota no encontrada.' });
+        const { id } = req.params;
+
+        if (!id || typeof id !== 'string') {
+            return res.status(400).json({ error: 'ID de nota inválido.' });
+        }
+
+        const note = await staffNotesService.getStaffNoteById(id);
+        if (!note) {
+            return res.status(404).json({ error: 'Nota no encontrada.' });
+        }
+
         res.json(note);
     } catch (err) {
         logStaffNotesError('getById', err);
@@ -31,39 +40,62 @@ export const getById = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
     try {
         const { content } = req.body;
+
         if (!content || typeof content !== 'string') {
-            return res.status(400).json({ error: 'Contenido requerido.' });
+            return res.status(400).json({ error: 'Contenido requerido y debe ser texto.' });
         }
+
         const userId = (req as AuthenticatedRequest).user?.userId;
-        if (!userId) return res.status(401).json({ error: 'Usuario no autenticado.' });
+        if (!userId) {
+            return res.status(401).json({ error: 'Usuario no autenticado.' });
+        }
+
         const note = await staffNotesService.createStaffNote(content, userId);
         res.status(201).json(note);
     } catch (err) {
         logStaffNotesError('create', err);
-        res.status(500).json({ error: 'Error al crear la nota.' });
+        const message = err instanceof Error ? err.message : 'Error al crear la nota.';
+        res.status(400).json({ error: message });
     }
 };
 
 export const update = async (req: Request, res: Response) => {
     try {
+        const { id } = req.params;
         const { content } = req.body;
-        if (!content || typeof content !== 'string') {
-            return res.status(400).json({ error: 'Contenido requerido.' });
+
+        if (!id || typeof id !== 'string') {
+            return res.status(400).json({ error: 'ID de nota inválido.' });
         }
-        const note = await staffNotesService.updateStaffNote(req.params.id, content);
+
+        if (!content || typeof content !== 'string') {
+            return res.status(400).json({ error: 'Contenido requerido y debe ser texto.' });
+        }
+
+        const note = await staffNotesService.updateStaffNote(id, content);
         res.json(note);
     } catch (err) {
         logStaffNotesError('update', err);
-        res.status(500).json({ error: 'Error al actualizar la nota.' });
+        const message = err instanceof Error ? err.message : 'Error al actualizar la nota.';
+        const statusCode = message.includes('no encontrada') ? 404 : 400;
+        res.status(statusCode).json({ error: message });
     }
 };
 
 export const remove = async (req: Request, res: Response) => {
     try {
-        await staffNotesService.deleteStaffNote(req.params.id);
+        const { id } = req.params;
+
+        if (!id || typeof id !== 'string') {
+            return res.status(400).json({ error: 'ID de nota inválido.' });
+        }
+
+        await staffNotesService.deleteStaffNote(id);
         res.status(204).send();
     } catch (err) {
         logStaffNotesError('remove', err);
-        res.status(500).json({ error: 'Error al eliminar la nota.' });
+        const message = err instanceof Error ? err.message : 'Error al eliminar la nota.';
+        const statusCode = message.includes('no encontrada') ? 404 : 400;
+        res.status(statusCode).json({ error: message });
     }
 };
