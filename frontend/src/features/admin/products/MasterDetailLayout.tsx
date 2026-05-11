@@ -11,7 +11,6 @@ interface MasterDetailLayoutProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDeleteDirect?: (id: string) => void;
-  onDuplicate?: (product: AdminProduct) => void;
   canEdit: boolean;
   canDelete: boolean;
   children?: React.ReactNode;
@@ -25,7 +24,6 @@ export function MasterDetailLayout({
   onEdit,
   onDelete,
   onDeleteDirect,
-  onDuplicate,
   canEdit,
   canDelete,
   children,
@@ -51,7 +49,7 @@ export function MasterDetailLayout({
     if (!selectedProductId && products.length > 0) {
       setSelectedProductId(products[0].id);
     }
-  }, [products, loading, selectedProductId, defaultSelectedProductId]);
+  }, [products, loading, defaultSelectedProductId]);
 
   // Get selected product
   const selectedProduct = useMemo(
@@ -75,7 +73,6 @@ export function MasterDetailLayout({
         onSelectProduct={handleSelectProduct}
         onEdit={onEdit}
         onDelete={onDelete}
-        onDuplicate={onDuplicate}
         canEdit={canEdit && !!onEdit}
         canDelete={canDelete && !!onDelete}
       />
@@ -86,7 +83,6 @@ export function MasterDetailLayout({
           product={selectedProduct}
           onEdit={onEdit}
           onDelete={onDeleteDirect || onDelete}
-          onDuplicate={onDuplicate}
           canEdit={canEdit}
           canDelete={canDelete}
         />
