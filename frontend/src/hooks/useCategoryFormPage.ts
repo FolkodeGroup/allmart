@@ -109,10 +109,15 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
         const errors: Record<string, string> = {};
         if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
         if (!form.slug.trim()) errors.slug = 'El slug es obligatorio';
-        
+
+        // Validar que haya imagen (nueva o existente)
+        if (!form.image && !imgFile) {
+            errors.image = 'Es obligatorio subir al menos una imagen para la categoría';
+        }
+
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
-    }, [form]);
+    }, [form, imgFile]);
 
     // ── Submit ─────────────────────────────────────────────────────────────
     const handleSubmit = useCallback(async (e?: React.FormEvent) => {
@@ -176,7 +181,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
         if (!file) return;
 
         setImgError('');
-        
+
         // Validate file type and size
         if (!file.type.startsWith('image/')) {
             setImgError('Por favor selecciona un archivo de imagen válido');

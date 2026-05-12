@@ -26,7 +26,6 @@ interface ProductDetailPanelProps {
   product: AdminProduct;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
-  onDuplicate?: (product: AdminProduct) => void;
   canEdit?: boolean;
   canDelete?: boolean;
 }
@@ -44,7 +43,6 @@ export function ProductDetailPanel({
   product,
   onEdit,
   onDelete,
-  onDuplicate,
   canEdit = true,
   canDelete = true,
 }: ProductDetailPanelProps) {
@@ -177,7 +175,7 @@ export function ProductDetailPanel({
       </div>
 
       {/* Footer with actions */}
-      {(canEdit || canDelete || onDuplicate) && (
+      {(canEdit || canDelete) && (
         <div className={styles.panelFooter}>
           <div className={styles.actions}>
             {canEdit && onEdit && (
@@ -186,15 +184,6 @@ export function ProductDetailPanel({
                 className={styles.btnEdit}
               >
                 Editar
-              </button>
-            )}
-            {onDuplicate && (
-              <button
-                onClick={() => onDuplicate(product)}
-                className={styles.btnEdit}
-                title="Duplicar producto"
-              >
-                Duplicar
               </button>
             )}
             {canDelete && onDelete && (
