@@ -6,7 +6,7 @@
     min-height: 0;
     background: var(--color-bg-primary);
     font-family: inherit;
-    overflow: auto;
+    /* Quitar overflow para que sticky funcione con el scroll del body/html */
 }
 
 /* ── Sticky page header ──────────────────────────────────────────────────── */
@@ -127,7 +127,7 @@
 /* ── Sticky sidebar ──────────────────────────────────────────────────────── */
 .sidebar {
     position: sticky;
-    top: 61px;
+    top: 135px; /* Ajusta este valor según el alto real del navbar/header */
     align-self: flex-start;
     width: 188px;
     flex-shrink: 0;
@@ -139,7 +139,7 @@
     border: 1px solid var(--color-border);
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    /* overflow eliminado para no romper sticky */
 }
 
 .sidebarList {
