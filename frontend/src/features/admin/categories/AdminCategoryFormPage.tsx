@@ -135,6 +135,7 @@ export function AdminCategoryFormPage({
     }, []);
 
     const scrollToSection = useCallback((id: SectionId) => {
+        setActiveSection(id); // Resalta la tab al hacer click
         sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, []);
 
