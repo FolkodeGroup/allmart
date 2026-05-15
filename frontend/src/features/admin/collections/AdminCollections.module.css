@@ -1,3 +1,40 @@
+/* Columna de selección de checkboxes */
+.selectColHeader {
+  text-align: center;
+  vertical-align: middle;
+  padding-left: 12px;
+  padding-right: 12px;
+  width: 110px;
+}
+
+.selectColHeaderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.selectColLabel {
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.selectColCell {
+  text-align: center;
+  vertical-align: middle;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.selectColCellContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 .inputError {
   border-color: #e53e3e !important;
   background-color: #fff5f5;
