@@ -129,19 +129,21 @@ const AdminCollections: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Gestionar Colecciones</h1>
-        <button className={styles.btnPrimary} onClick={handleNew}>
-          + Nueva Colección
-        </button>
-        {selectedIds.length > 0 && (
-          <button
-            className={styles.btnSmallDanger}
-            style={{ marginLeft: 16 }}
-            onClick={handleBulkDelete}
-            disabled={deleting}
-          >
-            Eliminar seleccionadas ({selectedIds.length})
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {selectedIds.length > 0 && (
+            <button
+              className={styles.btnSmallDanger}
+              onClick={handleBulkDelete}
+              disabled={deleting}
+              style={{ marginRight: 8 }}
+            >
+              Eliminar seleccionadas ({selectedIds.length})
+            </button>
+          )}
+          <button className={styles.btnPrimary} onClick={handleNew}>
+            + Nueva Colección
           </button>
-        )}
+        </div>
       </div>
 
       <div className={styles.filters}>
@@ -189,12 +191,21 @@ const AdminCollections: React.FC = () => {
         <table className={styles.table}>
           <thead>
             <tr>
+              <th>Nombre</th>
+              <th>Slug</th>
+              <th>Posición</th>
+              <th>Orden</th>
+              <th>Productos</th>
+              <th>Estado</th>
+              <th>Acciones</th>
               <th>
                 <input
                   type="checkbox"
                   aria-label="Seleccionar todas"
                   checked={collections.length > 0 && selectedIds.length === collections.length}
-                  indeterminate={selectedIds.length > 0 && selectedIds.length < collections.length}
+                  ref={el => {
+                    if (el) el.indeterminate = selectedIds.length > 0 && selectedIds.length < collections.length;
+                  }}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setSelectedIds(collections.map((c) => c.id));
@@ -204,13 +215,6 @@ const AdminCollections: React.FC = () => {
                   }}
                 />
               </th>
-              <th>Nombre</th>
-              <th>Slug</th>
-              <th>Posición</th>
-              <th>Orden</th>
-              <th>Productos</th>
-              <th>Estado</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -231,20 +235,6 @@ const AdminCollections: React.FC = () => {
                 const checked = selectedIds.includes(collection.id);
                 return (
                   <tr key={collection.id}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        aria-label={`Seleccionar colección ${collection.name}`}
-                        checked={checked}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedIds((prev) => [...prev, collection.id]);
-                          } else {
-                            setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
-                          }
-                        }}
-                      />
-                    </td>
                     <td>
                       <strong>{collection.name}</strong>
                     </td>
@@ -274,6 +264,20 @@ const AdminCollections: React.FC = () => {
                       >
                         Eliminar
                       </button>
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        aria-label={`Seleccionar colección ${collection.name}`}
+                        checked={checked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds((prev) => [...prev, collection.id]);
+                          } else {
+                            setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
+                          }
+                        }}
+                      />
                     </td>
                   </tr>
                 );
