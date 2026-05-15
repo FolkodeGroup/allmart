@@ -1,3 +1,15 @@
+.inputError {
+  border-color: #e53e3e !important;
+  background-color: #fff5f5;
+}
+
+.fieldError {
+  color: #e53e3e;
+  font-size: 13px;
+  margin-top: 4px;
+  margin-bottom: 0;
+  font-weight: 500;
+}
 /* AdminCollections.module.css */
 
 .container {

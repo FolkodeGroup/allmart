@@ -40,6 +40,12 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   });
 
   const [error, setError] = useState<string | null>(null);
+  // Validaciones por campo
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    description?: string;
+    productIds?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
 
   // ─── Initial state snapshot (for dirty detection) ────────────────────────
@@ -131,15 +137,27 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
     setLoading(true);
 
-    try {
-      if (!formData.name.trim()) {
-        setError('El nombre es requerido');
-        setLoading(false);
-        return;
-      }
+    // Validaciones estrictas
+    const errors: { name?: string; description?: string; productIds?: string } = {};
+    if (!formData.name.trim()) {
+      errors.name = 'El nombre es obligatorio';
+    }
+    if (!formData.description.trim()) {
+      errors.description = 'La descripción es obligatoria';
+    }
+    if (!formData.productIds || formData.productIds.length === 0) {
+      errors.productIds = 'Debes seleccionar al menos un producto';
+    }
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setLoading(false);
+      return;
+    }
 
+    try {
       // Validar que el displayOrder sea único
       const allCollections = await collectionsService.getAllUnpaginated();
       const isDuplicateOrder = allCollections.some(
@@ -185,7 +203,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
 
       {error && <div className={styles.error}>{error}</div>}
 
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.form} noValidate>
         <div className={styles.formGroup}>
           <label htmlFor="collection-name">Nombre *</label>
           <input
@@ -199,9 +217,15 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                 name,
                 slug: !collection ? generateSlug(name) : formData.slug,
               });
+              setFieldErrors((prev) => ({ ...prev, name: undefined }));
             }}
             placeholder="Ej: Ofertas del Mes"
+            className={fieldErrors.name ? `${styles.inputError}` : undefined}
+            aria-invalid={!!fieldErrors.name}
           />
+          {fieldErrors.name && (
+            <span className={styles.fieldError}>{fieldErrors.name}</span>
+          )}
         </div>
 
         <div className={styles.formGroup}>
@@ -217,14 +241,22 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="collection-desc">Descripción</label>
+          <label htmlFor="collection-desc">Descripción *</label>
           <textarea
             id="collection-desc"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, description: e.target.value });
+              setFieldErrors((prev) => ({ ...prev, description: undefined }));
+            }}
             placeholder="Detalles y descripción"
             rows={3}
+            className={fieldErrors.description ? `${styles.inputError}` : undefined}
+            aria-invalid={!!fieldErrors.description}
           />
+          {fieldErrors.description && (
+            <span className={styles.fieldError}>{fieldErrors.description}</span>
+          )}
         </div>
 
         <div className={styles.formRow}>
@@ -259,18 +291,26 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
             <small>Menor número aparece primero</small>
           </div>
         </div>
-        <ProductSelector
-          selectedIds={formData.productIds}
-          onProductsChange={(productIds) => setFormData({ ...formData, productIds })}
-          initialProducts={
-            collection?.products?.map((p) => ({
-              id: p.id,
-              name: p.name,
-              price: p.price,
-              imageUrl: p.imageUrl,
-            })) ?? []
-          }
-        />
+        <div className={styles.formGroup}>
+          <ProductSelector
+            selectedIds={formData.productIds}
+            onProductsChange={(productIds) => {
+              setFormData({ ...formData, productIds });
+              setFieldErrors((prev) => ({ ...prev, productIds: undefined }));
+            }}
+            initialProducts={
+              collection?.products?.map((p) => ({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                imageUrl: p.imageUrl,
+              })) ?? []
+            }
+          />
+          {fieldErrors.productIds && (
+            <span className={styles.fieldError}>{fieldErrors.productIds}</span>
+          )}
+        </div>
 
         <div className={styles.formGroup}>
           <label>
@@ -284,7 +324,11 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.btnPrimary} disabled={loading}>
+          <button
+            type="submit"
+            className={styles.btnPrimary}
+            disabled={loading || !!fieldErrors.name || !!fieldErrors.description || !!fieldErrors.productIds}
+          >
             {loading ? 'Guardando...' : collection ? 'Actualizar' : 'Crear'}
           </button>
           <button type="button" className={styles.btnSecondary} onClick={handleCancel} disabled={loading}>
