@@ -198,22 +198,25 @@ const AdminCollections: React.FC = () => {
               <th>Productos</th>
               <th>Estado</th>
               <th>Acciones</th>
-              <th>
-                <input
-                  type="checkbox"
-                  aria-label="Seleccionar todas"
-                  checked={collections.length > 0 && selectedIds.length === collections.length}
-                  ref={el => {
-                    if (el) el.indeterminate = selectedIds.length > 0 && selectedIds.length < collections.length;
-                  }}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedIds(collections.map((c) => c.id));
-                    } else {
-                      setSelectedIds([]);
-                    }
-                  }}
-                />
+              <th className={styles.selectColHeader}>
+                <div className={styles.selectColHeaderContent}>
+                  <span className={styles.selectColLabel}>Selección</span>
+                  <input
+                    type="checkbox"
+                    aria-label="Seleccionar todas"
+                    checked={collections.length > 0 && selectedIds.length === collections.length}
+                    ref={el => {
+                      if (el) el.indeterminate = selectedIds.length > 0 && selectedIds.length < collections.length;
+                    }}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(collections.map((c) => c.id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                  />
+                </div>
               </th>
             </tr>
           </thead>
@@ -265,19 +268,21 @@ const AdminCollections: React.FC = () => {
                         Eliminar
                       </button>
                     </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        aria-label={`Seleccionar colección ${collection.name}`}
-                        checked={checked}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedIds((prev) => [...prev, collection.id]);
-                          } else {
-                            setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
-                          }
-                        }}
-                      />
+                    <td className={styles.selectColCell}>
+                      <div className={styles.selectColCellContent}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Seleccionar colección ${collection.name}`}
+                          checked={checked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds((prev) => [...prev, collection.id]);
+                            } else {
+                              setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
+                            }
+                          }}
+                        />
+                      </div>
                     </td>
                   </tr>
                 );
