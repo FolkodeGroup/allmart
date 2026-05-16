@@ -12,6 +12,7 @@ import { useAdminCategories } from './AdminCategoriesContext';
 import { useNotification } from './NotificationContext';
 import {
   fetchAdminProducts,
+  fetchAdminLowStockCount,
   createAdminProduct,
   updateAdminProduct,
   deleteAdminProduct,
@@ -71,6 +72,7 @@ interface AdminProductsContextType {
   getProduct: (id: string) => AdminProduct | undefined;
   loadProductVariants: (productId: string) => Promise<VariantGroup[]>;
   getLowStockCount: () => number;
+  lowStockTotal: number;
 }
 
 
@@ -104,6 +106,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     page: 1,
     totalPages: 1,
   });
+  const [lowStockTotal, setLowStockTotal] = useState(0);
 
   /** Carga (o recarga) los productos desde el backend con paginación y búsqueda */
   const refreshProducts = useCallback(async (params?: AdminProductsParams) => {
@@ -134,14 +137,26 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     await refreshProducts(lastParamsRef.current);
   }, [refreshProducts]);
 
+  /** Obtiene el conteo total de productos con stock < 5 desde el backend (ignora paginación). */
+  const refreshLowStockCount = useCallback(async () => {
+    if (!tokenRef.current) return;
+    try {
+      const count = await fetchAdminLowStockCount(tokenRef.current);
+      setLowStockTotal(count);
+    } catch {
+      // silencioso: el badge simplemente mantiene el último valor conocido
+    }
+  }, []);
+
   // Carga inicial: se ejecuta automáticamente al montar el contexto (cuando hay token disponible).
   // Esto garantiza que el Dashboard y cualquier componente vean los datos correctos sin necesidad
   // de visitar primero la página de productos.
   useEffect(() => {
     if (token) {
       refreshProducts({ page: 1, limit: 500 });
+      refreshLowStockCount();
     }
-  }, [token, refreshProducts]);
+  }, [token, refreshProducts, refreshLowStockCount]);
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 
@@ -161,7 +176,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
       const newProduct = apiToAdminProduct(created, categoriesRef.current);
       showNotificationRef.current('success', 'Producto creado exitosamente');
-      await refreshCurrentPage();
+      await Promise.all([refreshCurrentPage(), refreshLowStockCount()]);
       return newProduct;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al crear producto';
@@ -212,7 +227,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       }
 
       showNotificationRef.current('success', 'Producto actualizado exitosamente');
-      await refreshCurrentPage();
+      await Promise.all([refreshCurrentPage(), refreshLowStockCount()]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al actualizar producto';
       showNotificationRef.current('error', msg);
@@ -225,7 +240,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     try {
       await deleteAdminProduct(id, tokenRef.current!);
       showNotificationRef.current('success', 'Producto eliminado exitosamente');
-      await refreshCurrentPage();
+      await Promise.all([refreshCurrentPage(), refreshLowStockCount()]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
       showNotificationRef.current('error', msg);
@@ -257,8 +272,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
   const getProduct = (id: string) => products.find((p) => p.id === id);
 
-
-  const getLowStockCount = () => products.filter((p) => p.stock < 5).length;
+  const getLowStockCount = () => lowStockTotal;
 
   return (
     <AdminProductsContext.Provider
@@ -278,6 +292,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         getProduct,
         getLowStockCount,
         loadProductVariants,
+        lowStockTotal,
       }}
     >
       {children}

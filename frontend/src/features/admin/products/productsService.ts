@@ -373,3 +373,9 @@ export async function deleteAdminProduct(id: string, token: string): Promise<voi
     method: 'DELETE',
   }, token);
 }
+
+/** GET /api/admin/products/low-stock-count — Cantidad total de productos con stock < 5 */
+export async function fetchAdminLowStockCount(token: string): Promise<number> {
+  const body = await apiFetch<ApiSuccess<{ count: number }>>('/api/admin/products/low-stock-count', {}, token);
+  return body.data.count;
+}

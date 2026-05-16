@@ -114,7 +114,7 @@ export async function getProductById(id: string): Promise<Product> {
     include: { productCategories: { select: { categoryId: true } } },
   });
   if (!row) throw createError('Producto no encontrado', 404);
-  
+
   // Sincronizar imágenes si el producto tiene imágenes en storage pero product.images está vacío
   const imagesArray = Array.isArray(row.images) ? row.images : [];
   const hasStorageImages = imagesArray.length === 0;
@@ -133,7 +133,7 @@ export async function getProductById(id: string): Promise<Product> {
       (row as any).images = syncedImages;
     }
   }
-  
+
   return toProduct(row);
 }
 
@@ -262,6 +262,11 @@ export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
   await prisma.product.delete({ where: { id } });
+}
+
+/** Devuelve el total de productos con stock < 5 (sin paginación). */
+export async function getLowStockCount(): Promise<number> {
+  return prisma.product.count({ where: { stock: { lt: 5 } } });
 }
 
 // Función para obtener productos con búsqueda y paginación (Admin)
