@@ -1440,6 +1440,29 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #728: 426 añadir indicadores de pedidos con problemas cancelados pendientes de pago | 2026-04-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #727: 🔄 Registrar puntaje de gestión | 2026-04-05 |
 | dgimenezdeveloper | 5 | Creación de milestone | Milestone: REFACTORIZACIÓN IA (INFRAESTRUCTURA DE ARQUITECTURA) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #755: Pre-cargar grupos de variantes en formularios de producto (ADMIN/ PRODUCTOS) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #754: Mejorar organización de botones y texto alternativo en galería de imágenes (edición) (ADMIN/ PRODUCTOS) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #753: Mejorar solidez visual y funcional del componente Grid/Tabla (ADMIN/ PRODUCTOS) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #752: Hacer visible el componente Bulk solo cuando hay selección (ADMIN/ PRODUCTOS) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #751: Reubicar botones “Exportar CSV” y “Exportar Excel” en el buscador de productos (ADMIN/ PRODUCTOS) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #750: Corrección del filtro “Todos los estados” en el buscador de productos (ADMIN/ PRODUCTOS) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #749: Mejorar carga de imágenes en "Nuevo Producto" con Drag & Drop (ADMIN/ PRODUCTOS) | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #747: Corregir Funcionalidad del Botón "Ver" en Pedidos Recientes | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #746: Atomizar y Hacer Drag & Drop los Gráficos y Estadísticas | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #745: Modal de Confirmación para el Botón "Limpiar" en Feed de Actividad | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #744: Mejorar UI del Feed de Actividad | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #743: Hacer Notas Drag & Drop y Atomizadas | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #742: Rediseñar UI del Componente de Notas y sus Botones | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #741: Mejorar Visibilidad del Componente de Notas en Admin Dashboard | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #740: Limitar cantidad agregada al carrito según stock disponible | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #739: Funcionalidad para elegir variantes en la vista de producto | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #738: Mostrar disponibilidad, variantes y botón "Me gusta" en la vista de producto | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #737: Funcionamiento correcto de filtros en "Ver Todos" | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #736: Mostrar botón "Me gusta" en Productos Destacados | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #735: AUTOCOMPLETADO DE PRODUCTOS EN BUSCADOR DE HOME Y MEJORA DE UX EN ICONO DE LUPA | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #734: Rediseñar Dashboard con nueva jerarquía de KPIs accionables | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #733: Actualizar copy y labels del formulario de productos para flujo unificado | 2026-04-06 |
+| FedericoPaal | 3 | Creación de issue | Issue #732: Implementar redirects legacy para rutas antiguas sin romper bookmarks | 2026-04-06 |
 | dgimenezdeveloper | 3 | Creación de issue | Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-06 |
 | dgimenezdeveloper | 2 | Etiquetado de issue (FULLSTACK) | Issue #731: Refactorizar navegación del Admin Panel según nueva IA | 2026-04-06 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #756: Optimización de animación en OrdersTable para mejorar la experiencia visual al cargar la tabla de pedidos. | 2026-04-08 |
@@ -1462,6 +1485,17 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #770: feat: mega menú de categorías, loader inicial y seed demo robusto | 2026-04-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #769: 🔄 Registrar puntaje de gestión | 2026-04-11 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #729: 🔄 Actualización automática de puntajes semanal | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #768: Agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #767: Validación por campo en tiempo real sin esperar submit final | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #766: Implementar checklist visible de "ready to publish" | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #765: Refactorizar creación/edición de producto: reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #764: Implementar wizard de nuevo producto en 3 pasos | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #763: Implementar defaults inteligentes y autocompletado en formulario de producto | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #762: Implementar atajos de productividad (duplicar producto) | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #761: Integrar gestión de imágenes dentro de tab de Producto | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #760: Integrar gestión de variantes dentro de tab de Producto | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #759: Dividir AdminProductForm en tabs reutilizables para master-detail | 2026-04-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #758: Implementar vista master-detail de productos con layout reorganizado | 2026-04-11 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #780: 🔄 Actualización automática de puntajes semanal | 2026-04-12 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #782: 🔄 Registrar puntaje de gestión | 2026-04-13 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #782: 🔄 Registrar puntaje de gestión | 2026-04-13 |
@@ -1553,8 +1587,32 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #821: 🔄 Registrar puntaje de gestión | 2026-04-20 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #826: 🔄 Registrar puntaje de gestión | 2026-04-21 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #827: 🔄 Actualización automática de puntajes semanal | 2026-04-26 |
+| FedericoPaal | 3 | Creación de issue | Issue #848: Autocompletar texto alternativo de imagen con el nombre del banner | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #847: Ocultar paginación cuando no hay colecciones | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #846: Confirmación al eliminar una Colección | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #845: Permitir carga de imágenes locales en formulario de Colección | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #844: CONFIRMACIÓN AL DUPLICAR O ELIMINAR UNA PROMOCIÓN EN CAMPAÑAS | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #843: CONFIRMACIÓN AL ELIMINAR PRODUCTOS DE UNA PROMOCIÓN EN MATRIZ DE PRODUCTOS | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #842: Corregir el filtro de estado para que solo permita seleccionar un estado a la vez | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #841: Mejorar la visualización del detalle de pedido: modal o nueva página | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #840: Corregir y asegurar el funcionamiento de todos los filtros de estados en la vista de Pedidos | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #839: Advertencia por cambios no guardados en categorías | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #838: Vista de categorías con layout dividido (izquierda/derecha) | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #837: Redirección a formulario de nueva categoría | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #836: Confirmación al eliminar producto | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #835: Confirmación al duplicar producto | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #834: Mantener producto editado seleccionado tras guardar cambios | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #833: Hacer sticky el cuadro de pasos del formulario de creación de producto | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #832: Agregar botón propio para el formulario del wizard (alta rápida) en productos | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #831: Mejorar la visualización de porcentajes y nombres en los gráficos | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #830: Habilitar, deshabilitar y reordenar widgets en el panel con vista previa en tiempo real | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #829: Visualización detallada de información de Órdenes y Pedidos | 2026-04-28 |
+| FedericoPaal | 3 | Creación de issue | Issue #828: Acordeón en "Acciones Requeridas" con pestañas para Órdenes y Pagos | 2026-04-28 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #853: 🔄 Registrar puntaje de gestión | 2026-04-29 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #852: Se implementa acordeón en "Acciones Requeridas" con pestañas para Órd… | 2026-04-29 |
+| FedericoPaal | 3 | Creación de issue | Issue #851: Aplicar modo oscuro/claro en el menú de configuración y perfil de usuario | 2026-04-29 |
+| FedericoPaal | 3 | Creación de issue | Issue #850: Asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuro/claro | 2026-04-29 |
+| FedericoPaal | 3 | Creación de issue | Issue #849: Optimizar y unificar el soporte de modo oscuro/claro en todos los componentes del panel administrativo | 2026-04-29 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #859: Se mantiene producto editado seleccionado tras guardar cambios | 2026-04-30 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #858: 833 hacer sticky el cuadro de pasos del formulario de creación de producto | 2026-04-30 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #857: 832 agregar botón propio para el formulario del wizard alta rápida en productos | 2026-04-30 |
@@ -1596,25 +1654,62 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #880: 🔄 Registrar puntaje de gestión | 2026-05-06 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #879: 849 optimizar y unificar el soporte de modo oscuroclaro en todos los componentes del panel administrativo | 2026-05-06 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #883: 🔄 Registrar puntaje de gestión | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #903: Badge de productos con bajo stock en sidebar | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #902: Unificar vista de productos más vendidos en tabla | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #901: Validación y aviso de campos requeridos en creación de Banners | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #900: Evitar cuelgue al eliminar múltiples colecciones | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #899: Validación de campos requeridos al crear Colección | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #898: Renderizar descuentos de promociones en productos del Home | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #897: Sticky de opciones y marcado de pestañas en formularios | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #896: Eliminar imágenes en formularios de categorías | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #895: Validación de datos obligatorios en formulario de categorías | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #894: Renderizado en tiempo real de nuevas categorías | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #893: Eliminar funcionalidad de duplicar producto | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #892: Eliminar solo imágenes en edición de producto, con modal de confirmación | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #891: Imágenes estáticas en el formulario de creación de producto | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #890: Subida de imágenes solo por botón y eliminación de campo URL en creación de producto | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #889: Mejorar sticky y selección de opciones en el formulario de productos | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #888: Eliminar badge "Disponible" y stock de la lista de productos | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #887: Eliminar el formulario de Alta Rápida (Wizard) en la creación de productos | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #886: Visualización correcta del mapa de calor en Mapa de Actividades de Ventas | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #885: Optimización y corrección del widget/componente de notas | 2026-05-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #884: Eliminar checkbox de vista previa redundante en presencia de pestaña de vista previa | 2026-05-09 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #428: Añadir exportación de pedidos a CSV/Excel | 2026-05-09 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #823: Fix collections banner | 2026-04-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #825: 768 agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #865: Lo que cambié: | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #866: 841 mejorar la visualización del detalle de pedido modal o nueva página | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #869: Changes Made: | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #870: select de estados en vista de pedidos ajustado | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #874: Cambios Realizados | 2026-05-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #877: texto alternativo de imagen ajustado para sincronizarse con el titulo del banner | 2026-05-04 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #879: 849 optimizar y unificar el soporte de modo oscuroclaro en todos los componentes del panel administrativo | 2026-05-06 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #881: 850 asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuroclaro | 2026-05-06 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #907: 887 eliminar el formulario de alta rápida wizard en la creación de productos | 2026-05-10 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #916: Comportamiento del Formulario | 2026-05-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #908: 🔄 Actualización automática de puntajes semanal | 2026-05-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #924: 889 mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #910: 🔄 Registrar puntaje de gestión | 2026-05-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #908: 🔄 Actualización automática de puntajes semanal | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #912: 891 imágenes estáticas en el formulario de creación de producto | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #911: 1. Se eliminó la opción de agregar imágenes por URL | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #909: Se mantienen badges en la lista de productos de la vista  Producto pa… | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #907: 887 eliminar el formulario de alta rápida wizard en la creación de productos | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #906: 886 visualización correcta del mapa de calor en mapa de actividades de ventas | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #905: 885 optimización y corrección del widgetcomponente de notas | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #904: Se elimina checkbox de vista previa redundante en Dashboard/ Personal… | 2026-05-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #883: 🔄 Registrar puntaje de gestión | 2026-05-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #917: 🔄 Registrar puntaje de gestión | 2026-05-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #917: 🔄 Registrar puntaje de gestión | 2026-05-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #916: Comportamiento del Formulario | 2026-05-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #915: Cambios Realizados: | 2026-05-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #914: Eliminación exitosa de la funcionalidad de duplicar productos en la l… | 2026-05-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #913: Funcionalidades: | 2026-05-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #910: 🔄 Registrar puntaje de gestión | 2026-05-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #908: 🔄 Actualización automática de puntajes semanal | 2026-05-11 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #919: 🔄 Registrar puntaje de gestión | 2026-05-14 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #918: 897 sticky de opciones y marcado de pestañas en formularios | 2026-05-14 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #922: 900 evitar cuelgue al eliminar múltiples colecciones | 2026-05-15 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #921: 899 validación de campos requeridos al crear colección | 2026-05-15 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #920: 898 renderizar descuentos de promociones en productos del home | 2026-05-15 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #932: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #929: Cambios aplicados en un solo edit: | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #928: Varias reparaciones | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #927: Varias reparaciones | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #926: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #929: Cambios aplicados en un solo edit: | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #928: Varias reparaciones | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #926: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #925: se logra que el formulario resalte los campos faltantes | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #924: 889 mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #923: ✅ La imagen anterior se elimina completamente | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #919: 🔄 Registrar puntaje de gestión | 2026-05-16 |
