@@ -68,6 +68,7 @@ export interface PublicProductsParams {
   sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
   page?: number;
   limit?: number;
+  isFeatured?: boolean;
 }
 
 /** Payload compatible con el backend para crear/actualizar un producto */
@@ -310,6 +311,7 @@ export async function fetchPublicProducts(
   if (params.sort)     qs.set('sort', params.sort);
   if (params.page)     qs.set('page', String(params.page));
   if (params.limit)    qs.set('limit', String(params.limit));
+  if (typeof params.isFeatured !== 'undefined') qs.set('isFeatured', String(params.isFeatured));
 
   const url = `/api/products${qs.toString() ? `?${qs}` : ''}`;
   return apiFetch<PaginatedProducts>(url);

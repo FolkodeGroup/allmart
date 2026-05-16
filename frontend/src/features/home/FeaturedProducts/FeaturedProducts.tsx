@@ -31,7 +31,10 @@ export function FeaturedProducts({
   const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
-    Promise.all([fetchPublicProducts({ sort: 'newest', limit }), fetchPublicCategories()])
+    Promise.all([
+      fetchPublicProducts({ sort: 'newest', limit, isFeatured: true }),
+      fetchPublicCategories()
+    ])
       .then(([{ data }, categories]) => {
         setProducts(data.map((p) => mapApiProductToProduct(p, categories)));
       })
