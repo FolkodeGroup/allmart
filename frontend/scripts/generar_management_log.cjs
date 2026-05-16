@@ -7,7 +7,7 @@
 //   - Reviews de PRs (aprobaciones, cambios solicitados, comentarios)
 //   - Milestones creados por dgimenezdeveloper/folkodegroup
 //   - Milestones cerrados (si el creador es dgimenezdeveloper/folkodegroup)
-//   - Issues creados por dgimenezdeveloper/folkodegroup
+//   - Issues creados (acreditados al creador; folkodegroup mapeado a dgimenezdeveloper)
 //   - Issues etiquetados por dgimenezdeveloper/folkodegroup
 //   - Issues asignados por dgimenezdeveloper/folkodegroup
 //
@@ -206,12 +206,13 @@ async function collectIssueEvents(entries) {
   const issues = await fetchAllPages('issues?state=all&filter=all');
   console.log(`    ${issues.length} issues encontrados`);
 
-  // Issues creados
+  // Issues creados — acreditar al creador de cada issue (folkodegroup → dgimenezdeveloper)
   for (const issue of issues) {
     if (issue.pull_request) continue; // saltar PRs que aparecen en /issues
-    if (!isTracked(issue.user?.login)) continue;
+    const creator = issue.user?.login;
+    if (!creator) continue;
     entries.push({
-      dev: normalizeDev(issue.user.login),
+      dev: normalizeDev(creator),
       score: 3,
       actividad: 'Creación de issue',
       referencia: `Issue #${issue.number}: ${issue.title}`,
