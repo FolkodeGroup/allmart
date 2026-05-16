@@ -74,7 +74,6 @@ temp/
 # Misc
 .prettierrc
 .eslintrc*
-tsconfig*.json
 vitest.config.ts
 jest.config.js
 .npmrc
