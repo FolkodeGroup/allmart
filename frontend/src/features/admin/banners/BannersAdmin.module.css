@@ -1,3 +1,35 @@
+/* ── Validación visual de errores (copiado de OrderConfirmationForm.module.css) ── */
+.inputError {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 3px rgba(199, 80, 80, 0.1) !important;
+}
+
+.inputError:focus {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 3px rgba(199, 80, 80, 0.18) !important;
+}
+
+.errorMsg {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  font-weight: var(--font-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  animation: shake 0.3s ease both;
+}
+
+.errorMsg::before {
+  content: '⚠';
+  font-size: var(--text-xs);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-4px); }
+  75%       { transform: translateX(4px); }
+}
 /**
  * BannersAdmin.module.css
  * Estilos para el componente de administración de banners

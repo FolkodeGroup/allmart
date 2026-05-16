@@ -1,3 +1,7 @@
+type FieldErrors = {
+  title?: string;
+  imageFile?: string;
+};
 /**
  * features/admin/banners/BannersAdmin.tsx
  * Página de administración de banners de la homepage
@@ -39,6 +43,7 @@ export function BannersAdmin() {
     isActive: true,
     altText: '',
   });
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Unsaved changes detection
   const initialFormDataRef = useRef<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string }>({
@@ -135,23 +140,30 @@ export function BannersAdmin() {
     );
   }
 
+  function validateForm(): FieldErrors {
+    const errors: FieldErrors = {};
+    if (!formData.title.trim()) {
+      errors.title = 'El título es obligatorio';
+    }
+    // Solo requiere imagen al crear
+    if (!editingId && !formData.imageFile) {
+      errors.imageFile = 'La imagen es obligatoria';
+    }
+    return errors;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
-      toast.error('Título es requerido');
-      return;
-    }
+    const errors = validateForm();
+    setFieldErrors(errors);
 
-    // Para crear, requiere imagen
-    if (!editingId && !formData.imageFile) {
-      toast.error('Imagen es requerida para crear un nuevo banner');
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
     try {
       if (editingId) {
-        // Actualizar metadatos
         await bannersAdminService.updateBanner(editingId, {
           title: formData.title,
           description: formData.description,
@@ -159,14 +171,11 @@ export function BannersAdmin() {
           isActive: formData.isActive,
           altText: formData.altText,
         });
-
-        // Si hay imagen nueva, actualizar
         if (formData.imageFile) {
           await bannersAdminService.updateBannerImage(editingId, formData.imageFile);
         }
         toast.success('Banner actualizado');
       } else {
-        // Crear nuevo
         await bannersAdminService.createBanner(
           {
             title: formData.title,
@@ -184,6 +193,25 @@ export function BannersAdmin() {
     } catch (err) {
       toast.error(editingId ? 'Error al actualizar banner' : 'Error al crear banner');
       console.error(err);
+    }
+  }
+
+  function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const title = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      title,
+      altText: isAltManuallyEdited ? prev.altText : title,
+    }));
+    if (fieldErrors.title) {
+      setFieldErrors((prev) => ({ ...prev, title: undefined }));
+    }
+  }
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setFormData({ ...formData, imageFile: e.target.files?.[0] ?? null });
+    if (fieldErrors.imageFile) {
+      setFieldErrors((prev) => ({ ...prev, imageFile: undefined }));
     }
   }
 
@@ -240,7 +268,7 @@ export function BannersAdmin() {
       {showForm && (
         <div className={styles.formContainer}>
           <h2 className={styles.formTitle}>{editingId ? 'Editar Banner' : 'Nuevo Banner'}</h2>
-          <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.formGroup}>
               <label htmlFor="title">Título *</label>
               <input
@@ -248,16 +276,16 @@ export function BannersAdmin() {
                 type="text"
                 placeholder="Título del banner"
                 value={formData.title}
-                onChange={(e) => {
-                  const title = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    title,
-                    altText: isAltManuallyEdited ? prev.altText : title,
-                  }));
-                }}
-                required
+                onChange={handleTitleChange}
+                className={`${fieldErrors.title ? styles.inputError : ''}`}
+                aria-invalid={!!fieldErrors.title}
+                aria-describedby={fieldErrors.title ? 'title-error' : undefined}
               />
+              {fieldErrors.title && (
+                <span id="title-error" className={styles.errorMsg} role="alert">
+                  {fieldErrors.title}
+                </span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -277,9 +305,16 @@ export function BannersAdmin() {
                 id="image"
                 type="file"
                 accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp,image/tiff"
-                onChange={(e) => setFormData({ ...formData, imageFile: e.target.files?.[0] ?? null })}
-                required={!editingId}
+                onChange={handleImageChange}
+                className={`${fieldErrors.imageFile ? styles.inputError : ''}`}
+                aria-invalid={!!fieldErrors.imageFile}
+                aria-describedby={fieldErrors.imageFile ? 'image-error' : undefined}
               />
+              {fieldErrors.imageFile && (
+                <span id="image-error" className={styles.errorMsg} role="alert">
+                  {fieldErrors.imageFile}
+                </span>
+              )}
               {formData.imageFile && (
                 <img
                   src={URL.createObjectURL(formData.imageFile)}
