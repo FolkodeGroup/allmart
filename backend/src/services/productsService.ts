@@ -374,12 +374,18 @@ type ProductQuery = {
   sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
   page?: number;
   limit?: number;
+  isFeatured?: boolean;
 };
 
+
 export async function getPublicProducts(query: ProductQuery) {
-  const { category, q, sort, page = 1, limit = 12 } = query;
+  const { category, q, sort, page = 1, limit = 12, isFeatured } = query;
 
   const where: Record<string, unknown> = { status: 'active', stock: { gt: 0 } };
+
+  if (typeof isFeatured === 'boolean') {
+    where.isFeatured = isFeatured;
+  }
 
   if (category) {
     const foundCategory = await getCategoryBySlug(category);

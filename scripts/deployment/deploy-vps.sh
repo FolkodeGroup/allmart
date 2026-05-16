@@ -43,6 +43,53 @@ success(){ echo -e "${GREEN}[OK]${NC} $1"; }
 warn()   { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error()  { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
+cleanup_project_images() {
+  local image_repo="$1"
+  local container_name="$2"
+  local current_image_ref=""
+  local current_image_id=""
+  local image_refs=""
+  local candidate_image_id=""
+
+  if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
+    current_image_ref=$(docker inspect --format '{{.Config.Image}}' "$container_name" 2>/dev/null || true)
+    current_image_id=$(docker inspect --format '{{.Image}}' "$container_name" 2>/dev/null || true)
+  fi
+
+  image_refs=$(docker image ls "$image_repo" --format '{{.Repository}}:{{.Tag}}' | sort -u || true)
+
+  if [ -z "$image_refs" ]; then
+    log "No hay imágenes locales para limpiar en $image_repo"
+    return 0
+  fi
+
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+
+    local image_ref="$line"
+
+    if [ "$image_ref" = "${image_repo}:<none>" ]; then
+      continue
+    fi
+
+    if [ -n "$current_image_ref" ] && [ "$image_ref" = "$current_image_ref" ]; then
+      log "Conservando imagen en uso: $image_ref"
+      continue
+    fi
+
+    candidate_image_id=$(docker image inspect --format '{{.Id}}' "$image_ref" 2>/dev/null || true)
+    if [ -n "$current_image_id" ] && [ "$candidate_image_id" = "$current_image_id" ]; then
+      log "Conservando alias de la imagen en uso: $image_ref"
+      continue
+    fi
+
+    log "Eliminando imagen antigua de Allmart: $image_ref"
+    docker image rm "$image_ref" >/dev/null 2>&1 || warn "No se pudo eliminar $image_ref"
+  done <<EOF
+$image_refs
+EOF
+}
+
 # ─── Verificar que existe el directorio de deploy ─────────────────────────────
 if [ ! -d "$DEPLOY_DIR" ]; then
   log "Creando directorio de despliegue: $DEPLOY_DIR"
@@ -50,15 +97,6 @@ if [ ! -d "$DEPLOY_DIR" ]; then
 fi
 
 cd "$DEPLOY_DIR"
-log "Eliminando contenedor allmart-prod-db si existe..."
-if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-db$'; then
-  docker rm -f allmart-prod-db || warn "No se pudo eliminar el contenedor allmart-prod-db"
-fi
-
-log "Eliminando red allmart_allmart-prod-network si existe..."
-if docker network ls --format '{{.Name}}' | grep -q '^allmart_allmart-prod-network$'; then
-  docker network rm allmart_allmart-prod-network || warn "No se pudo eliminar la red allmart_allmart-prod-network"
-fi
 
 update_env() {
   key=$1
@@ -86,14 +124,12 @@ docker pull "${BACKEND_IMAGE}:${IMAGE_TAG}" || error "No se pudo descargar la im
 docker pull "${FRONTEND_IMAGE}:${IMAGE_TAG}" || error "No se pudo descargar la imagen del frontend"
 success "Imágenes descargadas correctamente"
 
-# ─── Detener contenedores viejos (sin eliminar volúmenes) ─────────────────────
-log "Deteniendo contenedores anteriores (si existen)..."
-# ⚠️  NO usar -v: destruiría el volumen allmart_pgdata y se perderían todos los datos
-docker compose -f "$COMPOSE_FILE" down --remove-orphans || warn "No había contenedores en ejecución"
+# ─── Mantener DB intacta y recrear solo backend/frontend ──────────────────────
+log "Asegurando que la base de datos permanezca levantada..."
+docker compose -f "$COMPOSE_FILE" up -d db --wait --wait-timeout 180
 
-# ─── Levantar los nuevos contenedores ─────────────────────────────────────────
-log "Levantando contenedores de producción..."
-docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 240
+log "Actualizando backend y frontend sin recrear la base de datos..."
+docker compose -f "$COMPOSE_FILE" up -d --no-deps backend frontend --wait --wait-timeout 240
 
 # ─── Verificar que los contenedores están corriendo ───────────────────────────
 log "Esperando que los servicios estén listos (30s)..."
@@ -107,9 +143,10 @@ else
   success "Todos los contenedores están en ejecución ($RUNNING/3)"
 fi
 
-# ─── Limpiar imágenes antiguas (no usadas) ────────────────────────────────────
-log "Limpiando imágenes Docker no utilizadas..."
-docker image prune -f --filter "until=24h" || warn "No se pudieron limpiar imágenes antiguas"
+# ─── Limpiar solo imágenes antiguas de Allmart ────────────────────────────────
+log "Limpiando únicamente imágenes antiguas de Allmart..."
+cleanup_project_images "$BACKEND_IMAGE" "allmart-prod-backend"
+cleanup_project_images "$FRONTEND_IMAGE" "allmart-prod-frontend"
 
 # ─── Estado final ─────────────────────────────────────────────────────────────
 echo ""

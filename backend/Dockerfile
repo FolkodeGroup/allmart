@@ -12,7 +12,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Instalar TODAS las dependencias (incluyendo devDeps para build)
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit && \
+    npm cache clean --force
 
 # ── Stage 2: Build de TypeScript + Prisma ────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -41,13 +42,17 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 COPY package.json package-lock.json* ./
 
 # Instalar solo dependencias de producción + dotenv (requerido en runtime por index.ts)
-RUN npm ci --omit=dev && npm install dotenv
+RUN npm ci --prefer-offline --no-audit --omit=dev && \
+    npm install dotenv && \
+    npm cache clean --force && \
+    rm -rf /home/node/.npm
 
 # Copiar Prisma schema (necesario para el client en runtime)
 COPY prisma ./prisma
 
 # Regenerar Prisma Client en la imagen de producción
-RUN npx prisma generate
+RUN npx prisma generate && \
+    npm cache clean --force
 
 # Copiar el código compilado desde el builder
 COPY --from=builder /app/dist ./dist
@@ -60,7 +65,8 @@ COPY scripts ./scripts
 
 # Copiar entrypoint script
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh && \
+    rm -rf .npmrc .gitignore .git .gitkeep
 
 # Cambiar al usuario no-root
 USER appuser

@@ -4,7 +4,35 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Pre-bundlea dependencias pesadas para acelerar la primera carga en desarrollo
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@mui/material',
+      '@mui/icons-material',
+      '@emotion/react',
+      '@emotion/styled',
+      'framer-motion',
+      'react-hook-form',
+      '@hookform/resolvers/zod',
+      'zod',
+      'recharts',
+      'lucide-react',
+      'react-hot-toast',
+    ],
+  },
   server: {
+    // Pre-transforma los archivos de entrada más comunes al iniciar el servidor
+    warmup: {
+      clientFiles: [
+        './src/main.tsx',
+        './src/App.tsx',
+        './src/components/layout/RootLayout/RootLayout.tsx',
+        './src/pages/Home/HomePage.tsx',
+      ],
+    },
     watch: {
       ignored: [
         '**/.git/**',

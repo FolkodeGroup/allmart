@@ -40,6 +40,43 @@ docker compose up --build
 
 > 📖 **Guía completa con instrucciones detalladas para Windows, Linux y Mac:** consulta [DOCKER.md](docs/deployment/DOCKER.md)
 
+## 🧰 Dev Container (sin instalar Node/npm local)
+
+
+Incluye instalación automática de dependencias en:
+
+- raíz del proyecto
+- `backend/`
+- `frontend/`
+
+### Pasos
+
+1. Instalá Docker y la extensión **Dev Containers** en VS Code.
+2. Abrí este repo en VS Code.
+3. Ejecutá el comando: `Dev Containers: Reopen in Container`.
+4. Esperá el primer build (se ejecuta el setup automático con `npm ci`/`npm install`).
+
+### Levantar servicios dentro del contenedor
+
+Terminal 1 (backend):
+
+```bash
+cd backend
+npm run dev
+```
+
+Terminal 2 (frontend):
+
+```bash
+cd frontend
+npm run dev
+```
+
+Puertos esperados:
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3001`
+
 ## Documentación
 
 Toda la documentación está organizada en la carpeta [`docs/`](docs/README.md).
