@@ -39,6 +39,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 
 
+
 /**
  * Gráfico de torta/donut para distribución de estados de pedidos.
  *
@@ -130,22 +131,22 @@ const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
 
                 {/* 🧠 Centro */}
                 <text
+                    className={styles.donutCenterText}
                     x={cx}
                     y={cy - 5}
                     textAnchor="middle"
                     fontSize={18}
                     fontWeight="700"
-                    fill="#1A1A1A"
                 >
                     {total}
                 </text>
 
                 <text
+                    className={styles.donutCenterLabel}
                     x={cx}
                     y={cy + 13}
                     textAnchor="middle"
                     fontSize={9}
-                    fill="#767676"
                 >
                     pedidos
                 </text>

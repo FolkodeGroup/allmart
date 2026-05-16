@@ -1,9 +1,11 @@
 .criticalStockSection {
   margin-top: 2rem;
-  background: #fff;
+  background: var(--color-bg-card, #fff);
   border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  border: 1px solid var(--color-border, transparent);
   padding: 1.5rem 2rem;
+  transition: background 0.3s;
 }
 .title {
   font-size: 1.25rem;
@@ -12,7 +14,7 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  color: #e53935;
+  color: var(--color-error, #e53935);
 }
 .icon {
   font-size: 1.5rem;
@@ -26,10 +28,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f9f9f9;
+  background: var(--color-bg-secondary, #f9f9f9);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  border: 1px solid var(--color-border-light, transparent);
+  transition: background 0.3s;
 }
 .info {
   display: flex;
@@ -39,17 +43,17 @@
 .productName {
   font-size: 1rem;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-primary, #333);
 }
 .stockCount {
   font-size: 0.95rem;
-  color: #e53935;
+  color: var(--color-error, #e53935);
   font-weight: 500;
 }
 .progressBarWrapper {
   width: 120px;
   height: 12px;
-  background: #eee;
+  background: var(--color-bg-tertiary, #eee);
   border-radius: 6px;
   overflow: hidden;
   margin-left: 1rem;

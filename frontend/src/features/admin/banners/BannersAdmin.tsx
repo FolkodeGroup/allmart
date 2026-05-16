@@ -1,10 +1,17 @@
+type FieldErrors = {
+  title?: string;
+  imageFile?: string;
+};
 /**
  * features/admin/banners/BannersAdmin.tsx
  * Página de administración de banners de la homepage
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useBlocker } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { Trash2, Plus, Edit2, Eye, EyeOff } from 'lucide-react';
 import { bannersAdminService, type AdminBanner } from './bannersAdminService';
 import { Button } from '../../../components/ui/Button/Button';
@@ -26,6 +33,7 @@ export function BannersAdmin() {
   const [banners, setBanners] = useState<AdminBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isAltManuallyEdited, setIsAltManuallyEdited] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -35,6 +43,47 @@ export function BannersAdmin() {
     isActive: true,
     altText: '',
   });
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  // Unsaved changes detection
+  const initialFormDataRef = useRef<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string }>({
+    title: '',
+    description: '',
+    displayOrder: 0,
+    isActive: true,
+    altText: '',
+  });
+
+  const isDirty = showForm && (
+    formData.title !== initialFormDataRef.current.title ||
+    formData.description !== initialFormDataRef.current.description ||
+    formData.displayOrder !== initialFormDataRef.current.displayOrder ||
+    formData.isActive !== initialFormDataRef.current.isActive ||
+    formData.altText !== initialFormDataRef.current.altText ||
+    formData.imageFile !== null
+  );
+
+  const {
+    showWarning,
+    confirmNavigation,
+    cancelNavigation,
+    interceptNavigation,
+    setIsDirty: setHookIsDirty,
+  } = useUnsavedChangesWarning({ active: isDirty });
+
+  useEffect(() => {
+    setHookIsDirty(isDirty);
+  }, [isDirty, setHookIsDirty]);
+
+  const blocker = useBlocker(isDirty);
+
+  function handleCancelForm() {
+    interceptNavigation(() => {
+      setFormData({ title: '', description: '', imageFile: null, displayOrder: 0, isActive: true, altText: '' });
+      setEditingId(null);
+      setShowForm(false);
+    });
+  }
 
   useEffect(() => {
     loadBanners();
@@ -64,38 +113,57 @@ export function BannersAdmin() {
     });
     setEditingId(null);
     setShowForm(false);
+    setIsAltManuallyEdited(false);
   }
 
   function handleEdit(banner: AdminBanner) {
+    initialFormDataRef.current = {
+      title: banner.title,
+      description: banner.description || '',
+      displayOrder: banner.displayOrder,
+      isActive: banner.isActive,
+      altText: banner.altText || '',
+    };
     setFormData({
       title: banner.title,
       description: banner.description || '',
-      imageFile: null, // No cargar archivo, solo metadatos
+      imageFile: null,
       displayOrder: banner.displayOrder,
       isActive: banner.isActive,
       altText: banner.altText || '',
     });
     setEditingId(banner.id);
     setShowForm(true);
+    // Si el alt existente difiere del título, el usuario lo editó manualmente en algún momento
+    setIsAltManuallyEdited(
+      !!banner.altText && banner.altText !== banner.title
+    );
+  }
+
+  function validateForm(): FieldErrors {
+    const errors: FieldErrors = {};
+    if (!formData.title.trim()) {
+      errors.title = 'El título es obligatorio';
+    }
+    // Solo requiere imagen al crear
+    if (!editingId && !formData.imageFile) {
+      errors.imageFile = 'La imagen es obligatoria';
+    }
+    return errors;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
-    if (!formData.title.trim()) {
-      toast.error('Título es requerido');
-      return;
-    }
 
-    // Para crear, requiere imagen
-    if (!editingId && !formData.imageFile) {
-      toast.error('Imagen es requerida para crear un nuevo banner');
+    const errors = validateForm();
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
     try {
       if (editingId) {
-        // Actualizar metadatos
         await bannersAdminService.updateBanner(editingId, {
           title: formData.title,
           description: formData.description,
@@ -103,14 +171,11 @@ export function BannersAdmin() {
           isActive: formData.isActive,
           altText: formData.altText,
         });
-
-        // Si hay imagen nueva, actualizar
         if (formData.imageFile) {
           await bannersAdminService.updateBannerImage(editingId, formData.imageFile);
         }
         toast.success('Banner actualizado');
       } else {
-        // Crear nuevo
         await bannersAdminService.createBanner(
           {
             title: formData.title,
@@ -128,6 +193,25 @@ export function BannersAdmin() {
     } catch (err) {
       toast.error(editingId ? 'Error al actualizar banner' : 'Error al crear banner');
       console.error(err);
+    }
+  }
+
+  function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const title = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      title,
+      altText: isAltManuallyEdited ? prev.altText : title,
+    }));
+    if (fieldErrors.title) {
+      setFieldErrors((prev) => ({ ...prev, title: undefined }));
+    }
+  }
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setFormData({ ...formData, imageFile: e.target.files?.[0] ?? null });
+    if (fieldErrors.imageFile) {
+      setFieldErrors((prev) => ({ ...prev, imageFile: undefined }));
     }
   }
 
@@ -171,11 +255,12 @@ export function BannersAdmin() {
         <Button
           onClick={() => {
             resetForm();
+            initialFormDataRef.current = { title: '', description: '', displayOrder: 0, isActive: true, altText: '' };
             setShowForm(true);
           }}
-          variant="primary"
+          className={styles.btnPrimary}
         >
-          <Plus size={20} />
+          <Plus size={16} />
           Nuevo Banner
         </Button>
       </div>
@@ -183,7 +268,7 @@ export function BannersAdmin() {
       {showForm && (
         <div className={styles.formContainer}>
           <h2 className={styles.formTitle}>{editingId ? 'Editar Banner' : 'Nuevo Banner'}</h2>
-          <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.formGroup}>
               <label htmlFor="title">Título *</label>
               <input
@@ -191,9 +276,16 @@ export function BannersAdmin() {
                 type="text"
                 placeholder="Título del banner"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
+                onChange={handleTitleChange}
+                className={`${fieldErrors.title ? styles.inputError : ''}`}
+                aria-invalid={!!fieldErrors.title}
+                aria-describedby={fieldErrors.title ? 'title-error' : undefined}
               />
+              {fieldErrors.title && (
+                <span id="title-error" className={styles.errorMsg} role="alert">
+                  {fieldErrors.title}
+                </span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -213,20 +305,27 @@ export function BannersAdmin() {
                 id="image"
                 type="file"
                 accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp,image/tiff"
-                onChange={(e) => setFormData({ ...formData, imageFile: e.target.files?.[0] ?? null })}
-                required={!editingId}
+                onChange={handleImageChange}
+                className={`${fieldErrors.imageFile ? styles.inputError : ''}`}
+                aria-invalid={!!fieldErrors.imageFile}
+                aria-describedby={fieldErrors.imageFile ? 'image-error' : undefined}
               />
+              {fieldErrors.imageFile && (
+                <span id="image-error" className={styles.errorMsg} role="alert">
+                  {fieldErrors.imageFile}
+                </span>
+              )}
               {formData.imageFile && (
-                <img 
-                  src={URL.createObjectURL(formData.imageFile)} 
-                  alt="preview" 
-                  className={styles.preview} 
+                <img
+                  src={URL.createObjectURL(formData.imageFile)}
+                  alt="preview"
+                  className={styles.preview}
                 />
               )}
               {editingId && !formData.imageFile && (
                 <div className={styles.currentImageInfo}>
                   <p>Imagen actual cargada</p>
-                  <img 
+                  <img
                     src={banners.find(b => b.id === editingId)?.thumbUrl}
                     alt="current"
                     className={styles.preview}
@@ -242,7 +341,10 @@ export function BannersAdmin() {
                 type="text"
                 placeholder="Descripción para accesibilidad"
                 value={formData.altText}
-                onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
+                onChange={(e) => {
+                  setIsAltManuallyEdited(true); // ← el usuario tomó control
+                  setFormData({ ...formData, altText: e.target.value });
+                }}
               />
             </div>
 
@@ -274,10 +376,10 @@ export function BannersAdmin() {
             </div>
 
             <div className={styles.formActions}>
-              <Button type="button" variant="secondary" onClick={resetForm}>
+              <Button type="button" className={styles.btnSecondary} onClick={handleCancelForm}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary">
+              <Button type="submit" className={styles.btnPrimary}>
                 {editingId ? 'Actualizar' : 'Crear'} Banner
               </Button>
             </div>
@@ -286,8 +388,8 @@ export function BannersAdmin() {
       )}
 
       {banners.length === 0 ? (
-        <EmptyState 
-          title="No hay banners" 
+        <EmptyState
+          title="No hay banners"
           description="Crea tu primer banner para mostrar en la homepage"
         />
       ) : (
@@ -341,6 +443,23 @@ export function BannersAdmin() {
           ))}
         </div>
       )}
+
+      {/* Unsaved changes warning */}
+      <ModalConfirm
+        open={showWarning || blocker.state === 'blocked'}
+        title="¿Abandonar sin guardar?"
+        message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
+        confirmText="Sí, abandonar"
+        cancelText="Seguir editando"
+        onConfirm={() => {
+          if (blocker.state === 'blocked') blocker.proceed();
+          confirmNavigation();
+        }}
+        onCancel={() => {
+          if (blocker.state === 'blocked') blocker.reset();
+          cancelNavigation();
+        }}
+      />
     </div>
   );
 }

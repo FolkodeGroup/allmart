@@ -1,9 +1,11 @@
 .card {
   padding: 1.5rem;
-  background: white;
+  background: var(--color-bg-card, #fff);
+  border: 1px solid var(--color-border, transparent);
   border-radius: 1rem;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 2rem;
+  transition: background 0.3s;
 }
 .title {
   font-size: 1.2rem;
@@ -12,21 +14,28 @@
 }
 .table {
   width: 100%;
-  border-collapse: collapse;
   font-size: 0.98rem;
+  border: 1px solid var(--color-border);
+  border-collapse: collapse;
 }
 .table th, .table td {
   padding: 0.7rem 0.5rem;
   text-align: left;
 }
 .table th {
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   font-weight: 500;
   border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
 }
 .table tr:not(:last-child) td {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border);
 }
+
+.table tr:hover {
+  background: var(--color-bg-secondary);
+}
+
 .email {
   font-size: 0.85em;
   color: var(--color-text-tertiary);
@@ -35,4 +44,26 @@
   text-align: center;
   color: var(--color-text-tertiary);
   padding: 2rem 0;
+}
+
+.idTd {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.dateTd {
+  color: var(--color-soft-gray);
+}
+
+.nameTd {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.quantityTd {
+  color: var(--color-soft-gray);;
+}
+
+.priceTd {
+  color: var(--color-text-primary);
 }

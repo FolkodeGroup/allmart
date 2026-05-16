@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { VariantGroup } from '../context/AdminProductsContext';
 import type { AdminProduct } from '../context/AdminProductsContext';
-import type { ProductImageItem } from '../context/AdminImagesContext';
 import { useAdminProducts } from '../context/useAdminProductsContext';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useAdminCategories } from '../context/AdminCategoriesContext';
@@ -50,7 +49,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
         error: imagesError,
         loadImages,
         uploadImage,
-        updateImageMeta,
         deleteImage,
         clearImages,
     } = useAdminImages();
@@ -77,9 +75,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     const [imgNewAlt, setImgNewAlt] = useState('');
     const [imgError, setImgError] = useState('');
     const [showAddImgForm, setShowAddImgForm] = useState(false);
-    const [editingImgId, setEditingImgId] = useState<string | null>(null);
-    const [editingImgAlt, setEditingImgAlt] = useState('');
-    const [savingImgId, setSavingImgId] = useState<string | null>(null);
     const [deletingImgId, setDeletingImgId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -181,14 +176,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             errors.originalPrice = 'El precio original debe ser mayor a 0';
         }
         if (form.stock < 0) errors.stock = 'El stock no puede ser negativo';
-        if (!isEdit) {
-            const invalidImgs = form.images.filter(
-                url => url.trim() !== '' && !url.startsWith('http')
-            );
-            if (invalidImgs.length > 0) {
-                errors.images = 'Todas las URLs de imágenes deben ser válidas (http/https)';
-            }
-        }
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
     }, [form, isEdit]);
@@ -346,30 +333,11 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
         }
     }, [imgFile, imgNewAlt, productId, uploadImage, refreshCurrentPage]);
 
-    const handleApiStartEdit = useCallback((img: ProductImageItem) => {
-        setEditingImgId(img.id);
-        setEditingImgAlt(img.altText ?? '');
-    }, []);
 
-    const handleApiCommitEdit = useCallback(
-        async (imageId: string) => {
-            if (!productId) return;
-            setSavingImgId(imageId);
-            try {
-                await updateImageMeta(productId, imageId, { altText: editingImgAlt.trim() || null });
-                setEditingImgId(null);
-            } catch {
-                // error surfaced via context
-            } finally {
-                setSavingImgId(null);
-            }
-        },
-        [productId, editingImgAlt, updateImageMeta]
-    );
 
     const handleApiDeleteImage = useCallback(
         async (imageId: string) => {
-            if (!productId || !window.confirm('¿Eliminar esta imagen?')) return;
+            if (!productId) return;
             setDeletingImgId(imageId);
             try {
                 await deleteImage(productId, imageId);
@@ -493,13 +461,9 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
         imgNewAlt, setImgNewAlt,
         imgError,
         showAddImgForm, setShowAddImgForm,
-        editingImgId, setEditingImgId,
-        editingImgAlt, setEditingImgAlt,
-        savingImgId, deletingImgId,
+        deletingImgId,
         fileInputRef,
         handleApiUploadImage,
-        handleApiStartEdit,
-        handleApiCommitEdit,
         handleApiDeleteImage,
 
         // Category state + handlers

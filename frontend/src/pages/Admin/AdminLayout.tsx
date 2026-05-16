@@ -140,6 +140,7 @@ export function AdminLayout() {
 
   useEffect(() => {
     localStorage.setItem('admin-theme', theme);
+    // La clase 'dark' se aplica al wrapper del admin (ver render)
   }, [theme]);
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -293,7 +294,7 @@ export function AdminLayout() {
   };
 
   return (
-    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'dark' : ''}`}>
+    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'admin-dark' : ''}`}>
       <Button
         className={styles.mobileToggle}
         onClick={() => setIsMobileOpen(true)}
@@ -340,7 +341,10 @@ export function AdminLayout() {
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             variant="ghost"
           >
-            {theme === 'dark' ? '🌙' : '☀️'}
+            <p className={styles.navItem} style={{ color: '#000', background: 'none', width: 48, height: 32 }}>
+              {theme === 'dark' ? '🌙' : '☀️'}
+
+            </p>
           </Button>
           <nav className={styles.nav}>
             {navItems.map((item) => renderNavItem(item))}

@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import type { Collection } from './collectionsService';
 import { collectionsService } from './collectionsService';
 import AdminCollectionForm from './AdminCollectionForm';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminCollections.module.css';
 
 type ViewMode = 'list' | 'form';
@@ -22,6 +23,11 @@ const AdminCollections: React.FC = () => {
   const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Bulk delete state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
+  const [deleting, setDeleting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const limit = 10;
 
@@ -50,14 +56,44 @@ const AdminCollections: React.FC = () => {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('¿Está seguro de que desea eliminar esta colección?')) return;
+
+  function handleDelete(id: string) {
+    setIdsToDelete([id]);
+    setDeleteModalOpen(true);
+  }
+
+  function handleBulkDelete() {
+    if (selectedIds.length === 0) return;
+    setIdsToDelete([...selectedIds]);
+    setDeleteModalOpen(true);
+  }
+
+
+  async function handleConfirmDelete() {
+    if (!idsToDelete.length) return;
+    setDeleting(true);
+    setError(null);
     try {
-      await collectionsService.delete(id);
+      // Bulk delete: eliminar todas en paralelo
+      await Promise.all(idsToDelete.map((id) => collectionsService.delete(id)));
+      // Feedback visual (reemplaza por tu sistema de toasts preferido)
+      // toast.success(idsToDelete.length > 1 ? 'Colecciones eliminadas' : 'Colección eliminada');
+      setDeleteModalOpen(false);
+      setIdsToDelete([]);
+      setSelectedIds([]);
       await loadCollections();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando colección');
+      setError(err instanceof Error ? err.message : 'Error eliminando colección(es)');
+    } finally {
+      setDeleting(false);
     }
+  }
+
+
+  function handleCancelDelete() {
+    setDeleteModalOpen(false);
+    setIdsToDelete([]);
+    setDeleting(false);
   }
 
   function handleEdit(collection: Collection) {
@@ -93,9 +129,21 @@ const AdminCollections: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Gestionar Colecciones</h1>
-        <button className={styles.btnPrimary} onClick={handleNew}>
-          + Nueva Colección
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {selectedIds.length > 0 && (
+            <button
+              className={styles.btnSmallDanger}
+              onClick={handleBulkDelete}
+              disabled={deleting}
+              style={{ marginRight: 8 }}
+            >
+              Eliminar seleccionadas ({selectedIds.length})
+            </button>
+          )}
+          <button className={styles.btnPrimary} onClick={handleNew}>
+            + Nueva Colección
+          </button>
+        </div>
       </div>
 
       <div className={styles.filters}>
@@ -146,79 +194,140 @@ const AdminCollections: React.FC = () => {
               <th>Nombre</th>
               <th>Slug</th>
               <th>Posición</th>
+              <th>Orden</th>
               <th>Productos</th>
               <th>Estado</th>
               <th>Acciones</th>
+              <th className={styles.selectColHeader}>
+                <div className={styles.selectColHeaderContent}>
+                  <span className={styles.selectColLabel}>Selección</span>
+                  <input
+                    type="checkbox"
+                    aria-label="Seleccionar todas"
+                    checked={collections.length > 0 && selectedIds.length === collections.length}
+                    ref={el => {
+                      if (el) el.indeterminate = selectedIds.length > 0 && selectedIds.length < collections.length;
+                    }}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(collections.map((c) => c.id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                  />
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className={styles.loading}>
+                <td colSpan={8} className={styles.loading}>
                   Cargando...
                 </td>
               </tr>
             ) : collections.length === 0 ? (
               <tr>
-                <td colSpan={6} className={styles.empty}>
+                <td colSpan={8} className={styles.empty}>
                   No hay colecciones
                 </td>
               </tr>
             ) : (
-              collections.map((collection) => (
-                <tr key={collection.id}>
-                  <td>
-                    <strong>{collection.name}</strong>
-                  </td>
-                  <td className={styles.monospace}>{collection.slug}</td>
-                  <td>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</td>
-                  <td>{collection.productCount}</td>
-                  <td>
-                    <span
-                      className={
-                        collection.isActive ? styles.badgeActive : styles.badgeInactive
-                      }
-                    >
-                      {collection.isActive ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </td>
-                  <td className={styles.actions}>
-                    <button onClick={() => handleEdit(collection)} className={styles.btnSmall}>
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(collection.id)}
-                      className={styles.btnSmallDanger}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))
+              collections.map((collection) => {
+                const checked = selectedIds.includes(collection.id);
+                return (
+                  <tr key={collection.id}>
+                    <td>
+                      <strong>{collection.name}</strong>
+                    </td>
+                    <td className={styles.monospace}>{collection.slug}</td>
+                    <td>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</td>
+                    <td>
+                      <strong>{collection.displayOrder}</strong>
+                    </td>
+                    <td>{collection.productCount}</td>
+                    <td>
+                      <span
+                        className={
+                          collection.isActive ? styles.badgeActive : styles.badgeInactive
+                        }
+                      >
+                        {collection.isActive ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </td>
+                    <td className={styles.actions}>
+                      <button onClick={() => handleEdit(collection)} className={styles.btnSmall}>
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(collection.id)}
+                        className={styles.btnSmallDanger}
+                        disabled={deleting}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                    <td className={styles.selectColCell}>
+                      <div className={styles.selectColCellContent}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Seleccionar colección ${collection.name}`}
+                          checked={checked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds((prev) => [...prev, collection.id]);
+                            } else {
+                              setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
+                            }
+                          }}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
 
-      <div className={styles.pagination}>
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-          className={styles.btnSmall}
-        >
-          Anterior
-        </button>
-        <span>
-          Página {page} de {pages}
-        </span>
-        <button
-          disabled={page === pages}
-          onClick={() => setPage(page + 1)}
-          className={styles.btnSmall}
-        >
-          Siguiente
-        </button>
-      </div>
+      {collections.length > 0 && pages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className={styles.btnSmall}
+          >
+            Anterior
+          </button>
+          <span>
+            Página {page} de {pages}
+          </span>
+          <button
+            disabled={page === pages}
+            onClick={() => setPage(page + 1)}
+            className={styles.btnSmall}
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
+
+      <ConfirmModal
+        open={deleteModalOpen}
+        title={idsToDelete.length > 1 ? 'Eliminar Colecciones' : 'Eliminar Colección'}
+        message={
+          idsToDelete.length > 1
+            ? `¿Está seguro de que desea eliminar estas ${idsToDelete.length} colecciones? Esta acción no se puede deshacer.`
+            : '¿Está seguro de que desea eliminar esta colección? Esta acción no se puede deshacer.'
+        }
+        confirmLabel={deleting ? 'Eliminando...' : 'Eliminar'}
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        loading={deleting}
+      />
     </div>
   );
 };

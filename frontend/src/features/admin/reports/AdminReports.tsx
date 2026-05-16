@@ -616,13 +616,6 @@ export function AdminReports() {
               >
                 📊 Gráfico
               </button>
-
-              <button
-                className={`${styles.toggleBtn} ${salesViewMode === 'table' ? styles.active : ''}`}
-                onClick={() => setSalesViewMode('table')}
-              >
-                📋 Tabla
-              </button>
             </div>
             {salesContent}
           </div>
@@ -688,7 +681,7 @@ export function AdminReports() {
                 <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className={styles.exportWrap + ' fadeInFast'}>
+              <div className={styles.exportWrap + ' fadeInFast'}>
                 <span>Exportar como:</span>
 
                 <div className={styles.exportSelectWrap}>
@@ -755,7 +748,7 @@ export function AdminReports() {
             </div>
 
             {/* Filtros rápidos para la tabla de pedidos */}
-            <div className={styles.advancedFiltersWrap + ' fadeInFast'} style={{ marginBottom: 16 }}>
+            <div className={styles.advancedFiltersWrap + ' fadeInFast'}>
 
               <label className={styles.advancedLabel}>
                 Cliente

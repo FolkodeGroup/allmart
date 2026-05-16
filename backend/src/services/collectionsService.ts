@@ -261,6 +261,29 @@ export async function getCollectionsByDisplayPosition(
 }
 
 /**
+ * Obtiene TODAS las colecciones sin paginación (para admin)
+ */
+export async function getAllCollectionsUnpaginated(): Promise<CollectionResponseDTO[]> {
+  const collections = await prisma.collection.findMany({
+    orderBy: { displayOrder: 'asc' },
+    include: {
+      collectionItems: {
+        include: { product: true },
+        orderBy: { position: 'asc' },
+      },
+    },
+  });
+
+  return collections.map((c) =>
+    toCollectionDTO(
+      c,
+      c.collectionItems.length,
+      c.collectionItems
+    )
+  );
+}
+
+/**
  * Crea una nueva colección con productos
  */
 export async function createCollection(dto: CreateCollectionDTO): Promise<CollectionResponseDTO> {
@@ -276,6 +299,16 @@ export async function createCollection(dto: CreateCollectionDTO): Promise<Collec
   const existingSlug = await prisma.collection.findUnique({ where: { slug } });
   if (existingSlug) {
     throw createError(`El slug "${slug}" ya está en uso`, 409);
+  }
+
+  // Verificar que el displayOrder sea único si se proporciona
+  if (dto.displayOrder !== undefined) {
+    const existingOrder = await prisma.collection.findFirst({
+      where: { displayOrder: dto.displayOrder },
+    });
+    if (existingOrder) {
+      throw createError(`El orden de display ${dto.displayOrder} ya está en uso`, 409);
+    }
   }
 
   // Crear colección
@@ -326,6 +359,19 @@ export async function updateCollection(
     });
     if (slugExists) {
       throw createError(`El slug "${dto.slug}" ya está en uso`, 409);
+    }
+  }
+
+  // Verificar que el displayOrder sea único si se actualiza
+  if (dto.displayOrder !== undefined && dto.displayOrder !== existing.displayOrder) {
+    const orderExists = await prisma.collection.findFirst({
+      where: {
+        displayOrder: dto.displayOrder,
+        NOT: { id },
+      },
+    });
+    if (orderExists) {
+      throw createError(`El orden de display ${dto.displayOrder} ya está en uso`, 409);
     }
   }
 

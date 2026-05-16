@@ -176,22 +176,6 @@ export const DashboardWidgetSettings = React.forwardRef<
                     </div>
 
                     <div className={styles.content}>
-                        {/* Preview Toggle */}
-                        {onReorderWidgets && (
-                            <div className={styles.previewToggle}>
-                                <label className={styles.toggleLabel}>
-                                    <input
-                                        type="checkbox"
-                                        checked={showPreview}
-                                        onChange={(e) => setShowPreview(e.target.checked)}
-                                        className={styles.toggle}
-                                    />
-                                    <span className={styles.checkmark} />
-                                    <span className={styles.label}>Mostrar vista previa</span>
-                                </label>
-                            </div>
-                        )}
-
                         {/* Tabs for organization */}
                         <div className={styles.tabs}>
                             <button

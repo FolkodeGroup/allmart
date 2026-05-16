@@ -5,9 +5,10 @@
     display: flex;
     width: 100%;
     min-height: 500px;
-    border: 1px solid #e5e2dd;
+    border: 1px solid var(--color-border, #e5e2dd);
     border-radius: 12px;
-    background: #fff;
+    background: var(--color-bg-card, #fff);
+    transition: background 0.3s, border-color 0.3s;
 }
 
 /* ── Detail wrapper ────────────────────────────────────────────── */
@@ -26,7 +27,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3af;
+    color: var(--color-text-tertiary, #9ca3af);
     font-size: 14px;
     padding: 32px;
     text-align: center;
@@ -42,8 +43,8 @@
 .spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid #e5e2dd;
-    border-top-color: #769282;
+    border: 3px solid var(--color-border, #e5e2dd);
+    border-top-color: var(--color-primary, #769282);
     border-radius: 50%;
     animation: spin 700ms linear infinite;
 }
@@ -65,19 +66,3 @@
     }
 }
 
-/* ── Dark mode ─────────────────────────────────────────────────── */
-/*@media (prefers-color-scheme: dark) {
-    .container {
-        background: #1e1e1e;
-        border-color: #2d2d2d;
-    }
-
-    .emptyDetail {
-        color: #666;
-    }
-
-    .spinner {
-        border-color: #2d2d2d;
-        border-top-color: #4d7a62;
-    }
-}*/

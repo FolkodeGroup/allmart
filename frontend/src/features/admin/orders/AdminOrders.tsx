@@ -20,6 +20,7 @@
 
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import { STATUS_LABELS, STATUS_OPTIONS } from './utils/ordersHelpers';
@@ -46,16 +47,14 @@ import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
  */
 import type { OrderStatus } from '../../../context/AdminOrdersContext';
 
-// Importar componentes y hooks faltantes
-import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
-import OrderDetailModal from './components/OrderDetailModal';
+// Lazy load OrderDetailModal component (for future modal use if needed)
 
 
 
 
 function AdminOrders() {
   const { token } = useAdminAuth();
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null); // Pedido actualmente abierto en el modal de detalle (null = modal cerrado)
+  const navigate = useNavigate();
 
   /**
    * Lista completa de pedidos cargados.
@@ -75,7 +74,8 @@ function AdminOrders() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Acceso al contexto global de cambios sin guardar
-  const { setIsDirty: setGlobalDirty } = useUnsavedChanges();
+  // Ya no es necesario con navegación a página dedicada
+  // const { setIsDirty: setGlobalDirty } = useUnsavedChanges();
 
   // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
 
@@ -118,10 +118,10 @@ function AdminOrders() {
       return { type: 'custom' } as const;
     }
 
-    if (filters.statuses.length === 1) {
+    if (filters.status) {
       return {
         type: 'predefined',
-        period: filters.statuses[0],
+        period: filters.status,
       } as const;
     }
 
@@ -168,34 +168,37 @@ function AdminOrders() {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    if (reset) setIsLoading(true);
-    else setIsLoading(true);
+    setIsLoading(true);
     try {
       const params: Record<string, string | number> = {
-        page,
+        page: reset ? 1 : page,
         limit: PAGE_SIZE,
       };
 
+      // Pasar búsqueda al backend (server-side)
+      if (debouncedFilters.search) params.q = debouncedFilters.search;
+      // Cuando hay exactamente un estado seleccionado, filtrar en el backend
+      // Con múltiples estados, el filtro client-side en useOrdersFilters se encarga
+      if (debouncedFilters.status.length === 1) params.status = debouncedFilters.status[0];
+
       const res = await fetchAdminOrders(token, params);
-      // setHasMore(res.data.length === PAGE_SIZE);
       const normalized = res.data.map(mapApiOrderToOrder);
 
-      // reset=true reemplaza la lista; reset=false acumula (para infinite scroll)
+      // reset=true reemplaza la lista; reset=false acumula (para load more)
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
     } catch (e: unknown) {
       // Ignorar errores de abort; solo mostrar toast si fue un error real
       if (e instanceof Error && e.name !== 'AbortError') toast.error('Error al cargar pedidos');
     } finally {
       setIsLoading(false);
-      setIsLoading(false);
     }
-  }, [token, page, PAGE_SIZE]);
+  }, [token, page, PAGE_SIZE, debouncedFilters]);
 
-  // Cargar pedidos al montar y al cambiar filtros
+  // Cargar pedidos al montar y cada vez que cambien los filtros (debounced) o el token
   useEffect(() => {
     fetchOrders(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, debouncedFilters]);
 
   // Cargar más cuando el usuario avanza de página (solo si page > 1)
   useEffect(() => {
@@ -551,7 +554,7 @@ function AdminOrders() {
             ))}
           </div>
         </>
-      ) : orders.length === 0 ? (
+      ) : filtered.length === 0 ? (
         // Estado vacío: no hay pedidos que coincidan con los filtros activos
         <div className={sectionStyles.emptyState}>
           <span className={sectionStyles.emptyIcon}>🛒</span>
@@ -568,13 +571,13 @@ function AdminOrders() {
             orders={filtered}
             selectedIds={selectedIds}
             onSelect={handleSelectOne}
-            onDetail={setSelectedOrder}
+            onDetail={(order) => navigate(`/admin/pedidos/${order.id}`)}
           />
           <OrderList
             orders={filtered}
             selectedIds={selectedIds}
             onSelect={handleSelectOne}
-            onDetail={setSelectedOrder}
+            onDetail={(order) => navigate(`/admin/pedidos/${order.id}`)}
           />
           {/* ── Paginación ── */}
           {/*
@@ -730,25 +733,6 @@ function AdminOrders() {
         onConfirm={modal.isLoading ? () => { } : handleConfirmModal}
         onCancel={modal.isLoading ? () => { } : handleCloseModal}
       />
-
-      {/* ── Modal de detalle del pedido ── */}
-      {/*
-        Solo se monta cuando hay un pedido seleccionado.
-        `orders.find(...)` garantiza que se pasa la versión más reciente del pedido
-        (por si fue modificado mientras el modal estaba cerrado), usando `selectedOrder`
-        como fallback en caso de que ya no exista en la lista.
-      */}
-      {selectedOrder && (
-        <OrderDetailModal
-          order={(orders.find(o => o.id === selectedOrder!.id) ?? selectedOrder!)}
-          onClose={() => {
-            setSelectedOrder(null);
-            setGlobalDirty(false); // limpiar al cerrar
-          }}
-        />
-      )}
-
-
 
     </main>
   );

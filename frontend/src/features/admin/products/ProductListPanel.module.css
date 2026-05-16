@@ -122,14 +122,23 @@
   transition: transform 0.15s, opacity 0.15s;
 }
 
+.stockSection {
+  display: flex;
+  margin-left: auto;
+  align-items: center;
+  gap: 4px;
+}
+
 .inStock {
-  background: rgba(34, 197, 94, 0.14);
-  color: #166534;
+  background: var(--color-active-mode);
+  color: var(--color-text-instock);
+  border: 1px solid var(--color-dif-mode-dark);
 }
 
 .outOfStock {
   background: rgba(239, 68, 68, 0.14);
-  color: #b91c1c;
+  color: var(--color-text-outofstock);
+  border: 1px solid var(--color-error-mode);
 }
 
 .metaLine {
@@ -168,7 +177,11 @@
 }
 
 .discount {
-  color: #b91c1c;
+  color: var(--color-dif-mode);
+  background: var(--color-active-mode);
+  border: 1px solid var(--color-dif-mode-dark);
+  border-radius: 12px;
+  padding: 2px 6px;
   font-weight: 700;
   font-size: 11px;
 }
@@ -190,7 +203,7 @@
   display: none;
   position: absolute;
   right: 8px;
-  top: 50%;
+  top: 30%;
   transform: translateY(-50%);
   gap: 4px;
   align-items: center;

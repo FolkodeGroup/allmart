@@ -16,11 +16,13 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({ canCreate, o
       <p className={sectionStyles.subtitle}>
         Gestioná las categorías del catálogo para organizar tus productos.
       </p>
-      {canCreate && (
-        <button className={styles.newBtn} onClick={onNew}>
-          + Nueva categoría
-        </button>
-      )}
+       <div className={styles.btnContainer}>
+        {canCreate && (
+          <button className={styles.newBtn} onClick={onNew}>
+            + Nueva categoría
+          </button>
+        )}
+      </div>
     </div>
   </div>
 );

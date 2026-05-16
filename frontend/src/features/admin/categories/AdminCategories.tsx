@@ -4,7 +4,7 @@ import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Modal } from '../../../components/ui/Modal';
 import { useNotification } from '../../../context/NotificationContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
@@ -31,6 +31,7 @@ type CategorySortDirection = 'asc' | 'desc';
 
 export function AdminCategories() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory, uploadCategoryImage } = useAdminCategories();
   // Local state for pagination
   const [page, setPage] = useState(1);
@@ -106,6 +107,19 @@ export function AdminCategories() {
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, minProducts, maxProducts, isVisible]);
+
+  // Cuando se regresa a la página (ej: desde crear/editar categoría), refetch para mostrar cambios
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    refreshCategories({
+      q: selectedSuggestion || debouncedSearch,
+      page,
+      limit,
+      minProducts: minProducts === '' ? undefined : minProducts,
+      maxProducts: maxProducts === '' ? undefined : maxProducts,
+      isVisible: isVisible === 'all' ? undefined : isVisible === 'visible' ? true : false,
+    });
+  }, [location.pathname]);
 
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -397,22 +411,8 @@ export function AdminCategories() {
       </motion.div>
 
       {!loading && !error && categories.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            gap: 12,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            marginTop: 8,
-            marginBottom: 8,
-            padding: '8px 12px',
-            background: '#fafaf8',
-            borderRadius: 10,
-            border: '1px solid #e5e2dd',
-          }}
-        >
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className={styles.actionsBar}>
+          <div className={styles.exportBtnContainer}>
             <button className={styles.exportBtn} onClick={handleExportCSV} type="button">
               Exportar CSV
             </button>
@@ -421,13 +421,13 @@ export function AdminCategories() {
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '6px 10px', background: '#fff', borderRadius: 8, border: '1px solid #e5e2dd' }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ordenar:</span>
+          <div className={styles.sortContainer}>
+            <div className={styles.sortControls}>
+              <span className={styles.sortLabel}>Ordenar:</span>
               <select
                 value={sortField}
                 onChange={(e) => setSortField(e.target.value as CategorySortField)}
-                style={{ padding: '5px 6px', borderRadius: 6, border: '1px solid #e5e2dd', background: '#fff', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}
+                className={styles.sortSelect}
               >
                 <option value="name">Nombre</option>
                 <option value="slug">Slug</option>
@@ -436,7 +436,7 @@ export function AdminCategories() {
               </select>
               <button
                 onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                style={{ padding: '5px 8px', borderRadius: 6, border: '1px solid #e5e2dd', background: sortDirection === 'asc' ? '#769282' : '#fff', color: sortDirection === 'asc' ? '#fff' : '#666', cursor: 'pointer', fontWeight: 600, fontSize: 11, transition: 'all 0.2s', minWidth: 35 }}
+                className={styles.sortButton}
                 title={`Ordenar ${sortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
                 type="button"
               >

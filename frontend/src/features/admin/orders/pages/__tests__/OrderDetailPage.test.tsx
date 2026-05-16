@@ -182,7 +182,7 @@ describe('OrderDetailPage', () => {
       expect(screen.getByText(/550E8400/i)).toBeInTheDocument();
     });
 
-    const backButton = screen.getByText('← Volver');
+    const backButton = screen.getByLabelText('Volver a la lista de pedidos');
     expect(backButton).toBeInTheDocument();
   });
 

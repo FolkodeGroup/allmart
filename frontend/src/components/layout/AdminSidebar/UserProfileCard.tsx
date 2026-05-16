@@ -100,8 +100,6 @@ export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
                   className={styles.roleBadge}
                   style={{
                     backgroundColor: getRoleStyle(role).bg,
-                    color: getRoleStyle(role).text,
-                    borderColor: getRoleStyle(role).border,
                   }}
                 >
                   {ROLE_LABELS[role] ?? role}
@@ -140,7 +138,7 @@ export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
                   className={styles.dropdownRoleBadge}
                   style={{
                     backgroundColor: getRoleStyle(role).bg,
-                    color: getRoleStyle(role).text,
+
                   }}
                 >
                   {ROLE_LABELS[role] ?? role}

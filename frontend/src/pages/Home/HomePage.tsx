@@ -69,22 +69,33 @@ export function HomePage() {
         limit={4}
       />
       <AboutSection />
-      
-      {/* Secciones de Colecciones - Dinámicas con colores alternados */}
+
+
+      {/* Secciones de Colecciones - Dinámicas con degradación vertical */}
       {loading && (
-        <section style={{ background: 'var(--color-primary-light)', padding: 'var(--space-16) 0' }}>
+        <section style={{ background: 'linear-gradient(to bottom, var(--color-primary-light) 90%, #f9fafb 100%)', padding: 'var(--space-16) 0' }}>
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
             <p style={{ color: '#666' }}>Cargando colecciones especiales...</p>
           </div>
         </section>
       )}
-      
+
       {!loading && !error && collections.length > 0 && (
         <div>
           {collections.map((collection, index) => {
+            const isLast = index === collections.length - 1;
             const isEvenIndex = index % 2 === 0;
-            const backgroundColor = isEvenIndex ? 'var(--color-primary-light)' : '#f9fafb';
-            
+            let backgroundColor;
+            if (isLast) {
+              // Última colección: color puro
+              backgroundColor = isEvenIndex ? 'var(--color-primary-light)' : '#f9fafb';
+            } else {
+              // Degradado entre colecciones
+              backgroundColor = isEvenIndex
+                ? 'linear-gradient(to bottom, var(--color-primary-light) 90%, #f9fafb 100%)'
+                : 'linear-gradient(to bottom, #f9fafb 90%, var(--color-primary-light) 100%)';
+            }
+
             return (
               <section
                 key={collection.id}
@@ -105,7 +116,7 @@ export function HomePage() {
           })}
         </div>
       )}
-      
+
       <Benefits />
     </main>
   );

@@ -215,7 +215,7 @@
   align-items: flex-end;
   flex-direction: row;
   column-gap: 1.5rem;
-  margin-top: 1.2rem;
+  margin-top: 0.8rem;
   flex-wrap: wrap;
 }
 
@@ -243,7 +243,8 @@
 
 .advancedInput {
   width: 100%;
-  border: 1.5px solid #e5e2dd;
+  background: var(--color-bg-secondary);
+  border: 1.5px solid var(--color-border);
   padding: 8px 10px;
   border-radius: 6px;
 }
@@ -252,7 +253,7 @@
   display: flex;
   flex-direction: column;
   font-size: 14px;
-  color: #444;
+  color: var(--color-text-primary);
   gap: 0.3em;
   min-width: 160px;
 }
@@ -261,9 +262,9 @@
   min-width: 140px;
   padding: 6px 8px;
   border-radius: 6px;
-  border: 1.5px solid #e5e2dd;
-  background: #f8f8f8;
-  color: #1a1a1a;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   font-size: 15px;
   font-family: inherit;
   font-weight: 500;
@@ -306,7 +307,7 @@
 
 
 .advancedInput:focus {
-  border-color: #769282;
+  border-color: var(--color-border);
 }
 
 @media (max-width: 900px) {
@@ -956,7 +957,7 @@
     background: #fff;
     border: 1.5px solid #e5e2dd;
     border-radius: 6px;
-    padding: 4px 13px;
+    padding: 2px 10px;
     cursor: pointer;
     color: #1a1a1a;
     font-weight: 600;
@@ -981,7 +982,7 @@
     border-radius: 6px;
     box-shadow: 0 1px 2px #0001;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
-    padding: 4px 13px;
+    padding: 8px 13px;
     background: #769282;
     color: #fff;
     border-color: #769282;
@@ -1016,9 +1017,9 @@
     margin: 0 4px;
     padding: 2px 8px;
     border-radius: 4px;
-    border: 1.5px solid #e5e2dd;
-    background: #f8f8f8;
-    color: #1a1a1a;
+    border: 1.5px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
     font-size: 15px;
     font-family: inherit;
     font-weight: 500;
@@ -1149,23 +1150,23 @@
 }
 
 .metricCardRevenue {
-  background: linear-gradient(120deg, #f7fafc 70%, #e0e7ff 100%);
+  background: var(--color-bg-primary);
 }
 
 .metricCardOrders {
-  background: linear-gradient(120deg, #f7fafc 70%, #d1fae5 100%);
+  background: var(--color-bg-primary);
 }
 
 .metricCardAvgTicket {
-  background: linear-gradient(120deg, #f7fafc 70%, #fef9c3 100%);
+  background: var(--color-bg-primary);
 }
 
 .metricCardCompletion {
-  background: linear-gradient(120deg, #f7fafc 70%, #ece2fe 100%);
+  background: var(--color-bg-primary);
 }
 
 .metricCardPaid {
-  background: linear-gradient(120deg, #f7fafc 70%, #fee2e2 100%);
+  background: var(--color-bg-primary);
 }
 
 .metricCardRevenue .metricIcon {
@@ -1258,7 +1259,7 @@
 .dateInput {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -1372,6 +1373,7 @@ ALLMART — ADMIN REPORTS
   align-items: center;
   gap: var(--space-3);
   flex-wrap: wrap;
+  color: var(--color-text-secondary)
 }
 
 .exportSelectWrap {
@@ -1874,6 +1876,7 @@ ALLMART — ADMIN REPORTS
   flex-shrink: 0;
   overflow: visible;
   z-index: 9999;
+  color: var(--color-text-primary);
 }
 
 .donutLegend {
@@ -1918,6 +1921,13 @@ ALLMART — ADMIN REPORTS
   color: var(--color-text-tertiary);
 }
 
+.donutCenterText {
+  fill: var(--color-text-primary);
+}
+
+.donutCenterLabel {
+  fill: var(--color-text-primary);
+}
 
 /* ── Top productos ── */
 .productRanking {
@@ -2019,6 +2029,7 @@ ALLMART — ADMIN REPORTS
   border-radius: 10px;
   border: 1px solid var(--color-border);
   position: relative;
+  margin: 1rem;
 }
 
 @media (max-width: 900px) {
@@ -2291,154 +2302,3 @@ ALLMART — ADMIN REPORTS
   width: 100%;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DARK MODE OVERRIDES
-═══════════════════════════════════════════════════════════════════ */
-:global(.dark) .reportsPage {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .reportCardModern {
-  background: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-}
-:global(.dark) .reportCard {
-  background: var(--color-bg-card, #232a2f);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-:global(.dark) .metricCard {
-  background: var(--color-bg-card, #232a2f);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-:global(.dark) .table {
-  background: var(--color-bg-card, #232a2f);
-}
-:global(.dark) .table thead {
-  background: var(--color-bg-secondary, #181c1f);
-}
-:global(.dark) .table th {
-  color: var(--color-text-tertiary, #b6a68a);
-  border-bottom-color: var(--color-border, #2d3a3f);
-}
-:global(.dark) .table td {
-  color: var(--color-text-primary, #f3f3f3);
-  border-bottom-color: var(--color-border, #2d3a3f);
-}
-:global(.dark) .table td:first-child {
-  color: var(--color-text-secondary, #cbe7c9);
-}
-:global(.dark) .table td:nth-child(2) {
-  color: #86efac;
-}
-:global(.dark) .table td:nth-child(3) {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .table tbody tr:hover {
-  background: rgba(255,255,255,0.04);
-}
-:global(.dark) .modalContent {
-  background: var(--color-bg-card, #232a2f);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-:global(.dark) .modalHeader {
-  border-bottom-color: var(--color-border, #2d3a3f);
-}
-:global(.dark) .modalHeader h3 {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .modalClose {
-  color: var(--color-text-tertiary, #b6a68a);
-}
-:global(.dark) .modalClose:hover {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .modalRow {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .modalRow:hover {
-  background: rgba(255,255,255,0.05);
-}
-:global(.dark) .modalRow strong {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .productNameModern {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .statModernLabel {
-  color: var(--color-text-tertiary, #b6a68a);
-}
-:global(.dark) .statModernValue {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .progressBarModern {
-  background: rgba(255,255,255,0.1);
-}
-:global(.dark) .productImage,
-:global(.dark) .productImagePlaceholder {
-  background: var(--color-bg-secondary, #181c1f);
-  border-color: var(--color-border, #2d3a3f);
-}
-:global(.dark) .productImagePlaceholder {
-  color: var(--color-text-tertiary, #b6a68a);
-}
-:global(.dark) .advancedInput,
-:global(.dark) .advancedMultiSelect {
-  background: var(--color-bg-secondary, #181c1f);
-  border-color: var(--color-border, #2d3a3f);
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .advancedLabel {
-  color: var(--color-text-secondary, #cbe7c9);
-}
-:global(.dark) .chip {
-  background: rgba(163,201,168,0.15);
-  color: #a3c9a8;
-}
-:global(.dark) .chipClose {
-  color: #a3c9a8;
-}
-:global(.dark) .viewMoreBtn {
-  background: rgba(255,255,255,0.1);
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .orderCard {
-  background: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
-}
-:global(.dark) .orderCardClient {
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .salesCard {
-  background: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
-}
-:global(.dark) .salesCardDate {
-  color: var(--color-text-secondary, #cbe7c9);
-}
-:global(.dark) .salesCardProduct {
-  color: var(--color-text-primary, #f3f3f3);
-  border-bottom-color: var(--color-border, #2d3a3f);
-}
-:global(.dark) .dateInputMobile {
-  background: var(--color-bg-secondary, #181c1f);
-  border-color: var(--color-border, #2d3a3f);
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .filtersSelectMobile {
-  background: var(--color-bg-secondary, #181c1f);
-  border-color: var(--color-border, #2d3a3f);
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .noDataProducts {
-  color: var(--color-text-tertiary, #b6a68a);
-}
-:global(.dark) .pageBtn {
-  background: var(--color-bg-card, #232a2f);
-  border-color: var(--color-border, #2d3a3f);
-  color: var(--color-text-primary, #f3f3f3);
-}
-:global(.dark) .clearBtn {
-  background: var(--color-bg-secondary, #181c1f);
-  border-color: var(--color-border, #2d3a3f);
-  color: var(--color-text-primary, #f3f3f3);
-}

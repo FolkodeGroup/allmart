@@ -1,8 +1,8 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 18806 |
-| FedericoPaal | 4130 |
-| Mau-bar-iva | 2105 |
+| dgimenezdeveloper | 19564 |
+| FedericoPaal | 5295 |
+| Mau-bar-iva | 2325 |
 | Nahuel-Dalesio | 1630 |
 | CelinaJP | 1378 |
 | agustin-ovejero | 1132 |
@@ -11,6 +11,86 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #883: 🔄 Registrar puntaje de gestión | 2026-05-09 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #428: Añadir exportación de pedidos a CSV/Excel | 2026-05-09 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #882: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #880: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #882: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #881: 850 asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuroclaro | 2026-05-06 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #880: 🔄 Registrar puntaje de gestión | 2026-05-06 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #879: 849 optimizar y unificar el soporte de modo oscuroclaro en todos los componentes del panel administrativo | 2026-05-06 |
+| FedericoPaal | 80 | Issue | Asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuro/claro | 2026-05-06 |
+| FedericoPaal | 200 | Issue | Optimizar y unificar el soporte de modo oscuro/claro en todos los componentes del panel administrativo | 2026-05-06 |
+| Mau-bar-iva | 100 | Issue | Permitir carga de imágenes locales en formulario de Colección | 2026-05-06 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #878: 🔄 Registrar puntaje de gestión | 2026-05-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #878: 🔄 Registrar puntaje de gestión | 2026-05-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #877: texto alternativo de imagen ajustado para sincronizarse con el titulo del banner | 2026-05-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #876: 847 ocultar paginación cuando no hay colecciones | 2026-05-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #875: 845 Eliminación de subida de imagen en formulario de nueva colección, mejora de visualización de productos seleccionados y en vista home de colecciones (flehcas y height de cards) | 2026-05-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #875: 845 Eliminación de subida de imagen en formulario de nueva colección, mejora de visualización de productos seleccionados y en vista home de colecciones (flehcas y height de cards) | 2026-05-04 |
+| FedericoPaal | 75 | Issue | Ocultar paginación cuando no hay colecciones | 2026-05-04 |
+| Mau-bar-iva | 30 | Issue | Autocompletar texto alternativo de imagen con el nombre del banner | 2026-05-04 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #873: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #871: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #868: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #867: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #874: Cambios Realizados | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #873: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #872: Cambios Realizados en AdminPromotions.tsx | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #871: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #870: select de estados en vista de pedidos ajustado | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #869: Changes Made: | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #868: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #867: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #866: 841 mejorar la visualización del detalle de pedido modal o nueva página | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #865: Lo que cambié: | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #864: 839 advertencia por cambios no guardados en categorías | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #853: 🔄 Registrar puntaje de gestión | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #827: 🔄 Actualización automática de puntajes semanal | 2026-05-03 |
+| FedericoPaal | 30 | Issue | Confirmación al eliminar una Colección | 2026-05-03 |
+| FedericoPaal | 40 | Issue | CONFIRMACIÓN AL DUPLICAR O ELIMINAR UNA PROMOCIÓN EN CAMPAÑAS | 2026-05-03 |
+| FedericoPaal | 30 | Issue | CONFIRMACIÓN AL ELIMINAR PRODUCTOS DE UNA PROMOCIÓN EN MATRIZ DE PRODUCTOS | 2026-05-03 |
+| FedericoPaal | 60 | Issue | Mejorar la visualización del detalle de pedido: modal o nueva página | 2026-05-03 |
+| FedericoPaal | 40 | Issue | Corregir y asegurar el funcionamiento de todos los filtros de estados en la vista de Pedidos | 2026-05-03 |
+| FedericoPaal | 100 | Issue | Advertencia por cambios no guardados en categorías | 2026-05-03 |
+| Mau-bar-iva | 30 | Issue | Corregir el filtro de estado para que solo permita seleccionar un estado a la vez | 2026-05-03 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #863: 838 vista de categorías con layout dividido izquierdaderecha | 2026-05-02 |
+| Mau-bar-iva | 60 | Issue | Vista de categorías con layout dividido (izquierda/derecha) | 2026-05-02 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #862: 837 redirección a formulario de nueva categoría | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #861: 836 confirmación al eliminar producto | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #861: 836 confirmación al eliminar producto | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #860: Se implementa confirmación al duplicar producto | 2026-05-01 |
+| FedericoPaal | 40 | Issue | Redirección a formulario de nueva categoría | 2026-05-01 |
+| FedericoPaal | 30 | Issue | Confirmación al eliminar producto | 2026-05-01 |
+| FedericoPaal | 30 | Issue | Confirmación al duplicar producto | 2026-05-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #859: Se mantiene producto editado seleccionado tras guardar cambios | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #858: 833 hacer sticky el cuadro de pasos del formulario de creación de producto | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #857: 832 agregar botón propio para el formulario del wizard alta rápida en productos | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #856: 831 mejorar la visualización de porcentajes y nombres en los gráficos | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #855: 830 habilitar deshabilitar y reordenar widgets en el panel con vista previa en tiempo real | 2026-04-30 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #854: 829 visualización detallada de información de órdenes y pedidos | 2026-04-30 |
+| FedericoPaal | 40 | Issue | Mantener producto editado seleccionado tras guardar cambios | 2026-04-30 |
+| FedericoPaal | 40 | Issue | Hacer sticky el cuadro de pasos del formulario de creación de producto | 2026-04-30 |
+| FedericoPaal | 30 | Issue | Agregar botón propio para el formulario del wizard (alta rápida) en productos | 2026-04-30 |
+| FedericoPaal | 40 | Issue | Mejorar la visualización de porcentajes y nombres en los gráficos | 2026-04-30 |
+| FedericoPaal | 80 | Issue | Habilitar, deshabilitar y reordenar widgets en el panel con vista previa en tiempo real | 2026-04-30 |
+| FedericoPaal | 50 | Issue | Visualización detallada de información de Órdenes y Pedidos | 2026-04-30 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #853: 🔄 Registrar puntaje de gestión | 2026-04-29 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #852: Se implementa acordeón en "Acciones Requeridas" con pestañas para Órd… | 2026-04-29 |
+| FedericoPaal | 60 | Issue | Acordeón en "Acciones Requeridas" con pestañas para Órdenes y Pagos | 2026-04-29 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #827: 🔄 Actualización automática de puntajes semanal | 2026-04-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #826: 🔄 Registrar puntaje de gestión | 2026-04-21 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #826: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #824: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #825: 768 agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #824: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #821: 🔄 Registrar puntaje de gestión | 2026-04-20 |
+| FedericoPaal | 28 | Issue | Agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-19 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #821: 🔄 Registrar puntaje de gestión | 2026-04-18 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #819: 🔄 Registrar puntaje de gestión | 2026-04-18 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
@@ -19,6 +99,7 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #817: 🔄 Registrar puntaje de gestión | 2026-04-18 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
+| FedericoPaal | 42 | Issue | Validación por campo en tiempo real sin esperar submit final | 2026-04-18 |
 | FedericoPaal | 35 | Issue | Implementar checklist visible de "ready to publish" | 2026-04-18 |
 | Mau-bar-iva | 65 | Issue | Refactorizar creación/edición de producto: reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
 | agustin-ovejero | 32 | Issue | Implementar atajos de productividad (duplicar producto) | 2026-04-17 |
@@ -155,6 +236,7 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #723: 432 implementar confirmación de cambios antes de salir de la vista de pedidos | 2026-04-04 |
 | Mau-bar-iva | 70 | Issue | Expandir vista de pedidos a toda la pantalla usando Grid/Flexbox | 2026-04-04 |
 | Mau-bar-iva | 50 | Issue | Implementar confirmación de cambios antes de salir de la vista de pedidos | 2026-04-04 |
+| dgimenezdeveloper | 70 | Issue | Añadir exportación de pedidos a CSV/Excel | 2026-04-03 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #721: 🔄 Registrar puntaje de gestión | 2026-04-03 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #719: 🔄 Registrar puntaje de gestión | 2026-04-03 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #722: 425 mejorar la gestión de estados de pedidos pendiente confirmado enviado entregado cancelado abonado | 2026-04-03 |

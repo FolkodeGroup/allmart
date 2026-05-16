@@ -10,8 +10,6 @@ import { useScrollPreserver } from '../../../utils/tableScrollPreserver';
 // Components
 import { AdminProductFormPage } from './AdminProductFormPage';
 import { MasterDetailLayout } from './MasterDetailLayout';
-import { ProductWizard } from './productWizard/ProductWizard';
-import type { WizardProduct } from './productWizard/types';
 
 // UI Components
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -33,7 +31,7 @@ export function AdminProducts() {
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
   const [editPage, setEditPage] = useState<number>(1);
-  const [showWizard, setShowWizard] = useState(false);
+
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const resetUnsavedChangesFn = () => { };
 
@@ -46,51 +44,14 @@ export function AdminProducts() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
 
-  // Duplicate confirmation modal
-  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [productToDuplicate, setProductToDuplicate] = useState<import('../../../context/AdminProductsContext').AdminProduct | null>(null);
-  const [isDuplicating, setIsDuplicating] = useState(false);
-
   // Delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState<import('../../../context/AdminProductsContext').AdminProduct | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Context and hooks
-  const { products, deleteProduct, duplicateProduct, addProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
+  const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
 
-  // Mostrar modal de confirmación de duplicación
-  const handleDuplicateRequest = useCallback((product: import('../../../context/AdminProductsContext').AdminProduct) => {
-    setProductToDuplicate(product);
-    setShowDuplicateModal(true);
-  }, []);
-
-  // Confirmar y ejecutar duplicación
-  const handleConfirmDuplicate = useCallback(async () => {
-    if (!productToDuplicate) return;
-
-    setIsDuplicating(true);
-    try {
-      // Utiliza el helper oficial para duplicar productos
-      const { getDuplicateProductPayload } = await import('./productsService');
-      const payload = getDuplicateProductPayload(productToDuplicate);
-      await duplicateProduct({ ...productToDuplicate, ...payload });
-      toast.success('Producto duplicado con éxito');
-      setShowDuplicateModal(false);
-      setProductToDuplicate(null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error desconocido';
-      toast.error(`Error al duplicar: ${message}`);
-    } finally {
-      setIsDuplicating(false);
-    }
-  }, [productToDuplicate, duplicateProduct]);
-
-  // Cancelar duplicación
-  const handleCancelDuplicate = useCallback(() => {
-    setShowDuplicateModal(false);
-    setProductToDuplicate(null);
-  }, []);
   const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
 
@@ -215,42 +176,6 @@ export function AdminProducts() {
     setProductToDelete(null);
   }, []);
 
-  // === WIZARD HANDLER ===
-
-  const handleWizardPublish = async (wizardProduct: WizardProduct) => {
-    try {
-      if (!wizardProduct.name || !wizardProduct.price || !wizardProduct.sku || !wizardProduct.categoryId) {
-        toast.error('Completa todos los campos requeridos: nombre, precio, categóría y SKU');
-        return;
-      }
-      await addProduct({
-        name: wizardProduct.name || 'Sin nombre',
-        slug: (wizardProduct.name || 'sin-nombre').toLowerCase().replace(/\s+/g, '-'),
-        description: wizardProduct.description || '',
-        shortDescription: wizardProduct.shortDescription || '',
-        price: wizardProduct.price || 0,
-        stock: wizardProduct.stock || 0,
-        inStock: true,
-        images: wizardProduct.images || [],
-        category: categories.find(c => c.id === wizardProduct.categoryId) || { id: wizardProduct.categoryId, name: 'Unnamed', slug: '', isVisible: true },
-        categoryIds: wizardProduct.categoryId ? [wizardProduct.categoryId] : [],
-        tags: wizardProduct.tags || [],
-        features: [],
-        rating: 0,
-        reviewCount: 0,
-        sku: wizardProduct.sku || '',
-        variants: [],
-      });
-      toast.success('¡Producto creado exitosamente!');
-      refreshProducts({ page: 1, limit: 10 });
-      setShowWizard(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al crear producto';
-      toast.error(`Error: ${message}`);
-      throw err;
-    }
-  };
-
   return (
     <main
       ref={containerRef}
@@ -259,7 +184,7 @@ export function AdminProducts() {
     >
       {viewMode === 'list' && (
         <>
-          <ProductHeader canCreate={can('products.create')} onNew={handleNew} onWizard={() => setShowWizard(true)} />
+          <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
 
           <ProductFilters
             search={search}
@@ -320,7 +245,6 @@ export function AdminProducts() {
                 onEdit={can('products.edit') ? handleEdit : undefined}
                 onDelete={can('products.delete') ? handleDelete : undefined}
                 onDeleteDirect={can('products.delete') ? handleDirectDelete : undefined}
-                onDuplicate={can('products.create') ? handleDuplicateRequest : undefined}
                 canEdit={can('products.edit')}
                 canDelete={can('products.delete')}
                 defaultSelectedProductId={editId || undefined}
@@ -336,15 +260,6 @@ export function AdminProducts() {
             </div>
           )}
 
-          {showWizard && (
-            <ProductWizard
-              open={showWizard}
-              onClose={() => setShowWizard(false)}
-              categories={categories.map(c => ({ id: c.id, name: c.name || 'Unnamed' }))}
-              onPublish={handleWizardPublish}
-            />
-          )}
-
           {showWarning && (
             <ModalConfirm
               open={showWarning}
@@ -354,18 +269,6 @@ export function AdminProducts() {
               cancelText="Cancelar"
               onConfirm={confirmNavigation}
               onCancel={cancelNavigation}
-            />
-          )}
-
-          {showDuplicateModal && productToDuplicate && (
-            <ModalConfirm
-              open={showDuplicateModal}
-              title="Duplicar Producto"
-              message={`¿Estás seguro de que deseas duplicar el producto "${productToDuplicate.name}"? Se creará una nueva copia con los mismos datos.`}
-              confirmText={isDuplicating ? "Duplicando..." : "Duplicar"}
-              cancelText="Cancelar"
-              onConfirm={handleConfirmDuplicate}
-              onCancel={handleCancelDuplicate}
             />
           )}
 

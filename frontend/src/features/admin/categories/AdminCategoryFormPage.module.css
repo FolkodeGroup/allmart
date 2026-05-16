@@ -4,9 +4,9 @@
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    background: var(--color-bg, #f8fafc);
+    background: var(--color-bg-primary);
     font-family: inherit;
-    overflow: auto;
+    /* Quitar overflow para que sticky funcione con el scroll del body/html */
 }
 
 /* ── Sticky page header ──────────────────────────────────────────────────── */
@@ -19,8 +19,8 @@
     justify-content: space-between;
     gap: 16px;
     padding: 12px 24px;
-    background: var(--color-surface, #fff);
-    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    background: var(--color-bg-primary);
+    border-bottom: 1px solid var(--color-border);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
@@ -44,20 +44,21 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
+    padding: 0.5rem 1rem;
     border: 1px solid var(--color-border, #e2e8f0);
     border-radius: 6px;
-    background: transparent;
-    color: var(--color-text-muted, #64748b);
-    font-size: 0.85rem;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.2s ease;
     white-space: nowrap;
 }
 
 .backBtn:hover {
-    background: var(--color-bg, #f1f5f9);
-    color: var(--color-text, #1e293b);
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border);
+    transform: translateX(-2px);
 }
 
 .pageHeaderActions {
@@ -120,12 +121,13 @@
     margin: 0 auto;
     padding: 24px 24px 0;
     gap: 24px;
+    background: var(--color-bg-primary);
 }
 
 /* ── Sticky sidebar ──────────────────────────────────────────────────────── */
 .sidebar {
     position: sticky;
-    top: 61px;
+    top: 135px; /* Ajusta este valor según el alto real del navbar/header */
     align-self: flex-start;
     width: 188px;
     flex-shrink: 0;
@@ -133,11 +135,11 @@
     flex-direction: column;
     gap: 4px;
     padding: 8px;
-    background: var(--color-surface, #fff);
-    border: 1px solid var(--color-border, #e2e8f0);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    /* overflow eliminado para no romper sticky */
 }
 
 .sidebarList {
@@ -159,7 +161,7 @@
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: var(--color-text-muted, #64748b);
+    color: var(--color-text-primary);
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;
@@ -168,13 +170,13 @@
 }
 
 .sidebarItem:hover {
-    background: var(--color-bg, #f1f5f9);
-    color: var(--color-text, #1e293b);
+    background: var(--color-primary-dark);
+    color: var(--color-neutral-light);
 }
 
 .sidebarItemActive {
-    background: var(--color-primary-light, #eff6ff);
-    color: var(--color-primary, #2563eb);
+    background: var(--color-primary-dark, #eff6ff);
+    color: var(--color-neutral-light);
     font-weight: 600;
 }
 
@@ -225,14 +227,14 @@
     flex-direction: column;
     gap: 0;
     padding-bottom: 80px;
-    height: calc(100vh - 61px);
+    height: calc(100vh - 141px);
     overflow-y: auto;
 }
 
 /* ── Individual section card ─────────────────────────────────────────────── */
 .section {
-    background: var(--color-surface, #fff);
-    border: 1px solid var(--color-border, #e2e8f0);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 24px;
     margin-bottom: 20px;
@@ -360,6 +362,10 @@
     margin-top: 4px;
 }
 
+.checkboxLabel {
+    color: var(--color-text-primary);
+}
+
 /* ── Image upload section ────────────────────────────────────────────────── */
 .imageUploadSection {
     display: flex;
@@ -376,6 +382,7 @@
     border-radius: 8px;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
+    position: relative;
 }
 
 .imagePreviewImg {
@@ -383,6 +390,35 @@
     height: 120px;
     object-fit: cover;
     border-radius: 6px;
+}
+
+.deleteImageBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-error, #ef4444);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.deleteImageBtn:hover {
+    background: var(--color-error-dark, #dc2626);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.deleteImageBtn:active {
+    transform: scale(0.95);
 }
 
 .imageUploadTrigger {

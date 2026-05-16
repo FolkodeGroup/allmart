@@ -1,62 +1,402 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { useStaffNotes } from '../hooks/useStaffNotes';
+import type { StaffNote } from '../types/staffNote';
 
+import styles from './StaffNotes.module.css';
 
-function formatDate(dateStr: string) {
-    const d = new Date(dateStr);
-    return d.toLocaleString();
+interface UIState {
+    newContent: string;
+    editingId: string | null;
+    editContent: string;
+    creating: boolean;
+    deletingId: string | null;
+    deletingConfirm: string | null;
+    hoveredId: string | null;
+    pinnedExpandedId: string | null;
+    actionsHiddenFor: string | null;
 }
+
+const INITIAL_UI_STATE: UIState = {
+    newContent: '',
+    editingId: null,
+    editContent: '',
+    creating: false,
+    deletingId: null,
+    deletingConfirm: null,
+    hoveredId: null,
+    pinnedExpandedId: null,
+    actionsHiddenFor: null,
+};
+
+function formatDate(dateStr: string): string {
+    try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    } catch {
+        return dateStr;
+    }
+}
+
+interface NoteCardProps {
+    note: StaffNote;
+    isExpanded: boolean;
+    isEditing: boolean;
+    isDeleting: boolean;
+    isConfirmingDelete: boolean;
+    isActionsHidden: boolean;
+    editContent: string;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    onToggleExpanded: () => void;
+    onToggleActionsVisibility: () => void;
+    onStartEdit: () => void;
+    onEditContentChange: (content: string) => void;
+    onSaveEdit: () => void;
+    onCancelEdit: () => void;
+    onInitiateDelete: () => void;
+    onConfirmDelete: () => void;
+    onCancelDelete: () => void;
+}
+
+const NoteCard = memo(({
+    note,
+    isExpanded,
+    isEditing,
+    isDeleting,
+    isConfirmingDelete,
+    isActionsHidden,
+    editContent,
+    onMouseEnter,
+    onMouseLeave,
+    onToggleExpanded,
+    onToggleActionsVisibility,
+    onStartEdit,
+    onEditContentChange,
+    onSaveEdit,
+    onCancelEdit,
+    onInitiateDelete,
+    onConfirmDelete,
+    onCancelDelete,
+}: NoteCardProps) => {
+    const handleCardClick = useCallback(() => {
+        if (!isEditing) {
+            onToggleExpanded();
+            onToggleActionsVisibility();
+        }
+    }, [isEditing, onToggleExpanded, onToggleActionsVisibility]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !isEditing) {
+            e.preventDefault();
+            onToggleExpanded();
+        }
+    }, [isEditing, onToggleExpanded]);
+
+    const handleEditSubmit = useCallback((e: React.FormEvent) => {
+        e.preventDefault();
+        onSaveEdit();
+    }, [onSaveEdit]);
+
+    const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        onInitiateDelete();
+    }, [onInitiateDelete]);
+
+    const handleConfirmDeleteClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        onConfirmDelete();
+    }, [onConfirmDelete]);
+
+    const handleCancelDeleteClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        onCancelDelete();
+    }, [onCancelDelete]);
+
+    return (
+        <div
+            className={`${styles['sticky-note']} ${isExpanded ? styles['expanded'] : ''}`}
+            role="button"
+            tabIndex={0}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onClick={handleCardClick}
+            onKeyDown={handleKeyDown}
+        >
+            {isEditing ? (
+                <form
+                    onSubmit={handleEditSubmit}
+                    className={styles['edit-form']}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <textarea
+                        value={editContent}
+                        onChange={(e) => onEditContentChange(e.target.value)}
+                        rows={3}
+                        className={styles['edit-textarea']}
+                        autoFocus
+                        aria-label="Editar nota"
+                    />
+                    <div className={styles['edit-buttons']}>
+                        <button type="submit" className={styles['save-btn']}>
+                            Guardar
+                        </button>
+                        <button
+                            type="button"
+                            className={styles['cancel-btn']}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onCancelEdit();
+                            }}
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                <>
+                    <div className={styles['note-content']}>
+                        {note.content}
+                    </div>
+
+                    <div className={styles['note-metadata']}>
+                        <span>
+                            {note.user.firstName} {note.user.lastName} • {formatDate(note.updatedAt)}
+                        </span>
+                    </div>
+
+                    {isConfirmingDelete ? (
+                        <div className={styles['delete-confirmation']}>
+                            <p>¿Eliminar esta nota?</p>
+                            <div className={styles['confirmation-buttons']}>
+                                <button
+                                    className={styles['confirm-delete-btn']}
+                                    onClick={handleConfirmDeleteClick}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? 'Eliminando...' : 'Sí'}
+                                </button>
+                                <button
+                                    className={styles['cancel-btn']}
+                                    onClick={handleCancelDeleteClick}
+                                    disabled={isDeleting}
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    ) : !isActionsHidden ? (
+                        <div className={styles['note-actions']}>
+                            <button
+                                className={styles['edit-btn']}
+                                title="Editar"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onStartEdit();
+                                }}
+                            >
+                                ✏️
+                            </button>
+                            <button
+                                className={styles['delete-btn']}
+                                title="Eliminar"
+                                disabled={isDeleting}
+                                onClick={handleDeleteClick}
+                            >
+                                🗑️
+                            </button>
+                        </div>
+                    ) : null}
+                </>
+            )}
+        </div>
+    );
+});
+
+NoteCard.displayName = 'NoteCard';
 
 export default function StaffNotes() {
     const { notes, loading, error, createNote, updateNote, deleteNote } = useStaffNotes();
-    const [newContent, setNewContent] = useState('');
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [editContent, setEditContent] = useState('');
-    const [creating, setCreating] = useState(false);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [hoveredId, setHoveredId] = useState<string | null>(null);
-    const [pinnedExpandedId, setPinnedExpandedId] = useState<string | null>(null);
+    const [uiState, setUiState] = useState<UIState>(INITIAL_UI_STATE);
 
-    // Skeleton loading
+    const displayedError = error;
+
+    // Handler callbacks
+    const updateUiState = useCallback((updates: Partial<UIState> | ((prev: UIState) => UIState)) => {
+        setUiState(prev =>
+            typeof updates === 'function'
+                ? updates(prev)
+                : { ...prev, ...updates }
+        );
+    }, []);
+
+    const handleAddNote = useCallback(async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!uiState.newContent.trim()) return;
+
+        updateUiState({ creating: true });
+        try {
+            await createNote(uiState.newContent);
+            updateUiState({ newContent: '', creating: false });
+        } catch {
+            updateUiState({ creating: false });
+        }
+    }, [uiState.newContent, createNote, updateUiState]);
+
+    const handleStartEdit = useCallback((noteId: string, content: string) => {
+        updateUiState({ editingId: noteId, editContent: content });
+    }, [updateUiState]);
+
+    const handleSaveEdit = useCallback(async (noteId: string) => {
+        if (!uiState.editContent.trim()) return;
+
+        try {
+            await updateNote(noteId, uiState.editContent);
+            updateUiState({ editingId: null, editContent: '' });
+        } catch {
+            // Error is handled by the hook
+        }
+    }, [uiState.editContent, updateNote, updateUiState]);
+
+    const handleCancelEdit = useCallback(() => {
+        updateUiState({ editingId: null, editContent: '' });
+    }, [updateUiState]);
+
+    const handleInitiateDelete = useCallback((noteId: string) => {
+        updateUiState({ deletingConfirm: noteId });
+    }, [updateUiState]);
+
+    const handleConfirmDelete = useCallback(async (noteId: string) => {
+        updateUiState({ deletingId: noteId });
+        try {
+            await deleteNote(noteId);
+            updateUiState({ deletingId: null, deletingConfirm: null });
+        } catch {
+            updateUiState({ deletingId: null });
+        }
+    }, [deleteNote, updateUiState]);
+
+    const handleCancelDelete = useCallback(() => {
+        updateUiState({ deletingConfirm: null });
+    }, [updateUiState]);
+
+    const toggleExpanded = useCallback((noteId: string) => {
+        updateUiState(prev => ({
+            ...prev,
+            pinnedExpandedId: prev.pinnedExpandedId === noteId ? null : noteId,
+        }));
+    }, [updateUiState]);
+
+    const toggleActionsVisibility = useCallback((noteId: string) => {
+        updateUiState(prev => ({
+            ...prev,
+            actionsHiddenFor: prev.actionsHiddenFor === noteId ? null : noteId,
+        }));
+    }, [updateUiState]);
+
+    // notesList must be declared before any early returns (Rules of Hooks)
+    const notesList = useMemo(() => {
+        return notes.map((note) => {
+            const isExpanded = uiState.hoveredId === note.id || uiState.pinnedExpandedId === note.id;
+            const isEditing = uiState.editingId === note.id;
+            const isDeleting = uiState.deletingId === note.id;
+            const isConfirmingDelete = uiState.deletingConfirm === note.id;
+            const isActionsHidden = uiState.actionsHiddenFor === note.id;
+
+            return (
+                <NoteCard
+                    key={note.id}
+                    note={note}
+                    isExpanded={isExpanded}
+                    isEditing={isEditing}
+                    isDeleting={isDeleting}
+                    isConfirmingDelete={isConfirmingDelete}
+                    isActionsHidden={isActionsHidden}
+                    editContent={uiState.editContent}
+                    onMouseEnter={() => updateUiState({ hoveredId: note.id })}
+                    onMouseLeave={() =>
+                        updateUiState(prev => ({
+                            ...prev,
+                            hoveredId: prev.hoveredId === note.id ? null : prev.hoveredId,
+                        }))
+                    }
+                    onToggleExpanded={() => toggleExpanded(note.id)}
+                    onToggleActionsVisibility={() => toggleActionsVisibility(note.id)}
+                    onStartEdit={() => handleStartEdit(note.id, note.content)}
+                    onEditContentChange={(content) => updateUiState({ editContent: content })}
+                    onSaveEdit={() => handleSaveEdit(note.id)}
+                    onCancelEdit={handleCancelEdit}
+                    onInitiateDelete={() => handleInitiateDelete(note.id)}
+                    onConfirmDelete={() => handleConfirmDelete(note.id)}
+                    onCancelDelete={handleCancelDelete}
+                />
+            );
+        });
+    }, [
+        notes,
+        uiState.hoveredId,
+        uiState.pinnedExpandedId,
+        uiState.editingId,
+        uiState.deletingId,
+        uiState.deletingConfirm,
+        uiState.actionsHiddenFor,
+        uiState.editContent,
+        updateUiState,
+        toggleExpanded,
+        toggleActionsVisibility,
+        handleStartEdit,
+        handleSaveEdit,
+        handleCancelEdit,
+        handleInitiateDelete,
+        handleConfirmDelete,
+        handleCancelDelete,
+    ]);
+
+    // Skeleton loading UI
     if (loading) {
         return (
-            <div className="staff-notes-widget">
-                <div className="sticky-note skeleton" style={{ height: 100, width: 200, marginBottom: 12 }} />
-                <div className="sticky-note skeleton" style={{ height: 100, width: 200 }} />
+            <div className={styles['staff-notes-widget']}>
+                <div className={`${styles['sticky-note']} ${styles['skeleton']}`} />
+                <div className={`${styles['sticky-note']} ${styles['skeleton']}`} />
             </div>
         );
     }
 
     // Error state
-    if (error) {
-        return <div className="staff-notes-widget error">{error}</div>;
+    if (displayedError) {
+        return (
+            <div className={`${styles['staff-notes-widget']} ${styles['error']}`}>
+                <p>{displayedError}</p>
+            </div>
+        );
     }
 
     // Empty state
     if (!notes.length) {
         return (
-            <div className="staff-notes-widget empty">
+            <div className={`${styles['staff-notes-widget']} ${styles['empty']}`}>
                 <p>No hay notas del staff aún.</p>
-                <form
-                    onSubmit={async (e) => {
-                        e.preventDefault();
-                        if (!newContent.trim()) return;
-                        setCreating(true);
-                        await createNote(newContent);
-                        setNewContent('');
-                        setCreating(false);
-                    }}
-                >
+                <form onSubmit={handleAddNote} className={styles['add-note-form']}>
                     <textarea
-                        value={newContent}
-                        onChange={(e) => setNewContent(e.target.value)}
+                        value={uiState.newContent}
+                        className={styles['staff-notes-area']}
+                        onChange={(e) => updateUiState({ newContent: e.target.value })}
                         placeholder="Escribe una nota..."
                         rows={3}
-                        style={{ width: '100%', resize: 'vertical' }}
-                        disabled={creating}
+                        disabled={uiState.creating}
+                        aria-label="Nueva nota"
                     />
-                    <button type="submit" disabled={creating || !newContent.trim()} className="add-btn">
-                        {creating ? 'Agregando...' : 'Agregar nota'}
+                    <button
+                        type="submit"
+                        disabled={uiState.creating || !uiState.newContent.trim()}
+                        className={styles['add-btn']}
+                    >
+                        {uiState.creating ? 'Agregando...' : 'Agregar nota'}
                     </button>
                 </form>
             </div>
@@ -65,195 +405,31 @@ export default function StaffNotes() {
 
     // Main widget
     return (
-        <div className="staff-notes-widget">
+        <div className={styles['staff-notes-widget']}>
             <form
-                className="add-note-form"
-                onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (!newContent.trim()) return;
-                    setCreating(true);
-                    await createNote(newContent);
-                    setNewContent('');
-                    setCreating(false);
-                }}
+                className={styles['add-note-form']}
+                onSubmit={handleAddNote}
             >
                 <textarea
-                    value={newContent}
-                    onChange={(e) => setNewContent(e.target.value)}
+                    value={uiState.newContent}
+                    onChange={(e) => updateUiState({ newContent: e.target.value })}
                     placeholder="Escribe una nota..."
                     rows={2}
-                    style={{ width: '100%', resize: 'vertical' }}
-                    disabled={creating}
+                    className={styles['staff-notes-area']}
+                    disabled={uiState.creating}
+                    aria-label="Nueva nota"
                 />
-                <button type="submit" disabled={creating || !newContent.trim()} className="add-btn">
-                    {creating ? 'Agregando...' : 'Agregar nota'}
+                <button
+                    type="submit"
+                    disabled={uiState.creating || !uiState.newContent.trim()}
+                    className={styles['add-btn']}
+                >
+                    {uiState.creating ? 'Agregando...' : 'Agregar nota'}
                 </button>
             </form>
-            <div className="notes-list" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 16 }}>
-                {notes.map((note) => {
-                    const isExpanded = hoveredId === note.id || pinnedExpandedId === note.id;
-                    const toggleExpanded = () => {
-                        setPinnedExpandedId((current) => (current === note.id ? null : note.id));
-                    };
-
-                    return (
-                    <div
-                        key={note.id}
-                        className={`sticky-note ${isExpanded ? 'expanded' : ''}`}
-                        role="button"
-                        tabIndex={0}
-                        onMouseEnter={() => setHoveredId(note.id)}
-                        onMouseLeave={() => setHoveredId((current) => (current === note.id ? null : current))}
-                        onClick={() => {
-                            if (editingId !== note.id) toggleExpanded();
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                if (editingId !== note.id) toggleExpanded();
-                            }
-                        }}
-                        style={{
-                            background: '#fffbe7',
-                            border: '1px solid #f7e07e',
-                            borderRadius: 8,
-                            boxShadow: '0 2px 8px #0001',
-                            width: isExpanded ? 320 : 220,
-                            minHeight: 120,
-                            padding: 12,
-                            position: 'relative',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        {editingId === note.id ? (
-                            <form
-                                onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    await updateNote(note.id, editContent);
-                                    setEditingId(null);
-                                }}
-                            >
-                                <textarea
-                                    value={editContent}
-                                    onChange={(e) => setEditContent(e.target.value)}
-                                    rows={3}
-                                    style={{ width: '100%', resize: 'vertical' }}
-                                // autoFocus intentionally omitted for accessibility
-                                />
-                                <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                                    <button type="submit" className="save-btn">Guardar</button>
-                                    <button type="button" className="cancel-btn" onClick={() => setEditingId(null)}>
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </form>
-                        ) : (
-                            <>
-                                <div className="note-content">{note.content}</div>
-                                <button
-                                    type="button"
-                                    className="expand-btn"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleExpanded();
-                                    }}
-                                >
-                                    {isExpanded ? 'Ver menos' : 'Ver mas'}
-                                </button>
-                                <div style={{ fontSize: 12, color: '#b59d2b', marginTop: 8 }}>
-                                    <span>
-                                        {note.user.firstName} {note.user.lastName} • {formatDate(note.updatedAt)}
-                                    </span>
-                                </div>
-                                <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
-                                    <button
-                                        className="edit-btn"
-                                        title="Editar"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingId(note.id);
-                                            setEditContent(note.content);
-                                        }}
-                                    >
-                                        ✏️
-                                    </button>
-                                    <button
-                                        className="delete-btn"
-                                        title="Eliminar"
-                                        disabled={deletingId === note.id}
-                                        onClick={async (e) => {
-                                            e.stopPropagation();
-                                            setDeletingId(note.id);
-                                            await deleteNote(note.id);
-                                            setDeletingId(null);
-                                        }}
-                                    >
-                                        🗑️
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                                        );
-                                })}
+            <div className={styles['notes-list']}>
+                {notesList}
             </div>
-            <style>{`
-        .staff-notes-widget { max-width: 100%; }
-                .sticky-note {
-                    transition: box-shadow 0.2s ease, transform 0.2s ease;
-                    transform-origin: center;
-                    z-index: 1;
-                    cursor: pointer;
-                }
-                .sticky-note:hover,
-                .sticky-note.expanded {
-                    transform: translateY(-5px) scale(1.04);
-                    box-shadow: 0 10px 22px #0002;
-                    z-index: 5;
-                }
-        .sticky-note.skeleton { background: #f7e07e33; animation: pulse 1.2s infinite alternate; }
-                .note-content {
-                    white-space: pre-wrap;
-                    word-break: break-word;
-                    flex: 1;
-                    overflow: hidden;
-                    display: -webkit-box;
-                    -webkit-box-orient: vertical;
-                    -webkit-line-clamp: 2;
-                    max-height: 3.2em;
-                    transition: max-height 0.2s ease;
-                }
-                .sticky-note:hover .note-content,
-                .sticky-note.expanded .note-content {
-                    -webkit-line-clamp: unset;
-                    display: block;
-                    max-height: none;
-                    overflow: visible;
-                }
-        @keyframes pulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
-                .add-btn, .save-btn, .cancel-btn, .edit-btn, .delete-btn, .expand-btn {
-          background: #f7e07e;
-          border: none;
-          border-radius: 4px;
-          padding: 4px 10px;
-          margin-top: 4px;
-          cursor: pointer;
-          font-size: 14px;
-        }
-        .add-btn { background: #ffe066; color: #7c6f1c; }
-        .save-btn { background: #b6e07e; color: #2d6a1c; }
-        .cancel-btn { background: #eee; color: #888; }
-        .edit-btn { background: #fffbe7; color: #b59d2b; }
-        .delete-btn { background: #fffbe7; color: #b59d2b; }
-                .expand-btn { background: #fff7c6; color: #7c6f1c; font-size: 12px; align-self: flex-start; }
-        .add-note-form { margin-bottom: 12px; }
-        @media (max-width: 600px) {
-          .notes-list { flex-direction: column; gap: 8px; }
-          .sticky-note { width: 100%; min-width: 0; }
-        }
-      `}</style>
         </div>
     );
 }

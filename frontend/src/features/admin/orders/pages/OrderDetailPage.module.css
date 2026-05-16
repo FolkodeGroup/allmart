@@ -1,20 +1,24 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    OrderDetailPage.module.css
    Estilos para la página de detalle de un pedido individual.
+   Presenta la información de forma clara, ordenada y visualmente atractiva.
    ───────────────────────────────────────────────────────────────────────────── */
 
 .container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--color-bg-primary);
 }
 
 .header {
-  background: white;
-  border-bottom: 1px solid #e5e5e5;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid #e1e8ed;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .headerContent {
@@ -25,16 +29,87 @@
   gap: 1.5rem;
 }
 
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.backButton:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  transform: translateX(-2px);
+}
+
+.backButton:active {
+  transform: translateX(0);
+}
+
+.backIcon {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.backText {
+  display: inline;
+}
+
+@media (max-width: 640px) {
+  .backText {
+    display: none;
+  }
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
 .title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.3px;
+}
+
+.headerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.metaIcon {
+  font-size: 1.1rem;
+}
+
+.metaDivider {
+  color: #cbd5e1;
 }
 
 .content {
   flex: 1;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -50,19 +125,20 @@
   justify-content: center;
   min-height: 60vh;
   gap: 1.5rem;
-  padding: 2rem;
+  padding: 3rem 2rem;
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin: 2rem 0;
 }
 
 .spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid #e5e5e5;
+  border: 4px solid #e5e7eb;
   border-top-color: #2563eb;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -73,11 +149,23 @@
 
 .errorIcon {
   font-size: 3rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .errorTitle {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1a1a1a;
   margin: 0;
   text-align: center;
@@ -85,10 +173,11 @@
 
 .errorMessage {
   font-size: 1rem;
-  color: #666;
+  color: #64748b;
   text-align: center;
   margin: 0;
   max-width: 500px;
+  line-height: 1.5;
 }
 
 .errorMessage strong {
@@ -96,9 +185,13 @@
   font-weight: 600;
 }
 
-/* ── Responsive ──────────────────────────────────────────────────── */
+/* ── Responsive ────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
+  .container {
+    min-height: calc(100vh - 60px);
+  }
+
   .header {
     padding: 1rem;
   }
@@ -112,6 +205,10 @@
     font-size: 1.5rem;
   }
 
+  .headerMeta {
+    font-size: 0.85rem;
+  }
+
   .content {
     padding: 1rem;
   }
@@ -119,7 +216,7 @@
   .loadingState,
   .errorState {
     min-height: 50vh;
-    padding: 1.5rem;
+    padding: 2rem 1rem;
   }
 
   .errorTitle {
@@ -127,6 +224,39 @@
   }
 
   .errorMessage {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0.75rem;
+  }
+
+  .headerContent {
+    gap: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .headerMeta {
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .metaDivider {
+    display: none;
+  }
+
+  .content {
+    padding: 0.75rem;
+  }
+
+  .loadingState,
+  .errorState {
+    min-height: 40vh;
+    padding: 1.5rem 1rem;
   }
 }
