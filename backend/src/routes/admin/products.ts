@@ -23,6 +23,7 @@ router.use('/:productId/variants', variantsRouter);
 router.use('/:productId/images',   imagesRouter);
 
 // ─── CRUD productos ───────────────────────────────────────────────────────────
+router.get('/low-stock-count', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.lowStockCount);
 router.get('/',    requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.index);
 router.get('/:id', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.show);
 router.post('/',   requireRole(UserRole.ADMIN), ctrl.create);

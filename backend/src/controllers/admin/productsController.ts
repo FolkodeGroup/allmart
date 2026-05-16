@@ -51,3 +51,10 @@ export async function remove(req: AuthenticatedRequest, res: Response, next: Nex
     sendSuccess(res, null, 200, 'Producto eliminado');
   } catch (err) { next(err); }
 }
+
+export async function lowStockCount(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const count = await productsService.getLowStockCount();
+    sendSuccess(res, { count });
+  } catch (err) { next(err); }
+}
