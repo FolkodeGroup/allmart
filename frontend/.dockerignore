@@ -78,9 +78,6 @@ e2e/
 # Misc
 .prettierrc
 .eslintrc*
-tsconfig*.json
 vitest.config.ts
 jest.config.js
-vite.config.ts
 .npmrc
-nginx.conf
