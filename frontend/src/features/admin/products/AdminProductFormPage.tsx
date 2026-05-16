@@ -50,7 +50,6 @@ export function AdminProductFormPage({
         imagenes: null, variantes: null, seo: null,
     });
     const observerRef = useRef<IntersectionObserver | null>(null);
-    const layoutRef = useRef<HTMLDivElement | null>(null);
 
     // All form state + handlers come from the stable hook
     const formProps = useProductForm({
@@ -111,9 +110,6 @@ export function AdminProductFormPage({
 
     // ── Scroll spy via IntersectionObserver ───────────────────────────────
     useEffect(() => {
-        const root = layoutRef.current;
-        if (!root) return;
-
         observerRef.current?.disconnect();
         observerRef.current = new IntersectionObserver(
             entries => {
@@ -125,7 +121,7 @@ export function AdminProductFormPage({
                     setActiveSection(visible[0].target.id as SectionId);
                 }
             },
-            { root, threshold: 0.15, rootMargin: '-20px 0px -55% 0px' }
+            { threshold: 0.3, rootMargin: '-60px 0px -60% 0px' }
         );
 
         SECTIONS.forEach(s => {
@@ -198,7 +194,7 @@ export function AdminProductFormPage({
                 </div>
             </header>
 
-            <div className={styles.layout} ref={layoutRef}>
+            <div className={styles.layout}>
                 {/* ── Sticky sidebar nav ───────────────────────────────────── */}
                 <nav className={styles.sidebar} aria-label="Secciones del formulario">
                     <ul className={styles.sidebarList}>
