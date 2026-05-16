@@ -25,7 +25,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
     const auth = useAdminAuth();
     const userEmail = (auth.user as { email?: string } | null)?.email ?? 'desconocido';
 
-    const { addCategory, updateCategory, getCategory, categories, uploadCategoryImage } = useAdminCategories();
+    const { addCategory, updateCategory, getCategory, categories, uploadCategoryImage, refreshCategory, deleteCategoryImage } = useAdminCategories();
 
     const isEdit = !!categoryId;
 
@@ -40,6 +40,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
     // ── Image management state ─────────────────────────────────────────────
     const [imgFile, setImgFile] = useState<File | null>(null);
     const [imgError, setImgError] = useState('');
+    const [imageDeleted, setImageDeleted] = useState(false);
 
     // ── Initialize form when categoryId changes ────────────────────────────
     useEffect(() => {
@@ -65,6 +66,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
             setFieldErrors({});
             setImgFile(null);
             setImgError('');
+            setImageDeleted(false);
             setLoading(false);
         };
         initForm();
@@ -109,6 +111,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
         const errors: Record<string, string> = {};
         if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
         if (!form.slug.trim()) errors.slug = 'El slug es obligatorio';
+
 
         // Validar que haya imagen (nueva o existente)
         if (!form.image && !imgFile) {
@@ -157,13 +160,27 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
                 });
             }
 
-            // Upload image if selected
+            // Delete image if it was removed
+            if (imageDeleted && categoryId_result && isEdit) {
+                try {
+                    await deleteCategoryImage(categoryId_result);
+                } catch (err) {
+                    console.error('Error deleting image:', err);
+                    // No es un error crítico, continuar
+                }
+            }
+
+            // Upload image if a new file is selected
             if (imgFile && categoryId_result) {
                 try {
                     await uploadCategoryImage(categoryId_result, imgFile);
+                    // Recargar la categoría del backend para asegurar que los datos estén sincronizados
+                    await refreshCategory(categoryId_result);
                 } catch (err) {
                     console.error('Error uploading image:', err);
-                    // Continue anyway, category was saved
+                    setError('Error al subir la imagen. La categoría se guardó pero la imagen no se actualizó.');
+                    setSaving(false);
+                    return;
                 }
             }
 
@@ -173,7 +190,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
         } finally {
             setSaving(false);
         }
-    }, [form, isEdit, categoryId, validateForm, addCategory, updateCategory, uploadCategoryImage, userEmail, onSuccess, imgFile]);
+    }, [form, isEdit, categoryId, validateForm, addCategory, updateCategory, uploadCategoryImage, userEmail, onSuccess, imgFile, refreshCategory, imageDeleted, deleteCategoryImage]);
 
     // ── Image handlers ────────────────────────────────────────────────────
     const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,6 +198,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
         if (!file) return;
 
         setImgError('');
+
 
         // Validate file type and size
         if (!file.type.startsWith('image/')) {
@@ -195,6 +213,21 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
 
         setImgFile(file);
     }, []);
+
+    // ── Delete image handler ──────────────────────────────────────────────
+    const handleDeleteImage = useCallback(() => {
+        // Delete the newly selected image file
+        if (imgFile) {
+            setImgFile(null);
+            setImgError('');
+            setImageDeleted(true);
+        }
+        // Delete the existing image from the form
+        if (form.image) {
+            setField('image', '');
+            setImageDeleted(true);
+        }
+    }, [imgFile, form.image, setField]);
 
     return {
         form,
@@ -211,6 +244,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
         imgError,
         setImgError,
         handleImageChange,
+        handleDeleteImage,
         categories,
     };
 }

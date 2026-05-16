@@ -32,7 +32,7 @@ interface ApiSuccess<T> {
 export interface CategoryPayload {
   name?: string;
   description?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   parentId?: string | null;
   isVisible?: boolean;
 }
@@ -77,13 +77,13 @@ export function mapApiCategoryToCategory(api: ApiCategory): Category {
 /** Convierte una Category del frontend al payload que acepta el backend */
 export function mapCategoryToPayload(category: Partial<Category>): CategoryPayload {
   const payload: Partial<CategoryPayload> = {};
-  
+
   if (category.name !== undefined) payload.name = category.name;
   if (category.description !== undefined) payload.description = category.description;
-  if (category.image !== undefined) payload.imageUrl = category.image;
+  if (category.image !== undefined) payload.imageUrl = category.image || null;
   if (category.parentId !== undefined) payload.parentId = category.parentId;
   if (category.isVisible !== undefined) payload.isVisible = category.isVisible;
-  
+
   return payload as CategoryPayload;
 }
 
@@ -141,6 +141,12 @@ export async function fetchAdminCategories(
   return body.data;
 }
 
+/** GET /api/admin/categories/:id — Obtiene una categoría específica para administración */
+export async function fetchAdminCategory(token: string, id: string): Promise<Category> {
+  const body = await apiFetch<ApiSuccess<ApiCategory>>(`/api/admin/categories/${id}`, {}, token);
+  return mapApiCategoryToCategory(body.data);
+}
+
 /** POST /api/admin/categories — Crea una nueva categoría */
 export async function createAdminCategory(token: string, category: Omit<Category, 'id'>): Promise<Category> {
   const body = await apiFetch<ApiSuccess<ApiCategory>>('/api/admin/categories', {
@@ -171,10 +177,17 @@ export async function uploadAdminCategoryImage(token: string, id: string, file: 
   const formData = new FormData();
   formData.append('image', file);
 
-  const body = await apiFetch<ApiSuccess<{ imageUrl: string }>>(`/api/admin/categories/${id}/image/upload`, {
+  const body = await apiFetch<ApiSuccess<{ url: string; imageUrl?: string }>>(`/api/admin/categories/${id}/image/upload`, {
     method: 'POST',
     body: formData,
   }, token);
 
-  return body.data.imageUrl;
+  return body.data.url ?? body.data.imageUrl ?? '';
+}
+
+/** DELETE /api/admin/categories/:id/image — Elimina la imagen de una categoría */
+export async function deleteAdminCategoryImage(token: string, id: string): Promise<void> {
+  await apiFetch<ApiSuccess<void>>(`/api/admin/categories/${id}/image`, {
+    method: 'DELETE',
+  }, token);
 }

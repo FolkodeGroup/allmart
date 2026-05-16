@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { FileText, Image, ArrowLeft, AlertCircle, Upload } from 'lucide-react';
+import { FileText, Image, ArrowLeft, AlertCircle, Upload, X } from 'lucide-react';
 import { useBlocker } from 'react-router-dom';
 import { useCategoryForm } from '../../../hooks/useCategoryFormPage';
-import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { CategoryTabBasico } from './tabs/CategoryTabBasico';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
@@ -91,25 +90,12 @@ export function AdminCategoryFormPage({
         [formProps.form, formProps.initialForm, formProps.imgFile, shallowCompareRelevantFields]
     );
 
-    const { showWarning, confirmNavigation, cancelNavigation, interceptNavigation, setIsDirty } =
-        useUnsavedChangesWarning({
-            active: isDirty,
-            onConfirmExit: onBack,
-        });
-
-    // Sync external isDirty into the hook's internal state so interceptNavigation fires
-    useEffect(() => {
-        setIsDirty(isDirty);
-    }, [isDirty, setIsDirty]);
-
     // Block in-app SPA navigation when there are unsaved changes
     const blocker = useBlocker(isDirty);
 
     const handleCancel = useCallback(() => {
-        interceptNavigation(() => {
-            onBack();
-        });
-    }, [interceptNavigation, onBack]);
+        onBack();
+    }, [onBack]);
 
     // ── Scroll spy via IntersectionObserver ───────────────────────────────
     useEffect(() => {
@@ -290,6 +276,15 @@ export function AdminCategoryFormPage({
                                         className={styles.imagePreviewImg}
                                     />
                                     <span className={styles.fieldHint}>Imagen actual</span>
+                                    <button
+                                        type="button"
+                                        onClick={formProps.handleDeleteImage}
+                                        className={styles.deleteImageBtn}
+                                        title="Eliminar imagen"
+                                        aria-label="Eliminar imagen actual"
+                                    >
+                                        <X size={16} />
+                                    </button>
                                 </div>
                             )}
 
@@ -301,28 +296,33 @@ export function AdminCategoryFormPage({
                                         className={styles.imagePreviewImg}
                                     />
                                     <span className={styles.fieldHint}>Nueva imagen a cargar</span>
+                                    <button
+                                        type="button"
+                                        onClick={formProps.handleDeleteImage}
+                                        className={styles.deleteImageBtn}
+                                        title="Eliminar imagen"
+                                        aria-label="Eliminar nueva imagen"
+                                    >
+                                        <X size={16} />
+                                    </button>
                                 </div>
                             )}
 
-                            <div className={styles.imageUploadSection}>
-                                <label className={styles.imageUploadTrigger}>
-                                    <Upload size={24} />
-                                    <span>Click para seleccionar o arrastra una imagen</span>
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={formProps.handleImageChange}
-                                        style={{ display: 'none' }}
-                                    />
-                                </label>
-                                {formProps.imgFile && (
-                                    <p className={styles.fieldHint}>
-                                        Archivo: {formProps.imgFile.name} (
-                                        {(formProps.imgFile.size / 1024 / 1024).toFixed(2)} MB)
-                                    </p>
-                                )}
-                            </div>
+                            {!formProps.form.image && !formProps.imgFile && (
+                                <div className={styles.imageUploadSection}>
+                                    <label className={styles.imageUploadTrigger}>
+                                        <Upload size={24} />
+                                        <span>Click para seleccionar o arrastra una imagen</span>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={formProps.handleImageChange}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
+                                </div>
+                            )}
                         </fieldset>
                     </section>
 
@@ -337,18 +337,16 @@ export function AdminCategoryFormPage({
 
             {/* ── Unsaved changes warning (cancel button or SPA navigation) ─── */}
             <ModalConfirm
-                open={showWarning || blocker.state === 'blocked'}
+                open={blocker.state === 'blocked'}
                 title="¿Abandonar sin guardar?"
                 message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
                 confirmText="Sí, abandonar"
                 cancelText="Seguir editando"
                 onConfirm={() => {
-                    if (blocker.state === 'blocked') blocker.proceed();
-                    confirmNavigation();
+                    blocker.proceed?.();
                 }}
                 onCancel={() => {
-                    if (blocker.state === 'blocked') blocker.reset();
-                    cancelNavigation();
+                    blocker.reset?.();
                 }}
             />
         </div>
