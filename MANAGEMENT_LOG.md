@@ -1616,3 +1616,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #907: 887 eliminar el formulario de alta rápida wizard en la creación de productos | 2026-05-10 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #916: Comportamiento del Formulario | 2026-05-11 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #908: 🔄 Actualización automática de puntajes semanal | 2026-05-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #924: 889 mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
