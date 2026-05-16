@@ -8,30 +8,24 @@ import styles from './DiscountBadge.module.css';
 
 interface Props {
   discountPercentage?: number;
-  originalPrice?: number;
-  finalPrice?: number;
+  discountAmount?: number;
   promotionType?: string;
 }
 
 const DiscountBadge: React.FC<Props> = ({
   discountPercentage,
-  originalPrice,
-  finalPrice,
+  discountAmount,
   promotionType,
 }) => {
-  if (!discountPercentage || discountPercentage <= 0) {
-    return null;
-  }
-
   let badgeText = '';
   if (promotionType === 'bogo') {
     badgeText = 'BOGO';
-  } else if (promotionType === 'percentage') {
+  } else if (promotionType === 'percentage' && discountPercentage && discountPercentage > 0) {
     badgeText = `-${Math.round(discountPercentage)}%`;
-  } else if (promotionType === 'fixed' && originalPrice && finalPrice) {
-    badgeText = `-$${(originalPrice - finalPrice).toFixed(2)}`;
+  } else if (promotionType === 'fixed' && discountAmount && discountAmount > 0) {
+    badgeText = `-$${discountAmount.toFixed(2)}`;
   } else {
-    badgeText = 'EN OFERTA';
+    return null;
   }
 
   return (

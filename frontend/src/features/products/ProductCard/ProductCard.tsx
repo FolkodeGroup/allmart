@@ -121,12 +121,11 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           />
         </Link>
 
-        {/* Mostrar DiscountBadge si hay descuento dinámico o estático */}
+        {/* Mostrar DiscountBadge según el tipo de promoción */}
         {(dynamicDiscount || (product.discount && product.discount > 0)) && (
           <DiscountBadge
-            discountPercentage={dynamicDiscount?.discountPercentage || product.discount}
-            originalPrice={dynamicDiscount?.originalPrice || product.originalPrice || product.price}
-            finalPrice={dynamicDiscount?.finalPrice || (product.price * (1 - (product.discount || 0) / 100))}
+            discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
+            discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
             promotionType={dynamicDiscount?.promotionType || (product.discount ? 'percentage' : undefined)}
           />
         )}
@@ -203,21 +202,31 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-            {dynamicDiscount ? (
-              <ProductPrice
-                price={dynamicDiscount.finalPrice}
-                originalPrice={dynamicDiscount.originalPrice}
-                discount={dynamicDiscount.discountPercentage}
-                size="md"
-              />
-            ) : (
-              <ProductPrice
-                price={product.price}
-                originalPrice={product.originalPrice}
-                discount={product.discount}
-                size="md"
-              />
-            )}
+          {dynamicDiscount ? (
+            <ProductPrice
+              price={dynamicDiscount.finalPrice}
+              originalPrice={dynamicDiscount.originalPrice}
+              discount={
+                dynamicDiscount.promotionType === 'percentage'
+                  ? dynamicDiscount.discountPercentage
+                  : undefined
+              }
+              discountAmount={
+                dynamicDiscount.promotionType === 'fixed'
+                  ? dynamicDiscount.discountAmount
+                  : undefined
+              }
+              promotionType={dynamicDiscount.promotionType}
+              size="md"
+            />
+          ) : (
+            <ProductPrice
+              price={product.price}
+              originalPrice={product.originalPrice}
+              discount={product.discount}
+              size="md"
+            />
+          )}
         </div>
       </div>
       <Link

@@ -65,7 +65,10 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     if (!token) throw new Error('No autenticado');
     try {
       const newCategory = await categoriesService.createAdminCategory(token, category);
-      refreshCategories();
+      // Actualización optimista: agregar la nueva categoría al inicio del array
+      setCategories(prev => [newCategory, ...prev]);
+      // Incrementar el total
+      setPagination(prev => ({ ...prev, total: prev.total + 1 }));
       showNotification('success', 'Categoría creada exitosamente');
       return newCategory;
     } catch (err) {
@@ -78,7 +81,12 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     if (!token) throw new Error('No autenticado');
     try {
       await categoriesService.updateAdminCategory(token, id, data);
-      refreshCategories();
+      // Actualización optimista: actualizar la categoría en el array
+      setCategories(prev =>
+        prev.map(cat =>
+          cat.id === id ? { ...cat, ...data } : cat
+        )
+      );
       showNotification('success', 'Categoría actualizada exitosamente');
     } catch (err) {
       showNotification('error', err instanceof Error ? err.message : 'Error al actualizar categoría');
@@ -90,7 +98,10 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     if (!token) throw new Error('No autenticado');
     try {
       await categoriesService.deleteAdminCategory(token, id);
-      refreshCategories();
+      // Actualización optimista: remover la categoría del array
+      setCategories(prev => prev.filter(cat => cat.id !== id));
+      // Decrementar el total
+      setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
       showNotification('success', 'Categoría eliminada exitosamente');
     } catch (err) {
       showNotification('error', err instanceof Error ? err.message : 'Error al eliminar categoría');
@@ -102,7 +113,12 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     if (!token) throw new Error('No autenticado');
     try {
       const url = await categoriesService.uploadAdminCategoryImage(token, id, file);
-      refreshCategories();
+      // Actualización optimista: actualizar la imagen en el array
+      setCategories(prev =>
+        prev.map(cat =>
+          cat.id === id ? { ...cat, image: url } : cat
+        )
+      );
       showNotification('success', 'Imagen de categoría subida');
       return url;
     } catch (err) {

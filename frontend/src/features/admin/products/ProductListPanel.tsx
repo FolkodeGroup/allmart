@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { PackageSearch, AlertCircle, Pencil, Copy, Trash2 } from 'lucide-react';
+import { PackageSearch, AlertCircle, Pencil, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../../../utils/imageUrl';
@@ -14,7 +14,6 @@ interface ProductListPanelProps {
   onSelectProduct: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
-  onDuplicate?: (product: AdminProduct) => void;
   canEdit?: boolean;
   canDelete?: boolean;
   scrollPreserveKey?: string;
@@ -29,7 +28,6 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
     onSelectProduct,
     onEdit,
     onDelete,
-    onDuplicate,
     canEdit = true,
     canDelete = true,
     scrollPreserveKey = 'product-list-scroll',
@@ -197,16 +195,6 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
                     aria-label={`Editar ${product.name}`}
                   >
                     <Pencil size={14} />
-                  </button>
-                )}
-                {onDuplicate && (
-                  <button
-                    className={styles.quickBtn}
-                    title="Duplicar"
-                    onClick={(e) => { e.stopPropagation(); onDuplicate(product); }}
-                    aria-label={`Duplicar ${product.name}`}
-                  >
-                    <Copy size={14} />
                   </button>
                 )}
                 {canDelete && onDelete && (

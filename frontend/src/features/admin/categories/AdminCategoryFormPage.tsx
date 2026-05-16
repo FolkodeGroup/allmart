@@ -135,6 +135,7 @@ export function AdminCategoryFormPage({
     }, []);
 
     const scrollToSection = useCallback((id: SectionId) => {
+        setActiveSection(id); // Resalta la tab al hacer click
         sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, []);
 
@@ -273,10 +274,12 @@ export function AdminCategoryFormPage({
                             <Image size={17} strokeWidth={1.8} /> Imagen
                         </h2>
                         <fieldset className={styles.fieldset}>
-                            <legend className={styles.legend}>Imagen de la categoría</legend>
+                            <legend className={styles.legend}>Imagen de la categoría *</legend>
 
-                            {formProps.imgError && (
-                                <div className={styles.imgError}>{formProps.imgError}</div>
+                            {(formProps.fieldErrors.image || formProps.imgError) && (
+                                <div className={styles.imgError}>
+                                    {formProps.fieldErrors.image || formProps.imgError}
+                                </div>
                             )}
 
                             {formProps.form.image && !formProps.imgFile && (
