@@ -1618,3 +1618,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #908: 🔄 Actualización automática de puntajes semanal | 2026-05-11 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #924: 889 mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
