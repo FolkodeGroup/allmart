@@ -14,11 +14,15 @@ on:
 jobs:
   registrar_puntaje_gestion:
     runs-on: ubuntu-latest
-    # Solo procesar si el actor es dgimenezdeveloper o folkodegroup
-    # Ignorar eventos generados por el propio bot (chore PRs)
+    # Ejecutar siempre para creación de issues (para acreditar al autor del issue).
+    # Para el resto de eventos limitar a los actores configurados y evitar PRs generados por el bot.
     if: |
-      (github.actor == 'dgimenezdeveloper' || github.actor == 'folkodegroup') &&
-      github.event.pull_request.head.ref != 'chore/gestion-puntaje-auto'
+      (
+        github.event_name == 'issues' && github.event.action == 'opened'
+      ) || (
+        (github.actor == 'dgimenezdeveloper' || github.actor == 'folkodegroup') &&
+        (github.event.pull_request == null || github.event.pull_request.head.ref != 'chore/gestion-puntaje-auto')
+      )
 
     steps:
       - name: Checkout code
@@ -38,10 +42,17 @@ jobs:
           github-token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const actor = context.actor;
-            // Siempre acreditar a dgimenezdeveloper (también cubre folkodegroup)
-            const devAcreditado = 'dgimenezdeveloper';
             const eventName = context.eventName;
             const payload = context.payload;
+
+            // Por defecto usar un fallback seguro
+            let devAcreditado = 'dgimenezdeveloper';
+
+            // Para creación de issues acreditar al creador real (mantener mapeo folkodegroup → dgimenezdeveloper)
+            if (eventName === 'issues' && payload.action === 'opened') {
+              const creator = payload.issue?.user?.login || actor || 'dgimenezdeveloper';
+              devAcreditado = (creator && creator.toLowerCase() === 'folkodegroup') ? 'dgimenezdeveloper' : creator;
+            }
 
             let puntaje = 0;
             let actividad = '';
