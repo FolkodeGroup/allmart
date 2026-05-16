@@ -13,10 +13,12 @@ interface AdminCategoriesContextType {
   totalPages: number;
   error: string | null;
   refreshCategories: (params?: categoriesService.AdminCategoriesParams) => Promise<void>;
+  refreshCategory: (id: string) => Promise<void>;
   addCategory: (c: Omit<Category, 'id'>) => Promise<Category>;
   updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   uploadCategoryImage: (id: string, file: File) => Promise<string>;
+  deleteCategoryImage: (id: string) => Promise<void>;
   getCategory: (id: string) => Category | undefined;
 }
 
@@ -53,6 +55,23 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
       showNotification('error', message);
     } finally {
       setIsLoading(false);
+    }
+  }, [token, showNotification]);
+
+  /** Recarga una categoría específica desde el backend y actualiza el estado */
+  const refreshCategory = useCallback(async (id: string) => {
+    if (!token) return;
+    try {
+      const category = await categoriesService.fetchAdminCategory(token, id);
+      setCategories(prev =>
+        prev.map(cat =>
+          cat.id === id ? category : cat
+        )
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al recargar categoría';
+      setError(message);
+      showNotification('error', message);
     }
   }, [token, showNotification]);
 
@@ -127,6 +146,23 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteCategoryImage = async (id: string) => {
+    if (!token) throw new Error('No autenticado');
+    try {
+      await categoriesService.deleteAdminCategoryImage(token, id);
+      // Actualización optimista: remover la imagen del array
+      setCategories(prev =>
+        prev.map(cat =>
+          cat.id === id ? { ...cat, image: '' } : cat
+        )
+      );
+      showNotification('success', 'Imagen de categoría eliminada');
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Error al eliminar imagen');
+      throw err;
+    }
+  };
+
   const getCategory = (id: string) => categories.find(c => c.id === id);
 
   return (
@@ -139,10 +175,12 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
         totalPages: pagination.totalPages,
         error,
         refreshCategories,
+        refreshCategory,
         addCategory,
         updateCategory,
         deleteCategory,
         uploadCategoryImage,
+        deleteCategoryImage,
         getCategory
       }}
     >
