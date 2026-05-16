@@ -227,7 +227,7 @@
     flex-direction: column;
     gap: 0;
     padding-bottom: 80px;
-    height: calc(100vh - 61px);
+    height: calc(100vh - 141px);
     overflow-y: auto;
 }
 

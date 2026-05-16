@@ -133,6 +133,7 @@ export function AdminProductFormPage({
     }, []);
 
     const scrollToSection = useCallback((id: SectionId) => {
+        setActiveSection(id);
         sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, []);
 
