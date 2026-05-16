@@ -1046,12 +1046,14 @@
     padding: 24px 24px 0;
     gap: 24px;
     background: var(--color-bg-primary);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* ── Sticky sidebar ──────────────────────────────────────────────────────── */
 .sidebar {
     position: sticky;
-    top: 135px; /* AdminHeader (~74px) + page header (~61px) */
+    top: 0;
     align-self: flex-start;
     width: 188px;
     flex-shrink: 0;
@@ -1063,7 +1065,7 @@
     border: 1px solid var(--color-border, #e2e8f0);
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    /* overflow eliminado para no romper la barra de progreso absoluta */
+    overflow: hidden;
 }
 
 .sidebarList {
@@ -1167,7 +1169,7 @@
     flex-direction: column;
     gap: 0;
     padding-bottom: 80px;
-    height: calc(100vh - 61px);
+    height: calc(100vh - 141px);
     overflow-y: auto;
 }
 
