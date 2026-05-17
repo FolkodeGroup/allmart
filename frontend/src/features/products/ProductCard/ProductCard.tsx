@@ -202,29 +202,17 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-          {dynamicDiscount ? (
-            <ProductPrice
-              price={dynamicDiscount.finalPrice}
-              originalPrice={dynamicDiscount.originalPrice}
-              discount={
-                dynamicDiscount.promotionType === 'percentage'
-                  ? dynamicDiscount.discountPercentage
-                  : undefined
-              }
-              discountAmount={
-                dynamicDiscount.promotionType === 'fixed'
-                  ? dynamicDiscount.discountAmount
-                  : undefined
-              }
-              promotionType={dynamicDiscount.promotionType}
-              size="md"
-            />
-          ) : (
-            <ProductPrice
-              price={product.price}
-              size="md"
-            />
-          )}
+                {dynamicDiscount ? (
+                  <ProductPrice
+                    price={dynamicDiscount.finalPrice}
+                    size="md"
+                  />
+                ) : (
+                  <ProductPrice
+                    price={product.price}
+                    size="md"
+                  />
+                )}
         </div>
       </div>
       <Link
