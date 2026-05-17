@@ -17,8 +17,6 @@ export interface ApiProduct {
   description?: string;
   shortDescription?: string;
   price: number;
-  compareAtPrice?: number;
-  discount?: number;
   images: Array<string | { url?: string } | null>;
   categoryId: string;
   categoryIds?: string[];
@@ -77,8 +75,6 @@ export interface ProductPayload {
   description?: string;
   shortDescription?: string;
   price: number;
-  compareAtPrice?: number;
-  discount?: number;
   images?: string[];
   categoryId: string;
   categoryIds?: string[];
@@ -170,12 +166,6 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     description: api.description ?? '',
     shortDescription: api.shortDescription ?? '',
     price: api.price,
-    originalPrice: api.compareAtPrice,
-    discount: api.discount ?? (
-      api.compareAtPrice && api.compareAtPrice > api.price
-        ? Math.round(((api.compareAtPrice - api.price) / api.compareAtPrice) * 100)
-        : undefined
-    ),
     images: normalizedImages,
     category: primaryCategory,
     categoryId: primaryCategory.id || api.categoryId,
@@ -196,9 +186,6 @@ interface AdminProductInput {
   description?: string;
   shortDescription?: string;
   price: number;
-  originalPrice?: number;
-  compareAtPrice?: number;
-  discount?: number;
   images?: string[];
   category?: { id: string };
   categoryId?: string;
@@ -229,8 +216,6 @@ export function mapAdminProductToPayload(product: AdminProductInput): ProductPay
     description: product.description,
     shortDescription: product.shortDescription,
     price: product.price,
-    compareAtPrice: product.originalPrice,
-    discount: product.discount,
     images: product.images,
     categoryId: primaryCategoryId,
     categoryIds: normalizedCategoryIds,

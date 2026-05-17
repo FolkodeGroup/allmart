@@ -23,7 +23,6 @@ type PersistedProduct = {
 interface DemoProductTemplate {
   name: string;
   price: number;
-  originalPrice?: number;
   tags: string[];
 }
 
@@ -50,8 +49,6 @@ interface GeneratedProduct {
   shortDescription: string;
   description: string;
   price: number;
-  originalPrice?: number;
-  discount?: number;
   images: string[];
   categorySlug: string;
   tags: string[];
@@ -225,9 +222,8 @@ type FeaturePoolKey = keyof typeof FEATURE_POOLS;
 const p = (
   name: string,
   price: number,
-  tags: string[],
-  originalPrice?: number
-): DemoProductTemplate => ({ name, price, tags, originalPrice });
+  tags: string[]
+): DemoProductTemplate => ({ name, price, tags });
 
 const sub = (
   name: string,
@@ -268,8 +264,8 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cocina',
       'cocina',
       [
-        p('Set de Ollas Granito 7 Piezas', 129990, ['oferta', 'bestseller', 'cocina'], 159990),
-        p('Sarten Profunda Antiadherente 28cm', 46990, ['nuevo', 'cocina', 'hogar'], 57990),
+        p('Set de Ollas Granito 7 Piezas', 129990, ['oferta', 'bestseller', 'cocina']),
+        p('Sarten Profunda Antiadherente 28cm', 46990, ['nuevo', 'cocina', 'hogar']),
       ]
     ),
     sub(
@@ -279,7 +275,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cocina',
       'cocina',
       [
-        p('Set Cuchillos Chef Acero 5 Piezas', 38990, ['oferta', 'cocina', 'premium'], 47990),
+        p('Set Cuchillos Chef Acero 5 Piezas', 38990, ['oferta', 'cocina', 'premium']),
         p('Juego Espatulas Silicona Premium x6', 15990, ['nuevo', 'cocina', 'organizacion']),
       ]
     ),
@@ -290,7 +286,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cocina',
       'hogar',
       [
-        p('Frascos Hermeticos Vidrio x6 con Etiquetas', 26990, ['bestseller', 'organizacion', 'hogar'], 31990),
+        p('Frascos Hermeticos Vidrio x6 con Etiquetas', 26990, ['bestseller', 'organizacion', 'hogar']),
         p('Organizador Deslizante Bajo Mesada', 34990, ['nuevo', 'hogar', 'cocina']),
       ]
     ),
@@ -303,7 +299,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cafeMate',
       'cafeMate',
       [
-        p('Cafetera Italiana Acero 6 Tazas', 34990, ['oferta', 'cafe', 'bestseller'], 41990),
+        p('Cafetera Italiana Acero 6 Tazas', 34990, ['oferta', 'cafe', 'bestseller']),
         p('Prensa Francesa Doble Filtro 1L', 42990, ['nuevo', 'cafe', 'premium']),
       ]
     ),
@@ -314,7 +310,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cafeMate',
       'cafeMate',
       [
-        p('Mate Imperial Acero Inox Grabado', 29990, ['oferta', 'mate', 'premium'], 37990),
+        p('Mate Imperial Acero Inox Grabado', 29990, ['oferta', 'mate', 'premium']),
         p('Bombilla Pico Loro Alpaca Premium', 18990, ['nuevo', 'mate', 'bestseller']),
       ]
     ),
@@ -325,7 +321,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cafeMate',
       'cafeMate',
       [
-        p('Termo Acero 1L Pico Cebador', 52990, ['oferta', 'mate', 'hogar'], 64990),
+        p('Termo Acero 1L Pico Cebador', 52990, ['oferta', 'mate', 'hogar']),
         p('Matera Ecocuero Organizadora', 25990, ['nuevo', 'organizacion', 'mate']),
       ]
     ),
@@ -338,7 +334,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cocteleria',
       'cocteleria',
       [
-        p('Set Copas Vino Cristal x6', 32990, ['oferta', 'bestseller', 'mesa'], 39990),
+        p('Set Copas Vino Cristal x6', 32990, ['oferta', 'bestseller', 'mesa']),
         p('Vasos Trago Largo 420ml x6', 21990, ['nuevo', 'cocteleria', 'hogar']),
       ]
     ),
@@ -349,7 +345,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cocteleria',
       'cocteleria',
       [
-        p('Kit Bartender 12 Piezas con Base', 59990, ['oferta', 'premium', 'bar'], 74990),
+        p('Kit Bartender 12 Piezas con Base', 59990, ['oferta', 'premium', 'bar']),
         p('Shaker Boston Profesional 750ml', 27990, ['nuevo', 'bar', 'cocteleria']),
       ]
     ),
@@ -373,7 +369,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'bano',
       'bano',
       [
-        p('Juego Toallas Algodon Peinado x3', 28990, ['oferta', 'bestseller', 'bano'], 34990),
+        p('Juego Toallas Algodon Peinado x3', 28990, ['oferta', 'bestseller', 'bano']),
         p('Alfombra de Bano Antideslizante', 16990, ['nuevo', 'hogar', 'bano']),
       ]
     ),
@@ -385,7 +381,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'bano',
       [
         p('Dispenser Jabon Ceramica Mate', 14990, ['nuevo', 'bano', 'decoracion']),
-        p('Set Accesorios Bano 4 Piezas Bamboo', 29990, ['oferta', 'bano', 'premium'], 35990),
+        p('Set Accesorios Bano 4 Piezas Bamboo', 29990, ['oferta', 'bano', 'premium']),
       ]
     ),
     sub(
@@ -419,7 +415,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'reposteria',
       'reposteria',
       [
-        p('Set Boquillas Acero Pasteleria x24', 20990, ['oferta', 'reposteria', 'premium'], 25990),
+        p('Set Boquillas Acero Pasteleria x24', 20990, ['oferta', 'reposteria', 'premium']),
         p('Base Giratoria Decoracion Torta', 27990, ['nuevo', 'bestseller', 'reposteria']),
       ]
     ),
@@ -443,8 +439,8 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'ferreteria',
       'ferreteria',
       [
-        p('Caja Herramientas Hogar 45 Piezas', 54990, ['oferta', 'bestseller', 'ferreteria'], 66990),
-        p('Taladro Percutor 650W con Maletin', 89990, ['oferta', 'premium', 'ferreteria'], 109990),
+        p('Caja Herramientas Hogar 45 Piezas', 54990, ['oferta', 'bestseller', 'ferreteria']),
+        p('Taladro Percutor 650W con Maletin', 89990, ['oferta', 'premium', 'ferreteria']),
       ]
     ),
     sub(
@@ -490,7 +486,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'hogar',
       [
         p('Jarron Ceramica Texturada 30cm', 25990, ['nuevo', 'decoracion', 'hogar']),
-        p('Cuadro Triptico Minimalista 90x45', 49990, ['oferta', 'premium', 'decoracion'], 59990),
+        p('Cuadro Triptico Minimalista 90x45', 49990, ['oferta', 'premium', 'decoracion']),
       ]
     ),
     sub(
@@ -513,7 +509,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'textiles',
       'textiles',
       [
-        p('Mantel Antimanchas 160x240', 27990, ['oferta', 'mesa', 'textiles'], 33990),
+        p('Mantel Antimanchas 160x240', 27990, ['oferta', 'mesa', 'textiles']),
         p('Set Servilletas Lino x6', 16990, ['nuevo', 'mesa', 'hogar']),
       ]
     ),
@@ -536,7 +532,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'textiles',
       [
         p('Set Almohadones Chenille x2', 24990, ['nuevo', 'decoracion', 'textiles']),
-        p('Manta Tejida Sofa 130x170', 31990, ['oferta', 'hogar', 'bestseller'], 38990),
+        p('Manta Tejida Sofa 130x170', 31990, ['oferta', 'hogar', 'bestseller']),
       ]
     ),
   ]),
@@ -548,7 +544,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'iluminacion',
       'iluminacion',
       [
-        p('Lampara LED Regulable USB-C', 34990, ['oferta', 'iluminacion', 'bestseller'], 41990),
+        p('Lampara LED Regulable USB-C', 34990, ['oferta', 'iluminacion', 'bestseller']),
         p('Velador Metal y Madera E27', 28990, ['nuevo', 'decoracion', 'hogar']),
       ]
     ),
@@ -559,7 +555,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'iluminacion',
       'iluminacion',
       [
-        p('Tira LED RGB 10m App + Control', 45990, ['oferta', 'iluminacion', 'tecnologia'], 55990),
+        p('Tira LED RGB 10m App + Control', 45990, ['oferta', 'iluminacion', 'tecnologia']),
         p('Pack Luces Calidas Guirnalda 20m', 22990, ['nuevo', 'hogar', 'ambientacion']),
       ]
     ),
@@ -584,7 +580,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'jardineria',
       [
         p('Maceta Ceramica Drenante 28cm', 18990, ['nuevo', 'jardin', 'decoracion']),
-        p('Jardinera Autorriego 60cm', 32990, ['oferta', 'bestseller', 'jardin'], 39990),
+        p('Jardinera Autorriego 60cm', 32990, ['oferta', 'bestseller', 'jardin']),
       ]
     ),
     sub(
@@ -605,7 +601,7 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'jardineria',
       'jardineria',
       [
-        p('Kit Riego por Goteo 20 Macetas', 35990, ['oferta', 'jardin', 'bestseller'], 42990),
+        p('Kit Riego por Goteo 20 Macetas', 35990, ['oferta', 'jardin', 'bestseller']),
         p('Manguera Expandible 15m con Pistola', 24990, ['nuevo', 'jardin', 'hogar']),
       ]
     ),
@@ -636,12 +632,6 @@ function slugify(value: string): string {
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
-}
-
-function calculateDiscount(price: number, originalPrice?: number): number | undefined {
-  if (!originalPrice || originalPrice <= price) return undefined;
-  const discount = Math.round(((originalPrice - price) / originalPrice) * 100);
-  return discount > 0 ? discount : undefined;
 }
 
 function getImages(imageSet: ImageSetKey, seed: number): string[] {
@@ -717,7 +707,6 @@ function buildDemoProducts(categories: DemoCategory[]): GeneratedProduct[] {
     for (const subcategoryRow of categoryRow.subcategories) {
       for (const template of subcategoryRow.products) {
         const slug = slugify(template.name);
-        const discount = calculateDiscount(template.price, template.originalPrice);
         const rating = Number((4 + ((globalIndex % 11) / 10)).toFixed(1));
         const reviewCount = 10 + ((globalIndex * 17) % 191);
         const stock = 10 + ((globalIndex * 13) % 91);
@@ -739,8 +728,6 @@ function buildDemoProducts(categories: DemoCategory[]): GeneratedProduct[] {
             `Ideal para ${subcategoryRow.description.toLowerCase()}. ` +
             'Su relacion precio-calidad esta orientada a hogares argentinos que buscan funcionalidad y diseno.',
           price: template.price,
-          originalPrice: template.originalPrice,
-          discount,
           images: getImages(subcategoryRow.imageSet, globalIndex),
           categorySlug: subcategoryRow.slug,
           tags: Array.from(new Set(template.tags)),
@@ -973,8 +960,6 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
             shortDescription: product.shortDescription,
             description: product.description,
             price: product.price,
-            originalPrice: product.originalPrice ?? null,
-            discount: product.discount ?? null,
             images: product.images,
             categoryId,
             tags: product.tags,
@@ -995,8 +980,6 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
             shortDescription: product.shortDescription,
             description: product.description,
             price: product.price,
-            originalPrice: product.originalPrice ?? null,
-            discount: product.discount ?? null,
             images: product.images,
             categoryId,
             tags: product.tags,

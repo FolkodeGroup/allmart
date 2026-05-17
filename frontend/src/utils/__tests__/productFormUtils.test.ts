@@ -202,11 +202,6 @@ describe('productFormUtils', () => {
       expect(getInlineFieldError(0, 'stock')).toBe('');
     });
 
-    it('debería validar campo discount correctamente', () => {
-      expect(getInlineFieldError(150, 'discount')).toBe('El descuento debe estar entre 0 y 100');
-      expect(getInlineFieldError(-10, 'discount')).toBe('El descuento debe estar entre 0 y 100');
-      expect(getInlineFieldError(50, 'discount')).toBe('');
-    });
 
     it('debería validar campo slug correctamente', () => {
       expect(getInlineFieldError('Producto-Especial', 'slug')).toBe(
