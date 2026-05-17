@@ -43,6 +43,7 @@ export function ProductListPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState<number | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [sortOptions, setSortOptions] = useState<SortOption[]>(FALLBACK_SORT_OPTIONS);
   const [loading, setLoading] = useState(true);
@@ -93,7 +94,7 @@ export function ProductListPage() {
 
   /* Cargar productos cuando cambian los filtros */
   useEffect(() => {
-    const params: PublicProductsParams = { limit: 48 };
+    const params: PublicProductsParams = { limit: 100 };
     if (selectedCategory) params.category = selectedCategory;
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
     if (showOnlyFeatured) params.isFeatured = true;
@@ -101,7 +102,8 @@ export function ProductListPage() {
     setLoading(true);
     setError(null);
     fetchPublicProducts(params)
-      .then(({ data }) => {
+      .then(({ data, total }) => {
+        setTotalProducts(total ?? null);
         let mappedProducts = data.map((p) => mapApiProductToProduct(p, categories));
         
         // Filtrar por "En Oferta" si está habilitado
@@ -319,8 +321,12 @@ export function ProductListPage() {
                 Mostrando{' '}
                 <span className={styles.resultCountBold}>
                   {visibleProducts.length}
-                </span>{' '}
-                productos
+                </span>
+                {totalProducts ? (
+                  <> de <span className={styles.resultCountBold}>{totalProducts}</span> productos</>
+                ) : (
+                  ' productos'
+                )}
               </span>
             </div>
 
