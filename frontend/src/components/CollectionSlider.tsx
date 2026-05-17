@@ -270,10 +270,11 @@ const CollectionSlider: React.FC<Props> = ({
           </button>
         )}
 
-        <div className={styles.viewport} ref={viewportRef}>
+        <div className={styles.viewport} ref={viewportRef} style={{ paddingTop: `${gapPx / 2}px`, paddingBottom: `${gapPx / 2}px` }}>
           <div
             className={`${styles.track} ${!shouldLoop ? styles.trackStatic : ''}`}
             style={{
+              backgroundColor: 'transparent',
               gap: `${gapPx}px`,
               transform: `translateX(-${translateX}px)`,
               transition: transitionEnabled
@@ -291,7 +292,7 @@ const CollectionSlider: React.FC<Props> = ({
                 <article
                   key={slide.key}
                   className={styles.slide}
-                  style={{ width: slideWidth > 0 ? `${slideWidth}px` : undefined }}
+                  style={{ width: slideWidth > 0 ? `${slideWidth}px` : undefined, paddingTop: '10px', paddingBottom: '10px', backgroundColor: 'transparent' }}
                   role="group"
                   aria-roledescription="slide"
                   aria-label={`${slide.originalIndex + 1} de ${products.length}`}
