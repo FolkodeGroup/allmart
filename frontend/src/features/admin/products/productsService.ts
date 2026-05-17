@@ -27,6 +27,7 @@ export interface ApiProduct {
   rating: number;
   reviewCount: number;
   inStock: boolean;
+  isFeatured?: boolean;
   features: string[];
   createdAt: string;
   updatedAt: string;
@@ -84,6 +85,7 @@ export interface ProductPayload {
   rating?: number;
   reviewCount?: number;
   inStock?: boolean;
+  isFeatured?: boolean;
   tags?: string[];
   features?: string[];
 }
@@ -175,6 +177,7 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     rating: api.rating,
     reviewCount: api.reviewCount ?? 0,
     inStock: api.inStock ?? api.stock > 0,
+    isFeatured: api.isFeatured ?? false,
     sku: api.sku ?? '',
     features: Array.isArray(api.features) ? api.features : [],
   };
@@ -196,6 +199,7 @@ interface AdminProductInput {
   rating?: number;
   reviewCount?: number;
   inStock?: boolean;
+  isFeatured?: boolean;
   tags?: string[];
   features?: string[];
   slug?: string;
@@ -225,6 +229,7 @@ export function mapAdminProductToPayload(product: AdminProductInput): ProductPay
     rating: product.rating ?? 0,
     reviewCount: product.reviewCount ?? 0,
     inStock: product.inStock ?? true,
+    isFeatured: product.isFeatured ?? false,
     tags: product.tags,
     features: product.features,
   };

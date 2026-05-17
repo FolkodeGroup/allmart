@@ -5,4 +5,5 @@ export * from './formatters';
 export * from './permissions';
 export * from './security';
 export * from './whatsapp';
+export * from './orders';
 export * from './productFormUtils';

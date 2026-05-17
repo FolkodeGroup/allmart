@@ -1,12 +1,9 @@
 /**
  * components/CollectionSlider.tsx
- * Componente reutilizable para mostrar colecciones de productos con carrusel adaptativo.
- * - Detecta overflow: flechas solo aparecen si hay más items de los que caben
- * - Centra items si son pocos
- * - Responsive design consistente con el resto de la app
+ * Carrusel infinito de productos para colecciones públicas.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import styles from './CollectionSlider.module.css';
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../utils/imageUrl';
 
@@ -27,60 +24,196 @@ interface Props {
   onProductClick?: (productSlug: string) => void;
 }
 
+interface SlideItem {
+  key: string;
+  originalIndex: number;
+  product: CollectionProduct;
+}
+
+const AUTOPLAY_INTERVAL_MS = 3200;
+const TRANSITION_DURATION_MS = 560;
+
+/**
+ * Masculine Spanish nouns that take the article "el".
+ * When a collection title starts with one of these we use "del" instead of "de".
+ */
+const MASCULINE_NOUNS_ES = new Set([
+  'dia', 'mes', 'ano', 'verano', 'otono', 'invierno',
+  'fin', 'inicio', 'regreso', 'comienzo',
+  'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo',
+]);
+
+function buildOfertasText(title: string): string {
+  const firstWord = title
+    .trim()
+    .split(/\s+/)[0]
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const preposition = MASCULINE_NOUNS_ES.has(firstWord) ? 'del' : 'de';
+  return `Ofertas ${preposition} ${title}`;
+}
+
+function getResponsiveValues(viewportWidth: number) {
+  if (viewportWidth < 640) {
+    return { visibleSlides: 1, gapPx: 12 };
+  }
+
+  if (viewportWidth < 900) {
+    return { visibleSlides: 2, gapPx: 14 };
+  }
+
+  if (viewportWidth < 1200) {
+    return { visibleSlides: 3, gapPx: 16 };
+  }
+
+  return { visibleSlides: 5, gapPx: 20 };
+}
+
 const CollectionSlider: React.FC<Props> = ({
   title,
-  description,
   products,
   bannerUrl,
   onProductClick,
 }) => {
-  const [hasOverflow, setHasOverflow] = useState(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const resetAnimationFrameRef = useRef<number | null>(null);
+  const titleId = useId();
+  const [visibleSlides, setVisibleSlides] = useState(5);
+  const [gapPx, setGapPx] = useState(20);
+  const [slideWidth, setSlideWidth] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [transitionEnabled, setTransitionEnabled] = useState(true);
+  const [hoverPaused, setHoverPaused] = useState(false);
+  const [focusPaused, setFocusPaused] = useState(false);
 
-  // Detectar overflow y capacidad de scroll
-  const checkOverflow = () => {
-    if (!sliderRef.current) return;
+  // Siempre usar visibleSlides para el tamaño, aunque haya menos productos
+  const slidesPerView = visibleSlides;
+  const shouldLoop = products.length > slidesPerView;
+  const cloneCount = shouldLoop ? Math.min(visibleSlides, products.length) : 0;
 
-    const { scrollWidth, clientWidth, scrollLeft } = sliderRef.current;
-    const hasOverflowContent = scrollWidth > clientWidth;
+  const leadingClones: SlideItem[] = shouldLoop
+    ? products.slice(-cloneCount).map((product, index) => ({
+        key: `${product.id}-clone-start-${index}`,
+        originalIndex: products.length - cloneCount + index,
+        product,
+      }))
+    : [];
 
-    setHasOverflow(hasOverflowContent);
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10); // 10px threshold
+  const trailingClones: SlideItem[] = shouldLoop
+    ? products.slice(0, cloneCount).map((product, index) => ({
+        key: `${product.id}-clone-end-${index}`,
+        originalIndex: index,
+        product,
+      }))
+    : [];
+
+  const baseSlides: SlideItem[] = products.map((product, index) => ({
+    key: `${product.id}-original-${index}`,
+    originalIndex: index,
+    product,
+  }));
+
+  const slides: SlideItem[] = shouldLoop
+    ? [...leadingClones, ...baseSlides, ...trailingClones]
+    : baseSlides;
+
+  const isPaused = hoverPaused || focusPaused;
+  const translateX = currentIndex * (slideWidth + gapPx);
+
+  const syncViewportMetrics = () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const { visibleSlides: nextVisibleSlides, gapPx: nextGapPx } = getResponsiveValues(window.innerWidth);
+    const viewportWidth = viewportRef.current?.clientWidth ?? 0;
+
+    setVisibleSlides(nextVisibleSlides);
+    setGapPx(nextGapPx);
+
+    if (viewportWidth > 0) {
+      // Always size slides based on the full responsive count so cards are
+      // the same width regardless of how many products the collection has.
+      // When products < nextVisibleSlides the track uses justify-content:center.
+      const nextSlideWidth = (viewportWidth - nextGapPx * (nextVisibleSlides - 1)) / nextVisibleSlides;
+      setSlideWidth(nextSlideWidth);
+    }
+  };
+
+  const resetTrackPosition = (nextIndex: number) => {
+    setTransitionEnabled(false);
+    setCurrentIndex(nextIndex);
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (resetAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(resetAnimationFrameRef.current);
+    }
+
+    resetAnimationFrameRef.current = window.requestAnimationFrame(() => {
+      resetAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        setTransitionEnabled(true);
+      });
+    });
   };
 
   useEffect(() => {
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
+    syncViewportMetrics();
 
-    const slider = sliderRef.current;
-    if (slider) {
-      slider.addEventListener('scroll', checkOverflow);
+    if (typeof window === 'undefined') {
+      return;
     }
 
+    window.addEventListener('resize', syncViewportMetrics);
+
     return () => {
-      window.removeEventListener('resize', checkOverflow);
-      if (slider) {
-        slider.removeEventListener('scroll', checkOverflow);
-      }
+      window.removeEventListener('resize', syncViewportMetrics);
     };
   }, [products.length]);
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (!sliderRef.current) return;
-    const scrollAmount = 320;
-    const newPos =
-      direction === 'left'
-        ? sliderRef.current.scrollLeft - scrollAmount
-        : sliderRef.current.scrollLeft + scrollAmount;
+  useEffect(() => {
+    resetTrackPosition(shouldLoop ? cloneCount : 0);
+  }, [cloneCount, shouldLoop, products]);
 
-    sliderRef.current.scrollTo({
-      left: newPos,
-      behavior: 'smooth',
-    });
+  useEffect(() => {
+    if (!shouldLoop || isPaused) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCurrentIndex((prevIndex) => prevIndex + 1);
+    }, AUTOPLAY_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isPaused, shouldLoop]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && resetAnimationFrameRef.current !== null) {
+        window.cancelAnimationFrame(resetAnimationFrameRef.current);
+      }
+    };
+  }, []);
+
+  const goToPrevious = () => {
+    if (!shouldLoop) {
+      return;
+    }
+
+    setCurrentIndex((prevIndex) => prevIndex - 1);
+  };
+
+  const goToNext = () => {
+    if (!shouldLoop) {
+      return;
+    }
+
+    setCurrentIndex((prevIndex) => prevIndex + 1);
   };
 
   const handleProductClick = (productSlug: string) => {
@@ -103,6 +236,21 @@ const CollectionSlider: React.FC<Props> = ({
     return null;
   }
 
+  const handleTrackTransitionEnd = () => {
+    if (!shouldLoop) {
+      return;
+    }
+
+    if (currentIndex >= products.length + cloneCount) {
+      resetTrackPosition(cloneCount);
+      return;
+    }
+
+    if (currentIndex < cloneCount) {
+      resetTrackPosition(products.length + cloneCount - 1);
+    }
+  };
+
   return (
     <div className={styles.container}>
       {bannerUrl && (
@@ -113,77 +261,99 @@ const CollectionSlider: React.FC<Props> = ({
 
       <div className={styles.header}>
         <div className={styles.titleSection}>
-          <h2>{title}</h2>
-          {description && <p>{description}</p>}
+          <h2 id={titleId}>{title}</h2>
+          <p className={styles.ofertasSubtitle}>{buildOfertasText(title)}</p>
         </div>
       </div>
 
       <div
-        className={`${styles.sliderWrapper} ${!hasOverflow ? styles.centered : ''}`}
-        ref={containerRef}
+        className={`${styles.carousel} ${!shouldLoop ? styles.carouselStatic : ''}`}
+        role="region"
+        aria-roledescription="carrusel"
+        aria-labelledby={titleId}
+        onMouseEnter={() => setHoverPaused(true)}
+        onMouseLeave={() => setHoverPaused(false)}
+        onFocusCapture={() => setFocusPaused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setFocusPaused(false);
+          }
+        }}
       >
-        {hasOverflow && (
+        {shouldLoop && (
           <button
             className={`${styles.navButton} ${styles.navLeft}`}
-            onClick={() => scroll('left')}
-            aria-label="Scroll left"
-            disabled={!canScrollLeft}
-            style={{ opacity: canScrollLeft ? 1 : 0.3 }}
+            type="button"
+            onClick={goToPrevious}
+            aria-label={`Ver productos anteriores de ${title}`}
           >
             ‹
           </button>
         )}
 
-        <div
-          className={styles.slider}
-          ref={sliderRef}
-          role="region"
-          aria-label={`Productos de ${title}`}
-        >
-          {products.map((product) => {
-            const imageUrl = normalizeImageUrl(product.imageUrl) ?? DEFAULT_IMAGE_PLACEHOLDER;
+        <div className={styles.viewport} ref={viewportRef} style={{ paddingTop: `${gapPx / 2}px`, paddingBottom: `${gapPx / 2}px` }}>
+          <div
+            className={`${styles.track} ${!shouldLoop ? styles.trackStatic : ''}`}
+            style={{
+              backgroundColor: 'transparent',
+              gap: `${gapPx}px`,
+              transform: `translateX(-${translateX}px)`,
+              transition: transitionEnabled
+                ? `transform ${TRANSITION_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+                : 'none',
+            }}
+            onTransitionEnd={handleTrackTransitionEnd}
+            aria-live={isPaused ? 'polite' : 'off'}
+          >
+            {slides.map((slide, index) => {
+              const imageUrl = normalizeImageUrl(slide.product.imageUrl) ?? DEFAULT_IMAGE_PLACEHOLDER;
+              const isVisible = index >= currentIndex && index < currentIndex + slidesPerView;
 
-            return (
-              <div
-                key={product.id}
-                className={styles.productCard}
-                onClick={() => handleProductClick(product.slug)}
-                role="button"
-                tabIndex={0}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleProductClick(product.slug);
-                  }
-                }}
-              >
-                <div className={styles.imageWrapper}>
-                  <img
-                    src={imageUrl}
-                    alt={product.name}
-                    className={styles.productImage}
-                    loading="lazy"
-                    onError={handleImageError}
-                  />
-                </div>
+              return (
+                <article
+                  key={slide.key}
+                  className={styles.slide}
+                  style={{ width: slideWidth > 0 ? `${slideWidth}px` : undefined, paddingTop: '10px', paddingBottom: '10px', backgroundColor: 'transparent' }}
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`${slide.originalIndex + 1} de ${products.length}`}
+                  aria-hidden={!isVisible}
+                >
+                  <button
+                    type="button"
+                    className={styles.productCard}
+                    onClick={() => handleProductClick(slide.product.slug)}
+                    tabIndex={isVisible ? 0 : -1}
+                  >
+                    <div className={styles.imageWrapper}>
+                      <img
+                        src={imageUrl}
+                        alt={slide.product.name}
+                        className={styles.productImage}
+                        loading="lazy"
+                        onError={handleImageError}
+                      />
+                    </div>
 
-                <div className={styles.productInfo}>
-                  <h3>{product.name}</h3>
-                  <p className={styles.price}>
-                    ${product.price}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+                    <div className={styles.productInfo}>
+                      <h3>{slide.product.name}</h3>
+                      <p className={styles.price}>
+                        ${slide.product.price}
+                      </p>
+                    </div>
+                  </button>
+                </article>
+              );
+            })}
+          </div>
         </div>
 
-        {hasOverflow && (
+        {shouldLoop && (
           <button
             className={`${styles.navButton} ${styles.navRight}`}
-            onClick={() => scroll('right')}
-            aria-label="Scroll right"
-            disabled={!canScrollRight}
-            style={{ opacity: canScrollRight ? 1 : 0.3 }}
+            type="button"
+            onClick={goToNext}
+            aria-label={`Ver más productos de ${title}`}
           >
             ›
           </button>

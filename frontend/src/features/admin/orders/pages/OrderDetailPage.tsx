@@ -22,6 +22,7 @@ import styles from './OrderDetailPage.module.css';
 import { Button } from '../../../../components/ui/Button/Button';
 import { OrderDetailContent } from '../components/OrderDetailContent';
 import { formatDateTime, formatPrice } from '../utils/ordersHelpers';
+import { formatOrderLabel } from '../../../../utils/orders';
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -95,7 +96,7 @@ export default function OrderDetailPage() {
           <div className={styles.errorIcon}>😕</div>
           <h1 className={styles.errorTitle}>Pedido no encontrado</h1>
           <p className={styles.errorMessage}>
-            El pedido con ID <strong>{id}</strong> no existe o fue eliminado.
+            El {formatOrderLabel(id ?? '')} no existe o fue eliminado.
           </p>
           <Button
             variant="primary"
@@ -145,7 +146,7 @@ export default function OrderDetailPage() {
 
           <div className={styles.headerInfo}>
             <h1 className={styles.title}>
-              Pedido #{order.id.slice(0, 8).toUpperCase()}
+              {formatOrderLabel(order.id)}
             </h1>
             <div className={styles.headerMeta}>
               <span className={styles.metaItem}>

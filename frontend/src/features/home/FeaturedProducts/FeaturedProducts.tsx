@@ -18,8 +18,8 @@ interface FeaturedProductsProps {
 }
 
 export function FeaturedProducts({
-  title = 'Productos destacados',
-  label = 'Lo mejor',
+  title = 'Productos Destacados',
+  label = '',
   tag = 'destacado',
   limit = 8,
 }: FeaturedProductsProps) {
@@ -131,11 +131,6 @@ export function FeaturedProducts({
           <span className={styles.label}>{label}</span>
           <h2 className={styles.title}>{title}</h2>
         </div>
-        <Link to={`/productos?tag=${tag}`}>
-          <Button className={styles.butSecundaryAdaptado} variant="secondary" size="sm">
-            Ver todos
-          </Button>
-        </Link>
       </div>
 
       <div className={styles.carouselViewport}>
@@ -159,6 +154,14 @@ export function FeaturedProducts({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className={styles.ctaContainer}>
+        <Link to={`/productos?tag=${tag}`}>
+          <Button className={styles.ctaButton} variant="primary" size="lg">
+            Ver todos
+          </Button>
+        </Link>
       </div>
     </section>
   );

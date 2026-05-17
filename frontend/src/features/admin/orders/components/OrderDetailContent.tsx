@@ -258,6 +258,9 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               {order.customer.firstName} {order.customer.lastName}
             </span>
             <span className={styles.customerEmailText}>{order.customer.email}</span>
+            {order.customer.phone && (
+              <span className={styles.customerEmailText}>{order.customer.phone}</span>
+            )}
           </div>
         </div>
       </section>

@@ -32,7 +32,8 @@ export function useOrdersFilters(orders: Order[]) {
                 o.id.toLowerCase().includes(q) ||
                 o.customer.firstName.toLowerCase().includes(q) ||
                 o.customer.lastName.toLowerCase().includes(q) ||
-                o.customer.email.toLowerCase().includes(q);
+                o.customer.email.toLowerCase().includes(q) ||
+                o.customer.phone?.toLowerCase().includes(q);
 
             const matchStatus = !filters.status || o.status === filters.status;
 

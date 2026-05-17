@@ -2,6 +2,7 @@ import React from 'react';
 import type { AdminActivityLog } from '../services/adminActivityLogService';
 import { useAdminProducts } from '../context/useAdminProductsContext';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { formatOrderLabel } from '../utils/orders';
 
 interface ActivityItemProps {
     log: AdminActivityLog;
@@ -45,7 +46,7 @@ function buildDescription(
         name = (log.details?.name as string) || `Categoría #${log.entityId}`;
         entity = 'la categoría';
     } else if (log.entity === 'order' && log.entityId) {
-        name = `Pedido #${log.entityId}`;
+        name = formatOrderLabel(log.entityId);
         entity = 'el pedido';
     } else if (log.entity === 'user' && log.entityId) {
         name = (log.details?.name as string) || `Usuario #${log.entityId}`;

@@ -10,6 +10,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  role?: 'dialog' | 'alertdialog';
   actions?: ReactNode;
   disableClose?: boolean;
   showCloseButton?: boolean;
@@ -29,6 +30,7 @@ export const Modal: FC<ModalProps> = ({
   onClose,
   title,
   children,
+  role = 'dialog',
   actions,
   disableClose,
   showCloseButton = false,
@@ -181,7 +183,7 @@ export const Modal: FC<ModalProps> = ({
           )}
           <div
             className={`${styles.modal} ${sizeClass} ${flushClass}${className ? ` ${className}` : ''}`}
-            role="dialog"
+            role={role}
             aria-modal="true"
             aria-labelledby={labelledBy}
             aria-label={ariaLabel}

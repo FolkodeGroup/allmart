@@ -138,7 +138,7 @@
   text-transform: uppercase;
 }
 
-.cartCount {
+.actionCount {
   position: absolute;
   top: -5px;
   right: -5px;
@@ -409,7 +409,7 @@
     display: none;
   }
 
-  .cartCount {
+  .actionCount {
     right: -3px;
   }
 
@@ -447,7 +447,7 @@
     padding: 0.25rem 0.55rem;
   }
 
-  .cartCount {
+  .actionCount {
     min-width: 17px;
     height: 17px;
     font-size: 0.61rem;

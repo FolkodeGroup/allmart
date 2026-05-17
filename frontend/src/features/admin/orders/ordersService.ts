@@ -17,6 +17,7 @@ export interface Order {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
   items: Array<{
     productId: string;
@@ -61,6 +62,7 @@ interface ApiOrder {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
   items?: ApiOrderItem[];
   total: number;
@@ -119,6 +121,7 @@ export function mapApiOrderToOrder(api: ApiOrder): Order {
       firstName: api.customer.firstName,
       lastName: api.customer.lastName,
       email: api.customer.email,
+      phone: api.customer.phone,
     },
     items: (api.items ?? []).map((item) => ({
       productId: item.productId,

@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../AdminReports.module.css';
 import type { Order } from '../../../../context/AdminOrdersContext';
+import { formatOrderCode } from '../../../../utils/orders';
 
 export interface OrdersTableProps {
     orders: Order[];
@@ -149,7 +150,7 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
                         const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
                         return (
                             <tr key={o.id}>
-                                <td className={styles.tblId}>#{o.id.slice(0, 8).toUpperCase()}</td>
+                                <td className={styles.tblId}>#{formatOrderCode(o.id)}</td>
                                 <td className={styles.tblDate}>
                                     {formatShortDate(o.createdAt)}
                                 </td>

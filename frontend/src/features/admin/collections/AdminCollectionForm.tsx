@@ -3,14 +3,69 @@
  * Formulario para crear/editar colecciones.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useId, useMemo } from 'react';
 import { useBlocker } from 'react-router-dom';
 import type { Collection } from './collectionsService';
 import { collectionsService } from './collectionsService';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
+import { Modal } from '../../../components/ui/Modal';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductSelector } from './ProductSelector';
 import styles from './AdminCollections.module.css';
+
+type RequiredFieldKey = 'name' | 'slug' | 'displayPosition' | 'productIds';
+
+const REQUIRED_FIELD_LABELS: Record<RequiredFieldKey, string> = {
+  name: 'Nombre',
+  slug: 'Slug',
+  displayPosition: 'Posición de Display',
+  productIds: 'Productos en la colección',
+};
+
+function getMissingRequiredFields(formData: {
+  name: string;
+  slug: string;
+  displayPosition: 'home' | 'category';
+  productIds: string[];
+}): RequiredFieldKey[] {
+  const missingFields: RequiredFieldKey[] = [];
+
+  if (!formData.name.trim()) {
+    missingFields.push('name');
+  }
+
+  if (!formData.slug.trim()) {
+    missingFields.push('slug');
+  }
+
+  if (!formData.displayPosition) {
+    missingFields.push('displayPosition');
+  }
+
+  if (!formData.productIds.length) {
+    missingFields.push('productIds');
+  }
+
+  return missingFields;
+}
+
+function getFieldErrors(missingFields: RequiredFieldKey[]) {
+  const errors: {
+    name?: string;
+    slug?: string;
+    displayPosition?: string;
+    productIds?: string;
+  } = {};
+
+  for (const field of missingFields) {
+    errors[field] =
+      field === 'productIds'
+        ? 'Debes seleccionar al menos un producto'
+        : `${REQUIRED_FIELD_LABELS[field]} es obligatorio`;
+  }
+
+  return errors;
+}
 
 interface Props {
   collection?: Collection | null;
@@ -22,7 +77,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   const [formData, setFormData] = useState<{
     name: string;
     slug: string;
-    description: string;
     displayPosition: 'home' | 'category';
     displayOrder: number;
     imageUrl: string;
@@ -31,7 +85,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   }>({
     name: '',
     slug: '',
-    description: '',
     displayPosition: 'home',
     displayOrder: 0,
     imageUrl: '',
@@ -40,19 +93,21 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [missingRequiredFields, setMissingRequiredFields] = useState<RequiredFieldKey[]>([]);
   // Validaciones por campo
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
-    description?: string;
+    slug?: string;
+    displayPosition?: string;
     productIds?: string;
   }>({});
   const [loading, setLoading] = useState(false);
+  const missingFieldsDescriptionId = useId();
 
   // ─── Initial state snapshot (for dirty detection) ────────────────────────
   const [initialFormData] = useState(() => collection ? {
     name: collection.name,
     slug: collection.slug,
-    description: collection.description || '',
     displayPosition: collection.displayPosition,
     displayOrder: collection.displayOrder,
     imageUrl: collection.imageUrl || '',
@@ -61,7 +116,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   } : {
     name: '',
     slug: '',
-    description: '',
     displayPosition: 'home' as 'home' | 'category',
     displayOrder: 0,
     imageUrl: '',
@@ -97,7 +151,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       setFormData({
         name: collection.name,
         slug: collection.slug,
-        description: collection.description || '',
         displayPosition: collection.displayPosition,
         displayOrder: collection.displayOrder,
         imageUrl: collection.imageUrl || '',
@@ -138,21 +191,13 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
     e.preventDefault();
     setError(null);
     setFieldErrors({});
+    setMissingRequiredFields([]);
     setLoading(true);
 
-    // Validaciones estrictas
-    const errors: { name?: string; description?: string; productIds?: string } = {};
-    if (!formData.name.trim()) {
-      errors.name = 'El nombre es obligatorio';
-    }
-    if (!formData.description.trim()) {
-      errors.description = 'La descripción es obligatoria';
-    }
-    if (!formData.productIds || formData.productIds.length === 0) {
-      errors.productIds = 'Debes seleccionar al menos un producto';
-    }
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
+    const missingFields = getMissingRequiredFields(formData);
+    if (missingFields.length > 0) {
+      setFieldErrors(getFieldErrors(missingFields));
+      setMissingRequiredFields(missingFields);
       setLoading(false);
       return;
     }
@@ -195,6 +240,11 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       .replace(/\s+/g, '-')
       .replace(/[^\w-]+/g, '');
   }
+
+  const closeMissingFieldsModal = useCallback(() => {
+    setMissingRequiredFields([]);
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.formHeader}>
@@ -234,28 +284,17 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
             id="collection-slug"
             type="text"
             value={formData.slug}
-            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, slug: e.target.value });
+              setFieldErrors((prev) => ({ ...prev, slug: undefined }));
+            }}
             placeholder="Ej: ofertas-del-mes"
+            className={fieldErrors.slug ? styles.inputError : undefined}
+            aria-invalid={!!fieldErrors.slug}
           />
           <small>URL amigable para acceder a esta colección</small>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="collection-desc">Descripción *</label>
-          <textarea
-            id="collection-desc"
-            value={formData.description}
-            onChange={(e) => {
-              setFormData({ ...formData, description: e.target.value });
-              setFieldErrors((prev) => ({ ...prev, description: undefined }));
-            }}
-            placeholder="Detalles y descripción"
-            rows={3}
-            className={fieldErrors.description ? `${styles.inputError}` : undefined}
-            aria-invalid={!!fieldErrors.description}
-          />
-          {fieldErrors.description && (
-            <span className={styles.fieldError}>{fieldErrors.description}</span>
+          {fieldErrors.slug && (
+            <span className={styles.fieldError}>{fieldErrors.slug}</span>
           )}
         </div>
 
@@ -266,15 +305,23 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
               id="collection-display-pos"
               value={formData.displayPosition}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  displayPosition: e.target.value as Collection['displayPosition'],
-                })
+                {
+                  setFormData({
+                    ...formData,
+                    displayPosition: e.target.value as Collection['displayPosition'],
+                  });
+                  setFieldErrors((prev) => ({ ...prev, displayPosition: undefined }));
+                }
               }
+              className={fieldErrors.displayPosition ? styles.inputError : undefined}
+              aria-invalid={!!fieldErrors.displayPosition}
             >
               <option value="home">Home</option>
               <option value="category">Categoría</option>
             </select>
+            {fieldErrors.displayPosition && (
+              <span className={styles.fieldError}>{fieldErrors.displayPosition}</span>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -327,7 +374,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           <button
             type="submit"
             className={styles.btnPrimary}
-            disabled={loading || !!fieldErrors.name || !!fieldErrors.description || !!fieldErrors.productIds}
+            disabled={loading}
           >
             {loading ? 'Guardando...' : collection ? 'Actualizar' : 'Crear'}
           </button>
@@ -353,6 +400,36 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           cancelNavigation();
         }}
       />
+
+      <Modal
+        open={missingRequiredFields.length > 0}
+        onClose={closeMissingFieldsModal}
+        role="alertdialog"
+        title="No se puede guardar la colección"
+        size="sm"
+        className={styles.requiredFieldsModal}
+        ariaDescribedBy={missingFieldsDescriptionId}
+        actions={(
+          <button
+            type="button"
+            className={styles.requiredFieldsAction}
+            onClick={closeMissingFieldsModal}
+          >
+            Entendido
+          </button>
+        )}
+      >
+        <div className={styles.requiredFieldsContent}>
+          <p id={missingFieldsDescriptionId} className={styles.requiredFieldsSummary}>
+            Completá los campos obligatorios antes de crear o actualizar la colección.
+          </p>
+          <ul className={styles.requiredFieldsList}>
+            {missingRequiredFields.map((field) => (
+              <li key={field}>{REQUIRED_FIELD_LABELS[field]}</li>
+            ))}
+          </ul>
+        </div>
+      </Modal>
     </div>
   );
 };

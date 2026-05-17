@@ -61,7 +61,7 @@ export function CategoryGrid() {
   return (
     <section className={styles.section} aria-label="Categorías destacadas">
       <div className={styles.header}>
-        <span className={styles.label}>Explora</span>
+        <span className={styles.label}>Explora todas las</span>
         <h2 className={styles.title}>Categorías destacadas</h2>
         <p className={styles.subtitle}>
           Todo lo que necesitás para tu hogar, organizado para vos.

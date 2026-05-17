@@ -30,6 +30,7 @@ import { useUnsavedChanges } from '../../../../context/useUnsavedChanges';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderStatusSelector } from '../components/OrderStatusSelector';
 import { OrderTimeline } from './OrderTimeline';
+import { formatOrderLabel } from '../../../../utils/orders';
 
 // 3. Agregar prop opcional para notificar dirty state al padre
 
@@ -228,7 +229,7 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
                 {/* ── Header: ID del pedido + fecha + botón cerrar ── */}
                 <div className={styles.detailHeader}>
                     <div className={styles.detailHeaderInfo}>
-                        <h2 className={styles.detailTitle}>Pedido #{order.id.slice(0, 8).toUpperCase()}</h2>
+                        <h2 className={styles.detailTitle}>{formatOrderLabel(order.id)}</h2>
                         <span className={styles.detailDate}>{formatDateTime(order.createdAt)}</span>
                     </div>
                     <button className={styles.closeBtn} onClick={handleClose} type="button" aria-label="Cerrar">✕</button>
@@ -361,6 +362,9 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
                                     {order.customer.firstName} {order.customer.lastName}
                                 </span>
                                 <span className={styles.customerEmailText}>{order.customer.email}</span>
+                                {order.customer.phone && (
+                                    <span className={styles.customerEmailText}>{order.customer.phone}</span>
+                                )}
                             </div>
                         </div>
                     </section>
