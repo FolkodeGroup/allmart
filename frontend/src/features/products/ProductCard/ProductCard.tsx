@@ -19,6 +19,8 @@ interface ProductCardProps {
   variant?: 'default' | 'featured';
 }
 
+const FEATURED_GALLERY_AUTOPLAY_MS = 2800;
+
 function renderStars(rating: number): string {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5 ? 1 : 0;
@@ -69,6 +71,24 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   const isNew = product.tags.includes("nuevo");
   const isFeatured = variant === 'featured';
   const hasGallery = isFeatured && galleryImages.length > 1;
+
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [product.id, galleryImages.length]);
+
+  useEffect(() => {
+    if (!hasGallery) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % galleryImages.length);
+    }, FEATURED_GALLERY_AUTOPLAY_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [galleryImages.length, hasGallery]);
 
   const toggleFavorito = (e:React.MouseEvent) => {
     e.preventDefault();
@@ -131,28 +151,6 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         )}
         {hasGallery && (
           <>
-            <button
-              type="button"
-              className={`${styles.galleryNav} ${styles.galleryPrev}`}
-              aria-label="Imagen anterior"
-              onClick={(event) => {
-                event.preventDefault();
-                goToImage(currentImageIndex - 1);
-              }}
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              className={`${styles.galleryNav} ${styles.galleryNext}`}
-              aria-label="Siguiente imagen"
-              onClick={(event) => {
-                event.preventDefault();
-                goToImage(currentImageIndex + 1);
-              }}
-            >
-              ›
-            </button>
             <div className={styles.galleryDots} role="group" aria-label="Selector de imagen">
               {galleryImages.map((_, index) => (
                 <button
