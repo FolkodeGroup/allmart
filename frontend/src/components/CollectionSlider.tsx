@@ -33,6 +33,27 @@ interface SlideItem {
 const AUTOPLAY_INTERVAL_MS = 3200;
 const TRANSITION_DURATION_MS = 560;
 
+/**
+ * Masculine Spanish nouns that take the article "el".
+ * When a collection title starts with one of these we use "del" instead of "de".
+ */
+const MASCULINE_NOUNS_ES = new Set([
+  'dia', 'mes', 'ano', 'verano', 'otono', 'invierno',
+  'fin', 'inicio', 'regreso', 'comienzo',
+  'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo',
+]);
+
+function buildOfertasText(title: string): string {
+  const firstWord = title
+    .trim()
+    .split(/\s+/)[0]
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const preposition = MASCULINE_NOUNS_ES.has(firstWord) ? 'del' : 'de';
+  return `Ofertas ${preposition} ${title}`;
+}
+
 function getResponsiveValues(viewportWidth: number) {
   if (viewportWidth < 640) {
     return { visibleSlides: 1, gapPx: 12 };
@@ -51,7 +72,6 @@ function getResponsiveValues(viewportWidth: number) {
 
 const CollectionSlider: React.FC<Props> = ({
   title,
-  description,
   products,
   bannerUrl,
   onProductClick,
@@ -242,7 +262,7 @@ const CollectionSlider: React.FC<Props> = ({
       <div className={styles.header}>
         <div className={styles.titleSection}>
           <h2 id={titleId}>{title}</h2>
-          {description && <p>{description}</p>}
+          <p className={styles.ofertasSubtitle}>{buildOfertasText(title)}</p>
         </div>
       </div>
 

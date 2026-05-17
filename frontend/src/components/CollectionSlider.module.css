@@ -50,18 +50,28 @@
 
 /* Adapt title color according to section background (global classes) */
 :global(.collection-section--primary) .titleSection h2 {
-  color: var(--color-primary-dark);
+  color: var(--color-text-instock);
 }
 
 :global(.collection-section--inverse) .titleSection h2 {
   color: var(--color-text-primary);
 }
 
-.titleSection p {
+.ofertasSubtitle {
   margin: 0;
-  color: #6b7280;
   font-size: 16px;
+  font-weight: 500;
   line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--color-text-secondary);
+}
+
+:global(.collection-section--primary) .titleSection .ofertasSubtitle {
+  color: var(--color-text-instock);
+}
+
+:global(.collection-section--inverse) .titleSection .ofertasSubtitle {
+  color: var(--color-primary-dark);
 }
 
 .carousel {
@@ -170,7 +180,7 @@
   margin: 0;
   font-size: 26px;
   font-weight: 800;
-  color: #2f67ff;
+  color: var(--color-text-instock);
   margin-top: auto;
 }
 
