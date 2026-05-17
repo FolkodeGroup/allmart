@@ -380,6 +380,15 @@
   padding: 0 var(--space-6);
 }
 
+/* ── Reviews section ── */
+.reviewsSection {
+  max-width: var(--container-2xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--space-6);
+  padding-bottom: var(--space-16);
+}
+
 .relatedTitle {
   font-family: var(--font-heading);
   font-size: var(--text-xl);

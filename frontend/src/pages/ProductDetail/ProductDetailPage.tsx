@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
+import { ProductReviews } from '../../components/ProductReviews/ProductReviews';
 
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
@@ -401,6 +402,11 @@ export function ProductDetailPage() {
           </div>
         </section>
       )}
+
+      {/* Reviews section */}
+      <div className={styles.reviewsSection}>
+        <ProductReviews productId={product.id} />
+      </div>
     </main>
   );
 }

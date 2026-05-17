@@ -14,6 +14,15 @@ export interface CreateReviewInput {
   text?: string;
 }
 
+export interface CreateGuestReviewInput {
+  productId: string;
+  orderId: string;
+  reviewerName: string;
+  rating: number;
+  title?: string;
+  text?: string;
+}
+
 /**
  * Obtiene las reviews de un producto con paginación.
  */
@@ -43,12 +52,15 @@ export async function getProductReviews(
     data: reviews.map((r) => ({
       id: r.id,
       productId: r.productId,
-      userId: r.userId,
-      userName: `${r.user.firstName} ${r.user.lastName.charAt(0)}.`,
+      userId: r.userId ?? null,
+      userName: r.user
+        ? `${r.user.firstName} ${r.user.lastName.charAt(0)}.`
+        : (r.reviewerName ?? 'Comprador verificado'),
       rating: r.rating,
       title: r.title,
       text: r.text,
       helpful: r.helpful,
+      verified: r.orderId !== null,
       createdAt: r.createdAt,
     })),
     total,
@@ -101,11 +113,77 @@ export async function createReview(input: CreateReviewInput) {
     id: review.id,
     productId: review.productId,
     userId: review.userId,
-    userName: `${review.user.firstName} ${review.user.lastName.charAt(0)}.`,
+    userName: review.user
+        ? `${review.user.firstName} ${review.user.lastName.charAt(0)}.`
+        : 'Usuario',
     rating: review.rating,
     title: review.title,
     text: review.text,
     helpful: review.helpful,
+    createdAt: review.createdAt,
+  };
+}
+
+/**
+ * Crea una review de producto verificada por número de pedido.
+ * No requiere cuenta de usuario; el pedido actúa como prueba de compra.
+ */
+export async function createGuestReview(input: CreateGuestReviewInput) {
+  if (input.rating < 1 || input.rating > 5) {
+    throw createError('El rating debe estar entre 1 y 5', 400);
+  }
+  if (!input.reviewerName?.trim()) {
+    throw createError('El nombre del reseñador es requerido', 400);
+  }
+
+  const product = await prisma.product.findUnique({ where: { id: input.productId } });
+  if (!product) throw createError('Producto no encontrado', 404);
+
+  // Verificar que el pedido existe y contiene el producto
+  const order = await prisma.order.findUnique({
+    where: { id: input.orderId },
+    include: { orderItems: { select: { productId: true } } },
+  });
+  if (!order) throw createError('Pedido no encontrado. Verificá el número de pedido.', 404);
+
+  const hasProduct = order.orderItems.some((item) => item.productId === input.productId);
+  if (!hasProduct) {
+    throw createError('Este pedido no incluye el producto que querés reseñar.', 400);
+  }
+
+  // Una sola reseña por pedido+producto
+  const existing = await prisma.productReview.findUnique({
+    where: {
+      productId_orderId: {
+        productId: input.productId,
+        orderId: input.orderId,
+      },
+    },
+  });
+  if (existing) throw createError('Ya enviaste una reseña para este producto con este pedido.', 409);
+
+  const review = await prisma.productReview.create({
+    data: {
+      productId: input.productId,
+      orderId: input.orderId,
+      reviewerName: input.reviewerName.trim(),
+      rating: input.rating,
+      title: input.title?.trim() || null,
+      text: input.text?.trim() || null,
+    },
+  });
+
+  await recalculateProductRating(input.productId);
+
+  return {
+    id: review.id,
+    productId: review.productId,
+    userName: input.reviewerName.trim(),
+    rating: review.rating,
+    title: review.title,
+    text: review.text,
+    helpful: review.helpful,
+    verified: true,
     createdAt: review.createdAt,
   };
 }
