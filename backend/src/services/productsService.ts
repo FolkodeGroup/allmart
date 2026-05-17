@@ -317,7 +317,6 @@ export async function getAdminProducts(query: {
         description: true,
         shortDescription: true,
         price: true,
-        discount: true,
         images: true,
         categoryId: true,
         tags: true,
