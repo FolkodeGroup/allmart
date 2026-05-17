@@ -44,6 +44,8 @@ export function ProductListPage() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState<number | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [sortOptions, setSortOptions] = useState<SortOption[]>(FALLBACK_SORT_OPTIONS);
   const [loading, setLoading] = useState(true);
@@ -94,28 +96,46 @@ export function ProductListPage() {
 
   /* Cargar productos cuando cambian los filtros */
   useEffect(() => {
-    const params: PublicProductsParams = { limit: 100 };
+    const params: PublicProductsParams = { limit: 9, page };
     if (selectedCategory) params.category = selectedCategory;
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
     if (showOnlyFeatured) params.isFeatured = true;
-
-    setLoading(true);
     setError(null);
+    if (page === 1) setLoading(true);
+    else setIsLoadingMore(true);
+
     fetchPublicProducts(params)
       .then(({ data, total }) => {
         setTotalProducts(total ?? null);
         let mappedProducts = data.map((p) => mapApiProductToProduct(p, categories));
-        
+
         // Filtrar por "En Oferta" si está habilitado
         if (showOnlyOnSale) {
           mappedProducts = mappedProducts.filter((p) => activeDiscounts.has(p.id));
         }
-        
-        setProducts(mappedProducts);
+
+        if (page === 1) {
+          setProducts(mappedProducts);
+        } else {
+          setProducts((prev) => [...prev, ...mappedProducts]);
+        }
       })
       .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories]);
+      .finally(() => {
+        if (page === 1) setLoading(false);
+        else setIsLoadingMore(false);
+      });
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories, page]);
+
+  /* Resetear paginación cuando cambian filtros relevantes */
+  useEffect(() => {
+    setPage(1);
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured]);
+
+  const handleLoadMore = () => {
+    if (isLoadingMore) return;
+    setPage((p) => p + 1);
+  };
 
   const updateTagParam = (nextTag: string | null) => {
     const updated = new URLSearchParams(searchParams);
@@ -400,6 +420,19 @@ export function ProductListPage() {
                 ))}
               </div>
             )
+          )}
+
+          {!loading && !error && totalProducts !== null && products.length < totalProducts && (
+            <div className={styles.loadMoreWrap}>
+              <button
+                type="button"
+                className={styles.loadMoreBtn}
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? 'Cargando...' : 'Cargar más'}
+              </button>
+            </div>
           )}
 
           {!loading && !error && visibleProducts.length === 0 && (
