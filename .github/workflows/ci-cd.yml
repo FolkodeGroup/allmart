@@ -161,7 +161,7 @@ jobs:
           port: ${{ env.VPS_PORT }}
           username: ${{ env.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "docker-compose.prod.yml,docker/,scripts/deploy-vps.sh"
+          source: "docker-compose.prod.yml,docker/,scripts/deployment/deploy-vps.sh"
           target: ${{ env.DEPLOY_DIR }}
           strip_components: 0
 
@@ -232,10 +232,6 @@ jobs:
 
             # No construir DATABASE_URL en host VPS: backend usa DB_* directamente via Prisma adapter
 
-            echo "Descargando imagenes actualizadas..."
-            docker pull ${{ env.BACKEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
-            docker pull ${{ env.FRONTEND_IMAGE }}:${{ needs.docker-build-push.outputs.image_tag }}
-
             # ─── Backup de la BD antes de tocar contenedores ─────────────────
             echo "Haciendo backup de la BD antes del deploy..."
             BACKUP_DIR="/opt/allmart/backups"
@@ -253,28 +249,7 @@ jobs:
               echo "INFO: Contenedor DB no corriendo — saltando backup (primer deploy)"
             fi
 
-            echo "Limpiando contenedores y redes huérfanos..."
-            # ⚠️  Solo eliminar backend y frontend, NUNCA la DB con -f (el volumen persiste igual)
-            if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-backend$'; then
-              docker rm -f allmart-prod-backend 2>/dev/null || true
-            fi
-            if docker ps -a --format '{{.Names}}' | grep -q '^allmart-prod-frontend$'; then
-              docker rm -f allmart-prod-frontend 2>/dev/null || true
-            fi
-            # Eliminar red si existe
-            if docker network ls --format '{{.Name}}' | grep -q '^allmart_allmart-prod-network$'; then
-              docker network rm allmart_allmart-prod-network 2>/dev/null || true
-            fi
-
-            echo "Reiniciando contenedores..."
-            # ⚠️  NUNCA usar -v aquí: destruiría el volumen allmart_pgdata y se perderían todos los datos
-            docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
-            docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 240
-
-            echo "Estado final:"
-            docker compose -f docker-compose.prod.yml ps
-
-            echo "Limpiando imagenes no utilizadas..."
-            docker image prune -f --filter "until=24h" || true
+            echo "Ejecutando deploy de Allmart sin tocar la base de datos ni otros proyectos..."
+            IMAGE_TAG="${{ needs.docker-build-push.outputs.image_tag }}" bash scripts/deployment/deploy-vps.sh
 
             echo "Despliegue completado exitosamente"

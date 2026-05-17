@@ -6,7 +6,7 @@ import styles from './AdminCategories.module.css';
 import { CategoryCard } from './CategoryCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeSlideIn } from './animationConfig';
-import { Tooltip } from '../../../components/ui/Tooltip';
+import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 
 interface CategoriesGridProps {
   categories: Category[];

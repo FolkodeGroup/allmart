@@ -4,13 +4,14 @@ import { Request, Response } from "express";
 import { getPublicProducts, getProductBySlug } from "../../services/productsService";
 
 export const index = async (req: Request, res: Response) => {
-  const { category, q, sort, page, limit } = req.query;
+  const { category, q, sort, page, limit, isFeatured } = req.query;
   const result = await getPublicProducts({
     category: category as string,
     q: q as string,
     sort: sort as any,
     page: page ? Number(page) : undefined,
     limit: limit ? Number(limit) : undefined,
+    isFeatured: typeof isFeatured !== 'undefined' ? isFeatured === 'true' || isFeatured === '1' : undefined,
   });
   res.json(result);
 };

@@ -11,7 +11,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { AdminLoadingFallback } from '../../components/ui/AdminLoadingFallback';
 import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
-import { ModalConfirm } from "../../components/ui/ModalConfirm";
+import { ModalConfirm } from "../../components/ui/ModalConfirm/ModalConfirm";
 import type { Permission } from "../../utils/permissions";
 
 type NavBadge = "pending" | "lowStock" | null;

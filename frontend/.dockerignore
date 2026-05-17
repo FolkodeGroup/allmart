@@ -1,22 +1,83 @@
 # =============================================================================
 # Allmart Frontend — .dockerignore
 # Archivos y carpetas excluidos del contexto de build de Docker.
+# NOTA: Reduce el tamaño del contexto de build significativamente
 # =============================================================================
 
-node_modules
+# Dependencias
+node_modules/
 npm-debug.log*
-dist
-.env
-.env.*
-!.env.example
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+
+# Git
 .git
 .gitignore
-.vscode
-.idea
+.gitattributes
+.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Documentación (excepto README si es necesario)
+docs/
 *.md
 !README.md
+!CHANGELOG.md
+
+# Tests
+test-results/
+__tests__/
+.test/
+*.test.*
+*.spec.*
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Environment (excepto ejemplos)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Docker
 Dockerfile
 .dockerignore
-coverage
-.nyc_output
-*.log
+docker-compose*.yml
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+Jenkinsfile
+
+# Temporales
+tmp/
+temp/
+*.tmp
+.cache/
+
+# E2E testing
+e2e/
+
+# Misc
+.prettierrc
+.eslintrc*
+vitest.config.ts
+jest.config.js
+.npmrc

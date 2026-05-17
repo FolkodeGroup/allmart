@@ -12,7 +12,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Instalar todas las dependencias
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit && \
+    npm cache clean --force
 
 # ── Stage 2: Build de React/Vite ────────────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -28,19 +29,24 @@ ARG VITE_API_URL=http://localhost:3001
 ENV VITE_API_URL=$VITE_API_URL
 
 # Build de producción
-RUN npm run build
+RUN npm run build && \
+    npm cache clean --force
 
 # ── Stage 3: Servir con nginx ────────────────────────────────────────────────
 FROM nginx:stable-alpine AS production
 
 # Eliminar la configuración por defecto de nginx
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm /etc/nginx/conf.d/default.conf && \
+    rm -rf /etc/nginx/conf.d.default
 
 # Copiar nuestra configuración personalizada
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copiar el build desde el stage anterior
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Limpiar archivos innecesarios de nginx
+RUN rm -rf /var/cache/nginx/* /var/log/nginx/* /etc/nginx/sites-enabled/*
 
 # Puerto expuesto
 EXPOSE 80

@@ -68,6 +68,7 @@ export interface PublicProductsParams {
   sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
   page?: number;
   limit?: number;
+  isFeatured?: boolean;
 }
 
 /** Payload compatible con el backend para crear/actualizar un producto */
@@ -310,6 +311,7 @@ export async function fetchPublicProducts(
   if (params.sort)     qs.set('sort', params.sort);
   if (params.page)     qs.set('page', String(params.page));
   if (params.limit)    qs.set('limit', String(params.limit));
+  if (typeof params.isFeatured !== 'undefined') qs.set('isFeatured', String(params.isFeatured));
 
   const url = `/api/products${qs.toString() ? `?${qs}` : ''}`;
   return apiFetch<PaginatedProducts>(url);
@@ -370,4 +372,10 @@ export async function deleteAdminProduct(id: string, token: string): Promise<voi
   await apiFetch<unknown>(`/api/admin/products/${id}`, {
     method: 'DELETE',
   }, token);
+}
+
+/** GET /api/admin/products/low-stock-count — Cantidad total de productos con stock < 5 */
+export async function fetchAdminLowStockCount(token: string): Promise<number> {
+  const body = await apiFetch<ApiSuccess<{ count: number }>>('/api/admin/products/low-stock-count', {}, token);
+  return body.data.count;
 }
