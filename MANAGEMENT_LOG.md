@@ -1736,3 +1736,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #947: 935 eliminar campos de precio original y descuento en formulario de productos | 2026-05-17 |
