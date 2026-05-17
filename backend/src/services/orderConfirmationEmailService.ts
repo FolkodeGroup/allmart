@@ -83,8 +83,17 @@ function formatOrderLabel(orderId: string): string {
   return `Pedido #${formatOrderCode(orderId)}`;
 }
 
+function normalizePhoneForWhatsApp(phone: string): string {
+  return phone.replace(/\D/g, '');
+}
+
+function buildWhatsAppUrl(phone: string): string {
+  return `https://wa.me/${normalizePhoneForWhatsApp(phone)}`;
+}
+
 function buildTextBody(input: OrderConfirmationEmailInput): string {
   const orderLabel = formatOrderLabel(input.orderId);
+  const whatsappUrl = buildWhatsAppUrl(env.ALLMART_WHATSAPP_PHONE);
   const lines = input.items.map((item) => {
     const subtotal = item.unitPrice * item.quantity;
     return `- ${item.productName}: ${item.quantity} x ${formatPrice(item.unitPrice)} = ${formatPrice(subtotal)}`;
@@ -106,7 +115,7 @@ function buildTextBody(input: OrderConfirmationEmailInput): string {
     `Total: ${formatPrice(input.total)}`,
     input.notes ? `Notas: ${input.notes}` : '',
     '',
-    `Si necesitás ayuda, escribinos por WhatsApp al +${env.ALLMART_WHATSAPP_PHONE}.`,
+    `Si necesitás ayuda, escribinos por WhatsApp al +${env.ALLMART_WHATSAPP_PHONE}: ${whatsappUrl}`,
     'Gracias por comprar en Allmart.',
   ].filter(Boolean).join('\n');
 }
@@ -114,6 +123,7 @@ function buildTextBody(input: OrderConfirmationEmailInput): string {
 function buildHtmlBody(input: OrderConfirmationEmailInput): string {
   const orderLabel = formatOrderLabel(input.orderId);
   const preheader = `Confirmamos ${orderLabel} por ${formatPrice(input.total)}.`;
+  const whatsappUrl = buildWhatsAppUrl(env.ALLMART_WHATSAPP_PHONE);
   const rows = input.items.map((item) => {
     const subtotal = item.unitPrice * item.quantity;
 
@@ -256,7 +266,10 @@ function buildHtmlBody(input: OrderConfirmationEmailInput): string {
                     <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:24px;">
                       <tr>
                         <td style="padding:18px 20px;background-color:#f0f7f4;border-radius:14px;font-family:Arial,sans-serif;font-size:14px;line-height:22px;color:#365244;">
-                          Si necesitás ayuda con este pedido, podés escribirnos por WhatsApp al +${escapeHtml(env.ALLMART_WHATSAPP_PHONE)}.
+                          Si necesitás ayuda con este pedido, podés escribirnos por WhatsApp al
+                          <a href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer" style="color:#2f6b50;font-weight:700;text-decoration:underline;white-space:nowrap;">
+                            +${escapeHtml(env.ALLMART_WHATSAPP_PHONE)}
+                          </a>.
                         </td>
                       </tr>
                     </table>
