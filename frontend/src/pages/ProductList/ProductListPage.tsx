@@ -34,9 +34,12 @@ export function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategory = searchParams.get('category') ?? '';
   const urlSubCategory = searchParams.get('sub') ?? '';
+  const urlTag = searchParams.get('tag') ?? '';
+  const hasFeaturedTag = urlTag.trim().toLowerCase() === 'destacado';
   const [sortBy, setSortBy] = useState('relevance');
   const [selectedCategory, setSelectedCategory] = useState<string>(urlSubCategory || urlCategory);
   const [showOnlyOnSale, setShowOnlyOnSale] = useState(false);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(hasFeaturedTag);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -51,6 +54,10 @@ export function ProductListPage() {
     const next = urlSubCategory || urlCategory;
     setSelectedCategory((prev) => (prev === next ? prev : next));
   }, [urlCategory, urlSubCategory]);
+
+  useEffect(() => {
+    setShowOnlyFeatured((prev) => (prev === hasFeaturedTag ? prev : hasFeaturedTag));
+  }, [hasFeaturedTag]);
 
   /* Cargar sort options dinámicas */
   useEffect(() => {
@@ -89,6 +96,7 @@ export function ProductListPage() {
     const params: PublicProductsParams = { limit: 48 };
     if (selectedCategory) params.category = selectedCategory;
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
+    if (showOnlyFeatured) params.isFeatured = true;
 
     setLoading(true);
     setError(null);
@@ -105,7 +113,17 @@ export function ProductListPage() {
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [sortBy, selectedCategory, showOnlyOnSale, activeDiscounts, categories]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories]);
+
+  const updateTagParam = (nextTag: string | null) => {
+    const updated = new URLSearchParams(searchParams);
+    if (nextTag) {
+      updated.set('tag', nextTag);
+    } else {
+      updated.delete('tag');
+    }
+    setSearchParams(updated, { replace: true });
+  };
 
   const toggleCategory = (slug: string) => {
     const next = selectedCategory === slug ? '' : slug;
@@ -271,7 +289,16 @@ export function ProductListPage() {
               <span className={styles.filterLabel}>Novedades</span>
             </label>
             <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
+              <input
+                type="checkbox"
+                className={styles.filterCheckbox}
+                checked={showOnlyFeatured}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setShowOnlyFeatured(checked);
+                  updateTagParam(checked ? 'destacado' : null);
+                }}
+              />
               <span className={styles.filterLabel}>Destacados</span>
             </label>
           </div>
