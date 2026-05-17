@@ -64,8 +64,7 @@ export function HomePage() {
       {banners.length > 0 && <BannerSlider banners={banners} />}
       <CategoryGrid />
       <FeaturedProducts
-        title="Productos destacados"
-        label="Lo mejor"
+        title="Productos Destacados"
         tag="destacado"
         limit={4}
       />

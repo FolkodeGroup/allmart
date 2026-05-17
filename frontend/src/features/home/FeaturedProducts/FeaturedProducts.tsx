@@ -18,8 +18,8 @@ interface FeaturedProductsProps {
 }
 
 export function FeaturedProducts({
-  title = 'Productos destacados',
-  label = 'Lo mejor',
+  title = 'Productos Destacados',
+  label = '',
   tag = 'destacado',
   limit = 8,
 }: FeaturedProductsProps) {
