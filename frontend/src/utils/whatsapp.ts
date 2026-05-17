@@ -1,6 +1,8 @@
 import type { CartItem } from '../types';
 import type { OrderFormData } from '../components/ui/OrderConfirmationForm';
 
+const DEFAULT_WHATSAPP_PHONE = '5491165891091';
+
 /* ── Formateador de precios ARS ── */
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('es-AR', {
@@ -37,6 +39,7 @@ export function buildWhatsAppMessage(
     '👤 *Datos del cliente*',
     `  Nombre: ${client.firstName} ${client.lastName}`,
     `  Email: ${client.email}`,
+    `  Celular: ${client.phone}`,
     '',
     '📦 *Productos*',
     productLines,
@@ -53,6 +56,7 @@ export function buildWhatsAppMessage(
 /* ── Genera la URL de WhatsApp con el mensaje codificado ── */
 export function buildWhatsAppUrl(message: string, phone?: string): string {
   const encoded = encodeURIComponent(message);
-  const base = phone ? `https://wa.me/${phone}` : 'https://wa.me/';
+  const targetPhone = (phone ?? DEFAULT_WHATSAPP_PHONE).replace(/\D/g, '');
+  const base = `https://wa.me/${targetPhone}`;
   return `${base}?text=${encoded}`;
 }

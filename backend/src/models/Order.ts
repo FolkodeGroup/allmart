@@ -13,6 +13,7 @@ export interface Order {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
   total: number;
   status: OrderStatus;
@@ -38,6 +39,7 @@ export type CreateOrderDTO = {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
   total: number;
   notes?: string;

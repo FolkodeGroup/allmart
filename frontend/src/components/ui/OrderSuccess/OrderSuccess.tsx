@@ -94,6 +94,8 @@ export function OrderSuccess({ client, items, totalPrice }: OrderSuccessProps) {
             <dd>{client.firstName} {client.lastName}</dd>
             <dt>Email</dt>
             <dd>{client.email}</dd>
+            <dt>Celular</dt>
+            <dd>{client.phone}</dd>
           </dl>
         </section>
 

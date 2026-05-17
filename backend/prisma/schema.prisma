@@ -225,6 +225,7 @@ model Order {
   customerFirstName   String               @map("customer_first_name") @db.VarChar(100)
   customerLastName    String               @map("customer_last_name") @db.VarChar(100)
   customerEmail       String               @map("customer_email") @db.VarChar(255)
+  customerPhone       String?              @map("customer_phone") @db.VarChar(30)
   total               Decimal              @default(0) @db.Decimal(12, 2)
   status              OrderStatus          @default(pendiente)
   paymentStatus       PaymentStatus        @default(no_abonado) @map("payment_status")
@@ -241,6 +242,7 @@ model Order {
 
   @@index([createdAt], map: "idx_orders_created_at")
   @@index([customerEmail], map: "idx_orders_customer_email")
+  @@index([customerPhone], map: "idx_orders_customer_phone")
   @@index([status], map: "idx_orders_status")
   @@map("orders")
 }

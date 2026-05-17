@@ -5,6 +5,7 @@ export interface CreatePublicOrderPayload {
     firstName: string;
     lastName: string;
     email: string;
+    phone: string;
   };
   items: Array<{
     productId: string;
