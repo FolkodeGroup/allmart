@@ -87,6 +87,7 @@
 
 .trackStatic {
   justify-content: center;
+  justify-content: center;
 }
 
 .slide {
@@ -95,7 +96,7 @@
 }
 
 .productCard {
-  width: 100%;
+  width: auto;
   min-height: 100%;
   border: none;
   padding: 0;

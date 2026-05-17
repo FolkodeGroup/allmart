@@ -67,7 +67,8 @@ const CollectionSlider: React.FC<Props> = ({
   const [hoverPaused, setHoverPaused] = useState(false);
   const [focusPaused, setFocusPaused] = useState(false);
 
-  const slidesPerView = Math.max(1, Math.min(visibleSlides, products.length || 1));
+  // Siempre usar visibleSlides para el tamaño, aunque haya menos productos
+  const slidesPerView = visibleSlides;
   const shouldLoop = products.length > slidesPerView;
   const cloneCount = shouldLoop ? Math.min(visibleSlides, products.length) : 0;
 
