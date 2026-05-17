@@ -360,6 +360,17 @@
   gap: var(--space-3);
 }
 
+.favoriteButtonActive {
+  background: var(--color-primary);
+  color: var(--color-neutral-light);
+  border-color: var(--color-primary);
+}
+
+.favoriteButtonActive:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
 /* ── Related Products ── */
 .relatedSection {
   margin-top: var(--space-16);

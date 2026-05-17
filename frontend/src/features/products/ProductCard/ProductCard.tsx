@@ -11,7 +11,8 @@ import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
 import { isLowStock } from '../../../utils/inventory';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Heart } from 'lucide-react';
+import { useFavorites } from '../../../components/layout/context/FavoritesContextUtils';
 
 
 interface ProductCardProps {
@@ -30,19 +31,11 @@ function renderStars(rating: number): string {
 
 
 export function ProductCard({ product, variant = 'default' }: ProductCardProps) {
-  const storageKey = `wishlist-${product.id}`;
   const galleryImages = product.images?.length ? product.images : [undefined];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorito, setIsFavorito] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    const saved = localStorage.getItem(storageKey);
-    return saved === "true";
-  });
   const [dynamicDiscount, setDynamicDiscount] = useState<ProductDiscount | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(isFavorito));
-  }, [isFavorito, storageKey]);
+  const { isFavorite, toggleFavorite, syncFavorite } = useFavorites();
+  const isFavorito = isFavorite(product.id);
 
   // Cargar descuento dinámico desde API
   useEffect(() => {
@@ -84,10 +77,19 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
     return () => window.clearInterval(intervalId);
   }, [galleryImages.length, hasGallery]);
 
+  useEffect(() => {
+    if (!isFavorito) {
+      return;
+    }
+
+    syncFavorite(product);
+  }, [isFavorito, product, syncFavorite]);
+
 
   const toggleFavorito = (e:React.MouseEvent) => {
     e.preventDefault();
-    setIsFavorito(!isFavorito);
+    e.stopPropagation();
+    toggleFavorite(product);
   };
 
   const goToImage = (index: number) => {
@@ -201,11 +203,11 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         </div>
         <button
           className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
-          aria-label={`Agregar ${product.name} a favoritos`}
+          aria-label={isFavorito ? `Quitar ${product.name} de favoritos` : `Agregar ${product.name} a favoritos`}
           type="button"
           onClick={toggleFavorito}
         >
-          ♡
+          <Heart size={18} fill={isFavorito ? 'currentColor' : 'transparent'} aria-hidden="true" />
         </button>
       </div>
 

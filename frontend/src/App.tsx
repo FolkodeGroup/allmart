@@ -5,7 +5,9 @@ import { HomePage } from './pages/Home/HomePage';
 import { ProductListPage } from './pages/ProductList/ProductListPage';
 import { ProductDetailPage } from './pages/ProductDetail/ProductDetailPage';
 import { CartProvider } from './components/layout/context/CartContext';
+import { FavoritesProvider } from './components/layout/context/FavoritesContext';
 import { CartPage } from './pages/Cart/CartPage';
+import { FavoritesPage } from './pages/Favorites/FavoritesPage';
 import { ContactPage } from './pages/StaticInfo/ContactPage';
 import { FaqPage } from './pages/StaticInfo/FaqPage';
 import { HowToBuyPage } from './pages/StaticInfo/HowToBuyPage';
@@ -51,6 +53,7 @@ const router = createBrowserRouter([
       { path: 'productos', element: <ProductListPage /> },
       { path: 'producto/:slug', element: <ProductDetailPage /> },
       { path: 'carrito', element: <CartPage /> },
+      { path: 'favoritos', element: <FavoritesPage /> },
       { path: 'como-comprar', element: <HowToBuyPage /> },
       { path: 'envios', element: <ShippingPage /> },
       { path: 'preguntas-frecuentes', element: <FaqPage /> },
@@ -222,7 +225,9 @@ function App() {
           <NotificationProvider>
             <AdminAuthProvider>
               <CartProvider>
-                <RouterProvider router={router} />
+                <FavoritesProvider>
+                  <RouterProvider router={router} />
+                </FavoritesProvider>
               </CartProvider>
             </AdminAuthProvider>
           </NotificationProvider>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { VariantGroup } from '../../context/AdminProductsContext';
 import { useParams, Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import type { Product } from '../../types';
 import {
   fetchPublicProductBySlug,
@@ -16,6 +17,7 @@ import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
+import { useFavorites } from '../../components/layout/context/FavoritesContextUtils';
 
 function renderStars(rating: number): string {
   const full = Math.floor(rating);
@@ -26,6 +28,7 @@ function renderStars(rating: number): string {
 
 export function ProductDetailPage() {
   const { addToCart } = useCart();
+  const { isFavorite, toggleFavorite, syncFavorite } = useFavorites();
   const { slug } = useParams<{ slug: string }>();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -135,6 +138,15 @@ export function ProductDetailPage() {
 
   const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
   const isNew = product ? product.tags.includes('nuevo') : false;
+  const isProductFavorite = product ? isFavorite(product.id) : false;
+
+  useEffect(() => {
+    if (!product || !isProductFavorite) {
+      return;
+    }
+
+    syncFavorite(product);
+  }, [isProductFavorite, product, syncFavorite]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -364,8 +376,14 @@ export function ProductDetailPage() {
                     ? 'Seleccioná todas las variantes'
                     : 'Agregar al carrito'}
               </Button>
-              <Button variant="secondary" size="lg">
-                ♡
+              <Button
+                variant="secondary"
+                size="lg"
+                className={isProductFavorite ? styles.favoriteButtonActive : ''}
+                onClick={() => toggleFavorite(product)}
+                leftIcon={<Heart size={18} fill={isProductFavorite ? 'currentColor' : 'transparent'} aria-hidden="true" />}
+              >
+                {isProductFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
               </Button>
             </div>
           </div>
