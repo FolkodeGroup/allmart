@@ -433,7 +433,6 @@ export function AdminCategoryProducts() {
                 name={product.name}
                 sku={product.sku}
                 price={product.price}
-                discount={product.discount}
                 stock={product.stock}
                 inStock={product.inStock}
                 image={product.images?.[0]}

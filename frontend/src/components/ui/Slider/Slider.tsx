@@ -57,7 +57,6 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
                 style={{ '--items-per-page': itemsPerPage } as React.CSSProperties}
               >
                 {pageProducts.map((product) => {
-                  const hasDiscount = product.discount && product.discount > 0;
                   const isNew = product.tags.includes('nuevo');
                   return (
                     <div className={styles.sliderCard} key={product.id}>
@@ -71,9 +70,6 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
                           placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                         />
                         <div className={styles.sliderBadges}>
-                          {hasDiscount && (
-                            <span className={styles.badgeDiscount}>-{product.discount}%</span>
-                          )}
                           {isNew && (
                             <span className={styles.badgeNew}>Nuevo</span>
                           )}
@@ -92,8 +88,6 @@ const Slider: React.FC<SliderProps> = ({ products, itemsPerPage = 5 }) => {
                         <div className={styles.sliderPriceRow}>
                           <ProductPrice
                             price={product.price}
-                            originalPrice={product.originalPrice}
-                            discount={product.discount}
                             size="sm"
                           />
                         </div>

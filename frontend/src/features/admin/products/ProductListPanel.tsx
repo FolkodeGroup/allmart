@@ -162,12 +162,6 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
 
                   <div className={styles.priceLine}>
                     <strong>{currencyFormatter.format(product.price)}</strong>
-                    {!!product.discount && product.discount > 0 && product.originalPrice && (
-                      <span className={styles.originalPrice}>{currencyFormatter.format(product.originalPrice)}</span>
-                    )}
-                    {!!product.discount && product.discount > 0 && (
-                      <span className={styles.discount}>-{product.discount}%</span>
-                    )}
                     <div className={styles.stockSection}>
                       <span
                         className={`${styles.stockBadge} ${

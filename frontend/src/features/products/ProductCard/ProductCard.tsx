@@ -62,7 +62,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         console.error('Error loading discount:', error);
       }
     };
-    
+
     loadDiscount();
   }, [product.id, product.price, product.category?.id, product.categoryIds]);
 
@@ -122,11 +122,11 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         </Link>
 
         {/* Mostrar DiscountBadge según el tipo de promoción */}
-        {(dynamicDiscount || (product.discount && product.discount > 0)) && (
+        {dynamicDiscount && (
           <DiscountBadge
             discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
             discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
-            promotionType={dynamicDiscount?.promotionType || (product.discount ? 'percentage' : undefined)}
+            promotionType={dynamicDiscount?.promotionType}
           />
         )}
         {hasGallery && (
@@ -202,31 +202,17 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-          {dynamicDiscount ? (
-            <ProductPrice
-              price={dynamicDiscount.finalPrice}
-              originalPrice={dynamicDiscount.originalPrice}
-              discount={
-                dynamicDiscount.promotionType === 'percentage'
-                  ? dynamicDiscount.discountPercentage
-                  : undefined
-              }
-              discountAmount={
-                dynamicDiscount.promotionType === 'fixed'
-                  ? dynamicDiscount.discountAmount
-                  : undefined
-              }
-              promotionType={dynamicDiscount.promotionType}
-              size="md"
-            />
-          ) : (
-            <ProductPrice
-              price={product.price}
-              originalPrice={product.originalPrice}
-              discount={product.discount}
-              size="md"
-            />
-          )}
+                {dynamicDiscount ? (
+                  <ProductPrice
+                    price={dynamicDiscount.finalPrice}
+                    size="md"
+                  />
+                ) : (
+                  <ProductPrice
+                    price={product.price}
+                    size="md"
+                  />
+                )}
         </div>
       </div>
       <Link

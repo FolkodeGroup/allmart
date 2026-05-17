@@ -65,7 +65,7 @@ export function ProductDetailPage() {
         // Cargar productos relacionados de la misma categoría
         const primaryCategoryId = apiProduct.categoryId || apiProduct.categoryIds?.[0];
         const category = categories.find((c) => c.id === primaryCategoryId);
-        
+
         if (!category) {
           setRelatedProducts([]);
           return;
@@ -73,11 +73,11 @@ export function ProductDetailPage() {
 
         try {
           // Cargar más productos para filtrar mejor
-          const { data } = await fetchPublicProducts({ 
-            category: category.slug, 
+          const { data } = await fetchPublicProducts({
+            category: category.slug,
             limit: 8 // Cargar más para tener mejor selección
           });
-          
+
           if (cancelled) return;
 
           // Filtrar: excluir el producto actual y tomar los primeros 4
@@ -109,7 +109,7 @@ export function ProductDetailPage() {
   /* Cargar descuento dinámico desde API */
   useEffect(() => {
     if (!product) return;
-    
+
     const loadDiscount = async () => {
       try {
         const categoryIds = Array.isArray(product.categoryIds)
@@ -134,7 +134,6 @@ export function ProductDetailPage() {
   }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
 
   const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
-  const hasDiscount = product ? Boolean(product.discount && product.discount > 0) : false;
   const isNew = product ? product.tags.includes('nuevo') : false;
 
   const handleAddToCart = () => {
@@ -225,9 +224,6 @@ export function ProductDetailPage() {
         {/* Info */}
         <div className={styles.info}>
           <div className={styles.badges}>
-            {hasDiscount && (
-              <Badge variant="discount">-{product.discount}%</Badge>
-            )}
             {isNew && <Badge variant="new">Nuevo</Badge>}
           </div>
 
@@ -248,15 +244,11 @@ export function ProductDetailPage() {
             {dynamicDiscount ? (
               <ProductPrice
                 price={dynamicDiscount.finalPrice}
-                originalPrice={dynamicDiscount.originalPrice}
-                discount={dynamicDiscount.discountPercentage}
                 size="lg"
               />
             ) : (
               <ProductPrice
                 price={product.price}
-                originalPrice={product.originalPrice}
-                discount={product.discount}
                 size="lg"
               />
             )}

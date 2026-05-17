@@ -15,8 +15,6 @@ export const EMPTY_FORM: Omit<AdminProduct, 'id'> = {
     description: '',
     shortDescription: '',
     price: 0,
-    originalPrice: undefined,
-    discount: undefined,
     images: [''],
     category: { id: '', name: '', slug: '', isVisible: true },
     categoryIds: [],
@@ -124,7 +122,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     const shallowCompareRelevantFields = useCallback((a: typeof form, b: typeof form): boolean => {
         // Solo comparar campos relevantes para el usuario final
         const keys: (keyof typeof form)[] = [
-            'name', 'slug', 'description', 'shortDescription', 'price', 'originalPrice', 'discount',
+            'name', 'slug', 'description', 'shortDescription', 'price',
             'images', 'category', 'categoryIds', 'tags', 'inStock', 'isFeatured', 'sku', 'features', 'stock', 'variants'
         ];
         for (const key of keys) {
@@ -169,12 +167,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
         if (!form.sku?.trim()) errors.sku = 'El SKU es obligatorio';
         if (!form.price || form.price <= 0) errors.price = 'El precio debe ser mayor a 0';
         if (!form.category.id) errors.category = 'Seleccioná una categoría';
-        if (form.discount !== undefined && (form.discount < 0 || form.discount > 100)) {
-            errors.discount = 'El descuento debe estar entre 0 y 100';
-        }
-        if (form.originalPrice !== undefined && form.originalPrice <= 0) {
-            errors.originalPrice = 'El precio original debe ser mayor a 0';
-        }
         if (form.stock < 0) errors.stock = 'El stock no puede ser negativo';
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
@@ -416,7 +408,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     // ── Derived error flags per section ───────────────────────────────────
     const sectionErrors = useMemo(() => ({
         basico: !!(fieldErrors.name || fieldErrors.sku),
-        precios: !!(fieldErrors.price || fieldErrors.discount || fieldErrors.originalPrice || fieldErrors.stock),
+        precios: !!(fieldErrors.price || fieldErrors.stock),
         categorias: !!fieldErrors.category,
         imagenes: !!fieldErrors.images,
         variantes: false,
