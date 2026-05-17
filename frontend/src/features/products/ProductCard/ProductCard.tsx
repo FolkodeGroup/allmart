@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ProductImage } from '../../../components/ui/ProductImage';
 import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
@@ -77,18 +77,13 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   }, [product.id, galleryImages.length]);
 
   useEffect(() => {
-    if (!hasGallery) {
-      return;
-    }
-
+    if (!hasGallery) return;
     const intervalId = window.setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % galleryImages.length);
     }, FEATURED_GALLERY_AUTOPLAY_MS);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
+    return () => window.clearInterval(intervalId);
   }, [galleryImages.length, hasGallery]);
+
 
   const toggleFavorito = (e:React.MouseEvent) => {
     e.preventDefault();
@@ -98,6 +93,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   const goToImage = (index: number) => {
     if (!hasGallery) return;
     const nextIndex = (index + galleryImages.length) % galleryImages.length;
+    if (nextIndex === currentImageIndex) return;
     setCurrentImageIndex(nextIndex);
   };
 
@@ -128,17 +124,43 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         onKeyDown={hasGallery ? handleGalleryKeyDown : undefined}
       >
         <Link to={`/producto/${product.slug}`}>
-          <ProductImage
-            src={galleryImages[currentImageIndex]}
-            alt={`${product.name}${hasGallery ? ` - imagen ${currentImageIndex + 1} de ${galleryImages.length}` : ''}`}
-            className={styles.image}
-            width={isFeatured ? 420 : undefined}
-            height={isFeatured ? 320 : undefined}
-            placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
-            loading={isFeatured ? 'eager' : 'lazy'}
-            fetchPriority={isFeatured ? 'high' : 'auto'}
-            sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 240px'}
-          />
+          {hasGallery ? (
+            <div className={styles.featuredImageStage}>
+              {galleryImages.map((img, idx) => (
+                <ProductImage
+                  key={`${product.id}-gallery-${idx}`}
+                  src={img}
+                  alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
+                  className={
+                    styles.image +
+                    ' ' +
+                    styles.galleryImage +
+                    ' ' +
+                    (idx === currentImageIndex ? styles.galleryImageActive : styles.galleryImageInactive)
+                  }
+                  width={isFeatured ? 420 : undefined}
+                  height={isFeatured ? 320 : undefined}
+                  placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                  style={{ position: 'absolute', inset: 0 }}
+                  loading="eager"
+                  fetchPriority="high"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
+                />
+              ))}
+            </div>
+          ) : (
+            <ProductImage
+              src={galleryImages[currentImageIndex]}
+              alt={product.name}
+              className={styles.image}
+              width={isFeatured ? 420 : undefined}
+              height={isFeatured ? 320 : undefined}
+              placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+              loading={isFeatured ? 'eager' : 'lazy'}
+              fetchPriority={isFeatured ? 'high' : 'auto'}
+              sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 240px'}
+            />
+          )}
         </Link>
 
         {/* Mostrar DiscountBadge según el tipo de promoción */}
