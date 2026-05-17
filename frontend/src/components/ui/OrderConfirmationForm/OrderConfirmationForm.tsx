@@ -118,7 +118,7 @@ export function OrderConfirmationForm({
 
       // Mostrar feedback y abrir WhatsApp con el ID del pedido generado.
       setTimeout(() => {
-        const whatsappMessage = `${buildWhatsAppMessage(data, cartItems, totalPrice)}\n\nID de pedido: ${orderId}`;
+        const whatsappMessage = buildWhatsAppMessage(data, cartItems, totalPrice, orderId);
         const whatsappUrl = buildWhatsAppUrl(whatsappMessage);
         window.open(whatsappUrl, '_blank');
         onCancel();

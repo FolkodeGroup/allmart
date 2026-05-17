@@ -17,7 +17,7 @@ export function buildWhatsAppMessage(
   client: OrderFormData,
   items: CartItem[],
   totalPrice: number,
-  // shippingLabel: string = 'A calcular'
+  orderId?: string,
 ): string {
   const date = new Date().toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -28,26 +28,33 @@ export function buildWhatsAppMessage(
   const productLines = items
     .map(({ product, quantity }) => {
       const subtotal = formatPrice(product.price * quantity);
-      return `  • ${product.name} x${quantity} — ${subtotal}`;
+      return `- ${product.name} x${quantity}: ${subtotal}`;
     })
     .join('\n');
 
+  const orderLines = [
+    `- Fecha: ${date}`,
+    ...(orderId ? [`- ID: ${orderId}`] : []),
+  ];
+
   const message = [
-    '🛍️ *Nuevo pedido — ALLMART*',
-    `📅 Fecha: ${date}`,
+    'Hola Allmart, acabo de realizar un pedido desde la tienda online.',
     '',
-    '👤 *Datos del cliente*',
-    `  Nombre: ${client.firstName} ${client.lastName}`,
-    `  Email: ${client.email}`,
-    `  Celular: ${client.phone}`,
+    '*Pedido*',
+    ...orderLines,
     '',
-    '📦 *Productos*',
+    '*Cliente*',
+    `- Nombre: ${client.firstName} ${client.lastName}`,
+    `- Email: ${client.email}`,
+    `- Celular: ${client.phone}`,
+    '',
+    '*Productos*',
     productLines,
     '',
-    '📊 *Resumen*',
-    `  *Total: ${formatPrice(totalPrice)}*`,
+    '*Total*',
+    `- ${formatPrice(totalPrice)}`,
     '',
-    '¡Gracias por tu compra! 🙌',
+    'Mensaje generado automaticamente desde la tienda online.',
   ].join('\n');
 
   return message;
