@@ -1,7 +1,7 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 20034 |
-| FedericoPaal | 6054 |
+| dgimenezdeveloper | 20094 |
+| FedericoPaal | 6084 |
 | Mau-bar-iva | 2325 |
 | Nahuel-Dalesio | 1630 |
 | CelinaJP | 1378 |
@@ -12,12 +12,18 @@
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
 | agustin-ovejero | 35 | Issue | Validación y aviso de campos requeridos en creación de Banners | 2026-05-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #936: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #934: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #932: 🔄 Registrar puntaje de gestión | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #929: Cambios aplicados en un solo edit: | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #928: Varias reparaciones | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #927: Varias reparaciones | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #926: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #934: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #932: 🔄 Registrar puntaje de gestión | 2026-05-16 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #929: Cambios aplicados en un solo edit: | 2026-05-16 |
@@ -30,6 +36,16 @@
 | FedericoPaal | 30 | Issue | Badge de productos con bajo stock en sidebar | 2026-05-16 |
 | FedericoPaal | 45 | Issue | Eliminar imágenes en formularios de categorías | 2026-05-16 |
 | FedericoPaal | 40 | Issue | Mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #945: Hacer los banners clickeables y redirigir a Categorías o Colecciones según corresponda | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #944: Crear pestaña "Proveedores" en el panel de administración | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #943: Agregar recta de Objetivo Mensual en Reportes | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #942: Eliminar campo "Descripción" del formulario de Banners | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #941: Orden de visualización único para cada Banner | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #940: Ver productos correctamente seleccionados al editar promoción | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #939: Botón para exportar catálogo de productos en PDF con imágenes | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #938: Conexión robusta de variantes en productos nuevos | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #937: Eliminar paso intermedio al agregar imágenes de productos | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #935: Eliminar campos de Precio Original y Descuento en formulario de productos | 2026-05-16 |
 | agustin-ovejero | 60 | Issue | Evitar cuelgue al eliminar múltiples colecciones | 2026-05-15 |
 | agustin-ovejero | 40 | Issue | Validación de campos requeridos al crear Colección | 2026-05-15 |
 | agustin-ovejero | 80 | Issue | Renderizar descuentos de promociones en productos del Home | 2026-05-15 |
