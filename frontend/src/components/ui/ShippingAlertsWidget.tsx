@@ -4,6 +4,7 @@ import styles from './ShippingAlertsWidget.module.css';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Link } from 'react-router-dom';
 import { Button } from './Button/Button';
+import { formatOrderCode } from '../../utils/orders';
 
 export default function ShippingAlertsWidget() {
   const { orders } = useAdminOrders();
@@ -46,7 +47,7 @@ export default function ShippingAlertsWidget() {
           <div key={order.id} className={styles.orderItem}>
             <div className={styles.orderHeader}>
               <div className={styles.orderInfo}>
-                <span className={styles.orderId}>#{order.id.slice(0, 8)}</span>
+                <span className={styles.orderId}>#{formatOrderCode(order.id)}</span>
                 <span className={styles.orderDate}>{formatDate(order.createdAt)}</span>
               </div>
               <Badge variant={order.status === 'en-preparacion' ? 'new' : 'new'}>

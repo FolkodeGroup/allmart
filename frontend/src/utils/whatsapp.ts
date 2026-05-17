@@ -1,5 +1,6 @@
 import type { CartItem } from '../types';
 import type { OrderFormData } from '../components/ui/OrderConfirmationForm';
+import { formatOrderLabel } from './orders';
 
 const DEFAULT_WHATSAPP_PHONE = '5491165891091';
 
@@ -33,8 +34,8 @@ export function buildWhatsAppMessage(
     .join('\n');
 
   const orderLines = [
+    ...(orderId ? [`- Numero: ${formatOrderLabel(orderId)}`] : []),
     `- Fecha: ${date}`,
-    ...(orderId ? [`- ID: ${orderId}`] : []),
   ];
 
   const message = [

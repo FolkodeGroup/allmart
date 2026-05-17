@@ -18,6 +18,7 @@ import styles from '../AdminOrders.module.css';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import type { Order } from '../../../../context/AdminOrdersContext';
 import { Button } from '../../../../components/ui/Button/Button';
+import { formatOrderCode, formatOrderLabel } from '../../../../utils/orders';
 
 /**
  * Props de OrderItem.
@@ -168,14 +169,14 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
           type="checkbox"
           checked={selected}
           onChange={e => { e.stopPropagation(); onSelect(order.id); }}
-          aria-label={`Seleccionar pedido ${order.id}`}
+          aria-label={`Seleccionar ${formatOrderLabel(order.id)}`}
           onClick={e => e.stopPropagation()}
         />
       </td>
 
       {/* ID truncado a 8 caracteres para legibilidad */}
       <td style={{ padding: '16px 20px', fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5 }}>
-        #{order.id.slice(0, 8).toUpperCase()}
+        #{formatOrderCode(order.id)}
       </td>
       <td style={{ padding: '16px 20px', color: '#64748b', fontSize: 15 }}>{formatDate(order.createdAt)}</td>
       <td style={{ padding: '16px 20px' }}>

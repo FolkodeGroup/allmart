@@ -75,10 +75,19 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function formatOrderCode(orderId: string): string {
+  return orderId.slice(0, 8).toUpperCase();
+}
+
+function formatOrderLabel(orderId: string): string {
+  return `Pedido #${formatOrderCode(orderId)}`;
+}
+
 function buildTextBody(input: OrderConfirmationEmailInput): string {
+  const orderLabel = formatOrderLabel(input.orderId);
   const lines = input.items.map((item) => {
     const subtotal = item.unitPrice * item.quantity;
-    return `- ${item.productName} x${item.quantity}: ${formatPrice(subtotal)}`;
+    return `- ${item.productName}: ${item.quantity} x ${formatPrice(item.unitPrice)} = ${formatPrice(subtotal)}`;
   });
 
   return [
@@ -86,7 +95,7 @@ function buildTextBody(input: OrderConfirmationEmailInput): string {
     '',
     'Recibimos tu compra en Allmart.',
     '',
-    `Pedido: ${input.orderId}`,
+    `Numero de pedido: ${orderLabel}`,
     `Fecha: ${formatDate(input.createdAt)}`,
     `Email: ${input.customer.email}`,
     `Celular: ${input.customer.phone}`,
@@ -103,85 +112,162 @@ function buildTextBody(input: OrderConfirmationEmailInput): string {
 }
 
 function buildHtmlBody(input: OrderConfirmationEmailInput): string {
+  const orderLabel = formatOrderLabel(input.orderId);
+  const preheader = `Confirmamos ${orderLabel} por ${formatPrice(input.total)}.`;
   const rows = input.items.map((item) => {
     const subtotal = item.unitPrice * item.quantity;
 
     return `
       <tr>
-        <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#1f2937;">${escapeHtml(item.productName)}</td>
-        <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#4b5563;text-align:center;">${item.quantity}</td>
-        <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#1f2937;text-align:right;">${formatPrice(subtotal)}</td>
+        <td style="padding:16px 0;border-bottom:1px solid #e5e7eb;">
+          <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="font-family:Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1f2937;">
+                ${escapeHtml(item.productName)}
+              </td>
+              <td align="right" style="font-family:Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1f2937;white-space:nowrap;">
+                ${formatPrice(subtotal)}
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding-top:6px;font-family:Arial,sans-serif;font-size:14px;line-height:20px;color:#64748b;">
+                ${item.quantity} x ${formatPrice(item.unitPrice)}
+              </td>
+            </tr>
+          </table>
+        </td>
       </tr>`;
   }).join('');
 
   const notesSection = input.notes
-    ? `<p style="margin:16px 0 0;color:#4b5563;"><strong>Notas:</strong> ${escapeHtml(input.notes)}</p>`
+    ? `
+      <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:24px;">
+        <tr>
+          <td style="padding:16px 18px;background-color:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;font-family:Arial,sans-serif;font-size:14px;line-height:22px;color:#475569;">
+            <strong style="color:#1f2937;">Notas:</strong> ${escapeHtml(input.notes)}
+          </td>
+        </tr>
+      </table>`
     : '';
 
   return `
-    <div style="background:#f6f4ee;padding:32px 16px;font-family:Arial,sans-serif;color:#1f2937;">
-      <div style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #e5e7eb;">
-        <div style="padding:28px 32px;background:#769282;color:#ffffff;">
-          <div style="font-size:28px;font-weight:700;line-height:1.1;">Allmart</div>
-          <p style="margin:10px 0 0;font-size:16px;opacity:0.92;">Confirmación de compra</p>
+    <!DOCTYPE html>
+    <html lang="es">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>Confirmación de compra</title>
+      </head>
+      <body style="margin:0;padding:0;background-color:#f6f4ee;">
+        <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;color:transparent;">
+          ${escapeHtml(preheader)}
         </div>
 
-        <div style="padding:32px;">
-          <h1 style="margin:0 0 12px;font-size:24px;line-height:1.2;">Gracias por tu compra, ${escapeHtml(input.customer.firstName)}.</h1>
-          <p style="margin:0 0 24px;color:#4b5563;line-height:1.6;">
-            Recibimos tu pedido y ya quedó registrado en Allmart. Te compartimos el resumen completo para que lo tengas a mano.
-          </p>
-
-          <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px;margin-bottom:24px;">
-            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-              <div>
-                <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6b7280;">Pedido</div>
-                <div style="font-size:16px;font-weight:700;color:#111827;">${escapeHtml(input.orderId)}</div>
-              </div>
-              <div>
-                <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6b7280;">Fecha</div>
-                <div style="font-size:16px;font-weight:700;color:#111827;">${escapeHtml(formatDate(input.createdAt))}</div>
-              </div>
-              <div>
-                <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#6b7280;">Total</div>
-                <div style="font-size:20px;font-weight:700;color:#769282;">${formatPrice(input.total)}</div>
-              </div>
-            </div>
-          </div>
-
-          <div style="margin-bottom:24px;">
-            <h2 style="margin:0 0 12px;font-size:18px;">Datos de contacto</h2>
-            <p style="margin:0;color:#4b5563;line-height:1.8;">
-              <strong>Cliente:</strong> ${escapeHtml(input.customer.firstName)} ${escapeHtml(input.customer.lastName)}<br />
-              <strong>Email:</strong> ${escapeHtml(input.customer.email)}<br />
-              <strong>Celular:</strong> ${escapeHtml(input.customer.phone)}
-            </p>
-          </div>
-
-          <div>
-            <h2 style="margin:0 0 12px;font-size:18px;">Detalle de tu compra</h2>
-            <table style="width:100%;border-collapse:collapse;">
-              <thead>
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#f6f4ee">
+          <tr>
+            <td align="center" style="padding:24px 12px;">
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:640px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:24px;overflow:hidden;">
                 <tr>
-                  <th style="text-align:left;padding:0 0 10px;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">Producto</th>
-                  <th style="padding:0 0 10px;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">Cant.</th>
-                  <th style="text-align:right;padding:0 0 10px;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">Subtotal</th>
+                  <td bgcolor="#769282" style="padding:24px 24px 20px;border-radius:24px 24px 0 0;">
+                    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;line-height:18px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#eff7f2;">Allmart</p>
+                    <p style="margin:10px 0 0;font-family:Arial,sans-serif;font-size:28px;line-height:32px;font-weight:700;color:#ffffff;">Confirmación de compra</p>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                ${rows}
-              </tbody>
-            </table>
-          </div>
 
-          ${notesSection}
+                <tr>
+                  <td style="padding:28px 24px 32px;">
+                    <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:16px;line-height:24px;color:#64748b;">Gracias por tu compra,</p>
+                    <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:32px;line-height:38px;font-weight:700;color:#1f2937;">${escapeHtml(input.customer.firstName)}.</p>
+                    <p style="margin:0 0 24px;font-family:Arial,sans-serif;font-size:16px;line-height:24px;color:#475569;">
+                      Recibimos tu pedido y ya quedó registrado en Allmart. Te compartimos el resumen completo para que lo tengas a mano.
+                    </p>
 
-          <div style="margin-top:28px;padding:18px 20px;background:#f0f7f4;border-radius:14px;color:#365244;line-height:1.6;">
-            Si necesitás ayuda con este pedido, podés escribirnos por WhatsApp al +${escapeHtml(env.ALLMART_WHATSAPP_PHONE)}.
-          </div>
-        </div>
-      </div>
-    </div>`;
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="border:1px solid #e5e7eb;border-radius:16px;background-color:#f8fafc;margin-bottom:24px;">
+                      <tr>
+                        <td style="padding:18px 20px;border-bottom:1px solid #e5e7eb;">
+                          <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:12px;line-height:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;">Número de pedido</p>
+                          <p style="margin:0;font-family:Arial,sans-serif;font-size:22px;line-height:28px;font-weight:700;color:#1f2937;">${escapeHtml(orderLabel)}</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:18px 20px;border-bottom:1px solid #e5e7eb;">
+                          <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:12px;line-height:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;">Fecha</p>
+                          <p style="margin:0;font-family:Arial,sans-serif;font-size:16px;line-height:24px;font-weight:700;color:#1f2937;">${escapeHtml(formatDate(input.createdAt))}</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:18px 20px;">
+                          <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:12px;line-height:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;">Total</p>
+                          <p style="margin:0;font-family:Arial,sans-serif;font-size:24px;line-height:30px;font-weight:700;color:#769282;">${formatPrice(input.total)}</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
+                      <tr>
+                        <td style="padding-bottom:12px;font-family:Arial,sans-serif;font-size:20px;line-height:28px;font-weight:700;color:#1f2937;">Datos de contacto</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                              <td style="padding:6px 0;width:110px;font-family:Arial,sans-serif;font-size:14px;line-height:22px;font-weight:700;color:#475569;">Cliente</td>
+                              <td style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;line-height:22px;color:#64748b;">${escapeHtml(input.customer.firstName)} ${escapeHtml(input.customer.lastName)}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding:6px 0;width:110px;font-family:Arial,sans-serif;font-size:14px;line-height:22px;font-weight:700;color:#475569;">Email</td>
+                              <td style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;line-height:22px;color:#64748b;">${escapeHtml(input.customer.email)}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding:6px 0;width:110px;font-family:Arial,sans-serif;font-size:14px;line-height:22px;font-weight:700;color:#475569;">Celular</td>
+                              <td style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;line-height:22px;color:#64748b;">${escapeHtml(input.customer.phone)}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td style="padding-bottom:12px;font-family:Arial,sans-serif;font-size:20px;line-height:28px;font-weight:700;color:#1f2937;">Detalle de tu compra</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                            ${rows}
+                            <tr>
+                              <td style="padding-top:16px;">
+                                <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;">
+                                  <tr>
+                                    <td style="padding:16px 18px;font-family:Arial,sans-serif;font-size:15px;line-height:22px;font-weight:700;color:#475569;">Total abonado</td>
+                                    <td align="right" style="padding:16px 18px;font-family:Arial,sans-serif;font-size:20px;line-height:26px;font-weight:700;color:#769282;white-space:nowrap;">${formatPrice(input.total)}</td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    ${notesSection}
+
+                    <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:24px;">
+                      <tr>
+                        <td style="padding:18px 20px;background-color:#f0f7f4;border-radius:14px;font-family:Arial,sans-serif;font-size:14px;line-height:22px;color:#365244;">
+                          Si necesitás ayuda con este pedido, podés escribirnos por WhatsApp al +${escapeHtml(env.ALLMART_WHATSAPP_PHONE)}.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>`;
 }
 
 export async function sendOrderConfirmationEmail(input: OrderConfirmationEmailInput): Promise<'sent' | 'skipped'> {
@@ -191,7 +277,7 @@ export async function sendOrderConfirmationEmail(input: OrderConfirmationEmailIn
   }
 
   const transporter = getTransporter();
-  const subject = `Allmart: confirmación de tu compra ${input.orderId.slice(0, 8)}`;
+  const subject = `Allmart: confirmación de tu compra - ${formatOrderLabel(input.orderId)}`;
 
   await transporter.sendMail({
     from: `${env.MAIL_FROM_NAME} <${env.MAIL_FROM_EMAIL}>`,
