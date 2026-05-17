@@ -1729,3 +1729,27 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #938: Conexión robusta de variantes en productos nuevos | 2026-05-16 |
 | FedericoPaal | 3 | Creación de issue | Issue #937: Eliminar paso intermedio al agregar imágenes de productos | 2026-05-16 |
 | FedericoPaal | 3 | Creación de issue | Issue #935: Eliminar campos de Precio Original y Descuento en formulario de productos | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #816: 765 refactorizar creaciónedición de producto reemplazar modal por vista completa y corregir pérdida de foco en inputs | 2026-04-18 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #818: Se implementa checklist visible de "ready to publish" | 2026-04-18 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #823: Fix collections banner | 2026-04-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #822: 🔄 Actualización automática de puntajes semanal | 2026-04-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #825: 768 agregar atajos de teclado y acciones rápidas para flujo de creación | 2026-04-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #865: Lo que cambié: | 2026-05-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #866: 841 mejorar la visualización del detalle de pedido modal o nueva página | 2026-05-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #869: Changes Made: | 2026-05-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #870: select de estados en vista de pedidos ajustado | 2026-05-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #874: Cambios Realizados | 2026-05-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #877: texto alternativo de imagen ajustado para sincronizarse con el titulo del banner | 2026-05-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #879: 849 optimizar y unificar el soporte de modo oscuroclaro en todos los componentes del panel administrativo | 2026-05-06 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #881: 850 asegurar consistencia de colores en menú lateral y badges de notificación según modo oscuroclaro | 2026-05-06 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #907: 887 eliminar el formulario de alta rápida wizard en la creación de productos | 2026-05-10 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #916: Comportamiento del Formulario | 2026-05-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #908: 🔄 Actualización automática de puntajes semanal | 2026-05-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #924: 889 mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #947: 935 eliminar campos de precio original y descuento en formulario de productos | 2026-05-17 |

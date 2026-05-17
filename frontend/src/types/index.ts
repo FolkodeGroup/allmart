@@ -8,8 +8,6 @@ export interface Product {
   description: string;
   shortDescription: string;
   price: number;
-  originalPrice?: number;
-  discount?: number;
   images: string[];
   category: Category;
   categoryId?: string; // Helper property for convenience
