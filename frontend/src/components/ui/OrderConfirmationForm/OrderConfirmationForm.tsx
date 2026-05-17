@@ -140,10 +140,14 @@ export function OrderConfirmationForm({
       className={styles.backdrop}
       onClick={handleBackdropClick}
       role="presentation"
-      aria-hidden="true"
-      tabIndex={-1}
     >
-      <div className={styles.panel}>
+      <div
+        className={styles.panel}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="order-form-title"
+        tabIndex={-1}
+      >
         {/* ── Cabecera ── */}
         <div className={styles.header}>
           <h2 id="order-form-title" className={styles.title}>
@@ -167,15 +171,18 @@ export function OrderConfirmationForm({
 
         {/* ── Mock de procesamiento y feedback visual ── */}
         {processing && (
-          <div className={styles.processing} style={{ textAlign: 'center', padding: '2rem' }}>
+          <div className={styles.processing} role="status" aria-live="polite" style={{ textAlign: 'center', padding: '2rem' }}>
             <div className={styles.spinner} style={{ margin: '0 auto 1rem', width: 32, height: 32, border: '4px solid #eee', borderTop: '4px solid #25d366', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
             <p>Procesando pedido...</p>
           </div>
         )}
         {success && (
-          <div className={styles.success} style={{ textAlign: 'center', padding: '2rem' }}>
+          <div className={styles.success} role="status" aria-live="polite" style={{ textAlign: 'center', padding: '2rem' }}>
             <span style={{ fontSize: 32, color: '#25d366' }} role="img" aria-label="Pedido enviado">✅</span>
-            <p style={{ marginTop: 16, fontWeight: 'bold' }}>¡Pedido enviado por WhatsApp!</p>
+            <p style={{ marginTop: 16, marginBottom: 8, fontWeight: 'bold' }}>Pedido confirmado</p>
+            <p style={{ margin: 0 }}>
+              Te enviamos el detalle por correo y abriremos WhatsApp en unos segundos.
+            </p>
           </div>
         )}
         {!processing && !success && (
