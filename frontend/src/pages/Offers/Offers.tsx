@@ -8,6 +8,7 @@ import type { PublicPromotion, PublicCollection } from '../../services/publicCol
 import { publicCollectionsService } from '../../services/publicCollectionsService';
 import CollectionSlider from '../../components/CollectionSlider';
 import styles from './Offers.module.css';
+import '../../styles/collections.css';
 
 const Offers: React.FC = () => {
   const [promotions, setPromotions] = useState<PublicPromotion[]>([]);
@@ -73,17 +74,24 @@ const Offers: React.FC = () => {
       {collections.length > 0 && (
         <section className={styles.section}>
           <h2>Colecciones Especiales</h2>
-          <div className={styles.collectionsGrid}>
-            {collections.map((collection) => (
-              <CollectionSlider
-                key={collection.id}
-                title={collection.name}
-                description={collection.description}
-                products={collection.products || []}
-                bannerUrl={collection.imageUrl}
-                onProductClick={handleProductClick}
-              />
-            ))}
+            <div className={styles.collectionsGrid}>
+            {collections.map((collection, index) => {
+              const isEven = index % 2 === 0;
+              const themeClass = isEven ? 'collection-section--primary' : 'collection-section--inverse';
+              return (
+                <section key={collection.id} className={`collection-section ${themeClass}`} aria-label={collection.name}>
+                  <div className="section-inner">
+                    <CollectionSlider
+                      title={collection.name}
+                      description={collection.description}
+                      products={collection.products || []}
+                      bannerUrl={collection.imageUrl}
+                      onProductClick={handleProductClick}
+                    />
+                  </div>
+                </section>
+              );
+            })}
           </div>
         </section>
       )}

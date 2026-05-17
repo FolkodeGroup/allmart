@@ -107,13 +107,15 @@ const CollectionSlider: React.FC<Props> = ({
 
     const { visibleSlides: nextVisibleSlides, gapPx: nextGapPx } = getResponsiveValues(window.innerWidth);
     const viewportWidth = viewportRef.current?.clientWidth ?? 0;
-    const nextSlidesPerView = Math.max(1, Math.min(nextVisibleSlides, products.length || 1));
 
     setVisibleSlides(nextVisibleSlides);
     setGapPx(nextGapPx);
 
     if (viewportWidth > 0) {
-      const nextSlideWidth = (viewportWidth - nextGapPx * (nextSlidesPerView - 1)) / nextSlidesPerView;
+      // Always size slides based on the full responsive count so cards are
+      // the same width regardless of how many products the collection has.
+      // When products < nextVisibleSlides the track uses justify-content:center.
+      const nextSlideWidth = (viewportWidth - nextGapPx * (nextVisibleSlides - 1)) / nextVisibleSlides;
       setSlideWidth(nextSlideWidth);
     }
   };

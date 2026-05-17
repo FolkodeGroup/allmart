@@ -6,6 +6,7 @@ import { publicCollectionsService } from '../../services/publicCollectionsServic
 import type { PublicBanner } from '../../services/publicBannersService';
 import { publicBannersService } from '../../services/publicBannersService';
 import CollectionSlider from '../../components/CollectionSlider';
+import '../../styles/collections.css';
 import BannerSlider from '../../components/BannerSlider';
 import { Benefits } from '../../features/home/Benefits/Benefits';
 import { AboutSection } from '../../features/home/AboutSection/AboutSection';
@@ -73,9 +74,9 @@ export function HomePage() {
 
       {/* Secciones de Colecciones - Dinámicas con degradación vertical */}
       {loading && (
-        <section style={{ background: 'linear-gradient(to bottom, var(--color-primary-light) 90%, #f9fafb 100%)', padding: 'var(--space-16) 0' }}>
-          <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
-            <p style={{ color: '#666' }}>Cargando colecciones especiales...</p>
+        <section className="collection-section collection-section--primary">
+          <div className="section-inner">
+            <p style={{ color: 'var(--color-text-secondary)' }}>Cargando colecciones especiales...</p>
           </div>
         </section>
       )}
@@ -83,26 +84,16 @@ export function HomePage() {
       {!loading && !error && collections.length > 0 && (
         <div>
           {collections.map((collection, index) => {
-            const isLast = index === collections.length - 1;
             const isEvenIndex = index % 2 === 0;
-            let backgroundColor;
-            if (isLast) {
-              // Última colección: color puro
-              backgroundColor = isEvenIndex ? 'var(--color-primary-light)' : '#f9fafb';
-            } else {
-              // Degradado entre colecciones
-              backgroundColor = isEvenIndex
-                ? 'linear-gradient(to bottom, var(--color-primary-light) 90%, #f9fafb 100%)'
-                : 'linear-gradient(to bottom, #f9fafb 90%, var(--color-primary-light) 100%)';
-            }
+            const themeClass = isEvenIndex ? 'collection-section--primary' : 'collection-section--inverse';
 
             return (
               <section
                 key={collection.id}
-                style={{ background: backgroundColor, padding: 'var(--space-16) 0' }}
+                className={`collection-section ${themeClass}`}
                 aria-label={collection.name}
               >
-                <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
+                <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }} className="section-inner">
                   <CollectionSlider
                     title={collection.name}
                     description={collection.description}

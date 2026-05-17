@@ -1,0 +1,54 @@
+/* ============================================================
+   Collections section — gradients & layout
+   Each section IS the gradient (top-color → bottom-color).
+   .--primary  green top → white bottom
+   .--inverse  white top → green bottom
+   Adjacent sections connect seamlessly at their shared edge.
+   ============================================================ */
+
+/* ── Layout ── */
+.collection-section {
+  padding: var(--space-16) 0;
+}
+
+.collection-section .section-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 var(--space-10);
+}
+
+/* ── Primary: green → white ──
+   Multi-stop gradient simulates ease-out (fast fade at start, gentle at end).
+   Bottom edge = pure white → connects seamlessly with .--inverse top.    */
+.collection-section--primary {
+  background: linear-gradient(
+    180deg,
+    rgba(var(--color-primary-light-rgb), 1)    0%,
+    rgba(var(--color-primary-light-rgb), 0.88) 18%,
+    rgba(var(--color-primary-light-rgb), 0.66) 40%,
+    rgba(var(--color-primary-light-rgb), 0.36) 62%,
+    rgba(var(--color-primary-light-rgb), 0.12) 82%,
+    rgba(255, 255, 255, 1)                    100%
+  );
+}
+
+/* ── Inverse: white → green ──
+   Multi-stop gradient simulates ease-in (subtle at start, rich at end).
+   Bottom edge = full green → connects seamlessly with .--primary top.   */
+.collection-section--inverse {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1)                    0%,
+    rgba(var(--color-primary-light-rgb), 0.10) 20%,
+    rgba(var(--color-primary-light-rgb), 0.38) 44%,
+    rgba(var(--color-primary-light-rgb), 0.70) 68%,
+    rgba(var(--color-primary-light-rgb), 0.90) 86%,
+    rgba(var(--color-primary-light-rgb), 1)   100%
+  );
+}
+
+@media (max-width: 768px) {
+  .collection-section .section-inner {
+    padding: 0 var(--space-6);
+  }
+}

@@ -31,7 +31,30 @@
   font-size: clamp(2rem, 2.8vw, 3rem);
   font-weight: 800;
   color: #1f2937;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
+  font-family: var(--font-body);
+  line-height: 1.02;
+}
+
+/* Decorative underline and brand accent for titles */
+.titleSection h2::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 6px;
+  margin-top: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--color-accent), color-mix(in srgb, var(--color-accent), white 30%));
+  opacity: 0.98;
+}
+
+/* Adapt title color according to section background (global classes) */
+:global(.collection-section--primary) .titleSection h2 {
+  color: var(--color-primary-dark);
+}
+
+:global(.collection-section--inverse) .titleSection h2 {
+  color: var(--color-text-primary);
 }
 
 .titleSection p {

@@ -5,8 +5,8 @@
 :root {
   /* ── Color Palette ── */
   --color-primary: #769282;
-  --color-primary-light: #8fa99a;
-  --color-primary-dark: #5d7568;
+   --color-primary-rgb: 118,146,130;
+  --color-primary-light: #8fa99a;  --color-primary-light-rgb: 143,169,154;  --color-primary-dark: #5d7568;
   --color-accent: #DDB08C;
   --color-accent-light: #e8c5a8;
   --color-accent-dark: #c89a70;
