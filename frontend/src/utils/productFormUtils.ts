@@ -180,12 +180,6 @@ export const getInlineFieldError = (
       }
       return '';
 
-    case 'discount':
-      if (typeof value === 'number' && (value < 0 || value > 100)) {
-        return 'El descuento debe estar entre 0 y 100';
-      }
-      return '';
-
     case 'slug':
       if (typeof value === 'string' && value && !isValidSlug(value)) {
         return 'El slug debe contener solo letras minúsculas, números y guiones';
