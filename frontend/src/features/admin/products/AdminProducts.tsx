@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import toast from 'react-hot-toast';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import type { StatusFilter, StockLevelFilter } from './productsService';
+import { exportCatalogPdf } from './productsService';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
@@ -52,8 +53,50 @@ export function AdminProducts() {
   // Context and hooks
   const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
 
-  const { can } = useAdminAuth();
+  const { can, token } = useAdminAuth();
   const { categories } = useAdminCategories();
+
+  // PDF export
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  const handleExportPdf = useCallback(async () => {
+    if (!token) {
+      toast.error('Sesión no iniciada. Por favor, volvé a iniciar sesión.');
+      return;
+    }
+    setIsExportingPdf(true);
+    try {
+      const { blob, filename } = await exportCatalogPdf(
+        {
+          title: 'Catálogo Allmart',
+          columns: 3,
+          paperFormat: 'A4',
+          filters: {
+            status: statusFilter,
+            q: search || undefined,
+            categoryId: categoryFilter || undefined,
+            stockLevel: stockLevelFilter,
+          },
+        },
+        token,
+      );
+      // Descargar en el navegador
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success('Catálogo PDF descargado con éxito');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al exportar PDF: ${message}`);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  }, [token, search, categoryFilter, statusFilter, stockLevelFilter]);
 
   // Scroll preservation
   const containerRef = useRef<HTMLElement>(null);
@@ -184,7 +227,12 @@ export function AdminProducts() {
     >
       {viewMode === 'list' && (
         <>
-          <ProductHeader canCreate={can('products.create')} onNew={handleNew} />
+          <ProductHeader
+            canCreate={can('products.create')}
+            onNew={handleNew}
+            onExportPdf={handleExportPdf}
+            isExportingPdf={isExportingPdf}
+          />
 
           <ProductFilters
             search={search}
