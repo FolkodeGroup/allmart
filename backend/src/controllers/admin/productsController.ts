@@ -59,8 +59,6 @@ function mapProductToCatalogInput(product: Awaited<ReturnType<typeof productsSer
     price: product.price,
     shortDescription: product.shortDescription ?? product.description ?? '',
     imageUrl: product.images[0],
-    sku: product.sku ?? '',
-    stock: product.stock ?? 0,
   };
 }
 

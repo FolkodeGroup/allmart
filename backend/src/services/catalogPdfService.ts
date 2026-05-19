@@ -37,8 +37,6 @@ export interface CatalogPdfProductInput {
   description?: string | null;
   imageUrl?: string | null;
   images?: string[] | null;
-  sku?: string | null;
-  stock?: number | null;
 }
 
 export interface CatalogPdfProduct {
@@ -50,8 +48,6 @@ export interface CatalogPdfProduct {
   shortDescription: string;
   imageUrl?: string;
   imageAlt: string;
-  sku: string;
-  stock: number;
 }
 
 interface CatalogRenderableProduct extends CatalogPdfProduct {
@@ -199,8 +195,6 @@ export function normalizeCatalogProduct(
     shortDescription,
     imageUrl,
     imageAlt: `Imagen principal de ${title}`,
-    sku: product.sku ?? '',
-    stock: product.stock ?? 0,
   };
 }
 
@@ -337,9 +331,7 @@ export function buildCatalogHtml(options: {
         <img src="${product.imageDataUri}" alt="${escapeHtml(product.imageAlt)}" />
       </td>
       <td class="table-title">${escapeHtml(product.title)}</td>
-      <td class="table-sku">${escapeHtml(product.sku)}</td>
       <td class="table-price">${escapeHtml(product.formattedPrice)}</td>
-      <td class="table-stock">${escapeHtml(String(product.stock))}</td>
       <td class="table-description">${escapeHtml(product.shortDescription || 'Sin descripcion breve.')}</td>
     </tr>
   `,
@@ -453,21 +445,10 @@ export function buildCatalogHtml(options: {
             max-width: 52mm;
             word-break: break-word;
           }
-          .table-sku {
-            font: 400 9pt var(--font-body);
-            color: var(--brand-text-muted);
-            white-space: nowrap;
-          }
-
           .table-price {
             color: var(--brand-accent-dark);
             font: 700 10pt var(--font-heading);
             white-space: nowrap;
-          }
-          .table-stock {
-            font: 700 10pt var(--font-heading);
-            text-align: center;
-            color: var(--brand-text);
           }
           .table-description {
             color: var(--brand-text-muted);
@@ -493,9 +474,7 @@ export function buildCatalogHtml(options: {
                 <tr>
                   <th>Imagen</th>
                   <th>Nombre</th>
-                  <th>SKU</th>
                   <th>Precio</th>
-                  <th>Stock</th>
                   <th>Descripcion</th>
                 </tr>
               </thead>
