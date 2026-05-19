@@ -5,7 +5,7 @@
  */
 
 import type { Product, Category } from '../../../types';
-import { apiFetch } from '../../../utils/apiClient';
+import { apiFetch, getAuthHeaders } from '../../../utils/apiClient';
 
 // ─── Tipos que retorna el backend ─────────────────────────────────────────────
 
@@ -368,4 +368,74 @@ export async function deleteAdminProduct(id: string, token: string): Promise<voi
 export async function fetchAdminLowStockCount(token: string): Promise<number> {
   const body = await apiFetch<ApiSuccess<{ count: number }>>('/api/admin/products/low-stock-count', {}, token);
   return body.data.count;
+}
+
+// ─── Exportación de catálogo PDF ──────────────────────────────────────────────
+
+/** Parámetros para la exportación del catálogo en PDF */
+export interface CatalogPdfExportParams {
+  /** Título del catálogo (aparece en el header del PDF) */
+  title?: string;
+  /** Número de columnas en la grilla de productos */
+  columns?: 1 | 2 | 3 | 4;
+  /** Formato de papel */
+  paperFormat?: 'A4' | 'Letter' | 'Legal';
+  /** Filtros a aplicar en el servidor */
+  filters?: {
+    status?: StatusFilter;
+    q?: string;
+    categoryId?: string;
+    stockLevel?: StockLevelFilter;
+    /** Límite máximo de productos a incluir (default: 60) */
+    limit?: number;
+  };
+}
+
+/**
+ * POST /api/admin/products/export-pdf
+ * Genera y descarga el catálogo de productos en PDF.
+ * La respuesta es un Blob binario (application/pdf).
+ */
+export async function exportCatalogPdf(
+  params: CatalogPdfExportParams,
+  token: string,
+): Promise<{ blob: Blob; filename: string }> {
+  const headers = {
+    ...(getAuthHeaders(token) as Record<string, string>),
+    'Content-Type': 'application/json',
+  };
+
+  const body: Record<string, unknown> = {
+    title: params.title ?? 'Catálogo Allmart',
+    columns: params.columns ?? 3,
+    paperFormat: params.paperFormat ?? 'A4',
+    filters: {
+      ...(params.filters?.status && params.filters.status !== 'all' ? { status: params.filters.status } : {}),
+      ...(params.filters?.q ? { q: params.filters.q } : {}),
+      ...(params.filters?.categoryId ? { categoryId: params.filters.categoryId } : {}),
+      ...(params.filters?.stockLevel && params.filters.stockLevel !== 'all' ? { stockLevel: params.filters.stockLevel } : {}),
+      ...(params.filters?.limit ? { limit: params.filters.limit } : {}),
+    },
+  };
+
+  const response = await fetch('/api/admin/products/export-pdf', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => String(response.status));
+    throw new Error(`Error al generar el PDF (${response.status}): ${errText}`);
+  }
+
+  const blob = await response.blob();
+
+  // Extraer nombre de archivo del header Content-Disposition si está disponible
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const filenameMatch = disposition.match(/filename[^;=\n]*=(?:["']?)([^"'\n;]+)/);
+  const filename = filenameMatch?.[1]?.trim()
+    ?? `catalogo-allmart-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+  return { blob, filename };
 }

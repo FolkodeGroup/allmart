@@ -26,6 +26,7 @@ router.use('/:productId/images',   imagesRouter);
 router.get('/low-stock-count', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.lowStockCount);
 router.get('/',    requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.index);
 router.get('/:id', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.show);
+router.post('/export-pdf', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.exportCatalogPdf);
 router.post('/',   requireRole(UserRole.ADMIN), ctrl.create);
 router.put('/:id', requireRole(UserRole.ADMIN), ctrl.update);
 router.delete('/:id', requireRole(UserRole.ADMIN), ctrl.remove);

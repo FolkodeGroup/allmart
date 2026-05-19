@@ -3,11 +3,83 @@
  * Controlador CRUD para el dominio de productos.
  */
 
+import { isAbsolute, resolve } from 'node:path';
 import { Response, NextFunction } from 'express';
 import * as productsService from '../../services/productsService';
+import {
+  CatalogPdfProductInput,
+  generateCatalogPdf,
+} from '../../services/catalogPdfService';
+import { createError } from '../../middlewares/errorHandler';
 import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
 import { CreateProductDTO, UpdateProductDTO } from '../../models/Product';
+
+type CatalogExportRequestBody = {
+  products?: CatalogPdfProductInput[];
+  productIds?: string[];
+  filters?: {
+    q?: string;
+    categoryId?: string;
+    status?: string;
+    stockLevel?: string;
+    limit?: number;
+  };
+  paperFormat?: 'A4' | 'Letter';
+  columns?: 2 | 3;
+  title?: string;
+  subtitle?: string;
+  locale?: string;
+  defaultCurrency?: string;
+  contactText?: string;
+  savePath?: string;
+};
+
+function buildBaseUrl(req: AuthenticatedRequest): string {
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  const forwardedHost = req.headers['x-forwarded-host'];
+  const protocol = typeof forwardedProto === 'string'
+    ? forwardedProto.split(',')[0].trim()
+    : req.protocol;
+  const host = typeof forwardedHost === 'string'
+    ? forwardedHost.split(',')[0].trim()
+    : req.get('host');
+
+  if (!host) {
+    throw createError('No se pudo resolver el host para generar el catalogo', 500);
+  }
+
+  return `${protocol}://${host}`;
+}
+
+function mapProductToCatalogInput(product: Awaited<ReturnType<typeof productsService.getProductsForCatalogExport>>[number]): CatalogPdfProductInput {
+  return {
+    id: product.id,
+    title: product.name,
+    price: product.price,
+    shortDescription: product.shortDescription ?? product.description ?? '',
+    imageUrl: product.images[0],
+  };
+}
+
+function resolveCatalogSavePath(savePath?: string): string | undefined {
+  if (!savePath) {
+    return undefined;
+  }
+
+  if (isAbsolute(savePath)) {
+    throw createError('savePath debe ser relativo al directorio de exportacion configurado', 400);
+  }
+
+  const baseDirectory = resolve(process.env.CATALOG_PDF_OUTPUT_DIR ?? `${process.cwd()}/test-results/catalog-exports`);
+  const resolvedPath = resolve(baseDirectory, savePath);
+
+  if (!resolvedPath.startsWith(`${baseDirectory}/`) && resolvedPath !== baseDirectory) {
+    throw createError('savePath contiene una ruta no permitida', 400);
+  }
+
+  return resolvedPath;
+}
 
 export async function index(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -57,4 +129,46 @@ export async function lowStockCount(req: AuthenticatedRequest, res: Response, ne
     const count = await productsService.getLowStockCount();
     sendSuccess(res, { count });
   } catch (err) { next(err); }
+}
+
+export async function exportCatalogPdf(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const body = (req.body ?? {}) as CatalogExportRequestBody;
+    const filters = body.filters ?? {};
+
+    const inputProducts = Array.isArray(body.products) && body.products.length > 0
+      ? body.products
+      : (await productsService.getProductsForCatalogExport({
+        q: filters.q,
+        categoryId: filters.categoryId,
+        status: filters.status,
+        stockLevel: filters.stockLevel,
+        productIds: body.productIds,
+        limit: filters.limit,
+      })).map(mapProductToCatalogInput);
+
+    if (inputProducts.length === 0) {
+      throw createError('No se encontraron productos para exportar', 404);
+    }
+
+    const { buffer, fileName } = await generateCatalogPdf({
+      products: inputProducts,
+      baseUrl: buildBaseUrl(req),
+      paperFormat: body.paperFormat,
+      columns: body.columns,
+      title: body.title,
+      subtitle: body.subtitle,
+      locale: body.locale,
+      defaultCurrency: body.defaultCurrency,
+      contactText: body.contactText,
+      savePath: resolveCatalogSavePath(body.savePath),
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.status(200).send(buffer);
+  } catch (err) {
+    next(err);
+  }
 }

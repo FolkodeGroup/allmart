@@ -1,12 +1,19 @@
 # =============================================================================
 # Allmart Backend — Dockerfile (multi-stage)
-# Imagen Node 20 Alpine para build y producción.
+# Imagen Node 22 Debian slim para build y producción.
 # =============================================================================
 
 # ── Stage 1: Instalación de dependencias ─────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:22-bookworm-slim AS deps
+
+ENV PUPPETEER_CACHE_DIR=/app/.cache/puppeteer
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    unzip && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copiar solo los archivos de dependencia para aprovechar cache de Docker
 COPY package.json package-lock.json* ./
@@ -16,7 +23,9 @@ RUN npm ci --prefer-offline --no-audit && \
     npm cache clean --force
 
 # ── Stage 2: Build de TypeScript + Prisma ────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:22-bookworm-slim AS builder
+
+ENV PUPPETEER_CACHE_DIR=/app/.cache/puppeteer
 
 WORKDIR /app
 
@@ -31,12 +40,40 @@ RUN npx prisma generate
 RUN npm run build
 
 # ── Stage 3: Imagen de producción ────────────────────────────────────────────
-FROM node:20-alpine AS production
+FROM node:22-bookworm-slim AS production
+
+ENV NODE_ENV=production
+ENV PUPPETEER_CACHE_DIR=/app/.cache/puppeteer
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxkbcommon0 \
+    libxrandr2 \
+    libxss1 \
+    unzip \
+    wget && \
+    rm -rf /var/lib/apt/lists/*
+
 # Crear usuario no-root por seguridad
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN groupadd -r appgroup && useradd -r -g appgroup -G audio,video appuser
 
 # Copiar package.json para referencia
 COPY package.json package-lock.json* ./
@@ -66,6 +103,8 @@ COPY scripts ./scripts
 # Copiar entrypoint script
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh && \
+    mkdir -p /app/.cache/puppeteer && \
+    chown -R appuser:appgroup /app && \
     rm -rf .npmrc .gitignore .git .gitkeep
 
 # Cambiar al usuario no-root

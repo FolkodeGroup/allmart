@@ -98,6 +98,96 @@ function toProduct(row: any): Product {
   };
 }
 
+const adminProductSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  description: true,
+  shortDescription: true,
+  price: true,
+  images: true,
+  categoryId: true,
+  tags: true,
+  rating: true,
+  reviewCount: true,
+  inStock: true,
+  stock: true,
+  sku: true,
+  features: true,
+  isFeatured: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  productCategories: { select: { categoryId: true } },
+} satisfies Prisma.ProductSelect;
+
+type AdminProductsFilterQuery = {
+  q?: string;
+  categoryId?: string;
+  status?: string;
+  stockLevel?: string;
+  productIds?: string[];
+};
+
+function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string, any> {
+  const { q, categoryId, status, stockLevel, productIds } = query;
+  const where: Record<string, any> = {};
+
+  if (Array.isArray(productIds) && productIds.length > 0) {
+    where.id = { in: productIds };
+  }
+
+  if (categoryId) {
+    where.productCategories = { some: { categoryId } };
+  }
+
+  if (status && status !== 'all') {
+    where.status = status;
+  }
+
+  if (stockLevel && stockLevel !== 'all') {
+    if (stockLevel === 'no_stock') {
+      where.stock = 0;
+    } else if (stockLevel === 'low_stock') {
+      where.stock = { gt: 0, lte: 5 };
+    } else if (stockLevel === 'in_stock') {
+      where.stock = { gt: 5 };
+    }
+  }
+
+  if (q) {
+    const search = q.toLowerCase();
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { sku: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  return where;
+}
+
+async function hydrateProductImagesFromStorage(rows: Array<{ id: string; images: unknown }>): Promise<void> {
+  for (const row of rows) {
+    const imagesArray = Array.isArray(row.images) ? row.images : [];
+    if (imagesArray.length === 0) {
+      const storageImages = await prisma.productImageStorage.findMany({
+        where: { productId: row.id },
+        select: { id: true },
+        orderBy: { position: 'asc' },
+      });
+      if (storageImages.length > 0) {
+        const syncedImages = storageImages.map((img) => `/api/images/products/${img.id}`);
+        await prisma.product.update({
+          where: { id: row.id },
+          data: { images: syncedImages as any },
+        });
+        (row as any).images = syncedImages;
+      }
+    }
+  }
+}
+
 export async function getAllProducts(): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     orderBy: { createdAt: 'desc' },
@@ -273,35 +363,7 @@ export async function getAdminProducts(query: {
   limit?: number;
 }) {
   const { q, categoryId, status, stockLevel, page = 1, limit = 10 } = query;
-
-  const where: Record<string, any> = {};
-
-  if (categoryId) {
-    where.productCategories = { some: { categoryId } };
-  }
-
-  if (status && status !== 'all') {
-    where.status = status;
-  }
-
-  if (stockLevel && stockLevel !== 'all') {
-    if (stockLevel === 'no_stock') {
-      where.stock = 0;
-    } else if (stockLevel === 'low_stock') {
-      where.stock = { gt: 0, lte: 5 };
-    } else if (stockLevel === 'in_stock') {
-      where.stock = { gt: 5 };
-    }
-  }
-
-  if (q) {
-    const search = q.toLowerCase();
-    where.OR = [
-      { name: { contains: search, mode: 'insensitive' } },
-      { sku: { contains: search, mode: 'insensitive' } },
-      { description: { contains: search, mode: 'insensitive' } },
-    ];
-  }
+  const where = buildAdminProductsWhere({ q, categoryId, status, stockLevel });
 
   const [total, rows] = await Promise.all([
     prisma.product.count({ where }),
@@ -310,50 +372,11 @@ export async function getAdminProducts(query: {
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit,
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        shortDescription: true,
-        price: true,
-        images: true,
-        categoryId: true,
-        tags: true,
-        rating: true,
-        reviewCount: true,
-        inStock: true,
-        stock: true,
-        sku: true,
-        features: true,
-        isFeatured: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        productCategories: { select: { categoryId: true } },
-      },
+      select: adminProductSelect,
     }),
   ]);
 
-  // Sincronizar imágenes para productos que tienen storage pero producto.images está vacío
-  for (const row of rows) {
-    const imagesArray = Array.isArray(row.images) ? row.images : [];
-    if (imagesArray.length === 0) {
-      const storageImages = await prisma.productImageStorage.findMany({
-        where: { productId: row.id },
-        select: { id: true },
-        orderBy: { position: 'asc' },
-      });
-      if (storageImages.length > 0) {
-        const syncedImages = storageImages.map(img => `/api/images/products/${img.id}`);
-        await prisma.product.update({
-          where: { id: row.id },
-          data: { images: syncedImages as any },
-        });
-        (row as any).images = syncedImages;
-      }
-    }
-  }
+  await hydrateProductImagesFromStorage(rows);
 
   return {
     data: rows.map(toProduct),
@@ -362,6 +385,62 @@ export async function getAdminProducts(query: {
     limit,
     totalPages: Math.ceil(total / limit),
   };
+}
+
+/**
+ * Para el export de catálogo: prefiere siempre las imágenes del storage (binarias)
+ * sobre URLs externas (e.g. Unsplash), usando una sola consulta batch.
+ * No actualiza la DB, solo sobreescribe en memoria.
+ */
+async function preferStorageImagesForExport(rows: Array<{ id: string; images: unknown }>): Promise<void> {
+  if (rows.length === 0) return;
+  const productIds = rows.map((r) => r.id);
+  const storageRecords = await prisma.productImageStorage.findMany({
+    where: { productId: { in: productIds } },
+    select: { id: true, productId: true },
+    orderBy: { position: 'asc' },
+  });
+
+  // Agrupar por producto
+  const byProduct = new Map<string, string[]>();
+  for (const rec of storageRecords) {
+    const urls = byProduct.get(rec.productId) ?? [];
+    urls.push(`/api/images/products/${rec.id}`);
+    byProduct.set(rec.productId, urls);
+  }
+
+  // Sobreescribir en memoria si hay imágenes en storage
+  for (const row of rows) {
+    const storageUrls = byProduct.get(row.id);
+    if (storageUrls && storageUrls.length > 0) {
+      (row as any).images = storageUrls;
+    }
+  }
+}
+
+export async function getProductsForCatalogExport(query: {
+  q?: string;
+  categoryId?: string;
+  status?: string;
+  stockLevel?: string;
+  productIds?: string[];
+  limit?: number;
+}): Promise<Product[]> {
+  const { q, categoryId, status, stockLevel, productIds, limit } = query;
+  const where = buildAdminProductsWhere({ q, categoryId, status, stockLevel, productIds });
+  const rows = await prisma.product.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    select: adminProductSelect,
+  });
+
+  // Hidratar productos con images vacías (también actualiza la DB)
+  await hydrateProductImagesFromStorage(rows);
+  // Para el export, preferir siempre imágenes binarias del storage sobre URLs externas
+  await preferStorageImagesForExport(rows);
+
+  return rows.map(toProduct);
 }
 
 // Función para obtener productos del catálogo (con filtros)

@@ -1,90 +1,88 @@
-.backdrop {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 0.2s;
+.overlay.overlay {
+  background: var(--admin-confirm-modal-overlay);
+  backdrop-filter: blur(6px);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.modal.modal {
+  background: var(--admin-confirm-modal-bg);
+  color: var(--admin-confirm-modal-text);
+  border: 1px solid var(--admin-confirm-modal-border);
+  box-shadow: var(--admin-confirm-modal-shadow);
 }
 
-.panel {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
-  min-width: 320px;
-  max-width: 90vw;
-  animation: popIn 0.2s;
-}
-
-@media (max-width: 600px) {
-  .panel {
-    max-width: 100vw;
-    min-width: 0;
-    border-radius: 0;
-    padding: 18px 4vw 16px 4vw;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.13);
-  }
-}
-
-@keyframes popIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+.modal h2 {
+  color: var(--admin-confirm-modal-text);
   text-align: center;
 }
 
 .message {
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--admin-confirm-modal-text-muted);
+  max-width: 32ch;
+  margin: 0 auto;
   text-align: center;
 }
 
-.actions {
+.actions.actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.875rem;
   justify-content: center;
+  flex-wrap: wrap;
+}
+
+.actions > button {
+  flex: 1 1 0;
+  min-width: 138px;
 }
 
 .confirmBtn {
-  background: #e53935;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
-  font-weight: 500;
+  background: var(--admin-confirm-danger-bg);
+  color: var(--admin-confirm-danger-text);
+  border: 1px solid var(--admin-confirm-danger-border);
+  border-radius: 12px;
+  padding: 0.85rem 1.15rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
-  transition: background 0.15s;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  transition: background 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
 }
+
 .confirmBtn:hover {
-  background: #b71c1c;
+  background: var(--admin-confirm-danger-hover-bg);
+  border-color: var(--admin-confirm-danger-hover-bg);
+  transform: translateY(-1px);
 }
 
 .cancelBtn {
-  background: #eee;
-  color: #333;
-  border: none;
-  border-radius: 5px;
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
-  font-weight: 500;
+  background: var(--admin-confirm-cancel-bg);
+  color: var(--admin-confirm-cancel-text);
+  border: 1px solid var(--admin-confirm-cancel-border);
+  border-radius: 12px;
+  padding: 0.85rem 1.15rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s;
 }
+
 .cancelBtn:hover {
-  background: #ccc;
+  background: var(--admin-confirm-cancel-hover-bg);
+  transform: translateY(-1px);
+}
+
+.confirmBtn:focus-visible,
+.cancelBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 118, 146, 130), 0.24);
+}
+
+@media (max-width: 520px) {
+  .actions > button {
+    min-width: 100%;
+  }
 }
 
