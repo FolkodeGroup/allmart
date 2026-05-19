@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, FileDown, Loader2 } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import sectionStyles from '../../features/admin/shared/AdminSection.module.css';
 import styles from './ProductHeader.module.css';
 
