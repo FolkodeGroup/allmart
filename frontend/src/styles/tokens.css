@@ -30,6 +30,22 @@
   --color-error: #C75050;
   --color-overlay: rgba(0, 0, 0, 0.4);
 
+   /* ── Admin confirm/warning modals ── */
+   --admin-confirm-modal-bg: #ffffff;
+   --admin-confirm-modal-border: #e7dfd5;
+   --admin-confirm-modal-text: #2f3331;
+   --admin-confirm-modal-text-muted: #5f645f;
+   --admin-confirm-modal-overlay: rgba(16, 18, 20, 0.42);
+   --admin-confirm-modal-shadow: 0 22px 56px rgba(30, 24, 18, 0.18);
+   --admin-confirm-cancel-bg: #f3eee8;
+   --admin-confirm-cancel-border: #ddd2c6;
+   --admin-confirm-cancel-text: #2f3835;
+   --admin-confirm-cancel-hover-bg: #ebe3da;
+   --admin-confirm-danger-bg: #e75646;
+   --admin-confirm-danger-border: #e75646;
+   --admin-confirm-danger-text: #ffffff;
+   --admin-confirm-danger-hover-bg: #d44739;
+
   /* ── Inverse Colors (for light mode) ── */
   --color-primary-light-inverse: #767676;
   --color-primary-dark-inverse: #4A4A4A;
@@ -132,6 +148,23 @@
   /* ── Header ── */
   --header-height: 72px;
   --header-height-scrolled: 64px;
+}
+
+body[data-admin-theme='dark'] {
+   --admin-confirm-modal-bg: #353132;
+   --admin-confirm-modal-border: #4c4341;
+   --admin-confirm-modal-text: #f5f1ea;
+   --admin-confirm-modal-text-muted: #d8cec2;
+   --admin-confirm-modal-overlay: rgba(8, 10, 12, 0.72);
+   --admin-confirm-modal-shadow: 0 26px 64px rgba(0, 0, 0, 0.46);
+   --admin-confirm-cancel-bg: #262c2f;
+   --admin-confirm-cancel-border: #769282;
+   --admin-confirm-cancel-text: #f5f1ea;
+   --admin-confirm-cancel-hover-bg: #2f3639;
+   --admin-confirm-danger-bg: #6d494e;
+   --admin-confirm-danger-border: #6d494e;
+   --admin-confirm-danger-text: #ff8b90;
+   --admin-confirm-danger-hover-bg: #7b5459;
 }
 
 /* ── Breakpoints (reference, used in media queries) ──

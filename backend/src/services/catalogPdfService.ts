@@ -10,6 +10,7 @@ const ALLMART_LOGO_SVG = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http
 const MAX_TITLE_LENGTH = 80;
 const MAX_SHORT_DESCRIPTION_LENGTH = 200;
 const OPTIMIZED_IMAGE_SIZE = 300;
+const IMAGE_PREPARATION_CONCURRENCY = 4;
 
 export interface CatalogPdfBranding {
   primary: string;
@@ -267,6 +268,32 @@ async function buildOptimizedImageDataUri(
   }
 }
 
+async function mapWithConcurrency<TInput, TOutput>(
+  items: TInput[],
+  concurrency: number,
+  mapper: (item: TInput, index: number) => Promise<TOutput>,
+): Promise<TOutput[]> {
+  if (items.length === 0) {
+    return [];
+  }
+
+  const results = new Array<TOutput>(items.length);
+  let nextIndex = 0;
+
+  const worker = async () => {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  };
+
+  const workerCount = Math.min(Math.max(1, concurrency), items.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+
+  return results;
+}
+
 async function prepareProductsForRender(
   products: CatalogPdfProductInput[],
   locale: string,
@@ -276,12 +303,12 @@ async function prepareProductsForRender(
 ): Promise<CatalogRenderableProduct[]> {
   const normalizedProducts = products.map((product) => normalizeCatalogProduct(product, locale, defaultCurrency));
 
-  return Promise.all(
-    normalizedProducts.map(async (product) => ({
+  // Evita saturar proveedores externos de imágenes (Unsplash/imgix) cuando el
+  // catálogo exporta muchos productos en una sola corrida.
+  return mapWithConcurrency(normalizedProducts, IMAGE_PREPARATION_CONCURRENCY, async (product) => ({
       ...product,
       imageDataUri: await buildOptimizedImageDataUri(product.imageUrl, product.title, branding, baseUrl),
-    })),
-  );
+    }));
 }
 
 export function buildCatalogHtml(options: {

@@ -40,6 +40,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             title={title}
             disableClose={loading}
             size="sm"
+            className={styles.modal}
+            overlayClassName={styles.overlay}
             actionsClassName={styles.actions}
             actions={
                 <>

@@ -32,6 +32,8 @@ export const ModalConfirm: React.FC<ModalConfirmProps> = ({
       onClose={onCancel}
       title={title}
       size="sm"
+      className={styles.modal}
+      overlayClassName={styles.overlay}
       actionsClassName={styles.actions}
       actions={
         <>

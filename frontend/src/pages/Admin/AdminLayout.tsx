@@ -140,7 +140,14 @@ export function AdminLayout() {
 
   useEffect(() => {
     localStorage.setItem('admin-theme', theme);
-    // La clase 'dark' se aplica al wrapper del admin (ver render)
+    // Los modales se renderizan por portal en document.body, por eso el tema
+    // del admin también se refleja en body para que los confirm/warning tomen
+    // los colores correctos en modo claro y oscuro.
+    document.body.setAttribute('data-admin-theme', theme);
+
+    return () => {
+      document.body.removeAttribute('data-admin-theme');
+    };
   }, [theme]);
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
