@@ -34,10 +34,8 @@ export const ProductHeader: React.FC<ProductHeaderProps> = ({
               aria-label="Exportar catálogo de productos en PDF"
               title="Exportar catálogo PDF con los filtros activos"
             >
-              {isExportingPdf ? (
+              {isExportingPdf && (
                 <Loader2 size={15} strokeWidth={2} className={styles.spinIcon} />
-              ) : (
-                <FileDown size={15} strokeWidth={2} />
               )}
               {isExportingPdf ? 'Generando…' : 'Exportar PDF'}
             </button>
