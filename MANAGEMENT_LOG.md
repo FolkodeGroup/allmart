@@ -1754,3 +1754,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #947: 935 eliminar campos de precio original y descuento en formulario de productos | 2026-05-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #949: Colecciones | 2026-05-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #950: 902 unificar vista de productos más vendidos en tabla | 2026-05-19 |
