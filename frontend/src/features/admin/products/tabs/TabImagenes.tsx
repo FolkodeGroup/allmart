@@ -41,7 +41,7 @@ interface TabImagenesProps {
     setShowAddImgForm: (b: boolean) => void;
     deletingImgId: string | null;
     fileInputRef: RefObject<HTMLInputElement | null>;
-    onApiUploadImage: () => Promise<void>;
+    onApiUploadImage: (file?: File) => Promise<void>;
     onApiDeleteImage: (imageId: string) => Promise<void>;
 }
 
@@ -102,29 +102,23 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
             <>
                 <fieldset className={styles.fieldset}>
                     <legend className={styles.legend}>Imágenes del producto</legend>
-
-                    {imagesError && <div className={styles.errorText}>{imagesError}</div>}
-
-                    {!showAddImgForm ? (
-                        <button
-                            type="button"
-                            className={styles.uploadButton}
-                            onClick={() => setShowAddImgForm(true)}
-                            disabled={imagesLoading}
-                        >
-                            + Agregar imagen
-                        </button>
-                    ) : (
-                        <div className={styles.uploadSection}>
+                    <p className={styles.fieldHint}>
+                        Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
+                    </p>
+                    <div className={styles.uploadSection}>
+                        <label className={styles.uploadLabel}>
                             <input
                                 type="file"
                                 accept="image/*"
                                 multiple
                                 ref={fileInputRef}
-                                onChange={e => {
+                                onChange={async e => {
                                     const files = e.target.files;
                                     if (files && files.length > 0) {
-                                        setImgFile(files[0]);
+                                        const file = files[0];
+                                        setImgFile(file);
+                                        await onApiUploadImage(file); // pasa el file directo, sin depender del estado
+                                        if (e.target) e.target.value = ''; // permite re-seleccionar el mismo archivo
                                     }
                                 }}
                                 style={{ display: 'none' }}
@@ -134,40 +128,13 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 onClick={() => fileInputRef.current?.click()}
                                 className={styles.uploadButton}
                             >
-                                📁 Seleccionar archivo(s)
+                                <span className={styles.uploadButton}>
+                                    {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : '+ Agregar imágenes'}
+                                </span>
                             </button>
-                            {imgFile && <p style={{ fontSize: '13px', color: '#6b7280' }}>Archivo: {imgFile.name}</p>}
-                            <input
-                                type="text"
-                                placeholder="Texto alternativo (opcional)"
-                                value={imgNewAlt}
-                                onChange={e => setImgNewAlt(e.target.value)}
-                                className={styles.inputField}
-                            />
-                            <div>
-                                <button
-                                    type="button"
-                                    onClick={onApiUploadImage}
-                                    disabled={!imgFile}
-                                    className={styles.submitBtn}
-                                >
-                                    ✓ Subir
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowAddImgForm(false);
-                                        setImgFile(null);
-                                        setImgNewAlt('');
-                                    }}
-                                    className={styles.cancelBtn}
-                                >
-                                    ✕ Cancelar
-                                </button>
-                            </div>
-                            {imgError && <div className={styles.errorText}>{imgError}</div>}
-                        </div>
-                    )}
+                        </label>
+                        {imgError && <div className={styles.errorText}>{imgError}</div>}
+                    </div>
 
                     {imagesLoading ? (
                         <div>Cargando imágenes...</div>
@@ -194,7 +161,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                             ))}
                         </div>
                     )}
-                </fieldset>
+                </fieldset >
                 <ModalConfirm
                     open={deleteConfirmImageId !== null}
                     title="Eliminar imagen"

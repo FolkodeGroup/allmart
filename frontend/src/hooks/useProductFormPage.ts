@@ -309,12 +309,13 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     );
 
     // ── Image handlers (API / edit mode) ──────────────────────────────────
-    const handleApiUploadImage = useCallback(async () => {
+    const handleApiUploadImage = useCallback(async (fileOverride?: File) => {
         setImgError('');
-        if (!imgFile) { setImgError('Seleccioná un archivo'); return; }
+        const file = fileOverride ?? imgFile;
+        if (!file) { setImgError('Seleccioná un archivo'); return; }
         if (!productId) return;
         try {
-            await uploadImage(productId, imgFile, imgNewAlt.trim() || undefined);
+            await uploadImage(productId, file, imgNewAlt.trim() || undefined);
             setImgFile(null);
             setImgNewAlt('');
             setShowAddImgForm(false);
