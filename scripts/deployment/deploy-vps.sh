@@ -90,6 +90,43 @@ $image_refs
 EOF
 }
 
+cleanup_stale_recreate_containers() {
+  local container_name="$1"
+  local stale_names=""
+
+  stale_names=$(docker ps -a --format '{{.Names}}' | grep -E "^[a-f0-9]{12}_${container_name}$" || true)
+
+  if [ -z "$stale_names" ]; then
+    return 0
+  fi
+
+  while IFS= read -r stale_name; do
+    [ -z "$stale_name" ] && continue
+    warn "Eliminando contenedor temporal huérfano de una recreación previa: $stale_name"
+    docker rm -f "$stale_name" >/dev/null 2>&1 || warn "No se pudo eliminar $stale_name"
+  done <<EOF
+$stale_names
+EOF
+}
+
+cleanup_unhealthy_service_container() {
+  local container_name="$1"
+  local status=""
+
+  if ! docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
+    return 0
+  fi
+
+  status=$(docker inspect --format '{{.State.Status}}' "$container_name" 2>/dev/null || true)
+
+  case "$status" in
+    dead|removing|created|exited)
+      warn "Eliminando contenedor $container_name en estado no reutilizable: $status"
+      docker rm -f "$container_name" >/dev/null 2>&1 || warn "No se pudo eliminar $container_name"
+      ;;
+  esac
+}
+
 # ─── Verificar que existe el directorio de deploy ─────────────────────────────
 if [ ! -d "$DEPLOY_DIR" ]; then
   log "Creando directorio de despliegue: $DEPLOY_DIR"
@@ -128,8 +165,14 @@ success "Imágenes descargadas correctamente"
 log "Asegurando que la base de datos permanezca levantada..."
 docker compose -f "$COMPOSE_FILE" up -d db --wait --wait-timeout 180
 
+log "Limpiando residuos de recreaciones previas de backend/frontend..."
+cleanup_stale_recreate_containers "allmart-prod-backend"
+cleanup_stale_recreate_containers "allmart-prod-frontend"
+cleanup_unhealthy_service_container "allmart-prod-backend"
+cleanup_unhealthy_service_container "allmart-prod-frontend"
+
 log "Actualizando backend y frontend sin recrear la base de datos..."
-docker compose -f "$COMPOSE_FILE" up -d --no-deps backend frontend --wait --wait-timeout 240
+docker compose -f "$COMPOSE_FILE" up -d --no-deps --remove-orphans backend frontend --wait --wait-timeout 240
 
 # ─── Verificar que los contenedores están corriendo ───────────────────────────
 log "Esperando que los servicios estén listos (30s)..."
