@@ -29,7 +29,7 @@ describe('catalogPdfService', () => {
     expect(product.formattedPrice).toContain('19');
   });
 
-  it('renders branded html with the requested number of columns', () => {
+  it('renders branded html in table format', () => {
     const html = buildCatalogHtml({
       columns: 3,
       title: 'Catalogo Mayorista',
@@ -48,7 +48,9 @@ describe('catalogPdfService', () => {
       ],
     });
 
-    expect(html).toContain('--catalog-columns: 3');
+    expect(html).toContain('class="catalog-table"');
+    expect(html).toContain('<th>Imagen</th>');
+    expect(html).toContain('<th>Descripcion</th>');
     expect(html).toContain('Catalogo Mayorista');
     expect(html).toContain('Juego de sartenes &amp; utensilios');
     expect(html).toContain('PDF listo para compartir con clientes.');
