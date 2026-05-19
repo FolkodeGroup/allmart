@@ -1,5 +1,8 @@
 import type { CartItem } from '../types';
 import type { OrderFormData } from '../components/ui/OrderConfirmationForm';
+import { formatOrderLabel } from './orders';
+
+const DEFAULT_WHATSAPP_PHONE = '5491165891091';
 
 /* ── Formateador de precios ARS ── */
 function formatPrice(price: number): string {
@@ -15,7 +18,7 @@ export function buildWhatsAppMessage(
   client: OrderFormData,
   items: CartItem[],
   totalPrice: number,
-  // shippingLabel: string = 'A calcular'
+  orderId?: string,
 ): string {
   const date = new Date().toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -26,25 +29,33 @@ export function buildWhatsAppMessage(
   const productLines = items
     .map(({ product, quantity }) => {
       const subtotal = formatPrice(product.price * quantity);
-      return `  • ${product.name} x${quantity} — ${subtotal}`;
+      return `- ${product.name} x${quantity}: ${subtotal}`;
     })
     .join('\n');
 
+  const orderLines = [
+    ...(orderId ? [`- Numero: ${formatOrderLabel(orderId)}`] : []),
+    `- Fecha: ${date}`,
+  ];
+
   const message = [
-    '🛍️ *Nuevo pedido — ALLMART*',
-    `📅 Fecha: ${date}`,
+    'Hola Allmart, acabo de realizar un pedido desde la tienda online.',
     '',
-    '👤 *Datos del cliente*',
-    `  Nombre: ${client.firstName} ${client.lastName}`,
-    `  Email: ${client.email}`,
+    '*Pedido*',
+    ...orderLines,
     '',
-    '📦 *Productos*',
+    '*Cliente*',
+    `- Nombre: ${client.firstName} ${client.lastName}`,
+    `- Email: ${client.email}`,
+    `- Celular: ${client.phone}`,
+    '',
+    '*Productos*',
     productLines,
     '',
-    '📊 *Resumen*',
-    `  *Total: ${formatPrice(totalPrice)}*`,
+    '*Total*',
+    `- ${formatPrice(totalPrice)}`,
     '',
-    '¡Gracias por tu compra! 🙌',
+    'Mensaje generado automaticamente desde la tienda online.',
   ].join('\n');
 
   return message;
@@ -53,6 +64,7 @@ export function buildWhatsAppMessage(
 /* ── Genera la URL de WhatsApp con el mensaje codificado ── */
 export function buildWhatsAppUrl(message: string, phone?: string): string {
   const encoded = encodeURIComponent(message);
-  const base = phone ? `https://wa.me/${phone}` : 'https://wa.me/';
+  const targetPhone = (phone ?? DEFAULT_WHATSAPP_PHONE).replace(/\D/g, '');
+  const base = `https://wa.me/${targetPhone}`;
   return `${base}?text=${encoded}`;
 }

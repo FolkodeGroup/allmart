@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ProductImage } from '../../../components/ui/ProductImage';
 import { Link } from "react-router-dom";
 import type { Product } from "../../../types";
@@ -11,13 +11,16 @@ import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
 import { isLowStock } from '../../../utils/inventory';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Heart } from 'lucide-react';
+import { useFavorites } from '../../../components/layout/context/FavoritesContextUtils';
 
 
 interface ProductCardProps {
   product: Product & { stock?: number };
   variant?: 'default' | 'featured';
 }
+
+const FEATURED_GALLERY_AUTOPLAY_MS = 2800;
 
 function renderStars(rating: number): string {
   const full = Math.floor(rating);
@@ -28,19 +31,11 @@ function renderStars(rating: number): string {
 
 
 export function ProductCard({ product, variant = 'default' }: ProductCardProps) {
-  const storageKey = `wishlist-${product.id}`;
   const galleryImages = product.images?.length ? product.images : [undefined];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorito, setIsFavorito] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    const saved = localStorage.getItem(storageKey);
-    return saved === "true";
-  });
   const [dynamicDiscount, setDynamicDiscount] = useState<ProductDiscount | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(isFavorito));
-  }, [isFavorito, storageKey]);
+  const { isFavorite, toggleFavorite, syncFavorite } = useFavorites();
+  const isFavorito = isFavorite(product.id);
 
   // Cargar descuento dinámico desde API
   useEffect(() => {
@@ -62,7 +57,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         console.error('Error loading discount:', error);
       }
     };
-    
+
     loadDiscount();
   }, [product.id, product.price, product.category?.id, product.categoryIds]);
 
@@ -70,14 +65,37 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   const isFeatured = variant === 'featured';
   const hasGallery = isFeatured && galleryImages.length > 1;
 
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [product.id, galleryImages.length]);
+
+  useEffect(() => {
+    if (!hasGallery) return;
+    const intervalId = window.setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % galleryImages.length);
+    }, FEATURED_GALLERY_AUTOPLAY_MS);
+    return () => window.clearInterval(intervalId);
+  }, [galleryImages.length, hasGallery]);
+
+  useEffect(() => {
+    if (!isFavorito) {
+      return;
+    }
+
+    syncFavorite(product);
+  }, [isFavorito, product, syncFavorite]);
+
+
   const toggleFavorito = (e:React.MouseEvent) => {
     e.preventDefault();
-    setIsFavorito(!isFavorito);
+    e.stopPropagation();
+    toggleFavorite(product);
   };
 
   const goToImage = (index: number) => {
     if (!hasGallery) return;
     const nextIndex = (index + galleryImages.length) % galleryImages.length;
+    if (nextIndex === currentImageIndex) return;
     setCurrentImageIndex(nextIndex);
   };
 
@@ -108,51 +126,55 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         onKeyDown={hasGallery ? handleGalleryKeyDown : undefined}
       >
         <Link to={`/producto/${product.slug}`}>
-          <ProductImage
-            src={galleryImages[currentImageIndex]}
-            alt={`${product.name}${hasGallery ? ` - imagen ${currentImageIndex + 1} de ${galleryImages.length}` : ''}`}
-            className={styles.image}
-            width={isFeatured ? 420 : undefined}
-            height={isFeatured ? 320 : undefined}
-            placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
-            loading={isFeatured ? 'eager' : 'lazy'}
-            fetchPriority={isFeatured ? 'high' : 'auto'}
-            sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 240px'}
-          />
+          {hasGallery ? (
+            <div className={styles.featuredImageStage}>
+              {galleryImages.map((img, idx) => (
+                <ProductImage
+                  key={`${product.id}-gallery-${idx}`}
+                  src={img}
+                  alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
+                  className={
+                    styles.image +
+                    ' ' +
+                    styles.galleryImage +
+                    ' ' +
+                    (idx === currentImageIndex ? styles.galleryImageActive : styles.galleryImageInactive)
+                  }
+                  width={isFeatured ? 420 : undefined}
+                  height={isFeatured ? 320 : undefined}
+                  placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                  style={{ position: 'absolute', inset: 0 }}
+                  loading="eager"
+                  fetchPriority="high"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
+                />
+              ))}
+            </div>
+          ) : (
+            <ProductImage
+              src={galleryImages[currentImageIndex]}
+              alt={product.name}
+              className={styles.image}
+              width={isFeatured ? 420 : undefined}
+              height={isFeatured ? 320 : undefined}
+              placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+              loading={isFeatured ? 'eager' : 'lazy'}
+              fetchPriority={isFeatured ? 'high' : 'auto'}
+              sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 240px'}
+            />
+          )}
         </Link>
 
         {/* Mostrar DiscountBadge según el tipo de promoción */}
-        {(dynamicDiscount || (product.discount && product.discount > 0)) && (
+        {dynamicDiscount && (
           <DiscountBadge
             discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
             discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
-            promotionType={dynamicDiscount?.promotionType || (product.discount ? 'percentage' : undefined)}
+            promotionType={dynamicDiscount?.promotionType}
           />
         )}
         {hasGallery && (
           <>
-            <button
-              type="button"
-              className={`${styles.galleryNav} ${styles.galleryPrev}`}
-              aria-label="Imagen anterior"
-              onClick={(event) => {
-                event.preventDefault();
-                goToImage(currentImageIndex - 1);
-              }}
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              className={`${styles.galleryNav} ${styles.galleryNext}`}
-              aria-label="Siguiente imagen"
-              onClick={(event) => {
-                event.preventDefault();
-                goToImage(currentImageIndex + 1);
-              }}
-            >
-              ›
-            </button>
             <div className={styles.galleryDots} role="group" aria-label="Selector de imagen">
               {galleryImages.map((_, index) => (
                 <button
@@ -181,11 +203,11 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         </div>
         <button
           className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
-          aria-label={`Agregar ${product.name} a favoritos`}
+          aria-label={isFavorito ? `Quitar ${product.name} de favoritos` : `Agregar ${product.name} a favoritos`}
           type="button"
           onClick={toggleFavorito}
         >
-          ♡
+          <Heart size={18} fill={isFavorito ? 'currentColor' : 'transparent'} aria-hidden="true" />
         </button>
       </div>
 
@@ -202,31 +224,17 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-          {dynamicDiscount ? (
-            <ProductPrice
-              price={dynamicDiscount.finalPrice}
-              originalPrice={dynamicDiscount.originalPrice}
-              discount={
-                dynamicDiscount.promotionType === 'percentage'
-                  ? dynamicDiscount.discountPercentage
-                  : undefined
-              }
-              discountAmount={
-                dynamicDiscount.promotionType === 'fixed'
-                  ? dynamicDiscount.discountAmount
-                  : undefined
-              }
-              promotionType={dynamicDiscount.promotionType}
-              size="md"
-            />
-          ) : (
-            <ProductPrice
-              price={product.price}
-              originalPrice={product.originalPrice}
-              discount={product.discount}
-              size="md"
-            />
-          )}
+                {dynamicDiscount ? (
+                  <ProductPrice
+                    price={dynamicDiscount.finalPrice}
+                    size="md"
+                  />
+                ) : (
+                  <ProductPrice
+                    price={product.price}
+                    size="md"
+                  />
+                )}
         </div>
       </div>
       <Link

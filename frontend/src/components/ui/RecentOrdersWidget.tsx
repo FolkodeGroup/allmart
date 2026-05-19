@@ -6,6 +6,7 @@ import { Badge } from './Badge/Badge';
 import styles from './RecentOrdersWidget.module.css';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Link } from 'react-router-dom';
+import { formatOrderCode } from '../../utils/orders';
 
 const STATUS_COLORS = {
   pendiente: 'new' as const,
@@ -50,7 +51,7 @@ export default function RecentOrdersWidget() {
         <tbody>
           {recentOrders.map(order => (
             <tr key={order.id}>
-              <td className={styles.idTd}>{order.id}</td>
+              <td className={styles.idTd}>#{formatOrderCode(order.id)}</td>
               <td className={styles.dateTd}>{formatDate(order.createdAt)}</td>
               <td>
                 <strong className={styles.nameTd}>{order.customer.firstName} {order.customer.lastName}</strong><br />

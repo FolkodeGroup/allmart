@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { VariantGroup } from '../../context/AdminProductsContext';
 import { useParams, Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import type { Product } from '../../types';
 import {
   fetchPublicProductBySlug,
@@ -13,9 +14,11 @@ import { Button } from '../../components/ui/Button/Button';
 import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
+import { ProductReviews } from '../../components/ProductReviews/ProductReviews';
 
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
+import { useFavorites } from '../../components/layout/context/FavoritesContextUtils';
 
 function renderStars(rating: number): string {
   const full = Math.floor(rating);
@@ -26,6 +29,7 @@ function renderStars(rating: number): string {
 
 export function ProductDetailPage() {
   const { addToCart } = useCart();
+  const { isFavorite, toggleFavorite, syncFavorite } = useFavorites();
   const { slug } = useParams<{ slug: string }>();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -65,7 +69,7 @@ export function ProductDetailPage() {
         // Cargar productos relacionados de la misma categoría
         const primaryCategoryId = apiProduct.categoryId || apiProduct.categoryIds?.[0];
         const category = categories.find((c) => c.id === primaryCategoryId);
-        
+
         if (!category) {
           setRelatedProducts([]);
           return;
@@ -73,11 +77,11 @@ export function ProductDetailPage() {
 
         try {
           // Cargar más productos para filtrar mejor
-          const { data } = await fetchPublicProducts({ 
-            category: category.slug, 
+          const { data } = await fetchPublicProducts({
+            category: category.slug,
             limit: 8 // Cargar más para tener mejor selección
           });
-          
+
           if (cancelled) return;
 
           // Filtrar: excluir el producto actual y tomar los primeros 4
@@ -109,7 +113,7 @@ export function ProductDetailPage() {
   /* Cargar descuento dinámico desde API */
   useEffect(() => {
     if (!product) return;
-    
+
     const loadDiscount = async () => {
       try {
         const categoryIds = Array.isArray(product.categoryIds)
@@ -134,8 +138,16 @@ export function ProductDetailPage() {
   }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
 
   const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
-  const hasDiscount = product ? Boolean(product.discount && product.discount > 0) : false;
   const isNew = product ? product.tags.includes('nuevo') : false;
+  const isProductFavorite = product ? isFavorite(product.id) : false;
+
+  useEffect(() => {
+    if (!product || !isProductFavorite) {
+      return;
+    }
+
+    syncFavorite(product);
+  }, [isProductFavorite, product, syncFavorite]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -225,9 +237,6 @@ export function ProductDetailPage() {
         {/* Info */}
         <div className={styles.info}>
           <div className={styles.badges}>
-            {hasDiscount && (
-              <Badge variant="discount">-{product.discount}%</Badge>
-            )}
             {isNew && <Badge variant="new">Nuevo</Badge>}
           </div>
 
@@ -248,15 +257,11 @@ export function ProductDetailPage() {
             {dynamicDiscount ? (
               <ProductPrice
                 price={dynamicDiscount.finalPrice}
-                originalPrice={dynamicDiscount.originalPrice}
-                discount={dynamicDiscount.discountPercentage}
                 size="lg"
               />
             ) : (
               <ProductPrice
                 price={product.price}
-                originalPrice={product.originalPrice}
-                discount={product.discount}
                 size="lg"
               />
             )}
@@ -372,8 +377,14 @@ export function ProductDetailPage() {
                     ? 'Seleccioná todas las variantes'
                     : 'Agregar al carrito'}
               </Button>
-              <Button variant="secondary" size="lg">
-                ♡
+              <Button
+                variant="secondary"
+                size="lg"
+                className={isProductFavorite ? styles.favoriteButtonActive : ''}
+                onClick={() => toggleFavorite(product)}
+                leftIcon={<Heart size={18} fill={isProductFavorite ? 'currentColor' : 'transparent'} aria-hidden="true" />}
+              >
+                {isProductFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
               </Button>
             </div>
           </div>
@@ -391,6 +402,11 @@ export function ProductDetailPage() {
           </div>
         </section>
       )}
+
+      {/* Reviews section */}
+      <div className={styles.reviewsSection}>
+        <ProductReviews productId={product.id} />
+      </div>
     </main>
   );
 }

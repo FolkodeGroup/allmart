@@ -215,6 +215,10 @@
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   letter-spacing: var(--tracking-wide);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   cursor: pointer;
   transition: background var(--transition-base), transform var(--transition-fast);
 }
@@ -225,6 +229,12 @@
 
 .confirmBtn:active {
   transform: scale(0.98);
+}
+
+.confirmBtnIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .cancelBtn {

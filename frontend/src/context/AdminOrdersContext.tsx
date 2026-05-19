@@ -44,6 +44,7 @@ export interface Order {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
   items: OrderItem[];
   total: number;

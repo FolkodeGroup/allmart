@@ -17,6 +17,7 @@ import { useAdminOrders } from '../../../../context/AdminOrdersContext';
 import { useState } from 'react';
 import React from 'react';
 import toast from 'react-hot-toast';
+import { formatOrderCode, formatOrderLabel } from '../../../../utils/orders';
 
 /** Props de OrderList. Recibe la lista ya filtrada desde AdminOrders. */
 interface OrderListProps {
@@ -65,12 +66,12 @@ export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderList
                 type="checkbox"
                 checked={selectedIds.includes(order.id)}
                 onChange={e => { e.stopPropagation(); onSelect(order.id); }}
-                aria-label={`Seleccionar pedido ${order.id}`}
+                aria-label={`Seleccionar ${formatOrderLabel(order.id)}`}
                 onClick={e => e.stopPropagation()}
                 style={{ marginRight: 8, minWidth: 24, minHeight: 24 }}
               />
               <span className={styles.mobileCardId}>
-                #{order.id.slice(0, 8).toUpperCase()}
+                #{formatOrderCode(order.id)}
               </span>
               <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
             </div>

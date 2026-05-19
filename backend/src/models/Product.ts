@@ -14,8 +14,6 @@ export interface Product {
   description?: string;
   shortDescription?: string;
   price: number;
-  compareAtPrice?: number;  // original_price en DB
-  discount?: number;
   images: string[];         // Json en DB
   categoryId: string;
   categoryIds?: string[];

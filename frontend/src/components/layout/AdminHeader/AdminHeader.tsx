@@ -1,6 +1,7 @@
 //src/components/layout/Admin/AdminHeader.tsx
 import { useLocation } from "react-router-dom";
 import { useAdminCategories } from "../../../context/AdminCategoriesContext";
+import { formatOrderLabel } from "../../../utils/orders";
 import styles from "./AdminHeader.module.css";
 
 interface Breadcrumb {
@@ -68,15 +69,32 @@ export function AdminHeader() {
     return category?.name ?? null;
   })();
 
+  const orderLabelForPath = (() => {
+    const match = location.pathname.match(/^\/admin\/pedidos\/([^/]+)$/i);
+    if (!match) return null;
+
+    return formatOrderLabel(decodeURIComponent(match[1]));
+  })();
+
   const breadcrumbs = generateBreadcrumbs(location.pathname).map((crumb, index, all) => {
     const isLast = index === all.length - 1;
-    if (!isLast || !categoryNameForPath) return crumb;
-    if (!crumb.path.startsWith('/admin/categorias/')) return crumb;
+    if (!isLast) return crumb;
 
-    return {
-      ...crumb,
-      label: categoryNameForPath,
-    };
+    if (categoryNameForPath && crumb.path.startsWith('/admin/categorias/')) {
+      return {
+        ...crumb,
+        label: categoryNameForPath,
+      };
+    }
+
+    if (orderLabelForPath && crumb.path.startsWith('/admin/pedidos/')) {
+      return {
+        ...crumb,
+        label: orderLabelForPath,
+      };
+    }
+
+    return crumb;
   });
   const currentSection =
     breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard";

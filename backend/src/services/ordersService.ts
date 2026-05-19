@@ -89,6 +89,7 @@ function toOrder(row: any): Order {
       firstName: row.customerFirstName || row.customer_first_name,
       lastName: row.customerLastName || row.customer_last_name,
       email: row.customerEmail || row.customer_email,
+      phone: row.customerPhone || row.customer_phone || undefined,
     },
     total: typeof row.total === 'object' && row.total.toNumber ? row.total.toNumber() : Number(row.total),
     status: prismaStatusToOrderStatus(row.status),
@@ -141,6 +142,7 @@ export async function getAllOrders(
       { customerFirstName: { contains: q, mode: 'insensitive' } },
       { customerLastName:  { contains: q, mode: 'insensitive' } },
       { customerEmail:     { contains: q, mode: 'insensitive' } },
+      { customerPhone:     { contains: q, mode: 'insensitive' } },
     ];
   }
 
@@ -207,6 +209,7 @@ export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
       customerFirstName: dto.customer.firstName,
       customerLastName:  dto.customer.lastName,
       customerEmail:     dto.customer.email,
+      customerPhone:     dto.customer.phone ?? null,
       total:             dto.total,
       notes:             dto.notes ?? null,
       status:            orderStatusToPrismaStatus(OrderStatus.PENDING) as Parameters<typeof prisma.order.create>[0]['data']['status'],

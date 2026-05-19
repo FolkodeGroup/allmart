@@ -17,8 +17,6 @@ export interface ApiProduct {
   description?: string;
   shortDescription?: string;
   price: number;
-  compareAtPrice?: number;
-  discount?: number;
   images: Array<string | { url?: string } | null>;
   categoryId: string;
   categoryIds?: string[];
@@ -29,6 +27,7 @@ export interface ApiProduct {
   rating: number;
   reviewCount: number;
   inStock: boolean;
+  isFeatured?: boolean;
   features: string[];
   createdAt: string;
   updatedAt: string;
@@ -77,8 +76,6 @@ export interface ProductPayload {
   description?: string;
   shortDescription?: string;
   price: number;
-  compareAtPrice?: number;
-  discount?: number;
   images?: string[];
   categoryId: string;
   categoryIds?: string[];
@@ -88,6 +85,7 @@ export interface ProductPayload {
   rating?: number;
   reviewCount?: number;
   inStock?: boolean;
+  isFeatured?: boolean;
   tags?: string[];
   features?: string[];
 }
@@ -170,12 +168,6 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     description: api.description ?? '',
     shortDescription: api.shortDescription ?? '',
     price: api.price,
-    originalPrice: api.compareAtPrice,
-    discount: api.discount ?? (
-      api.compareAtPrice && api.compareAtPrice > api.price
-        ? Math.round(((api.compareAtPrice - api.price) / api.compareAtPrice) * 100)
-        : undefined
-    ),
     images: normalizedImages,
     category: primaryCategory,
     categoryId: primaryCategory.id || api.categoryId,
@@ -185,6 +177,7 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     rating: api.rating,
     reviewCount: api.reviewCount ?? 0,
     inStock: api.inStock ?? api.stock > 0,
+    isFeatured: api.isFeatured ?? false,
     sku: api.sku ?? '',
     features: Array.isArray(api.features) ? api.features : [],
   };
@@ -196,9 +189,6 @@ interface AdminProductInput {
   description?: string;
   shortDescription?: string;
   price: number;
-  originalPrice?: number;
-  compareAtPrice?: number;
-  discount?: number;
   images?: string[];
   category?: { id: string };
   categoryId?: string;
@@ -209,6 +199,7 @@ interface AdminProductInput {
   rating?: number;
   reviewCount?: number;
   inStock?: boolean;
+  isFeatured?: boolean;
   tags?: string[];
   features?: string[];
   slug?: string;
@@ -229,8 +220,6 @@ export function mapAdminProductToPayload(product: AdminProductInput): ProductPay
     description: product.description,
     shortDescription: product.shortDescription,
     price: product.price,
-    compareAtPrice: product.originalPrice,
-    discount: product.discount,
     images: product.images,
     categoryId: primaryCategoryId,
     categoryIds: normalizedCategoryIds,
@@ -240,6 +229,7 @@ export function mapAdminProductToPayload(product: AdminProductInput): ProductPay
     rating: product.rating ?? 0,
     reviewCount: product.reviewCount ?? 0,
     inStock: product.inStock ?? true,
+    isFeatured: product.isFeatured ?? false,
     tags: product.tags,
     features: product.features,
   };

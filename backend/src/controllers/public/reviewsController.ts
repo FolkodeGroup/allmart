@@ -1,8 +1,3 @@
-/**
- * controllers/public/reviewsController.ts
- * Controlador para reviews de productos (endpoints públicos + autenticados).
- */
-
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../../types';
 import * as reviewsService from '../../services/reviewsService';
@@ -31,6 +26,31 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
       productId,
       userId,
       rating,
+      title,
+      text,
+    });
+    res.status(201).json(review);
+  } catch (error: any) {
+    res.status(error.status || 500).json({ message: error.message || 'Error interno' });
+  }
+};
+
+/** POST /api/products/:productId/reviews/guest — sin autenticación, verificado por pedido */
+export const createGuest = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { productId } = req.params;
+    const { orderId, reviewerName, rating, title, text } = req.body;
+
+    if (!orderId || !reviewerName || !rating) {
+      res.status(400).json({ message: 'Campos requeridos: orderId, reviewerName, rating' });
+      return;
+    }
+
+    const review = await reviewsService.createGuestReview({
+      productId,
+      orderId: String(orderId),
+      reviewerName: String(reviewerName),
+      rating: Number(rating),
       title,
       text,
     });

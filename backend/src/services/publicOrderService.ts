@@ -4,20 +4,26 @@
  */
 
 import { prisma } from '../config/prisma';
-import { CreatePublicOrderDTO, OrderStatus, PaymentStatus } from '../types';
+import { CreatePublicOrderDTO } from '../types';
 import { createError } from '../middlewares/errorHandler';
+import { sendOrderConfirmationEmail } from './orderConfirmationEmailService';
 
 export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<string> {
   const { customer, items, total, notes } = data;
+  const normalizedPhone = customer?.phone?.trim();
 
-  // ─── Validaciones de negocio ──────────────────────────────────────────────
-  if (!customer?.firstName || !customer?.lastName || !customer?.email) {
+  if (!customer?.firstName || !customer?.lastName || !customer?.email || !normalizedPhone) {
     throw createError('Datos del cliente incompletos', 400);
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(customer.email)) {
     throw createError('Email inválido', 400);
+  }
+
+  const phoneDigits = normalizedPhone.replace(/\D/g, '');
+  if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+    throw createError('Celular inválido', 400);
   }
 
   if (!Array.isArray(items) || items.length === 0) {
@@ -34,34 +40,31 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     throw createError('Total inválido', 400);
   }
 
-  // ─── Transacción Prisma ───────────────────────────────────────────────────
   const result = await prisma.$transaction(async (tx) => {
-    // 1. Crear el pedido
     const order = await tx.order.create({
       data: {
-        customerFirstName:  customer.firstName,
-        customerLastName:   customer.lastName,
-        customerEmail:      customer.email,
+        customerFirstName: customer.firstName,
+        customerLastName: customer.lastName,
+        customerEmail: customer.email,
+        customerPhone: normalizedPhone,
         total,
-        notes:              notes ?? null,
-        status:             'pendiente' as Parameters<typeof tx.order.create>[0]['data']['status'],
-        paymentStatus:      'no_abonado' as Parameters<typeof tx.order.create>[0]['data']['paymentStatus'],
+        notes: notes ?? null,
+        status: 'pendiente' as Parameters<typeof tx.order.create>[0]['data']['status'],
+        paymentStatus: 'no_abonado' as Parameters<typeof tx.order.create>[0]['data']['paymentStatus'],
       },
     });
 
-    // 2. Crear los items del pedido y decrementar stock
     await tx.orderItem.createMany({
       data: items.map((item) => ({
-        orderId:      order.id,
-        productId:    item.productId,
-        productName:  item.productName,
+        orderId: order.id,
+        productId: item.productId,
+        productName: item.productName,
         productImage: item.productImage ?? null,
-        quantity:     item.quantity,
-        unitPrice:    item.unitPrice,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
       })),
     });
 
-    // 3. Decrementar stock y registrar alertas lowStockAlert si es necesario
     for (const item of items) {
       const product = await tx.product.findUnique({
         where: { id: item.productId },
@@ -72,40 +75,61 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
         const stockBefore = product.stock;
         const stockAfter = stockBefore - item.quantity;
 
-        // Actualizar stock (permitiendo valores negativos)
         await tx.product.update({
           where: { id: product.id },
           data: { stock: stockAfter },
         });
 
-        // Registrar alerta si el stock quedó en 0 o en negativo
         if (stockAfter <= 0) {
           await tx.lowStockAlert.create({
             data: {
-              orderId:      order.id,
-              productId:    product.id,
-              productName:  product.name,
+              orderId: order.id,
+              productId: product.id,
+              productName: product.name,
               quantitySold: item.quantity,
-              stockBefore:  stockBefore,
-              stockAfter:   stockAfter,
+              stockBefore,
+              stockAfter,
             },
           });
         }
       }
     }
 
-    // 4. Registrar el historial de estado inicial
-    // (El trigger en BD también lo hace, pero lo hacemos explícito para Prisma)
     await tx.orderStatusHistory.create({
       data: {
-        orderId:   order.id,
-        status:    'pendiente' as Parameters<typeof tx.orderStatusHistory.create>[0]['data']['status'],
-        note:      'Pedido creado: estado inicial set',
+        orderId: order.id,
+        status: 'pendiente' as Parameters<typeof tx.orderStatusHistory.create>[0]['data']['status'],
+        note: 'Pedido creado: estado inicial set',
       },
     });
 
-    return order.id;
+    return {
+      id: order.id,
+      createdAt: order.createdAt,
+    };
   });
 
-  return result;
+  try {
+    await sendOrderConfirmationEmail({
+      orderId: result.id,
+      createdAt: result.createdAt,
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: normalizedPhone,
+      },
+      items: items.map((item) => ({
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+      })),
+      total,
+      notes,
+    });
+  } catch (error) {
+    console.error('[Orders] No se pudo enviar el email de confirmación:', error);
+  }
+
+  return result.id;
 }

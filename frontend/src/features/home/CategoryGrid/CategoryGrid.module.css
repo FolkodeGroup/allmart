@@ -20,7 +20,7 @@
   font-weight: var(--font-semibold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
-  color: var(--color-primary);
+  color: var(--color-text-primary);
   margin-bottom: var(--space-3);
   display: block;
 }
@@ -29,7 +29,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-2xl);
   font-weight: var(--font-bold);
-  color: var(--color-text-primary);
+  color: var(--color-warm-gray);
   margin-bottom: var(--space-3);
   line-height: var(--leading-tight);
 }
@@ -38,7 +38,7 @@
   font-family: var(--font-body);
   font-size: var(--text-base);
   font-weight: var(--font-regular);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-primary);
   line-height: var(--leading-relaxed);
   max-width: 500px;
   margin: 0 auto;

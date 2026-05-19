@@ -34,12 +34,18 @@ export function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategory = searchParams.get('category') ?? '';
   const urlSubCategory = searchParams.get('sub') ?? '';
+  const urlTag = searchParams.get('tag') ?? '';
+  const hasFeaturedTag = urlTag.trim().toLowerCase() === 'destacado';
   const [sortBy, setSortBy] = useState('relevance');
   const [selectedCategory, setSelectedCategory] = useState<string>(urlSubCategory || urlCategory);
   const [showOnlyOnSale, setShowOnlyOnSale] = useState(false);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState(hasFeaturedTag);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState<number | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [sortOptions, setSortOptions] = useState<SortOption[]>(FALLBACK_SORT_OPTIONS);
   const [loading, setLoading] = useState(true);
@@ -51,6 +57,10 @@ export function ProductListPage() {
     const next = urlSubCategory || urlCategory;
     setSelectedCategory((prev) => (prev === next ? prev : next));
   }, [urlCategory, urlSubCategory]);
+
+  useEffect(() => {
+    setShowOnlyFeatured((prev) => (prev === hasFeaturedTag ? prev : hasFeaturedTag));
+  }, [hasFeaturedTag]);
 
   /* Cargar sort options dinámicas */
   useEffect(() => {
@@ -86,26 +96,56 @@ export function ProductListPage() {
 
   /* Cargar productos cuando cambian los filtros */
   useEffect(() => {
-    const params: PublicProductsParams = { limit: 48 };
+    const params: PublicProductsParams = { limit: 9, page };
     if (selectedCategory) params.category = selectedCategory;
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
-
-    setLoading(true);
+    if (showOnlyFeatured) params.isFeatured = true;
     setError(null);
+    if (page === 1) setLoading(true);
+    else setIsLoadingMore(true);
+
     fetchPublicProducts(params)
-      .then(({ data }) => {
+      .then(({ data, total }) => {
+        setTotalProducts(total ?? null);
         let mappedProducts = data.map((p) => mapApiProductToProduct(p, categories));
-        
+
         // Filtrar por "En Oferta" si está habilitado
         if (showOnlyOnSale) {
           mappedProducts = mappedProducts.filter((p) => activeDiscounts.has(p.id));
         }
-        
-        setProducts(mappedProducts);
+
+        if (page === 1) {
+          setProducts(mappedProducts);
+        } else {
+          setProducts((prev) => [...prev, ...mappedProducts]);
+        }
       })
       .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [sortBy, selectedCategory, showOnlyOnSale, activeDiscounts, categories]);
+      .finally(() => {
+        if (page === 1) setLoading(false);
+        else setIsLoadingMore(false);
+      });
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories, page]);
+
+  /* Resetear paginación cuando cambian filtros relevantes */
+  useEffect(() => {
+    setPage(1);
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured]);
+
+  const handleLoadMore = () => {
+    if (isLoadingMore) return;
+    setPage((p) => p + 1);
+  };
+
+  const updateTagParam = (nextTag: string | null) => {
+    const updated = new URLSearchParams(searchParams);
+    if (nextTag) {
+      updated.set('tag', nextTag);
+    } else {
+      updated.delete('tag');
+    }
+    setSearchParams(updated, { replace: true });
+  };
 
   const toggleCategory = (slug: string) => {
     const next = selectedCategory === slug ? '' : slug;
@@ -271,7 +311,16 @@ export function ProductListPage() {
               <span className={styles.filterLabel}>Novedades</span>
             </label>
             <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
+              <input
+                type="checkbox"
+                className={styles.filterCheckbox}
+                checked={showOnlyFeatured}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setShowOnlyFeatured(checked);
+                  updateTagParam(checked ? 'destacado' : null);
+                }}
+              />
               <span className={styles.filterLabel}>Destacados</span>
             </label>
           </div>
@@ -292,8 +341,12 @@ export function ProductListPage() {
                 Mostrando{' '}
                 <span className={styles.resultCountBold}>
                   {visibleProducts.length}
-                </span>{' '}
-                productos
+                </span>
+                {totalProducts ? (
+                  <> de <span className={styles.resultCountBold}>{totalProducts}</span> productos</>
+                ) : (
+                  ' productos'
+                )}
               </span>
             </div>
 
@@ -367,6 +420,19 @@ export function ProductListPage() {
                 ))}
               </div>
             )
+          )}
+
+          {!loading && !error && totalProducts !== null && products.length < totalProducts && (
+            <div className={styles.loadMoreWrap}>
+              <button
+                type="button"
+                className={styles.loadMoreBtn}
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? 'Cargando...' : 'Cargar más'}
+              </button>
+            </div>
           )}
 
           {!loading && !error && visibleProducts.length === 0 && (

@@ -62,7 +62,7 @@ export function AdminProductFormPage({
     // Optimized isDirty: compara solo campos relevantes
     const shallowCompareRelevantFields = React.useCallback((a: typeof formProps.form, b: typeof formProps.form): boolean => {
         const keys: (keyof typeof formProps.form)[] = [
-            'name', 'slug', 'description', 'shortDescription', 'price', 'originalPrice', 'discount',
+            'name', 'slug', 'description', 'shortDescription', 'price',
             'images', 'category', 'categoryIds', 'tags', 'inStock', 'isFeatured', 'sku', 'features', 'stock', 'variants'
         ];
         for (const key of keys) {

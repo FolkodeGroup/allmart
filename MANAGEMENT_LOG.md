@@ -1698,12 +1698,18 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #922: 900 evitar cuelgue al eliminar múltiples colecciones | 2026-05-15 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #921: 899 validación de campos requeridos al crear colección | 2026-05-15 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #920: 898 renderizar descuentos de promociones en productos del home | 2026-05-15 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #936: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #934: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #932: 🔄 Registrar puntaje de gestión | 2026-05-16 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #929: Cambios aplicados en un solo edit: | 2026-05-16 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #928: Varias reparaciones | 2026-05-16 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #927: Varias reparaciones | 2026-05-16 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #926: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #934: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #932: 🔄 Registrar puntaje de gestión | 2026-05-16 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #929: Cambios aplicados en un solo edit: | 2026-05-16 |
@@ -1713,6 +1719,16 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #924: 889 mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #923: ✅ La imagen anterior se elimina completamente | 2026-05-16 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #919: 🔄 Registrar puntaje de gestión | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #945: Hacer los banners clickeables y redirigir a Categorías o Colecciones según corresponda | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #944: Crear pestaña "Proveedores" en el panel de administración | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #943: Agregar recta de Objetivo Mensual en Reportes | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #942: Eliminar campo "Descripción" del formulario de Banners | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #941: Orden de visualización único para cada Banner | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #940: Ver productos correctamente seleccionados al editar promoción | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #939: Botón para exportar catálogo de productos en PDF con imágenes | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #938: Conexión robusta de variantes en productos nuevos | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #937: Eliminar paso intermedio al agregar imágenes de productos | 2026-05-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #935: Eliminar campos de Precio Original y Descuento en formulario de productos | 2026-05-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #810: 808 refactor integral ejecución de objetivos críticos usando prompt para claude opus 46 | 2026-04-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #812: fix(ci-cd): agregar limpieza agresiva de Docker antes del deploy | 2026-04-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #814: 🔄 Actualización automática de puntajes semanal | 2026-04-17 |
@@ -1736,3 +1752,5 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #930: Se corrige la badge de productos con bajo stock en sidebar | 2026-05-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #931: Resumen: Actualicé la atribución de puntajes para que los issues crea… | 2026-05-16 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #933: 🔄 Actualización automática de puntajes semanal | 2026-05-16 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #947: 935 eliminar campos de precio original y descuento en formulario de productos | 2026-05-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #949: Colecciones | 2026-05-17 |

@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CircleUserRound, Menu, Search, ShoppingCart, X } from 'lucide-react';
+import { CircleUserRound, Heart, Menu, Search, ShoppingCart, X } from 'lucide-react';
 import type { NavigationItem, Category } from '../../../types';
 import { fetchPublicCategories } from '../../../services/categoriesService';
 import { buildNavigationFromCategories, fallbackNavigation } from '../navigation/publicNavigation';
 import { CategoryMegaMenu } from './CategoryMegaMenu';
 import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
+import { useFavorites } from '../context/FavoritesContextUtils';
 
 export function Header() {
   const { totalItems } = useCart();
+  const { totalItems: totalFavorites } = useFavorites();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
@@ -82,10 +84,16 @@ export function Header() {
               <span className={styles.actionLabel}>Ingresar</span>
             </Link>
 
+            <Link to="/favoritos" className={styles.iconBtn} aria-label="Mis favoritos">
+              <Heart size={19} strokeWidth={2.1} aria-hidden="true" />
+              <span className={styles.actionLabel}>Favoritos</span>
+              <span className={styles.actionCount}>{totalFavorites > 0 ? totalFavorites : 0}</span>
+            </Link>
+
             <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
               <ShoppingCart size={19} strokeWidth={2.1} aria-hidden="true" />
               <span className={styles.actionLabel}>Carrito</span>
-              <span className={styles.cartCount}>{totalItems > 0 ? totalItems : 0}</span>
+              <span className={styles.actionCount}>{totalItems > 0 ? totalItems : 0}</span>
             </Link>
           </div>
 
@@ -199,6 +207,14 @@ export function Header() {
             )}
           </div>
         ))}
+
+        <Link
+          to="/favoritos"
+          className={styles.mobileNavLink}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Favoritos
+        </Link>
 
         {/* Todas las Categorías en menú móvil */}
         {allCategories.length > 0 && (
