@@ -120,8 +120,7 @@ export function AdminReports() {
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
   const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf'>('csv');
-  // Estados para alternar la vista del top de productos (lista vs tarjetas)
-  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+  // Eliminado: Estado para alternar la vista del top de productos
 
   // PDF export
   const pdfRootRef = useRef<HTMLDivElement>(null); // para la UI visible
@@ -344,19 +343,20 @@ export function AdminReports() {
 
   /* ── Top productos ── */
   const topProducts = useMemo(() => {
-    const map = new Map<string, { id: string; name: string; qty: number; revenue: number }>();
+    const map = new Map<string, { id: string; name: string; qty: number; revenue: number; productImage?: string }>();
     activeOrders.forEach(o =>
       o.items.forEach(it => {
-        const prev = map.get(it.productId) ?? { id: it.productId, name: it.productName, qty: 0, revenue: 0 };
+        const prev = map.get(it.productId) ?? { id: it.productId, name: it.productName, qty: 0, revenue: 0, productImage: it.productImage };
         map.set(it.productId, {
           id: it.productId,
           name: it.productName,
           qty: prev.qty + it.quantity,
           revenue: prev.revenue + it.unitPrice * it.quantity,
+          productImage: it.productImage || prev.productImage,
         });
       })
     );
-    return [...map.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+    return [...map.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 10);
   }, [activeOrders]);
 
   const maxProductRevenue = topProducts[0]?.revenue ?? 1;
@@ -626,34 +626,12 @@ export function AdminReports() {
               <div className={styles.panelHeader}>
                 <h2 className={styles.panelTitle + ' fadeInFast'}>🏆 Productos más vendidos</h2>
                 <p className={styles.panelSubtitle + ' fadeInFast'}>Por ingresos generados</p>
-
               </div>
-              <div className={styles.viewToggle + ' fadeInFast'}>
-                <span className={styles.viewToggleLabel}>Cambiar vista:</span>
-                <button
-                  className={`${styles.toggleBtn} ${viewMode === 'list' ? styles.active : ''}`}
-                  onClick={() => setViewMode('list')}
-                >
-                  📊 Lista
-                </button>
-
-                <button
-                  className={`${styles.toggleBtn} ${viewMode === 'cards' ? styles.active : ''}`}
-                  onClick={() => setViewMode('cards')}
-                >
-                  🧾 Cards
-                </button>
-              </div>
-              {topProducts.length === 0 ? (
-                <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
-              ) : (
-                <ProductRanking
-                  products={topProducts}
-                  maxRevenue={maxProductRevenue}
-                  formatPrice={formatPrice}
-                  viewMode={viewMode}
-                />
-              )}
+              <ProductRanking
+                products={topProducts}
+                maxRevenue={maxProductRevenue}
+                formatPrice={formatPrice}
+              />
             </div>
 
             <div className={styles.panel + ' fadeInFast'}>

@@ -170,7 +170,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
         if (form.stock < 0) errors.stock = 'El stock no puede ser negativo';
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
-    }, [form, isEdit]);
+    }, [form]);
 
     // ── Submit ─────────────────────────────────────────────────────────────
     const handleSubmit = useCallback(async (e?: React.FormEvent) => {
@@ -309,12 +309,13 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     );
 
     // ── Image handlers (API / edit mode) ──────────────────────────────────
-    const handleApiUploadImage = useCallback(async () => {
+    const handleApiUploadImage = useCallback(async (fileOverride?: File) => {
         setImgError('');
-        if (!imgFile) { setImgError('Seleccioná un archivo'); return; }
+        const file = fileOverride ?? imgFile;
+        if (!file) { setImgError('Seleccioná un archivo'); return; }
         if (!productId) return;
         try {
-            await uploadImage(productId, imgFile, imgNewAlt.trim() || undefined);
+            await uploadImage(productId, file, imgNewAlt.trim() || undefined);
             setImgFile(null);
             setImgNewAlt('');
             setShowAddImgForm(false);

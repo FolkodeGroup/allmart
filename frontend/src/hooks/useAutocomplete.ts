@@ -3,7 +3,7 @@
  * Gestiona sugerencias, búsqueda y filtrado with debounce
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { debounce, filterSuggestions, sanitizeAutocompleteInput } from '../utils/productFormUtils';
+import { filterSuggestions, sanitizeAutocompleteInput } from '../utils/productFormUtils';
 
 export interface UseAutocompleteOptions {
   suggestions: string[];
@@ -78,17 +78,19 @@ export function useAutocomplete({
   );
 
   // Debounced version of performSearch
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSearch = useCallback(
-    debounce(performSearch, debounceDelay),
-    [performSearch, debounceDelay]
-  );
 
-  // Trigger search cuando el query cambia
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const sanitized = sanitizeAutocompleteInput(query);
-    debouncedSearch(sanitized);
-  }, [query, debouncedSearch]);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      performSearch(sanitized);
+    }, debounceDelay);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [query, debounceDelay, performSearch]);
 
   const openSuggestions = useCallback(() => setIsOpen(true), []);
   const closeSuggestions = useCallback(() => setIsOpen(false), []);
