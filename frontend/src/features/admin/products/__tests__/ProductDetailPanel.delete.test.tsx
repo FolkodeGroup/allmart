@@ -6,9 +6,18 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { ProductDetailPanel } from '../ProductDetailPanel';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
 import { AdminVariantsProvider } from '../../../../context';
+
+function TestWrapper({ children }: { children: ReactNode }) {
+  return (
+    <AdminVariantsProvider>
+      {children}
+    </AdminVariantsProvider>
+  );
+}
 
 const mockProduct: AdminProduct = {
   id: 'prod-1',
@@ -34,15 +43,10 @@ const mockProduct: AdminProduct = {
 describe('ProductDetailPanel - Delete Confirmation Modal', () => {
   it('should show delete confirmation modal when delete button is clicked', async () => {
     const onDelete = vi.fn();
-
     render(
-      <AdminVariantsProvider>
-        <ProductDetailPanel
-          product={mockProduct}
-          onDelete={onDelete}
-          canDelete={true}
-        />
-      </AdminVariantsProvider>
+      <TestWrapper>
+        <ProductDetailPanel product={mockProduct} onDelete={onDelete} canDelete={true} />
+      </TestWrapper>
     );
 
     // Find and click the delete button
@@ -61,13 +65,10 @@ describe('ProductDetailPanel - Delete Confirmation Modal', () => {
 
   it('should cancel deletion when cancel button is clicked', async () => {
     const onDelete = vi.fn();
-
     render(
-      <ProductDetailPanel
-        product={mockProduct}
-        onDelete={onDelete}
-        canDelete={true}
-      />
+      <TestWrapper>
+        <ProductDetailPanel product={mockProduct} onDelete={onDelete} canDelete={true} />
+      </TestWrapper>
     );
 
     // Click delete button
@@ -97,13 +98,10 @@ describe('ProductDetailPanel - Delete Confirmation Modal', () => {
 
   it('should call onDelete when confirm button is clicked', async () => {
     const onDelete = vi.fn();
-
     render(
-      <ProductDetailPanel
-        product={mockProduct}
-        onDelete={onDelete}
-        canDelete={true}
-      />
+      <TestWrapper>
+        <ProductDetailPanel product={mockProduct} onDelete={onDelete} canDelete={true} />
+      </TestWrapper>
     );
 
     // Click delete button
@@ -133,13 +131,10 @@ describe('ProductDetailPanel - Delete Confirmation Modal', () => {
 
   it('should not show delete button when canDelete is false', () => {
     const onDelete = vi.fn();
-
     render(
-      <ProductDetailPanel
-        product={mockProduct}
-        onDelete={onDelete}
-        canDelete={false}
-      />
+      <TestWrapper>
+        <ProductDetailPanel product={mockProduct} onDelete={onDelete} canDelete={false} />
+      </TestWrapper>
     );
 
     // Verify delete button is not present in footer actions
@@ -151,13 +146,10 @@ describe('ProductDetailPanel - Delete Confirmation Modal', () => {
 
   it('should show delete button when canDelete is true', () => {
     const onDelete = vi.fn();
-
     render(
-      <ProductDetailPanel
-        product={mockProduct}
-        onDelete={onDelete}
-        canDelete={true}
-      />
+      <TestWrapper>
+        <ProductDetailPanel product={mockProduct} onDelete={onDelete} canDelete={true} />
+      </TestWrapper>
     );
 
     // Verify delete button is present in footer
