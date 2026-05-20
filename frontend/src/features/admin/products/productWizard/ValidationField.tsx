@@ -14,7 +14,7 @@ interface ValidationFieldProps {
   type?: string;
   placeholder?: string;
   value: string | number;
-  onChange: (value: any) => void;
+  onChange: (value: string | number) => void;
   onBlur?: () => void;
   required?: boolean;
   maxLength?: number;

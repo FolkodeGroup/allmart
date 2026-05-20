@@ -17,7 +17,7 @@ export interface FieldValidationState {
 }
 
 export interface FieldValidator {
-  (value: any): Promise<FieldError | null>;
+  (value: unknown): Promise<FieldError | null>;
 }
 
 export function useFieldValidation(validator?: FieldValidator) {
@@ -28,7 +28,7 @@ export function useFieldValidation(validator?: FieldValidator) {
   });
 
   const validate = useCallback(
-    async (value: any) => {
+    async (value: unknown) => {
       if (!validator) {
         setState({ error: null, isValidating: false, isValid: true });
         return null;
@@ -44,7 +44,7 @@ export function useFieldValidation(validator?: FieldValidator) {
           isValid: error ? false : true,
         });
         return error;
-      } catch (err) {
+      } catch {
         const error: FieldError = {
           message: 'Error durante la validación',
         };
