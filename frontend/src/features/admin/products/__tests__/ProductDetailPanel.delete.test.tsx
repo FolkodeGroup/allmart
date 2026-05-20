@@ -8,6 +8,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { ProductDetailPanel } from '../ProductDetailPanel';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
+import { AdminVariantsProvider } from '../../../../context';
 
 const mockProduct: AdminProduct = {
   id: 'prod-1',
@@ -35,11 +36,13 @@ describe('ProductDetailPanel - Delete Confirmation Modal', () => {
     const onDelete = vi.fn();
 
     render(
-      <ProductDetailPanel
-        product={mockProduct}
-        onDelete={onDelete}
-        canDelete={true}
-      />
+      <AdminVariantsProvider>
+        <ProductDetailPanel
+          product={mockProduct}
+          onDelete={onDelete}
+          canDelete={true}
+        />
+      </AdminVariantsProvider>
     );
 
     // Find and click the delete button
