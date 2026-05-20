@@ -16,11 +16,12 @@ export interface FieldValidationState {
   isValid: boolean | null; // null = no validado aún, true = válido, false = inválido
 }
 
-export interface FieldValidator {
-  (value: unknown): Promise<FieldError | null>;
+export interface FieldValidator<T = unknown> {
+  (value: T): Promise<FieldError | null>;
 }
 
-export function useFieldValidation(validator?: FieldValidator) {
+
+export function useFieldValidation<T = unknown>(validator?: FieldValidator<T>) {
   const [state, setState] = useState<FieldValidationState>({
     error: null,
     isValidating: false,
@@ -28,14 +29,12 @@ export function useFieldValidation(validator?: FieldValidator) {
   });
 
   const validate = useCallback(
-    async (value: unknown) => {
+    async (value: T) => {
       if (!validator) {
         setState({ error: null, isValidating: false, isValid: true });
         return null;
       }
-
       setState((prev) => ({ ...prev, isValidating: true }));
-
       try {
         const error = await validator(value);
         setState({
@@ -45,9 +44,7 @@ export function useFieldValidation(validator?: FieldValidator) {
         });
         return error;
       } catch {
-        const error: FieldError = {
-          message: 'Error durante la validación',
-        };
+        const error: FieldError = { message: 'Error durante la validación' };
         setState({ error, isValidating: false, isValid: false });
         return error;
       }
@@ -59,11 +56,7 @@ export function useFieldValidation(validator?: FieldValidator) {
     setState({ error: null, isValidating: false, isValid: null });
   }, []);
 
-  return {
-    ...state,
-    validate,
-    clearError,
-  };
+  return { ...state, validate, clearError };
 }
 
 /**

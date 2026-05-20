@@ -60,8 +60,8 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
       validate: validateStep,
     }));
 
-    const handleNameChange = (value: string) => {
-      onDataChange({ ...data, name: value });
+    const handleNameChange = (value: string | number) => {
+      onDataChange({ ...data, name: String(value) });
       nameValidation.clearError();
     };
 
@@ -78,8 +78,8 @@ export const Step1BasicInfo = React.memo(forwardRef<{ validate: () => boolean },
       await categoryValidation.validate(data.categoryId || '');
     };
 
-    const handleSkuChange = (value: string) => {
-      onDataChange({ ...data, sku: value });
+    const handleSkuChange = (value: string | number) => {
+      onDataChange({ ...data, sku: String(value) });
       skuValidation.clearError();
     };
 
