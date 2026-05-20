@@ -3,6 +3,7 @@ import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { ProductListPanel } from './ProductListPanel';
 import { ProductDetailPanel } from './ProductDetailPanel';
 import styles from './MasterDetailLayout.module.css';
+import { AdminVariantsProvider } from '../../../context';
 
 interface MasterDetailLayoutProps {
   products: AdminProduct[];
@@ -49,7 +50,7 @@ export function MasterDetailLayout({
     if (!selectedProductId && products.length > 0) {
       setSelectedProductId(products[0].id);
     }
-  }, [products, loading, defaultSelectedProductId]);
+  }, [products, loading, defaultSelectedProductId, selectedProductId]);
 
   // Get selected product
   const selectedProduct = useMemo(
@@ -79,13 +80,15 @@ export function MasterDetailLayout({
 
       {/* Detail Panel (Right) - Only show when product is selected */}
       {selectedProduct && (
-        <ProductDetailPanel
-          product={selectedProduct}
-          onEdit={onEdit}
-          onDelete={onDeleteDirect || onDelete}
-          canEdit={canEdit}
-          canDelete={canDelete}
-        />
+        <AdminVariantsProvider>
+          <ProductDetailPanel
+            product={selectedProduct}
+            onEdit={onEdit}
+            onDelete={onDeleteDirect || onDelete}
+            canEdit={canEdit}
+            canDelete={canDelete}
+          />
+        </AdminVariantsProvider>
       )}
 
       {/* Empty state when no product selected */}
