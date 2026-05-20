@@ -10,12 +10,18 @@ import type { ReactNode } from 'react';
 import { ProductDetailPanel } from '../ProductDetailPanel';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
 import { AdminVariantsProvider } from '../../../../context';
+import { AdminAuthProvider } from '../../../../context/AdminAuthContext';
+import { NotificationProvider } from '../../../../context/NotificationContext';
 
 function TestWrapper({ children }: { children: ReactNode }) {
   return (
-    <AdminVariantsProvider>
-      {children}
-    </AdminVariantsProvider>
+    <AdminAuthProvider>
+      <NotificationProvider>
+        <AdminVariantsProvider>
+          {children}
+        </AdminVariantsProvider>
+      </NotificationProvider>
+    </AdminAuthProvider>
   );
 }
 
