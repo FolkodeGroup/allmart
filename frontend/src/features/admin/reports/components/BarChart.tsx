@@ -113,14 +113,11 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
         const formatCurrency = (n: number) =>
             n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 });
         let label = `Objetivo mensual: ${formatCurrency(monthlyGoal)}`;
-        let arrow = '';
         // Si está fuera del rango, anclar y mostrar indicador
         if (y < padTop) {
             y = padTop + 8;
-            arrow = '↑';
         } else if (y > padTop + chartH) {
             y = padTop + chartH - 8;
-            arrow = '↓';
         }
         referenceLine = (
             <g>
