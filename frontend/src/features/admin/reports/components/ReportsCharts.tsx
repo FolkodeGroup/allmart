@@ -20,9 +20,10 @@ export interface ReportsChartsProps {
     barData: BarChartDatum[];
     statusSlices: DonutChartSlice[];
     isLoading: boolean;
+    monthlyGoal: number;
 }
 
-export function ReportsCharts({ barData, statusSlices, isLoading }: ReportsChartsProps) {
+export function ReportsCharts({ barData, statusSlices, isLoading, monthlyGoal }: ReportsChartsProps) {
     if (isLoading) {
         return (
             <>
@@ -34,7 +35,7 @@ export function ReportsCharts({ barData, statusSlices, isLoading }: ReportsChart
     return (
         <>
             <Suspense fallback={<BarChartSkeleton />}>
-                <BarChart data={barData} />
+                <BarChart data={barData} monthlyGoal={monthlyGoal} />
             </Suspense>
             <Suspense fallback={<DonutChartSkeleton />}>
                 <DonutChart slices={statusSlices} />

@@ -25,6 +25,8 @@ import {
   getDayKeyLocalFromMs,
 } from '../../../utils/date';
 import { useReportsData } from './hooks/useReportsData';
+import { useMonthlyGoal } from '../goals/hooks/useMonthlyGoal';
+import { ReportsCharts } from './components/ReportsCharts';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -33,11 +35,7 @@ function formatPrice(n: number) {
   }).format(n);
 }
 
-function formatPriceShort(n: number) {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
-  return `$${n}`;
-}
+
 
 function isoDateLabel(iso: string) {
   const d = new Date(iso);
@@ -75,7 +73,7 @@ const PERIOD_LABELS: Record<Period, string> = {
 };
 
 // Lazy loading de gráficos optimizado (cada chunk por separado, no se recrea en cada render)
-const BarChart = React.lazy(() => import('./components/BarChart'));
+// const BarChart = React.lazy(() => import('./components/BarChart'));
 const DonutChart = React.lazy(() => import('./components/DonutChart'));
 
 
@@ -176,6 +174,8 @@ export function AdminReports() {
   },
     [orders]);
 
+  // Objetivo mensual
+  const { monthlyGoal } = useMonthlyGoal();
   // Filtrado extendido
   // periodOrders: solo filtra por período (filtros generales)
   const {
@@ -434,16 +434,13 @@ export function AdminReports() {
 
   const salesContent = useMemo(() => {
     if (salesViewMode === 'chart') {
-      //  El guard por si el periodo no tiene ventas, para evitar mostrar un gráfico vacío sin contexto.
-      /*if (barData.every(d => d.value === 0)) {
-        return <p className={styles.noData + ' fadeCross'}>Sin ventas en este período.</p>;
-      }*/
       return (
-        <Suspense fallback={<BarChartSkeleton aria-busy="true" />}>
-          <div className={styles.fadeIn}>
-            <BarChart data={barData} formatValue={(n) => formatPriceShort(n)} />
-          </div>
-        </Suspense>
+        <ReportsCharts
+          barData={barData}
+          statusSlices={statusSlices}
+          isLoading={isLoading}
+          monthlyGoal={monthlyGoal}
+        />
       );
     }
 
@@ -457,7 +454,7 @@ export function AdminReports() {
         />
       </div>
     );
-  }, [barData, salesViewMode, BarChartSkeleton, dayKeys, periodOrders]);
+  }, [barData, salesViewMode, isLoading, statusSlices, monthlyGoal, dayKeys, periodOrders]);
 
   const from = filteredOrdersTable.length === 0
     ? 0

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useMonthlyGoal } from '../../features/admin/goals/hooks/useMonthlyGoal';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { useAdminProducts } from '../../context/useAdminProductsContext';
@@ -156,11 +157,7 @@ export function AdminDashboard() {
     return Object.values(clientMap).sort((a, b) => b.total - a.total).slice(0, 5);
   }, [orders]);
 
-  const MONTHLY_GOAL_KEY = 'allmart_monthly_goal';
-  const [monthlyGoal, setMonthlyGoal] = useState(() => {
-    const saved = localStorage.getItem(MONTHLY_GOAL_KEY);
-    return saved ? Number(saved) : 500000;
-  });
+  const { monthlyGoal, setMonthlyGoal } = useMonthlyGoal();
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState('');
   const currentMonthRevenue = useMemo(() => {
@@ -337,7 +334,6 @@ export function AdminDashboard() {
                       onClick={() => {
                         const val = Math.max(0, Number(goalInput) || 0);
                         setMonthlyGoal(val);
-                        localStorage.setItem(MONTHLY_GOAL_KEY, String(val));
                         setEditingGoal(false);
                       }}
                     >

@@ -16,6 +16,7 @@ function useIsMobile() {
 type Props = {
     data: { label: string; value: number; dateKey: string }[];
     formatValue?: (n: number) => string;
+    monthlyGoal?: number;
 };
 
 /**
@@ -24,7 +25,7 @@ type Props = {
  * @param data Array de objetos con label, value y dateKey
  * @param formatValue Función opcional para formatear los valores
  */
-const BarChart = ({ data, formatValue }: Props) => {
+const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
     const isMobile = useIsMobile();
 
@@ -103,6 +104,46 @@ const BarChart = ({ data, formatValue }: Props) => {
 
     if (!data.length) return null;
 
+
+    // Línea de referencia para el objetivo mensual SIEMPRE visible
+    let referenceLine = null;
+    if (monthlyGoal && monthlyGoal > 0 && maxVal > 0) {
+        let y = padTop + chartH - (monthlyGoal / maxVal) * chartH;
+        let label = 'Objetivo mensual';
+        let arrow = '';
+        // Si está fuera del rango, anclar y mostrar indicador
+        if (y < padTop) {
+            y = padTop + 8;
+            arrow = '↑';
+        } else if (y > padTop + chartH) {
+            y = padTop + chartH - 8;
+            arrow = '↓';
+        }
+        referenceLine = (
+            <g>
+                <line
+                    x1={padLeft}
+                    x2={dynamicW - padRight}
+                    y1={y}
+                    y2={y}
+                    stroke="#1976d2"
+                    strokeDasharray="6 3"
+                    strokeWidth={2}
+                />
+                <text
+                    x={dynamicW - padRight - 4}
+                    y={y - 6}
+                    textAnchor="end"
+                    fontSize={12}
+                    fill="#1976d2"
+                    fontWeight="bold"
+                >
+                    {label} {arrow}
+                </text>
+            </g>
+        );
+    }
+
     return (
         <div
             className={styles.chartWrap}
@@ -138,6 +179,8 @@ const BarChart = ({ data, formatValue }: Props) => {
                         </g>
                     );
                 })}
+                {/* Línea de referencia del objetivo mensual */}
+                {referenceLine}
 
                 {/* BARRAS */}
                 {data.map((d, i) => {
