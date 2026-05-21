@@ -109,7 +109,10 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
     let referenceLine = null;
     if (monthlyGoal && monthlyGoal > 0 && maxVal > 0) {
         let y = padTop + chartH - (monthlyGoal / maxVal) * chartH;
-        let label = 'Objetivo mensual';
+        // Formatear el valor como moneda
+        const formatCurrency = (n: number) =>
+            n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 });
+        let label = `Objetivo mensual: ${formatCurrency(monthlyGoal)}`;
         let arrow = '';
         // Si está fuera del rango, anclar y mostrar indicador
         if (y < padTop) {
@@ -134,11 +137,11 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
                     x={dynamicW - padRight - 4}
                     y={y - 6}
                     textAnchor="end"
-                    fontSize={12}
+                    fontSize={9}
                     fill="#1976d2"
                     fontWeight="bold"
                 >
-                    {label} {arrow}
+                    {label}
                 </text>
             </g>
         );

@@ -437,7 +437,6 @@ export function AdminReports() {
       return (
         <ReportsCharts
           barData={barData}
-          statusSlices={statusSlices}
           isLoading={isLoading}
           monthlyGoal={monthlyGoal}
         />

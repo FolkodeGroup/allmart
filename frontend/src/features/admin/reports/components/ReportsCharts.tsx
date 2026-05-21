@@ -1,8 +1,7 @@
 // Gráficos con lazy loading y skeletons
 import React, { Suspense } from 'react';
 const BarChart = React.lazy(() => import('../components/BarChart'));
-const DonutChart = React.lazy(() => import('../components/DonutChart'));
-import { BarChartSkeleton, DonutChartSkeleton } from './Skeletons';
+import { BarChartSkeleton } from './Skeletons';
 
 /**
  * Presenta los gráficos y skeletons, sin lógica de datos.
@@ -12,34 +11,19 @@ export interface BarChartDatum {
     label: string;
     value: number;
 }
-export interface DonutChartSlice {
-    key: string;
-    count: number;
-}
 export interface ReportsChartsProps {
     barData: BarChartDatum[];
-    statusSlices: DonutChartSlice[];
     isLoading: boolean;
     monthlyGoal: number;
 }
 
-export function ReportsCharts({ barData, statusSlices, isLoading, monthlyGoal }: ReportsChartsProps) {
+export function ReportsCharts({ barData, isLoading, monthlyGoal }: ReportsChartsProps) {
     if (isLoading) {
-        return (
-            <>
-                <BarChartSkeleton />
-                <DonutChartSkeleton />
-            </>
-        );
+        return <BarChartSkeleton />;
     }
     return (
-        <>
-            <Suspense fallback={<BarChartSkeleton />}>
-                <BarChart data={barData} monthlyGoal={monthlyGoal} />
-            </Suspense>
-            <Suspense fallback={<DonutChartSkeleton />}>
-                <DonutChart slices={statusSlices} />
-            </Suspense>
-        </>
+        <Suspense fallback={<BarChartSkeleton />}>
+            <BarChart data={barData} monthlyGoal={monthlyGoal} />
+        </Suspense>
     );
 }
