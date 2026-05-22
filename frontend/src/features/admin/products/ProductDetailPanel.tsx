@@ -1,9 +1,10 @@
-import React, { useState, Suspense, useMemo, useCallback } from 'react';
+import React, { useState, Suspense, useMemo, useCallback, useEffect } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { ReadyToPublishChecklist } from './productWizard/ReadyToPublishChecklist';
 import type { WizardProduct } from './productWizard/types';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import styles from './ProductDetailPanel.module.css';
+import { useAdminVariants } from '../../../context/AdminVariantsContext';
 
 // Lazy load tab components
 const ProductDetailBasic = React.lazy(() =>
@@ -75,6 +76,12 @@ export function ProductDetailPanel({
     setShowDeleteModal(false);
   }, []);
 
+  const { variants, loadVariants } = useAdminVariants();
+
+  useEffect(() => {
+    loadVariants(product.id);
+  }, [product.id, loadVariants]);
+
   // Adapt AdminProduct to WizardProduct format for the checklist
   // Note: AdminProduct.variants are VariantGroups, not individual variants with price/stock
   const adaptedProduct = useMemo<Partial<WizardProduct>>(() => ({
@@ -83,12 +90,15 @@ export function ProductDetailPanel({
     categoryId: product.category?.id,
     sku: product.sku,
     price: product.price,
-    variants: (product.variants && product.variants.length > 0) ? [
-      // Create a minimal variant structure for checklist validation
-      { id: '1', name: 'Variantes disponibles', price: product.price, stock: product.stock }
-    ] : [],
+    variants: variants.map((v, i) => ({
+      id: v.id ?? String(i),
+      name: v.name,
+      sku: product.sku,
+      price: product.price,
+      stock: product.stock,
+    })),
     images: product.images || [],
-  }), [product]);
+  }), [product, variants]);
 
   // Render tab content with suspense fallback
   const renderTabContent = () => {

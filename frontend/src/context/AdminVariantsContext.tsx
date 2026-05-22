@@ -112,6 +112,9 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
       const data = await variantsService.fetchVariantsByProduct(t, productId);
       setVariants(data.map(apiToVariantGroup));
       setSelectedProductId(productId);
+    }).catch(() => {
+      setVariants([]);
+      setSelectedProductId(null);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);

@@ -306,9 +306,9 @@ async function prepareProductsForRender(
   // Evita saturar proveedores externos de imágenes (Unsplash/imgix) cuando el
   // catálogo exporta muchos productos en una sola corrida.
   return mapWithConcurrency(normalizedProducts, IMAGE_PREPARATION_CONCURRENCY, async (product) => ({
-      ...product,
-      imageDataUri: await buildOptimizedImageDataUri(product.imageUrl, product.title, branding, baseUrl),
-    }));
+    ...product,
+    imageDataUri: await buildOptimizedImageDataUri(product.imageUrl, product.title, branding, baseUrl),
+  }));
 }
 
 export function buildCatalogHtml(options: {
@@ -367,7 +367,7 @@ export function buildCatalogHtml(options: {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .catalog-shell { padding: 12mm; }
+          .catalog-shell { padding: 5mm; }
           .catalog-hero {
             background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary));
             border-radius: 18px;

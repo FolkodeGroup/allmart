@@ -69,19 +69,20 @@
 
 /* ── Export PDF Button ──────────────────────────────────────────────────────── */
 .exportBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-right: 4px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 16px;
-  background: transparent;
-  color: var(--color-primary, #769282);
-  border: 1.5px solid var(--color-primary, #769282);
-  border-radius: 8px;
   font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
   line-height: 1;
 }
@@ -98,8 +99,13 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinIcon {
