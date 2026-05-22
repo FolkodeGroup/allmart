@@ -18,7 +18,7 @@ import { Step1BasicInfo } from './Step1BasicInfo';
 import { Step2VariantsImages } from './Step2VariantsImages';
 import { Step3ReviewPublish } from './Step3ReviewPublish';
 import { DraftService } from './draftService';
-import { useReadyToPublish } from './ReadyToPublishChecklist';
+import { useReadyToPublish } from '../../../../hooks/useReadyToPublish';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 import { QuickActionsToolbar } from './QuickActionsToolbar';
 import styles from './ProductWizard.module.css';
@@ -382,99 +382,99 @@ export function ProductWizard({
         actions={modalActions}
         actionsClassName={styles.modalActions}
       >
-      {/* Progress Indicator */}
-      <div className={styles.progressContainer}>
-        <div className={styles.progressBar}>
-          <div
-            className={styles.progressFill}
-            style={{ width: `${(currentStep / 3) * 100}%` }}
-          />
+        {/* Progress Indicator */}
+        <div className={styles.progressContainer}>
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${(currentStep / 3) * 100}%` }}
+            />
+          </div>
+          <div className={styles.steps}>
+            {stepTitles.map((title, idx) => {
+              const isClickable = idx + 1 < currentStep;
+              return (
+                <div
+                  key={idx}
+                  className={`${styles.step} ${idx + 1 === currentStep ? styles.active : ''} ${idx + 1 < currentStep ? styles.completed : ''
+                    }`}
+                  role={isClickable ? 'button' : undefined}
+                  tabIndex={isClickable ? 0 : -1}
+                  onClick={isClickable ? () => setCurrentStep(idx + 1) : undefined}
+                  onKeyDown={isClickable ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setCurrentStep(idx + 1);
+                    }
+                  } : undefined}
+                  aria-disabled={!isClickable}
+                >
+                  <div className={styles.stepNumber}>{idx + 1}</div>
+                  <span className={styles.stepLabel}>{title}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className={styles.steps}>
-          {stepTitles.map((title, idx) => {
-            const isClickable = idx + 1 < currentStep;
-            return (
-              <div
-                key={idx}
-                className={`${styles.step} ${idx + 1 === currentStep ? styles.active : ''} ${idx + 1 < currentStep ? styles.completed : ''
-                  }`}
-                role={isClickable ? 'button' : undefined}
-                tabIndex={isClickable ? 0 : -1}
-                onClick={isClickable ? () => setCurrentStep(idx + 1) : undefined}
-                onKeyDown={isClickable ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    setCurrentStep(idx + 1);
-                  }
-                } : undefined}
-                aria-disabled={!isClickable}
-              >
-                <div className={styles.stepNumber}>{idx + 1}</div>
-                <span className={styles.stepLabel}>{title}</span>
-              </div>
-            );
-          })}
+
+        {/* Step Content */}
+        <div className={styles.stepsContainer}>
+          <AnimatePresence mode="wait" custom={currentStep > 2 ? -1 : 1}>
+            <motion.div
+              key={currentStep}
+              custom={currentStep > 2 ? -1 : 1}
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: 'spring', stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+              className={styles.stepWrapper}
+            >
+              {currentStep === 1 && (
+                <Step1BasicInfo
+                  ref={step1Ref}
+                  data={data}
+                  onDataChange={handleDataChange}
+                  categories={categories}
+                />
+              )}
+
+              {currentStep === 2 && (
+                <Step2VariantsImages
+                  ref={step2Ref}
+                  data={data}
+                  onDataChange={handleDataChange}
+                  categories={categories}
+                />
+              )}
+
+              {currentStep === 3 && (
+                <Step3ReviewPublish
+                  data={data}
+                  categories={categories}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
-      </div>
+      </Modal>
 
-      {/* Step Content */}
-      <div className={styles.stepsContainer}>
-        <AnimatePresence mode="wait" custom={currentStep > 2 ? -1 : 1}>
-          <motion.div
-            key={currentStep}
-            custom={currentStep > 2 ? -1 : 1}
-            variants={stepVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: 'spring', stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className={styles.stepWrapper}
-          >
-            {currentStep === 1 && (
-              <Step1BasicInfo
-                ref={step1Ref}
-                data={data}
-                onDataChange={handleDataChange}
-                categories={categories}
-              />
-            )}
-
-            {currentStep === 2 && (
-              <Step2VariantsImages
-                ref={step2Ref}
-                data={data}
-                onDataChange={handleDataChange}
-                categories={categories}
-              />
-            )}
-
-            {currentStep === 3 && (
-              <Step3ReviewPublish
-                data={data}
-                categories={categories}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </Modal>
-
-    {/* Quick Actions Floating Toolbar */}
-    {open && (
-      <QuickActionsToolbar
-        onSave={handleSaveDraft}
-        onDuplicate={handleDuplicate}
-        onPreview={handlePreview}
-        onPublish={() => handlePublish(false)}
-        onDiscard={handleClose}
-        isLoading={isSavingDraft}
-        isPublishing={isPublishing}
-        canPublish={isReady}
-        canDuplicate={!!data.name}
-      />
-    )}
-  </>
-);
+      {/* Quick Actions Floating Toolbar */}
+      {open && (
+        <QuickActionsToolbar
+          onSave={handleSaveDraft}
+          onDuplicate={handleDuplicate}
+          onPreview={handlePreview}
+          onPublish={() => handlePublish(false)}
+          onDiscard={handleClose}
+          isLoading={isSavingDraft}
+          isPublishing={isPublishing}
+          canPublish={isReady}
+          canDuplicate={!!data.name}
+        />
+      )}
+    </>
+  );
 }

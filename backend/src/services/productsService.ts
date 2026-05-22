@@ -232,7 +232,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   }
 
   const skuExists = await prisma.product.findUnique({ where: { sku: dto.sku } });
-  if (skuExists) throw createError(`El SKU "${dto.sku}" ya está en uso`, 409);
+  if (skuExists) throw createError('El SKU ya está en uso', 409, ['sku']);
 
   await ensureCategoriesExist(normalizedCategoryIds);
   const primaryCategoryId = dto.categoryId ?? normalizedCategoryIds[0];
@@ -483,11 +483,11 @@ export async function getPublicProducts(query: ProductQuery) {
 
   const orderBy: Record<string, string> = {};
   switch (sort) {
-    case 'price_asc':   orderBy.price = 'asc';  break;
-    case 'price_desc':  orderBy.price = 'desc'; break;
-    case 'rating':      orderBy.rating = 'desc'; break;
+    case 'price_asc': orderBy.price = 'asc'; break;
+    case 'price_desc': orderBy.price = 'desc'; break;
+    case 'rating': orderBy.rating = 'desc'; break;
     case 'newest':
-    default:            orderBy.createdAt = 'desc';
+    default: orderBy.createdAt = 'desc';
   }
 
   const [total, rows] = await Promise.all([
