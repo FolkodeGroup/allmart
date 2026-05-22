@@ -3,7 +3,7 @@ export { Step1BasicInfo } from './Step1BasicInfo';
 export { Step2VariantsImages } from './Step2VariantsImages';
 export { Step3ReviewPublish } from './Step3ReviewPublish';
 export { DraftService } from './draftService';
-export { ReadyToPublishChecklist, useReadyToPublish } from './ReadyToPublishChecklist';
+export { ReadyToPublishChecklist } from './ReadyToPublishChecklist';
 export { useFieldValidation, fieldValidators } from './useFieldValidation';
 export { ValidationField } from './ValidationField';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';

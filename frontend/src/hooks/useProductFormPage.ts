@@ -215,7 +215,17 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             }
             onSuccess();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al guardar el producto');
+            const message = err instanceof Error ? err.message : '';
+
+            // Detectar error de SKU duplicado
+            if (message.toLowerCase().includes('sku') || message.toLowerCase().includes('duplicate')) {
+                setFieldErrors(prev => ({
+                    ...prev,
+                    sku: 'Este SKU ya está en uso'
+                }));
+            } else {
+                setError(message || 'Error al guardar el producto');
+            }
         } finally {
             setSaving(false);
         }
