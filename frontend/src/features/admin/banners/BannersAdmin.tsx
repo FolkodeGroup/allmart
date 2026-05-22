@@ -23,7 +23,6 @@ import sectionStyles from '../shared/AdminSection.module.css';
 
 interface FormData {
   title: string;
-  description: string;
   imageFile: File | null;
   displayOrder: number;
   isActive: boolean;
@@ -39,7 +38,6 @@ export function BannersAdmin() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    description: '',
     imageFile: null,
     displayOrder: 0,
     isActive: true,
@@ -58,7 +56,6 @@ export function BannersAdmin() {
 
   const isDirty = showForm && (
     formData.title !== initialFormDataRef.current.title ||
-    formData.description !== initialFormDataRef.current.description ||
     formData.displayOrder !== initialFormDataRef.current.displayOrder ||
     formData.isActive !== initialFormDataRef.current.isActive ||
     formData.altText !== initialFormDataRef.current.altText ||
@@ -81,7 +78,7 @@ export function BannersAdmin() {
 
   function handleCancelForm() {
     interceptNavigation(() => {
-      setFormData({ title: '', description: '', imageFile: null, displayOrder: 0, isActive: true, altText: '' });
+      setFormData({ title: '', imageFile: null, displayOrder: 0, isActive: true, altText: '' });
       setEditingId(null);
       setShowForm(false);
     });
@@ -107,7 +104,6 @@ export function BannersAdmin() {
   function resetForm() {
     setFormData({
       title: '',
-      description: '',
       imageFile: null,
       displayOrder: 0,
       isActive: true,
@@ -128,7 +124,6 @@ export function BannersAdmin() {
     };
     setFormData({
       title: banner.title,
-      description: banner.description || '',
       imageFile: null,
       displayOrder: banner.displayOrder,
       isActive: banner.isActive,
@@ -158,7 +153,6 @@ export function BannersAdmin() {
       if (editingId) {
         await bannersAdminService.updateBanner(editingId, {
           title: formData.title,
-          description: formData.description,
           displayOrder: formData.displayOrder,
           isActive: formData.isActive,
           altText: formData.altText,
@@ -171,7 +165,6 @@ export function BannersAdmin() {
         await bannersAdminService.createBanner(
           {
             title: formData.title,
-            description: formData.description,
             displayOrder: formData.displayOrder,
             isActive: formData.isActive,
             altText: formData.altText,
@@ -335,17 +328,6 @@ export function BannersAdmin() {
                   {fieldErrors.title}
                 </span>
               )}
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="description">Descripción</label>
-              <textarea
-                id="description"
-                placeholder="Descripción opcional del banner"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-              />
             </div>
 
             <div className={styles.formGroup}>
