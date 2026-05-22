@@ -1,6 +1,7 @@
 type FieldErrors = {
   title?: string;
   imageFile?: string;
+  displayOrder?: string;
 };
 /**
  * features/admin/banners/BannersAdmin.tsx
@@ -34,6 +35,7 @@ export function BannersAdmin() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAltManuallyEdited, setIsAltManuallyEdited] = useState(false);
+  const [displayOrderInput, setDisplayOrderInput] = useState('0');
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -134,23 +136,13 @@ export function BannersAdmin() {
     });
     setEditingId(banner.id);
     setShowForm(true);
+    setDisplayOrderInput(String(banner.displayOrder));
     // Si el alt existente difiere del título, el usuario lo editó manualmente en algún momento
     setIsAltManuallyEdited(
       !!banner.altText && banner.altText !== banner.title
     );
   }
 
-  function validateForm(): FieldErrors {
-    const errors: FieldErrors = {};
-    if (!formData.title.trim()) {
-      errors.title = 'El título es obligatorio';
-    }
-    // Solo requiere imagen al crear
-    if (!editingId && !formData.imageFile) {
-      errors.imageFile = 'La imagen es obligatoria';
-    }
-    return errors;
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -241,6 +233,54 @@ export function BannersAdmin() {
     }
   }
 
+  // ─── Helper: calcula el siguiente displayOrder disponible ────────────────
+  function getNextAvailableOrder(banners: AdminBanner[]): number {
+    const used = new Set(banners.map((b) => b.displayOrder));
+    let next = 0;
+    while (used.has(next)) next++;
+    return next;
+  }
+
+  // ─── Helper: posiciones libres para el select de edición ─────────────────
+
+  function getAvailableOrders(banners: AdminBanner[], editingId: string | null): number[] {
+    const usedByOthers = new Set(
+      banners
+        .filter((b) => b.id !== editingId)
+        .map((b) => b.displayOrder)
+    );
+    const max = Math.max(...banners.map((b) => b.displayOrder), -1);
+    // Mostramos hasta max + 10 posiciones libres adelante
+    const EXTRA_SLOTS = 10;
+    const upperBound = max + EXTRA_SLOTS;
+    return Array.from({ length: upperBound + 1 }, (_, i) => i).filter(
+      (n) => !usedByOthers.has(n)
+    );
+  }
+
+  function validateForm(): FieldErrors {
+    const errors: FieldErrors = {};
+
+    if (!formData.title.trim()) {
+      errors.title = 'El título es obligatorio';
+    }
+
+    if (!editingId && !formData.imageFile) {
+      errors.imageFile = 'La imagen es obligatoria';
+    }
+
+    const occupied = banners
+      .filter((b) => b.id !== editingId)
+      .some((b) => b.displayOrder === formData.displayOrder);
+
+    if (occupied) {
+      const available = getAvailableOrders(banners, editingId).slice(0, 5);
+      errors.displayOrder = `Posición ocupada. Disponibles: ${available.join(', ')}`;
+    }
+
+    return errors;
+  }
+
   if (loading && banners.length === 0) {
     return <LoadingSpinner />;
   }
@@ -254,11 +294,20 @@ export function BannersAdmin() {
         </div>
         <Button
           onClick={() => {
+            const nextOrder = getNextAvailableOrder(banners);   // ← aquí
+            const firstFree = getAvailableOrders(banners, null)[0] ?? 0;
+            setDisplayOrderInput(String(firstFree));
             resetForm();
-            initialFormDataRef.current = { title: '', description: '', displayOrder: 0, isActive: true, altText: '' };
+            initialFormDataRef.current = {
+              title: '',
+              description: '',
+              displayOrder: nextOrder,                          // ← aquí
+              isActive: true,
+              altText: '',
+            };
+            setFormData((prev) => ({ ...prev, displayOrder: nextOrder })); // ← aquí
             setShowForm(true);
           }}
-          className={styles.btnPrimary}
         >
           <Plus size={16} />
           Nuevo Banner
@@ -354,13 +403,52 @@ export function BannersAdmin() {
                 <input
                   id="displayOrder"
                   type="number"
-                  value={formData.displayOrder}
-                  onChange={(e) => {
-                    const parsed = parseInt(e.target.value, 10);
-                    setFormData({ ...formData, displayOrder: Number.isNaN(parsed) ? 0 : parsed });
-                  }}
                   min="0"
+                  value={displayOrderInput}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setDisplayOrderInput(raw); // permite vacío mientras escribe
+
+                    const order = parseInt(raw, 10);
+                    if (!Number.isNaN(order) && order >= 0) {
+                      setFormData((prev) => ({ ...prev, displayOrder: order }));
+
+                      const occupied = banners
+                        .filter((b) => b.id !== editingId)
+                        .some((b) => b.displayOrder === order);
+
+                      if (occupied) {
+                        const available = getAvailableOrders(banners, editingId).slice(0, 5);
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          displayOrder: `Posición ocupada. Disponibles: ${available.join(', ')}`,
+                        }));
+                      } else {
+                        setFieldErrors((prev) => ({ ...prev, displayOrder: undefined }));
+                      }
+                    } else {
+                      // Campo vacío o inválido: limpiar error, no actualizar formData todavía
+                      setFieldErrors((prev) => ({ ...prev, displayOrder: undefined }));
+                    }
+                  }}
+                  onBlur={() => {
+                    const order = parseInt(displayOrderInput, 10);
+                    if (Number.isNaN(order) || order < 0) {
+                      setDisplayOrderInput(String(formData.displayOrder));
+                    } else {
+                      // ← forzar sincronización aunque el onChange ya lo haya hecho
+                      setFormData((prev) => ({ ...prev, displayOrder: order }));
+                    }
+                  }}
+                  className={fieldErrors.displayOrder ? styles.inputError : ''}
+                  aria-invalid={!!fieldErrors.displayOrder}
+                  aria-describedby={fieldErrors.displayOrder ? 'order-error' : undefined}
                 />
+                {fieldErrors.displayOrder && (
+                  <span id="order-error" className={styles.errorMsg} role="alert">
+                    {fieldErrors.displayOrder}
+                  </span>
+                )}
               </div>
 
               <div className={styles.formGroup}>
