@@ -40,7 +40,7 @@ const AdminPromotions: React.FC = () => {
 
   useEffect(() => {
     loadPromotions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, filterActive]);
 
   async function loadPromotions() {
@@ -113,8 +113,15 @@ const AdminPromotions: React.FC = () => {
     setActionPromotionName('');
   }
 
-  function handleEdit(promo: Promotion) {
-    setSelectedPromotion(promo);
+  async function handleEdit(promo: Promotion) {
+    try {
+      // Cargar detalle completo con rules incluidas
+      const fullPromotion = await promotionsService.getById(promo.id);
+      setSelectedPromotion(fullPromotion);
+    } catch {
+      // Fallback al objeto parcial si falla
+      setSelectedPromotion(promo);
+    }
     setViewMode('form');
   }
 
