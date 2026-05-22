@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, FileDown, Loader2 } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import sectionStyles from '../../features/admin/shared/AdminSection.module.css';
 import styles from './ProductHeader.module.css';
 
@@ -34,10 +34,8 @@ export const ProductHeader: React.FC<ProductHeaderProps> = ({
               aria-label="Exportar catálogo de productos en PDF"
               title="Exportar catálogo PDF con los filtros activos"
             >
-              {isExportingPdf ? (
+              {isExportingPdf && (
                 <Loader2 size={15} strokeWidth={2} className={styles.spinIcon} />
-              ) : (
-                <FileDown size={15} strokeWidth={2} />
               )}
               {isExportingPdf ? 'Generando…' : 'Exportar PDF'}
             </button>
