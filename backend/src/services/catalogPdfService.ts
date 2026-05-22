@@ -199,6 +199,11 @@ export function normalizeCatalogProduct(
 }
 
 async function fetchImageBuffer(source: string, baseUrl?: string): Promise<Buffer> {
+  // Validate that source is a string (should always be, but defensive programming)
+  if (typeof source !== 'string' || !source.trim()) {
+    throw createError('Source de imagen inválido o vacío', 400);
+  }
+
   if (/^data:/i.test(source)) {
     return decodeDataUri(source);
   }
@@ -544,9 +549,10 @@ export async function generateCatalogPdf(options: GenerateCatalogPdfOptions): Pr
 
   const puppeteerModule = await import('puppeteer');
   const puppeteer = puppeteerModule.default ?? puppeteerModule;
+  
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
   });
 
   try {

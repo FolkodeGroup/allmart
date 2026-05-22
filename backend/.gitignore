@@ -38,6 +38,9 @@ logs/
 Thumbs.db
 desktop.ini
 
+# Ignorar configuración de Puppeteer
+.puppeteerrc.json
+
 # ─── OS / Editor ──────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
