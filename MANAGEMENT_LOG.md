@@ -1757,3 +1757,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #950: 902 unificar vista de productos más vendidos en tabla | 2026-05-19 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #951: 937 eliminar paso intermedio al agregar imágenes de productos | 2026-05-19 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #954: Exportar catalogo | 2026-05-19 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #960: descripcion en formulario de banners eliminado. | 2026-05-22 |
