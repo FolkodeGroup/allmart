@@ -1,0 +1,95 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.errorBanner {
+    background-color: var(--color-background-danger);
+    color: var(--color-text-danger);
+    border: 1px solid var(--color-border-danger);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem 1rem;
+    margin: 0;
+}
+
+/* ── Tabla ─────────────────────────────────────────── */
+.tableWrapper {
+    overflow-x: auto;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-border-tertiary);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table thead tr {
+    background-color: var(--color-background-secondary);
+}
+
+.table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--color-border-tertiary);
+}
+
+.table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-border-tertiary);
+    color: var(--color-text-primary);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: var(--color-background-secondary);
+}
+
+.cellName {
+    font-weight: 500;
+}
+
+.link {
+    color: var(--color-text-info);
+    text-decoration: none;
+    max-width: 200px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
