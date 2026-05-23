@@ -35,6 +35,8 @@ const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts
 const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders'));
 const OrderDetailPage = lazy(() => import('./features/admin/orders/pages/OrderDetailPage'));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
+const SuppliersAdmin = lazy(() => import('./features/admin/suppliers/SuppliersAdmin').then(m => ({ default: m.SuppliersAdmin })));
+const SuppliersAdminFormWrapper = lazy(() => import('./features/admin/suppliers/SuppliersAdminFormWrapper').then(m => ({ default: m.SuppliersAdminFormWrapper, })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
 const AdminCategoryFormPageWrapper = lazy(() => import('./features/admin/categories/AdminCategoryFormPageWrapper').then(m => ({ default: m.AdminCategoryFormPageWrapper })));
 const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
@@ -180,6 +182,35 @@ const router = createBrowserRouter([
             </Suspense>
           </AdminRoute>
         )
+      },
+      {
+        path: 'proveedores',
+        element: (
+          <AdminRoute requiredPermission="suppliers.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <SuppliersAdmin />
+            </Suspense>
+          </AdminRoute>
+        )
+      }, {
+        path: 'proveedores/nuevo',
+        element: (
+          <AdminRoute requiredPermission="suppliers.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <SuppliersAdminFormWrapper />
+            </Suspense>
+          </AdminRoute>
+        ),
+      },
+      {
+        path: 'proveedores/:id/editar',
+        element: (
+          <AdminRoute requiredPermission="suppliers.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <SuppliersAdminFormWrapper />
+            </Suspense>
+          </AdminRoute>
+        ),
       },
       {
         path: 'promociones',

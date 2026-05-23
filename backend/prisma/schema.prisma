@@ -526,3 +526,19 @@ model Favorite {
   @@index([productId], map: "idx_favorites_product_id")
   @@map("favorites")
 }
+
+// ─── Suppliers ───────────────────────────────────────────────────────────────
+
+model Supplier {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(255)
+  url       String?  @db.VarChar(500)
+  phone     String   @db.VarChar(50)
+  address   String   @db.VarChar(500)
+  products  String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([name], map: "idx_suppliers_name")
+  @@map("suppliers")
+}

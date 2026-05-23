@@ -1,0 +1,139 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+.description {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.errorBanner {
+    background-color: var(--color-background-danger);
+    color: var(--color-text-danger);
+    border: 1px solid var(--color-border-danger);
+    border-radius: var(--border-radius-md);
+    padding: 0.75rem 1rem;
+    margin: 0;
+}
+
+/* ── Tabla ─────────────────────────────────────────── */
+.tableWrapper {
+    overflow-x: auto;
+    border: 1px solid #cdcdcd;
+    background: #f7f7f7;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.table thead tr {
+    background-color: #f2efeb;
+}
+
+.table th {
+    padding: 0.65rem 1rem;
+    text-align: left;
+    font-size: .9rem;
+    font-weight: 600;
+    color: #a09494;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    border-bottom: 1px solid #a09494;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #a09494;
+}
+
+.table td {
+    padding: 1rem 1rem;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr {
+    transition: background 0.12s;
+}
+
+.table tbody tr:hover {
+    background-color: #f7f7f7;
+}
+
+/* ── Celdas específicas ─────────────────────────────── */
+.cellName {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+}
+
+.link {
+    color: var(--color-text-info);
+    text-decoration: none;
+    max-width: 180px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+    font-size: 0.82rem;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.empty {
+    color: var(--color-text-tertiary);
+    font-size: 0.85rem;
+}
+
+/* ── Acciones ───────────────────────────────────────── */
+.actions {
+    display: flex;
+    gap: 0.4rem;
+    white-space: nowrap;
+    justify-content: flex-end;
+}
+
+.actionsInner {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: all 0.2s ease;
+    display: flex;
+    gap: 6px;
+}
+
+/* Mostrar al hacer hover en la fila */
+.table tbody tr:hover .actionsInner {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}

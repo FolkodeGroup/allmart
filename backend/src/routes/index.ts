@@ -30,6 +30,7 @@ import publicBannersRouter from './public/banners';
 import publicReviewsRouter from './public/reviews';
 import publicFavoritesRouter from './public/favorites';
 import publicConfigRouter from './public/config';
+import suppliersRouter from './admin/suppliers';
 import { adminMiddleware } from '../middlewares/auth';
 
 const adminRouter = Router();
@@ -50,6 +51,7 @@ adminRouter.use('/collections', collectionsRouter);
 adminRouter.use('/low-stock-alerts', lowStockAlertsRouter);
 adminRouter.use('/banners', bannersRouter);
 adminRouter.use('/reports', reportsRouter);
+adminRouter.use('/suppliers', suppliersRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();

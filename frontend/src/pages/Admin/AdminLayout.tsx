@@ -100,6 +100,13 @@ const navItems: NavItem[] = [
     permission: "reports.view",
     badge: null,
   },
+  {
+    label: "Proveedores",
+    to: "/admin/proveedores",
+    icon: "🏭",
+    permission: "suppliers.view",
+    badge: null,
+  },
 ];
 
 type Theme = 'light' | 'dark';

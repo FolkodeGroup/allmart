@@ -24,7 +24,12 @@ export type Permission =
   | 'orders.delete'
   | 'orders.markPaid'
   // Reportes
-  | 'reports.view';
+  | 'reports.view'
+  // Proveedores
+  | 'suppliers.view'
+  | 'suppliers.create'
+  | 'suppliers.edit'
+  | 'suppliers.delete';
 
 // ─── Permisos por rol ─────────────────────────────────────────────────────────
 const ADMIN_PERMISSIONS: Permission[] = [
@@ -33,6 +38,7 @@ const ADMIN_PERMISSIONS: Permission[] = [
   'categories.view', 'categories.create', 'categories.edit', 'categories.delete',
   'orders.view', 'orders.edit', 'orders.delete', 'orders.markPaid',
   'reports.view',
+  'suppliers.view', 'suppliers.create', 'suppliers.edit', 'suppliers.delete',
 ];
 
 const EDITOR_PERMISSIONS: Permission[] = [
