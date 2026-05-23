@@ -36,7 +36,6 @@ const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders'));
 const OrderDetailPage = lazy(() => import('./features/admin/orders/pages/OrderDetailPage'));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
 const SuppliersAdmin = lazy(() => import('./features/admin/suppliers/SuppliersAdmin').then(m => ({ default: m.SuppliersAdmin })));
-const SuppliersAdminForm = lazy(() => import('./features/admin/suppliers/SuppliersAdminForm').then(m => ({ default: m.SuppliersAdminForm, })));
 const SuppliersAdminFormWrapper = lazy(() => import('./features/admin/suppliers/SuppliersAdminFormWrapper').then(m => ({ default: m.SuppliersAdminFormWrapper, })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
 const AdminCategoryFormPageWrapper = lazy(() => import('./features/admin/categories/AdminCategoryFormPageWrapper').then(m => ({ default: m.AdminCategoryFormPageWrapper })));
