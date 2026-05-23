@@ -1759,3 +1759,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #954: Exportar catalogo | 2026-05-19 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #960: descripcion en formulario de banners eliminado. | 2026-05-22 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #961: 943 agregar recta de objetivo mensual en reportes | 2026-05-22 |
+| FedericoPaal | 3 | Creación de issue | Issue #974: Mejorar formato y legibilidad de archivos exportados (CSV, Excel, PDF) en la vista de Pedidos | 2026-05-23 |
