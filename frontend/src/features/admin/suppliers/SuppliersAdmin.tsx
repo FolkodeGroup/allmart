@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { Pagination } from '../reports/components/Pagination';
 import { Button } from '../../../components/ui/Button/Button';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
@@ -8,11 +10,28 @@ import styles from './SuppliersAdmin.module.css';
 import sectionStyles from '../shared/AdminSection.module.css';
 
 export function SuppliersAdmin() {
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
     const navigate = useNavigate();
     const {
         suppliers, loading, error,
         deleteId, setDeleteId, confirmDelete,
     } = useSuppliers();
+    const total = suppliers.length;
+
+    const paginatedSuppliers = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        return suppliers.slice(start, end);
+    }, [suppliers, page, pageSize]);
+
+    useEffect(() => {
+        const totalPages = Math.ceil(suppliers.length / pageSize);
+        if (page > totalPages) {
+            setPage(totalPages || 1);
+        }
+    }, [suppliers.length, page, pageSize]);
 
     return (
         <div className={styles.container}>
@@ -57,7 +76,7 @@ export function SuppliersAdmin() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {suppliers.map((s) => (
+                                {paginatedSuppliers.map((s) => (
                                     <tr key={s.id}>
                                         <td className={styles.cellName}>{s.name}</td>
                                         <td>
@@ -101,6 +120,16 @@ export function SuppliersAdmin() {
                                 ))}
                             </tbody>
                         </table>
+                        <Pagination
+                            page={page}
+                            pageSize={pageSize}
+                            total={total}
+                            onPageChange={setPage}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPage(1);
+                            }}
+                        />
                     </div>
                 )
             }
