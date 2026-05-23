@@ -71,7 +71,7 @@ export function useSuppliers() {
     function openEdit(supplier: AdminSupplier) {
         setFormData({
             name: supplier.name,
-            url: supplier.url,
+            url: supplier.url ?? '',
             phone: supplier.phone,
             address: supplier.address,
             products: supplier.products,
