@@ -953,46 +953,46 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
 
     const productRow = existingId
       ? await prisma.product.update({
-          where: { id: existingId },
-          data: {
-            name: product.name,
-            slug: product.slug,
-            shortDescription: product.shortDescription,
-            description: product.description,
-            price: product.price,
-            images: product.images,
-            categoryId,
-            tags: product.tags,
-            rating: product.rating,
-            reviewCount: product.reviewCount,
-            inStock: product.inStock,
-            stock: product.stock,
-            sku: product.sku,
-            features: product.features,
-            status: ProductStatus.ACTIVE,
-            isFeatured: product.tags.includes('bestseller'),
-          },
-        })
+        where: { id: existingId },
+        data: {
+          name: product.name,
+          slug: product.slug,
+          shortDescription: product.shortDescription,
+          description: product.description,
+          price: product.price,
+          images: product.images,
+          categoryId,
+          tags: product.tags,
+          rating: product.rating,
+          reviewCount: product.reviewCount,
+          inStock: product.inStock,
+          stock: product.stock,
+          sku: product.sku,
+          features: product.features,
+          status: ProductStatus.ACTIVE,
+          isFeatured: product.tags.includes('bestseller'),
+        },
+      })
       : await prisma.product.create({
-          data: {
-            name: product.name,
-            slug: product.slug,
-            shortDescription: product.shortDescription,
-            description: product.description,
-            price: product.price,
-            images: product.images,
-            categoryId,
-            tags: product.tags,
-            rating: product.rating,
-            reviewCount: product.reviewCount,
-            inStock: product.inStock,
-            stock: product.stock,
-            sku: product.sku,
-            features: product.features,
-            status: ProductStatus.ACTIVE,
-            isFeatured: product.tags.includes('bestseller'),
-          },
-        });
+        data: {
+          name: product.name,
+          slug: product.slug,
+          shortDescription: product.shortDescription,
+          description: product.description,
+          price: product.price,
+          images: product.images,
+          categoryId,
+          tags: product.tags,
+          rating: product.rating,
+          reviewCount: product.reviewCount,
+          inStock: product.inStock,
+          stock: product.stock,
+          sku: product.sku,
+          features: product.features,
+          status: ProductStatus.ACTIVE,
+          isFeatured: product.tags.includes('bestseller'),
+        },
+      });
 
     await prisma.productCategory.upsert({
       where: {
@@ -1259,6 +1259,68 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
   return { orderCount, salesCount };
 }
 
+async function seedSuppliers(): Promise<number> {
+  console.log('Creando proveedores demo...');
+
+  // Idempotente: borra solo los demo y los recrea
+  await prisma.supplier.deleteMany({
+    where: {
+      name: {
+        in: [
+          'Distribuidora Hogar SA',
+          'Cocina & Arte SRL',
+          'Iluminarte',
+          'Verde Jardín',
+          'Ferrotodo',
+        ],
+      },
+    },
+  });
+
+  const { count } = await prisma.supplier.createMany({
+    data: [
+      {
+        name: 'Distribuidora Hogar SA',
+        url: 'https://distribuidorahogar.com.ar',
+        phone: '+54 11 4321-1234',
+        address: 'Av. Corrientes 1500, CABA',
+        products: 'Textiles, Almohadones, Manteles',
+      },
+      {
+        name: 'Cocina & Arte SRL',
+        url: 'https://cocinaarte.com.ar',
+        phone: '+54 11 5678-8765',
+        address: 'Bv. Oroño 540, Rosario, Santa Fe',
+        products: 'Baterías de cocina, Utensilios, Repostería',
+      },
+      {
+        name: 'Iluminarte',
+        url: null,
+        phone: '+54 351 422-3344',
+        address: 'Av. Colón 890, Córdoba',
+        products: 'Lámparas LED, Tiras de luz, Apliques',
+      },
+      {
+        name: 'Verde Jardín',
+        url: 'https://verdejardín.com.ar',
+        phone: '+54 11 6543-2109',
+        address: 'Calle 13 Nº 440, La Plata, Buenos Aires',
+        products: 'Macetas, Herramientas de jardín, Sistemas de riego',
+      },
+      {
+        name: 'Ferrotodo',
+        url: 'https://ferrotodo.com.ar',
+        phone: '+54 11 4000-9988',
+        address: 'Av. San Martín 3200, CABA',
+        products: 'Herramientas manuales, Pinturas, Organización de taller',
+      },
+    ],
+  });
+
+  console.log(`Proveedores demo: ${count}`);
+  return count;
+}
+
 async function seedDemo() {
   try {
     console.log('Iniciando seed DEMO robusto de Allmart...');
@@ -1276,7 +1338,7 @@ async function seedDemo() {
     } = await seedCategoriesAndProducts(generatedProducts);
 
     const { orderCount, salesCount } = await seedOrdersAndSales(persistedProducts);
-
+    const supplierCount = await seedSuppliers();
     console.log('=============================================');
     console.log('SEED DEMO COMPLETADO');
     console.log('=============================================');
@@ -1286,6 +1348,7 @@ async function seedDemo() {
     console.log(`Productos cargados: ${productCount}`);
     console.log(`Pedidos demo: ${orderCount}`);
     console.log(`Ventas/transacciones demo: ${salesCount}`);
+    console.log(`Proveedores demo: ${supplierCount}`);
     console.log('Nota: estado "completed" del negocio se mapea a "entregado" por schema actual.');
     console.log('=============================================');
   } catch (error) {

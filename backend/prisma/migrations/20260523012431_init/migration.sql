@@ -55,8 +55,6 @@ CREATE TABLE "products" (
     "description" TEXT,
     "short_description" TEXT,
     "price" DECIMAL(12,2) NOT NULL,
-    "original_price" DECIMAL(12,2),
-    "discount" DECIMAL(5,2),
     "images" JSONB NOT NULL DEFAULT '[]',
     "category_id" UUID,
     "tags" JSONB NOT NULL DEFAULT '[]',
@@ -143,6 +141,7 @@ CREATE TABLE "orders" (
     "customer_first_name" VARCHAR(100) NOT NULL,
     "customer_last_name" VARCHAR(100) NOT NULL,
     "customer_email" VARCHAR(255) NOT NULL,
+    "customer_phone" VARCHAR(30),
     "total" DECIMAL(12,2) NOT NULL DEFAULT 0,
     "status" "order_status" NOT NULL DEFAULT 'pendiente',
     "payment_status" "payment_status" NOT NULL DEFAULT 'no-abonado',
@@ -345,6 +344,47 @@ CREATE TABLE "banners" (
     CONSTRAINT "banners_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "product_reviews" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "product_id" UUID NOT NULL,
+    "user_id" UUID,
+    "order_id" UUID,
+    "reviewer_name" VARCHAR(100),
+    "rating" INTEGER NOT NULL,
+    "title" VARCHAR(255),
+    "text" TEXT,
+    "helpful" INTEGER NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "product_reviews_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "favorites" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" UUID NOT NULL,
+    "product_id" UUID NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "favorites_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "suppliers" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "name" VARCHAR(255) NOT NULL,
+    "url" VARCHAR(500),
+    "phone" VARCHAR(50) NOT NULL,
+    "address" VARCHAR(500) NOT NULL,
+    "products" TEXT NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "suppliers_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_unique" ON "users"("email");
 
@@ -413,6 +453,9 @@ CREATE INDEX "idx_orders_created_at" ON "orders"("created_at");
 
 -- CreateIndex
 CREATE INDEX "idx_orders_customer_email" ON "orders"("customer_email");
+
+-- CreateIndex
+CREATE INDEX "idx_orders_customer_phone" ON "orders"("customer_phone");
 
 -- CreateIndex
 CREATE INDEX "idx_orders_status" ON "orders"("status");
@@ -516,6 +559,33 @@ CREATE INDEX "idx_banners_is_active" ON "banners"("is_active");
 -- CreateIndex
 CREATE INDEX "idx_banners_display_order" ON "banners"("display_order");
 
+-- CreateIndex
+CREATE INDEX "idx_product_reviews_product_id" ON "product_reviews"("product_id");
+
+-- CreateIndex
+CREATE INDEX "idx_product_reviews_user_id" ON "product_reviews"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_product_reviews_order_id" ON "product_reviews"("order_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "product_reviews_unique" ON "product_reviews"("product_id", "user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "product_reviews_order_unique" ON "product_reviews"("product_id", "order_id");
+
+-- CreateIndex
+CREATE INDEX "idx_favorites_user_id" ON "favorites"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_favorites_product_id" ON "favorites"("product_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "favorites_unique" ON "favorites"("user_id", "product_id");
+
+-- CreateIndex
+CREATE INDEX "idx_suppliers_name" ON "suppliers"("name");
+
 -- AddForeignKey
 ALTER TABLE "categories" ADD CONSTRAINT "categories_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
 
@@ -584,3 +654,18 @@ ALTER TABLE "low_stock_alerts" ADD CONSTRAINT "low_stock_alerts_order_fk" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "low_stock_alerts" ADD CONSTRAINT "low_stock_alerts_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "favorites" ADD CONSTRAINT "favorites_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "favorites" ADD CONSTRAINT "favorites_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;

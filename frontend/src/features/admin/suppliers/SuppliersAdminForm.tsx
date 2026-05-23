@@ -23,6 +23,11 @@ type SectionId = typeof SECTIONS[number]['id'];
 // ── Component ────────────────────────────────────────────────────────────
 export function SuppliersAdminForm({ supplierId, onBack, onSuccess }: Props) {
     const formRef = useRef<HTMLFormElement | null>(null);
+    const savedSuccessfully = useRef(false);
+    const handleSuccess = () => {
+        savedSuccessfully.current = true;
+        onSuccess();
+    };
 
     const [activeSection, setActiveSection] = React.useState<SectionId>('identificacion');
     const sectionRefs = useRef<Record<SectionId, HTMLElement | null>>({
@@ -41,10 +46,12 @@ export function SuppliersAdminForm({ supplierId, onBack, onSuccess }: Props) {
         isDirty,
         handleField,
         handleSubmit,
-    } = useSupplierForm({ id: supplierId ?? undefined, onSuccess });
+    } = useSupplierForm({ id: supplierId ?? undefined, onSuccess: handleSuccess });
 
     // Block SPA navigation when there are unsaved changes
-    const blocker = useBlocker(isDirty);
+    const blocker = useBlocker(() => {
+        return isDirty && !savedSuccessfully.current;
+    });
 
     // ── Scroll spy ───────────────────────────────────────────────────────
     useEffect(() => {

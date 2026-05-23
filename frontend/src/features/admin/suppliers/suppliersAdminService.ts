@@ -1,54 +1,60 @@
-// Servicio para gestionar proveedores desde el panel administrativo
+import { apiFetch } from '../../../utils/apiClient';
 
-// Simple local id generator
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+interface ApiSuccess<T> {
+    success: boolean;
+    data: T;
+    message?: string;
 }
 
 export interface AdminSupplier {
     id: string;
     name: string;
-    url: string;
+    url: string | null;
     phone: string;
     address: string;
     products: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
-// Simulación de almacenamiento en memoria
-let suppliers: AdminSupplier[] = [
-    {
-        id: uuidv4(),
-        name: 'Proveedor Ejemplo',
-        url: 'https://proveedor.com',
-        phone: '+54 11 1234-5678',
-        address: 'Calle Falsa 123, CABA',
-        products: 'Papel, Cartón',
-    },
-];
+export type SupplierInput = Omit<AdminSupplier, 'id' | 'createdAt' | 'updatedAt'>;
 
 export const suppliersAdminService = {
     async getAllSuppliers(): Promise<AdminSupplier[]> {
-        return Promise.resolve([...suppliers]);
+        const body = await apiFetch<ApiSuccess<AdminSupplier[]>>('/api/admin/suppliers');
+        return body.data ?? [];
     },
+
     async getSupplier(id: string): Promise<AdminSupplier | undefined> {
-        return Promise.resolve(suppliers.find(s => s.id === id));
+        try {
+            const body = await apiFetch<ApiSuccess<AdminSupplier>>(`/api/admin/suppliers/${id}`);
+            return body.data;
+        } catch {
+            return undefined;
+        }
     },
-    async createSupplier(data: Omit<AdminSupplier, 'id'>): Promise<AdminSupplier> {
-        const newSupplier = { ...data, id: uuidv4() };
-        suppliers.push(newSupplier);
-        return Promise.resolve(newSupplier);
+
+    async createSupplier(data: SupplierInput): Promise<AdminSupplier> {
+        const body = await apiFetch<ApiSuccess<AdminSupplier>>('/api/admin/suppliers', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+        return body.data;
     },
-    async updateSupplier(id: string, data: Omit<AdminSupplier, 'id'>): Promise<AdminSupplier | undefined> {
-        const idx = suppliers.findIndex(s => s.id === id);
-        if (idx === -1) return undefined;
-        suppliers[idx] = { ...suppliers[idx], ...data };
-        return Promise.resolve(suppliers[idx]);
+
+    async updateSupplier(id: string, data: SupplierInput): Promise<AdminSupplier | undefined> {
+        try {
+            const body = await apiFetch<ApiSuccess<AdminSupplier>>(`/api/admin/suppliers/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(data),
+            });
+            return body.data;
+        } catch {
+            return undefined;
+        }
     },
+
     async deleteSupplier(id: string): Promise<void> {
-        suppliers = suppliers.filter(s => s.id !== id);
-        return Promise.resolve();
+        await apiFetch(`/api/admin/suppliers/${id}`, { method: 'DELETE' });
     },
 };

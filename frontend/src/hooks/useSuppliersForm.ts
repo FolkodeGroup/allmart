@@ -21,7 +21,7 @@ export function useSupplierForm({ id, onSuccess }: UseSupplierFormOptions) {
     const [loading, setLoading] = useState(!!id);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
+    const savedSuccessfully = useRef(false);
     // Guardamos el estado inicial para calcular isDirty
     const initialFormRef = useRef<SupplierFormData>(EMPTY_FORM);
 
@@ -33,11 +33,11 @@ export function useSupplierForm({ id, onSuccess }: UseSupplierFormOptions) {
             .then((supplier) => {
                 if (!supplier) { setError('Proveedor no encontrado.'); return; }
                 const loaded: SupplierFormData = {
-                    name: supplier.name,
-                    url: supplier.url,
-                    phone: supplier.phone,
-                    address: supplier.address,
-                    products: supplier.products,
+                    name: supplier.name ?? '',
+                    url: supplier.url ?? '',
+                    phone: supplier.phone ?? '',
+                    address: supplier.address ?? '',
+                    products: supplier.products ?? '',
                 };
                 setFormData(loaded);
                 initialFormRef.current = loaded;
@@ -75,7 +75,8 @@ export function useSupplierForm({ id, onSuccess }: UseSupplierFormOptions) {
             } else {
                 await suppliersAdminService.createSupplier(formData);
             }
-            initialFormRef.current = formData; // resetea isDirty antes de navegar
+            savedSuccessfully.current = true;
+            initialFormRef.current = formData;
             onSuccess();
         } catch {
             setError('No se pudo guardar el proveedor.');

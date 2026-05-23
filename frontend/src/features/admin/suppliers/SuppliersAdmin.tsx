@@ -5,6 +5,7 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { useSuppliers } from '../../../hooks/useSuppliers';
 import styles from './SuppliersAdmin.module.css';
+import sectionStyles from '../shared/AdminSection.module.css';
 
 export function SuppliersAdmin() {
     const navigate = useNavigate();
@@ -16,7 +17,10 @@ export function SuppliersAdmin() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <h2 className={styles.title}>Proveedores</h2>
+                <div>
+                    <h2 className={sectionStyles.title}>Proveedores</h2>
+                    <p className={sectionStyles.description}>Administra los proveedores de tu catálogo</p>
+                </div>
                 <Button
                     type="button"
                     onClick={() => navigate('/admin/proveedores/nuevo')}
@@ -25,71 +29,80 @@ export function SuppliersAdmin() {
                 </Button>
             </div>
 
-            {error && (
-                <p className={styles.errorBanner} role="alert">{error}</p>
-            )}
+            {
+                error && (
+                    <p className={styles.errorBanner} role="alert">{error}</p>
+                )
+            }
 
-            {loading ? (
-                <LoadingSpinner message="Cargando proveedores..." />
-            ) : suppliers.length === 0 ? (
-                <EmptyState
-                    title="Sin proveedores"
-                    description="No hay proveedores cargados. Creá el primero."
-                />
-            ) : (
-                <div className={styles.tableWrapper}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Página</th>
-                                <th>Teléfono</th>
-                                <th>Dirección</th>
-                                <th>Productos</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {suppliers.map((s) => (
-                                <tr key={s.id}>
-                                    <td className={styles.cellName}>{s.name}</td>
-                                    <td>
-                                        <a
-                                            href={s.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={styles.link}
-                                        >
-                                            {s.url}
-                                        </a>
-                                    </td>
-                                    <td>{s.phone}</td>
-                                    <td>{s.address}</td>
-                                    <td>{s.products}</td>
-                                    <td className={styles.actions}>
-                                        <Button
-                                            size="sm"
-                                            variant="secondary"
-                                            type="button"
-                                            onClick={() => navigate(`/admin/proveedores/${s.id}/editar`)}
-                                        >
-                                            Editar
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="secondary"
-                                            type="button"
-                                            onClick={() => setDeleteId(s.id)}
-                                        >
-                                            Eliminar
-                                        </Button>
-                                    </td>
+            {
+                loading ? (
+                    <LoadingSpinner message="Cargando proveedores..." />
+                ) : suppliers.length === 0 ? (
+                    <EmptyState
+                        title="Sin proveedores"
+                        description="No hay proveedores cargados. Creá el primero."
+                    />
+                ) : (
+                    <div className={styles.tableWrapper}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Página</th>
+                                    <th>Teléfono</th>
+                                    <th>Dirección</th>
+                                    <th>Productos</th>
+                                    <th></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )
+                            </thead>
+                            <tbody>
+                                {suppliers.map((s) => (
+                                    <tr key={s.id}>
+                                        <td className={styles.cellName}>{s.name}</td>
+                                        <td>
+                                            {s.url ? (
+                                                <a
+                                                    href={s.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className={styles.link}
+                                                >
+                                                    {s.url}
+                                                </a>
+                                            ) : (
+                                                <span className={styles.empty}>—</span>
+                                            )}
+                                        </td>
+                                        <td>{s.phone}</td>
+                                        <td>{s.address}</td>
+                                        <td>{s.products}</td>
+                                        <td className={styles.actions}>
+                                            <div className={styles.actionsInner}>
+                                                <Button
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    type="button"
+                                                    onClick={() => navigate(`/admin/proveedores/${s.id}/editar`)}
+                                                >
+                                                    Editar
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    type="button"
+                                                    onClick={() => setDeleteId(s.id)}
+                                                >
+                                                    Eliminar
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )
             }
 
             <ModalConfirm
