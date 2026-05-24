@@ -1,0 +1,1 @@
+-- Migration file (empty - placeholder for incomplete migration)
