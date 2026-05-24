@@ -1,0 +1,106 @@
+/* features/admin/banners/BannerFilterBuilder.module.css */
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    background: #f9f7f4;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 8px;
+}
+
+.hint {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-text-secondary, #64748b);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.select {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: var(--color-text-primary, #1e293b);
+    background: var(--color-bg, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.select:focus {
+    border-color: var(--color-primary, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.tagGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tagBtn {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary, #64748b);
+    background: var(--color-bg, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tagBtn:hover {
+    border-color: var(--color-primary, #6366f1);
+    color: var(--color-primary, #6366f1);
+}
+
+.tagBtnActive {
+    color: #ffffff;
+    background: var(--color-primary, #6366f1);
+    border-color: var(--color-primary, #6366f1);
+}
+
+.tagBtnActive:hover {
+    background: var(--color-primary-dark, #4f46e5);
+    border-color: var(--color-primary-dark, #4f46e5);
+    color: #ffffff;
+}
+
+.preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--color-bg, #ffffff);
+    border: 1px dashed var(--color-border, #e2e8f0);
+    border-radius: 6px;
+    flex-wrap: wrap;
+}
+
+.previewLabel {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary, #64748b);
+    white-space: nowrap;
+}
+
+.previewUrl {
+    font-size: 12px;
+    color: var(--color-primary, #6366f1);
+    word-break: break-all;
+}

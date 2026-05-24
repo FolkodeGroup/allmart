@@ -3,6 +3,7 @@
  * Servicio para obtener banners dinámicamente desde la API pública.
  */
 
+import type { BannerFilterConfig } from '../types/bannerFilter';
 import { apiFetch } from '../utils/apiClient';
 
 interface ApiSuccess<T> {
@@ -20,6 +21,7 @@ export interface PublicBanner {
   imageUrl: string;      // /api/images/banners/:id
   thumbUrl: string;      // /api/images/banners/:id/thumb
   altText?: string;
+  filterConfig?: BannerFilterConfig;
   createdAt: string;
   updatedAt: string;
 }

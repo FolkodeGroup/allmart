@@ -26,6 +26,7 @@ export async function index(req: AuthenticatedRequest, res: Response, next: Next
       sizeBytes: b.sizeBytes,
       originalFilename: b.originalFilename,
       altText: b.altText,
+      filterConfig: b.filterConfig,
       imageUrl: `/api/images/banners/${b.id}`,
       thumbUrl: `/api/images/banners/${b.id}/thumb`,
       createdAt: b.createdAt,
@@ -67,7 +68,6 @@ export async function show(req: AuthenticatedRequest, res: Response, next: NextF
 export async function create(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     let { title, description, displayOrder, isActive, altText } = req.body;
-
     // Convertir a tipos correctos (FormData envía todo como string)
     displayOrder = displayOrder ? parseInt(displayOrder, 10) : 0;
     isActive = isActive === 'true' || isActive === true;
@@ -85,7 +85,11 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
     };
 
     const imageData = await bannerImageService.processBannerImage(file);
-
+    const filterConfig = req.body.filterConfig
+      ? (typeof req.body.filterConfig === 'string'
+        ? JSON.parse(req.body.filterConfig)
+        : req.body.filterConfig)
+      : {};
     const banner = await bannersService.createBanner(
       title,
       description || undefined,
@@ -93,7 +97,10 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
       displayOrder || 0,
       isActive !== false,
       imageData,
+      filterConfig,
     );
+
+
 
     const response = {
       id: banner.id,
@@ -112,6 +119,7 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
       thumbUrl: `/api/images/banners/${banner.id}/thumb`,
       createdAt: banner.createdAt,
       updatedAt: banner.updatedAt,
+      filterConfig: banner.filterConfig,
     };
 
     sendSuccess(res, response, 201, 'Banner creado y imagen procesada');
@@ -123,13 +131,18 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
 export async function update(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const { title, description, displayOrder, isActive, altText } = req.body;
-
+    const filterConfig = req.body.filterConfig
+      ? (typeof req.body.filterConfig === 'string'
+        ? JSON.parse(req.body.filterConfig)
+        : req.body.filterConfig)
+      : undefined;
     const banner = await bannersService.updateBanner(req.params.id, {
       title,
       description: description !== undefined ? description : undefined,
       displayOrder,
       isActive,
       altText: altText !== undefined ? altText : undefined,
+      filterConfig,
     });
 
     const response = {
@@ -149,6 +162,7 @@ export async function update(req: AuthenticatedRequest, res: Response, next: Nex
       thumbUrl: `/api/images/banners/${banner.id}/thumb`,
       createdAt: banner.createdAt,
       updatedAt: banner.updatedAt,
+      filterConfig: banner.filterConfig,
     };
 
     sendSuccess(res, response, 200, 'Banner actualizado');

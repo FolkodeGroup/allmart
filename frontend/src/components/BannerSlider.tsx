@@ -7,6 +7,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './BannerSlider.module.css';
 import type { PublicBanner } from '../services/publicBannersService';
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../utils/imageUrl';
+import { useNavigate } from 'react-router-dom';
+import { bannerFilterToUrl } from '../utils/bannerFilterToUrl';
 
 interface Props {
   banners: PublicBanner[];
@@ -17,6 +19,7 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navigate = useNavigate();
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
     const target = event.currentTarget;
@@ -84,6 +87,11 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
     return null;
   }
 
+  function handleBannerClick(banner: PublicBanner) {
+    const url = bannerFilterToUrl(banner.filterConfig ?? {});
+    navigate(url);
+  }
+
   return (
     <div className={styles.slider}>
       <div
@@ -101,6 +109,8 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
               key={banner.id}
               className={`${styles.slide} ${index === currentIndex ? styles.active : ''}`}
               aria-hidden={index !== currentIndex}
+              onClick={() => handleBannerClick(banner)}
+              style={{ cursor: 'pointer' }}
             >
               <div className={styles.slideContent}>
                 <img

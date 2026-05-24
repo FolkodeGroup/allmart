@@ -22,6 +22,7 @@ export interface BannerWithImageMeta extends Banner {
   sizeBytes: number;
   originalFilename?: string;
   altText?: string;
+  filterConfig?: Record<string, unknown>;
 }
 
 export type CreateBannerDTO = Omit<Banner, 'id' | 'createdAt' | 'updatedAt'>;

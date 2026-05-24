@@ -9,6 +9,14 @@
   box-shadow: 0 0 0 3px rgba(199, 80, 80, 0.18) !important;
 }
 
+.legend {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+
+}
+
 .errorMsg {
   font-family: var(--font-ui);
   font-size: var(--text-xs);
@@ -26,10 +34,21 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25%       { transform: translateX(-4px); }
-  75%       { transform: translateX(4px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
 }
+
 /**
  * BannersAdmin.module.css
  * Estilos para el componente de administración de banners
@@ -171,9 +190,9 @@
 
 .btnSecondary:hover:not(:disabled),
 .btnSecondary:focus-visible {
-    background: var(--color-bg-secondary, #f3f4f6);
-    color: var(--color-primary, #2563eb);
-    border-color: var(--color-primary, #2563eb);
+  background: var(--color-bg-secondary, #f3f4f6);
+  color: var(--color-primary, #2563eb);
+  border-color: var(--color-primary, #2563eb);
 }
 
 .bannersGrid {
@@ -319,4 +338,3 @@
     flex: 1;
   }
 }
-
