@@ -4,7 +4,8 @@
  */
 
 import { prisma } from '../config/prisma';
-import { BannerWithImageMeta, CreateBannerDTO, UpdateBannerDTO } from '../models/Banner';
+import { Prisma } from '@prisma/client';
+import { BannerWithImageMeta } from '../models/Banner';
 import { createError } from '../middlewares/errorHandler';
 
 function toBuffer(bytes: Uint8Array | Buffer): Buffer {
@@ -28,6 +29,7 @@ function toBannerWithMeta(row: any): BannerWithImageMeta {
     sizeBytes: row.sizeBytes,
     originalFilename: row.originalFilename ?? undefined,
     altText: row.altText ?? undefined,
+    filterConfig: row.filterConfig ?? undefined,
   };
 }
 
@@ -42,6 +44,7 @@ function toBannerPublic(row: any): any {
     imageUrl: `/api/images/banners/${row.id}`,
     thumbUrl: `/api/images/banners/${row.id}/thumb`,
     altText: row.altText ?? undefined,
+    filterConfig: row.filterConfig ?? {},
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -86,10 +89,10 @@ export async function getBannerThumbnail(id: string): Promise<{ data: Buffer; wi
   });
   if (!row) throw createError('Banner no encontrado', 404);
   if (!row.thumbnail) throw createError('Miniatura no disponible', 404);
-  return { 
-    data: toBuffer(row.thumbnail), 
-    width: row.thumbWidth ?? 0, 
-    height: row.thumbHeight ?? 0 
+  return {
+    data: toBuffer(row.thumbnail),
+    width: row.thumbWidth ?? 0,
+    height: row.thumbHeight ?? 0
   };
 }
 
@@ -109,6 +112,7 @@ export async function createBanner(
     sizeBytes: number;
     originalFilename?: string;
   },
+  filterConfig: Record<string, unknown>,
 ): Promise<BannerWithImageMeta> {
   if (!title.trim()) {
     throw createError('El título es requerido', 400);
@@ -130,6 +134,7 @@ export async function createBanner(
       sizeBytes: imageData.sizeBytes,
       originalFilename: imageData.originalFilename ?? null,
       mimeType: 'image/webp',
+      filterConfig: (filterConfig ?? {}) as Prisma.InputJsonValue,
     },
   });
 
@@ -144,6 +149,7 @@ export async function updateBanner(
     displayOrder: number;
     isActive: boolean;
     altText: string | null;
+    filterConfig: Record<string, unknown>;
   }>,
 ): Promise<BannerWithImageMeta> {
   const existing = await prisma.banner.findUnique({
@@ -159,6 +165,9 @@ export async function updateBanner(
       displayOrder: updates.displayOrder ?? existing.displayOrder,
       isActive: updates.isActive ?? existing.isActive,
       altText: updates.altText !== undefined ? updates.altText : existing.altText,
+      filterConfig: (updates.filterConfig !== undefined
+        ? updates.filterConfig
+        : existing.filterConfig) as Prisma.InputJsonValue,
     },
   });
 

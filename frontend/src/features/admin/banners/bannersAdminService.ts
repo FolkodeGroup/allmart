@@ -3,6 +3,7 @@
  * Servicio para gestionar banners desde el panel administrativo
  */
 
+import type { BannerFilterConfig } from '../../../types/bannerFilter';
 import { apiFetch } from '../../../utils/apiClient';
 
 interface ApiSuccess<T> {
@@ -15,6 +16,7 @@ export interface AdminBanner {
   id: string;
   title: string;
   description?: string;
+  filterConfig?: BannerFilterConfig;
   displayOrder: number;
   isActive: boolean;
   width: number;
@@ -50,9 +52,10 @@ export const bannersAdminService = {
   /**
    * Crea un nuevo banner con imagen
    */
-  async createBanner(data: { title: string; description?: string; altText?: string; displayOrder?: number; isActive?: boolean }, imageFile: File): Promise<AdminBanner> {
+  async createBanner(data: { title: string; description?: string; altText?: string; displayOrder?: number; isActive?: boolean; filterConfig?: BannerFilterConfig }, imageFile: File): Promise<AdminBanner> {
     const formData = new FormData();
     formData.append('title', data.title);
+    if (data.filterConfig) formData.append('filterConfig', JSON.stringify(data.filterConfig));
     if (data.description) formData.append('description', data.description);
     if (data.altText) formData.append('altText', data.altText);
     if (data.displayOrder !== undefined) formData.append('displayOrder', String(data.displayOrder));
@@ -69,7 +72,7 @@ export const bannersAdminService = {
   /**
    * Actualiza metadatos de un banner (sin cambiar imagen)
    */
-  async updateBanner(id: string, data: Partial<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string }>): Promise<AdminBanner> {
+  async updateBanner(id: string, data: Partial<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string; filterConfig: BannerFilterConfig }>): Promise<AdminBanner> {
     const body = await apiFetch<ApiSuccess<AdminBanner>>(`/api/admin/banners/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),

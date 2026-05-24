@@ -20,6 +20,9 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import styles from './BannersAdmin.module.css';
 import sectionStyles from '../shared/AdminSection.module.css';
+import { BannerFilterBuilder } from './BannerFilterBuilder';
+import type { BannerFilterConfig } from '../../../types/bannerFilter';
+import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 
 interface FormData {
   title: string;
@@ -27,10 +30,12 @@ interface FormData {
   displayOrder: number;
   isActive: boolean;
   altText: string;
+  filterConfig: BannerFilterConfig;
 }
 
 export function BannersAdmin() {
   const [banners, setBanners] = useState<AdminBanner[]>([]);
+  const { categories } = useAdminCategories();
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAltManuallyEdited, setIsAltManuallyEdited] = useState(false);
@@ -42,16 +47,18 @@ export function BannersAdmin() {
     displayOrder: 0,
     isActive: true,
     altText: '',
+    filterConfig: {},
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Unsaved changes detection
-  const initialFormDataRef = useRef<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string }>({
+  const initialFormDataRef = useRef<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
     title: '',
     description: '',
     displayOrder: 0,
     isActive: true,
     altText: '',
+    filterConfig: {},
   });
 
   const isDirty = showForm && (
@@ -59,7 +66,9 @@ export function BannersAdmin() {
     formData.displayOrder !== initialFormDataRef.current.displayOrder ||
     formData.isActive !== initialFormDataRef.current.isActive ||
     formData.altText !== initialFormDataRef.current.altText ||
+    formData.filterConfig !== initialFormDataRef.current.filterConfig ||
     formData.imageFile !== null
+
   );
 
   const {
@@ -78,7 +87,7 @@ export function BannersAdmin() {
 
   function handleCancelForm() {
     interceptNavigation(() => {
-      setFormData({ title: '', imageFile: null, displayOrder: 0, isActive: true, altText: '' });
+      setFormData({ title: '', imageFile: null, displayOrder: 0, isActive: true, altText: '', filterConfig: {} });
       setEditingId(null);
       setShowForm(false);
     });
@@ -108,6 +117,7 @@ export function BannersAdmin() {
       displayOrder: 0,
       isActive: true,
       altText: '',
+      filterConfig: {},
     });
     setEditingId(null);
     setShowForm(false);
@@ -121,6 +131,7 @@ export function BannersAdmin() {
       displayOrder: banner.displayOrder,
       isActive: banner.isActive,
       altText: banner.altText || '',
+      filterConfig: banner.filterConfig || {},
     };
     setFormData({
       title: banner.title,
@@ -128,6 +139,7 @@ export function BannersAdmin() {
       displayOrder: banner.displayOrder,
       isActive: banner.isActive,
       altText: banner.altText || '',
+      filterConfig: banner.filterConfig || {},
     });
     setEditingId(banner.id);
     setShowForm(true);
@@ -156,6 +168,7 @@ export function BannersAdmin() {
           displayOrder: formData.displayOrder,
           isActive: formData.isActive,
           altText: formData.altText,
+          filterConfig: formData.filterConfig,
         });
         if (formData.imageFile) {
           await bannersAdminService.updateBannerImage(editingId, formData.imageFile);
@@ -165,6 +178,7 @@ export function BannersAdmin() {
         await bannersAdminService.createBanner(
           {
             title: formData.title,
+            filterConfig: formData.filterConfig,
             displayOrder: formData.displayOrder,
             isActive: formData.isActive,
             altText: formData.altText,
@@ -294,11 +308,12 @@ export function BannersAdmin() {
             initialFormDataRef.current = {
               title: '',
               description: '',
-              displayOrder: nextOrder,                          // ← aquí
+              displayOrder: nextOrder,
               isActive: true,
               altText: '',
+              filterConfig: {},
             };
-            setFormData((prev) => ({ ...prev, displayOrder: nextOrder })); // ← aquí
+            setFormData((prev) => ({ ...prev, displayOrder: nextOrder }));
             setShowForm(true);
           }}
         >
@@ -330,6 +345,17 @@ export function BannersAdmin() {
               )}
             </div>
 
+            <div >
+              <fieldset className={styles.formGroup} style={{ border: "none" }}>
+                <legend className={styles.legend}>Destino del banner</legend>
+                <BannerFilterBuilder
+                  value={formData.filterConfig}
+                  onChange={filterConfig => setFormData(prev => ({ ...prev, filterConfig }))}
+                  categories={categories}
+                />
+              </fieldset>
+            </div>
+
             <div className={styles.formGroup}>
               <label htmlFor="image">Imagen del Banner {!editingId && '*'}</label>
               <input
@@ -341,6 +367,7 @@ export function BannersAdmin() {
                 aria-invalid={!!fieldErrors.imageFile}
                 aria-describedby={fieldErrors.imageFile ? 'image-error' : undefined}
               />
+
               {fieldErrors.imageFile && (
                 <span id="image-error" className={styles.errorMsg} role="alert">
                   {fieldErrors.imageFile}
