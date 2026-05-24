@@ -1,16 +1,86 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 20094 |
-| FedericoPaal | 6084 |
-| Mau-bar-iva | 2325 |
+| dgimenezdeveloper | 20519 |
+| FedericoPaal | 6203 |
+| Mau-bar-iva | 2835 |
 | Nahuel-Dalesio | 1630 |
+| agustin-ovejero | 1457 |
 | CelinaJP | 1378 |
-| agustin-ovejero | 1377 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #978: 🔄 Registrar puntaje de gestión | 2026-05-23 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #977: Resumen de lo realizado | 2026-05-23 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #976: 🔄 Registrar puntaje de gestión | 2026-05-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #977: Resumen de lo realizado | 2026-05-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #976: 🔄 Registrar puntaje de gestión | 2026-05-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #975: 944 crear pestaña proveedores en el panel de administración | 2026-05-23 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #965: 🔄 Registrar puntaje de gestión | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #992: Modal de confirmación al cerrar sesión del ADMIN | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #991: Implementar pestañas dinámicas por proveedor con detalle y análisis de productos | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #990: Descarga de PDF en Reportes con tabla de pedidos y estilo Allmart | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #989: Desplegable dinámico para asociar categorías y productos a un banner | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #988: Eliminar campo "N° de Orden" en banners y renderizar por fecha de creación (LIFO) | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #987: Eliminar vista de Colecciones del ADMIN y generar dinámicamente por ventas | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #986: Valor fijo e ineditable para promociones BOGO | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #985: Validar rango de valor para descuento porcentual en promociones | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #984: Eliminar Exportación de Archivos en Pedidos | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #983: Exportar PDF en Productos con Filtros | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #982: Eliminar Mapa de Calor de la vista de Dashboard ADMIN | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #981: Eliminar botón de Colapsar Sidebar en el Sidebar | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #980: Nueva sección "Consultas" en el Admin para visualizar mensajes de "Contáctanos" | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #979: Crear sección de "Contáctanos" en el Home | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #974: Mejorar formato y legibilidad de archivos exportados (CSV, Excel, PDF) en la vista de Pedidos | 2026-05-23 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #973: Reubicar acciones de edición/eliminación en detalles de categoría para evitar superposición con etiquetas | 2026-05-23 |
+| Mau-bar-iva | 260 | Issue | Crear pestaña "Proveedores" en el panel de administración | 2026-05-23 |
+| agustin-ovejero | 40 | Issue | Agregar recta de Objetivo Mensual en Reportes | 2026-05-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #965: 🔄 Registrar puntaje de gestión | 2026-05-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #963: 🔄 Registrar puntaje de gestión | 2026-05-22 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #962: 🔄 Registrar puntaje de gestión | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #964: 939 botón para exportar catálogo de productos en pdf con imágenes | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #963: 🔄 Registrar puntaje de gestión | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #962: 🔄 Registrar puntaje de gestión | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #961: 943 agregar recta de objetivo mensual en reportes | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #960: descripcion en formulario de banners eliminado. | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #959: 938 conexión robusta de variantes en productos nuevos | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #958: Validación implementada | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #957: handleEdit ajustado para cargar el detalle completo de la promoción | 2026-05-22 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #956: 939 botón para exportar catálogo de productos en pdf con imágenes | 2026-05-22 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #972: Actualización de la vista al editar y guardar un producto | 2026-05-22 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #971: Visualización de Etiquetas y Características en el detalle del producto | 2026-05-22 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #970: Automatización para desmarcar NOVEDAD después de 2 semanas | 2026-05-22 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #969: Checkbox para marcar productos como NOVEDAD y renderizado en Home | 2026-05-22 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #968: Corrección de redirección del botón "Configuración" en Acceso Rápido | 2026-05-22 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #967: Reorganización de la sección "Stock y productos" en el Dashboard | 2026-05-22 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #966: Redirección al formulario de edición desde "Completar" en Productos Incompletos | 2026-05-22 |
+| Mau-bar-iva | 20 | Issue | Eliminar campo "Descripción" del formulario de Banners | 2026-05-22 |
+| Mau-bar-iva | 60 | Issue | Orden de visualización único para cada Banner | 2026-05-22 |
+| Mau-bar-iva | 40 | Issue | Ver productos correctamente seleccionados al editar promoción | 2026-05-22 |
+| Mau-bar-iva | 60 | Issue | Botón para exportar catálogo de productos en PDF con imágenes | 2026-05-22 |
+| Mau-bar-iva | 40 | Issue | Conexión robusta de variantes en productos nuevos | 2026-05-22 |
+| agustin-ovejero | 40 | Issue | Unificar vista de productos más vendidos en tabla | 2026-05-19 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #955: 🔄 Registrar puntaje de gestión | 2026-05-19 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #954: Exportar catalogo | 2026-05-19 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #953: 🔄 Registrar puntaje de gestión | 2026-05-19 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #952: 🔄 Registrar puntaje de gestión | 2026-05-19 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #955: 🔄 Registrar puntaje de gestión | 2026-05-19 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #954: Exportar catalogo | 2026-05-19 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #953: 🔄 Registrar puntaje de gestión | 2026-05-19 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #952: 🔄 Registrar puntaje de gestión | 2026-05-19 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #951: 937 eliminar paso intermedio al agregar imágenes de productos | 2026-05-19 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #950: 902 unificar vista de productos más vendidos en tabla | 2026-05-19 |
+| Mau-bar-iva | 30 | Issue | Eliminar paso intermedio al agregar imágenes de productos | 2026-05-19 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #949: Colecciones | 2026-05-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #948: 🔄 Registrar puntaje de gestión | 2026-05-17 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #946: 🔄 Actualización automática de puntajes semanal | 2026-05-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #949: Colecciones | 2026-05-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #948: 🔄 Registrar puntaje de gestión | 2026-05-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #947: 935 eliminar campos de precio original y descuento en formulario de productos | 2026-05-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #946: 🔄 Actualización automática de puntajes semanal | 2026-05-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #936: 🔄 Registrar puntaje de gestión | 2026-05-17 |
+| FedericoPaal | 50 | Issue | Eliminar campos de Precio Original y Descuento en formulario de productos | 2026-05-17 |
 | agustin-ovejero | 35 | Issue | Validación y aviso de campos requeridos en creación de Banners | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #936: 🔄 Registrar puntaje de gestión | 2026-05-16 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #934: 🔄 Registrar puntaje de gestión | 2026-05-16 |
@@ -36,7 +106,7 @@
 | FedericoPaal | 30 | Issue | Badge de productos con bajo stock en sidebar | 2026-05-16 |
 | FedericoPaal | 45 | Issue | Eliminar imágenes en formularios de categorías | 2026-05-16 |
 | FedericoPaal | 40 | Issue | Mejorar sticky y selección de opciones en el formulario de productos | 2026-05-16 |
-| FedericoPaal | 3 | Gestión | Creación de issue — Issue #945: Hacer los banners clickeables y redirigir a Categorías o Colecciones según corresponda | 2026-05-16 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #945: Hacer los banners clickeables y redirigir a Categorías y/o Productos según corresponda | 2026-05-16 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #944: Crear pestaña "Proveedores" en el panel de administración | 2026-05-16 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #943: Agregar recta de Objetivo Mensual en Reportes | 2026-05-16 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #942: Eliminar campo "Descripción" del formulario de Banners | 2026-05-16 |
