@@ -1760,3 +1760,21 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #960: descripcion en formulario de banners eliminado. | 2026-05-22 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #961: 943 agregar recta de objetivo mensual en reportes | 2026-05-22 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #975: 944 crear pestaña proveedores en el panel de administración | 2026-05-23 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #965: 🔄 Registrar puntaje de gestión | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #992: Modal de confirmación al cerrar sesión del ADMIN | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #991: Implementar pestañas dinámicas por proveedor con detalle y análisis de productos | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #990: Descarga de PDF en Reportes con tabla de pedidos y estilo Allmart | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #989: Desplegable dinámico para asociar categorías y productos a un banner | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #988: Eliminar campo "N° de Orden" en banners y renderizar por fecha de creación (LIFO) | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #987: Eliminar vista de Colecciones del ADMIN y generar dinámicamente por ventas | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #986: Valor fijo e ineditable para promociones BOGO | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #985: Validar rango de valor para descuento porcentual en promociones | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #984: Eliminar Exportación de Archivos en Pedidos | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #983: Exportar PDF en Productos con Filtros | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #982: Eliminar Mapa de Calor de la vista de Dashboard ADMIN | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #981: Eliminar botón de Colapsar Sidebar en el Sidebar | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #980: Nueva sección "Consultas" en el Admin para visualizar mensajes de "Contáctanos" | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #979: Crear sección de "Contáctanos" en el Home | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #974: Mejorar formato y legibilidad de archivos exportados (CSV, Excel, PDF) en la vista de Pedidos | 2026-05-23 |
+| FedericoPaal | 3 | Creación de issue | Issue #973: Reubicar acciones de edición/eliminación en detalles de categoría para evitar superposición con etiquetas | 2026-05-23 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #993: 🔄 Actualización automática de puntajes semanal | 2026-05-24 |
