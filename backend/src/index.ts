@@ -8,6 +8,7 @@ import 'dotenv/config';
 import app from './app';
 import { env } from './config/env';
 import { connectDB } from './config/database';
+import { removeExpiredNovedadTags } from './jobs/removeNovedadTag';
 
 async function bootstrap(): Promise<void> {
   await connectDB();
@@ -15,6 +16,11 @@ async function bootstrap(): Promise<void> {
   app.listen(env.PORT, () => {
     console.log(`[Server] Escuchando en http://localhost:${env.PORT}`);
     console.log(`[Server] Modo: ${env.NODE_ENV}`);
+    removeExpiredNovedadTags().catch(console.error);
+
+    setInterval(() => {
+      removeExpiredNovedadTags().catch(console.error);
+    }, 24 * 60 * 60 * 1000);
   });
 }
 

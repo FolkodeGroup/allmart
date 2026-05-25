@@ -255,6 +255,9 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       reviewCount: dto.reviewCount ?? 0,
       inStock: dto.inStock ?? true,
       tags: Array.isArray(dto.tags) ? dto.tags : [],
+      novedadSince: Array.isArray(dto.tags) && dto.tags.includes('novedad')
+        ? new Date()
+        : null,
       features: Array.isArray(dto.features) ? dto.features : [],
       isFeatured: dto.isFeatured ?? false,
     },
@@ -326,6 +329,23 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
           ? dto.stock > 0
           : existing.inStock,
       tags: Array.isArray(dto.tags) ? dto.tags : (existing.tags ?? Prisma.JsonNull),
+      novedadSince: (() => {
+        const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
+        if (incomingTags === null) return undefined; // no se tocaron los tags
+
+        const teniaNovedad = Array.isArray(existing.tags)
+          ? (existing.tags as string[]).includes('novedad')
+          : false;
+        const tieneNovedad = incomingTags.includes('novedad');
+
+        if (tieneNovedad && !teniaNovedad) {
+          return new Date(); // se acaba de agregar
+        }
+        if (!tieneNovedad) {
+          return null; // se quitó el tag
+        }
+        return undefined; // no cambió, mantener valor actual
+      })(),
       features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
       isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : existing.isFeatured,
     },
