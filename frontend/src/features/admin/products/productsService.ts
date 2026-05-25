@@ -68,6 +68,8 @@ export interface PublicProductsParams {
   page?: number;
   limit?: number;
   isFeatured?: boolean;
+  isOnSale?: boolean;
+  isNovedad?: boolean;
 }
 
 /** Payload compatible con el backend para crear/actualizar un producto */
@@ -153,12 +155,12 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
 
   const normalizedImages = Array.isArray(api.images)
     ? api.images
-        .map((img) => {
-          if (typeof img === 'string') return img;
-          if (img && typeof img === 'object' && typeof img.url === 'string') return img.url;
-          return '';
-        })
-        .filter(Boolean)
+      .map((img) => {
+        if (typeof img === 'string') return img;
+        if (img && typeof img === 'object' && typeof img.url === 'string') return img.url;
+        return '';
+      })
+      .filter(Boolean)
     : [];
 
   return {
@@ -297,10 +299,10 @@ export async function fetchPublicProducts(
 ): Promise<PaginatedProducts> {
   const qs = new URLSearchParams();
   if (params.category) qs.set('category', params.category);
-  if (params.q)        qs.set('q', params.q);
-  if (params.sort)     qs.set('sort', params.sort);
-  if (params.page)     qs.set('page', String(params.page));
-  if (params.limit)    qs.set('limit', String(params.limit));
+  if (params.q) qs.set('q', params.q);
+  if (params.sort) qs.set('sort', params.sort);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
   if (typeof params.isFeatured !== 'undefined') qs.set('isFeatured', String(params.isFeatured));
 
   const url = `/api/products${qs.toString() ? `?${qs}` : ''}`;
@@ -320,12 +322,12 @@ export async function fetchAdminProducts(
   params: AdminProductsParams = {},
 ): Promise<PaginatedProducts> {
   const qs = new URLSearchParams();
-  if (params.q)          qs.set('q', params.q);
+  if (params.q) qs.set('q', params.q);
   if (params.categoryId) qs.set('categoryId', params.categoryId);
   if (params.status && params.status !== 'all') qs.set('status', params.status);
   if (params.stockLevel && params.stockLevel !== 'all') qs.set('stockLevel', params.stockLevel);
-  if (params.page)       qs.set('page', String(params.page));
-  if (params.limit)      qs.set('limit', String(params.limit));
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
 
   const url = `/api/admin/products${qs.toString() ? `?${qs}` : ''}`;
   const body = await apiFetch<ApiSuccess<PaginatedProducts>>(url, {}, token);

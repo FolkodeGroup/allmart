@@ -8,10 +8,10 @@ export interface BannerFilterConfig {
     // brand?: string;
 }
 
-export type BannerTag = 'oferta' | 'destacado' | 'nuevo';
+export type BannerTag = 'oferta' | 'destacado' | 'novedad';
 
 export const BANNER_TAGS: { value: BannerTag; label: string }[] = [
     { value: 'oferta', label: '🏷️ En oferta' },
     { value: 'destacado', label: '⭐ Destacados' },
-    { value: 'nuevo', label: '🆕 Novedades' },
+    { value: 'novedad', label: '🆕 Novedades' },
 ];

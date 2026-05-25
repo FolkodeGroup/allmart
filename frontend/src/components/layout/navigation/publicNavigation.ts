@@ -2,7 +2,7 @@ import type { Category, NavigationItem } from '../../../types';
 
 export const baseNavigation: NavigationItem[] = [
   { label: 'Ofertas', href: '/productos?tag=oferta' },
-  { label: 'Novedades', href: '/productos?tag=nuevo' },
+  { label: 'Novedades', href: '/productos?tag=novedad' },
 ];
 
 export const fallbackNavigation: NavigationItem[] = [
@@ -50,9 +50,9 @@ export function buildNavigationFromCategories(categories: Category[]): Navigatio
       href: `/productos?category=${encodeURIComponent(category.slug)}`,
       children: children.length
         ? children.map((child) => ({
-            label: getCategoryLabel(child),
-            href: `/productos?category=${encodeURIComponent(child.slug)}`,
-          }))
+          label: getCategoryLabel(child),
+          href: `/productos?category=${encodeURIComponent(child.slug)}`,
+        }))
         : undefined,
     };
   });
