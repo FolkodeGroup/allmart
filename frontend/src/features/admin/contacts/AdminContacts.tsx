@@ -20,7 +20,7 @@ export function AdminContacts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const limit = 20;
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
   const [statusFilter, setStatusFilter] = useState<string>('');
