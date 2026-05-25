@@ -1791,3 +1791,4 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #973: Reubicar acciones de edición/eliminación en detalles de categoría para evitar superposición con etiquetas | 2026-05-23 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #993: 🔄 Actualización automática de puntajes semanal | 2026-05-24 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #998: Lo que se hizo: | 2026-05-25 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #999: 969 checkbox para marcar productos como novedad y renderizado en home | 2026-05-25 |
