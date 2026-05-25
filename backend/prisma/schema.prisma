@@ -136,6 +136,7 @@ model Product {
   reviews          ProductReview[]
   favorites        Favorite[]
   category         Category?        @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "products_category_fk")
+  novedadSince     DateTime?    @map("novedad_since") @db.Timestamptz(6)
 
   @@index([categoryId], map: "idx_products_category_id")
   @@index([sku], map: "idx_products_sku")
