@@ -544,3 +544,24 @@ model Supplier {
   @@index([name], map: "idx_suppliers_name")
   @@map("suppliers")
 }
+
+// ─── Contacts ────────────────────────────────────────────────────────────────
+
+model Contact {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @db.VarChar(150)
+  email       String   @db.VarChar(255)
+  phone       String?  @db.VarChar(30)
+  message     String   @db.Text
+  status      String   @default("unread") @db.VarChar(50)
+  isFlagged   Boolean  @default(false) @map("is_flagged")
+  adminNotes  String?  @map("admin_notes") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([email], map: "idx_contacts_email")
+  @@index([status], map: "idx_contacts_status")
+  @@index([isFlagged], map: "idx_contacts_is_flagged")
+  @@index([createdAt], map: "idx_contacts_created_at")
+  @@map("contacts")
+}
