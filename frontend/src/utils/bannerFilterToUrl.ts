@@ -23,8 +23,8 @@ export function bannerFilterToUrl(filter: BannerFilterConfig): string {
     if (tags.includes('oferta')) {
         params.set('tag', tags.includes('destacado') ? 'destacado,oferta' : 'oferta');
     }
-    if (tags.includes('nuevo')) {
-        params.set('nuevo', 'true');
+    if (tags.includes('novedad')) {
+        params.set('tag', 'novedad');
     }
 
     const qs = params.toString();

@@ -35,11 +35,15 @@ export function ProductListPage() {
   const urlCategory = searchParams.get('category') ?? '';
   const urlSubCategory = searchParams.get('sub') ?? '';
   const urlTag = searchParams.get('tag') ?? '';
-  const hasFeaturedTag = urlTag.trim().toLowerCase() === 'destacado';
+  const tag = urlTag.trim().toLowerCase();
+  const hasFeaturedTag = tag === 'destacado';
+  const hasOfertaTag = tag === 'oferta';
+  const hasNovedadTag = tag === 'novedad';
   const [sortBy, setSortBy] = useState('relevance');
   const [selectedCategory, setSelectedCategory] = useState<string>(urlSubCategory || urlCategory);
-  const [showOnlyOnSale, setShowOnlyOnSale] = useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(hasFeaturedTag);
+  const [showOnlyOnSale, setShowOnlyOnSale] = useState(hasOfertaTag);
+  const [showOnlyNovedad, setShowOnlyNovedad] = useState(hasNovedadTag);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -61,6 +65,14 @@ export function ProductListPage() {
   useEffect(() => {
     setShowOnlyFeatured((prev) => (prev === hasFeaturedTag ? prev : hasFeaturedTag));
   }, [hasFeaturedTag]);
+
+  useEffect(() => {
+    setShowOnlyOnSale((prev) => (prev === hasOfertaTag ? prev : hasOfertaTag));
+  }, [hasOfertaTag]);
+
+  useEffect(() => {
+    setShowOnlyNovedad((prev) => (prev === hasNovedadTag ? prev : hasNovedadTag));
+  }, [hasNovedadTag]);
 
   /* Cargar sort options dinámicas */
   useEffect(() => {
@@ -100,6 +112,8 @@ export function ProductListPage() {
     if (selectedCategory) params.category = selectedCategory;
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
     if (showOnlyFeatured) params.isFeatured = true;
+    if (showOnlyOnSale) params.isOnSale = true;
+    if (showOnlyNovedad) params.isNovedad = true;
     setError(null);
     if (page === 1) setLoading(true);
     else setIsLoadingMore(true);
@@ -114,6 +128,12 @@ export function ProductListPage() {
           mappedProducts = mappedProducts.filter((p) => activeDiscounts.has(p.id));
         }
 
+        if (showOnlyNovedad) {
+          mappedProducts = mappedProducts.filter(p =>
+            p.tags.some(t => t.toLowerCase() === 'novedad')
+          );
+        }
+
         if (page === 1) {
           setProducts(mappedProducts);
         } else {
@@ -125,12 +145,12 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories, page]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories, page, showOnlyNovedad]);
 
   /* Resetear paginación cuando cambian filtros relevantes */
   useEffect(() => {
     setPage(1);
-  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, showOnlyNovedad]);
 
   const handleLoadMore = () => {
     if (isLoadingMore) return;
@@ -307,7 +327,16 @@ export function ProductListPage() {
               <span className={styles.filterLabel}>En oferta</span>
             </label>
             <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
+              <input
+                type="checkbox"
+                className={styles.filterCheckbox}
+                checked={showOnlyNovedad}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setShowOnlyNovedad(checked);
+                  updateTagParam(checked ? 'novedad' : null);
+                }}
+              />
               <span className={styles.filterLabel}>Novedades</span>
             </label>
             <label className={styles.filterOption}>

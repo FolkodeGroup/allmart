@@ -73,7 +73,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
 
     const handleBlur = useCallback((fieldName: string) => {
         setTouched(prev => ({ ...prev, [fieldName]: true }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [validateField]);
 
     // Generar SKU sugerido
@@ -222,6 +222,24 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                 <legend className={styles.legend}>Etiquetas</legend>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="product-tags">Agregar etiqueta</label>
+                    <div className={styles.field}>
+                        <label className={styles.fieldCheckbox}>
+                            <input
+                                type="checkbox"
+                                checked={form.tags.includes('novedad')}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        if (!form.tags.includes('novedad')) {
+                                            setField('tags', [...form.tags, 'novedad']);
+                                        }
+                                    } else {
+                                        setField('tags', form.tags.filter(t => t !== 'novedad'));
+                                    }
+                                }}
+                            />
+                            Marcar como Novedad
+                        </label>
+                    </div>
                     <div className={styles.tagRow}>
                         <input
                             className={styles.input}
