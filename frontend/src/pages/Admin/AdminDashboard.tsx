@@ -19,7 +19,6 @@ import { DashboardWidgetSettings } from '../../components/ui/DashboardWidgetSett
 import StaffNotes from '../../components/StaffNotes';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
-import SalesActivityHeatmap from '../../components/ui/SalesActivityHeatmap';
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 
 import styles from './AdminDashboard.module.css';
@@ -35,7 +34,6 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   charts: 'Analítica',
   recent_orders: 'Pedidos Recientes',
   weekly_sales: 'Ventas Semanales',
-  sales_heatmap: 'Mapa de Actividad de Ventas',
 };
 
 const CATEGORY_COLORS = [
@@ -198,20 +196,7 @@ export function AdminDashboard() {
 
   const weeklyTotalSales = useMemo(() => weeklySalesData.reduce((s, d) => s + d.sales, 0), [weeklySalesData]);
 
-  // ─── Sales heatmap data ─────────────────────────────────────────────────────
 
-  const heatmapData = useMemo(() => {
-    const dayLabels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    const hourLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
-    const matrix: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
-    orders.forEach((o) => {
-      const d = new Date(o.createdAt);
-      const day = (d.getDay() + 6) % 7; // Monday = 0
-      const hour = d.getHours();
-      matrix[day][hour]++;
-    });
-    return { data: matrix, dayLabels, hourLabels };
-  }, [orders]);
 
   // ─── Drag handlers ─────────────────────────────────────────────────────────
 
@@ -431,10 +416,6 @@ export function AdminDashboard() {
       case 'weekly_sales':
         if (!can('reports.view')) return null;
         return <WeeklySalesWidget data={weeklySalesData} totalSales={weeklyTotalSales} />;
-
-      case 'sales_heatmap':
-        if (!can('reports.view')) return null;
-        return <SalesActivityHeatmap data={heatmapData.data} dayLabels={heatmapData.dayLabels} hourLabels={heatmapData.hourLabels} />;
 
       case 'staff_notes':
         return <StaffNotes />;
