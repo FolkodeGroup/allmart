@@ -278,22 +278,26 @@ export function AdminDashboard() {
 
       case 'critical_stock':
         return (
-          <div className={styles.alertsSplit}>
-            {/* Acordeón de Acciones Requeridas */}
+          <div className={styles.criticalStockContainer}>
+            {/* Acordeón de Acciones Requeridas (ancho completo) */}
             {can('orders.view') && (
-              <div className={styles.alertsColumn}>
+              <div className={styles.requiredActionsWrapper}>
                 <RequiredActionsAccordion />
               </div>
             )}
-            {/* Alertas de Stock y Productos */}
+
+            {/* Alertas de Stock y Productos (2 columnas) */}
             {can('products.view') && (
-              <div className={styles.alertsColumn}>
-                <h4 className={styles.alertsColumnTitle}>📦 Stock y Productos</h4>
-                <div className={styles.alertsColumnScroll}>
+              <div className={styles.alertsSplit}>
+                <div className={styles.alertsColumn}>
                   <div className={styles.alertCard}>
                     <CriticalStockAlert products={products.map((p) => ({ id: p.id, name: p.name, stock: typeof p.stock === 'number' ? p.stock : 0 }))} />
                   </div>
-                  <div className={styles.alertCard}><IncompleteProductsWidget /></div>
+                </div>
+                <div className={styles.alertsColumn}>
+                  <div className={styles.alertCard}>
+                    <IncompleteProductsWidget />
+                  </div>
                 </div>
               </div>
             )}

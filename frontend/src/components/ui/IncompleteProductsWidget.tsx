@@ -89,7 +89,7 @@ export default function IncompleteProductsWidget() {
             </div>
 
             <div className={styles.actions}>
-              <Link to={`/admin/productos/${product.id}`}>
+              <Link to={`/admin/productos?edit=${product.id}`}>
                 <Button variant="primary" size="sm">Completar</Button>
               </Link>
             </div>

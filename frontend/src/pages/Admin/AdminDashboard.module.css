@@ -244,12 +244,14 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-5);
+  align-items: start;
 }
 
 .alertsColumn {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  height: 100%;
 }
 
 .alertsColumnTitle {
@@ -278,6 +280,17 @@
 
 .alertCard {
   min-width: 0;
+}
+
+/* ── Critical Stock Container ── */
+.criticalStockContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.requiredActionsWrapper {
+  width: 100%;
 }
 
 /* ── Charts Grid ─────────────────────────────────────────────── */

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { useSearchParams } from 'react-router-dom';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import type { StatusFilter, StockLevelFilter } from './productsService';
 import { exportCatalogPdf } from './productsService';
@@ -27,6 +28,7 @@ import styles from './AdminProducts.module.css';
 type ViewMode = 'list' | 'form';
 
 export function AdminProducts() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   // Form management
@@ -58,6 +60,20 @@ export function AdminProducts() {
 
   // PDF export
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  // ─── Auto-open edit form if 'edit' param is present ───────────────────────
+  useEffect(() => {
+    const editParam = searchParams.get('edit');
+    if (editParam && !editId) {
+      setEditId(editParam);
+      setViewMode('form');
+      // Clear the edit parameter from URL
+      setSearchParams(prev => {
+        prev.delete('edit');
+        return prev;
+      });
+    }
+  }, [searchParams, editId, setSearchParams]);
 
   const handleExportPdf = useCallback(async () => {
     if (!token) {

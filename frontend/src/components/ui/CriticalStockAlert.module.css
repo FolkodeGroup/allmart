@@ -1,5 +1,4 @@
 .criticalStockSection {
-  margin-top: 2rem;
   background: var(--color-bg-card, #fff);
   border-radius: 1rem;
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
