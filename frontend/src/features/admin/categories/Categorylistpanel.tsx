@@ -152,16 +152,17 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                     <div className={styles.content}>
                                         <div className={styles.headerLine}>
                                             <h3 className={styles.title}>{displayName}</h3>
+                                            <span className={styles.slug} title={`Slug: ${cat.slug}`}>
+                                                {cat.slug}
+                                            </span>
+
+                                        </div>
+
+                                        <div className={styles.metaLine}>
                                             <span
                                                 className={`${styles.visibilityBadge} ${cat.isVisible ? styles.visible : styles.hidden}`}
                                             >
                                                 {cat.isVisible ? 'Visible' : 'Oculta'}
-                                            </span>
-                                        </div>
-
-                                        <div className={styles.metaLine}>
-                                            <span className={styles.slug} title={`Slug: ${cat.slug}`}>
-                                                {cat.slug}
                                             </span>
                                             {productCount !== undefined && (
                                                 <>
