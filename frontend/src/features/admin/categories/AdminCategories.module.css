@@ -1266,8 +1266,6 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin-top: 8px;
-  margin-bottom: 8px;
   padding: 8px 12px;
   background: var(--color-bg-secondary);
   border-radius: 10px;

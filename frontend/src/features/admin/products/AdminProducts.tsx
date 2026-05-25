@@ -26,6 +26,8 @@ import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
 
 type ViewMode = 'list' | 'form';
+type ProductSortField = 'name' | 'sku' | 'category';
+type ProductSortDirection = 'asc' | 'desc';
 
 export function AdminProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,6 +48,10 @@ export function AdminProducts() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
+
+  // Sort state
+  const [sortField, setSortField] = useState<ProductSortField>('name');
+  const [sortDirection, setSortDirection] = useState<ProductSortDirection>('asc');
 
   // Delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -116,7 +122,7 @@ export function AdminProducts() {
 
   // Scroll preservation
   const containerRef = useRef<HTMLElement>(null);
-  useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'products-master-detail', [apiPage, search, categoryFilter, statusFilter, stockLevelFilter]);
+  useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'products-master-detail', [apiPage, search, categoryFilter, statusFilter, stockLevelFilter, sortField, sortDirection]);
 
   // Unsaved changes warning
   const {
@@ -166,6 +172,31 @@ export function AdminProducts() {
       p.sku.toLowerCase().includes(search.toLowerCase())
     ).slice(0, 8)
     : [], [search, products]);
+
+  // Sort products based on sort field and direction
+  const sortedProducts = useMemo(() => {
+    const ordered = [...products];
+
+    ordered.sort((a, b) => {
+      let result = 0;
+
+      switch (sortField) {
+        case 'name':
+          result = a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+          break;
+        case 'sku':
+          result = a.sku.localeCompare(b.sku, 'es', { sensitivity: 'base' });
+          break;
+        case 'category':
+          result = (a.category?.name ?? '').localeCompare(b.category?.name ?? '', 'es', { sensitivity: 'base' });
+          break;
+      }
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+
+    return ordered;
+  }, [products, sortField, sortDirection]);
 
   // === FORM/EDIT HANDLERS ===
 
@@ -246,8 +277,6 @@ export function AdminProducts() {
           <ProductHeader
             canCreate={can('products.create')}
             onNew={handleNew}
-            onExportPdf={handleExportPdf}
-            isExportingPdf={isExportingPdf}
           />
 
           <ProductFilters
@@ -273,6 +302,39 @@ export function AdminProducts() {
             setStockLevelFilter={setStockLevelFilter}
             total={total}
           />
+
+          {!loading && !error && products.length > 0 && (
+            <div className={styles.actionsBar}>
+              <div className={styles.exportBtnContainer}>
+                <button className={styles.exportBtn} onClick={handleExportPdf} disabled={isExportingPdf} type="button">
+                  {isExportingPdf ? 'Generando…' : 'Exportar PDF'}
+                </button>
+              </div>
+
+              <div className={styles.sortContainer}>
+                <div className={styles.sortControls}>
+                  <span className={styles.sortLabel}>Ordenar:</span>
+                  <select
+                    value={sortField}
+                    onChange={(e) => setSortField(e.target.value as ProductSortField)}
+                    className={styles.sortSelect}
+                  >
+                    <option value="name">Nombre</option>
+                    <option value="sku">SKU</option>
+                    <option value="category">Categoría</option>
+                  </select>
+                  <button
+                    onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                    className={styles.sortButton}
+                    title={`Ordenar ${sortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
+                    type="button"
+                  >
+                    {sortDirection === 'asc' ? '▲' : '▼'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {!loading && error && (
             <EmptyState
@@ -303,7 +365,7 @@ export function AdminProducts() {
           {!loading && !error && products.length > 0 && (
             <div className={styles.contentArea}>
               <MasterDetailLayout
-                products={products}
+                products={sortedProducts}
                 loading={loading}
                 error={error}
                 onEdit={can('products.edit') ? handleEdit : undefined}
