@@ -409,7 +409,7 @@ export function AdminDashboard() {
               { icon: '📊', title: 'Reportes', desc: 'Métricas y estadísticas', to: '/admin/reportes', color: 'warm', ok: can('reports.view') },
               { icon: '🏷️', title: 'Categorías', desc: 'Organizar catálogo', to: '/admin/categorias', color: 'secondary', ok: can('products.view') },
               { icon: '🎨', title: 'Banners', desc: 'Contenido promocional', to: '/admin/banners', color: 'primary', ok: true },
-              { icon: '⚙️', title: 'Configuración', desc: 'Ajustes de la tienda', to: '/admin/settings', color: 'secondary', ok: true },
+              { icon: '⚙️', title: 'Configuración', desc: 'Ajustes de la tienda', to: '/admin/configuracion', color: 'secondary', ok: true },
             ]
               .filter((s) => s.ok)
               .map((s) => (
