@@ -30,27 +30,25 @@ export function MasterDetailLayout({
   children,
   defaultSelectedProductId,
 }: MasterDetailLayoutProps) {
-  const [selectedProductId, setSelectedProductId] = useState<string | undefined>(undefined);
+  const [selectedProductId, setSelectedProductId] = useState<string | undefined>(
+    defaultSelectedProductId
+  );
 
   // Auto-select product: prefer defaultSelectedProductId if provided and valid,
   // otherwise select the first product if none is selected
   React.useEffect(() => {
-    if (loading) return;
+    if (loading || products.length === 0) return;
 
-    if (defaultSelectedProductId) {
-      // Check if the preferred product exists in the list
-      const preferredExists = products.some(p => p.id === defaultSelectedProductId);
-      if (preferredExists) {
-        setSelectedProductId(defaultSelectedProductId);
-        return;
-      }
-    }
+    setSelectedProductId(prev => {
+      const exists = products.some(p => p.id === prev);
 
-    // Fall back to first product if no selection or preferred not found
-    if (!selectedProductId && products.length > 0) {
-      setSelectedProductId(products[0].id);
-    }
-  }, [products, loading, defaultSelectedProductId, selectedProductId]);
+      // Si sigue existiendo, NO tocar
+      if (exists) return prev;
+
+      // Si no existe (ej: se eliminó), seleccionar primero
+      return products[0].id;
+    });
+  }, [products, loading]);
 
   // Get selected product
   const selectedProduct = useMemo(

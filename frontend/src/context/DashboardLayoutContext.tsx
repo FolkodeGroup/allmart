@@ -1,9 +1,9 @@
 /**
  * context/DashboardLayoutContext.tsx
- * 
+ *
  * Context for managing dashboard widget layout and personalization.
  * Handles widget order persistence across sessions.
- * 
+ *
  * Future: Can be easily migrated to backend storage by updating the service layer.
  */
 
@@ -24,8 +24,7 @@ export type WidgetId =
     | 'recent_orders'
     | 'quick_access'
     | 'staff_notes'
-    | 'weekly_sales'
-    | 'sales_heatmap';
+    | 'weekly_sales';
 
 export interface Widget {
     id: WidgetId;
@@ -56,7 +55,6 @@ const ALL_WIDGET_IDS: WidgetId[] = [
     'charts',
     'recent_orders',
     'weekly_sales',
-    'sales_heatmap',
 ];
 
 const REGRESSED_WIDGET_ORDER: WidgetId[] = [

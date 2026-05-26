@@ -134,10 +134,7 @@ export function AdminLayout() {
     cancelNavigation,
   } = useUnsavedChanges();
 
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    const saved = localStorage.getItem('admin-sidebar-collapsed');
-    return saved ? JSON.parse(saved) : false;
-  });
+
 
   // Dark mode state
   const [theme, setTheme] = useState<Theme>(() => {
@@ -187,12 +184,7 @@ export function AdminLayout() {
     });
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "admin-sidebar-collapsed",
-      JSON.stringify(isCollapsed),
-    );
-  }, [isCollapsed]);
+
 
   const getBadgeCount = (badge: NavBadge) => {
     if (badge === 'pending') return getPendingOrdersCount();
@@ -231,7 +223,7 @@ export function AdminLayout() {
         <div key={item.to} className={styles.navSection}>
           <button
             type="button"
-            title={isCollapsed ? breadcrumbLabel : undefined}
+            title={breadcrumbLabel}
             data-label={breadcrumbLabel}
             className={[
               styles.navItem,
@@ -239,7 +231,7 @@ export function AdminLayout() {
               activeInTree ? styles.navItemActive : '',
               locked ? styles.navItemLocked : '',
             ].filter(Boolean).join(' ')}
-            onClick={() => !isCollapsed && toggleGroup(item.to)}
+            onClick={() => toggleGroup(item.to)}
             aria-expanded={isExpanded}
             aria-label={breadcrumbLabel}
           >
@@ -254,17 +246,15 @@ export function AdminLayout() {
             </span>
           </button>
 
-          {!isCollapsed && (
-            <div
-              className={`${styles.navChildrenCollapsible} ${isExpanded ? styles.navChildrenOpen : ''}`}
-              role="group"
-              aria-label={item.label}
-            >
-              <div className={styles.navChildrenInner}>
-                {item.children!.map((child) => renderNavItem(child, level + 1, breadcrumbLabel))}
-              </div>
+          <div
+            className={`${styles.navChildrenCollapsible} ${isExpanded ? styles.navChildrenOpen : ''}`}
+            role="group"
+            aria-label={item.label}
+          >
+            <div className={styles.navChildrenInner}>
+              {item.children!.map((child) => renderNavItem(child, level + 1, breadcrumbLabel))}
             </div>
-          )}
+          </div>
         </div>
       );
     }
@@ -273,7 +263,7 @@ export function AdminLayout() {
     return (
       <div key={item.to} className={level > 0 ? styles.navBranch : styles.navSection}>
         <NavLink
-          title={isCollapsed ? breadcrumbLabel : ''}
+          title={breadcrumbLabel}
           data-label={breadcrumbLabel}
           to={item.to}
           onClick={handleNavItemClick(item.to)}
@@ -298,7 +288,7 @@ export function AdminLayout() {
             <span className={styles.navBadge}>{badgeCount}</span>
           )}
         </NavLink>
-        {!isCollapsed && item.children && item.children.length > 0 && (
+        {item.children && item.children.length > 0 && (
           <div className={styles.navChildren} role="group" aria-label={item.label}>
             {item.children.map((child) => renderNavItem(child, level + 1, breadcrumbLabel))}
           </div>
@@ -308,7 +298,7 @@ export function AdminLayout() {
   };
 
   return (
-    <div className={`${styles.wrapper} ${isCollapsed ? styles.collapsed : ''} ${theme === 'dark' ? 'admin-dark' : ''}`}>
+    <div className={`${styles.wrapper} ${theme === 'dark' ? 'admin-dark' : ''}`}>
       <Button
         className={styles.mobileToggle}
         onClick={() => setIsMobileOpen(true)}
@@ -334,22 +324,13 @@ export function AdminLayout() {
       >
         <div className={styles.brand}>
           <span className={styles.brandLogo}>allmart</span>
-          {!isCollapsed && <span className={styles.brandTag}>Admin</span>}
-          <Button
-            className={styles.desktopToggle}
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            aria-label="Colapsar/Expandir barra lateral"
-            variant="ghost"
-            type="button"
-          >
-            {isCollapsed ? "❯" : "❮"}
-          </Button>
+          <span className={styles.brandTag}>Admin</span>
         </div>
 
         {/* Agrupación: Dark mode + navItems en un solo bloque */}
         <div className={styles.navGroup}>
           <Button
-            className={`${styles.darkToggle} ${isCollapsed ? styles.darkToggleCollapsed : styles.darkToggleExpanded}`}
+            className={`${styles.darkToggle} ${styles.darkToggleExpanded}`}
             aria-label="Cambiar modo oscuro"
             type="button"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -365,7 +346,7 @@ export function AdminLayout() {
           </nav>
         </div>
 
-        <UserProfileCard isCollapsed={isCollapsed} />
+        <UserProfileCard />
       </aside>
 
       <main className={styles.main}>
