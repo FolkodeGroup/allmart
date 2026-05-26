@@ -322,7 +322,7 @@ function AdminOrders() {
     showExportModal, setShowExportModal,
     exportFormat, setExportFormat,
     handleExport,
-  } = useReportsExport(filtered, adaptedFilters);
+  } = useReportsExport(filtered, adaptedFilters, token);
 
   /** Dispara exportación directa sin modal para el formato indicado */
   const triggerExport = useCallback((format: 'csv' | 'xlsx' | 'pdf') => {

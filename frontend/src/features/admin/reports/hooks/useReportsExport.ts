@@ -1,6 +1,7 @@
 // Centraliza exportación y feedback
 import { useState } from 'react';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../../utils/exportHelpers';
+import { exportOrdersPdfFromBackend } from '../../orders/ordersService';
 import type { Order } from '../../../../context/AdminOrdersContext';
 
 /**
@@ -12,7 +13,8 @@ type Filters =
 
 export function useReportsExport(
     periodOrders: Order[],
-    filters: Filters
+    filters: Filters,
+    token?: string | null,
 ) {
     const [notif, setNotif] = useState({
         open: false,
@@ -49,7 +51,18 @@ export function useReportsExport(
         try {
             if (exportFormat === 'csv') await exportOrdersCSV(periodOrders, fileName);
             else if (exportFormat === 'xlsx') await exportOrdersXLSX(periodOrders, fileName);
-            else if (exportFormat === 'pdf') await exportOrdersPDF(periodOrders, fileName);
+            else if (exportFormat === 'pdf') {
+                if (token) {
+                    // Use backend-generated PDF with Allmart catalog style
+                    const params: Record<string, string> = {};
+                    if (filters.type === 'predefined' && filters.period && filters.period !== 'todos') {
+                        params.status = filters.period;
+                    }
+                    await exportOrdersPdfFromBackend(token, params);
+                } else {
+                    await exportOrdersPDF(periodOrders, fileName);
+                }
+            }
 
             setNotif({
                 open: true,
