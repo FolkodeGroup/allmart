@@ -1817,3 +1817,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1015: fix: actualizar workflow a Node.js 24 (evitar deprecation warnings) | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1017: 979 crear sección de contáctanos en el home | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1021: Se implementa nueva sección "Consultas" en el Admin para visualizar m… | 2026-05-26 |
+| FedericoPaal | 3 | Creación de issue | Issue #1025: Aplicar estilos para modos claro/oscuro en la vista de Proveedores del ADMIN | 2026-05-26 |
