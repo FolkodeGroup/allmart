@@ -57,6 +57,9 @@ export function ProductListPage() {
   const [activeDiscounts, setActiveDiscounts] = useState<Set<string>>(new Set());
   const rootCategories = categories.filter((cat) => !cat.parentId);
 
+  const urlSlugs = searchParams.get('slugs') ?? '';
+  const slugList = urlSlugs ? urlSlugs.split(',').filter(Boolean) : [];
+
   useEffect(() => {
     const next = urlSubCategory || urlCategory;
     setSelectedCategory((prev) => (prev === next ? prev : next));
@@ -134,6 +137,10 @@ export function ProductListPage() {
           );
         }
 
+        if (slugList.length > 0) {
+          mappedProducts = mappedProducts.filter(p => slugList.includes(p.slug));
+        }
+
         if (page === 1) {
           setProducts(mappedProducts);
         } else {
@@ -145,7 +152,7 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories, page, showOnlyNovedad]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories, slugList, page, showOnlyNovedad]);
 
   /* Resetear paginación cuando cambian filtros relevantes */
   useEffect(() => {

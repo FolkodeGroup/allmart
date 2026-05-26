@@ -104,3 +104,103 @@
     color: var(--color-primary, #6366f1);
     word-break: break-all;
 }
+
+.typeToggle {
+    display: flex;
+    gap: 8px;
+}
+
+.typeBtn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 6px;
+    background: var(--color-bg, #fff);
+    color: var(--color-text-secondary, #64748b);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.typeBtnActive {
+    border-color: var(--color-primary, #6366f1);
+    background: var(--color-primary, #6366f1);
+    color: #fff;
+}
+
+.chipList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--color-primary, #6366f1);
+    color: #fff;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.chipRemove {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0 2px;
+    opacity: 0.8;
+}
+
+.chipRemove:hover {
+    opacity: 1;
+}
+
+.autocompleteWrapper {
+    position: relative;
+}
+
+.suggestionList {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg, #fff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 4px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestionItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--color-text-primary, #1e293b);
+}
+
+.suggestionItem:hover {
+    background: var(--color-bg-subtle, #f8f9fa);
+}
+
+.suggestionSlug {
+    font-size: 11px;
+    color: var(--color-text-secondary, #64748b);
+}
