@@ -97,7 +97,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     isActive !== initialState.isActive ||
     JSON.stringify(selectedProductIds) !== JSON.stringify(initialState.selectedProductIds) ||
     JSON.stringify(selectedCategoryIds) !== JSON.stringify(initialState.selectedCategoryIds),
-  [name, description, type, value, startDate, endDate, minPurchase, maxDiscount, priority, isActive, selectedProductIds, selectedCategoryIds, initialState]);
+    [name, description, type, value, startDate, endDate, minPurchase, maxDiscount, priority, isActive, selectedProductIds, selectedCategoryIds, initialState]);
 
   const {
     showWarning,
@@ -309,17 +309,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="promo-value">Valor *</label>
-                <input
-                  id="promo-value"
-                  type="number"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  placeholder={type === 'percentage' ? '0 – 100' : '0'}
-                  min="0"
-                  max={type === 'percentage' ? '100' : undefined}
-                  step={type === 'percentage' ? '0.01' : '1'}
-                  style={valueError ? { borderColor: '#e74c3c' } : {}}
-                />
+                <input id="promo-value" type="number" value={value} onChange={(e) => setValue(e.target.value)} placeholder={type === 'percentage' ? '0 – 100' : '0'} min="0" step={type === 'percentage' ? '0.01' : '1'} disabled={type === 'bogo'} />
                 <small>{type === 'percentage' ? 'Porcentaje de descuento' : type === 'fixed' ? 'Pesos de descuento' : 'Aplica al 2do artículo'}</small>
                 {valueError && <small style={{ color: '#e74c3c', fontWeight: '500' }}>⚠️ {valueError}</small>}
               </div>
