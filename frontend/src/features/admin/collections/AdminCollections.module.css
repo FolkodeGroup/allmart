@@ -234,6 +234,26 @@
   font-weight: 500;
 }
 
+.badgeManual {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #e0ecf4;
+  color: #1e4e7a;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeAuto {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #ede9fe;
+  color: #5b21b6;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .actions {
   display: flex;
   gap: 8px;
@@ -484,5 +504,86 @@ button:disabled {
 .btnSecondary {
   width: auto;
   padding: 10px 16px;
+}
+
+/* ── Auto Sales Params ─────────────────────────────────────────────────── */
+
+.autoParamsFieldset {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: var(--space-4);
+  margin: 0;
+  background: var(--color-bg-tertiary);
+}
+
+.autoParamsFieldset legend {
+  padding: 0 var(--space-2);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+.autoParamsFieldset .formRow {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .autoParamsFieldset .formRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .autoParamsFieldset .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.syncRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.btnSync {
+  padding: 8px 16px;
+  border: 1px solid var(--color-primary);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.btnSync:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btnSync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.syncInfo {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.successMsg {
+  padding: var(--space-3);
+  background-color: #d1fae5;
+  color: #065f46;
+  border-radius: 6px;
+  margin-bottom: var(--space-3);
+  font-size: 14px;
+  font-weight: 500;
 }
 

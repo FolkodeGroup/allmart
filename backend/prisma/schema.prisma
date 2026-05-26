@@ -58,6 +58,13 @@ enum CollectionDisplayPosition {
   @@map("collection_display_position")
 }
 
+enum CollectionType {
+  manual
+  auto_sales
+
+  @@map("collection_type")
+}
+
 // ─── Modelos ──────────────────────────────────────────────────────────────────
 
 model User {
@@ -412,6 +419,12 @@ model Collection {
   displayPosition CollectionDisplayPosition @map("display_position")
   imageUrl        String?           @map("image_url")
   isActive        Boolean           @default(true) @map("is_active")
+  /// Tipo de colección: 'manual' (admin elige productos) o 'auto_sales' (top vendidos por categoría)
+  type            String            @default("manual") @db.VarChar(20)
+  /// Parámetros de configuración para colecciones auto: { categoryId, windowDays, limit, pinnedProductIds, excludeProductIds }
+  params          Json              @default("{}")
+  /// Última sincronización de productos para colecciones auto
+  snapshotAt      DateTime?         @map("snapshot_at") @db.Timestamptz(6)
   createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   collectionItems CollectionItem[]
@@ -419,6 +432,7 @@ model Collection {
   @@index([slug], map: "idx_collections_slug")
   @@index([isActive], map: "idx_collections_is_active")
   @@index([displayPosition], map: "idx_collections_display_position")
+  @@index([type], map: "idx_collections_type")
   @@map("collections")
 }
 

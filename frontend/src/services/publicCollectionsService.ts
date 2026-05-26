@@ -16,6 +16,10 @@ export interface PublicCollection {
   displayPosition: 'home' | 'category';
   imageUrl?: string;
   isActive: boolean;
+  /** 'manual' | 'auto_sales' */
+  type?: string;
+  params?: Record<string, unknown>;
+  snapshotAt?: string;
   productCount: number;
   createdAt: string;
   updatedAt: string;
