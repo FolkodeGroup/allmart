@@ -44,6 +44,7 @@ const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m 
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
 const BannersAdmin = lazy(() => import('./features/admin/banners/BannersAdmin').then(m => ({ default: m.BannersAdmin })));
 const LowStockAlerts = lazy(() => import('./features/admin/lowStockAlerts').then(m => ({ default: m.default })));
+const AdminContacts = lazy(() => import('./features/admin/contacts').then(m => ({ default: m.AdminContacts })));
 
 const router = createBrowserRouter([
   {
@@ -238,6 +239,16 @@ const router = createBrowserRouter([
           <AdminRoute requiredPermission="products.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <BannersAdmin />
+            </Suspense>
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'contactos',
+        element: (
+          <AdminRoute requiredPermission="orders.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminContacts />
             </Suspense>
           </AdminRoute>
         )

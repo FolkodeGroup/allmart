@@ -30,7 +30,9 @@ import publicBannersRouter from './public/banners';
 import publicReviewsRouter from './public/reviews';
 import publicFavoritesRouter from './public/favorites';
 import publicConfigRouter from './public/config';
+import publicContactsRouter from './public/contacts';
 import suppliersRouter from './admin/suppliers';
+import contactsRouter from './admin/contacts';
 import { adminMiddleware } from '../middlewares/auth';
 
 const adminRouter = Router();
@@ -52,6 +54,7 @@ adminRouter.use('/low-stock-alerts', lowStockAlertsRouter);
 adminRouter.use('/banners', bannersRouter);
 adminRouter.use('/reports', reportsRouter);
 adminRouter.use('/suppliers', suppliersRouter);
+adminRouter.use('/contacts', contactsRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();
@@ -67,6 +70,7 @@ publicRouter.use('/banners', publicBannersRouter);
 publicRouter.use('/', publicReviewsRouter);     // /api/products/:id/reviews y /api/reviews/:id
 publicRouter.use('/favorites', publicFavoritesRouter);
 publicRouter.use('/config', publicConfigRouter);
+publicRouter.use('/contacts', publicContactsRouter);
 
 // Router principal de la API
 const apiRouter = Router();
