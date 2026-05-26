@@ -1,4 +1,4 @@
 ALTER TABLE orders
-ADD COLUMN customer_phone VARCHAR(30);
+ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(30);
 
-CREATE INDEX idx_orders_customer_phone ON orders(customer_phone);
+CREATE INDEX IF NOT EXISTS idx_orders_customer_phone ON orders(customer_phone);
