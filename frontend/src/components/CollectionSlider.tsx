@@ -29,6 +29,7 @@ export interface CollectionProduct {
 
 interface Props {
   title: string;
+  slug: string;
   description?: string;
   products: CollectionProduct[];
   bannerUrl?: string;
@@ -55,6 +56,7 @@ function formatPrice(price: number | string): string {
 // ─── Componente ────────────────────────────────────────────────────────────────
 const CollectionSlider: React.FC<Props> = ({
   title,
+  slug,
   products,
   bannerUrl,
   onProductClick,
@@ -173,7 +175,7 @@ const CollectionSlider: React.FC<Props> = ({
       <div className={styles.header}>
         <h2 id={titleId} className={styles.title}>{title}</h2>
         <a
-          href={`/productos?coleccion=${encodeURIComponent(title)}`}
+          href={`/productos?coleccion=${encodeURIComponent(slug)}`}
           className={styles.viewAll}
           aria-label={`Ver todos los productos de ${title}`}
         >

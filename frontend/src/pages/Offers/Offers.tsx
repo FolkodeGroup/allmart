@@ -83,6 +83,7 @@ const Offers: React.FC = () => {
                   <div className="section-inner">
                     <CollectionSlider
                       title={collection.name}
+                      slug={collection.slug}
                       description={collection.description}
                       products={collection.products || []}
                       bannerUrl={collection.imageUrl}

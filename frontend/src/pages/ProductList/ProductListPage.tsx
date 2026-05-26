@@ -7,7 +7,7 @@ import {
   type PublicProductsParams,
 } from '../../services/productsService';
 import { fetchPublicCategories } from '../../services/categoriesService';
-import { publicCollectionsService } from '../../services/publicCollectionsService';
+import { publicCollectionsService, type PublicCollection } from '../../services/publicCollectionsService';
 import { configService, type SortOption } from '../../services/configService';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import styles from './ProductListPage.module.css';
@@ -35,6 +35,7 @@ export function ProductListPage() {
   const urlCategory = searchParams.get('category') ?? '';
   const urlSubCategory = searchParams.get('sub') ?? '';
   const urlTag = searchParams.get('tag') ?? '';
+  const urlColeccion = searchParams.get('coleccion') ?? '';
   const tag = urlTag.trim().toLowerCase();
   const hasFeaturedTag = tag === 'destacado';
   const hasOfertaTag = tag === 'oferta';
@@ -55,7 +56,12 @@ export function ProductListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeDiscounts, setActiveDiscounts] = useState<Set<string>>(new Set());
+  const [categoryCollections, setCategoryCollections] = useState<PublicCollection[]>([]);
+  const [activeCollection, setActiveCollection] = useState<PublicCollection | null>(null);
+  const [collectionLoading, setCollectionLoading] = useState(false);
   const rootCategories = categories.filter((cat) => !cat.parentId);
+
+  const isCollectionView = urlColeccion.length > 0;
 
   useEffect(() => {
     const next = urlSubCategory || urlCategory;
@@ -105,6 +111,35 @@ export function ProductListPage() {
 
     loadActiveDiscounts();
   }, []);
+
+  /* Cargar colecciones de categoría cuando se selecciona una categoría */
+  useEffect(() => {
+    if (selectedCategory) {
+      publicCollectionsService
+        .getCollectionsByPosition('category')
+        .then(setCategoryCollections)
+        .catch((error) => {
+          console.error('Error loading category collections:', error);
+          setCategoryCollections([]);
+        });
+    } else {
+      setCategoryCollections([]);
+    }
+  }, [selectedCategory]);
+
+  /* Cargar colección específica cuando viene ?coleccion= en la URL */
+  useEffect(() => {
+    if (!urlColeccion) {
+      setActiveCollection(null);
+      return;
+    }
+    setCollectionLoading(true);
+    publicCollectionsService
+      .getCollectionBySlug(urlColeccion)
+      .then((col) => setActiveCollection(col))
+      .catch(() => setActiveCollection(null))
+      .finally(() => setCollectionLoading(false));
+  }, [urlColeccion]);
 
   /* Cargar productos cuando cambian los filtros */
   useEffect(() => {
@@ -239,6 +274,81 @@ export function ProductListPage() {
     };
   }, [childCategories, selectedCategoryInfo, visibleProducts]);
 
+  /* Vista de colección específica */
+  if (isCollectionView) {
+    const colProducts = activeCollection?.products ?? [];
+    return (
+      <main className={styles.page}>
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <Link to="/">Inicio</Link>
+          <span className={styles.breadcrumbSep}>/</span>
+          <Link to="/productos">Productos</Link>
+          <span className={styles.breadcrumbSep}>/</span>
+          <span className={styles.breadcrumbCurrent}>
+            {activeCollection?.name ?? urlColeccion}
+          </span>
+        </nav>
+
+        <div style={{ maxWidth: 'var(--container-2xl)', margin: '0 auto', padding: '0 var(--space-6)' }}>
+          {collectionLoading ? (
+            <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Cargando colección...</p>
+          ) : !activeCollection ? (
+            <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Colección no encontrada.</p>
+          ) : (
+            <>
+              {/* Header de la colección */}
+              <div className={styles.collectionViewHeader}>
+                {activeCollection.imageUrl && (
+                  <img src={activeCollection.imageUrl} alt={activeCollection.name} className={styles.collectionViewBanner} />
+                )}
+                <div className={styles.collectionViewMeta}>
+                  <h1 className={styles.collectionViewTitle}>{activeCollection.name}</h1>
+                  {activeCollection.description && (
+                    <p className={styles.collectionViewDesc}>{activeCollection.description}</p>
+                  )}
+                  <span className={styles.collectionViewCount}>
+                    {colProducts.length} {colProducts.length === 1 ? 'producto' : 'productos'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Grilla de productos */}
+              {colProducts.length === 0 ? (
+                <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Esta colección aún no tiene productos.</p>
+              ) : (
+                <div className={styles.collectionViewGrid}>
+                  {colProducts.map((product) => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      className={styles.collectionViewCard}
+                      onClick={() => { window.location.href = `/producto/${product.slug}`; }}
+                    >
+                      <div className={styles.collectionViewImg}>
+                        <img
+                          src={product.imageUrl || '/placeholder.png'}
+                          alt={product.name}
+                          loading="lazy"
+                          onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
+                        />
+                      </div>
+                      <div className={styles.collectionViewCardInfo}>
+                        <p className={styles.collectionViewCardName}>{product.name}</p>
+                        <p className={styles.collectionViewCardPrice}>
+                          ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className={styles.page}>
       {/* Breadcrumb */}
@@ -357,6 +467,54 @@ export function ProductListPage() {
 
         {/* Main Content */}
         <div className={styles.main}>
+          {categoryCollections.length > 0 && (
+            <div className={styles.categoryCollections}>
+              {categoryCollections.map((collection) => (
+                <div key={collection.id} className={styles.categoryBanner}>
+                  <div className={styles.categoryBannerLabel}>
+                    <span className={styles.categoryBannerTitle}>{collection.name}</span>
+                    {collection.description && (
+                      <span className={styles.categoryBannerDesc}>{collection.description}</span>
+                    )}
+                  </div>
+                  <div className={styles.categoryBannerProducts}>
+                    {(collection.products ?? []).slice(0, 5).map((product) => (
+                      <button
+                        key={product.id}
+                        type="button"
+                        className={styles.categoryBannerCard}
+                        onClick={() => { window.location.href = `/producto/${product.slug}`; }}
+                        title={product.name}
+                      >
+                        <div className={styles.categoryBannerImg}>
+                          <img
+                            src={product.imageUrl || '/placeholder.png'}
+                            alt={product.name}
+                            loading="lazy"
+                            onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
+                          />
+                        </div>
+                        <p className={styles.categoryBannerProductName}>{product.name}</p>
+                        <p className={styles.categoryBannerPrice}>
+                          ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                  <a
+                    href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}
+                    className={styles.categoryBannerViewAll}
+                  >
+                    Ver todos
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className={styles.toolbar}>
             <div>
               <button
