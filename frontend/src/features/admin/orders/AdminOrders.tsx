@@ -36,6 +36,7 @@ import { useReportsExport } from '../reports/hooks/useReportsExport';
 import { OrdersFiltersBar } from './components/OrdersFiltersBar';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
 import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
+import { ExportButtons } from '../../../components/ui/ExportButtons';
 
 /**
  * MOCK_ORDERS — datos de ejemplo para desarrollo local.
@@ -315,13 +316,6 @@ function AdminOrders() {
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // ── Exportación ─────────────────────────────────────────────────
-  /**
-   * useReportsExport gestiona el flujo completo de exportación:
-   *  - `filtered`: pedidos a exportar (ya filtrados por la UI)
-   *  - `adaptedFilters`: metadata del filtro para el reporte
-   *
-   * Expone: notif, exportLoading, showExportModal, exportFormat, handleExport
-   */
   const {
     notif, setNotif,
     exportLoading,
@@ -329,6 +323,17 @@ function AdminOrders() {
     exportFormat, setExportFormat,
     handleExport,
   } = useReportsExport(filtered, adaptedFilters);
+
+  /** Dispara exportación directa sin modal para el formato indicado */
+  const triggerExport = useCallback((format: 'csv' | 'xlsx' | 'pdf') => {
+    if (!filtered.length) {
+      setNotif({ open: true, type: 'error', message: 'No hay pedidos para exportar.' });
+      return;
+    }
+    setExportFormat(format);
+    // Pequeño defer para que setExportFormat se aplique antes de handleExport
+    setTimeout(() => setShowExportModal(true), 0);
+  }, [filtered.length, setExportFormat, setShowExportModal, setNotif]);
 
   // ── Validaciones de acciones masivas ───────────────────────────
   /**
@@ -453,52 +458,26 @@ function AdminOrders() {
 
       {/* Exportación */}
       <section className={styles.exportWrap} aria-label="Exportar pedidos">
-        <div className={styles.exportWrap}>
-          <span className={styles.exportLabel}>Exportar tabla de pedidos como:</span>
-          <div className={styles.exportSelectWrap}>
-            <select
-              className={styles.exportSelect}
-              value={exportFormat}
-              onChange={e => setExportFormat(e.target.value as 'csv' | 'xlsx' | 'pdf')}
-              disabled={exportLoading !== null}
-              aria-label="Formato de exportación"
-            >
-              <option value="csv">CSV</option>
-              <option value="xlsx">Excel</option>
-              <option value="pdf">PDF</option>
-            </select>
-            <button
-              type="button"
-              className={styles.exportBtn}
-              onClick={() => {
-                // Validar antes de abrir el modal: no exportar si no hay pedidos
-                if (!filtered.length) {
-                  setNotif({ open: true, type: 'error', message: 'No hay pedidos para exportar.' });
-                  return;
-                }
-                setShowExportModal(true);
-              }}
-              disabled={exportLoading !== null || filtered.length === 0}
-              aria-label={`Exportar pedidos como ${exportFormat.toUpperCase()}`}
-              title={filtered.length === 0 ? 'No hay pedidos para exportar' : `Exportar ${filtered.length} pedidos como ${exportFormat.toUpperCase()}`}
-            >
-              {exportLoading ? '⏳ Exportando…' : '⬇ Exportar'}
-            </button>
-          </div>
-        </div>
+        <ExportButtons
+          onExportCSV={() => triggerExport('csv')}
+          onExportExcel={() => triggerExport('xlsx')}
+          onExportPDF={() => triggerExport('pdf')}
+          loading={exportLoading}
+          disabled={filtered.length === 0}
+        />
 
         {/* Modal de confirmación antes de exportar */}
         <ModalConfirm
           open={showExportModal}
           title="Exportar pedidos"
-          message={`¿Exportar ${orders.length} pedido${orders.length !== 1 ? 's' : ''} como ${exportFormat.toUpperCase()}?`}
+          message={`¿Exportar ${filtered.length} pedido${filtered.length !== 1 ? 's' : ''} como ${exportFormat.toUpperCase()}?`}
           confirmText={exportLoading ? 'Exportando…' : 'Exportar'}
           cancelText="Cancelar"
           onConfirm={handleExport}
           onCancel={() => setShowExportModal(false)}
         />
 
-        {/* Notificación de resultado de exportación (éxito o error) */}
+        {/* Notificación de resultado */}
         <Notification
           open={notif.open}
           type={notif.type}
