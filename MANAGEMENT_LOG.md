@@ -1793,3 +1793,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #998: Lo que se hizo: | 2026-05-25 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #999: 969 checkbox para marcar productos como novedad y renderizado en home | 2026-05-25 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1000: 970 automatización para desmarcar novedad después de 2 semanas | 2026-05-25 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1009: input de precio desabilitado para promociones tipo BOGO (Buy One Get One)  | 2026-05-26 |
