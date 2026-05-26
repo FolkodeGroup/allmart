@@ -1819,3 +1819,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1021: Se implementa nueva sección "Consultas" en el Admin para visualizar m… | 2026-05-26 |
 | FedericoPaal | 3 | Creación de issue | Issue #1025: Aplicar estilos para modos claro/oscuro en la vista de Proveedores del ADMIN | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1026: 974 mejorar formato y legibilidad de archivos exportados csv excel pdf en la vista de pedidos | 2026-05-26 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1028: Se implementa aplicacion de  estilos para modos claro/oscuro en la vi… | 2026-05-26 |
