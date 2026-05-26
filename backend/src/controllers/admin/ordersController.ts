@@ -5,9 +5,11 @@
 
 import { Response, NextFunction } from 'express';
 import * as ordersService from '../../services/ordersService';
+import { generateOrdersPdf, OrderPdfInput } from '../../services/ordersPdfService';
 import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
 import { CreateOrderDTO, UpdateOrderDTO } from '../../models/Order';
+import { OrderStatus, PaymentStatus } from '../../types';
 
 export async function index(_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -76,5 +78,47 @@ export async function updatePayment(req: AuthenticatedRequest, res: Response, ne
     sendSuccess(res, order, 200, 'Estado de pago actualizado');
   } catch (error) {
     next(error);
+  }
+}
+
+export async function exportPdf(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { status, paymentStatus, q, title } = req.query as Record<string, string | undefined>;
+
+    const result = await ordersService.getAllOrders({
+      status: status as OrderStatus | undefined,
+      paymentStatus: paymentStatus as PaymentStatus | undefined,
+      q,
+      page: '1',
+      limit: '500',
+    });
+
+    const orders: OrderPdfInput[] = result.data.map((o) => ({
+      id: o.id,
+      createdAt: o.createdAt,
+      customerFirstName: o.customer.firstName,
+      customerLastName: o.customer.lastName,
+      customerEmail: o.customer.email,
+      total: Number(o.total),
+      status: o.status,
+      paymentStatus: o.paymentStatus ?? 'unpaid',
+      items: (o.items ?? []).map((i) => ({
+        productName: i.productName,
+        quantity: i.quantity,
+        unitPrice: Number(i.unitPrice),
+      })),
+    }));
+
+    const { buffer, fileName } = await generateOrdersPdf({
+      orders,
+      title: title ?? 'Reporte de Pedidos',
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.status(200).send(buffer);
+  } catch (err) {
+    next(err);
   }
 }

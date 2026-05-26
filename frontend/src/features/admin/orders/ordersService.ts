@@ -231,3 +231,53 @@ export async function bulkUpdateAdminOrdersStatus(
   }, token);
   return body.data;
 }
+
+export interface OrdersPdfExportParams {
+  status?: string;
+  paymentStatus?: string;
+  q?: string;
+  title?: string;
+}
+
+/**
+ * GET /api/admin/orders/export-pdf
+ * Genera y descarga el reporte de pedidos en PDF con el estilo visual del catálogo Allmart.
+ * La respuesta es un Blob binario (application/pdf).
+ */
+export async function exportOrdersPdfFromBackend(
+  token: string,
+  params: OrdersPdfExportParams = {}
+): Promise<void> {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set('status', params.status);
+  if (params.paymentStatus) qs.set('paymentStatus', params.paymentStatus);
+  if (params.q) qs.set('q', params.q);
+  if (params.title) qs.set('title', params.title);
+
+  const url = `/api/admin/orders/export-pdf${qs.toString() ? `?${qs.toString()}` : ''}`;
+
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => String(response.status));
+    throw new Error(`Error al generar el PDF (${response.status}): ${errText}`);
+  }
+
+  const blob = await response.blob();
+
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const filenameMatch = disposition.match(/filename[^;=\n]*=(?:["']?)([^"'\n;]+)/);
+  const filename = filenameMatch?.[1]?.trim()
+    ?? `pedidos-todos-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+  const url2 = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url2;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url2);
+}

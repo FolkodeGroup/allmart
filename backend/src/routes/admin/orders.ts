@@ -17,6 +17,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get("/", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.index);
+router.get("/export-pdf", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.exportPdf);
 router.get("/:id", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.show);
 router.post("/", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.create);
 router.put("/:id", requireRole(UserRole.ADMIN), ctrl.update);

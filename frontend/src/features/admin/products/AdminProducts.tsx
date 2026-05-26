@@ -328,10 +328,6 @@ export function AdminProducts() {
           <ProductHeader
             canCreate={can('products.create')}
             onNew={handleNew}
-            onExportCSV={handleExportCSV}
-            onExportExcel={handleExportExcel}
-            onExportPdf={handleExportPdf}
-            exportLoadingFormat={exportLoadingFormat ?? (isExportingPdf ? 'pdf' : null)}
           />
 
           <ProductFilters
