@@ -80,6 +80,25 @@ function toPromotionDTO(promotion: any): PromotionResponseDTO {
 }
 
 /**
+ * Valida el valor de una promoción basado en su tipo
+ */
+function validatePromotionValue(type: string, value: number): void {
+  if (typeof value !== 'number' || isNaN(value)) {
+    throw createError('El valor debe ser un número válido', 400);
+  }
+
+  if (type === 'percentage') {
+    if (value < 0 || value > 100) {
+      throw createError('El porcentaje debe estar entre 0 y 100', 400);
+    }
+  } else if (type === 'fixed') {
+    if (value < 0) {
+      throw createError('El monto debe ser positivo', 400);
+    }
+  }
+}
+
+/**
  * Obtiene todas las promociones con paginación
  */
 export async function getAllPromotions(
@@ -172,6 +191,9 @@ export async function createPromotion(dto: CreatePromotionDTO): Promise<any> {
     );
   }
 
+  // Validar el valor basado en el tipo
+  validatePromotionValue(dto.type, dto.value);
+
   if (new Date(dto.endDate) <= new Date(dto.startDate)) {
     throw createError('La fecha de fin debe ser posterior a la fecha de inicio', 400);
   }
@@ -243,6 +265,12 @@ export async function updatePromotion(
 
   if (new Date(endDate) <= new Date(startDate)) {
     throw createError('La fecha de fin debe ser posterior a la fecha de inicio', 400);
+  }
+
+  // Validar el valor si se proporciona
+  if (dto.value !== undefined) {
+    const type = dto.type || existing.type;
+    validatePromotionValue(type, dto.value);
   }
 
   // Actualizar promoción

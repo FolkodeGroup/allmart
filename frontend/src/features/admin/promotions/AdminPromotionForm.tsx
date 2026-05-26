@@ -65,6 +65,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
   // ─── UI ──────────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'details' | 'products' | 'categories'>('details');
   const [error, setError] = useState<string | null>(null);
+  const [valueError, setValueError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // ─── Initial state snapshot (for dirty detection) ────────────────────────
@@ -166,6 +167,35 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     loadSelectors();
   }, [loadSelectors]);
 
+  // ─── Validation function ─────────────────────────────────────────────────
+  const validateValue = useCallback((valueToValidate: string, discountType: 'percentage' | 'fixed' | 'bogo'): string | null => {
+    if (!valueToValidate) return null;
+
+    const numValue = Number(valueToValidate);
+
+    if (isNaN(numValue)) {
+      return 'El valor debe ser un número válido';
+    }
+
+    if (discountType === 'percentage') {
+      if (numValue < 0 || numValue > 100) {
+        return 'El porcentaje debe estar entre 0 y 100';
+      }
+    } else if (discountType === 'fixed') {
+      if (numValue < 0) {
+        return 'El monto debe ser positivo';
+      }
+    }
+
+    return null;
+  }, []);
+
+  // ─── Real-time validation effect ──────────────────────────────────────────
+  useEffect(() => {
+    const error = validateValue(value, type);
+    setValueError(error);
+  }, [value, type, validateValue]);
+
   // ─── Handlers ────────────────────────────────────────────────────────────
   function toggleProduct(id: string) {
     setSelectedProductIds((prev) =>
@@ -183,7 +213,13 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     e.preventDefault();
     setError(null);
     if (!name.trim()) { setError('El nombre es requerido'); return; }
-    if (!value || isNaN(Number(value)) || Number(value) < 0) { setError('El valor debe ser un número positivo'); return; }
+
+    const valueValidationError = validateValue(value, type);
+    if (valueValidationError) {
+      setError(valueValidationError);
+      return;
+    }
+
     if (!startDate || !endDate) { setError('Las fechas son requeridas'); return; }
     if (new Date(startDate) >= new Date(endDate)) { setError('La fecha de fin debe ser posterior a la de inicio'); return; }
 
@@ -275,6 +311,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
                 <label htmlFor="promo-value">Valor *</label>
                 <input id="promo-value" type="number" value={value} onChange={(e) => setValue(e.target.value)} placeholder={type === 'percentage' ? '0 – 100' : '0'} min="0" step={type === 'percentage' ? '0.01' : '1'} disabled={type === 'bogo'} />
                 <small>{type === 'percentage' ? 'Porcentaje de descuento' : type === 'fixed' ? 'Pesos de descuento' : 'Aplica al 2do artículo'}</small>
+                {valueError && <small style={{ color: '#e74c3c', fontWeight: '500' }}>⚠️ {valueError}</small>}
               </div>
             </div>
             <div className={styles.formRow}>
@@ -413,7 +450,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         )}
 
         <div className={styles.formActions}>
-          <button type="submit" className={styles.btnPrimary} disabled={saving}>
+          <button type="submit" className={styles.btnPrimary} disabled={saving || !!valueError}>
             {saving ? 'Guardando...' : promotion ? 'Actualizar Promoción' : 'Crear Promoción'}
           </button>
           <button type="button" className={styles.btnSecondary} onClick={handleCancel} disabled={saving}>
