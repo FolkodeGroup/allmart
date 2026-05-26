@@ -19,11 +19,24 @@ CREATE INDEX IF NOT EXISTS idx_product_reviews_order_id
   ON product_reviews(order_id);
 
 -- 5. Restricción única: un solo review por pedido+producto
-ALTER TABLE product_reviews
-  ADD CONSTRAINT product_reviews_order_unique
-  UNIQUE (product_id, order_id);
+-- 5. Restricción única: un solo review por pedido+producto (agregar solo si no existe)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'product_reviews_order_unique') THEN
+    ALTER TABLE product_reviews
+      ADD CONSTRAINT product_reviews_order_unique
+      UNIQUE (product_id, order_id);
+  END IF;
+END
+$$;
 
--- 6. CHECK: debe haber al menos una identidad (user_id o order_id)
-ALTER TABLE product_reviews
-  ADD CONSTRAINT product_reviews_identity_check
-  CHECK (user_id IS NOT NULL OR order_id IS NOT NULL);
+-- 6. CHECK: debe haber al menos una identidad (user_id o order_id) (agregar solo si no existe)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'product_reviews_identity_check') THEN
+    ALTER TABLE product_reviews
+      ADD CONSTRAINT product_reviews_identity_check
+      CHECK (user_id IS NOT NULL OR order_id IS NOT NULL);
+  END IF;
+END
+$$;
