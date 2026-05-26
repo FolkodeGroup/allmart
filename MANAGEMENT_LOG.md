@@ -1820,3 +1820,4 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1025: Aplicar estilos para modos claro/oscuro en la vista de Proveedores del ADMIN | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1026: 974 mejorar formato y legibilidad de archivos exportados csv excel pdf en la vista de pedidos | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1028: Se implementa aplicacion de  estilos para modos claro/oscuro en la vi… | 2026-05-26 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1029: 990 descarga de pdf en reportes con tabla de pedidos y estilo allmart | 2026-05-26 |
