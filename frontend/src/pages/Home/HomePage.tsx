@@ -10,6 +10,7 @@ import '../../styles/collections.css';
 import BannerSlider from '../../components/BannerSlider';
 import { Benefits } from '../../features/home/Benefits/Benefits';
 import { AboutSection } from '../../features/home/AboutSection/AboutSection';
+import { ContactForm } from '../../features/home/ContactForm/ContactForm';
 
 export function HomePage() {
   const [collections, setCollections] = useState<PublicCollection[]>(
@@ -106,6 +107,8 @@ export function HomePage() {
           })}
         </div>
       )}
+
+      <ContactForm />
 
       <Benefits />
     </main>
