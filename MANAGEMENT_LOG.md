@@ -1789,8 +1789,26 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #979: Crear sección de "Contáctanos" en el Home | 2026-05-23 |
 | FedericoPaal | 3 | Creación de issue | Issue #974: Mejorar formato y legibilidad de archivos exportados (CSV, Excel, PDF) en la vista de Pedidos | 2026-05-23 |
 | FedericoPaal | 3 | Creación de issue | Issue #973: Reubicar acciones de edición/eliminación en detalles de categoría para evitar superposición con etiquetas | 2026-05-23 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #993: 🔄 Actualización automática de puntajes semanal | 2026-05-24 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #994: Implementación de ruta para banners en el admin panel. | 2026-05-24 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #993: 🔄 Actualización automática de puntajes semanal | 2026-05-24 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #998: Lo que se hizo: | 2026-05-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #999: 969 checkbox para marcar productos como novedad y renderizado en home | 2026-05-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1000: 970 automatización para desmarcar novedad después de 2 semanas | 2026-05-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1009: input de precio desabilitado para promociones tipo BOGO (Buy One Get One)  | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #978: 🔄 Registrar puntaje de gestión | 2026-05-24 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1002: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1001: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #997: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1002: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1001: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1000: 970 automatización para desmarcar novedad después de 2 semanas | 2026-05-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #999: 969 checkbox para marcar productos como novedad y renderizado en home | 2026-05-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #998: Lo que se hizo: | 2026-05-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #997: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #996: 967 reorganización de la sección stock y productos en el dashboard | 2026-05-25 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1010: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1010: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1009: input de precio desabilitado para promociones tipo BOGO (Buy One Get One)  | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1008: Se implamenta validacion de rango de valor para descuento porcentual … | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1007: Resultados Esperados - CUMPLIDOS ✓ | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1006: Resultados: | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1005: Resultados: | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1004: fix en diseño de acciones rapidas en categorias | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1003: fix | 2026-05-26 |

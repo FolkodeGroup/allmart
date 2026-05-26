@@ -1,8 +1,8 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 20519 |
-| FedericoPaal | 6203 |
-| Mau-bar-iva | 2835 |
+| dgimenezdeveloper | 20814 |
+| FedericoPaal | 6448 |
+| Mau-bar-iva | 3110 |
 | Nahuel-Dalesio | 1630 |
 | agustin-ovejero | 1457 |
 | CelinaJP | 1378 |
@@ -11,6 +11,42 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1010: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1010: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1009: input de precio desabilitado para promociones tipo BOGO (Buy One Get One) | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1008: Se implamenta validacion de rango de valor para descuento porcentual … | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1007: Resultados Esperados - CUMPLIDOS ✓ | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1006: Resultados: | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1005: Resultados: | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1004: fix en diseño de acciones rapidas en categorias | 2026-05-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1003: fix | 2026-05-26 |
+| FedericoPaal | 30 | Issue | Validar rango de valor para descuento porcentual en promociones | 2026-05-26 |
+| FedericoPaal | 60 | Issue | Exportar PDF en Productos con Filtros | 2026-05-26 |
+| FedericoPaal | 15 | Issue | Eliminar Mapa de Calor de la vista de Dashboard ADMIN | 2026-05-26 |
+| FedericoPaal | 20 | Issue | Eliminar botón de Colapsar Sidebar en el Sidebar | 2026-05-26 |
+| Mau-bar-iva | 20 | Issue | Valor fijo e ineditable para promociones BOGO | 2026-05-26 |
+| Mau-bar-iva | 40 | Issue | Reubicar acciones de edición/eliminación en detalles de categoría para evitar superposición con etiquetas | 2026-05-26 |
+| Mau-bar-iva | 45 | Issue | Actualización de la vista al editar y guardar un producto | 2026-05-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1002: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1001: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #997: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1002: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1001: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1000: 970 automatización para desmarcar novedad después de 2 semanas | 2026-05-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #999: 969 checkbox para marcar productos como novedad y renderizado en home | 2026-05-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #998: Lo que se hizo: | 2026-05-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #997: 🔄 Registrar puntaje de gestión | 2026-05-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #996: 967 reorganización de la sección stock y productos en el dashboard | 2026-05-25 |
+| FedericoPaal | 30 | Issue | Corrección de redirección del botón "Configuración" en Acceso Rápido | 2026-05-25 |
+| FedericoPaal | 50 | Issue | Reorganización de la sección "Stock y productos" en el Dashboard | 2026-05-25 |
+| FedericoPaal | 40 | Issue | Redirección al formulario de edición desde "Completar" en Productos Incompletos | 2026-05-25 |
+| Mau-bar-iva | 60 | Issue | Automatización para desmarcar NOVEDAD después de 2 semanas | 2026-05-25 |
+| Mau-bar-iva | 60 | Issue | Checkbox para marcar productos como NOVEDAD y renderizado en Home | 2026-05-25 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #993: 🔄 Actualización automática de puntajes semanal | 2026-05-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #994: Implementación de ruta para banners en el admin panel. | 2026-05-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #993: 🔄 Actualización automática de puntajes semanal | 2026-05-24 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #978: 🔄 Registrar puntaje de gestión | 2026-05-24 |
+| Mau-bar-iva | 50 | Issue | Hacer los banners clickeables y redirigir a Categorías y/o Productos según corresponda | 2026-05-24 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #978: 🔄 Registrar puntaje de gestión | 2026-05-23 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #977: Resumen de lo realizado | 2026-05-23 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #976: 🔄 Registrar puntaje de gestión | 2026-05-23 |
