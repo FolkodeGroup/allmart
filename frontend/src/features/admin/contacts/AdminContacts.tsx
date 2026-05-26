@@ -1,326 +1,517 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { contactsService } from '../../../services/contactsService';
+import { Modal } from '../../../components/ui/Modal';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { useNotification } from '../../../context/NotificationContext';
+import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { MessageSquare } from 'lucide-react';
+import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminContacts.module.css';
 
 interface Contact {
   id: string;
   name: string;
   email: string;
-  phone?: string;
+  phone?: string | null;
   message: string;
   status: string;
   isFlagged: boolean;
-  adminNotes?: string;
+  adminNotes?: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
+type StatusFilter = '' | 'unread' | 'read';
+
+const LIMIT = 20;
+
 export function AdminContacts() {
+  const { showNotification } = useNotification();
+  const { can } = useAdminAuth();
+
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const limit = 20;
   const [total, setTotal] = useState(0);
-  const [pages, setPages] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [flaggedFilter, setFlaggedFilter] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [modalNotes, setModalNotes] = useState('');
+
+  // Detail / notes modal
+  const [detailContact, setDetailContact] = useState<Contact | null>(null);
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [notesText, setNotesText] = useState('');
+
+  // Delete confirm modal
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Track in-flight status toggle per row
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+
+  // Debounce search
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   useEffect(() => {
-    loadContacts();
-  }, [page, limit, statusFilter, flaggedFilter, searchQuery]);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 350);
+    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
+  }, [searchQuery]);
 
-  const loadContacts = async () => {
+  const loadContacts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const result = await contactsService.listContacts(
         page,
-        limit,
+        LIMIT,
         statusFilter || undefined,
-        flaggedFilter ? true : undefined,
-        searchQuery || undefined
+        undefined,
+        debouncedSearch || undefined,
       );
       setContacts(result.data);
       setTotal(result.pagination.total);
-      setPages(result.pagination.pages);
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar contactos');
+      setTotalPages(result.pagination.pages);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al cargar consultas';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter, debouncedSearch]);
 
-  const handleStatusChange = async (contactId: string, newStatus: string) => {
+  useEffect(() => {
+    loadContacts();
+  }, [loadContacts]);
+
+  const handleToggleReadStatus = async (contact: Contact) => {
+    const newStatus = contact.status === 'unread' ? 'read' : 'unread';
+    setTogglingIds(prev => new Set(prev).add(contact.id));
+    // Optimistic update
+    setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, status: newStatus } : c));
     try {
-      await contactsService.updateContact(contactId, { status: newStatus });
-      loadContacts();
-    } catch (err: any) {
-      alert(err.message || 'Error al actualizar estado');
+      await contactsService.updateContact(contact.id, { status: newStatus });
+      showNotification('success', newStatus === 'read' ? 'Marcado como leído' : 'Marcado como no leído');
+    } catch (err: unknown) {
+      // Revert optimistic update
+      setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, status: contact.status } : c));
+      showNotification('error', err instanceof Error ? err.message : 'Error al actualizar estado');
+    } finally {
+      setTogglingIds(prev => { const next = new Set(prev); next.delete(contact.id); return next; });
     }
   };
 
-  const handleFlagToggle = async (contactId: string, isFlagged: boolean) => {
-    try {
-      await contactsService.updateContact(contactId, { isFlagged: !isFlagged });
-      loadContacts();
-    } catch (err: any) {
-      alert(err.message || 'Error al actualizar bandera');
+  const handleOpenDetail = (contact: Contact) => {
+    setDetailContact(contact);
+    setNotesText(contact.adminNotes ?? '');
+    // Auto-mark as read when opening detail
+    if (contact.status === 'unread') {
+      handleToggleReadStatus(contact);
     }
-  };
-
-  const handleOpenNotes = (contact: Contact) => {
-    setSelectedContact(contact);
-    setModalNotes(contact.adminNotes || '');
-    setShowModal(true);
   };
 
   const handleSaveNotes = async () => {
-    if (!selectedContact) return;
+    if (!detailContact) return;
+    setSavingNotes(true);
     try {
-      await contactsService.updateContact(selectedContact.id, { adminNotes: modalNotes });
-      setShowModal(false);
-      loadContacts();
-    } catch (err: any) {
-      alert(err.message || 'Error al guardar notas');
+      await contactsService.updateContact(detailContact.id, { adminNotes: notesText });
+      setContacts(prev => prev.map(c => c.id === detailContact.id ? { ...c, adminNotes: notesText } : c));
+      showNotification('success', 'Notas guardadas');
+      setDetailContact(prev => prev ? { ...prev, adminNotes: notesText } : null);
+    } catch (err: unknown) {
+      showNotification('error', err instanceof Error ? err.message : 'Error al guardar notas');
+    } finally {
+      setSavingNotes(false);
     }
   };
 
-  const handleDelete = async (contactId: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este contacto?')) return;
+  const handleDeleteConfirmed = async () => {
+    if (!deleteConfirmId) return;
+    setDeleting(true);
     try {
-      await contactsService.deleteContact(contactId);
+      await contactsService.deleteContact(deleteConfirmId);
+      showNotification('success', 'Consulta eliminada');
+      setDeleteConfirmId(null);
       loadContacts();
-    } catch (err: any) {
-      alert(err.message || 'Error al eliminar contacto');
+    } catch (err: unknown) {
+      showNotification('error', err instanceof Error ? err.message : 'Error al eliminar');
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleResetFilters = () => {
-    setPage(1);
-    setStatusFilter('');
-    setFlaggedFilter(false);
-    setSearchQuery('');
-  };
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString('es-AR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
-  if (loading && contacts.length === 0) {
-    return <div className={styles.loading}>Cargando contactos...</div>;
-  }
+  const unreadTotal = contacts.filter(c => c.status === 'unread').length;
 
   return (
-    <div className={styles.container}>
+    <div className={`${sectionStyles.page} ${styles.container}`}>
+
+      {/* ── Header ─────────────────────────────────────────────── */}
       <div className={styles.header}>
-        <h1>Gestión de Contactos</h1>
-        <p className={styles.subtitle}>
-          Total: <strong>{total}</strong> contactos
-        </p>
+        <div className={styles.headerText}>
+          <h1 className={styles.title}>
+            Consultas recibidas
+            {unreadTotal > 0 && (
+              <span className={styles.unreadBadge}>{unreadTotal}</span>
+            )}
+          </h1>
+          <p className={styles.subtitle}>
+            Mensajes enviados desde el formulario de Contacto del sitio
+          </p>
+        </div>
       </div>
 
-      {/* Filtros */}
-      <div className={styles.filters}>
+      {/* ── Stats ───────────────────────────────────────────────── */}
+      <div className={styles.statsBar}>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Total</span>
+          <span className={styles.statValue}>{total}</span>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>No leídas</span>
+          <span className={`${styles.statValue} ${unreadTotal > 0 ? styles.danger : ''}`}>
+            {unreadTotal}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Filters ─────────────────────────────────────────────── */}
+      <div className={styles.filtersBar}>
         <input
-          type="text"
+          type="search"
           placeholder="Buscar por nombre, email o mensaje..."
           value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPage(1);
-          }}
+          onChange={e => setSearchQuery(e.target.value)}
           className={styles.searchInput}
+          aria-label="Buscar consultas"
         />
-
         <select
           value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-          className={styles.select}
+          onChange={e => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }}
+          className={styles.filterSelect}
+          aria-label="Filtrar por estado"
         >
           <option value="">Todos los estados</option>
-          <option value="unread">No leído</option>
-          <option value="read">Leído</option>
+          <option value="unread">No leídas</option>
+          <option value="read">Leídas</option>
         </select>
-
-        <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={flaggedFilter}
-            onChange={(e) => {
-              setFlaggedFilter(e.target.checked);
-              setPage(1);
-            }}
-          />
-          Solo marcados
-        </label>
-
-        {(statusFilter || flaggedFilter || searchQuery) && (
-          <button onClick={handleResetFilters} className={styles.resetBtn}>
+        {(statusFilter || debouncedSearch) && (
+          <button
+            type="button"
+            className={styles.btnRead}
+            onClick={() => { setStatusFilter(''); setSearchQuery(''); setPage(1); }}
+          >
             Limpiar filtros
           </button>
         )}
       </div>
 
-      {error && <div className={styles.error}>{error}</div>}
-
-      {/* Tabla */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Teléfono</th>
-              <th>Mensaje</th>
-              <th>Estado</th>
-              <th>Marcado</th>
-              <th>Fecha</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contacts.length === 0 ? (
-              <tr>
-                <td colSpan={8} className={styles.noData}>
-                  No hay contactos para mostrar
-                </td>
-              </tr>
-            ) : (
-              contacts.map((contact) => (
-                <tr key={contact.id} className={contact.status === 'unread' ? styles.unread : ''}>
-                  <td className={styles.name}>{contact.name}</td>
-                  <td className={styles.email}>{contact.email}</td>
-                  <td className={styles.phone}>{contact.phone || '-'}</td>
-                  <td className={styles.message}>{contact.message.substring(0, 50)}...</td>
-                  <td>
-                    <select
-                      value={contact.status}
-                      onChange={(e) => handleStatusChange(contact.id, e.target.value)}
-                      className={styles.statusSelect}
-                    >
-                      <option value="unread">No leído</option>
-                      <option value="read">Leído</option>
-                    </select>
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => handleFlagToggle(contact.id, contact.isFlagged)}
-                      className={`${styles.flagBtn} ${contact.isFlagged ? styles.flagged : ''}`}
-                      title={contact.isFlagged ? 'Desmarcar' : 'Marcar'}
-                    >
-                      {contact.isFlagged ? '🚩' : '🏳️'}
-                    </button>
-                  </td>
-                  <td className={styles.date}>
-                    {new Date(contact.createdAt).toLocaleDateString('es-AR', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </td>
-                  <td className={styles.actions}>
-                    <button
-                      onClick={() => handleOpenNotes(contact)}
-                      className={styles.actionBtn}
-                      title="Ver/Editar notas"
-                    >
-                      📝
-                    </button>
-                    <button
-                      onClick={() => handleDelete(contact.id)}
-                      className={`${styles.actionBtn} ${styles.deleteBtn}`}
-                      title="Eliminar"
-                    >
-                      🗑️
-                    </button>
-                  </td>
+      {/* ── Content ─────────────────────────────────────────────── */}
+      {loading ? (
+        <LoadingSpinner message="Cargando consultas..." size="lg" />
+      ) : error ? (
+        <EmptyState
+          icon={<MessageSquare size={48} color="#ef4444" />}
+          title="Error al cargar consultas"
+          description={error}
+          action={{ label: 'Reintentar', onClick: loadContacts }}
+        />
+      ) : contacts.length === 0 ? (
+        <EmptyState
+          icon={<MessageSquare size={48} color="#94a3b8" />}
+          title="No hay consultas"
+          description={
+            debouncedSearch || statusFilter
+              ? 'No hay resultados para los filtros seleccionados.'
+              : 'Todavía no se han recibido consultas desde el formulario de contacto.'
+          }
+        />
+      ) : (
+        <>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Remitente</th>
+                  <th>Mensaje</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {contacts.map(contact => (
+                  <tr
+                    key={contact.id}
+                    className={contact.status === 'unread' ? styles.unread : ''}
+                  >
+                    {/* Remitente */}
+                    <td>
+                      <div className={styles.cellContact}>
+                        <span className={styles.contactName}>{contact.name}</span>
+                        <a
+                          href={`mailto:${contact.email}`}
+                          className={styles.contactEmail}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {contact.email}
+                        </a>
+                        {contact.phone && (
+                          <span className={styles.contactPhone}>{contact.phone}</span>
+                        )}
+                      </div>
+                    </td>
 
-      {/* Paginación */}
-      {pages > 1 && (
-        <div className={styles.pagination}>
-          <button
-            onClick={() => setPage(Math.max(1, page - 1))}
-            disabled={page === 1}
-            className={styles.paginationBtn}
-          >
-            ← Anterior
-          </button>
+                    {/* Mensaje (truncado, expandible) */}
+                    <td className={styles.messageCellWrapper}>
+                      <button
+                        type="button"
+                        className={styles.messageText}
+                        onClick={() => handleOpenDetail(contact)}
+                        title="Ver mensaje completo"
+                      >
+                        {contact.message.length > 100
+                          ? `${contact.message.slice(0, 100)}…`
+                          : contact.message}
+                      </button>
+                    </td>
 
-          <span className={styles.pageInfo}>
-            Página {page} de {pages}
-          </span>
+                    {/* Estado */}
+                    <td>
+                      <span className={`${styles.statusBadge} ${contact.status === 'unread' ? styles.unreadBadgeStatus : styles.readBadge}`}>
+                        {contact.status === 'unread' ? '● No leída' : '✓ Leída'}
+                      </span>
+                    </td>
 
-          <button
-            onClick={() => setPage(Math.min(pages, page + 1))}
-            disabled={page === pages}
-            className={styles.paginationBtn}
-          >
-            Siguiente →
-          </button>
-        </div>
-      )}
+                    {/* Fecha */}
+                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.8rem', color: '#6b7280' }}>
+                      {formatDate(contact.createdAt)}
+                    </td>
 
-      {/* Modal de Notas */}
-      {showModal && selectedContact && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h2>Notas del Contacto</h2>
+                    {/* Acciones */}
+                    <td>
+                      <div className={styles.actions}>
+                        <button
+                          type="button"
+                          className={styles.btnRead}
+                          onClick={() => handleOpenDetail(contact)}
+                          title="Ver detalle y notas"
+                        >
+                          Ver
+                        </button>
+                        <button
+                          type="button"
+                          className={contact.status === 'unread' ? styles.btnRead : styles.btnUnread}
+                          onClick={() => handleToggleReadStatus(contact)}
+                          disabled={togglingIds.has(contact.id)}
+                          title={contact.status === 'unread' ? 'Marcar como leída' : 'Marcar como no leída'}
+                        >
+                          {togglingIds.has(contact.id)
+                            ? '...'
+                            : contact.status === 'unread'
+                              ? 'Marcar leída'
+                              : 'No leída'}
+                        </button>
+                        {can('contacts.delete') && (
+                          <button
+                            type="button"
+                            className={styles.btnDelete}
+                            onClick={() => setDeleteConfirmId(contact.id)}
+                            title="Eliminar consulta"
+                          >
+                            Eliminar
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ── Pagination ─────────────────────────────────────── */}
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
               <button
-                onClick={() => setShowModal(false)}
-                className={styles.closeBtn}
+                type="button"
+                className={styles.pageBtn}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
               >
-                ✕
+                ← Anterior
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+                .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+                  if (idx > 0 && (p as number) - (arr[idx - 1] as number) > 1) acc.push('...');
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((item, idx) =>
+                  item === '...'
+                    ? <span key={`ellipsis-${idx}`} className={styles.pageInfo}>…</span>
+                    : (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`${styles.pageBtn} ${page === item ? styles.active : ''}`}
+                        onClick={() => setPage(item as number)}
+                      >
+                        {item}
+                      </button>
+                    )
+                )}
+              <button
+                type="button"
+                className={styles.pageBtn}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                Siguiente →
               </button>
             </div>
+          )}
+        </>
+      )}
 
-            <div className={styles.modalBody}>
-              <div className={styles.contactInfo}>
-                <p>
-                  <strong>De:</strong> {selectedContact.name} ({selectedContact.email})
-                </p>
-                <p>
-                  <strong>Mensaje:</strong> {selectedContact.message}
-                </p>
+      {/* ── Detail / Notes Modal ────────────────────────────────── */}
+      <Modal
+        open={!!detailContact}
+        onClose={() => !savingNotes && setDetailContact(null)}
+        title="Detalle de la consulta"
+        size="md"
+        showCloseButton
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.btnRead}
+              onClick={handleSaveNotes}
+              disabled={savingNotes}
+              style={{ minWidth: 120, background: '#16a34a', color: '#fff' }}
+            >
+              {savingNotes ? 'Guardando...' : 'Guardar notas'}
+            </button>
+            <button
+              type="button"
+              className={styles.btnUnread}
+              onClick={() => setDetailContact(null)}
+              disabled={savingNotes}
+              style={{ minWidth: 100 }}
+            >
+              Cerrar
+            </button>
+          </>
+        }
+        disableClose={savingNotes}
+      >
+        {detailContact && (
+          <div className={styles.detailGrid}>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Nombre</span>
+              <span className={styles.detailValue}>{detailContact.name}</span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Email</span>
+              <a href={`mailto:${detailContact.email}`} className={styles.detailValue} style={{ color: '#6366f1' }}>
+                {detailContact.email}
+              </a>
+            </div>
+            {detailContact.phone && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Teléfono</span>
+                <span className={styles.detailValue}>{detailContact.phone}</span>
               </div>
-
+            )}
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Fecha</span>
+              <span className={styles.detailValue}>{formatDate(detailContact.createdAt)}</span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Estado</span>
+              <span className={`${styles.statusBadge} ${detailContact.status === 'unread' ? styles.unreadBadgeStatus : styles.readBadge}`}>
+                {detailContact.status === 'unread' ? '● No leída' : '✓ Leída'}
+              </span>
+            </div>
+            <div>
+              <span className={styles.detailLabel} style={{ display: 'block', marginBottom: '0.5rem' }}>Mensaje</span>
+              <p className={styles.detailMessage}>{detailContact.message}</p>
+            </div>
+            <div>
+              <label className={styles.detailLabel} htmlFor="admin-notes" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                Notas internas (solo visible para admins)
+              </label>
               <textarea
-                value={modalNotes}
-                onChange={(e) => setModalNotes(e.target.value)}
-                placeholder="Agrega notas administrativas aquí..."
-                className={styles.notesTextarea}
+                id="admin-notes"
+                value={notesText}
+                onChange={e => setNotesText(e.target.value)}
+                rows={3}
+                disabled={savingNotes}
+                placeholder="Agregar notas internas sobre esta consulta..."
+                style={{
+                  width: '100%',
+                  borderRadius: 8,
+                  border: '1px solid #d1d5db',
+                  padding: '10px 12px',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  fontSize: '0.875rem',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
-
-            <div className={styles.modalFooter}>
-              <button
-                onClick={() => setShowModal(false)}
-                className={styles.cancelBtn}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSaveNotes}
-                className={styles.saveBtn}
-              >
-                Guardar Notas
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
+
+      {/* ── Delete Confirm Modal ────────────────────────────────── */}
+      <Modal
+        open={!!deleteConfirmId}
+        onClose={() => !deleting && setDeleteConfirmId(null)}
+        title="Eliminar consulta"
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.btnDelete}
+              onClick={handleDeleteConfirmed}
+              disabled={deleting}
+              style={{ minWidth: 100 }}
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar'}
+            </button>
+            <button
+              type="button"
+              className={styles.btnUnread}
+              onClick={() => setDeleteConfirmId(null)}
+              disabled={deleting}
+              style={{ minWidth: 100 }}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+        disableClose={deleting}
+      >
+        <p>¿Estás seguro de que querés eliminar esta consulta? Esta acción no se puede deshacer.</p>
+      </Modal>
     </div>
   );
 }
