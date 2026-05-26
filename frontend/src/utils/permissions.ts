@@ -29,7 +29,10 @@ export type Permission =
   | 'suppliers.view'
   | 'suppliers.create'
   | 'suppliers.edit'
-  | 'suppliers.delete';
+  | 'suppliers.delete'
+  // Contactos / Consultas
+  | 'contacts.view'
+  | 'contacts.delete';
 
 // ─── Permisos por rol ─────────────────────────────────────────────────────────
 const ADMIN_PERMISSIONS: Permission[] = [
@@ -39,6 +42,7 @@ const ADMIN_PERMISSIONS: Permission[] = [
   'orders.view', 'orders.edit', 'orders.delete', 'orders.markPaid',
   'reports.view',
   'suppliers.view', 'suppliers.create', 'suppliers.edit', 'suppliers.delete',
+  'contacts.view', 'contacts.delete',
 ];
 
 const EDITOR_PERMISSIONS: Permission[] = [
@@ -46,7 +50,8 @@ const EDITOR_PERMISSIONS: Permission[] = [
   'variants.view',
   'categories.view',
   'orders.view', 'orders.edit', 'orders.markPaid',
-  // editor NO puede: products/variants/categories CRUD, orders.delete, reports.view
+  'contacts.view',
+  // editor NO puede: products/variants/categories CRUD, orders.delete, reports.view, contacts.delete
 ];
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {

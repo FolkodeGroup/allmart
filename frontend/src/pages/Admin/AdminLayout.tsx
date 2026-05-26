@@ -107,6 +107,13 @@ const navItems: NavItem[] = [
     permission: "suppliers.view",
     badge: null,
   },
+  {
+    label: "Consultas",
+    to: "/admin/contactos",
+    icon: "💬",
+    permission: "contacts.view",
+    badge: null,
+  },
 ];
 
 type Theme = 'light' | 'dark';
