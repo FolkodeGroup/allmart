@@ -23,11 +23,7 @@ const ROLE_COLORS: Record<string, { bg: string; text: string; border: string }> 
   },
 };
 
-interface UserProfileCardProps {
-  isCollapsed?: boolean;
-}
-
-export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
+export function UserProfileCard() {
   const { user, role, logout } = useAdminAuth();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -79,7 +75,7 @@ export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
     .slice(0, 2) || 'U';
 
   return (
-    <div className={`${styles.container} ${isCollapsed ? styles.collapsed : ''}`} ref={dropdownRef}>
+    <div className={styles.container} ref={dropdownRef}>
       <Button
         className={styles.profileButton}
         onClick={handleDropdownToggle}
@@ -91,38 +87,34 @@ export function UserProfileCard({ isCollapsed = false }: UserProfileCardProps) {
         <div className={styles.avatar}>
           <span className={styles.initials}>{userInitials}</span>
         </div>
-        {!isCollapsed && (
-          <>
-            <div className={styles.userInfo}>
-              <span className={styles.userEmail}>{user}</span>
-              {role && (
-                <span
-                  className={styles.roleBadge}
-                  style={{
-                    backgroundColor: getRoleStyle(role).bg,
-                  }}
-                >
-                  {ROLE_LABELS[role] ?? role}
-                </span>
-              )}
-            </div>
-            <div className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </div>
-          </>
-        )}
+        <div className={styles.userInfo}>
+          <span className={styles.userEmail}>{user}</span>
+          {role && (
+            <span
+              className={styles.roleBadge}
+              style={{
+                backgroundColor: getRoleStyle(role).bg,
+              }}
+            >
+              {ROLE_LABELS[role] ?? role}
+            </span>
+          )}
+        </div>
+        <div className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
       </Button>
 
       {isDropdownOpen && (
