@@ -96,6 +96,7 @@ export function HomePage() {
                 <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }} className="section-inner">
                   <CollectionSlider
                     title={collection.name}
+                    slug={collection.slug}
                     description={collection.description}
                     products={collection.products || []}
                     bannerUrl={collection.imageUrl}

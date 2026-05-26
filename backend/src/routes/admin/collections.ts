@@ -11,6 +11,9 @@ const router = Router();
 // GET /api/admin/collections/all - Obtener todas las colecciones sin paginación
 router.get('/all', controller.getAll);
 
+// POST /api/admin/collections/sync-all - Sincronizar todas las colecciones auto_sales
+router.post('/sync-all', controller.syncAllCollections);
+
 // GET /api/admin/collections - Listar colecciones con paginación
 router.get('/', controller.index);
 
@@ -25,6 +28,9 @@ router.put('/:id', controller.update);
 
 // DELETE /api/admin/collections/:id - Eliminar colección
 router.delete('/:id', controller.destroy);
+
+// POST /api/admin/collections/:id/sync - Sincronizar colección auto_sales individual
+router.post('/:id/sync', controller.syncCollection);
 
 // POST /api/admin/collections/:id/reorder - Reordenar productos en colección
 router.post('/:id/reorder', controller.reorder);

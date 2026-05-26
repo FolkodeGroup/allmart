@@ -5,6 +5,14 @@
 
 import { apiFetch } from '../../../utils/apiClient';
 
+export interface AutoSalesParams {
+  categoryId?: string;
+  windowDays?: number;
+  limit?: number;
+  pinnedProductIds?: string[];
+  excludeProductIds?: string[];
+}
+
 export interface Collection {
   id: string;
   name: string;
@@ -14,6 +22,10 @@ export interface Collection {
   displayPosition: 'home' | 'category';
   imageUrl?: string;
   isActive: boolean;
+  /** 'manual' | 'auto_sales' */
+  type: string;
+  params: AutoSalesParams;
+  snapshotAt?: string;
   productCount: number;
   createdAt: string;
   updatedAt: string;
@@ -52,8 +64,6 @@ export const collectionsService = {
     if (displayPosition) params.append('displayPosition', displayPosition);
     if (isActive !== undefined) params.append('isActive', String(isActive));
     const response = await apiFetch<{ data: PaginatedCollections }>(`/api/admin/collections?${params}`);
-    // El servidor devuelve { success: true, data: { data: [...], pagination: {...} } }
-    // Extraemos el contenido de data
     return response.data;
   },
 
@@ -113,4 +123,41 @@ export const collectionsService = {
     const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}/products/${productId}`, { method: 'DELETE' });
     return response.data;
   },
+
+  /** Sincroniza una colección auto_sales con el top de ventas actual */
+  async sync(id: string): Promise<Collection> {
+    const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}/sync`, {
+      method: 'POST',
+    });
+    return response.data;
+  },
+
+  /** Sincroniza todas las colecciones auto_sales activas */
+  async syncAll(): Promise<{ synced: number; errors: string[] }> {
+    const response = await apiFetch<{ data: { synced: number; errors: string[] } }>(
+      '/api/admin/collections/sync-all',
+      { method: 'POST' }
+    );
+    return response.data;
+  },
 };
+
+
+export interface CollectionProduct {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  imageUrl?: string;
+  position: number;
+}
+
+export interface PaginatedCollections {
+  data: Collection[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
