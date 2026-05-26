@@ -1,4 +1,6 @@
 import type { Category } from '../../../../types';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // CSV export utility
 export function exportCategoriesToCSV(categories: Category[]) {
@@ -61,3 +63,61 @@ export async function exportCategoriesToExcel(categories: Category[]) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+// PDF export utility (jsPDF + autotable)
+export async function exportCategoriesToPDF(categories: Category[]) {
+  if (!categories || categories.length === 0) {
+    alert('No hay categorías para exportar.');
+    return;
+  }
+
+  const doc = new jsPDF({ orientation: 'landscape' });
+
+  doc.setFontSize(14);
+  doc.setTextColor(118, 146, 130); // --color-primary
+  doc.text('Reporte de Categorías — Allmart', 14, 12);
+
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 14, 18);
+
+  autoTable(doc, {
+    head: [['ID', 'Nombre', 'Slug', 'Descripción', 'Productos', 'Visible']],
+    body: categories.map(cat => [
+      cat.id.slice(0, 8) + '…',
+      cat.name,
+      cat.slug,
+      cat.description ?? '',
+      String(cat.itemCount ?? 0),
+      cat.isVisible ? 'Sí' : 'No',
+    ]),
+    startY: 24,
+    styles: {
+      fontSize: 8,
+      cellPadding: 3,
+      overflow: 'linebreak',
+      valign: 'top',
+    },
+    headStyles: {
+      fillColor: [118, 146, 130],
+      textColor: 255,
+      fontStyle: 'bold',
+      fontSize: 9,
+    },
+    alternateRowStyles: {
+      fillColor: [242, 239, 235],
+    },
+    columnStyles: {
+      0: { cellWidth: 28 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 80 },
+      4: { cellWidth: 22 },
+      5: { cellWidth: 18 },
+    },
+  });
+
+  const date = new Date().toISOString().slice(0, 10);
+  doc.save(`categories-${date}.pdf`);
+}
+

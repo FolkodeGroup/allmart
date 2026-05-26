@@ -27,6 +27,7 @@ import {
 import { useReportsData } from './hooks/useReportsData';
 import { useMonthlyGoal } from '../goals/hooks/useMonthlyGoal';
 import { ReportsCharts } from './components/ReportsCharts';
+import { ExportButtons } from '../../../components/ui/ExportButtons';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -114,10 +115,8 @@ export function AdminReports() {
   const [pageSize, setPageSize] = useState(10);
 
   // Feedback de exportación
-  const [showExportModal, setShowExportModal] = useState(false);
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
-  const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf'>('csv');
   // Eliminado: Estado para alternar la vista del top de productos
 
   // PDF export
@@ -656,69 +655,46 @@ export function AdminReports() {
               </div>
 
               <div className={styles.exportWrap + ' fadeInFast'}>
-                <span>Exportar como:</span>
-
-                <div className={styles.exportSelectWrap}>
-                  <select
-                    className={styles.exportSelect}
-                    value={exportFormat}
-                    onChange={e => setExportFormat(e.target.value as 'csv' | 'xlsx' | 'pdf')}
-                    disabled={exportLoading !== null}
-                    aria-label="Formato de exportación"
-                  >
-                    <option value="csv">CSV</option>
-                    <option value="xlsx">Excel</option>
-                    <option value="pdf">PDF</option>
-                  </select>
-                  <button
-                    type="button"
-                    className={styles.exportBtn}
-                    onClick={() => setShowExportModal(true)}
-                    title={`Exportar pedidos del período como ${exportFormat.toUpperCase()}`}
-                    disabled={exportLoading !== null}
-                  >
-                    ⬇ Exportar
-                  </button>
-                </div>
+                <ExportButtons
+                  onExportCSV={async () => {
+                    if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                    setExportLoading('csv');
+                    try {
+                      const lbl = filters.type === 'predefined' ? filters.period : 'custom';
+                      exportOrdersCSV(periodOrders, getExportFileName('pedidos', lbl, 'csv'));
+                      setNotif({ open: true, type: 'success', message: 'CSV descargado.' });
+                    } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar CSV.' }); }
+                    finally { setExportLoading(null); }
+                  }}
+                  onExportExcel={async () => {
+                    if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                    setExportLoading('xlsx');
+                    try {
+                      const lbl = filters.type === 'predefined' ? filters.period : 'custom';
+                      exportOrdersXLSX(periodOrders, getExportFileName('pedidos', lbl, 'xlsx'));
+                      setNotif({ open: true, type: 'success', message: 'Excel descargado.' });
+                    } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar Excel.' }); }
+                    finally { setExportLoading(null); }
+                  }}
+                  onExportPDF={async () => {
+                    if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                    setExportLoading('pdf');
+                    try {
+                      const lbl = filters.type === 'predefined' ? filters.period : 'custom';
+                      await exportOrdersPDF(periodOrders, getExportFileName('pedidos', lbl, 'pdf'));
+                      setNotif({ open: true, type: 'success', message: 'PDF descargado.' });
+                    } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar PDF.' }); }
+                    finally { setExportLoading(null); }
+                  }}
+                  loading={exportLoading}
+                />
+                <Notification
+                  open={notif.open}
+                  type={notif.type}
+                  message={notif.message}
+                  onClose={() => setNotif(n => ({ ...n, open: false }))}
+                />
               </div>
-              <ConfirmModal
-                open={showExportModal}
-                title="Exportar pedidos"
-                message={`¿Deseás exportar los pedidos del período como archivo ${exportFormat.toUpperCase()}?`}
-                confirmLabel={exportLoading ? 'Exportando...' : 'Exportar'}
-                cancelLabel="Cancelar"
-                loading={!!exportLoading}
-                onConfirm={async () => {
-                  setExportLoading(exportFormat);
-                  setShowExportModal(false);
-                  const periodLabel =
-                    filters.type === 'predefined'
-                      ? filters.period
-                      : 'custom';
-                  const fileName = getExportFileName('pedidos', periodLabel, exportFormat === 'xlsx' ? 'xlsx' : exportFormat);
-                  try {
-                    if (exportFormat === 'csv') {
-                      exportOrdersCSV(periodOrders, fileName);
-                    } else if (exportFormat === 'xlsx') {
-                      exportOrdersXLSX(periodOrders, fileName);
-                    } else if (exportFormat === 'pdf') {
-                      await exportOrdersPDF(periodOrders, fileName);
-                    }
-                    setNotif({ open: true, type: 'success', message: `Exportación exitosa. Archivo ${exportFormat.toUpperCase()} descargado.` });
-                  } catch {
-                    setNotif({ open: true, type: 'error', message: `Ocurrió un error al exportar (${exportFormat.toUpperCase()}). Por favor, intentá nuevamente.` });
-                  } finally {
-                    setExportLoading(null);
-                  }
-                }}
-                onCancel={() => setShowExportModal(false)}
-              />
-              <Notification
-                open={notif.open}
-                type={notif.type}
-                message={notif.message}
-                onClose={() => setNotif(n => ({ ...n, open: false }))}
-              />
             </div>
 
             {/* Filtros rápidos para la tabla de pedidos */}

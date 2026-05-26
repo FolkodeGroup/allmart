@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import type { StatusFilter, StockLevelFilter } from './productsService';
 import { exportCatalogPdf } from './productsService';
+import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
@@ -18,6 +19,7 @@ import { EmptyState } from '../../../components/ui/EmptyState';
 import { PackageSearch, AlertCircle } from 'lucide-react';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductHeader } from '../../../components/ui/ProductHeader';
+import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { ProductFilters } from '../../../components/ui/ProductFilters';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
 
@@ -66,6 +68,7 @@ export function AdminProducts() {
 
   // PDF export
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [exportLoadingFormat, setExportLoadingFormat] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
 
   // ─── Auto-open edit form if 'edit' param is present ───────────────────────
   useEffect(() => {
@@ -119,6 +122,54 @@ export function AdminProducts() {
       setIsExportingPdf(false);
     }
   }, [token, search, categoryFilter, statusFilter, stockLevelFilter]);
+
+  const handleExportCSV = useCallback(() => {
+    if (!products.length) {
+      toast.error('No hay productos para exportar.');
+      return;
+    }
+    setExportLoadingFormat('csv');
+    try {
+      exportProductsToCSV(products.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.category?.name ?? 'Sin categoría',
+        price: p.price,
+        stock: p.stock,
+        inStock: p.inStock,
+        isFeatured: p.isFeatured,
+      })));
+      toast.success('CSV de productos descargado.');
+    } catch {
+      toast.error('Error al exportar CSV.');
+    } finally {
+      setExportLoadingFormat(null);
+    }
+  }, [products]);
+
+  const handleExportExcel = useCallback(async () => {
+    if (!products.length) {
+      toast.error('No hay productos para exportar.');
+      return;
+    }
+    setExportLoadingFormat('xlsx');
+    try {
+      exportProductsToExcel(products.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.category?.name ?? 'Sin categoría',
+        price: p.price,
+        stock: p.stock,
+        inStock: p.inStock,
+        isFeatured: p.isFeatured,
+      })));
+      toast.success('Excel de productos descargado.');
+    } catch {
+      toast.error('Error al exportar Excel.');
+    } finally {
+      setExportLoadingFormat(null);
+    }
+  }, [products]);
 
   // Scroll preservation
   const containerRef = useRef<HTMLElement>(null);
@@ -277,6 +328,10 @@ export function AdminProducts() {
           <ProductHeader
             canCreate={can('products.create')}
             onNew={handleNew}
+            onExportCSV={handleExportCSV}
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+            exportLoadingFormat={exportLoadingFormat ?? (isExportingPdf ? 'pdf' : null)}
           />
 
           <ProductFilters
@@ -305,11 +360,14 @@ export function AdminProducts() {
 
           {!loading && !error && products.length > 0 && (
             <div className={styles.actionsBar}>
-              <div className={styles.exportBtnContainer}>
-                <button className={styles.exportBtn} onClick={handleExportPdf} disabled={isExportingPdf} type="button">
-                  {isExportingPdf ? 'Generando…' : 'Exportar PDF'}
-                </button>
-              </div>
+                  <div className={styles.exportBtnContainer}>
+                    <ExportButtons
+                      onExportCSV={handleExportCSV}
+                      onExportExcel={handleExportExcel}
+                      onExportPDF={handleExportPdf}
+                      loading={exportLoadingFormat ?? (isExportingPdf ? 'pdf' : null)}
+                    />
+                  </div>
 
               <div className={styles.sortContainer}>
                 <div className={styles.sortControls}>

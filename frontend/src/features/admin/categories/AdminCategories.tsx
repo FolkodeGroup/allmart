@@ -17,7 +17,9 @@ import { FolderSearch, AlertCircle } from 'lucide-react';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminCategories.module.css';
 import { CategoriesHeader } from './components/CategoriesHeader';
-import { exportCategoriesToCSV, exportCategoriesToExcel } from './utils/exportCategories';
+import { exportCategoriesToCSV, exportCategoriesToExcel, exportCategoriesToPDF } from './utils/exportCategories';
+import { ExportButtons } from '../../../components/ui/ExportButtons';
+import type { ExportFormat } from '../../../components/ui/ExportButtons';
 import { CategoriesFilters } from './components/CategoriesFilters';
 // import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
@@ -362,6 +364,8 @@ export function AdminCategories() {
   const parentOptions = categories.filter((cat) => !cat.parentId && cat.id !== editId);
 
   // Export handlers
+  const [exportLoadingCat, setExportLoadingCat] = useState<ExportFormat | null>(null);
+
   const handleExportCSV = () => {
     if (!categoriesWithOptimism.length) {
       showNotification('info', 'No hay categorías para exportar.');
@@ -369,12 +373,21 @@ export function AdminCategories() {
     }
     exportCategoriesToCSV(categoriesWithOptimism);
   };
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!categoriesWithOptimism.length) {
       showNotification('info', 'No hay categorías para exportar.');
       return;
     }
-    exportCategoriesToExcel(categoriesWithOptimism);
+    setExportLoadingCat('xlsx');
+    try { await exportCategoriesToExcel(categoriesWithOptimism); } finally { setExportLoadingCat(null); }
+  };
+  const handleExportPDF = async () => {
+    if (!categoriesWithOptimism.length) {
+      showNotification('info', 'No hay categorías para exportar.');
+      return;
+    }
+    setExportLoadingCat('pdf');
+    try { await exportCategoriesToPDF(categoriesWithOptimism); } finally { setExportLoadingCat(null); }
   };
 
   return (
@@ -413,12 +426,12 @@ export function AdminCategories() {
       {!loading && !error && categories.length > 0 && (
         <div className={styles.actionsBar}>
           <div className={styles.exportBtnContainer}>
-            <button className={styles.exportBtn} onClick={handleExportCSV} type="button">
-              Exportar CSV
-            </button>
-            <button className={styles.exportBtn} onClick={handleExportExcel} type="button">
-              Exportar Excel
-            </button>
+            <ExportButtons
+              onExportCSV={handleExportCSV}
+              onExportExcel={handleExportExcel}
+              onExportPDF={handleExportPDF}
+              loading={exportLoadingCat}
+            />
           </div>
 
           <div className={styles.sortContainer}>
