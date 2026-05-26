@@ -229,6 +229,7 @@ body[data-admin-theme='dark'] {
 
   --color-active-mode: rgba(209, 107, 23, 0.12);
   --color-error-mode: #c91414dc;
+  --color-error-mode-hover: #c91c1c;
 
    --color-text-instock: #fff;
    --color-text-outofstock: #fff;
