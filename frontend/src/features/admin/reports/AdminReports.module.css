@@ -857,6 +857,7 @@
   flex-wrap: wrap;
   font-size: 15px;
   width: 100%;
+  padding: 0.5rem 0.5rem;
 }
 
 @media (max-width: 600px) {
