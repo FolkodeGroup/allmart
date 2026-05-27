@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { CircleUserRound, Heart, Menu, Search, ShoppingCart, X } from 'lucide-react';
+import { CircleUserRound, Heart, Menu, ShoppingCart, X } from 'lucide-react';
 import type { NavigationItem, Category, Product } from '../../../types';
 import { fetchPublicCategories } from '../../../services/categoriesService';
 import { buildNavigationFromCategories, fallbackNavigation } from '../navigation/publicNavigation';
