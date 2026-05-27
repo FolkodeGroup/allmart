@@ -1822,3 +1822,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1028: Se implementa aplicacion de  estilos para modos claro/oscuro en la vi… | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1029: 990 descarga de pdf en reportes con tabla de pedidos y estilo allmart | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1032: 987 eliminar vista de colecciones del admin y generar dinámicamente por ventas | 2026-05-26 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1034: 989 desplegable dinámico para asociar categorías y productos a un banner | 2026-05-27 |
