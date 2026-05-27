@@ -61,6 +61,12 @@ export function ProductListPage() {
   const [collectionLoading, setCollectionLoading] = useState(false);
   const rootCategories = categories.filter((cat) => !cat.parentId);
 
+  const urlSlugs = searchParams.get('slugs') ?? '';
+  const slugList = useMemo(
+    () => urlSlugs ? urlSlugs.split(',').filter(Boolean) : [],
+    [urlSlugs]
+  );
+
   const isCollectionView = urlColeccion.length > 0;
 
   useEffect(() => {
@@ -145,6 +151,8 @@ export function ProductListPage() {
   useEffect(() => {
     const params: PublicProductsParams = { limit: 9, page };
     if (selectedCategory) params.category = selectedCategory;
+    if (urlTag) params.tag = urlTag;
+    if (urlSlugs) params.slugs = urlSlugs;
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
     if (showOnlyFeatured) params.isFeatured = true;
     if (showOnlyOnSale) params.isOnSale = true;
@@ -156,18 +164,26 @@ export function ProductListPage() {
     fetchPublicProducts(params)
       .then(({ data, total }) => {
         setTotalProducts(total ?? null);
-        let mappedProducts = data.map((p) => mapApiProductToProduct(p, categories));
+        const mappedProducts = data.map((p) => mapApiProductToProduct(p, categories));
 
-        // Filtrar por "En Oferta" si está habilitado
+        /* Filtrar por "En Oferta" si está habilitado
         if (showOnlyOnSale) {
           mappedProducts = mappedProducts.filter((p) => activeDiscounts.has(p.id));
         }
-
+        if (tag) {
+          mappedProducts = mappedProducts.filter(p =>
+            p.tags.some(t => t.toLowerCase() === tag)
+          );
+        }
         if (showOnlyNovedad) {
           mappedProducts = mappedProducts.filter(p =>
             p.tags.some(t => t.toLowerCase() === 'novedad')
           );
         }
+
+        if (slugList.length > 0) {
+          mappedProducts = mappedProducts.filter(p => slugList.includes(p.slug));
+        }*/
 
         if (page === 1) {
           setProducts(mappedProducts);
@@ -180,12 +196,12 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, activeDiscounts, categories, page, showOnlyNovedad]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, activeDiscounts, categories, urlSlugs, slugList, page, showOnlyNovedad]);
 
   /* Resetear paginación cuando cambian filtros relevantes */
   useEffect(() => {
     setPage(1);
-  }, [sortBy, selectedCategory, showOnlyOnSale, showOnlyFeatured, showOnlyNovedad]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad]);
 
   const handleLoadMore = () => {
     if (isLoadingMore) return;
@@ -231,19 +247,7 @@ export function ProductListPage() {
     [categories, selectedParentCategory]
   );
 
-  const visibleProducts = useMemo(() => {
-    if (!selectedCategoryInfo) return products;
-
-    const childIds = new Set(childCategories.map((child) => child.id));
-    return products.filter((product) => {
-      const ids = getProductCategoryIds(product);
-      if (!selectedCategoryInfo.parentId) {
-        if (ids.includes(selectedCategoryInfo.id)) return true;
-        return ids.some((id) => childIds.has(id));
-      }
-      return ids.includes(selectedCategoryInfo.id);
-    });
-  }, [childCategories, products, selectedCategoryInfo]);
+  const visibleProducts = products;
 
   const groupedProducts = useMemo(() => {
     const shouldGroup =
@@ -432,7 +436,11 @@ export function ProductListPage() {
                 type="checkbox"
                 className={styles.filterCheckbox}
                 checked={showOnlyOnSale}
-                onChange={(e) => setShowOnlyOnSale(e.target.checked)}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setShowOnlyOnSale(checked);
+                  updateTagParam(checked ? 'oferta' : null);
+                }}
               />
               <span className={styles.filterLabel}>En oferta</span>
             </label>
@@ -507,7 +515,7 @@ export function ProductListPage() {
                   >
                     Ver todos
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </a>
                 </div>

@@ -471,28 +471,75 @@ type ProductQuery = {
   page?: number;
   limit?: number;
   isFeatured?: boolean;
+  tag?: string;
+  isOnSale?: boolean;
+  isNovedad?: boolean;
+  slugs?: string;
 };
 
 
 export async function getPublicProducts(query: ProductQuery) {
-  const { category, q, sort, page = 1, limit = 12, isFeatured } = query;
+  const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
   const where: Record<string, unknown> = { status: 'active', stock: { gt: 0 } };
 
+  // ⭐ Featured
   if (typeof isFeatured === 'boolean') {
     where.isFeatured = isFeatured;
   }
 
+  // 🏷️ TAG dinámico
+  if (tag) {
+    // Filtrar IDs primero, luego aplicar al where principal
+    const taggedProducts = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM products 
+    WHERE tags::jsonb @> to_jsonb(ARRAY[${tag.toLowerCase()}]::text[])
+  `;
+
+    const ids = taggedProducts.map(r => r.id);
+    if (ids.length === 0) {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
+
+    // Combinar con otros filtros existentes
+    where.id = where.id
+      ? { in: (where.id as any).in.filter((id: string) => ids.includes(id)) }
+      : { in: ids };
+  }
+
+  // 📦 SLUGS (productos específicos)
+  if (slugs) {
+    const slugArray = slugs.split(',').map(s => s.trim()).filter(Boolean);
+
+    where.slug = {
+      in: slugArray,
+    };
+  }
+
+  // 📂 CATEGORÍA (slug + hijos)
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
+
     const children = await prisma.category.findMany({
       where: { parentId: foundCategory.id },
       select: { id: true },
     });
-    const categoryIds = [foundCategory.id, ...children.map((child) => child.id)];
-    where.productCategories = { some: { categoryId: { in: categoryIds } } };
+
+    const categoryIds = [
+      foundCategory.id,
+      ...children.map(c => c.id),
+    ];
+
+    where.productCategories = {
+      some: {
+        categoryId: {
+          in: categoryIds,
+        },
+      },
+    };
   }
 
+  // 🔎 BÚSQUEDA
   if (q) {
     const search = q.toLowerCase();
     where.OR = [
@@ -501,20 +548,22 @@ export async function getPublicProducts(query: ProductQuery) {
     ];
   }
 
-  const orderBy: Record<string, string> = {};
+  // 📊 ORDEN
+  const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   switch (sort) {
     case 'price_asc': orderBy.price = 'asc'; break;
     case 'price_desc': orderBy.price = 'desc'; break;
     case 'rating': orderBy.rating = 'desc'; break;
-    case 'newest':
+    case 'newest': orderBy.createdAt = 'desc'; break;
     default: orderBy.createdAt = 'desc';
   }
 
+  // 📦 QUERY FINAL
   const [total, rows] = await Promise.all([
-    prisma.product.count({ where: where as never }),
+    prisma.product.count({ where }),
     prisma.product.findMany({
-      where: where as never,
-      orderBy: orderBy as never,
+      where,
+      orderBy,
       skip: (page - 1) * limit,
       take: limit,
       include: { productCategories: { select: { categoryId: true } } },
