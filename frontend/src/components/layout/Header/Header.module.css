@@ -56,6 +56,7 @@
   display: flex;
   align-items: center;
   width: 100%;
+  position: relative;
   min-height: 44px;
   border-radius: 999px;
   border: 1px solid rgba(21, 32, 24, 0.22);
@@ -81,6 +82,10 @@
   color: #1f2c23;
 }
 
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
 .searchInput::placeholder {
   color: #67766d;
 }
@@ -88,6 +93,7 @@
 .searchIcon {
   color: #4e6356;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .userActions {
@@ -317,13 +323,25 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mobileNavLink {
