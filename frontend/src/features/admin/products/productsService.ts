@@ -67,6 +67,8 @@ export interface PublicProductsParams {
   sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
   page?: number;
   limit?: number;
+  tag?: string;
+  slugs?: string;
   isFeatured?: boolean;
   isOnSale?: boolean;
   isNovedad?: boolean;
@@ -92,14 +94,6 @@ export interface ProductPayload {
   features?: string[];
 }
 
-/** Parámetros de filtro para el catálogo público */
-export interface PublicProductsParams {
-  category?: string;
-  q?: string;
-  sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
-  page?: number;
-  limit?: number;
-}
 
 /** Parámetros de filtro para administración */
 export type StockLevelFilter = 'all' | 'no_stock' | 'low_stock' | 'in_stock';
@@ -303,7 +297,16 @@ export async function fetchPublicProducts(
   if (params.sort) qs.set('sort', params.sort);
   if (params.page) qs.set('page', String(params.page));
   if (params.limit) qs.set('limit', String(params.limit));
-  if (typeof params.isFeatured !== 'undefined') qs.set('isFeatured', String(params.isFeatured));
+  if (params.tag) qs.set('tag', params.tag);
+  if (params.slugs) qs.set('slugs', params.slugs);
+
+  if (typeof params.isOnSale !== 'undefined') {
+    qs.set('isOnSale', String(params.isOnSale));
+  }
+
+  if (typeof params.isNovedad !== 'undefined') {
+    qs.set('isNovedad', String(params.isNovedad));
+  }
 
   const url = `/api/products${qs.toString() ? `?${qs}` : ''}`;
   return apiFetch<PaginatedProducts>(url);
