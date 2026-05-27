@@ -139,7 +139,6 @@ const NoteCard = memo(({
                         onChange={(e) => onEditContentChange(e.target.value)}
                         rows={3}
                         className={styles['edit-textarea']}
-                        autoFocus
                         aria-label="Editar nota"
                     />
                     <div className={styles['edit-buttons']}>

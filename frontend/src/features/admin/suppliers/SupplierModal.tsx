@@ -66,10 +66,11 @@ export function SupplierModal({ supplierId, onClose, onSaved }: SupplierModalPro
     }
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={onClose} role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+            <div className={styles.modal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="supplier-modal-title">
                 <div className={styles.header}>
-                    <h3>{supplierId ? 'Editar proveedor' : 'Nuevo proveedor'}</h3>
+                    <h3 id="supplier-modal-title">{supplierId ? 'Editar proveedor' : 'Nuevo proveedor'}</h3>
                     <button type="button" className={styles.closeBtn} onClick={onClose}><X size={18} /></button>
                 </div>
 
@@ -79,36 +80,36 @@ export function SupplierModal({ supplierId, onClose, onSaved }: SupplierModalPro
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <div className={styles.row}>
                             <div className={styles.field}>
-                                <label>Nombre *</label>
-                                <input value={form.name} onChange={field('name')} placeholder="Distribuidor ABC" className={errors.name ? styles.inputError : ''} />
+                                <label htmlFor="supplier-name">Nombre *</label>
+                                <input id="supplier-name" value={form.name} onChange={field('name')} placeholder="Distribuidor ABC" className={errors.name ? styles.inputError : ''} />
                                 {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
                             </div>
                             <div className={styles.field}>
-                                <label>Email</label>
-                                <input type="email" value={form.email} onChange={field('email')} placeholder="ventas@proveedor.com" className={errors.email ? styles.inputError : ''} />
+                                <label htmlFor="supplier-email">Email</label>
+                                <input id="supplier-email" type="email" value={form.email} onChange={field('email')} placeholder="ventas@proveedor.com" className={errors.email ? styles.inputError : ''} />
                                 {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
                             </div>
                         </div>
 
                         <div className={styles.row}>
                             <div className={styles.field}>
-                                <label>Teléfono</label>
-                                <input value={form.phone} onChange={field('phone')} placeholder="+54 11 4000-0000" />
+                                <label htmlFor="supplier-phone">Teléfono</label>
+                                <input id="supplier-phone" value={form.phone} onChange={field('phone')} placeholder="+54 11 4000-0000" />
                             </div>
                             <div className={styles.field}>
-                                <label>Web / URL</label>
-                                <input value={form.url} onChange={field('url')} placeholder="https://proveedor.com" />
+                                <label htmlFor="supplier-url">Web / URL</label>
+                                <input id="supplier-url" value={form.url} onChange={field('url')} placeholder="https://proveedor.com" />
                             </div>
                         </div>
 
                         <div className={styles.field}>
-                            <label>Dirección</label>
-                            <input value={form.address} onChange={field('address')} placeholder="Av. Corrientes 1234, CABA" />
+                            <label htmlFor="supplier-address">Dirección</label>
+                            <input id="supplier-address" value={form.address} onChange={field('address')} placeholder="Av. Corrientes 1234, CABA" />
                         </div>
 
                         <div className={styles.field}>
-                            <label>Descripción</label>
-                            <textarea value={form.description} onChange={field('description')} rows={3} placeholder="Descripción del proveedor..." />
+                            <label htmlFor="supplier-description">Descripción</label>
+                            <textarea id="supplier-description" value={form.description} onChange={field('description')} rows={3} placeholder="Descripción del proveedor..." />
                         </div>
 
                         <label className={styles.checkboxRow}>

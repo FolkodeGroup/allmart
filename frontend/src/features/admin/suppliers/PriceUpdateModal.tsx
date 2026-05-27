@@ -59,10 +59,11 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
     }
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={onClose} role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+            <div className={styles.modal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="price-update-title">
                 <div className={styles.header}>
-                    <div className={styles.headerTitle}><DollarSign size={16} /> Actualizar Precio</div>
+                    <div id="price-update-title" className={styles.headerTitle}><DollarSign size={16} /> Actualizar Precio</div>
                     <button type="button" className={styles.closeBtn} onClick={onClose}><X size={18} /></button>
                 </div>
 
@@ -71,8 +72,8 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.row}>
                         <div className={styles.field}>
-                            <label>Precio de Venta *</label>
-                            <input type="number" min="0.01" step="0.01" value={price} onChange={e => setPrice(e.target.value)} className={errors.price ? styles.inputError : ''} />
+                            <label htmlFor="price-input">Precio de Venta *</label>
+                            <input id="price-input" type="number" min="0.01" step="0.01" value={price} onChange={e => setPrice(e.target.value)} className={errors.price ? styles.inputError : ''} />
                             {errors.price && <span className={styles.errorMsg}>{errors.price}</span>}
                             {!errors.price && currentPrice !== priceNum && priceNum > 0 && (
                                 <span className={styles.hint}>
@@ -82,8 +83,8 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                             )}
                         </div>
                         <div className={styles.field}>
-                            <label>Costo (opcional)</label>
-                            <input type="number" min="0" step="0.01" value={cost} onChange={e => setCost(e.target.value)} className={errors.cost ? styles.inputError : ''} placeholder="Opcional" />
+                            <label htmlFor="cost-input">Costo (opcional)</label>
+                            <input id="cost-input" type="number" min="0" step="0.01" value={cost} onChange={e => setCost(e.target.value)} className={errors.cost ? styles.inputError : ''} placeholder="Opcional" />
                             {errors.cost && <span className={styles.errorMsg}>{errors.cost}</span>}
                         </div>
                     </div>
@@ -95,8 +96,8 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                     )}
 
                     <div className={styles.field}>
-                        <label>Razón del cambio</label>
-                        <select value={reason} onChange={e => setReason(e.target.value)}>
+                        <label htmlFor="reason-select">Razón del cambio</label>
+                        <select id="reason-select" value={reason} onChange={e => setReason(e.target.value)}>
                             {REASON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>

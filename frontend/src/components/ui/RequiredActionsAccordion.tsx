@@ -6,6 +6,7 @@ import { Button } from './Button/Button';
 import { Link } from 'react-router-dom';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import styles from './RequiredActionsAccordion.module.css';
+import type { Order } from '../../types';
 
 export default function RequiredActionsAccordion() {
   const { orders } = useAdminOrders();
@@ -60,7 +61,7 @@ export default function RequiredActionsAccordion() {
 
   // ─── Render table row ───────────────────────────────────────────────────────
 
-  const renderTableRow = (order: any) => {
+  const renderTableRow = (order: Order) => {
     const statusBadgeVariantMap: Record<string, 'discount' | 'new' | 'outOfStock'> = {
       'pendiente': 'discount',
       'confirmado': 'new',

@@ -10,7 +10,6 @@ import {
     type SupplierProductEntry,
     type PriceHistoryEntry,
 } from './suppliersAdminService';
-import { SupplierModal } from './SupplierModal';
 import { PriceHistoryModal } from './PriceHistoryModal';
 import styles from './SuppliersMasterDetail.module.css';
 
@@ -500,9 +499,10 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
             {/* ── MODALS ── */}
             {deleteId && (
-                <div className={styles.overlay} onClick={() => setDeleteId(null)}>
-                    <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
-                        <h4>¿Eliminar proveedor?</h4>
+                <div className={styles.overlay} onClick={() => setDeleteId(null)} role="presentation" onKeyDown={(e) => e.key === 'Escape' && setDeleteId(null)}>
+                    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+                    <div className={styles.confirmModal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="delete-confirmation-title">
+                        <h4 id="delete-confirmation-title">¿Eliminar proveedor?</h4>
                         <p>Esta acción desactivará el proveedor. No se puede deshacer si tiene productos activos.</p>
                         <div className={styles.confirmActions}>
                             <button type="button" className={styles.btnSecondary} onClick={() => setDeleteId(null)}>Cancelar</button>

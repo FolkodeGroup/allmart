@@ -79,7 +79,7 @@ export function SupplierProductListPanel({
                     role="listbox"
                     aria-label="Lista de productos del proveedor"
                 >
-                    {filtered.map((product, index) => (
+                    {filtered.map((product, _index) => (
                         <div
                             key={product.id}
                             className={`${styles.productRow} ${selectedProductId === product.id ? styles.selected : ''}`}

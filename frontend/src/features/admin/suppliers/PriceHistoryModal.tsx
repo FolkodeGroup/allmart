@@ -39,10 +39,11 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose 
     };
 
     return (
-        <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <div className={styles.overlay} onClick={onClose} role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+            <div className={styles.modal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="price-history-title">
                 <div className={styles.header}>
-                    <div className={styles.headerTitle}>
+                    <div id="price-history-title" className={styles.headerTitle}>
                         <TrendingUp size={16} />
                         <span>Historial de precios — <strong>{productName}</strong></span>
                     </div>

@@ -105,13 +105,7 @@ export function AdminCategories() {
     if (selectedSuggestion) setSelectedSuggestion(null);
   }, [debouncedSearch, selectedSuggestion, page, limit, minProducts, maxProducts, isVisible, refreshCategories]);
 
-  // Reset page to 1 cuando cambia búsqueda o filtros
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, minProducts, maxProducts, isVisible]);
-
   // Cuando se regresa a la página (ej: desde crear/editar categoría), refetch para mostrar cambios
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     refreshCategories({
       q: selectedSuggestion || debouncedSearch,
@@ -121,7 +115,7 @@ export function AdminCategories() {
       maxProducts: maxProducts === '' ? undefined : maxProducts,
       isVisible: isVisible === 'all' ? undefined : isVisible === 'visible' ? true : false,
     });
-  }, [location.pathname]);
+  }, [location.pathname, debouncedSearch, selectedSuggestion, page, limit, minProducts, maxProducts, isVisible, refreshCategories]);
 
 
   const handlePageChange = useCallback((newPage: number) => {

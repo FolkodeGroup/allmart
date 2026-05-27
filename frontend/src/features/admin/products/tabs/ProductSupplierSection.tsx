@@ -170,9 +170,10 @@ export function ProductSupplierSection({
         <div className={styles.section}>
             {/* ── Dropdown ── */}
             <div className={styles.fieldGroup}>
-                <label className={styles.label}>Proveedor Principal</label>
+                <label htmlFor="primary-supplier-select" className={styles.label}>Proveedor Principal</label>
                 <div className={styles.dropdown} ref={dropdownRef}>
                     <button
+                        id="primary-supplier-select"
                         type="button"
                         className={styles.dropdownTrigger}
                         onClick={() => setOpen(v => !v)}
@@ -200,7 +201,6 @@ export function ProductSupplierSection({
                         <div className={styles.dropdownList}>
                             <div className={styles.searchBox}>
                                 <input
-                                    autoFocus
                                     type="text"
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}

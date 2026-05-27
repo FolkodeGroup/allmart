@@ -452,7 +452,7 @@ export function AdminReports() {
         />
       </div>
     );
-  }, [barData, salesViewMode, isLoading, statusSlices, monthlyGoal, dayKeys, periodOrders]);
+  }, [barData, salesViewMode, isLoading, monthlyGoal, dayKeys, periodOrders]);
 
   const from = filteredOrdersTable.length === 0
     ? 0
