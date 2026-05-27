@@ -68,7 +68,7 @@ export const contactsService = {
     if (isFlagged !== undefined) params.append('isFlagged', String(isFlagged));
     if (search) params.append('search', search);
 
-    const body = await apiFetch<ApiSuccess<Record<string, unknown>>>(`/api/admin/contacts?${params.toString()}`);
+    const body = await apiFetch<ApiSuccess<{ data: Contact[]; pagination: Record<string, unknown> }>>(`/api/admin/contacts?${params.toString()}`);
 
     if (!body.success) {
       throw new Error(body.message || 'Error al obtener contactos');

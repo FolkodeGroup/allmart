@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { suppliersAdminService, type ProductPriceHistoryDetailEntry } from './suppliersAdminService';
@@ -62,7 +62,7 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose 
                                 <LineChart data={chartData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e5e7eb)" />
                                     <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                                    <YAxis tick={{ fontSize: 10 }} tickFormatter={v => fmt.format(v)} />
+                                    <YAxis tick={{ fontSize: 10 }} tickFormatter={(v: number) => fmt.format(v)} />
                                     <Tooltip formatter={(v: number) => fmt.format(v)} />
                                     <Line type="monotone" dataKey="price" stroke="#6366f1" dot={false} strokeWidth={2} name="Precio" />
                                     {chartData.some(d => d.cost !== null) && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, Edit2, Trash2, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -350,7 +350,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                 <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
                                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e5e7eb)" />
                                                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                                                    <YAxis tick={{ fontSize: 11 }} tickFormatter={v => fmt.format(v)} />
+                                                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => fmt.format(v)} />
                                                     <Tooltip formatter={(v: number) => fmt.format(v)} />
                                                     <Legend wrapperStyle={{ fontSize: 11 }} />
                                                     {chartProducts.map((name, i) => (

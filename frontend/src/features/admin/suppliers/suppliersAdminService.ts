@@ -266,13 +266,13 @@ export const suppliersAdminService = {
     },
 
     async createSupplier(data: SupplierInput): Promise<AdminSupplier> {
-        const s = await suppliersAdminService.createSupplierV2(data);
+        const s = await suppliersAdminService.createSupplierV2({ ...data, url: data.url ?? undefined });
         return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: s.products, createdAt: s.createdAt, updatedAt: s.updatedAt };
     },
 
     async updateSupplier(id: string, data: SupplierInput): Promise<AdminSupplier | undefined> {
         try {
-            const s = await suppliersAdminService.updateSupplierV2(id, data);
+            const s = await suppliersAdminService.updateSupplierV2(id, { ...data, url: data.url ?? undefined });
             return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: s.products, createdAt: s.createdAt, updatedAt: s.updatedAt };
         } catch { return undefined; }
     },

@@ -6,7 +6,7 @@ import { Button } from './Button/Button';
 import { Link } from 'react-router-dom';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import styles from './RequiredActionsAccordion.module.css';
-import type { Order } from '../../types';
+import type { Order } from '../../context/AdminOrdersContext';
 
 export default function RequiredActionsAccordion() {
   const { orders } = useAdminOrders();

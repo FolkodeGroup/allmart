@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, Legend, ResponsiveContainer,
@@ -7,7 +7,7 @@ import {
     Globe, Phone, MapPin, TrendingUp, BarChart2,
     Table, Package, ExternalLink,
 } from 'lucide-react';
-import type { AdminSupplier, SupplierProductItem, ProductPriceHistoryEntry } from './suppliersAdminService';
+import type { AdminSupplier, SupplierProductItem, ProductPriceHistoryDetailEntry } from './suppliersAdminService';
 import { suppliersAdminService } from './suppliersAdminService';
 import styles from './SupplierPricePanel.module.css';
 
@@ -30,7 +30,7 @@ function formatPrice(v: number) {
 
 export function SupplierPricePanel({ supplier, selectedProduct }: SupplierPricePanelProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('chart');
-    const [history, setHistory] = useState<ProductPriceHistoryEntry[]>([]);
+    const [history, setHistory] = useState<ProductPriceHistoryDetailEntry[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -160,12 +160,12 @@ export function SupplierPricePanel({ supplier, selectedProduct }: SupplierPriceP
                             <div className={styles.chartContainer}>
                                 <ResponsiveContainer width="100%" height={260}>
                                     <LineChart
-                                        data={history}
+                                        data={history.map(h => ({ ...h, date: h.createdAt.slice(0, 10) }))}
                                         margin={{ top: 8, right: 20, left: 8, bottom: 8 }}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                                         <XAxis
-                                            dataKey="month"
+                                            dataKey="date"
                                             tick={{ fontSize: 11, fill: 'var(--color-text-tertiary)' }}
                                         />
                                         <YAxis
@@ -187,8 +187,8 @@ export function SupplierPricePanel({ supplier, selectedProduct }: SupplierPriceP
                                         />
                                         <Line
                                             type="monotone"
-                                            dataKey="avgPrice"
-                                            name="Precio promedio"
+                                            dataKey="price"
+                                            name="Precio"
                                             stroke="var(--color-primary)"
                                             strokeWidth={2.5}
                                             dot={{ r: 4, fill: 'var(--color-primary)' }}
@@ -196,18 +196,9 @@ export function SupplierPricePanel({ supplier, selectedProduct }: SupplierPriceP
                                         />
                                         <Line
                                             type="monotone"
-                                            dataKey="minPrice"
-                                            name="Precio mínimo"
+                                            dataKey="cost"
+                                            name="Costo"
                                             stroke="#22c55e"
-                                            strokeWidth={1.5}
-                                            strokeDasharray="5 3"
-                                            dot={false}
-                                        />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="maxPrice"
-                                            name="Precio máximo"
-                                            stroke="#ef4444"
                                             strokeWidth={1.5}
                                             strokeDasharray="5 3"
                                             dot={false}
@@ -220,21 +211,21 @@ export function SupplierPricePanel({ supplier, selectedProduct }: SupplierPriceP
                                 <table className={styles.table}>
                                     <thead>
                                         <tr>
-                                            <th>Mes</th>
-                                            <th>Precio Prom.</th>
-                                            <th>Precio Mín.</th>
-                                            <th>Precio Máx.</th>
-                                            <th>Ventas</th>
+                                            <th>Fecha</th>
+                                            <th>Precio</th>
+                                            <th>Costo</th>
+                                            <th>Margen %</th>
+                                            <th>Motivo</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {history.map(row => (
-                                            <tr key={row.monthKey}>
-                                                <td>{row.month}</td>
-                                                <td className={styles.priceCell}>{formatPrice(row.avgPrice)}</td>
-                                                <td className={styles.minCell}>{formatPrice(row.minPrice)}</td>
-                                                <td className={styles.maxCell}>{formatPrice(row.maxPrice)}</td>
-                                                <td>{row.salesCount}</td>
+                                            <tr key={row.id}>
+                                                <td>{row.createdAt.slice(0, 10)}</td>
+                                                <td className={styles.priceCell}>{formatPrice(row.price)}</td>
+                                                <td className={styles.minCell}>{row.cost !== null ? formatPrice(row.cost) : '—'}</td>
+                                                <td className={styles.maxCell}>{row.margin !== null ? `${row.margin.toFixed(1)}%` : '—'}</td>
+                                                <td>{row.changeReason}</td>
                                             </tr>
                                         ))}
                                     </tbody>
