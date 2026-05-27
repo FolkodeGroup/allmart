@@ -38,7 +38,7 @@ export function SuppliersAdmin() {
             <div className={styles.header}>
                 <div>
                     <h2 className={sectionStyles.title}>Proveedores</h2>
-                    <p className={sectionStyles.description}>Administra los proveedores de tu catálogo</p>
+                    <p className={styles.description}>Administra los proveedores de tu catálogo</p>
                 </div>
                 <Button
                     type="button"

@@ -22,7 +22,7 @@
 
 .description {
     font-size: 0.9rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-tertiary);
     margin: 0;
 }
 
@@ -38,8 +38,8 @@
 /* ── Tabla ─────────────────────────────────────────── */
 .tableWrapper {
     overflow-x: auto;
-    border: 1px solid #cdcdcd;
-    background: #f7f7f7;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
 }
 
 .table {
@@ -49,7 +49,8 @@
 }
 
 .table thead tr {
-    background-color: #f2efeb;
+    background-color: var(--color-bg-secondary);
+
 }
 
 .table th {
@@ -57,15 +58,15 @@
     text-align: left;
     font-size: .9rem;
     font-weight: 600;
-    color: #a09494;
+    color: var(--color-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     white-space: nowrap;
-    border-bottom: 1px solid #a09494;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .table tbody tr {
-    border-bottom: 1px solid #a09494;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .table td {
@@ -83,7 +84,7 @@
 }
 
 .table tbody tr:hover {
-    background-color: #f7f7f7;
+    background-color: var(--color-bg-secondary);
 }
 
 /* ── Celdas específicas ─────────────────────────────── */
@@ -110,7 +111,7 @@
 }
 
 .empty {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-primary);
     font-size: 0.85rem;
 }
 
