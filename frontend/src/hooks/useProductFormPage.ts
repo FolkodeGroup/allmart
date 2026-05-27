@@ -27,6 +27,7 @@ export const EMPTY_FORM: Omit<AdminProduct, 'id'> = {
     features: [],
     stock: 0,
     variants: [],
+    primarySupplierId: null,
 };
 
 export interface UseProductFormOptions {
