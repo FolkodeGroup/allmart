@@ -29,7 +29,9 @@ describe('useAutocomplete', () => {
     });
 
     // Esperar a que se ejecute el debounce
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
 
     expect(result.current.filteredSuggestions).toContain('Apple');
     expect(result.current.filteredSuggestions).toContain('Application');

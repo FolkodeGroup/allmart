@@ -5,6 +5,7 @@
 
 import { Response, NextFunction } from 'express';
 import * as collectionsService from '../../services/collectionsService';
+import { syncAutoCollection, syncAllAutoCollections } from '../../jobs/collectionsJob';
 import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
 import { CreateCollectionDTO, UpdateCollectionDTO } from '../../services/collectionsService';
@@ -169,6 +170,41 @@ export async function removeProduct(
     await collectionsService.removeProductFromCollection(req.params.id, productId);
     const collection = await collectionsService.getCollectionById(req.params.id);
     sendSuccess(res, collection, 200, 'Producto eliminado de la colección');
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/admin/collections/:id/sync
+ * Sincroniza manualmente una colección auto_sales con el top de ventas actual.
+ */
+export async function syncCollection(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await syncAutoCollection(req.params.id);
+    const collection = await collectionsService.getCollectionById(req.params.id);
+    sendSuccess(res, collection, 200, 'Colección sincronizada con top ventas');
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/admin/collections/sync-all
+ * Sincroniza todas las colecciones auto_sales activas de una vez.
+ */
+export async function syncAllCollections(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await syncAllAutoCollections();
+    sendSuccess(res, result, 200, `Sincronizadas ${result.synced} colecciones`);
   } catch (err) {
     next(err);
   }

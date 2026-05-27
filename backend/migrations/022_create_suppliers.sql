@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS suppliers (
 );
 
 -- Índice en nombre para búsquedas rápidas
-CREATE INDEX idx_suppliers_name ON suppliers(name);
+CREATE INDEX IF NOT EXISTS idx_suppliers_name ON suppliers(name);

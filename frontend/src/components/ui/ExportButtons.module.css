@@ -1,0 +1,134 @@
+/* ============================================================
+   ExportButtons — Componente unificado de exportación
+   Allmart Admin Panel · Soporta modo oscuro y claro via tokens
+   ============================================================ */
+
+.exportGroup {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  /* Transición suave al cambiar de modo */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* ── Botón base ── */
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  line-height: 1;
+  position: relative;
+  outline: none;
+}
+
+/* Sin borde derecho en el último */
+.exportBtn:last-child {
+  border-right: none;
+}
+
+/* ── Focus visible (accesibilidad) ── */
+.exportBtn:focus-visible {
+  z-index: 1;
+  box-shadow: 0 0 0 2px var(--color-primary);
+  outline: none;
+}
+
+/* ── Hover ── */
+.exportBtn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-text-primary);
+}
+
+/* ── Active ── */
+.exportBtn:not(:disabled):active {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  transform: translateY(1px);
+}
+
+/* ── Disabled ── */
+.exportBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Variante CSV: acento verde-oliva ── */
+.exportBtn--csv:not(:disabled):hover {
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary-dark);
+}
+
+/* ── Variante Excel: acento cálido (dorado allmart) ── */
+.exportBtn--xlsx:not(:disabled):hover {
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  color: var(--color-accent-dark);
+}
+
+/* ── Variante PDF: acento error/rojo suave ── */
+.exportBtn--pdf:not(:disabled):hover {
+  background: rgba(199, 80, 80, 0.1);
+  color: var(--color-error, #c75050);
+}
+
+/* ── Spinner animation ── */
+.spinner {
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Label ── */
+.btnLabel {
+  line-height: 1;
+}
+
+/* ── Modo oscuro: el grupo hereda los tokens dark de admin-dark ── */
+/* Los tokens CSS ya cambian automáticamente, no se necesita @media */
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .exportGroup {
+    flex-wrap: wrap;
+    border-radius: 8px;
+  }
+
+  .exportBtn {
+    flex: 1 1 auto;
+    justify-content: center;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    padding: 9px 12px;
+  }
+
+  .exportBtn:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .exportBtn {
+    font-size: 0.75rem;
+    padding: 8px 10px;
+    gap: 4px;
+  }
+}

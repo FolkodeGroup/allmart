@@ -1,12 +1,12 @@
 // Helper puro para transformar pedidos a filas exportables
 export function mapOrdersToRows(orders: Order[]): (string | number)[][] {
     return orders.map(o => [
-        o.id,
+        o.id.slice(0, 8).toUpperCase(),                         // ← solo primeros 8 chars
         new Date(o.createdAt).toLocaleDateString('es-AR'),
         `${o.customer.firstName} ${o.customer.lastName}`,
         o.customer.email,
-        o.items.map(i => `${i.productName} x${i.quantity}`).join(' | '),
-        o.total.toString().replace('.', ','),
+        o.items.map(i => `${i.productName} x${i.quantity}`).join('\n'), // ← salto de línea en vez de |
+        `$${Number(o.total).toLocaleString('es-AR')}`,
         o.status,
         o.paymentStatus ?? 'no-abonado',
     ]);
@@ -29,7 +29,7 @@ export function exportOrdersCSV(orders: Order[], fileName: string): void {
     const headers = ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'];
     const rows = mapOrdersToRows(orders);
     const csv = [headers, ...rows]
-        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}` ).join(','))
+        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}`).join(','))
         .join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     triggerDownload(blob, fileName);
@@ -49,18 +49,48 @@ export function exportOrdersXLSX(orders: Order[], fileName: string) {
 }
 
 export async function exportOrdersPDF(orders: Order[], fileName: string) {
-    // Importación dinámica para evitar cargar la librería si no se usa
+    const doc = new jsPDF({ orientation: 'landscape' }); // ← landscape para más ancho
 
-    const doc = new jsPDF();
-    const headers = [['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago']];
-    const rows = mapOrdersToRows(orders);
+    // Título
+    doc.setFontSize(14);
+    doc.setTextColor(38, 166, 154);
+    doc.text('Reporte de Pedidos', 14, 12);
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 14, 18);
+
     autoTable(doc, {
-        head: headers,
-        body: rows,
-        styles: { fontSize: 9 },
-        margin: { top: 18 },
-        headStyles: { fillColor: [38, 166, 154] },
+        head: [['N° Pedido', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago']],
+        body: mapOrdersToRows(orders),
+        startY: 24,
+        styles: {
+            fontSize: 7,
+            cellPadding: 3,
+            overflow: 'linebreak', // ← wrappea el texto en vez de desbordarlo
+            valign: 'top',
+        },
+        headStyles: {
+            fillColor: [38, 166, 154],
+            textColor: 255,
+            fontStyle: 'bold',
+            fontSize: 8,
+        },
+        columnStyles: {
+            0: { cellWidth: 22 },  // N° Pedido
+            1: { cellWidth: 20 },  // Fecha
+            2: { cellWidth: 30 },  // Cliente
+            3: { cellWidth: 45 },  // Email
+            4: { cellWidth: 70 },  // Productos ← más ancho
+            5: { cellWidth: 22 }, // Total
+            6: { cellWidth: 24 },  // Estado
+            7: { cellWidth: 20 },  // Pago
+        },
+        alternateRowStyles: {
+            fillColor: [245, 250, 249],
+        },
+        margin: { top: 24, left: 10, right: 10 },
     });
+
     doc.save(fileName);
 }
 

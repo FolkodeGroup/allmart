@@ -193,6 +193,7 @@ const AdminCollections: React.FC = () => {
             <tr>
               <th>Nombre</th>
               <th>Slug</th>
+              <th>Tipo</th>
               <th>Posición</th>
               <th>Orden</th>
               <th>Productos</th>
@@ -223,13 +224,13 @@ const AdminCollections: React.FC = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} className={styles.loading}>
+                <td colSpan={9} className={styles.loading}>
                   Cargando...
                 </td>
               </tr>
             ) : collections.length === 0 ? (
               <tr>
-                <td colSpan={8} className={styles.empty}>
+                <td colSpan={9} className={styles.empty}>
                   No hay colecciones
                 </td>
               </tr>
@@ -242,6 +243,11 @@ const AdminCollections: React.FC = () => {
                       <strong>{collection.name}</strong>
                     </td>
                     <td className={styles.monospace}>{collection.slug}</td>
+                    <td>
+                      <span className={collection.type === 'auto_sales' ? styles.badgeAuto : styles.badgeManual}>
+                        {collection.type === 'auto_sales' ? 'Auto ventas' : 'Manual'}
+                      </span>
+                    </td>
                     <td>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</td>
                     <td>
                       <strong>{collection.displayOrder}</strong>

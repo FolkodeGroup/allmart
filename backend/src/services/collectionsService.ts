@@ -6,6 +6,7 @@
 import { Collection, CollectionItem, CollectionDisplayPosition, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
+import type { AutoSalesParams } from '../jobs/collectionsJob';
 
 export interface CreateCollectionDTO {
   name: string;
@@ -16,6 +17,10 @@ export interface CreateCollectionDTO {
   imageUrl?: string;
   isActive?: boolean;
   productIds?: string[];
+  /** Tipo de colección: 'manual' (default) o 'auto_sales' */
+  type?: string;
+  /** Configuración para colecciones auto_sales */
+  params?: AutoSalesParams;
 }
 
 export interface UpdateCollectionDTO {
@@ -27,6 +32,8 @@ export interface UpdateCollectionDTO {
   imageUrl?: string;
   isActive?: boolean;
   productIds?: string[];
+  type?: string;
+  params?: AutoSalesParams;
 }
 
 export interface CollectionResponseDTO {
@@ -38,6 +45,9 @@ export interface CollectionResponseDTO {
   displayPosition: string;
   imageUrl?: string;
   isActive: boolean;
+  type: string;
+  params: AutoSalesParams;
+  snapshotAt?: string;
   productCount: number;
   createdAt: string;
   updatedAt: string;
@@ -107,6 +117,9 @@ function toCollectionDTO(
     displayPosition: collection.displayPosition,
     imageUrl: collection.imageUrl ?? undefined,
     isActive: collection.isActive,
+    type: collection.type ?? 'manual',
+    params: (collection.params as AutoSalesParams) ?? {},
+    snapshotAt: collection.snapshotAt?.toISOString(),
     productCount,
     createdAt: collection.createdAt.toISOString(),
     updatedAt: collection.updatedAt.toISOString(),
@@ -321,6 +334,8 @@ export async function createCollection(dto: CreateCollectionDTO): Promise<Collec
       displayPosition: dto.displayPosition,
       imageUrl: dto.imageUrl ?? null,
       isActive: dto.isActive ?? true,
+      type: dto.type ?? 'manual',
+      params: (dto.params ?? {}) as Prisma.InputJsonValue,
     },
   });
 
@@ -386,6 +401,8 @@ export async function updateCollection(
       displayPosition: dto.displayPosition,
       imageUrl: dto.imageUrl,
       isActive: dto.isActive,
+      ...(dto.type !== undefined && { type: dto.type }),
+      ...(dto.params !== undefined && { params: dto.params as Prisma.InputJsonValue }),
     },
   });
 
