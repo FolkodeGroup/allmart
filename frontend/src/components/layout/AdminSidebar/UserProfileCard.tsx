@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { ModalConfirm } from '../../ui/ModalConfirm/ModalConfirm';
 import { Button } from '../../ui/Button/Button';
 import styles from './UserProfileCard.module.css';
 
@@ -46,10 +47,19 @@ export function UserProfileCard() {
     }
   }, [isDropdownOpen]);
 
-  const handleLogout = () => {
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const handleLogoutClick = () => {
     setIsDropdownOpen(false);
+    setShowLogoutConfirm(true);
+  };
+  const handleLogoutConfirm = () => {
+    setShowLogoutConfirm(false);
     logout();
     window.location.replace('/');
+  };
+  const handleLogoutCancel = () => {
+    setShowLogoutConfirm(false);
   };
 
   const handleSettings = () => {
@@ -161,7 +171,7 @@ export function UserProfileCard() {
 
           <button
             className={`${styles.dropdownItem} ${styles.logoutItem}`}
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
             type="button"
             role="menuitem"
           >
@@ -184,6 +194,15 @@ export function UserProfileCard() {
           </button>
         </div>
       )}
+      <ModalConfirm
+        open={showLogoutConfirm}
+        title="Cerrar sesión"
+        description="¿Estás seguro de que querés cerrar sesión?"
+        confirmText="Cerrar sesión"
+        cancelText="Cancelar"
+        onConfirm={handleLogoutConfirm}
+        onCancel={handleLogoutCancel}
+      />
     </div>
   );
 }
