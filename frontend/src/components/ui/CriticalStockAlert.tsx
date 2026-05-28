@@ -18,7 +18,7 @@ export default function CriticalStockAlert({ products }: Props) {
   const sorted = [...criticalProducts].sort((a, b) => a.stock - b.stock).slice(0, 3);
 
   // Debug: mostrar en consola qué está siendo filtrado
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.MODE === 'development') {
     console.log('[CriticalStockAlert DEBUG]', {
       totalProducts: products.length,
       criticalCount: criticalProducts.length,
