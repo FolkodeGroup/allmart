@@ -33,7 +33,12 @@ export function SupplierModal({ supplierId, onClose, onSaved }: SupplierModalPro
     function validate(): boolean {
         const errs: typeof errors = {};
         if (!form.name?.trim()) errs.name = 'El nombre es obligatorio';
-        if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Email inválido';
+        if (!form.email?.trim()) {
+            errs.email = 'El email es obligatorio';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+            errs.email = 'Email inválido';
+        }
+        if (!form.phone?.trim()) errs.phone = 'El teléfono es obligatorio';
         setErrors(errs);
         return Object.keys(errs).length === 0;
     }
@@ -85,7 +90,7 @@ export function SupplierModal({ supplierId, onClose, onSaved }: SupplierModalPro
                                 {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
                             </div>
                             <div className={styles.field}>
-                                <label htmlFor="supplier-email">Email</label>
+                                <label htmlFor="supplier-email">Email *</label>
                                 <input id="supplier-email" type="email" value={form.email} onChange={field('email')} placeholder="ventas@proveedor.com" className={errors.email ? styles.inputError : ''} />
                                 {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
                             </div>
@@ -93,8 +98,9 @@ export function SupplierModal({ supplierId, onClose, onSaved }: SupplierModalPro
 
                         <div className={styles.row}>
                             <div className={styles.field}>
-                                <label htmlFor="supplier-phone">Teléfono</label>
-                                <input id="supplier-phone" value={form.phone} onChange={field('phone')} placeholder="+54 11 4000-0000" />
+                                <label htmlFor="supplier-phone">Teléfono *</label>
+                                <input id="supplier-phone" value={form.phone} onChange={field('phone')} placeholder="+54 11 4000-0000" className={errors.phone ? styles.inputError : ''} />
+                                {errors.phone && <span className={styles.errorMsg}>{errors.phone}</span>}
                             </div>
                             <div className={styles.field}>
                                 <label htmlFor="supplier-url">Web / URL</label>
