@@ -1826,3 +1826,4 @@ Este archivo es generado y actualizado automáticamente por:
 | Mau-bar-iva | 3 | Creación de issue | Issue #1046: Adaptar productos más vendidos a modo claro y oscuro | 2026-05-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1047: fix url de etiqueta link en CartPage.tsx | 2026-05-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1048: fix render de badge | 2026-05-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1049: 1043 alerta de stock crítico filtrar solo productos con stock bajo | 2026-05-28 |
