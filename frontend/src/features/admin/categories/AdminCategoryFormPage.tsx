@@ -80,7 +80,7 @@ export function AdminCategoryFormPage({
             }
             return true;
         },
-        []
+        [formProps]
     );
 
     const isDirty = useMemo(

@@ -51,6 +51,7 @@ function apiToAdminProduct(api: ApiProduct, categories: Category[]): AdminProduc
     ...base,
     stock: api.stock,
     variants: [],
+    primarySupplierId: api.primarySupplierId ?? null,
   };
 }
 

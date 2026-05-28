@@ -1,0 +1,297 @@
+/* ============================================
+   ALLMART — SUPPLIER PRICE PANEL
+   ============================================ */
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--color-bg-primary);
+    overflow: hidden;
+}
+
+/* ── Supplier header ── */
+.supplierHeader {
+    flex-shrink: 0;
+    padding: var(--space-4);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.supplierTitleRow {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.supplierAvatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--color-primary);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 20px;
+    font-weight: var(--font-semibold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.supplierTitleContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.supplierName {
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 4px;
+}
+
+.supplierMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+.metaLink {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity 0.15s;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.metaLink:hover {
+    opacity: 0.75;
+    text-decoration: underline;
+}
+
+.productsDesc {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: var(--space-2);
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.productsDescIcon {
+    margin-top: 1px;
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+}
+
+/* ── Chart section ── */
+.chartSection {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: var(--space-4);
+    gap: var(--space-3);
+    overflow: hidden;
+}
+
+.chartHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.chartTitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.chartTitle strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-medium);
+}
+
+.viewToggle {
+    display: flex;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.toggleBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 28px;
+    background: var(--color-bg-primary);
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    transition: background 0.15s, color 0.15s;
+}
+
+.toggleBtn:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.toggleActive {
+    background: var(--color-primary) !important;
+    color: #fff !important;
+}
+
+/* ── Chart container ── */
+.chartContainer {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Table view ── */
+.tableWrapper {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+}
+
+.table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-medium);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.table td {
+    padding: 8px 12px;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
+.table tbody tr:hover {
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-bg-primary));
+}
+
+.priceCell {
+    font-weight: var(--font-medium);
+}
+
+.minCell {
+    color: #15803d;
+}
+
+.maxCell {
+    color: #b91c1c;
+}
+
+/* ── Empty / Loading / Error states ── */
+.emptyChart,
+.noHistory {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: var(--space-3);
+    color: var(--color-text-tertiary);
+    text-align: center;
+}
+
+.emptyChart p,
+.noHistory p {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    margin: 0;
+    color: var(--color-text-tertiary);
+    max-width: 220px;
+    line-height: 1.5;
+}
+
+.emptyChartText {
+    max-width: 200px;
+}
+
+.currentPrice {
+    font-size: var(--text-xs) !important;
+    color: var(--color-text-secondary) !important;
+}
+
+.chartLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    justify-content: center;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.chartError {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    color: #b91c1c;
+    text-align: center;
+    padding: var(--space-4);
+}

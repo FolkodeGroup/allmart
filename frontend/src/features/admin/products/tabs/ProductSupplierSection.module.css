@@ -1,0 +1,246 @@
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 4px;
+}
+
+/* ── Label ── */
+.label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 6px;
+}
+
+/* ── Dropdown ── */
+.fieldGroup { position: relative; }
+
+.dropdown { position: relative; width: 100%; max-width: 400px; }
+
+.dropdownTrigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s;
+}
+
+.dropdownTrigger:hover { border-color: var(--color-accent, #6366f1); }
+.dropdownTrigger:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.selectedName {
+    flex: 1;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.placeholder {
+    flex: 1;
+    color: var(--color-text-tertiary);
+}
+
+.clearBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.12s;
+    flex-shrink: 0;
+}
+
+.clearBtn:hover { color: #ef4444; }
+
+.chevron {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+    transition: transform 0.15s;
+}
+
+.chevronOpen { transform: rotate(180deg); }
+
+.dropdownList {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    z-index: 500;
+    overflow: hidden;
+}
+
+.searchBox { padding: 8px; border-bottom: 1px solid var(--color-border); }
+
+.searchInput {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.82rem;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.searchInput:focus { border-color: var(--color-accent, #6366f1); }
+
+.options { max-height: 220px; overflow-y: auto; }
+
+.option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.83rem;
+    transition: background 0.1s;
+}
+
+.option:hover { background: var(--color-bg-secondary); }
+.optionActive { background: var(--color-accent-bg, #f0f1fe); }
+
+.optionName { color: var(--color-text-primary); }
+.optionNone { color: var(--color-text-tertiary); font-style: italic; }
+.activeStar { color: var(--color-accent, #6366f1); }
+
+.noOptions { padding: 16px; text-align: center; color: var(--color-text-tertiary); font-size: 0.82rem; }
+
+/* ── Supplier info card ── */
+.supplierCard {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    max-width: 600px;
+}
+
+.cardLoading { font-size: 0.82rem; color: var(--color-text-tertiary); }
+
+.cardStats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 12px;
+}
+
+.stat { display: flex; flex-direction: column; gap: 2px; }
+
+.statLabel { font-size: 0.75rem; color: var(--color-text-tertiary); font-weight: 500; }
+.statValue { font-size: 1rem; font-weight: 700; color: var(--color-text-primary); }
+.statDanger { color: #dc2626; }
+.statWarn   { color: #d97706; }
+.statOk     { color: #16a34a; }
+
+.cardActions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-accent, #6366f1);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.actionBtn:hover { opacity: 0.88; }
+
+.actionBtnGhost {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.actionBtnGhost:hover { background: var(--color-bg-tertiary, #f3f4f6); }
+
+/* ── Others table ── */
+.otherSection { max-width: 700px; }
+
+.otherTitle {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+}
+
+.otherTable {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.81rem;
+}
+
+.table thead tr {
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.table th {
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.76rem;
+    color: var(--color-text-secondary);
+}
+
+.table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+
+.rowActions { display: flex; gap: 6px; }
+
+.miniBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 9px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-bg-secondary);
+    font-size: 0.76rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.12s;
+    white-space: nowrap;
+}
+
+.miniBtn:hover { background: var(--color-bg-tertiary, #f3f4f6); }
+.miniBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.miniBtnDanger { border-color: #fca5a5; }
+.miniBtnDanger:hover { background: #fee2e2; color: #dc2626; }
