@@ -14,7 +14,7 @@ interface Props {
 export default function CriticalStockAlert({ products }: Props) {
   // Filtrar solo productos con stock bajo (mayor a 0 y menor o igual al umbral)
   // Ordenar por stock ascendente y tomar los 3 con menor stock
-  const criticalProducts = products.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
+  const criticalProducts = products.filter(p => p.stock >= 0 && p.stock <= LOW_STOCK_THRESHOLD);
   const sorted = [...criticalProducts].sort((a, b) => a.stock - b.stock).slice(0, 3);
 
   // Debug: mostrar en consola qué está siendo filtrado
