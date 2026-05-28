@@ -1,4 +1,5 @@
 import styles from './CriticalStockAlert.module.css';
+import { LOW_STOCK_THRESHOLD } from '../../constants/inventory';
 
 export interface CriticalStockProduct {
   id: string;
@@ -11,8 +12,27 @@ interface Props {
 }
 
 export default function CriticalStockAlert({ products }: Props) {
+  // Filtrar solo productos con stock bajo (mayor a 0 y menor o igual al umbral)
   // Ordenar por stock ascendente y tomar los 3 con menor stock
-  const sorted = [...products].sort((a, b) => a.stock - b.stock).slice(0, 3);
+  const criticalProducts = products.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
+  const sorted = [...criticalProducts].sort((a, b) => a.stock - b.stock).slice(0, 3);
+
+  // Debug: mostrar en consola qué está siendo filtrado
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[CriticalStockAlert DEBUG]', {
+      totalProducts: products.length,
+      criticalCount: criticalProducts.length,
+      criticalProducts: criticalProducts.map(p => ({ name: p.name, stock: p.stock })),
+      displaying: sorted.length,
+      displayedProducts: sorted.map(p => ({ name: p.name, stock: p.stock })),
+    });
+  }
+
+  // Si no hay productos con stock crítico, no mostrar nada
+  if (sorted.length === 0) {
+    return null;
+  }
+
   return (
     <section className={styles.criticalStockSection}>
       <h2 className={styles.title}>
@@ -30,7 +50,7 @@ export default function CriticalStockAlert({ products }: Props) {
                 className={styles.progressBar}
                 style={{
                   width: `${Math.min(100, product.stock * 10)}%`,
-                  backgroundColor: product.stock <= 5 ? '#e53935' : '#82ca9d',
+                  backgroundColor: product.stock === 0 ? '#d32f2f' : '#ff6f00',
                 }}
               />
             </div>
