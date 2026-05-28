@@ -29,6 +29,7 @@ export interface ApiProduct {
   inStock: boolean;
   isFeatured?: boolean;
   features: string[];
+  primarySupplierId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -176,6 +177,7 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     isFeatured: api.isFeatured ?? false,
     sku: api.sku ?? '',
     features: Array.isArray(api.features) ? api.features : [],
+    primarySupplierId: api.primarySupplierId ?? null,
   };
 }
 
@@ -196,6 +198,7 @@ interface AdminProductInput {
   reviewCount?: number;
   inStock?: boolean;
   isFeatured?: boolean;
+  primarySupplierId?: string | null;
   tags?: string[];
   features?: string[];
   slug?: string;
@@ -226,6 +229,7 @@ export function mapAdminProductToPayload(product: AdminProductInput): ProductPay
     reviewCount: product.reviewCount ?? 0,
     inStock: product.inStock ?? true,
     isFeatured: product.isFeatured ?? false,
+    ...(product.primarySupplierId !== undefined ? { primarySupplierId: product.primarySupplierId } : {}),
     tags: product.tags,
     features: product.features,
   };

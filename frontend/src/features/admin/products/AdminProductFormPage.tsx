@@ -11,6 +11,7 @@ import { TabCategorias } from './tabs/TabCategorias';
 import { TabImagenes } from './tabs/TabImagenes';
 import { TabVariantes } from './tabs/TabVariantes';
 import { TabSEOPublicacion } from './tabs/TabSeoPublicacion';
+import { ProductSupplierSection } from './tabs/ProductSupplierSection';
 
 import styles from './AdminProductFormPage.module.css';
 
@@ -269,6 +270,14 @@ export function AdminProductFormPage({
                             onRemoveTag={formProps.removeTag}
                             onAddFeature={formProps.addFeature}
                             onRemoveFeature={formProps.removeFeature}
+                        />
+
+                        <ProductSupplierSection
+                            productId={productId}
+                            productName={formProps.form.name}
+                            currentProductPrice={formProps.form.price}
+                            primarySupplierId={formProps.form.primarySupplierId}
+                            onPrimaryChange={(id) => formProps.setField('primarySupplierId', id)}
                         />
                     </section>
 

@@ -348,6 +348,9 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       })(),
       features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
       isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : existing.isFeatured,
+      ...(dto.primarySupplierId !== undefined
+        ? { primarySupplierId: dto.primarySupplierId ?? null }
+        : {}),
     },
   });
 
@@ -492,7 +495,7 @@ export async function getPublicProducts(query: ProductQuery) {
   if (tag) {
     // Filtrar IDs primero, luego aplicar al where principal
     const taggedProducts = await prisma.$queryRaw<{ id: string }[]>`
-    SELECT id FROM products 
+    SELECT id FROM products
     WHERE tags::jsonb @> to_jsonb(ARRAY[${tag.toLowerCase()}]::text[])
   `;
 
@@ -586,5 +589,72 @@ export async function getProductBySlug(slug: string): Promise<Product> {
   });
   if (!row) throw createError('Producto no encontrado', 404);
   return toProduct(row);
+}
+
+// ─── Historial de precios por producto ────────────────────────────────────────
+
+export interface ProductPriceHistoryEntry {
+  monthKey: string;    // "2025-01"
+  month: string;       // "Ene 2025"
+  avgPrice: number;
+  minPrice: number;
+  maxPrice: number;
+  salesCount: number;
+}
+
+const MONTH_NAMES_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+function toNum(v: unknown): number {
+  if (typeof v === 'number') return v;
+  if (typeof v === 'bigint') return Number(v);
+  if (v !== null && v !== undefined && typeof (v as any).toNumber === 'function') return (v as any).toNumber();
+  return parseFloat(String(v));
+}
+
+export async function getProductPriceHistory(productId: string): Promise<ProductPriceHistoryEntry[]> {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { id: true },
+  });
+  if (!product) throw createError('Producto no encontrado', 404);
+
+  type RawRow = {
+    month_key: string;
+    year: unknown;
+    month: unknown;
+    avg_price: unknown;
+    min_price: unknown;
+    max_price: unknown;
+    sales_count: unknown;
+  };
+
+  const rows = await prisma.$queryRaw<RawRow[]>`
+    SELECT
+      TO_CHAR(o.created_at, 'YYYY-MM') AS month_key,
+      EXTRACT(YEAR FROM o.created_at)::int AS year,
+      EXTRACT(MONTH FROM o.created_at)::int AS month,
+      AVG(oi.unit_price) AS avg_price,
+      MIN(oi.unit_price) AS min_price,
+      MAX(oi.unit_price) AS max_price,
+      COUNT(*)::int AS sales_count
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.id
+    WHERE oi.product_id = ${productId}::uuid
+    GROUP BY month_key, year, month
+    ORDER BY month_key ASC
+  `;
+
+  return rows.map(row => {
+    const year = toNum(row.year);
+    const month = toNum(row.month);
+    return {
+      monthKey: row.month_key,
+      month: `${MONTH_NAMES_ES[month - 1]} ${year}`,
+      avgPrice: Math.round(toNum(row.avg_price)),
+      minPrice: Math.round(toNum(row.min_price)),
+      maxPrice: Math.round(toNum(row.max_price)),
+      salesCount: toNum(row.sales_count),
+    };
+  });
 }
 

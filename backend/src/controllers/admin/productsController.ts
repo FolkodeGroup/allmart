@@ -131,6 +131,13 @@ export async function lowStockCount(req: AuthenticatedRequest, res: Response, ne
   } catch (err) { next(err); }
 }
 
+export async function priceHistory(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const history = await productsService.getProductPriceHistory(req.params.id);
+    sendSuccess(res, history);
+  } catch (err) { next(err); }
+}
+
 export async function exportCatalogPdf(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const body = (req.body ?? {}) as CatalogExportRequestBody;
