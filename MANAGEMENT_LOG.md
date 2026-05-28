@@ -1827,3 +1827,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1047: fix url de etiqueta link en CartPage.tsx | 2026-05-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1048: fix render de badge | 2026-05-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1049: 1043 alerta de stock crítico filtrar solo productos con stock bajo | 2026-05-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1050: 1042 campos obligatorios en proveedores | 2026-05-28 |
