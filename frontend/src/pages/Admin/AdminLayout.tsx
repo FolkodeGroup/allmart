@@ -5,6 +5,7 @@ import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
 import { useAdminProducts } from "../../context/useAdminProductsContext";
+import { useAdminContact } from "../../context/AdminContactContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
 import { UserProfileCard } from "../../components/layout/AdminSidebar/UserProfileCard";
 import { Button } from '../../components/ui/Button/Button';
@@ -14,7 +15,7 @@ import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 import { ModalConfirm } from "../../components/ui/ModalConfirm/ModalConfirm";
 import type { Permission } from "../../utils/permissions";
 
-type NavBadge = "pending" | "lowStock" | null;
+type NavBadge = "pending" | "lowStock" | "unreadContacts" | null;
 
 interface NavItem {
   label: string;
@@ -112,7 +113,7 @@ const navItems: NavItem[] = [
     to: "/admin/contactos",
     icon: "💬",
     permission: "contacts.view",
-    badge: null,
+    badge: "unreadContacts",
   },
 ];
 
@@ -140,7 +141,7 @@ export function AdminLayout() {
     confirmNavigation,
     cancelNavigation,
   } = useUnsavedChanges();
-
+  const { getUnreadContactsCount } = useAdminContact();
 
 
   // Dark mode state
@@ -196,6 +197,7 @@ export function AdminLayout() {
   const getBadgeCount = (badge: NavBadge) => {
     if (badge === 'pending') return getPendingOrdersCount();
     if (badge === 'lowStock') return getLowStockCount();
+    if (badge === 'unreadContacts') return getUnreadContactsCount();
     return null;
   };
 

@@ -5,6 +5,7 @@ import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { useNotification } from '../../../context/NotificationContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { useAdminContact } from '../../../context/AdminContactContext';
 import { MessageSquare } from 'lucide-react';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminContacts.module.css';
@@ -29,7 +30,7 @@ const LIMIT = 20;
 export function AdminContacts() {
   const { showNotification } = useNotification();
   const { can } = useAdminAuth();
-
+  const { refreshUnreadCount } = useAdminContact();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +100,7 @@ export function AdminContacts() {
     try {
       await contactsService.updateContact(contact.id, { status: newStatus });
       showNotification('success', newStatus === 'read' ? 'Marcado como leído' : 'Marcado como no leído');
+      refreshUnreadCount();
     } catch (err: unknown) {
       // Revert optimistic update
       setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, status: contact.status } : c));
@@ -106,6 +108,7 @@ export function AdminContacts() {
     } finally {
       setTogglingIds(prev => { const next = new Set(prev); next.delete(contact.id); return next; });
     }
+
   };
 
   const handleOpenDetail = (contact: Contact) => {
@@ -139,6 +142,7 @@ export function AdminContacts() {
       await contactsService.deleteContact(deleteConfirmId);
       showNotification('success', 'Consulta eliminada');
       setDeleteConfirmId(null);
+      refreshUnreadCount();
       loadContacts();
     } catch (err: unknown) {
       showNotification('error', err instanceof Error ? err.message : 'Error al eliminar');
