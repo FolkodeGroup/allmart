@@ -56,7 +56,7 @@ export function ProductRanking({
                                 <span className={styles.productNameModern}>{product.name}</span>
                             </td>
                             <td>
-                                <span className={styles.statModernValue}>{product.qty} und.</span>
+                                <span className={styles.statModernUnit}>{product.qty} und.</span>
                             </td>
                             <td>
                                 <span className={styles.statModernValue}>{formatPrice(product.revenue)}</span>
