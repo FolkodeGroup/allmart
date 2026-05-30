@@ -58,7 +58,7 @@ export function CartPage() {
         <ul className={styles.itemList} aria-label="Productos en el carrito">
           {items.map(({ product, quantity }) => (
             <li key={product.id} className={styles.item}>
-              <Link to={`/productos/${product.slug}`}>
+              <Link to={`/producto/${product.slug}`}>
                 <ProductImage
                   src={product.images[0]}
                   alt={product.name}
@@ -70,7 +70,7 @@ export function CartPage() {
               </Link>
 
               <div className={styles.itemInfo}>
-                <Link to={`/productos/${product.slug}`} className={styles.itemName}>
+                <Link to={`/producto/${product.slug}`} className={styles.itemName}>
                   {product.name}
                 </Link>
                 <span className={styles.itemCategory}>{product.category.name}</span>

@@ -1823,3 +1823,8 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1029: 990 descarga de pdf en reportes con tabla de pedidos y estilo allmart | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1032: 987 eliminar vista de colecciones del admin y generar dinámicamente por ventas | 2026-05-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1034: 989 desplegable dinámico para asociar categorías y productos a un banner | 2026-05-27 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1046: Adaptar productos más vendidos a modo claro y oscuro | 2026-05-27 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1047: fix url de etiqueta link en CartPage.tsx | 2026-05-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1048: fix render de badge | 2026-05-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1049: 1043 alerta de stock crítico filtrar solo productos con stock bajo | 2026-05-28 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1050: 1042 campos obligatorios en proveedores | 2026-05-28 |

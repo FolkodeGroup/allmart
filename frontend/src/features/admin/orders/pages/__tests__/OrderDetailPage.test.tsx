@@ -3,6 +3,7 @@
  * Tests unitarios para la página de detalle de pedidos.
  * Verifica carga, errores 404, y rendering del contenido.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -57,7 +58,11 @@ vi.mock('../../components/OrderStatusBadge', () => ({
 }));
 
 vi.mock('../../components/OrderStatusSelector', () => ({
+<<<<<<< HEAD
   OrderStatusSelector: ({ value, onChange }: { value: string; onChange: (val: string) => void }) => (
+=======
+  OrderStatusSelector: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+>>>>>>> 8a4399d627c096b8936173ed7628ced9195d14ba
     <select value={value} onChange={(e) => onChange(e.target.value)}>
       <option>pendiente</option>
       <option>confirmado</option>
@@ -112,17 +117,17 @@ describe('OrderDetailPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useParams as unknown as { mockReturnValue: (val: unknown) => void }).mockReturnValue({
+    (useParams as unknown as typeof useParams).mockReturnValue({
       id: '550e8400-e29b-41d4-a716-446655440000',
     });
-    (useNavigate as unknown as { mockReturnValue: (val: unknown) => void }).mockReturnValue(mockNavigate);
-    (useAdminOrders as unknown as { mockReturnValue: (val: unknown) => void }).mockReturnValue({
+    (useNavigate as unknown as typeof useNavigate).mockReturnValue(mockNavigate);
+    (useAdminOrders as unknown as typeof useAdminOrders).mockReturnValue({
       getOrder: vi.fn(() => null),
     });
   });
 
   it('should render loading state initially', () => {
-    (ordersService.fetchAdminOrderById as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(
+    (ordersService.fetchAdminOrderById as unknown as typeof ordersService.fetchAdminOrderById).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     );
 
@@ -153,7 +158,11 @@ describe('OrderDetailPage', () => {
   });
 
   it('should display 404 message when order not found', async () => {
+<<<<<<< HEAD
     (ordersService.fetchAdminOrderById as unknown as { mockRejectedValue: (err: unknown) => void }).mockRejectedValue(
+=======
+    (ordersService.fetchAdminOrderById as unknown as typeof ordersService.fetchAdminOrderById).mockRejectedValue(
+>>>>>>> 8a4399d627c096b8936173ed7628ced9195d14ba
       new Error('404 - Pedido no encontrado')
     );
 
@@ -188,7 +197,11 @@ describe('OrderDetailPage', () => {
 
   it('should display error message on API failure', async () => {
     const errorMessage = 'Error de conexión con el servidor';
+<<<<<<< HEAD
     (ordersService.fetchAdminOrderById as unknown as { mockRejectedValue: (err: unknown) => void }).mockRejectedValue(
+=======
+    (ordersService.fetchAdminOrderById as unknown as typeof ordersService.fetchAdminOrderById).mockRejectedValue(
+>>>>>>> 8a4399d627c096b8936173ed7628ced9195d14ba
       new Error(errorMessage)
     );
 

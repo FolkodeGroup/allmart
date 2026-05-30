@@ -140,7 +140,7 @@ export const contactsService = {
    * [ADMIN] Elimina un contacto.
    */
   async deleteContact(id: string): Promise<void> {
-    const body = await apiFetch<ApiSuccess<unknown>>(`/api/admin/contacts/${id}`, {
+    const body = await apiFetch<ApiSuccess<Record<string, unknown>>>(`/api/admin/contacts/${id}`, {
       method: 'DELETE',
     });
 

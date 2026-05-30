@@ -1,0 +1,112 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+}
+
+.modal {
+    background: var(--color-bg-primary);
+    border-radius: 14px;
+    width: 700px;
+    max-width: 95vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+}
+
+.headerTitle strong { color: var(--color-text-primary); }
+
+.closeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.12s;
+}
+
+.closeBtn:hover { background: var(--color-bg-secondary); }
+
+.loading, .empty {
+    padding: 40px;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: 0.85rem;
+}
+
+.body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.chartSection {
+    padding: 16px 20px 8px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.tableWrapper {
+    flex: 1;
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.81rem;
+}
+
+.table thead tr {
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+}
+
+.table th {
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.77rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+
+.low { color: #dc2626; font-weight: 600; }
+.mid { color: #d97706; font-weight: 600; }
+.ok  { color: #16a34a; font-weight: 600; }

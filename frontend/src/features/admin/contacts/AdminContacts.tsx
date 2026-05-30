@@ -77,8 +77,8 @@ export function AdminContacts() {
         debouncedSearch || undefined,
       );
       setContacts(result.data);
-      setTotal(result.pagination.total);
-      setTotalPages(result.pagination.pages);
+      setTotal(result.pagination.total as number);
+      setTotalPages(result.pagination.pages as number);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al cargar consultas';
       setError(msg);

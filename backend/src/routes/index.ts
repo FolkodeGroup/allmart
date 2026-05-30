@@ -33,6 +33,7 @@ import publicFavoritesRouter from './public/favorites';
 import publicConfigRouter from './public/config';
 import publicContactsRouter from './public/contacts';
 import suppliersRouter from './admin/suppliers';
+import suppliersV2Router from './admin/suppliersV2';
 import contactsRouter from './admin/contacts';
 import { adminMiddleware } from '../middlewares/auth';
 
@@ -55,7 +56,7 @@ adminRouter.use('/low-stock-alerts', lowStockAlertsRouter);
 adminRouter.use('/out-of-stock-alerts', outOfStockAlertsRouter);
 adminRouter.use('/banners', bannersRouter);
 adminRouter.use('/reports', reportsRouter);
-adminRouter.use('/suppliers', suppliersRouter);
+adminRouter.use('/suppliers', suppliersV2Router);
 adminRouter.use('/contacts', contactsRouter);
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────

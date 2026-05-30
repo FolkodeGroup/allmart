@@ -20,6 +20,7 @@ export interface Product {
   sku: string;
   features?: string[];
   isFeatured?: boolean;
+  primarySupplierId?: string | null;
 }
 
 export interface Category {

@@ -13,6 +13,7 @@ import { requireRole } from '../../middlewares/permissions';
 import { UserRole } from '../../types';
 import variantsRouter from './products/variants';
 import imagesRouter from './products/images';
+import productSuppliersRouter from './productSuppliers';
 
 const router = Router();
 
@@ -21,10 +22,12 @@ router.use(authMiddleware);
 // ─── Subdominios ──────────────────────────────────────────────────────────────
 router.use('/:productId/variants', variantsRouter);
 router.use('/:productId/images',   imagesRouter);
+router.use('/:id/suppliers', productSuppliersRouter);
 
 // ─── CRUD productos ───────────────────────────────────────────────────────────
 router.get('/low-stock-count', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.lowStockCount);
 router.get('/',    requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.index);
+router.get('/:id/price-history', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.priceHistory);
 router.get('/:id', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.show);
 router.post('/export-pdf', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.exportCatalogPdf);
 router.post('/',   requireRole(UserRole.ADMIN), ctrl.create);

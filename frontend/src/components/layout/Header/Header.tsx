@@ -153,7 +153,7 @@ export function Header() {
               <Link to="/carrito" className={styles.iconBtn} aria-label="Carrito de compras">
                 <ShoppingCart size={19} strokeWidth={2.1} aria-hidden="true" />
                 <span className={styles.actionLabel}>Carrito</span>
-                <span className={styles.actionCount}>{totalItems > 0 ? totalItems : 0}</span>
+                {totalItems > 0 && (<span className={styles.actionCount}>{totalItems}</span>)}
               </Link>
             </div>
 

@@ -41,6 +41,21 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
   }
 
   const result = await prisma.$transaction(async (tx) => {
+    // Validar que todos los productos existan antes de crear la orden
+    const validatedItems = [];
+    for (const item of items) {
+      const product = await tx.product.findUnique({
+        where: { id: item.productId },
+        select: { id: true, name: true, stock: true },
+      });
+
+      if (!product) {
+        throw createError(`Producto con ID ${item.productId} no encontrado`, 404);
+      }
+
+      validatedItems.push({ ...item, product });
+    }
+
     const order = await tx.order.create({
       data: {
         customerFirstName: customer.firstName,
@@ -55,7 +70,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     });
 
     await tx.orderItem.createMany({
-      data: items.map((item) => ({
+      data: validatedItems.map((item) => ({
         orderId: order.id,
         productId: item.productId,
         productName: item.productName,
@@ -65,33 +80,27 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       })),
     });
 
-    for (const item of items) {
-      const product = await tx.product.findUnique({
-        where: { id: item.productId },
-        select: { id: true, name: true, stock: true },
+    for (const item of validatedItems) {
+      const product = item.product;
+      const stockBefore = product.stock;
+      const stockAfter = stockBefore - item.quantity;
+
+      await tx.product.update({
+        where: { id: product.id },
+        data: { stock: stockAfter },
       });
 
-      if (product) {
-        const stockBefore = product.stock;
-        const stockAfter = stockBefore - item.quantity;
-
-        await tx.product.update({
-          where: { id: product.id },
-          data: { stock: stockAfter },
+      if (stockAfter <= 0) {
+        await tx.lowStockAlert.create({
+          data: {
+            orderId: order.id,
+            productId: product.id,
+            productName: product.name,
+            quantitySold: item.quantity,
+            stockBefore,
+            stockAfter,
+          },
         });
-
-        if (stockAfter <= 0) {
-          await tx.lowStockAlert.create({
-            data: {
-              orderId: order.id,
-              productId: product.id,
-              productName: product.name,
-              quantitySold: item.quantity,
-              stockBefore,
-              stockAfter,
-            },
-          });
-        }
       }
     }
 
