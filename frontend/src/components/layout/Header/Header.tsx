@@ -73,7 +73,6 @@ export function Header() {
   const filteredResults = useProductSearch({
     query: debouncedQuery,
     products,
-    categories: allCategories,
   });
 
   useEffect(() => {

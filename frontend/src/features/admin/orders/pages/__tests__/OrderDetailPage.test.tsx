@@ -3,7 +3,6 @@
  * Tests unitarios para la página de detalle de pedidos.
  * Verifica carga, errores 404, y rendering del contenido.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -137,7 +136,7 @@ describe('OrderDetailPage', () => {
   });
 
   it('should render order data when loaded successfully', async () => {
-    (ordersService.fetchAdminOrderById as any).mockResolvedValue(mockOrder);
+    (ordersService.fetchAdminOrderById as unknown as { mockResolvedValue: (val: unknown) => void }).mockResolvedValue(mockOrder);
 
     render(
       <BrowserRouter>
@@ -171,7 +170,7 @@ describe('OrderDetailPage', () => {
   });
 
   it('should show back button to navigate to orders list', async () => {
-    (ordersService.fetchAdminOrderById as any).mockResolvedValue(mockOrder);
+    (ordersService.fetchAdminOrderById as unknown as { mockResolvedValue: (val: unknown) => void }).mockResolvedValue(mockOrder);
 
     render(
       <BrowserRouter>
@@ -205,7 +204,7 @@ describe('OrderDetailPage', () => {
   });
 
   it('should display items quantity when order is loaded', async () => {
-    (ordersService.fetchAdminOrderById as any).mockResolvedValue(mockOrder);
+    (ordersService.fetchAdminOrderById as unknown as { mockResolvedValue: (val: unknown) => void }).mockResolvedValue(mockOrder);
 
     render(
       <BrowserRouter>

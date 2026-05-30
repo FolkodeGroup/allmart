@@ -68,6 +68,35 @@
     user-select: none;
 }
 
+.filterTabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.filterTab {
+    flex: 1;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.filterTab:hover {
+    color: var(--color-text-primary);
+}
+
+.filterTabActive {
+    color: var(--color-accent, #6366f1);
+    border-bottom-color: var(--color-accent, #6366f1);
+}
+
 .newBtn {
     display: flex;
     align-items: center;

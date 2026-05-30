@@ -43,7 +43,8 @@ const AdminCategoryProducts = lazy(() => import('./features/admin/categories/Adm
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
 const BannersAdmin = lazy(() => import('./features/admin/banners/BannersAdmin').then(m => ({ default: m.BannersAdmin })));
-const LowStockAlerts = lazy(() => import('./features/admin/lowStockAlerts').then(m => ({ default: m.default })));
+const StockAlertsPage = lazy(() => import('./features/admin/lowStockAlerts').then(m => ({ default: m.StockAlertsPage })));
+const OutOfStockAlertsPage = lazy(() => import('./features/admin/outOfStockAlerts').then(m => ({ default: m.OutOfStockAlertsPage })));
 const AdminContacts = lazy(() => import('./features/admin/contacts').then(m => ({ default: m.AdminContacts })));
 
 const router = createBrowserRouter([
@@ -169,7 +170,17 @@ const router = createBrowserRouter([
         element: (
           <AdminRoute requiredPermission="orders.view">
             <Suspense fallback={<AdminLoadingFallback />}>
-              <LowStockAlerts />
+              <StockAlertsPage />
+            </Suspense>
+          </AdminRoute>
+        )
+      },
+      {
+        path: 'alertas-sin-stock',
+        element: (
+          <AdminRoute requiredPermission="orders.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <OutOfStockAlertsPage />
             </Suspense>
           </AdminRoute>
         )

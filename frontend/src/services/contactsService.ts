@@ -31,6 +31,12 @@ interface Contact {
   updatedAt: string;
 }
 
+interface Pagination {
+  total: number;
+  pages: number;
+  currentPage: number;
+}
+
 export const contactsService = {
   /**
    * Envía un mensaje de contacto desde el formulario público.
@@ -60,7 +66,7 @@ export const contactsService = {
     status?: string,
     isFlagged?: boolean,
     search?: string,
-  ): Promise<{ data: Contact[]; pagination: Record<string, unknown> }> {
+  ): Promise<{ data: Contact[]; pagination: Pagination }> {
     const params = new URLSearchParams();
     params.append('page', String(page));
     params.append('limit', String(limit));
@@ -68,7 +74,7 @@ export const contactsService = {
     if (isFlagged !== undefined) params.append('isFlagged', String(isFlagged));
     if (search) params.append('search', search);
 
-    const body = await apiFetch<ApiSuccess<{ data: Contact[]; pagination: Record<string, unknown> }>>(`/api/admin/contacts?${params.toString()}`);
+    const body = await apiFetch<ApiSuccess<{ data: Contact[]; pagination: Pagination }>>(`/api/admin/contacts?${params.toString()}`);
 
     if (!body.success) {
       throw new Error(body.message || 'Error al obtener contactos');

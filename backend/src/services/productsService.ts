@@ -484,7 +484,7 @@ type ProductQuery = {
 export async function getPublicProducts(query: ProductQuery) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
-  const where: Record<string, unknown> = { status: 'active', stock: { gt: 0 } };
+  const where: Record<string, unknown> = { status: 'active' };
 
   // ⭐ Featured
   if (typeof isFeatured === 'boolean') {

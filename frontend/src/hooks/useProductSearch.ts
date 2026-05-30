@@ -8,7 +8,7 @@ interface Params {
     categories: Category[];
 }
 
-export function useProductSearch({ query, products, categories }: Params) {
+export function useProductSearch({ query, products }: Omit<Params, 'categories'>) {
     const normalizedQuery = query.toLowerCase().trim();
 
     return useMemo(() => {
@@ -29,5 +29,5 @@ export function useProductSearch({ query, products, categories }: Params) {
 
             return nameMatch || categoryMatch || tagsMatch;
         });
-    }, [normalizedQuery, products, categories]);
+    }, [normalizedQuery, products]);
 }

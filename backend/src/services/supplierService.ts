@@ -36,23 +36,29 @@ export const supplierService = {
       ...(q ? { name: { contains: q, mode: 'insensitive' as const } } : {}),
     };
 
-    const [suppliers, total] = await Promise.all([
-      prisma.supplier.findMany({
-        where,
-        orderBy: { name: 'asc' },
-        skip,
-        take: limit,
-        include: {
-          _count: { select: { productSuppliers: { where: { isActive: true } } } },
+    const suppliers = await prisma.supplier.findMany({
+      where,
+      orderBy: { name: 'asc' },
+      skip,
+      take: limit,
+      include: {
+        productSuppliers: {
+          where: { isActive: true },
+          select: { id: true },
         },
-      }),
-      prisma.supplier.count({ where }),
-    ]);
+        _count: {
+          select: { productSuppliers: true },
+        },
+      },
+    });
+
+    const total = await prisma.supplier.count({ where });
 
     return {
       data: suppliers.map(s => ({
         ...s,
-        productCount: s._count.productSuppliers,
+        productCount: s.productSuppliers.length,
+        productSuppliers: undefined,
         _count: undefined,
       })),
       total,
@@ -67,11 +73,22 @@ export const supplierService = {
     const supplier = await prisma.supplier.findUnique({
       where: { id },
       include: {
-        _count: { select: { productSuppliers: { where: { isActive: true } } } },
+        productSuppliers: {
+          where: { isActive: true },
+          select: { id: true },
+        },
+        _count: {
+          select: { productSuppliers: true },
+        },
       },
     });
     if (!supplier) throw createError('Proveedor no encontrado', 404);
-    return { ...supplier, productCount: supplier._count.productSuppliers, _count: undefined };
+    return {
+      ...supplier,
+      productCount: supplier.productSuppliers.length,
+      productSuppliers: undefined,
+      _count: undefined,
+    };
   },
 
   // ── Create ───────────────────────────────────────────────────────────────────
