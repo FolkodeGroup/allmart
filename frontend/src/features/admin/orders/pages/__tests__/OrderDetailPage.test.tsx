@@ -53,11 +53,11 @@ vi.mock('react-hot-toast', () => ({
 }));
 
 vi.mock('../../components/OrderStatusBadge', () => ({
-  OrderStatusBadge: ({ status }: any) => <div>{status}</div>,
+  OrderStatusBadge: ({ status }: { status: string }) => <div>{status}</div>,
 }));
 
 vi.mock('../../components/OrderStatusSelector', () => ({
-  OrderStatusSelector: ({ value, onChange }: any) => (
+  OrderStatusSelector: ({ value, onChange }: { value: string; onChange: (val: string) => void }) => (
     <select value={value} onChange={(e) => onChange(e.target.value)}>
       <option>pendiente</option>
       <option>confirmado</option>
@@ -74,13 +74,13 @@ vi.mock('../../../../services/adminActivityLogService', () => ({
 }));
 
 vi.mock('../../../../components/ui/Button/Button', () => ({
-  Button: ({ children, onClick, ...props }: any) => (
+  Button: ({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) => (
     <button onClick={onClick} {...props}>{children}</button>
   ),
 }));
 
 vi.mock('../../../../components/ui/Tooltip/Tooltip', () => ({
-  Tooltip: ({ children }: any) => <div>{children}</div>,
+  Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const mockOrder: Order = {
@@ -112,17 +112,17 @@ describe('OrderDetailPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useParams as any).mockReturnValue({
+    (useParams as unknown as { mockReturnValue: (val: unknown) => void }).mockReturnValue({
       id: '550e8400-e29b-41d4-a716-446655440000',
     });
-    (useNavigate as any).mockReturnValue(mockNavigate);
-    (useAdminOrders as any).mockReturnValue({
+    (useNavigate as unknown as { mockReturnValue: (val: unknown) => void }).mockReturnValue(mockNavigate);
+    (useAdminOrders as unknown as { mockReturnValue: (val: unknown) => void }).mockReturnValue({
       getOrder: vi.fn(() => null),
     });
   });
 
   it('should render loading state initially', () => {
-    (ordersService.fetchAdminOrderById as any).mockImplementation(
+    (ordersService.fetchAdminOrderById as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     );
 
@@ -136,7 +136,7 @@ describe('OrderDetailPage', () => {
   });
 
   it('should render order data when loaded successfully', async () => {
-    (ordersService.fetchAdminOrderById as any).mockResolvedValue(mockOrder);
+    (ordersService.fetchAdminOrderById as unknown as { mockResolvedValue: (val: unknown) => void }).mockResolvedValue(mockOrder);
 
     render(
       <BrowserRouter>
@@ -153,7 +153,7 @@ describe('OrderDetailPage', () => {
   });
 
   it('should display 404 message when order not found', async () => {
-    (ordersService.fetchAdminOrderById as any).mockRejectedValue(
+    (ordersService.fetchAdminOrderById as unknown as { mockRejectedValue: (err: unknown) => void }).mockRejectedValue(
       new Error('404 - Pedido no encontrado')
     );
 
@@ -170,7 +170,7 @@ describe('OrderDetailPage', () => {
   });
 
   it('should show back button to navigate to orders list', async () => {
-    (ordersService.fetchAdminOrderById as any).mockResolvedValue(mockOrder);
+    (ordersService.fetchAdminOrderById as unknown as { mockResolvedValue: (val: unknown) => void }).mockResolvedValue(mockOrder);
 
     render(
       <BrowserRouter>
@@ -188,7 +188,7 @@ describe('OrderDetailPage', () => {
 
   it('should display error message on API failure', async () => {
     const errorMessage = 'Error de conexión con el servidor';
-    (ordersService.fetchAdminOrderById as any).mockRejectedValue(
+    (ordersService.fetchAdminOrderById as unknown as { mockRejectedValue: (err: unknown) => void }).mockRejectedValue(
       new Error(errorMessage)
     );
 
@@ -204,7 +204,7 @@ describe('OrderDetailPage', () => {
   });
 
   it('should display items quantity when order is loaded', async () => {
-    (ordersService.fetchAdminOrderById as any).mockResolvedValue(mockOrder);
+    (ordersService.fetchAdminOrderById as unknown as { mockResolvedValue: (val: unknown) => void }).mockResolvedValue(mockOrder);
 
     render(
       <BrowserRouter>

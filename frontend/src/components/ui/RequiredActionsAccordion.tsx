@@ -60,7 +60,7 @@ export default function RequiredActionsAccordion() {
 
   // ─── Render table row ───────────────────────────────────────────────────────
 
-  const renderTableRow = (order: any) => {
+  const renderTableRow = (order: typeof orders[0]) => {
     const statusBadgeVariantMap: Record<string, 'discount' | 'new' | 'outOfStock'> = {
       'pendiente': 'discount',
       'confirmado': 'new',

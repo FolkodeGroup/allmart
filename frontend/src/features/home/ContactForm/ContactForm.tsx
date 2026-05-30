@@ -47,8 +47,9 @@ export function ContactForm() {
 
       // Ocultar mensaje de éxito después de 5 segundos
       setTimeout(() => setSuccess(false), 5000);
-    } catch (err: any) {
-      setError(err.message || 'Ocurrió un error al enviar el mensaje. Intenta de nuevo.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Ocurrió un error al enviar el mensaje. Intenta de nuevo.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

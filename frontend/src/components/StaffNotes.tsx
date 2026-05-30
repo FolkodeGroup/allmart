@@ -119,27 +119,25 @@ const NoteCard = memo(({
     }, [onCancelDelete]);
 
     return (
-        <div
+        <button
             className={`${styles['sticky-note']} ${isExpanded ? styles['expanded'] : ''}`}
-            role="button"
-            tabIndex={0}
+            type="button"
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             onClick={handleCardClick}
             onKeyDown={handleKeyDown}
+            aria-pressed={isExpanded}
         >
             {isEditing ? (
                 <form
                     onSubmit={handleEditSubmit}
                     className={styles['edit-form']}
-                    onClick={(e) => e.stopPropagation()}
                 >
                     <textarea
                         value={editContent}
                         onChange={(e) => onEditContentChange(e.target.value)}
                         rows={3}
                         className={styles['edit-textarea']}
-                        autoFocus
                         aria-label="Editar nota"
                     />
                     <div className={styles['edit-buttons']}>
@@ -214,7 +212,7 @@ const NoteCard = memo(({
                     ) : null}
                 </>
             )}
-        </div>
+        </button>
     );
 });
 

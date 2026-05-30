@@ -198,10 +198,12 @@ function ReviewForm({
       </p>
 
       <div className={styles.formGroup}>
-        <label className={styles.formLabel}>
+        <label htmlFor="star-rating" className={styles.formLabel}>
           Tu puntuación <span className={styles.required}>*</span>
         </label>
-        <StarPicker value={form.rating} onChange={(v) => set('rating', v)} />
+        <div id="star-rating">
+          <StarPicker value={form.rating} onChange={(v) => set('rating', v)} />
+        </div>
       </div>
 
       <div className={styles.formRow}>

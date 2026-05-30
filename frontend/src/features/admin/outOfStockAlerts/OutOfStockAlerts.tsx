@@ -84,7 +84,7 @@ export const OutOfStockAlerts: React.FC = () => {
       <div className={styles.alertsList}>
         {alertsData.map((alert) => (
           <div key={alert.productId} className={styles.alertCard}>
-            <div className={styles.cardHeader} onClick={() => toggleProductExpanded(alert.productId)}>
+            <button className={styles.cardHeader} onClick={() => toggleProductExpanded(alert.productId)} type="button" aria-expanded={expandedProducts.has(alert.productId)}>
               <div className={styles.productInfo}>
                 <h3>{alert.productName}</h3>
                 <div className={styles.metadata}>
@@ -102,10 +102,10 @@ export const OutOfStockAlerts: React.FC = () => {
                   <span className={styles.value}>{alert.totalQuantityOrdered} unidades</span>
                 </div>
               </div>
-              <button className={styles.expandBtn}>
+              <span className={styles.expandBtn} aria-hidden="true">
                 {expandedProducts.has(alert.productId) ? '▼' : '▶'}
-              </button>
-            </div>
+              </span>
+            </button>
 
             {expandedProducts.has(alert.productId) && (
               <div className={styles.cardContent}>

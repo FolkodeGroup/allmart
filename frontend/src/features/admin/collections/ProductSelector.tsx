@@ -28,7 +28,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     if (initialProducts.length > 0 && selectedProducts.length === 0) {
       setSelectedProducts(initialProducts);
     }
-  }, [initialProducts]);
+  }, [initialProducts, selectedProducts]);
 
   const fetchProducts = useCallback(async (query: string) => {
     setLoading(true);

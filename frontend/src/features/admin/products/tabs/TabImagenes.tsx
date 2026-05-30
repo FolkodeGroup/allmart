@@ -100,8 +100,10 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                         Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                     </p>
                     <div className={styles.uploadSection}>
-                        <label className={styles.uploadLabel}>
+                        <label htmlFor="product-images" className={styles.uploadLabel}>
+                            <span className="sr-only">Agregar imágenes del producto</span>
                             <input
+                                id="product-images"
                                 type="file"
                                 accept="image/*"
                                 multiple
