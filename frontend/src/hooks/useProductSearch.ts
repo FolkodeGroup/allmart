@@ -8,7 +8,7 @@ interface Params {
     categories: Category[];
 }
 
-export function useProductSearch({ query, products, _categories }: Omit<Params, 'categories'> & { _categories?: Params['categories'] }) {
+export function useProductSearch({ query, products }: Omit<Params, 'categories'>) {
     const normalizedQuery = query.toLowerCase().trim();
 
     return useMemo(() => {
