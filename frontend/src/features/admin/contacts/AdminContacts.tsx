@@ -36,7 +36,7 @@ export function AdminContacts() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(0)
   // Filters
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [searchQuery, setSearchQuery] = useState('');
