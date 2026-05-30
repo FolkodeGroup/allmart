@@ -55,13 +55,6 @@ const navItems: NavItem[] = [
         permission: null,
         badge: null,
       },
-      {
-        label: "⚠️ Sin stock",
-        to: "/admin/alertas-sin-stock",
-        icon: "🚨",
-        permission: null,
-        badge: "outOfStock",
-      },
     ],
   },
   {
@@ -70,6 +63,22 @@ const navItems: NavItem[] = [
     icon: "🛒",
     permission: null,
     badge: "pending",
+    children: [
+      {
+        label: "Todos los pedidos",
+        to: "/admin/pedidos",
+        icon: "🛒",
+        permission: null,
+        badge: "pending",
+      },
+      {
+        label: "⚠️ Sin stock",
+        to: "/admin/alertas-sin-stock",
+        icon: "🚨",
+        permission: null,
+        badge: "outOfStock",
+      },
+    ],
   },
   {
     label: "Marketing",
