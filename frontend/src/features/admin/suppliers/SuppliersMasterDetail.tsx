@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, Edit2, Trash2, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, Edit2, PowerOff, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     BarChart, Bar,
@@ -34,7 +34,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     const [suppliers, setSuppliers] = useState<AdminSupplierV2[]>([]);
     const [loadingList, setLoadingList] = useState(true);
     const [search, setSearch] = useState('');
-    const [filterActive, setFilterActive] = useState(false);
+    const [filterTab, setFilterTab] = useState<'active' | 'inactive'>('active');
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     // Right panel state
@@ -92,7 +92,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     // ── Filtered supplier list ──────────────────────────────────────────────
     const filteredSuppliers = useMemo(() => {
         let list = suppliers;
-        if (filterActive) list = list.filter(s => s.isActive);
+        // Filter by status based on selected tab
+        list = filterTab === 'active' ? list.filter(s => s.isActive) : list.filter(s => !s.isActive);
         if (search.trim()) {
             const q = search.toLowerCase();
             list = list.filter(s =>
@@ -102,7 +103,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             );
         }
         return list;
-    }, [suppliers, search, filterActive]);
+    }, [suppliers, search, filterTab]);
 
     const selectedSupplier = useMemo(() => suppliers.find(s => s.id === selectedId) ?? null, [suppliers, selectedId]);
 
@@ -214,10 +215,22 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                             onChange={e => setSearch(e.target.value)}
                         />
                     </div>
-                    <label className={styles.filterLabel}>
-                        <input type="checkbox" checked={filterActive} onChange={e => setFilterActive(e.target.checked)} />
-                        Solo activos
-                    </label>
+                    <div className={styles.filterTabs}>
+                        <button
+                            className={`${styles.filterTab} ${filterTab === 'active' ? styles.filterTabActive : ''}`}
+                            onClick={() => setFilterTab('active')}
+                            type="button"
+                        >
+                            Activos
+                        </button>
+                        <button
+                            className={`${styles.filterTab} ${filterTab === 'inactive' ? styles.filterTabActive : ''}`}
+                            onClick={() => setFilterTab('inactive')}
+                            type="button"
+                        >
+                            Inactivos
+                        </button>
+                    </div>
                     <button className={styles.newBtn} onClick={onNew} type="button">
                         <Plus size={14} /> Nuevo proveedor
                     </button>
@@ -256,8 +269,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                         <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); onEdit(s.id); }} title="Editar">
                                             <Edit2 size={13} />
                                         </button>
-                                        <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); setDeleteId(s.id); }} title="Eliminar">
-                                            <Trash2 size={13} />
+                                        <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); setDeleteId(s.id); }} title="Desactivar proveedor">
+                                            <PowerOff size={13} />
                                         </button>
                                     </div>
                                 </div>
@@ -502,11 +515,11 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                 <div className={styles.overlay} onClick={() => setDeleteId(null)} role="presentation" onKeyDown={(e) => e.key === 'Escape' && setDeleteId(null)}>
                     {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
                     <div className={styles.confirmModal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="delete-confirmation-title">
-                        <h4 id="delete-confirmation-title">¿Eliminar proveedor?</h4>
-                        <p>Esta acción desactivará el proveedor. No se puede deshacer si tiene productos activos.</p>
+                        <h4 id="delete-confirmation-title">¿Desactivar proveedor?</h4>
+                        <p>Esta acción desactivará el proveedor. Podrás reactivarlo después si es necesario.</p>
                         <div className={styles.confirmActions}>
                             <button type="button" className={styles.btnSecondary} onClick={() => setDeleteId(null)}>Cancelar</button>
-                            <button type="button" className={styles.btnDanger} onClick={confirmDelete}>Eliminar</button>
+                            <button type="button" className={styles.btnDanger} onClick={confirmDelete}>Desactivar</button>
                         </div>
                     </div>
                 </div>
