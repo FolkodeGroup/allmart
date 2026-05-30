@@ -49,7 +49,7 @@ export function ProductRankingList({
             <div className={styles.reportCardModernStats}>
                 <div className={styles.statModernBlock}>
                     <span className={styles.statModernLabel}>Ventas</span>
-                    <span className={styles.statModernValue}>{product.qty} und.</span>
+                    <span className={styles.statModernUnit}>{product.qty} und.</span>
                 </div>
                 <div className={styles.statModernBlock}>
                     <span className={styles.statModernLabel}>Ingresos</span>
