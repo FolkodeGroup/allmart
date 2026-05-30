@@ -618,7 +618,7 @@
 .productNameModern {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #222;
+  color: var(--color-text-primary, #222);
   line-height: 1.2;
   flex: 1;
   min-width: 0;
@@ -642,14 +642,19 @@
 
 .statModernLabel {
   font-size: 0.75rem;
-  color: #888;
+  color: #767676;
   font-weight: 500;
 }
 
-.statModernValue {
+.statModernValue,
+.statModernUnit {
   font-size: 1.01rem;
   font-weight: 600;
-  color: #222;
+  color: var(--color-text-primary, #222);
+}
+
+.statModernValue:nth-child(1) {
+  color: var(--color-primary, #769282);
 }
 
 .progressBarModern {
@@ -1677,6 +1682,7 @@ ALLMART — ADMIN REPORTS
   overflow: auto;
   max-height: 500px;
   border-radius: 12px;
+  border: 1px solid var(--color-border);
 }
 
 /* Tabla base */
@@ -1684,12 +1690,14 @@ ALLMART — ADMIN REPORTS
   width: 100%;
   border-collapse: collapse;
   min-width: 650px;
-  background: #fff;
+  background: var(--color-bg-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
 }
 
 /* Header */
 .table thead {
-  background: #f8f7f5;
+  background: var(--color-bg-secondary);
 }
 
 .table th {
@@ -1697,34 +1705,34 @@ ALLMART — ADMIN REPORTS
   padding: 12px 14px;
   font-size: 12px;
   font-weight: 600;
-  color: #666;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  border-bottom: 1px solid #e5e2dd;
+  color: var(--color-text-tertiary);
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* Filas */
 .table td {
   padding: 12px 14px;
   font-size: 13px;
-  color: #333;
-  border-bottom: 1px solid #eee;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
   vertical-align: top;
 }
 
 /* Hover suave */
 .table tbody tr {
+  border-bottom: 1px solid var(--color-border-light);
   transition: background 0.2s ease;
 }
 
 .table tbody tr:hover {
-  background: #fafafa;
+  background: var(--color-bg-secondary);
 }
 
 /* Primera columna (fecha) */
 .table td:first-child {
   font-weight: 500;
-  color: #444;
   white-space: nowrap;
 }
 
@@ -1737,7 +1745,7 @@ ALLMART — ADMIN REPORTS
 
 /* Productos */
 .table td:nth-child(3) {
-  color: #555;
+  color: var(--color-text-primary);
   line-height: 1.4;
 }
 
@@ -2302,4 +2310,3 @@ ALLMART — ADMIN REPORTS
   height: 44px;
   width: 100%;
 }
-

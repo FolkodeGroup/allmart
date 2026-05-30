@@ -13,6 +13,7 @@ import { AdminImagesProvider } from '../context/AdminImagesContext';
 import { AdminOrdersProvider } from '../context/AdminOrdersContext';
 import { DashboardLayoutProvider } from '../context/DashboardLayoutContext';
 import { UnsavedChangesProvider } from '../context/UnsavedChangesContext';
+import { AdminContactProvider } from '../context/AdminContactContext';
 
 interface Props {
   children: React.ReactNode;
@@ -31,7 +32,9 @@ export const AdminProvidersWrapper: React.FC<Props> = ({ children }) => {
             <AdminVariantsProvider>
               <AdminImagesProvider>
                 <AdminOrdersProvider>
-                  {children}
+                  <AdminContactProvider>
+                    {children}
+                  </AdminContactProvider>
                 </AdminOrdersProvider>
               </AdminImagesProvider>
             </AdminVariantsProvider>

@@ -5,6 +5,7 @@ import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useAdminOrders } from "../../context/AdminOrdersContext";
 import { useAdminProducts } from "../../context/useAdminProductsContext";
+import { useAdminContact } from "../../context/AdminContactContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
 import { UserProfileCard } from "../../components/layout/AdminSidebar/UserProfileCard";
 import { Button } from '../../components/ui/Button/Button';
@@ -15,7 +16,7 @@ import { ModalConfirm } from "../../components/ui/ModalConfirm/ModalConfirm";
 import type { Permission } from "../../utils/permissions";
 import { getOutOfStockAlertCount } from "../../features/admin/outOfStockAlerts/services/outOfStockAlertsService";
 
-type NavBadge = "pending" | "lowStock" | "outOfStock" | null;
+type NavBadge = "pending" | "lowStock" | "outOfStock" | "unreadContacts" | null;
 
 interface NavItem {
   label: string;
@@ -129,7 +130,7 @@ const navItems: NavItem[] = [
     to: "/admin/contactos",
     icon: "💬",
     permission: "contacts.view",
-    badge: null,
+    badge: "unreadContacts",
   },
 ];
 
@@ -157,6 +158,7 @@ export function AdminLayout() {
     confirmNavigation,
     cancelNavigation,
   } = useUnsavedChanges();
+  const { getUnreadContactsCount } = useAdminContact();
 
   // Out of stock alerts count
   const [outOfStockCount, setOutOfStockCount] = useState(0);
@@ -176,7 +178,6 @@ export function AdminLayout() {
     const interval = setInterval(loadOutOfStockCount, 30000);
     return () => clearInterval(interval);
   }, []);
-
 
 
   // Dark mode state
@@ -233,6 +234,7 @@ export function AdminLayout() {
     if (badge === 'pending') return getPendingOrdersCount();
     if (badge === 'lowStock') return getLowStockCount();
     if (badge === 'outOfStock') return outOfStockCount;
+    if (badge === 'unreadContacts') return getUnreadContactsCount();
     return null;
   };
 
