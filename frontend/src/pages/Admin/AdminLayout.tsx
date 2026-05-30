@@ -13,8 +13,9 @@ import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 import { ModalConfirm } from "../../components/ui/ModalConfirm/ModalConfirm";
 import type { Permission } from "../../utils/permissions";
+import { getOutOfStockAlertCount } from "../../features/admin/outOfStockAlerts/services/outOfStockAlertsService";
 
-type NavBadge = "pending" | "lowStock" | null;
+type NavBadge = "pending" | "lowStock" | "outOfStock" | null;
 
 interface NavItem {
   label: string;
@@ -53,6 +54,13 @@ const navItems: NavItem[] = [
         icon: "🏷️",
         permission: null,
         badge: null,
+      },
+      {
+        label: "⚠️ Sin stock",
+        to: "/admin/alertas-sin-stock",
+        icon: "🚨",
+        permission: null,
+        badge: "outOfStock",
       },
     ],
   },
@@ -141,6 +149,25 @@ export function AdminLayout() {
     cancelNavigation,
   } = useUnsavedChanges();
 
+  // Out of stock alerts count
+  const [outOfStockCount, setOutOfStockCount] = useState(0);
+
+  useEffect(() => {
+    const loadOutOfStockCount = async () => {
+      try {
+        const count = await getOutOfStockAlertCount();
+        setOutOfStockCount(count);
+      } catch (error) {
+        console.error('Error loading out of stock count:', error);
+      }
+    };
+
+    loadOutOfStockCount();
+    // Reload every 30 seconds
+    const interval = setInterval(loadOutOfStockCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
 
 
   // Dark mode state
@@ -196,6 +223,7 @@ export function AdminLayout() {
   const getBadgeCount = (badge: NavBadge) => {
     if (badge === 'pending') return getPendingOrdersCount();
     if (badge === 'lowStock') return getLowStockCount();
+    if (badge === 'outOfStock') return outOfStockCount;
     return null;
   };
 
