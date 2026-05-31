@@ -1803,7 +1803,43 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #998: Lo que se hizo: | 2026-05-25 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #997: 🔄 Registrar puntaje de gestión | 2026-05-25 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #996: 967 reorganización de la sección stock y productos en el dashboard | 2026-05-25 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1033: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1032: 987 eliminar vista de colecciones del admin y generar dinámicamente por ventas | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1031: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1030: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1027: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1026: 974 mejorar formato y legibilidad de archivos exportados csv excel pdf en la vista de pedidos | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1023: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1020: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1018: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1017: 979 crear sección de contáctanos en el home | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1016: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1015: fix: actualizar workflow a Node.js 24 (evitar deprecation warnings) | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1014: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1013: fix: mover nodemailer a dependencies de produccion | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1012: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1011: 🔄 Actualización automática de puntajes semanal | 2026-05-26 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1010: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1033: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1032: 987 eliminar vista de colecciones del admin y generar dinámicamente por ventas | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1031: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1030: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1029: 990 descarga de pdf en reportes con tabla de pedidos y estilo allmart | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1028: Se implementa aplicacion de  estilos para modos claro/oscuro en la vi… | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1027: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1026: 974 mejorar formato y legibilidad de archivos exportados csv excel pdf en la vista de pedidos | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1023: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1021: Se implementa nueva sección "Consultas" en el Admin para visualizar m… | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1020: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1019: Co-authored-by: Dario Gimenez <dgimenez.developer@gmail.com> | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1018: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1017: 979 crear sección de contáctanos en el home | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1016: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1015: fix: actualizar workflow a Node.js 24 (evitar deprecation warnings) | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1014: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1013: fix: mover nodemailer a dependencies de produccion | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1012: 🔄 Registrar puntaje de gestión | 2026-05-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1011: 🔄 Actualización automática de puntajes semanal | 2026-05-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1010: 🔄 Registrar puntaje de gestión | 2026-05-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1009: input de precio desabilitado para promociones tipo BOGO (Buy One Get One)  | 2026-05-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1008: Se implamenta validacion de rango de valor para descuento porcentual … | 2026-05-26 |
@@ -1812,21 +1848,40 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1005: Resultados: | 2026-05-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1004: fix en diseño de acciones rapidas en categorias | 2026-05-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1003: fix | 2026-05-26 |
-| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1011: 🔄 Actualización automática de puntajes semanal | 2026-05-26 |
-| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1015: fix: actualizar workflow a Node.js 24 (evitar deprecation warnings) | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1015: fix: actualizar workflow a Node.js 24 (evitar deprecation warnings) | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1017: 979 crear sección de contáctanos en el home | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1021: Se implementa nueva sección "Consultas" en el Admin para visualizar m… | 2026-05-26 |
 | FedericoPaal | 3 | Creación de issue | Issue #1025: Aplicar estilos para modos claro/oscuro en la vista de Proveedores del ADMIN | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1026: 974 mejorar formato y legibilidad de archivos exportados csv excel pdf en la vista de pedidos | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1028: Se implementa aplicacion de  estilos para modos claro/oscuro en la vi… | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1029: 990 descarga de pdf en reportes con tabla de pedidos y estilo allmart | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1032: 987 eliminar vista de colecciones del admin y generar dinámicamente por ventas | 2026-05-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1034: 989 desplegable dinámico para asociar categorías y productos a un banner | 2026-05-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1024: Aplicar estilos para modos claro/oscuro en la vista de Contactanos del ADMIN | 2026-05-26 |
+| FedericoPaal | 3 | Creación de issue | Issue #1022: Habilitar buscador de productos en el Home | 2026-05-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1039: 🔄 Registrar puntaje de gestión | 2026-05-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1035: 🔄 Registrar puntaje de gestión | 2026-05-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1038: implementación de modal de confirmación para el cierre de sesión | 2026-05-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1037: 1022 habilitar buscador de productos en el home | 2026-05-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1036: Se aplican estilos para modos claro/oscuro en la vista de Proveedores… | 2026-05-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1035: 🔄 Registrar puntaje de gestión | 2026-05-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1034: 989 desplegable dinámico para asociar categorías y productos a un banner | 2026-05-27 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1046: Adaptar productos más vendidos a modo claro y oscuro | 2026-05-27 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1047: fix url de etiqueta link en CartPage.tsx | 2026-05-28 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1048: fix render de badge | 2026-05-28 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1049: 1043 alerta de stock crítico filtrar solo productos con stock bajo | 2026-05-28 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1050: 1042 campos obligatorios en proveedores | 2026-05-28 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1056: 1045 badge de notificación en consultas del sidebar | 2026-05-30 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1057: 1044 renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-30 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1045: Badge de notificación en consultas del sidebar | 2026-05-27 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1044: Renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-27 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1043: ALERTA DE STOCK CRÍTICO: FILTRAR SOLO PRODUCTOS CON STOCK BAJO | 2026-05-27 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1042: Campos obligatorios en proveedores | 2026-05-27 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1041: Ocultar badge de notificación en el Carrito de Compras cuando no hay productos | 2026-05-27 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1040: Redirección a la información del producto desde el Carrito de Compras | 2026-05-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1054: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1053: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1052: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1051: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1054: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1053: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1052: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1051: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1050: 1042 campos obligatorios en proveedores | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1049: 1043 alerta de stock crítico filtrar solo productos con stock bajo | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1048: fix render de badge | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1047: fix url de etiqueta link en CartPage.tsx | 2026-05-28 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1039: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1059: 🔄 Registrar puntaje de gestión | 2026-05-30 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1058: 🔄 Registrar puntaje de gestión | 2026-05-30 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1059: 🔄 Registrar puntaje de gestión | 2026-05-30 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1058: 🔄 Registrar puntaje de gestión | 2026-05-30 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1057: 1044 renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-30 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1056: 1045 badge de notificación en consultas del sidebar | 2026-05-30 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1055: estilo ajustado | 2026-05-30 |
