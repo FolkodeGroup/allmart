@@ -1885,3 +1885,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1057: 1044 renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-30 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1056: 1045 badge de notificación en consultas del sidebar | 2026-05-30 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1055: estilo ajustado | 2026-05-30 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1060: 🔄 Actualización automática de puntajes semanal | 2026-06-02 |
