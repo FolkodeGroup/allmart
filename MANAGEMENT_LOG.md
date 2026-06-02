@@ -1830,3 +1830,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1050: 1042 campos obligatorios en proveedores | 2026-05-28 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1056: 1045 badge de notificación en consultas del sidebar | 2026-05-30 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1057: 1044 renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-30 |
+| FedericoPaal | 3 | Creación de issue | Issue #1070: Mostrar los atributos de las variantes seleccionadas en las líneas de producto dentro de la vista del Carrito. | 2026-06-02 |
