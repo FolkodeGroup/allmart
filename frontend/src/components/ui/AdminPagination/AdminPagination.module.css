@@ -1,0 +1,74 @@
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) 0;
+}
+
+.pageBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    border: 1.5px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-bg-primary);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+    min-height: 36px;
+    min-width: 36px;
+    justify-content: center;
+}
+
+.pageBtn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-primary));
+}
+
+.pageBtn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.pageBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pageBtn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.pageActive {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-neutral-light);
+    font-weight: var(--font-bold);
+}
+
+.pageActive:hover {
+    background: var(--color-primary-dark, #5a7a6a) !important;
+    border-color: var(--color-primary-dark, #5a7a6a) !important;
+    color: var(--color-neutral-light) !important;
+}
+
+.pageNumbers {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.ellipsis {
+    padding: 0 4px;
+    color: var(--color-text-tertiary);
+    align-self: center;
+    font-size: var(--text-sm);
+    user-select: none;
+}

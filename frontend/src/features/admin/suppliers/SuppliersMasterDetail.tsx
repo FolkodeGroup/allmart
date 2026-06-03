@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, Edit2, PowerOff, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -26,13 +26,14 @@ type TabId = 'chart' | 'table' | 'analysis';
 type RangeId = 7 | 30 | 90;
 
 interface SuppliersMasterDetailProps {
+    suppliers: AdminSupplierV2[];
+    loading: boolean;
     onNew: () => void;
     onEdit: (id: string) => void;
+    onDeleted: () => void;
 }
 
-export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailProps) {
-    const [suppliers, setSuppliers] = useState<AdminSupplierV2[]>([]);
-    const [loadingList, setLoadingList] = useState(true);
+export function SuppliersMasterDetail({ suppliers, loading, onNew, onEdit, onDeleted }: SuppliersMasterDetailProps) {
     const [search, setSearch] = useState('');
     const [filterTab, setFilterTab] = useState<'active' | 'inactive'>('active');
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -51,19 +52,6 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     // Sort
     const [sortKey, setSortKey] = useState<keyof SupplierProductEntry>('productName');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-
-    // ── Load suppliers ──────────────────────────────────────────────────────
-    const loadSuppliers = useCallback(async () => {
-        setLoadingList(true);
-        try {
-            const result = await suppliersAdminService.listSuppliers({ limit: 200 });
-            setSuppliers(result?.data ?? []);
-        } finally {
-            setLoadingList(false);
-        }
-    }, []);
-
-    useEffect(() => { loadSuppliers(); }, [loadSuppliers]);
 
     // Auto-select first supplier
     useEffect(() => {
@@ -185,7 +173,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         try {
             await suppliersAdminService.deleteSupplierV2(deleteId);
             if (selectedId === deleteId) setSelectedId(null);
-            await loadSuppliers();
+            onDeleted();
         } finally {
             setDeleteId(null);
         }
@@ -238,7 +226,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
                 {/* Supplier list */}
                 <div className={styles.supplierList}>
-                    {loadingList ? (
+                    {loading ? (
                         Array.from({ length: 5 }).map((_, i) => (
                             <div key={i} className={styles.supplierSkeleton} />
                         ))
@@ -534,5 +522,6 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                 />
             )}
         </div>
+
     );
 }

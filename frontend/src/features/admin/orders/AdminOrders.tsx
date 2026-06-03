@@ -37,7 +37,7 @@ import { OrdersFiltersBar } from './components/OrdersFiltersBar';
 import { useOrdersFilters } from './hooks/useOrdersFilters';
 import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
-
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 /**
  * MOCK_ORDERS — datos de ejemplo para desarrollo local.
  * Reemplazar por el fetch real cuando el backend esté disponible
@@ -69,6 +69,7 @@ function AdminOrders() {
   // `page` determina qué página se solicita al backend.
   // PAGE_SIZE define cuántos registros por página.
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1); // Si el backend devuelve totalPages, actualizarlo en fetchOrders
   const PAGE_SIZE = 10;
 
   // IDs de pedidos seleccionados para acciones masivas
@@ -186,6 +187,7 @@ function AdminOrders() {
       const normalized = res.data.map(mapApiOrderToOrder);
 
       // reset=true reemplaza la lista; reset=false acumula (para load more)
+      setTotalPages(res.totalPages); // Si el backend devuelve totalPages, actualizarlo
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
     } catch (e: unknown) {
       // Ignorar errores de abort; solo mostrar toast si fue un error real
@@ -199,14 +201,14 @@ function AdminOrders() {
   useEffect(() => {
     fetchOrders(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, debouncedFilters]);
+  }, [token, debouncedFilters, page]);
 
   // Cargar más cuando el usuario avanza de página (solo si page > 1)
-  useEffect(() => {
+  /*useEffect(() => {
     if (page === 1) return;
     fetchOrders(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page]);*/
 
   // Helpers selección múltiple
   // ── Selección múltiple ──────────────────────────────────────────
@@ -564,41 +566,12 @@ function AdminOrders() {
             Al cambiar de página, el useEffect de fetchOrders(false) se dispara
             para cargar la siguiente página desde el backend.
           */}
-          <nav className={styles.paginationWrap} aria-label="Paginación de pedidos">
-            <button
-              className={styles.paginationBtn}
-              type="button"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <span className={styles.paginationBtnIcon}>←</span> Anterior
-            </button>
-            <div className={styles.paginationPages}>
-              {Array.from({ length: Math.ceil(orders.length / PAGE_SIZE) || 1 }).map((_, i) => (
-                <button
-                  key={i + 1}
-                  className={
-                    page === i + 1
-                      ? `${styles.paginationPage} ${styles.paginationPageActive}`
-                      : styles.paginationPage
-                  }
-                  type="button"
-                  onClick={() => setPage(i + 1)}
-                  aria-current={page === i + 1 ? 'page' : undefined}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              className={styles.paginationBtn}
-              type="button"
-              onClick={() => setPage(p => Math.min(Math.ceil(orders.length / PAGE_SIZE) || 1, p + 1))}
-              disabled={page === (Math.ceil(orders.length / PAGE_SIZE) || 1)}
-            >
-              Siguiente <span className={styles.paginationBtnIcon}>→</span>
-            </button>
-          </nav>
+          <AdminPagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            ariaLabel="Paginación de pedidos"
+          />
 
           {/* ── Toolbar de acciones masivas ── */}
           {/*

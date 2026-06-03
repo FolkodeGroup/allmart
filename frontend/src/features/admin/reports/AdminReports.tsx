@@ -11,7 +11,7 @@ import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarnin
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
-import { Pagination } from './components/Pagination';
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { Suspense } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
@@ -755,13 +755,11 @@ export function AdminReports() {
                     Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
                   </p>
                 )}
-                <Pagination
+                <AdminPagination
                   page={page}
-                  pageSize={pageSize}
-                  total={filteredOrdersTable.length}
+                  totalPages={Math.ceil(filteredOrdersTable.length / pageSize) || 1}
                   onPageChange={setPage}
-                  onPageSizeChange={setPageSize}
-                  pageSizeOptions={[5, 10, 20, 50, 100]}
+                  ariaLabel="Paginación de pedidos del reporte"
                 />
               </>
             )}
