@@ -14,13 +14,13 @@ const ACTION_CONFIG: Record<
   string,
   { icon: string; label: string; tagBg: string; tagColor: string }
 > = {
-  create: { icon: "🛒", label: "Nuevo", tagBg: "#E6F1FB", tagColor: "#0C447C" },
-  edit: { icon: "✏️", label: "Edición", tagBg: "#EAF3DE", tagColor: "#27500A" },
-  delete: { icon: "🗑️", label: "Eliminado", tagBg: "#FCEBEB", tagColor: "#791F1F" },
-  order: { icon: "🛒", label: "Pedido", tagBg: "#E6F1FB", tagColor: "#0C447C" },
-  user: { icon: "👤", label: "Usuario", tagBg: "#EEEDFE", tagColor: "#3C3489" },
-  alert: { icon: "⚠️", label: "Alerta", tagBg: "#FAEEDA", tagColor: "#633806" },
-  default: { icon: "📋", label: "Acción", tagBg: "#F1EFE8", tagColor: "#444441" },
+  create: { icon: "", label: "Nuevo", tagBg: "var(--color-primary)", tagColor: "#fff" },
+  edit: { icon: "", label: "Edición", tagBg: "var(--color-accent-dark)", tagColor: "var(--color-text-inverse)" },
+  delete: { icon: "", label: "Eliminado", tagBg: "var(--color-error-mode)", tagColor: "#fff" },
+  order: { icon: "", label: "Pedido", tagBg: "var(--color-secondary)", tagColor: "#fff" },
+  user: { icon: "", label: "Usuario", tagBg: "var(--color-tertiary)", tagColor: "#fff" },
+  alert: { icon: "", label: "Alerta", tagBg: "var(--color-warning-mode)", tagColor: "#fff" },
+  default: { icon: "", label: "Acción", tagBg: "var(--color-bg-secondary)", tagColor: "var(--color-text-tertiary)" },
 };
 
 function getConfig(action: string) {
@@ -145,7 +145,7 @@ export function ActivityFeed({
                 <th>Descripción</th>
                 <th>Usuario</th>
                 <th>Tiempo</th>
-                <th></th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -171,7 +171,7 @@ export function ActivityFeed({
                         aria-label="Eliminar este evento"
                         title="Eliminar"
                       >
-                        ✕
+                        ELIMINAR
                       </button>
                     </td>
                   </tr>

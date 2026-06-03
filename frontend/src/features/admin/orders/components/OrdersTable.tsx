@@ -59,9 +59,9 @@ export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersT
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Fecha</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Cliente</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Productos</th>
-            <th style={{ textAlign: 'right', padding: '18px 20px' }}>Total</th>
+            <th style={{ textAlign: 'left', padding: '18px 20px' }}>Total</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Estado</th>
-            <th style={{ width: 80 }}></th>
+            <th style={{ textAlign: 'left', padding: '18px 20px', width: 80 }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -175,18 +175,18 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
       </td>
 
       {/* ID truncado a 8 caracteres para legibilidad */}
-      <td style={{ padding: '16px 20px', fontWeight: 700, fontSize: 17, color: '#2563eb', letterSpacing: 0.5 }}>
+      <td className={styles.tdOrder} >
         #{formatOrderCode(order.id)}
       </td>
-      <td style={{ padding: '16px 20px', color: '#64748b', fontSize: 15 }}>{formatDate(order.createdAt)}</td>
-      <td style={{ padding: '16px 20px' }}>
+      <td className={styles.tdDate}>{formatDate(order.createdAt)}</td>
+      <td className={styles.tdCustomer}>
         <div className={styles.customerTd}>{order.customer.firstName} {order.customer.lastName}</div>
-        <div style={{ color: '#64748b', fontSize: 14 }}>{order.customer.email}</div>
+        <div className={styles.tdEmail}>{order.customer.email}</div>
       </td>
-      <td style={{ padding: '16px 20px', color: '#334155', fontSize: 15 }}>
+      <td className={styles.tdProducts}>
         {totalQty} ítem{totalQty !== 1 ? 's' : ''}
       </td>
-      <td style={{ padding: '16px 20px', textAlign: 'right', fontWeight: 700, fontSize: 16, color: '#059669' }}>
+      <td className={styles.tdTotal} >
         {formatPrice(order.total)}
       </td>
 

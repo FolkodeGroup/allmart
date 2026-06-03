@@ -154,7 +154,9 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
                                 <td className={styles.tblDate}>
                                     {formatShortDate(o.createdAt)}
                                 </td>
-                                <td>{o.customer.firstName} {o.customer.lastName}</td>
+                                <td className={styles.tblCustomer}>
+                                    {o.customer.firstName} {o.customer.lastName}
+                                </td>
                                 <td className={`${styles.tblTotal} ${styles.tdRight}`}>
                                     {o.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
                                 </td>

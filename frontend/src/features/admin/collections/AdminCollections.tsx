@@ -9,6 +9,7 @@ import { collectionsService } from './collectionsService';
 import AdminCollectionForm from './AdminCollectionForm';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminCollections.module.css';
+import { Badge } from '../../../components/ui/Badge/Badge';
 
 type ViewMode = 'list' | 'form';
 
@@ -191,17 +192,17 @@ const AdminCollections: React.FC = () => {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Slug</th>
-              <th>Tipo</th>
-              <th>Posición</th>
-              <th>Orden</th>
-              <th>Productos</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th>NOMBRE</th>
+              <th>SLUG</th>
+              <th>TIPO</th>
+              <th>POSICIÓN</th>
+              <th>ORDEN</th>
+              <th>PRODUCTOS</th>
+              <th>ESTADO</th>
+              <th>ACCIONES</th>
               <th className={styles.selectColHeader}>
                 <div className={styles.selectColHeaderContent}>
-                  <span className={styles.selectColLabel}>Selección</span>
+                  <span className={styles.selectColLabel}>SELECCIÓN</span>
                   <input
                     type="checkbox"
                     aria-label="Seleccionar todas"
@@ -248,9 +249,12 @@ const AdminCollections: React.FC = () => {
                         {collection.type === 'auto_sales' ? 'Auto ventas' : 'Manual'}
                       </span>
                     </td>
-                    <td>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</td>
+                    <td><strong>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</strong></td>
                     <td>
-                      <strong>{collection.displayOrder}</strong>
+                      <Badge>
+                         {collection.displayOrder}
+                      </Badge>
+
                     </td>
                     <td>{collection.productCount}</td>
                     <td>
@@ -262,17 +266,19 @@ const AdminCollections: React.FC = () => {
                         {collection.isActive ? 'Activa' : 'Inactiva'}
                       </span>
                     </td>
-                    <td className={styles.actions}>
-                      <button onClick={() => handleEdit(collection)} className={styles.btnSmall}>
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(collection.id)}
-                        className={styles.btnSmallDanger}
-                        disabled={deleting}
-                      >
-                        Eliminar
-                      </button>
+                    <td>
+                      <div className={styles.actions}>
+                        <button onClick={() => handleEdit(collection)} className={styles.btnSmall}>
+                          EDITAR
+                        </button>
+                        <button
+                          onClick={() => handleDelete(collection.id)}
+                          className={styles.btnSmallDanger}
+                          disabled={deleting}
+                        >
+                          ELIMINAR
+                        </button>
+                      </div>
                     </td>
                     <td className={styles.selectColCell}>
                       <div className={styles.selectColCellContent}>

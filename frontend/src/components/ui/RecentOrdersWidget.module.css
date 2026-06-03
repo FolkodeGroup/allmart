@@ -19,12 +19,12 @@
   border-collapse: collapse;
 }
 .table th, .table td {
-  padding: 0.7rem 0.5rem;
+  padding: 0.75rem 1rem;
   text-align: left;
 }
 .table th {
   color: var(--color-text-tertiary);
-  font-weight: 500;
+  font-weight: 800;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
 }
@@ -47,12 +47,12 @@
 }
 
 .idTd {
-  color: var(--color-text-primary);
+  color: var(--color-dif-mode);
   font-weight: 600;
 }
 
 .dateTd {
-  color: var(--color-soft-gray);
+  color: var(--color-normal-gray);
 }
 
 .nameTd {
@@ -61,9 +61,10 @@
 }
 
 .quantityTd {
-  color: var(--color-soft-gray);;
+  color: var(--color-normal-gray);;
 }
 
 .priceTd {
   color: var(--color-text-primary);
+  font-weight: 600;
 }

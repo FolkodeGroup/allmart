@@ -12,6 +12,7 @@ import AdminPromotionForm from './AdminPromotionForm';
 import AdminPromotionMatrix from './AdminPromotionMatrix';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
+import { Badge } from '../../../components/ui/Badge/Badge';
 
 type ViewMode = 'list' | 'form';
 type MainTab = 'campaigns' | 'matrix';
@@ -210,13 +211,13 @@ const AdminPromotions: React.FC = () => {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>Tipo</th>
-                  <th>Valor</th>
-                  <th>Inicio</th>
-                  <th>Fin</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>NOMBRE</th>
+                  <th>TIPO</th>
+                  <th>VALOR</th>
+                  <th>INICIO</th>
+                  <th>FIN</th>
+                  <th>ESTADO</th>
+                  <th>ACCIONES</th>
                 </tr>
               </thead>
               <tbody>
@@ -241,10 +242,30 @@ const AdminPromotions: React.FC = () => {
                           <div className={styles.tableSubtext}>{promo.description}</div>
                         )}
                       </td>
-                      <td>{promo.type === 'percentage' ? '%' : promo.type === 'fixed' ? '$' : 'BOGO'}</td>
-                      <td>{promo.value}</td>
-                      <td>{new Date(promo.startDate).toLocaleDateString()}</td>
-                      <td>{new Date(promo.endDate).toLocaleDateString()}</td>
+                      <td>
+                        <Badge
+                        variant={
+                          promo.type === 'percentage'
+                            ? 'discount'
+                            : promo.type === 'fixed'
+                            ? 'new'
+                            : 'limited'
+                        }
+                      >
+                        {promo.type === 'percentage'
+                          ? '%'
+                          : promo.type === 'fixed'
+                          ? '$'
+                          : 'BOGO'}
+                      </Badge>
+                    </td>
+                      <td className={styles.tdValue}> {promo.value} </td>
+                      <td className={styles.tdDate}>
+                        {new Date(promo.startDate).toLocaleDateString()}
+                      </td>
+                      <td className={styles.tdDate}>
+                        {new Date(promo.endDate).toLocaleDateString()}
+                      </td>
                       <td>
                         <span className={promo.isActive ? styles.badgeActive : styles.badgeInactive}>
                           {promo.isActive ? 'Activa' : 'Inactiva'}
@@ -252,19 +273,19 @@ const AdminPromotions: React.FC = () => {
                       </td>
                       <td className={styles.actions}>
                         <button onClick={() => handleEdit(promo)} className={styles.btnSmall}>
-                          Editar
+                          EDITAR
                         </button>
                         <button
                           onClick={() => handleDuplicateClick(promo.id, promo.name)}
                           className={styles.btnSmallSecondary}
                         >
-                          Duplicar
+                          DUPLICAR
                         </button>
                         <button
                           onClick={() => handleDeleteClick(promo.id, promo.name)}
                           className={styles.btnSmallDanger}
                         >
-                          Eliminar
+                          ELIMINAR
                         </button>
                       </td>
                     </tr>

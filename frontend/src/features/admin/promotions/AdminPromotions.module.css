@@ -65,17 +65,28 @@
 }
 
 .table th {
-  padding: 12px;
+  padding: 0.75rem 1rem;
   text-align: left;
-  font-weight: 600;
+  font-weight: 800;
   background: var(--color-bg-secondary);
   color: var(--color-text-tertiary);
+  letter-spacing: 0.02em;
+  font-size: 0.85rem;
 }
 
 .table td {
-  padding: 12px;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
+.table .tdValue {
+  font-weight: 600;
+}
+
+.table .tdDate {
+  color: var(--color-normal-gray);
 }
 
 .table tr {
@@ -90,28 +101,32 @@
 .empty {
   text-align: center;
   padding: 24px !important;
-  color: #9ca3af;
+  color: var(--color-soft-gray);
   font-style: italic;
 }
 
 .badgeActive {
   display: inline-block;
-  padding: 4px 8px;
-  background-color: #d1fae5;
-  color: #065f46;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-primary);
+  color: var(--color-neutral-light);
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  min-width: 80px;
+  text-align: center;
 }
 
 .badgeInactive {
   display: inline-block;
-  padding: 4px 8px;
-  background-color: #fee2e2;
-  color: #7f1d1d;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-error-mode);
+  color: var(--color-neutral-light);
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  min-width: 80px;
+  text-align: center;
 }
 
 .actions {
@@ -146,14 +161,17 @@
 }
 
 .btnSmall {
-  background-color: #769282;
-  color: white;
-  padding: 6px 10px;
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  padding: 0.75rem 1rem !important;;
   font-size: 12px;
+  font-weight: 600;
 }
 
 .btnSmall:hover:not(:disabled) {
-  background-color: #5d7568;
+  background-color: var(--color-primary);
+  color: white;
 }
 
 .btnSmallSecondary {
@@ -168,14 +186,16 @@
 }
 
 .btnSmallDanger {
-  background-color: #f5d4d4;
-  color: #C75050;
+  background-color: transparent;
+  color: var(--color-error-mode);
+  border: 2px solid var(--color-error-mode);
   padding: 6px 10px;
   font-size: 12px;
 }
 
 .btnSmallDanger:hover:not(:disabled) {
-  background-color: #eba5a5;
+  background-color: var(--color-error-mode);
+  color: white;
 }
 
 .btnSecondary {
@@ -688,7 +708,7 @@ button:disabled {
   font-size: 13px;
   font-weight: 600;
   color: #1f2937;
-  background: #e0f2fe;
+  background: var(--color-warm-gray);
   padding: 2px 10px;
   border-radius: 12px;
 }
@@ -795,9 +815,11 @@ button:disabled {
 }
 
 .matrixProductPrice {
-  font-size: 13px;
+  font-size: 0.9rem;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  padding: 0.75rem 1rem
 }
 
 .matrixMoreText {
@@ -826,9 +848,9 @@ button:disabled {
 
 .badgeUpcoming {
   display: inline-block;
-  padding: 4px 8px;
-  background-color: #dbeafe;
-  color: #1d4ed8;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-accent-dark);
+  color: var(--color-neutral-light);
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
