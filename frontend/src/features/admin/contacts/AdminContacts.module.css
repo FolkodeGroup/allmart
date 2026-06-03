@@ -159,11 +159,11 @@
 .table th {
   padding: 0.75rem 1rem;
   text-align: left;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 800;
   color: var(--color-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
@@ -218,7 +218,7 @@
 
 .contactPhone {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--color-normal-gray);
 }
 
 .messageCellWrapper {
@@ -243,7 +243,13 @@
 }
 
 .messageText:hover {
-  color: #6366f1;
+  color: var(--color-dif-mode);
+}
+
+.tableWrapper .dateCell {
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--color-normal-gray);
 }
 
 /* ── Status badge ──────────────────────────────────────── */
@@ -277,12 +283,12 @@
 }
 
 .btnRead {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.78rem;
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -291,7 +297,8 @@
 }
 
 .btnRead:hover:not(:disabled) {
-  background: var(--color-bg-tertiary);
+  background: var(--color-primary);
+  color: var(--color-neutral-light)
 }
 
 .btnRead:disabled {
@@ -300,12 +307,12 @@
 }
 
 .btnUnread {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.78rem;
+  background: transparent;
+  color: var(--color-error-mode);
+  border: 1px solid var(--color-error-mode);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -314,7 +321,8 @@
 }
 
 .btnUnread:hover:not(:disabled) {
-  background: var(--color-bg-secondary);
+  background: var(--color-error-mode);
+  color: var(--color-neutral-light);
 }
 
 .btnUnread:disabled {
@@ -323,12 +331,12 @@
 }
 
 .btnDelete {
-  background: var(--color-error-mode);
-  color: #fff;
-  border: none;
-  border-radius: 7px;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.78rem;
+  background: transparent;
+  color: var(--color-error-mode);
+  border: 1px solid var(--color-error-mode);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -337,7 +345,8 @@
 }
 
 .btnDelete:hover:not(:disabled) {
-  background: var(--color-error-mode-hover);
+  background: var(--color-error-mode);
+  color: var(--color-neutral-light);
 }
 
 .btnDelete:disabled {

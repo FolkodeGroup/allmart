@@ -47,6 +47,8 @@
    --admin-confirm-danger-hover-bg: #d44739;
 
   /* ── Inverse Colors (for light mode) ── */
+  --color-normal-gray: #676767;
+
   --color-primary-light-inverse: #767676;
   --color-primary-dark-inverse: #4A4A4A;
 
@@ -58,6 +60,8 @@
 
   --color-active-mode: rgba(23, 209, 132, 0.12);
   --color-error-mode: #e74c3c;
+  --color-error-mode-hover: #c91c1c;
+
 
   --color-text-instock: #166534;
   --color-text-outofstock: #b91c1c;
@@ -205,7 +209,7 @@ body[data-admin-theme='dark'] {
   /* ── Text ── */
   --color-text-primary:        #f3f3f3;
   --color-text-secondary:      #cbe7c9;
-  --color-text-tertiary:       #b6a68a;
+  --color-text-tertiary:       #AEA491;
   --color-text-inverse:        #181c1f;
 
   /* ── Borders ── */
@@ -218,6 +222,8 @@ body[data-admin-theme='dark'] {
   --color-overlay:             rgba(0, 0, 0, 0.6);
 
   /* ── Inverse Colors (for dark mode) ── */
+  --color-normal-gray: #888888;
+
   --color-primary-light-inverse: #8fa99a;
   --color-primary-dark-inverse: #5d7568;
 

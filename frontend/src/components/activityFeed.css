@@ -33,14 +33,16 @@
   border-radius: 20px;
   border: 0.5px solid #ddd;
   background: transparent;
-  color: #aaa;
+  color: var(--color-error-mode);
+  border: 1px solid var(--color-error-mode);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
+  font-weight: 600;
 }
 
 .af-btn-clear:hover {
-  color: #E24B4A;
-  border-color: #E24B4A;
+  background: var(--color-error-mode);
+  color: #fff;
 }
 
 /* Badge en vivo */
@@ -49,7 +51,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #E24B4A;
+  color: var(--color-error-mode);
   font-weight: 500;
 }
 
@@ -57,7 +59,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #E24B4A;
+  background: var(--color-error-mode);
   display: inline-block;
   animation: af-pulse 1.4s infinite;
 }
@@ -86,24 +88,25 @@
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 20px;
-  border: 0.5px solid var(--color-accent-light-inverse);
+  border: 0.5px solid var(--color-dif-mode-dark);
   background: transparent;
-  color: var(--color-accent-light-inverse);;
+  color: var(--color-dif-mode-dark);;
   cursor: pointer;
-  font-weight: 400;
+  font-weight: 600;
   transition: all 0.15s;
 }
 
 .af-filter-btn:hover {
-  border-color: var(--color-accent-dark-inverse);
-  color: var(--color-accent-dark-inverse);
+  border-color: var(--color-dif-mode);
+  color: var(--color-text-inverse);
+  background: var(--color-dif-mode-dark);
 }
 
 .af-filter-btn.active {
-  border-color: var(--color-accent-dark-inverse);
-  background: var(--color-accent-dark-inverse);
-  color: #111;
-  font-weight: 500;
+  border-color: var(--color-dif-mode-dark);
+  background: var(--color-dif-mode-dark);
+  color: var(--color-text-inverse);
+  font-weight: 600;
 }
 
 /* Banner nuevos eventos */
@@ -204,11 +207,10 @@
 
 .af-tag {
   display: inline-block;
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.8rem !important;
   border-radius: 20px;
-  margin-top: 5px;
-  font-weight: 500;
+  font-weight: 600;
   /* background y color se setean inline desde ACTION_CONFIG */
 }
 
@@ -232,7 +234,7 @@
 .af-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 0.9rem;
 }
 
 .af-table thead {
@@ -243,13 +245,13 @@
 
 .af-table th {
   background: var(--color-bg-secondary);
-  padding: 8px 12px;
+  padding: 0.75rem 1rem;
   text-align: left;
-  font-weight: 500;
-  font-size: 11px;
+  font-weight: 800;
+  font-size: 0.85rem;
   color: var(--color-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -262,8 +264,8 @@
 }
 
 .af-row td {
-  padding: 8px 12px;
-  border-bottom: 0.5px solid var(--color-border);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
 }
 
@@ -273,10 +275,10 @@
 
 .af-tag {
   display: inline-block;
-  font-size: 11px;
+  font-size: 0.75rem;
   padding: 2px 8px;
   border-radius: 20px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -289,28 +291,29 @@
 }
 
 .af-user {
-  color: #888;
-  font-size: 12px;
+  color: var(--color-normal-gray);
+  font-size: 0.9rem;
 }
 
 .af-time {
-  color: var(--color-text-primary);
-  font-size: 12px;
+  color: var(--color-normal-gray);
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
 .af-delete-btn {
-  background: none;
-  border: none;
-  color: #ccc;
+  background: transparent;
+  border: 2px solid var(--color-error-mode);
+  color: var(--color-error-mode);
   cursor: pointer;
-  font-size: 14px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 12px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   transition: color 0.15s, background 0.15s;
+  font-weight: 600;
 }
 
 .af-delete-btn:hover {
-  color: #e53935;
-  background: #fef0f0;
+  color: #fff;
+  background: var(--color-error-mode);
 }

@@ -12,7 +12,7 @@
 }
 
 .discount {
-  background-color: var(--color-accent);
+  background-color: var(--color-accent-dark);
   color: var(--color-neutral-dark);
 }
 
@@ -24,4 +24,9 @@
 .outOfStock {
   background-color: var(--color-soft-gray);
   color: var(--color-neutral-light);
+}
+
+.limited {
+  background-color: var(--color-warm-gray);
+  color: var(--color-neutral-dark);
 }

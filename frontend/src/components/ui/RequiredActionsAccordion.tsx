@@ -87,15 +87,15 @@ export default function RequiredActionsAccordion() {
 
     return (
       <tr key={order.id} className={styles.tableRow}>
-        <td className={styles.tableCell}>{customerName}</td>
-        <td className={styles.tableCell}>{formatDate(order.createdAt)}</td>
+        <td className={styles.tableCellClient}>{customerName}</td>
+        <td className={styles.tableCellDate}>{formatDate(order.createdAt)}</td>
         <td className={styles.tableCell}>
           <Badge variant={statusBadgeVariant}>{statusLabel}</Badge>
         </td>
         <td className={styles.tableCellAmount}>{formatCurrency(order.total)}</td>
         <td className={styles.tableCellAction}>
           <Link to={`/admin/pedidos/${order.id}`}>
-            <Button variant="primary" size="sm">Ver Detalles</Button>
+            <Button variant="secondary" size="sm">Ver Detalles</Button>
           </Link>
         </td>
       </tr>

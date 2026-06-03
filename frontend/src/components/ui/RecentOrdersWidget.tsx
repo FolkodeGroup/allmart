@@ -39,13 +39,13 @@ export default function RecentOrdersWidget() {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>N° Pedido</th>
-            <th>Fecha</th>
-            <th>Cliente</th>
-            <th>Productos</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th></th>
+            <th>N° PEDIDO</th>
+            <th>FECHA</th>
+            <th>CLIENTE</th>
+            <th>PRODUCTOS</th>
+            <th>TOTAL</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
           </tr>
         </thead>
         <tbody>

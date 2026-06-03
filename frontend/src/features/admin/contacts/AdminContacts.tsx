@@ -304,7 +304,7 @@ export function AdminContacts() {
                     </td>
 
                     {/* Fecha */}
-                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.8rem', color: '#6b7280' }}>
+                    <td className={styles.dateCell}>
                       {formatDate(contact.createdAt)}
                     </td>
 

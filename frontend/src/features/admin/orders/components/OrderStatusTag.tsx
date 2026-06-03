@@ -35,10 +35,10 @@ export const OrderStatusTag: React.FC<Props> = ({ status }) => {
   let className = styles.statusTag;
 
   if (status === 'cancelado') {
-    indicator = <span className={styles.statusDangerIcon} title="Cancelado">⚠️</span>;
+    indicator = <span className={styles.statusDangerIcon} title="Cancelado"></span>;
     className += ' ' + styles.statusDanger;
   } else if (status === 'pendiente') {
-    indicator = <span className={styles.statusWarningIcon} title="Pendiente de pago">⏳</span>;
+    indicator = <span className={styles.statusWarningIcon} title="Pendiente de pago"></span>;
     className += ' ' + styles.statusWarning;
   }
 
