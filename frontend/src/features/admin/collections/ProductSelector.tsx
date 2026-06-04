@@ -4,6 +4,7 @@ import { getStoredToken } from '../../../utils/apiClient';
 import { normalizeImageUrl } from '../../../utils/imageUrl';
 import { ProductRow, type ProductRowData } from '../../../components/ProductRow';
 import styles from './AdminCollections.module.css';
+import { Search } from 'lucide-react';
 
 interface ProductSelectorProps {
   selectedIds: string[];
@@ -86,6 +87,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <label htmlFor="collection-products-search">Productos en esta colección</label>
 
       <div style={{ position: 'relative', marginBottom: '16px' }}>
+        <Search size={16} className={styles.searchIcon} />
         <input
           id="collection-products-search"
           type="text"

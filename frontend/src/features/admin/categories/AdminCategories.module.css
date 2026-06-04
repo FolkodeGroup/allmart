@@ -948,6 +948,13 @@
   min-width: 120px;
 }
 
+.filtersRowItem:focus,
+.filtersRowItem:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
+}
+
 .searchWrapper {
   position: relative;
   display: flex;
@@ -1316,6 +1323,13 @@
   transition: all 0.2s;
 }
 
+.sortSelect:focus,
+.sortSelect:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
+}
+
 .sortButton {
   padding: 5px 8px;
   border-radius: 6px;
@@ -1327,4 +1341,11 @@
   font-size: 11px;
   transition: all 0.2s;
   min-width: 35px;
+}
+
+.sortButton:focus,
+.sortButton:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }

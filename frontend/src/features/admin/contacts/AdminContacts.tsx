@@ -9,6 +9,7 @@ import { useAdminContact } from '../../../context/AdminContactContext';
 import { MessageSquare } from 'lucide-react';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminContacts.module.css';
+import { Search } from 'lucide-react';
 
 interface Contact {
   id: string;
@@ -196,6 +197,7 @@ export function AdminContacts() {
 
       {/* ── Filters ─────────────────────────────────────────────── */}
       <div className={styles.filtersBar}>
+        <Search size={16} className={styles.searchIcon} />
         <input
           type="search"
           placeholder="Buscar por nombre, email o mensaje..."
@@ -203,6 +205,10 @@ export function AdminContacts() {
           onChange={e => setSearchQuery(e.target.value)}
           className={styles.searchInput}
           aria-label="Buscar consultas"
+          autoComplete="off"
+          spellCheck="false"
+          autoCorrect="off"
+          autoCapitalize="off"
         />
         <select
           value={statusFilter}
