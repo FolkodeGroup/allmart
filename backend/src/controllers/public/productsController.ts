@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import { getPublicProducts, getProductBySlug } from "../../services/productsService";
 
 export const index = async (req: Request, res: Response) => {
-  const { category, tag, q, sort, page, limit, isFeatured, isOnSale, isNovedad, slugs } = req.query;
+  const { category, tag, q, sort, page, limit, isFeatured, isOnSale, isNovedad, slugs, priceRanges } = req.query;
   const result = await getPublicProducts({
     category: category as string,
     tag: tag as string,
@@ -13,6 +13,7 @@ export const index = async (req: Request, res: Response) => {
     page: page ? Number(page) : undefined,
     limit: limit ? Number(limit) : undefined,
     slugs: slugs as string,
+    priceRanges: priceRanges as string,
     isFeatured: typeof isFeatured !== 'undefined'
       ? isFeatured === 'true'
       : undefined,

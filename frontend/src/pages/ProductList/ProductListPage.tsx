@@ -20,6 +20,13 @@ const FALLBACK_SORT_OPTIONS: SortOption[] = [
   { label: 'Más nuevos', value: 'newest' },
 ];
 
+const PRICE_RANGE_OPTIONS = [
+  { id: '0-10000', label: 'Hasta $10.000' },
+  { id: '10000-25000', label: '$10.000 - $25.000' },
+  { id: '25000-50000', label: '$25.000 - $50.000' },
+  { id: '50000-', label: 'Más de $50.000' },
+] as const;
+
 function getProductCategoryIds(product: Product): string[] {
   const ids = new Set<string>();
   if (Array.isArray(product.categoryIds)) {
@@ -35,6 +42,7 @@ export function ProductListPage() {
   const urlCategory = searchParams.get('category') ?? '';
   const urlSubCategory = searchParams.get('sub') ?? '';
   const urlTag = searchParams.get('tag') ?? '';
+  const urlPriceRanges = searchParams.get('priceRanges') ?? '';
   const urlColeccion = searchParams.get('coleccion') ?? '';
   const tag = urlTag.trim().toLowerCase();
   const hasFeaturedTag = tag === 'destacado';
@@ -45,6 +53,7 @@ export function ProductListPage() {
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(hasFeaturedTag);
   const [showOnlyOnSale, setShowOnlyOnSale] = useState(hasOfertaTag);
   const [showOnlyNovedad, setShowOnlyNovedad] = useState(hasNovedadTag);
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -84,6 +93,22 @@ export function ProductListPage() {
   useEffect(() => {
     setShowOnlyNovedad((prev) => (prev === hasNovedadTag ? prev : hasNovedadTag));
   }, [hasNovedadTag]);
+
+  useEffect(() => {
+    const nextRanges = urlPriceRanges
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    const sortedCurrent = [...selectedPriceRanges].sort();
+    const sortedNext = [...nextRanges].sort();
+    const hasSameSelection = sortedCurrent.length === sortedNext.length
+      && sortedCurrent.every((value, index) => value === sortedNext[index]);
+
+    if (!hasSameSelection) {
+      setSelectedPriceRanges(nextRanges);
+    }
+  }, [urlPriceRanges, selectedPriceRanges]);
 
   /* Cargar sort options dinámicas */
   useEffect(() => {
@@ -156,6 +181,7 @@ export function ProductListPage() {
     if (showOnlyFeatured) params.isFeatured = true;
     if (showOnlyOnSale) params.isOnSale = true;
     if (showOnlyNovedad) params.isNovedad = true;
+    if (selectedPriceRanges.length > 0) params.priceRanges = selectedPriceRanges.join(',');
     setError(null);
     if (page === 1) setLoading(true);
     else setIsLoadingMore(true);
@@ -195,12 +221,12 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, activeDiscounts, categories, urlSlugs, slugList, page, showOnlyNovedad]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, activeDiscounts, categories, urlSlugs, slugList, page, showOnlyNovedad, selectedPriceRanges]);
 
   /* Resetear paginación cuando cambian filtros relevantes */
   useEffect(() => {
     setPage(1);
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, selectedPriceRanges]);
 
   const handleLoadMore = () => {
     if (isLoadingMore) return;
@@ -214,6 +240,22 @@ export function ProductListPage() {
     } else {
       updated.delete('tag');
     }
+    setSearchParams(updated, { replace: true });
+  };
+
+  const togglePriceRange = (rangeId: string) => {
+    const nextRanges = selectedPriceRanges.includes(rangeId)
+      ? selectedPriceRanges.filter((item) => item !== rangeId)
+      : [...selectedPriceRanges, rangeId];
+
+    const updated = new URLSearchParams(searchParams);
+    if (nextRanges.length > 0) {
+      updated.set('priceRanges', nextRanges.join(','));
+    } else {
+      updated.delete('priceRanges');
+    }
+
+    setSelectedPriceRanges(nextRanges);
     setSearchParams(updated, { replace: true });
   };
 
@@ -356,22 +398,17 @@ export function ProductListPage() {
         >
           <div className={styles.filterGroup}>
             <h3 className={styles.filterTitle}>Precio</h3>
-            <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
-              <span className={styles.filterLabel}>Hasta $10.000</span>
-            </label>
-            <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
-              <span className={styles.filterLabel}>$10.000 - $25.000</span>
-            </label>
-            <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
-              <span className={styles.filterLabel}>$25.000 - $50.000</span>
-            </label>
-            <label className={styles.filterOption}>
-              <input type="checkbox" className={styles.filterCheckbox} />
-              <span className={styles.filterLabel}>Más de $50.000</span>
-            </label>
+            {PRICE_RANGE_OPTIONS.map((option) => (
+              <label className={styles.filterOption} key={option.id}>
+                <input
+                  type="checkbox"
+                  className={styles.filterCheckbox}
+                  checked={selectedPriceRanges.includes(option.id)}
+                  onChange={() => togglePriceRange(option.id)}
+                />
+                <span className={styles.filterLabel}>{option.label}</span>
+              </label>
+            ))}
           </div>
 
           <div className={styles.filterGroup}>
