@@ -59,7 +59,6 @@ export function ProductListPage() {
   const [categoryCollections, setCategoryCollections] = useState<PublicCollection[]>([]);
   const [activeCollection, setActiveCollection] = useState<PublicCollection | null>(null);
   const [collectionLoading, setCollectionLoading] = useState(false);
-  const rootCategories = categories.filter((cat) => !cat.parentId);
 
   const urlSlugs = searchParams.get('slugs') ?? '';
   const slugList = useMemo(
@@ -218,19 +217,6 @@ export function ProductListPage() {
     setSearchParams(updated, { replace: true });
   };
 
-  const toggleCategory = (slug: string) => {
-    const next = selectedCategory === slug ? '' : slug;
-    setSelectedCategory(next);
-    const updated = new URLSearchParams(searchParams);
-    if (next) {
-      updated.set('category', next);
-    } else {
-      updated.delete('category');
-    }
-    updated.delete('sub');
-    setSearchParams(updated, { replace: true });
-  };
-
   const selectedCategoryInfo = useMemo(
     () => categories.find((cat) => cat.slug === selectedCategory),
     [categories, selectedCategory]
@@ -368,47 +354,6 @@ export function ProductListPage() {
           className={`${styles.sidebar} ${filtersOpen ? styles.open : ''}`}
           aria-label="Filtros de productos"
         >
-          <div className={styles.filterGroup}>
-            <h3 className={styles.filterTitle}>Categorías</h3>
-            {rootCategories.map((cat) => {
-              const children = categories.filter((child) => child.parentId === cat.id);
-              return (
-                <div key={cat.id} className={styles.categoryGroup}>
-                  <label className={styles.filterOption}>
-                    <input
-                      type="checkbox"
-                      className={styles.filterCheckbox}
-                      checked={selectedCategory === cat.slug}
-                      onChange={() => toggleCategory(cat.slug)}
-                    />
-                    <span className={styles.filterLabel}>{cat.name}</span>
-                    {cat.itemCount !== undefined && (
-                      <span className={styles.filterCount}>{cat.itemCount}</span>
-                    )}
-                  </label>
-                  {children.length > 0 && (
-                    <div className={styles.subCategoryList}>
-                      {children.map((child) => (
-                        <label className={`${styles.filterOption} ${styles.filterOptionChild}`} key={child.id}>
-                          <input
-                            type="checkbox"
-                            className={styles.filterCheckbox}
-                            checked={selectedCategory === child.slug}
-                            onChange={() => toggleCategory(child.slug)}
-                          />
-                          <span className={styles.filterLabel}>{child.name}</span>
-                          {child.itemCount !== undefined && (
-                            <span className={styles.filterCount}>{child.itemCount}</span>
-                          )}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
           <div className={styles.filterGroup}>
             <h3 className={styles.filterTitle}>Precio</h3>
             <label className={styles.filterOption}>
