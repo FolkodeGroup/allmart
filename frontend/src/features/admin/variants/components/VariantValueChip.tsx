@@ -4,8 +4,17 @@ import { Edit2, Check, X } from 'lucide-react';
 import styles from '../AdminVariants.module.css';
 import { useUnsavedChanges } from '../../../../context/useUnsavedChanges';
 
+type VariantValue = string | { id?: string; label?: string; [key: string]: unknown };
+
+const getVariantValueLabel = (value: VariantValue): string => {
+  if (typeof value === 'string') return value;
+  if (typeof value.label === 'string') return value.label;
+  if (typeof value.id === 'string') return value.id;
+  return String(value);
+};
+
 interface VariantValueChipProps {
-  value: string;
+  value: VariantValue;
   onRemove: () => void;
   onEdit: (oldValue: string, newValue: string) => void;
   canDelete: boolean;
@@ -30,20 +39,20 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
   canEdit,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+  const [editValue, setEditValue] = useState(getVariantValueLabel(value));
   const [editError, setEditError] = useState('');
   const { setIsDirty } = useUnsavedChanges();
 
   const enterEditMode = () => {
     if (!canEdit) return;
     setIsEditing(true);
-    setEditValue(value);
+    setEditValue(getVariantValueLabel(value));
     setEditError('');
   };
 
   const cancelEdit = () => {
     setIsEditing(false);
-    setEditValue(value);
+    setEditValue(getVariantValueLabel(value));
     setEditError('');
   };
 
@@ -53,12 +62,13 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
       setEditError('El valor no puede estar vacío');
       return;
     }
-    if (newValue === value) {
+    const originalValue = getVariantValueLabel(value);
+    if (newValue === originalValue) {
       cancelEdit();
       return;
     }
     // Validar que no exista el mismo valor (se valida en servidor)
-    onEdit(value, newValue);
+    onEdit(originalValue, newValue);
     setIsDirty(true);
     setIsEditing(false);
   };
@@ -79,7 +89,7 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
           autoFocus
           onChange={e => {
             setEditValue(e.target.value);
-            if (e.target.value !== value) {
+            if (e.target.value !== getVariantValueLabel(value)) {
               setIsDirty(true);
             }
             if (editError) setEditError('');
@@ -114,7 +124,7 @@ export const VariantValueChip: React.FC<VariantValueChipProps> = ({
 
   return (
     <span className={`${styles.valueChip} fadeIn microHover`} style={{ willChange: 'opacity, transform' }}>
-      {value}
+      {getVariantValueLabel(value)}
       <div className={styles.chipActions}>
         {canEdit && (
           <Tooltip title={`Editar el valor "${value}"`} placement="top" arrow>
