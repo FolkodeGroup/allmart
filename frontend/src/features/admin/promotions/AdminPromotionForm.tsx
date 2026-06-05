@@ -14,6 +14,7 @@ import { fetchAdminCategories } from '../categories/categoriesService';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { apiFetch } from '../../../utils/apiClient';
 import styles from './AdminPromotions.module.css';
+import { Search } from 'lucide-react';
 
 interface AdminProduct {
   id: string;
@@ -357,13 +358,20 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               Seleccioná los productos específicos a los que aplica esta promoción.
               También podés aplicarla a categorías enteras en la pestaña <strong>Categorías</strong>.
             </p>
+            <div className={styles.searchWrap}>
+            <Search size={16} className={styles.searchIcon} />
             <input
               type="text"
               className={styles.searchInput}
               placeholder="Buscar producto..."
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
+              autoComplete="off"
+              spellCheck="false"
+              autoCorrect="off"
+              autoCapitalize="off"
             />
+            </div>
             {loadingSelectors ? (
               <p className={styles.loading}>Cargando productos...</p>
             ) : allProducts.length === 0 ? (
@@ -406,13 +414,20 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               Al seleccionar una categoría, <strong>todos sus productos actuales y futuros</strong> quedan
               incluidos en la promoción automáticamente.
             </p>
+            <div className={styles.searchWrap}>
+            <Search size={16} className={styles.searchIcon} />
             <input
               type="text"
               className={styles.searchInput}
               placeholder="Buscar categoría..."
               value={categorySearch}
               onChange={(e) => setCategorySearch(e.target.value)}
+              autoComplete="off"
+              spellCheck="false"
+              autoCorrect="off"
+              autoCapitalize="off"
             />
+            </div>
             {loadingSelectors ? (
               <p className={styles.loading}>Cargando categorías...</p>
             ) : allCategories.length === 0 ? (

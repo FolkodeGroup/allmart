@@ -54,10 +54,14 @@
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
     outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.searchInput:focus {
-    border-color: var(--color-accent, #6366f1);
+.searchInput:focus,
+.searchInput:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .filterLabel {

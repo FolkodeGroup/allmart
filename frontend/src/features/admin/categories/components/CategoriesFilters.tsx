@@ -1,13 +1,10 @@
 import React from 'react';
 import styles from '../AdminCategories.module.css';
-import type { Category } from '../types/category';
 import { CategorySearchInput } from '../../../../components/ui/CategorySearchInput';
 
 interface CategoriesFiltersProps {
-  categories: Category[];
   search: string;
   setSearch: (v: string) => void;
-  setSelectedSuggestion: (v: string) => void;
   total: number;
   minProducts: number | '';
   setMinProducts: (v: number | '') => void;
@@ -18,10 +15,8 @@ interface CategoriesFiltersProps {
 }
 
 export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
-  categories,
   search,
   setSearch,
-  setSelectedSuggestion,
   total,
   minProducts,
   setMinProducts,
@@ -40,13 +35,8 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
       {/* 🔍 Buscador */}
       <div className={styles.searchWrapper}>
         <CategorySearchInput
-          categories={categories}
           value={search}
           onChange={setSearch}
-          onSelectSuggestion={(cat) => {
-            setSearch(cat.name);
-            setSelectedSuggestion(cat.name);
-          }}
           placeholder="Buscar categoría por nombre o slug..."
         />
         {/* 📊 Cantidad */}

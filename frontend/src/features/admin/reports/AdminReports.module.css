@@ -245,8 +245,28 @@
   width: 100%;
   background: var(--color-bg-secondary);
   border: 1.5px solid var(--color-border);
-  padding: 8px 10px;
+  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
   border-radius: 6px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.advancedInput:focus,
+.advancedInput:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
+}
+
+.searchInput {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
 }
 
 .advancedLabel {
@@ -260,7 +280,7 @@
 
 .advancedMultiSelect {
   min-width: 140px;
-  padding: 6px 8px;
+  padding: 10px 12px;
   border-radius: 6px;
   border: 1.5px solid var(--color-border);
   background: var(--color-bg-secondary);
@@ -272,8 +292,11 @@
   transition: border-color 0.15s;
 }
 
-.advancedMultiSelect:focus {
-  border-color: #769282;
+.advancedMultiSelect:focus,
+.advancedMultiSelect:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .metricsGrid {
@@ -281,6 +304,24 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 1.5rem;
   margin-bottom: 2.5rem;
+}
+
+.searchWrap {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  white-space: nowrap;
+  min-width: 30%;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  transform: translateY(80%);
+  color: var(--color-soft-gray);
+  z-index: 1;
+  pointer-events: none;
 }
 
 @media (max-width: 1100px) {
@@ -306,9 +347,6 @@
 
 
 
-.advancedInput:focus {
-  border-color: var(--color-border);
-}
 
 @media (max-width: 900px) {
   .advancedFiltersWrap {
@@ -1286,6 +1324,13 @@
   border-radius: 6px;
   padding: 0.3em 0.7em;
   margin-top: 0.1em;
+}
+
+.dateInput:focus,
+.dateInput:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .rangeSeparator {

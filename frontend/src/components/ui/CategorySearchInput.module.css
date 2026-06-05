@@ -9,31 +9,25 @@
   width: 100%;
   font-family: var(--font-ui);
   font-size: var(--text-sm);
-  padding: 9px 110px 9px 36px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 9px;
+  padding: 10px 110px 10px 36px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .searchInput::placeholder {
-  color: #bbb;
+  color: var(--color-text-tertiary);
 }
 
-.searchInput:hover {
-  border-color: var(--color-primary-light, #d0ccc7);
-}
-
-.searchInput:focus {
+.searchInput:focus,
+.searchInput:hover,
+.selectFilter:focus {
+  outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
-}
-
-.searchInput:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -1px;
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .suggestionsList {

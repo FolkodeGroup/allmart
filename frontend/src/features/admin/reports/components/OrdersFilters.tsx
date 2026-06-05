@@ -43,7 +43,7 @@ export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: Ord
             style={isMobile ? { flexDirection: 'column', gap: 10, width: '100%' } : {}}
         >
             <label className={styles.advancedLabel} style={isMobile ? { width: '100%' } : {}}>
-                Estado
+                <strong>Estado</strong>
                 <select
                     value=""
                     onChange={e => {

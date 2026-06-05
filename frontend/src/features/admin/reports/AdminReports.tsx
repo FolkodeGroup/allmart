@@ -28,6 +28,7 @@ import { useReportsData } from './hooks/useReportsData';
 import { useMonthlyGoal } from '../goals/hooks/useMonthlyGoal';
 import { ReportsCharts } from './components/ReportsCharts';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
+import { Search } from 'lucide-react';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
@@ -701,7 +702,9 @@ export function AdminReports() {
             <div className={styles.advancedFiltersWrap + ' fadeInFast'}>
 
               <label className={styles.advancedLabel}>
-                Cliente
+                <strong>Cliente</strong>
+                <div className={styles.searchWrap}>
+                <Search size={16} className={styles.searchIcon} />
                 <input
                   type="text"
                   value={ordersTableFilters.clientQuery}
@@ -711,10 +714,17 @@ export function AdminReports() {
                   }}
                   placeholder="Nombre o email"
                   className={styles.advancedInput}
+                  autoComplete="off"
+                  spellCheck="false"
+                  autoCorrect="off"
+                  autoCapitalize="off"
                 />
+                </div>
               </label>
               <label className={styles.advancedLabel}>
-                Producto
+                <strong>Producto</strong>
+                <div className={styles.searchWrap}>
+                <Search size={16} className={styles.searchIcon} />
                 <input
                   type="text"
                   value={ordersTableFilters.productQuery}
@@ -724,7 +734,12 @@ export function AdminReports() {
                   }}
                   placeholder="Nombre de producto"
                   className={styles.advancedInput}
+                  autoComplete="off"
+                  spellCheck="false"
+                  autoCorrect="off"
+                  autoCapitalize="off"
                 />
+                </div>
               </label>
               <OrdersFilters
                 ordersTableFilters={ordersTableFilters}

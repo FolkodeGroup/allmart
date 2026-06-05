@@ -70,6 +70,7 @@ export interface PublicProductsParams {
   limit?: number;
   tag?: string;
   slugs?: string;
+  priceRanges?: string;
   isFeatured?: boolean;
   isOnSale?: boolean;
   isNovedad?: boolean;
@@ -310,6 +311,10 @@ export async function fetchPublicProducts(
 
   if (typeof params.isNovedad !== 'undefined') {
     qs.set('isNovedad', String(params.isNovedad));
+  }
+
+  if (params.priceRanges) {
+    qs.set('priceRanges', params.priceRanges);
   }
 
   const url = `/api/products${qs.toString() ? `?${qs}` : ''}`;

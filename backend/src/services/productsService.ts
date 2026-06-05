@@ -478,6 +478,7 @@ type ProductQuery = {
   isOnSale?: boolean;
   isNovedad?: boolean;
   slugs?: string;
+  priceRanges?: string;
 };
 
 
@@ -542,7 +543,37 @@ export async function getPublicProducts(query: ProductQuery) {
     };
   }
 
-  // 🔎 BÚSQUEDA
+  // � RANGOS DE PRECIO
+  if (query.priceRanges) {
+    const ranges = query.priceRanges
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .map((range) => {
+        const [minStr, maxStr] = range.split('-');
+        const min = minStr !== '' ? Number(minStr) : undefined;
+        const max = maxStr !== '' ? Number(maxStr) : undefined;
+        const filter: Record<string, unknown> = {};
+
+        if (!Number.isNaN(min) && min !== undefined) {
+          filter.gte = min;
+        }
+        if (!Number.isNaN(max) && max !== undefined) {
+          filter.lte = max;
+        }
+        return { price: filter };
+      })
+      .filter((item) => Object.keys(item.price as Record<string, unknown>).length > 0);
+
+    if (ranges.length > 0) {
+      where.AND = [
+        ...(Array.isArray(where.AND) ? where.AND : []),
+        { OR: ranges },
+      ];
+    }
+  }
+
+  // �🔎 BÚSQUEDA
   if (q) {
     const search = q.toLowerCase();
     where.OR = [

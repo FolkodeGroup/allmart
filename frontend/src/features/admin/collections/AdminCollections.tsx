@@ -11,6 +11,7 @@ import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminCollections.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
+import { Search } from 'lucide-react';
 
 type ViewMode = 'list' | 'form';
 
@@ -149,6 +150,8 @@ const AdminCollections: React.FC = () => {
       </div>
 
       <div className={styles.filters}>
+        <div className={styles.searchWrap}>
+        <Search size={16} className={styles.searchIcon} />
         <input
           type="text"
           placeholder="Buscar colecciones..."
@@ -158,7 +161,12 @@ const AdminCollections: React.FC = () => {
             setPage(1);
           }}
           className={styles.searchInput}
+          autoComplete="off"
+          spellCheck="false"
+          autoCorrect="off"
+          autoCapitalize="off"
         />
+        </div>
         <select
           value={displayPosition}
           onChange={(e) => {

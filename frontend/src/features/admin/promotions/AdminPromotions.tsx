@@ -13,6 +13,7 @@ import AdminPromotionMatrix from './AdminPromotionMatrix';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
+import { Search } from 'lucide-react';
 
 type ViewMode = 'list' | 'form';
 type MainTab = 'campaigns' | 'matrix';
@@ -179,6 +180,8 @@ const AdminPromotions: React.FC = () => {
       {mainTab === 'campaigns' && (
         <>
           <div className={styles.filters}>
+            <div className={styles.searchWrap}>
+            <Search size={16} className={styles.searchIcon} />
             <input
               type="text"
               placeholder="Buscar promociones..."
@@ -188,7 +191,12 @@ const AdminPromotions: React.FC = () => {
                 setPage(1);
               }}
               className={styles.searchInput}
+              autoComplete="off"
+              spellCheck="false"
+              autoCorrect="off"
+              autoCapitalize="off"
             />
+            </div>
             <select
               value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
               onChange={(e) => {

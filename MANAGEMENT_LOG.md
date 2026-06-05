@@ -1887,3 +1887,7 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1055: estilo ajustado | 2026-05-30 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1060: 🔄 Actualización automática de puntajes semanal | 2026-06-02 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1071: Se implementa unificación estética de tablas y soporte para modo clar… | 2026-06-03 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1073: Se implementa unificación de barras de búsqueda basadas en Promocione… | 2026-06-05 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1074: 1066 optimizar el flujo de actualización e impacto visual inmediato en la edición de banners del panel administrador | 2026-06-05 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1075: 1067 eliminar el árbol de categorías y subcategorías como filtros en el sidebar de la vista de productoscategorías | 2026-06-05 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1076: 1068 transformar el componente de colecciones en un banner de ancho completo dentro de la vista de categoríasproductos | 2026-06-05 |

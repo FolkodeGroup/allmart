@@ -44,8 +44,6 @@ export function AdminProducts() {
 
   // Filters and search
   const [search, setSearch] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -216,14 +214,6 @@ export function AdminProducts() {
     });
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
-  // Suggestions for autocomplete
-  const suggestions = useMemo(() => search.length > 0
-    ? products.filter(p =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase())
-    ).slice(0, 8)
-    : [], [search, products]);
-
   // Sort products based on sort field and direction
   const sortedProducts = useMemo(() => {
     const ordered = [...products];
@@ -333,17 +323,7 @@ export function AdminProducts() {
           <ProductFilters
             search={search}
             setSearch={setSearch}
-            showSuggestions={showSuggestions}
-            setShowSuggestions={setShowSuggestions}
-            highlightedIndex={highlightedIndex}
-            setHighlightedIndex={setHighlightedIndex}
             inputRef={inputRef as React.RefObject<HTMLInputElement>}
-            suggestions={suggestions}
-            onSelectSuggestion={name => {
-              setSearch(name);
-              setShowSuggestions(false);
-              setHighlightedIndex(-1);
-            }}
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             categories={categories}

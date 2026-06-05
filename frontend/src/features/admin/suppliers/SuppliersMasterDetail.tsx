@@ -213,6 +213,10 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                             placeholder="Buscar proveedor..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
+                            autoComplete="off"
+                            spellCheck="false"
+                            autoCorrect="off"
+                            autoCapitalize="off"
                         />
                     </div>
                     <div className={styles.filterTabs}>
