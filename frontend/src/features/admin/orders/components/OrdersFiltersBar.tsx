@@ -14,6 +14,7 @@
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
+import { Search } from 'lucide-react';
 
 // Definidos localmente para no depender del helper global en este componente de UI puro
 const STATUS_OPTIONS: OrderStatus[] = [
@@ -69,7 +70,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                 <div className={styles.searchWrap}>
                     <label className={styles.dateLabel} htmlFor="order-search">Buscar</label>
                     <div className={styles.searchInputWrap}>
-                        <span className={styles.searchIcon}>🔍</span>
+                        <Search size={16} className={styles.searchIcon} />
                         <input
                             className={styles.searchInput}
                             id="order-search"
@@ -79,6 +80,10 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             onChange={e => onChange({ ...filters, search: e.target.value })}
                             disabled={disabled}
                             aria-label="Buscar pedidos"
+                            autoComplete="off"
+                            spellCheck="false"
+                            autoCorrect="off"
+                            autoCapitalize="off"
                         />
                     </div>
                 </div>

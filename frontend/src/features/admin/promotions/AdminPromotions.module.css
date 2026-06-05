@@ -30,21 +30,41 @@
   flex-wrap: wrap;
 }
 
-.searchInput,
-.selectFilter {
-  padding: 10px 12px;
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  transform: translateY(80%);
+  color: var(--color-soft-gray);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.searchInput {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   color: var(--color-text-primary);
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
+  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
+}
+
+.selectFilter {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  padding: 8px 12px !important;
 }
 
 .searchInput:focus,
-.selectFilter:focus {
+.searchInput:hover,
+.selectFilter:focus,
+.selectFilter:hover {
   outline: none;
-  border-color: #769282;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
@@ -350,7 +370,10 @@ button:disabled {
 
 .mainTab,
 .mainTabActive {
-  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
   border: none;
   background: transparent;
   font-size: 14px;
@@ -358,17 +381,17 @@ button:disabled {
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  color: var(--color-text-primary);
+  color: #6b7280;
   transition: color 0.2s, border-color 0.2s;
 }
 
 .mainTabActive {
-  color: #769282;
+  color: var(--color-primary);
   border-bottom-color: #769282;
 }
 
 .mainTab:hover {
-  color: var(--color-primary-dark);
+  color: var(--color-text-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -407,7 +430,7 @@ button:disabled {
 }
 
 .formTabActive {
-  color: #769282;
+  color: var(--color-primary);
   border-bottom-color: #769282;
 }
 
@@ -630,6 +653,15 @@ button:disabled {
   font-size: 13px;
   color: #6b7280;
   margin-top: 2px;
+}
+
+.searchWrap {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  white-space: nowrap;
+  min-width: 30%;
+  flex: 1;
 }
 
 /* Matrix table (accordion rows) */

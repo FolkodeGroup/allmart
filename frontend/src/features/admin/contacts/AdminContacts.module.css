@@ -99,24 +99,36 @@
   flex-wrap: wrap;
 }
 
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-soft-gray);
+  z-index: 1;
+  pointer-events: none;
+}
+
 .searchInput {
   flex: 1;
   min-width: 180px;
   max-width: 320px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 0.5rem 0.875rem;
+  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
   font-size: 0.875rem;
   outline: none;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: inherit;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
-.searchInput:focus {
-  border-color: var(--color-dif-mode-dark);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+.searchInput:focus,
+.searchInput:hover,
+.filterSelect:focus,
+.filterSelect:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .filterSelect {
@@ -130,10 +142,6 @@
   cursor: pointer;
   outline: none;
   transition: border-color 0.15s;
-}
-
-.filterSelect:focus {
-  border-color: var(--color-dif-mode-dark);
 }
 
 /* ── Table ─────────────────────────────────────────────── */

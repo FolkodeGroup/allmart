@@ -403,10 +403,8 @@ export function AdminCategories() {
         layout
       >
         <CategoriesFilters
-          categories={categories}
           search={search}
           setSearch={setSearch}
-          setSelectedSuggestion={setSelectedSuggestion}
           total={total}
           minProducts={minProducts}
           setMinProducts={setMinProducts}

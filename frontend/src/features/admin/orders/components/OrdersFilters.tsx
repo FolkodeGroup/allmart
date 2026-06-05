@@ -7,6 +7,7 @@
 import { STATUS_OPTIONS, STATUS_LABELS } from '../utils/ordersHelpers';
 import styles from '../AdminOrders.module.css';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
+import { Search } from 'lucide-react';
 
 /**
  * Props de la barra de filtros legacy.
@@ -50,7 +51,7 @@ export function OrdersFilters(props: OrdersFiltersProps) {
     <div className={styles.filters}>
       {/* ── Búsqueda libre ── */}
       <div className={styles.searchWrap}>
-        <span className={styles.searchIcon}>🔍</span>
+        <Search size={16} className={styles.searchIcon} />
         <input
           className={styles.searchInput}
           type="text"
@@ -59,6 +60,10 @@ export function OrdersFilters(props: OrdersFiltersProps) {
           onChange={e => setSearch(e.target.value)}
           disabled={isLoading}
           aria-label="Buscar pedidos"
+          autoComplete="off"
+          spellCheck="false"
+          autoCorrect="off"
+          autoCapitalize="off"
         />
       </div>
       {/* ── Filtro por estado ── */}

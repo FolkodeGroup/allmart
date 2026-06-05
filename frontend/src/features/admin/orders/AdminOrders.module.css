@@ -315,10 +315,11 @@
   flex: 1;
 }
 
-.searchInput:focus {
+.searchInput:focus,
+.searchInput:hover{
+  outline: none;
   border-color: var(--color-primary);
-  background: var(--color-bg-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .searchInput::placeholder {
@@ -384,9 +385,11 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.filterSelect:focus {
+.filterSelect:focus,
+.filterSelect:hover{
+  outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .chipsContainer {
@@ -483,8 +486,11 @@
   transition: border-color 0.15s;
 }
 
-.dateInput:focus {
+.dateInput:focus,
+.dateInput:hover{
+  outline: none;
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .totalFilters {
@@ -513,6 +519,13 @@
   outline: none;
   cursor: pointer;
   transition: border-color 0.15s;
+}
+
+.totalInput:focus,
+.totalInput:hover{
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
 .clearBtn {

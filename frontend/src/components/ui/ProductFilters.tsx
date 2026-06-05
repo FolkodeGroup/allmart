@@ -6,13 +6,7 @@ import type { StatusFilter, StockLevelFilter } from '../../features/admin/produc
 interface ProductFiltersProps {
   search: string;
   setSearch: (v: string) => void;
-  showSuggestions: boolean;
-  setShowSuggestions: (v: boolean) => void;
-  highlightedIndex: number;
-  setHighlightedIndex: (v: (i: number) => number) => void;
   inputRef: React.RefObject<HTMLInputElement>;
-  suggestions: Array<{ id: string; name: string; sku: string }>;
-  onSelectSuggestion: (name: string) => void;
   categoryFilter: string;
   setCategoryFilter: (v: string) => void;
   categories: Array<{ id: string; name: string }>;
@@ -26,13 +20,7 @@ interface ProductFiltersProps {
 export const ProductFilters: React.FC<ProductFiltersProps> = ({
   search,
   setSearch,
-  showSuggestions,
-  setShowSuggestions,
-  highlightedIndex,
-  setHighlightedIndex,
   inputRef,
-  suggestions,
-  onSelectSuggestion,
   categoryFilter,
   setCategoryFilter,
   categories,
@@ -56,69 +44,15 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           placeholder="Buscar por nombre, SKU..."
           value={search}
           autoComplete="off"
+          spellCheck="false"
+          autoCorrect="off"
+          autoCapitalize="off"
           onChange={e => {
             setSearch(e.target.value);
-            setShowSuggestions(true);
-            setHighlightedIndex(() => -1);
-          }}
-          onFocus={() => search && setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-          onKeyDown={e => {
-            if (!showSuggestions || suggestions.length === 0) return;
-            if (e.key === 'ArrowDown') {
-              setHighlightedIndex(i => (i < suggestions.length - 1 ? i + 1 : 0));
-              e.preventDefault();
-            } else if (e.key === 'ArrowUp') {
-              setHighlightedIndex(i => (i > 0 ? i - 1 : suggestions.length - 1));
-              e.preventDefault();
-            } else if ((e.key === 'Enter' || e.key === ' ') && highlightedIndex >= 0) {
-              onSelectSuggestion(suggestions[highlightedIndex].name);
-              setShowSuggestions(false);
-              setHighlightedIndex(() => -1);
-              inputRef.current?.blur();
-              setTimeout(() => inputRef.current?.focus(), 0);
-              e.preventDefault();
-            }
           }}
           aria-label="Buscar productos por nombre o SKU"
-          aria-autocomplete="list"
-          aria-controls="suggestions-list"
-          aria-activedescendant={highlightedIndex >= 0 ? `suggestion-${highlightedIndex}` : undefined}
         />
         <span className={styles.count} aria-live="polite">{total} productos</span>
-
-        {showSuggestions && suggestions.length > 0 && (
-          <ul
-            id="suggestions-list"
-            className={styles.suggestionsList}
-            role="listbox"
-            aria-label="Sugerencias de productos"
-          >
-            {suggestions.map((s, idx) => (
-              <li
-                key={s.id}
-                id={`suggestion-${idx}`}
-                className={`${styles.suggestionItem} ${idx === highlightedIndex ? styles.suggestionActive : ''}`}
-                role="option"
-                aria-selected={idx === highlightedIndex}
-                tabIndex={0}
-                onMouseDown={() => onSelectSuggestion(s.name)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    onSelectSuggestion(s.name);
-                    setShowSuggestions(false);
-                    setHighlightedIndex(() => -1);
-                    e.preventDefault();
-                  }
-                }}
-              >
-                <Search size={13} style={{ color: '#aaa', flexShrink: 0 }} />
-                <span style={{ flex: 1, fontWeight: 500 }}>{s.name}</span>
-                {s.sku && <span style={{ color: '#aaa', fontSize: 11 }}>{s.sku}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
 

@@ -9,6 +9,7 @@ import type { PromotionMatrixItem, PromotionProductsResult } from './promotionsS
 import { promotionsService } from './promotionsService';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
+import { Search } from 'lucide-react';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   active: { label: 'Activa', className: 'badgeActive' },
@@ -184,13 +185,20 @@ const AdminPromotionMatrix: React.FC = () => {
 
       {/* ─── Filters ─────────────────────────────────────────────────── */}
       <div className={styles.filters}>
+        <div className={styles.searchWrap}>
+        <Search size={16} className={styles.searchIcon} />
         <input
           type="text"
           className={styles.searchInput}
           placeholder="Buscar promoción..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          autoComplete="off"
+          spellCheck="false"
+          autoCorrect="off"
+          autoCapitalize="off"
         />
+        </div>
         <select
           className={styles.selectFilter}
           value={filterStatus}
