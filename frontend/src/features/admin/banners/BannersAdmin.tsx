@@ -15,6 +15,7 @@ import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarnin
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { Trash2, Plus, Edit2, Eye, EyeOff } from 'lucide-react';
 import { bannersAdminService, type AdminBanner } from './bannersAdminService';
+import { publicBannersService } from '../../../services/publicBannersService';
 import { Button } from '../../../components/ui/Button/Button';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -33,6 +34,12 @@ interface FormData {
   filterConfig: BannerFilterConfig;
 }
 
+function appendCacheBusting(url: string, updatedAt?: string): string {
+  if (!url) return url;
+  const timestamp = updatedAt ? String(new Date(updatedAt).getTime()) : String(Date.now());
+  return url.includes('?') ? `${url}&v=${timestamp}` : `${url}?v=${timestamp}`;
+}
+
 export function BannersAdmin() {
   const [banners, setBanners] = useState<AdminBanner[]>([]);
   const { categories } = useAdminCategories();
@@ -41,6 +48,11 @@ export function BannersAdmin() {
   const [isAltManuallyEdited, setIsAltManuallyEdited] = useState(false);
   const [displayOrderInput, setDisplayOrderInput] = useState('0');
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [bannerToDelete, setBannerToDelete] = useState<AdminBanner | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     title: '',
     imageFile: null,
@@ -83,13 +95,19 @@ export function BannersAdmin() {
     setHookIsDirty(isDirty);
   }, [isDirty, setHookIsDirty]);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const blocker = useBlocker(isDirty);
 
   function handleCancelForm() {
     interceptNavigation(() => {
-      setFormData({ title: '', imageFile: null, displayOrder: 0, isActive: true, altText: '', filterConfig: {} });
-      setEditingId(null);
-      setShowForm(false);
+      resetForm();
     });
   }
 
@@ -111,6 +129,10 @@ export function BannersAdmin() {
   }
 
   function resetForm() {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
     setFormData({
       title: '',
       imageFile: null,
@@ -161,6 +183,8 @@ export function BannersAdmin() {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
       if (editingId) {
         await bannersAdminService.updateBanner(editingId, {
@@ -187,11 +211,14 @@ export function BannersAdmin() {
         );
         toast.success('Banner creado');
       }
+      publicBannersService.invalidateCache();
       resetForm();
-      loadBanners();
+      await loadBanners();
     } catch (err) {
       toast.error(editingId ? 'Error al actualizar banner' : 'Error al crear banner');
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -208,32 +235,59 @@ export function BannersAdmin() {
   }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setFormData({ ...formData, imageFile: e.target.files?.[0] ?? null });
+    const file = e.target.files?.[0] ?? null;
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+
+    setFormData({ ...formData, imageFile: file });
     if (fieldErrors.imageFile) {
       setFieldErrors((prev) => ({ ...prev, imageFile: undefined }));
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este banner?')) {
-      return;
-    }
+  async function handleDeleteConfirm() {
+    if (!bannerToDelete) return;
+
+    setIsDeleting(true);
 
     try {
-      await bannersAdminService.deleteBanner(id);
+      await bannersAdminService.deleteBanner(bannerToDelete.id);
+      publicBannersService.invalidateCache();
       toast.success('Banner eliminado');
-      loadBanners();
+      setDeleteModalOpen(false);
+      setBannerToDelete(null);
+      await loadBanners();
     } catch (err) {
       toast.error('Error al eliminar banner');
       console.error(err);
+    } finally {
+      setIsDeleting(false);
     }
+  }
+
+  function openDeleteModal(banner: AdminBanner) {
+    setBannerToDelete(banner);
+    setDeleteModalOpen(true);
+  }
+
+  function closeDeleteModal() {
+    setDeleteModalOpen(false);
+    setBannerToDelete(null);
   }
 
   async function toggleActive(banner: AdminBanner) {
     try {
       await bannersAdminService.updateBanner(banner.id, { isActive: !banner.isActive });
+      publicBannersService.invalidateCache();
       toast.success(banner.isActive ? 'Banner desactivado' : 'Banner activado');
-      loadBanners();
+      await loadBanners();
     } catch (err) {
       toast.error('Error al actualizar banner');
       console.error(err);
@@ -373,18 +427,21 @@ export function BannersAdmin() {
                   {fieldErrors.imageFile}
                 </span>
               )}
-              {formData.imageFile && (
+              {previewUrl && (
                 <img
-                  src={URL.createObjectURL(formData.imageFile)}
+                  src={previewUrl}
                   alt="preview"
                   className={styles.preview}
                 />
               )}
-              {editingId && !formData.imageFile && (
+              {!previewUrl && editingId && !formData.imageFile && (
                 <div className={styles.currentImageInfo}>
                   <p>Imagen actual cargada</p>
                   <img
-                    src={banners.find(b => b.id === editingId)?.thumbUrl}
+                    src={appendCacheBusting(
+                      banners.find((b) => b.id === editingId)?.thumbUrl ?? '',
+                      banners.find((b) => b.id === editingId)?.updatedAt
+                    )}
                     alt="current"
                     className={styles.preview}
                   />
@@ -476,7 +533,12 @@ export function BannersAdmin() {
               <Button type="button" className={styles.btnSecondary} onClick={handleCancelForm}>
                 Cancelar
               </Button>
-              <Button type="submit" className={styles.btnPrimary}>
+              <Button
+                type="submit"
+                className={styles.btnPrimary}
+                isLoading={isSubmitting}
+                loadingText={editingId ? 'Actualizando...' : 'Creando...'}
+              >
                 {editingId ? 'Actualizar' : 'Crear'} Banner
               </Button>
             </div>
@@ -494,7 +556,7 @@ export function BannersAdmin() {
           {banners.map((banner) => (
             <div key={banner.id} className={styles.bannerCard}>
               <div className={styles.bannerImageWrapper}>
-                <img src={banner.imageUrl} alt={banner.title} />
+                <img src={appendCacheBusting(banner.imageUrl, banner.updatedAt)} alt={banner.title} />
                 <div className={styles.badgeContainer}>
                   {!banner.isActive && <span className={styles.badge}>Inactivo</span>}
                 </div>
@@ -530,7 +592,7 @@ export function BannersAdmin() {
                 <button
                   type="button"
                   className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-                  onClick={() => handleDelete(banner.id)}
+                  onClick={() => openDeleteModal(banner)}
                   title="Eliminar"
                 >
                   <Trash2 size={18} />
@@ -556,6 +618,20 @@ export function BannersAdmin() {
           if (blocker.state === 'blocked') blocker.reset();
           cancelNavigation();
         }}
+      />
+
+      <ModalConfirm
+        open={deleteModalOpen}
+        title="Eliminar Banner"
+        message={
+          bannerToDelete
+            ? `¿Estás seguro de que deseas eliminar el banner "${bannerToDelete.title}"? Esta acción no se puede deshacer.`
+            : '¿Estás seguro de que deseas eliminar este banner?'
+        }
+        confirmText={isDeleting ? 'Eliminando...' : 'Eliminar'}
+        cancelText="Cancelar"
+        onConfirm={handleDeleteConfirm}
+        onCancel={closeDeleteModal}
       />
     </div>
   );
