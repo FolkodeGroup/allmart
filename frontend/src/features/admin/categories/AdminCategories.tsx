@@ -1,4 +1,3 @@
-import { CategoriesPagination } from './components/CategoriesPagination';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
