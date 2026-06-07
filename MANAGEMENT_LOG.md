@@ -1885,9 +1885,34 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1057: 1044 renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-30 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1056: 1045 badge de notificación en consultas del sidebar | 2026-05-30 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1055: estilo ajustado | 2026-05-30 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1060: 🔄 Actualización automática de puntajes semanal | 2026-05-31 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1062: 🔄 Registrar puntaje de gestión | 2026-06-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1065: Unificación de barras de búsqueda basadas en Promociones y eliminación de dropdowns de filtros | 2026-06-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1064: Replicar diseño base de paginación de Productos en el resto del sitio | 2026-06-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1063: Homogeneización de dropdowns (hovers de marca) y rediseño de componentes de calendario | 2026-06-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1061: Unificación estética de tablas y soporte para modo claro/oscuro en múltiples vistas | 2026-06-01 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1062: 🔄 Registrar puntaje de gestión | 2026-06-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1060: 🔄 Actualización automática de puntajes semanal | 2026-06-02 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1071: Se implementa unificación estética de tablas y soporte para modo clar… | 2026-06-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1073: Se implementa unificación de barras de búsqueda basadas en Promocione… | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1074: 1066 optimizar el flujo de actualización e impacto visual inmediato en la edición de banners del panel administrador | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1075: 1067 eliminar el árbol de categorías y subcategorías como filtros en el sidebar de la vista de productoscategorías | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1076: 1068 transformar el componente de colecciones en un banner de ancho completo dentro de la vista de categoríasproductos | 2026-06-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1070: Mostrar los atributos de las variantes seleccionadas en las líneas de producto dentro de la vista del Carrito. | 2026-06-02 |
+| FedericoPaal | 3 | Creación de issue | Issue #1069: Implementar la selección dinámica de variantes en la vista de detalle del producto antes de habilitar la acción de compra. | 2026-06-02 |
+| FedericoPaal | 3 | Creación de issue | Issue #1068: Transformar el componente de Colecciones en un banner de ancho completo dentro de la vista de Categorías/Productos. | 2026-06-02 |
+| FedericoPaal | 3 | Creación de issue | Issue #1067: Eliminar el árbol de Categorías y Subcategorías como filtros en el sidebar de la vista de Productos/Categorías. | 2026-06-02 |
+| FedericoPaal | 3 | Creación de issue | Issue #1066: Optimizar el flujo de actualización e impacto visual inmediato en la edición de banners del panel administrador. | 2026-06-02 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1072: 🔄 Registrar puntaje de gestión | 2026-06-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1072: 🔄 Registrar puntaje de gestión | 2026-06-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1072: 🔄 Registrar puntaje de gestión | 2026-06-03 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1071: Se implementa unificación estética de tablas y soporte para modo clar… | 2026-06-03 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1082: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1080: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1079: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1078: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1077: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1081: 1064 replicar diseño base de paginación de productos en el resto del sitio | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1080: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1079: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1078: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1077: 🔄 Registrar puntaje de gestión | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1076: 1068 transformar el componente de colecciones en un banner de ancho completo dentro de la vista de categoríasproductos | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1075: 1067 eliminar el árbol de categorías y subcategorías como filtros en el sidebar de la vista de productoscategorías | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1074: 1066 optimizar el flujo de actualización e impacto visual inmediato en la edición de banners del panel administrador | 2026-06-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1073: Se implementa unificación de barras de búsqueda basadas en Promocione… | 2026-06-05 |
