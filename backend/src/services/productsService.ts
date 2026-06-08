@@ -616,10 +616,39 @@ export async function getPublicProducts(query: ProductQuery) {
 export async function getProductBySlug(slug: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { slug },
-    include: { productCategories: { select: { categoryId: true } } },
+    include: { productCategories: { select: { categoryId: true } }, productSkus: true },
   });
   if (!row) throw createError('Producto no encontrado', 404);
-  return toProduct(row);
+  const base = toProduct(row);
+  // Attach product SKUs to the returned object for public API consumption
+  // Map prisma productSkus rows to a lightweight shape
+  if (Array.isArray((row as any).productSkus)) {
+    const skus = (row as any).productSkus.map((s: any) => {
+      let images: string[] | undefined = undefined;
+      let attrs = s.attributes ?? {};
+      try {
+        if (attrs && typeof attrs === 'object' && Array.isArray(attrs.images)) {
+          images = attrs.images;
+          const { images: _img, ...rest } = attrs;
+          attrs = rest;
+        }
+      } catch {
+        // ignore
+      }
+      return {
+        id: s.id,
+        sku: s.sku,
+        attributes: attrs,
+        images,
+        stock: s.stock,
+        price: s.price ? Number(s.price) : undefined,
+        isActive: s.isActive,
+      };
+    });
+    // Attach using a non-invasive cast so existing callers don't break
+    (base as any).skus = skus;
+  }
+  return base;
 }
 
 // ─── Historial de precios por producto ────────────────────────────────────────

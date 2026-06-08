@@ -179,6 +179,19 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     sku: api.sku ?? '',
     features: Array.isArray(api.features) ? api.features : [],
     primarySupplierId: api.primarySupplierId ?? null,
+    skus: Array.isArray((api as any).skus)
+      ? (api as any).skus.map((s: unknown) => {
+        const row = s as unknown as Record<string, unknown>;
+        return {
+          id: String(row.id),
+          sku: String(row.sku),
+          attributes: (row.attributes ?? {}) as Record<string, unknown>,
+          stock: typeof row.stock === 'number' ? row.stock : Number(row.stock ?? 0),
+          price: typeof row.price === 'number' ? row.price : row.price !== undefined ? Number(row.price as unknown) : undefined,
+          images: Array.isArray(row.images) ? (row.images as unknown[]).map(i => String(i)).filter(Boolean) : undefined,
+        };
+      })
+      : undefined,
   };
 }
 

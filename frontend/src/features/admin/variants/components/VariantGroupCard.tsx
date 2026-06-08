@@ -6,6 +6,22 @@ import styles from '../AdminVariants.module.css';
 
 import type { VariantGroup } from '../../../../context/AdminVariantsContext';
 
+type VariantValue = string | { id?: string; label?: string; [key: string]: unknown };
+
+const getVariantValueKey = (value: VariantValue): string => {
+  if (typeof value === 'string') return value;
+  if (typeof value.id === 'string' && value.id.trim()) return value.id;
+  if (typeof value.label === 'string' && value.label.trim()) return value.label;
+  return JSON.stringify(value);
+};
+
+const getVariantValueLabel = (value: VariantValue): string => {
+  if (typeof value === 'string') return value;
+  if (typeof value.label === 'string') return value.label;
+  if (typeof value.id === 'string') return value.id;
+  return String(value);
+};
+
 interface VariantGroupCardProps {
   group: VariantGroup;
   onEditName: (id: string, newName: string) => void;
@@ -176,11 +192,11 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
         {group.values.length === 0 && (
           <span className={styles.noValues}>Sin valores aún</span>
         )}
-        {group.values.map(val => (
+        {group.values.map((val: VariantValue) => (
           <VariantValueChip
-            key={val}
+            key={getVariantValueKey(val)}
             value={val}
-            onRemove={() => onRemoveValue(group.id, val)}
+            onRemove={() => onRemoveValue(group.id, getVariantValueLabel(val))}
             onEdit={(oldVal, newVal) => onEditValue(group.id, oldVal, newVal)}
             canDelete={canDelete}
             canEdit={canEdit}
