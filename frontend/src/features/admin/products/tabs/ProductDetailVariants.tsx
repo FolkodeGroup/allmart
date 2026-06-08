@@ -130,6 +130,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
+  const [selectedCombinationKey, setSelectedCombinationKey] = useState<string>('original');
 
   useEffect(() => {
     if (product && product.sku) {
@@ -152,7 +153,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   };
 
   const handleCreateCombination = async () => {
-    // sanitize
     const attrs = { ...combinationAttrs };
     const sku = combinationSku.trim();
     const stock = combinationStock === '' ? undefined : Number(combinationStock);
@@ -164,29 +164,21 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       else images = [raw];
     }
     const price = combinationPrice === '' ? undefined : Number(combinationPrice);
+
     try {
       if (editingSkuId) {
-        // update existing
-        const updated = await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, images, price });
-        // replace in createdCombinations if present
-        setCreatedCombinations(prev =>
-          prev.map(p =>
-            p.id === updated.id
-              ? { ...updated, attributes: updated.attributes ?? {} }
-              : p
-          )
-        );
+        // update existing persisted SKU; server refresh will update list
+        await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, images, price });
         setEditingSkuId(null);
       } else {
         const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, images, price });
-        // optimistic push — backend may return created object
-        let newItem: CreatedCombination;
-        if (typeof created === 'object' && created !== null) {
-          newItem = (created as unknown) as CreatedCombination;
-        } else {
-          newItem = { sku: sku || undefined, attributes: attrs, stock, images, price };
+        // If backend returned a persisted object (with id), it will be present in `skus` after the context refresh.
+        // Only keep optimistic entry if backend didn't return an id.
+        const createdObj = created as CreatedCombination | undefined;
+        if (!(createdObj && createdObj.id)) {
+          const newItem: CreatedCombination = { sku: sku || undefined, attributes: attrs, stock, images, price };
+          setCreatedCombinations(prev => [newItem, ...prev]);
         }
-        setCreatedCombinations(prev => [newItem, ...prev]);
       }
     } catch (err) {
       console.error('Error creating/updating combination', err);
@@ -195,24 +187,33 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
-  const handleEditCombination = (skuId: string) => {
-    const sku = skus.find(s => s.id === skuId);
+  // Remove optimistic created combinations when the persisted `skus` list contains them
+  useEffect(() => {
+    if (!skus || skus.length === 0) return;
+    setCreatedCombinations(prev => prev.filter(local => {
+      // if local has no sku, keep it
+      if (!local.sku) return true;
+      // remove if a persisted sku with same sku string or id exists
+      return !skus.some(s => (local.id && s.id === local.id) || (local.sku && s.sku === local.sku));
+    }));
+  }, [skus]);
+
+  const handleEditCombination = (id: string) => {
+    const sku = skus.find(s => s.id === id);
     if (!sku) return;
+    setCombinationAttrs(sku.attributes || {});
     setCombinationSku(sku.sku ?? '');
     setCombinationStock(typeof sku.stock === 'number' ? sku.stock : '');
-    setCombinationImages(Array.isArray(sku.images) ? sku.images.join(', ') : '');
     setCombinationPrice(typeof sku.price === 'number' ? sku.price : '');
-    setCombinationAttrs(sku.attributes ?? {});
-    setEditingSkuId(skuId);
+    setCombinationImages(Array.isArray(sku.images) ? sku.images.join('\n') : '');
+    setEditingSkuId(id);
     setCombinationModalOpen(true);
   };
 
-  const handleDeleteCombination = async (skuId: string) => {
-    if (!confirm('¿Eliminar esta combinación?')) return;
+  const handleDeleteCombination = async (id: string) => {
+    if (!window.confirm('¿Eliminar esta combinación?')) return;
     try {
-      await deleteVariantChild(productId, skuId);
-      // remove from local created list if present
-      setCreatedCombinations(prev => prev.filter(p => p.id !== skuId));
+      await deleteVariantChild(productId, id);
     } catch (err) {
       console.error('Error deleting combination', err);
     }
@@ -303,8 +304,37 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         {/* Render created combinations */}
         <div className={styles.combinationsList}>
           {/* Persisted SKUs first */}
-          {skus.map(s => (
-            <div key={s.id} className={styles.combinationItem}>
+            {/* Original product combination card (selectable) */}
+            {product && (
+              <div
+                key="original"
+                role="button"
+                tabIndex={0}
+                className={styles.combinationItem}
+                onClick={() => setSelectedCombinationKey('original')}
+                onKeyDown={(e) => { if (e.key === 'Enter') setSelectedCombinationKey('original'); }}
+                style={selectedCombinationKey === 'original' ? { outline: '3px solid #3b82f6' } : undefined}
+              >
+                <div className={styles.combinationMeta}>
+                  <div className={styles.combinationSku}>Original</div>
+                  <div className={styles.combinationAttrs}>{Object.entries(product.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
+                </div>
+                <div className={styles.combinationRight}>
+                  <div className={styles.combinationPrice}>{typeof product.price === 'number' ? `$${product.price.toLocaleString('es-AR')}` : ''}</div>
+                  <div className={styles.combinationStock}>{product.stock !== undefined ? `Stock: ${product.stock}` : 'Stock: N/A'}</div>
+                </div>
+              </div>
+            )}
+            {skus.map(s => (
+              <div
+                key={s.id}
+                role="button"
+                tabIndex={0}
+                className={styles.combinationItem}
+                onClick={() => setSelectedCombinationKey(s.id)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setSelectedCombinationKey(s.id); }}
+                style={selectedCombinationKey === s.id ? { outline: '3px solid #3b82f6' } : undefined}
+              >
               <div className={styles.combinationMeta}>
                 <div className={styles.combinationSku}>{s.sku ?? '—'}</div>
                 <div className={styles.combinationAttrs}>{Object.entries(s.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
@@ -327,7 +357,15 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
           {/* Optimistic / newly created combos (local) */}
           {createdCombinations.length === 0 ? null : createdCombinations.map((c, idx) => (
-            <div key={c.id ?? idx} className={styles.combinationItem}>
+            <div
+              key={c.id ?? idx}
+              role="button"
+              tabIndex={0}
+              className={styles.combinationItem}
+              onClick={() => setSelectedCombinationKey(c.id ?? `local-${idx}`)}
+              onKeyDown={(e) => { if (e.key === 'Enter') setSelectedCombinationKey(c.id ?? `local-${idx}`); }}
+              style={selectedCombinationKey === (c.id ?? `local-${idx}`) ? { outline: '3px solid #3b82f6' } : undefined}
+            >
               <div className={styles.combinationMeta}>
                 <div className={styles.combinationSku}>{c.sku ?? '—'}</div>
                 <div className={styles.combinationAttrs}>{Object.entries(c.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
