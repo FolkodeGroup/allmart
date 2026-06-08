@@ -134,8 +134,8 @@ export const suppliersAdminService = {
         const params = new URLSearchParams();
         if (opts.q) params.set('q', opts.q);
         if (opts.isActive !== undefined) params.set('isActive', String(opts.isActive));
-        if (opts.page) params.set('page', String(opts.page));
-        if (opts.limit) params.set('limit', String(opts.limit));
+        if (opts.page !== undefined) params.set('page', String(opts.page));
+        if (opts.limit !== undefined) params.set('limit', String(opts.limit));
         const qs = params.toString();
         const body = await apiFetch<ApiSuccess<SuppliersListResponse>>(`/api/admin/suppliers${qs ? `?${qs}` : ''}`);
         return body.data;

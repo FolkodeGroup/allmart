@@ -10,6 +10,7 @@ import AdminCollectionForm from './AdminCollectionForm';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminCollections.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { Search } from 'lucide-react';
 
 type ViewMode = 'list' | 'form';
@@ -35,7 +36,7 @@ const AdminCollections: React.FC = () => {
 
   useEffect(() => {
     loadCollections();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, filterActive, displayPosition]);
 
   async function loadCollections() {
@@ -260,7 +261,7 @@ const AdminCollections: React.FC = () => {
                     <td><strong>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</strong></td>
                     <td>
                       <Badge>
-                         {collection.displayOrder}
+                        {collection.displayOrder}
                       </Badge>
 
                     </td>
@@ -312,26 +313,13 @@ const AdminCollections: React.FC = () => {
         </table>
       </div>
 
-      {collections.length > 0 && pages > 1 && (
-        <div className={styles.pagination}>
-          <button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            className={styles.btnSmall}
-          >
-            Anterior
-          </button>
-          <span>
-            Página {page} de {pages}
-          </span>
-          <button
-            disabled={page === pages}
-            onClick={() => setPage(page + 1)}
-            className={styles.btnSmall}
-          >
-            Siguiente
-          </button>
-        </div>
+      {pages > 1 && (
+        <AdminPagination
+          page={page}
+          totalPages={pages}
+          onPageChange={setPage}
+          ariaLabel="Paginación de colecciones"
+        />
       )}
 
       <ConfirmModal

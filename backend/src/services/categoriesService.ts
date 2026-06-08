@@ -102,10 +102,10 @@ export async function getAdminCategories(query: {
 
   return {
     data,
-    total: filteredTotal,
+    total,
     page,
     limit,
-    totalPages: Math.ceil(filteredTotal / limit),
+    totalPages: Math.ceil(total / limit),
   };
 }
 

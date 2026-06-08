@@ -16,7 +16,7 @@ export interface SupplierCreateInput {
   isActive?: boolean;
 }
 
-export interface SupplierUpdateInput extends Partial<SupplierCreateInput> {}
+export interface SupplierUpdateInput extends Partial<SupplierCreateInput> { }
 
 export interface SuppliersFilter {
   q?: string;
@@ -28,7 +28,7 @@ export interface SuppliersFilter {
 export const supplierService = {
   // ── List ────────────────────────────────────────────────────────────────────
   async list(filter: SuppliersFilter = {}) {
-    const { q, isActive, page = 1, limit = 50 } = filter;
+    const { q, isActive, page = 1, limit = 6 } = filter;
     const skip = (page - 1) * limit;
 
     const where = {
@@ -64,7 +64,7 @@ export const supplierService = {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.max(1, Math.ceil(total / limit)),
     };
   },
 

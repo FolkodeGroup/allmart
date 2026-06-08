@@ -21,11 +21,11 @@ import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductHeader } from '../../../components/ui/ProductHeader';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { ProductFilters } from '../../../components/ui/ProductFilters';
-import { ProductPagination } from '../../../components/ui/ProductPagination';
 
 // Styles
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminProducts.module.css';
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 
 type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
@@ -336,14 +336,14 @@ export function AdminProducts() {
 
           {!loading && !error && products.length > 0 && (
             <div className={styles.actionsBar}>
-                  <div className={styles.exportBtnContainer}>
-                    <ExportButtons
-                      onExportCSV={handleExportCSV}
-                      onExportExcel={handleExportExcel}
-                      onExportPDF={handleExportPdf}
-                      loading={exportLoadingFormat ?? (isExportingPdf ? 'pdf' : null)}
-                    />
-                  </div>
+              <div className={styles.exportBtnContainer}>
+                <ExportButtons
+                  onExportCSV={handleExportCSV}
+                  onExportExcel={handleExportExcel}
+                  onExportPDF={handleExportPdf}
+                  loading={exportLoadingFormat ?? (isExportingPdf ? 'pdf' : null)}
+                />
+              </div>
 
               <div className={styles.sortContainer}>
                 <div className={styles.sortControls}>
@@ -411,10 +411,11 @@ export function AdminProducts() {
               />
 
               {total > 10 && (
-                <ProductPagination
+                <AdminPagination
                   page={apiPage}
                   totalPages={apiTotalPages}
                   onPageChange={handlePageChange}
+                  ariaLabel="Paginación de productos"
                 />
               )}
             </div>
