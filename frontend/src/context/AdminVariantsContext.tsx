@@ -4,12 +4,12 @@
  * Consume la API REST del backend — sin mocks ni localStorage.
  */
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { useNotification } from './NotificationContext';
 import * as variantsService from '../features/admin/variants/variantsService';
-import type { ApiVariant } from '../features/admin/variants/variantsService';
+import type { ApiVariant, VariantChild } from '../features/admin/variants/variantsService';
 
 // ─── Tipos exportados ─────────────────────────────────────────────────────────
 
@@ -52,6 +52,12 @@ interface AdminVariantsContextType {
   addValueToVariant: (productId: string, variantId: string, value: string) => Promise<void>;
   /** Elimina un valor de un grupo existente */
   removeValueFromVariant: (productId: string, variantId: string, value: string) => Promise<void>;
+  /** SKUs/combinations CRUD for a product */
+  skus: VariantChild[];
+  loadSkus: (productId: string) => Promise<void>;
+  createVariantChild: (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number }) => Promise<unknown>;
+  updateVariantChild: (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number }) => Promise<VariantChild>;
+  deleteVariantChild: (productId: string, skuId: string) => Promise<void>;
 }
 
 // ─── Contexto ─────────────────────────────────────────────────────────────────
@@ -79,15 +85,16 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [skus, setSkus] = useState<VariantChild[]>([]);
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
-  function requireToken(): string {
+  const requireToken = useCallback(() => {
     if (!token) throw new Error('No hay sesión activa');
     return token;
-  }
+  }, [token]);
 
-  async function withLoading<T>(fn: () => Promise<T>, successMsg?: string): Promise<T> {
+  const withLoading = useCallback(async function <T>(fn: () => Promise<T>, successMsg?: string): Promise<T> {
     setIsLoading(true);
     setError(null);
     try {
@@ -102,7 +109,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [showNotification]);
 
   // ─── Operaciones ────────────────────────────────────────────────────────────
 
@@ -116,8 +123,15 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
       setVariants([]);
       setSelectedProductId(null);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [requireToken, withLoading]);
+
+  const loadSkus = useCallback(async (productId: string) => {
+    await withLoading(async () => {
+      const t = requireToken();
+      const data = await variantsService.fetchVariantChildren(t, productId);
+      setSkus(data);
+    }).catch(() => setSkus([]));
+  }, [requireToken, withLoading]);
 
   const clearVariants = useCallback(() => {
     setVariants([]);
@@ -125,7 +139,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     setError(null);
   }, []);
 
-  const addVariant = async (productId: string, name: string, values: string[] = []): Promise<VariantGroup> => {
+  const addVariant = useCallback(async (productId: string, name: string, values: string[] = []): Promise<VariantGroup> => {
     return withLoading(async () => {
       const t = requireToken();
       const created = await variantsService.createVariant(t, productId, { name, values });
@@ -133,9 +147,9 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
       setVariants(prev => [...prev, group]);
       return group;
     }, 'Grupo de variantes creado');
-  };
+  }, [requireToken, withLoading]);
 
-  const updateVariant = async (
+  const updateVariant = useCallback(async (
     productId: string,
     variantId: string,
     data: { name?: string; values?: string[] },
@@ -147,17 +161,17 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
         prev.map(v => (v.id === variantId ? apiToVariantGroup(updated) : v)),
       );
     }, 'Variantes actualizadas');
-  };
+  }, [requireToken, withLoading]);
 
-  const deleteVariant = async (productId: string, variantId: string) => {
+  const deleteVariant = useCallback(async (productId: string, variantId: string) => {
     await withLoading(async () => {
       const t = requireToken();
       await variantsService.deleteVariant(t, productId, variantId);
       setVariants(prev => prev.filter(v => v.id !== variantId));
     }, 'Grupo de variantes eliminado');
-  };
+  }, [requireToken, withLoading]);
 
-  const toggleVariantStatus = async (productId: string, variantId: string, newStatus: boolean) => {
+  const toggleVariantStatus = useCallback(async (productId: string, variantId: string, newStatus: boolean) => {
     const statusLabel = newStatus ? 'activada' : 'desactivada';
     await withLoading(async () => {
       const t = requireToken();
@@ -166,40 +180,101 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
         prev.map(v => (v.id === variantId ? apiToVariantGroup(updated) : v)),
       );
     }, `Variante ${statusLabel} correctamente`);
-  };
+  }, [requireToken, withLoading]);
 
-  const addValueToVariant = async (productId: string, variantId: string, value: string) => {
+  const addValueToVariant = useCallback(async (productId: string, variantId: string, value: string) => {
     const variant = variants.find(v => v.id === variantId);
     if (!variant) return;
     if (variant.values.includes(value)) return; // evitar duplicados
     const newValues = [...variant.values, value];
     await updateVariant(productId, variantId, { values: newValues });
-  };
+  }, [variants, updateVariant]);
 
-  const removeValueFromVariant = async (productId: string, variantId: string, value: string) => {
+  const removeValueFromVariant = useCallback(async (productId: string, variantId: string, value: string) => {
     const variant = variants.find(v => v.id === variantId);
     if (!variant) return;
     const newValues = variant.values.filter(v => v !== value);
     await updateVariant(productId, variantId, { values: newValues });
-  };
+  }, [variants, updateVariant]);
+
+  const createVariantChild = useCallback(async (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number }) => {
+    return withLoading(async () => {
+      const t = requireToken();
+      const created = await variantsService.createVariantChild(t, productId, payload);
+      // After creation refresh variants list to reflect any changes (best-effort)
+      try {
+        const data = await variantsService.fetchVariantsByProduct(t, productId);
+        setVariants(data.map(apiToVariantGroup));
+        // refresh skus as well
+        await loadSkus(productId);
+      } catch {
+        // ignore refresh errors
+      }
+      return created;
+    }, 'Entrada de variante creada');
+  }, [loadSkus, requireToken, withLoading]);
+
+  const updateVariantChild = useCallback(async (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number }) => {
+    return withLoading(async () => {
+      const t = requireToken();
+      const updated = await variantsService.updateVariantChild(
+        t, productId, skuId,
+        payload as typeof payload & { attributes: Record<string, string> },
+      );
+      // refresh list
+      await loadSkus(productId);
+      return updated;
+    }, 'Entrada de variante actualizada');
+  }, [loadSkus, requireToken, withLoading]);
+
+  const deleteVariantChild = useCallback(async (productId: string, skuId: string) => {
+    return withLoading(async () => {
+      const t = requireToken();
+      await variantsService.deleteVariantChild(t, productId, skuId);
+      await loadSkus(productId);
+    }, 'Entrada de variante eliminada');
+  }, [loadSkus, requireToken, withLoading]);
+
+  const providerValue = useMemo(() => ({
+    variants,
+    selectedProductId,
+    isLoading,
+    error,
+    loadVariants,
+    clearVariants,
+    addVariant,
+    updateVariant,
+    deleteVariant,
+    toggleVariantStatus,
+    addValueToVariant,
+    removeValueFromVariant,
+    skus,
+    loadSkus,
+    createVariantChild,
+    updateVariantChild,
+    deleteVariantChild,
+  }), [
+    variants,
+    selectedProductId,
+    isLoading,
+    error,
+    loadVariants,
+    clearVariants,
+    addVariant,
+    updateVariant,
+    deleteVariant,
+    toggleVariantStatus,
+    addValueToVariant,
+    removeValueFromVariant,
+    skus,
+    loadSkus,
+    createVariantChild,
+    updateVariantChild,
+    deleteVariantChild,
+  ]);
 
   return (
-    <AdminVariantsContext.Provider
-      value={{
-        variants,
-        selectedProductId,
-        isLoading,
-        error,
-        loadVariants,
-        clearVariants,
-        addVariant,
-        updateVariant,
-        deleteVariant,
-        toggleVariantStatus,
-        addValueToVariant,
-        removeValueFromVariant,
-      }}
-    >
+    <AdminVariantsContext.Provider value={providerValue}>
       {children}
     </AdminVariantsContext.Provider>
   );

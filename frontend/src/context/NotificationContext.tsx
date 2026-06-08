@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
@@ -10,7 +10,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const showNotification = (type: NotificationType, message: string) => {
+  const showNotification = useCallback((type: NotificationType, message: string) => {
     switch (type) {
       case 'success':
         toast.success(message);
@@ -26,12 +26,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         toast(message, { icon: 'ℹ️' });
         break;
     }
-  };
+  }, []);
+
+  const value = useMemo(() => ({ showNotification }), [showNotification]);
 
   return (
-    <NotificationContext.Provider value={{ showNotification }}>
+    <NotificationContext.Provider value={value}>
       {children}
-      <Toaster 
+      <Toaster
         position="bottom-right"
         toastOptions={{
           duration: 4000,

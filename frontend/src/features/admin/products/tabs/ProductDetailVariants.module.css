@@ -59,3 +59,160 @@
   font-size: var(--text-xs);
   color: var(--color-text-quaternary);
 }
+
+.addCombinationBtn {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+}
+
+.addCombinationBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* Modal (reuse app tokens) */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.modal {
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 720px;
+  padding: 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.modal h3 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-heading);
+  color: var(--color-primary-dark);
+}
+
+.fieldRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.fieldRow label {
+  width: 150px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.fieldRow input,
+.fieldRow select {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-primary);
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem
+}
+
+.modalActions button {
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer
+}
+
+.modalActions button[type="button"] {
+  background: transparent;
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-primary)
+}
+
+.modalActions button[type="submit"] {
+  background: var(--color-primary-dark);
+  color: #fff
+}
+
+/* Combinations list */
+.combinationsList {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem
+}
+
+.combinationItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light)
+}
+
+.combinationMeta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center
+}
+
+.combinationSku {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--color-primary-dark)
+}
+
+.combinationAttrs {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary)
+}
+
+.combinationStock {
+  font-weight: 700;
+  color: var(--color-accent-dark)
+}
+
+.combinationRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.combinationPrice {
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.combinationImages {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.combinationThumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-light);
+}

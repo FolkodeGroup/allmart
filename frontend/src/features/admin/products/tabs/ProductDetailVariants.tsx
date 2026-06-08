@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './ProductDetailVariants.module.css';
 import { useAdminVariants } from '../../../../context/AdminVariantsContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
@@ -22,6 +22,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     toggleVariantStatus,
     addValueToVariant,
     removeValueFromVariant,
+    createVariantChild,
+    skus,
+    loadSkus,
+    updateVariantChild,
+    deleteVariantChild,
   } = useAdminVariants();
   const { getProduct } = useAdminProducts();
   const [newGroupName, setNewGroupName] = useState('');
@@ -34,10 +39,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   const product = getProduct(productId);
 
+  const lastLoadedProductRef = useRef<string | null>(null);
   useEffect(() => {
-    if (productId) {
-      loadVariants(productId);
-    }
+    if (!productId) return;
+    if (lastLoadedProductRef.current === productId) return;
+    lastLoadedProductRef.current = productId;
+    loadVariants(productId);
+    loadSkus(productId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
@@ -112,6 +120,104 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setEditModal({ open: false, groupId: null });
   };
 
+  // --- New: Create variant combination (SKU + attributes + stock)
+  const [combinationModalOpen, setCombinationModalOpen] = useState(false);
+  const [combinationSku, setCombinationSku] = useState('');
+  const [combinationStock, setCombinationStock] = useState<number | ''>('');
+  const [combinationImages, setCombinationImages] = useState<string>('');
+  const [combinationPrice, setCombinationPrice] = useState<number | ''>('');
+  const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
+  type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
+  const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
+  const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (product && product.sku) {
+      // prefill sku base, actual initials will be appended when user focuses input
+      setCombinationSku(product.sku + '-');
+    }
+  }, [product]);
+
+  const openCombinationModal = () => {
+    // initialize attributes with first available value (if any)
+    const initial: Record<string, string> = {};
+    variants.forEach(v => {
+      initial[v.name] = v.values[0] ?? '';
+    });
+    setCombinationAttrs(initial);
+    setCombinationStock('');
+    setCombinationImages('');
+    setCombinationPrice('');
+    setCombinationModalOpen(true);
+  };
+
+  const handleCreateCombination = async () => {
+    // sanitize
+    const attrs = { ...combinationAttrs };
+    const sku = combinationSku.trim();
+    const stock = combinationStock === '' ? undefined : Number(combinationStock);
+    // Prefer newline-separated URLs to avoid splitting valid URLs that contain commas/semicolons in query strings.
+    let images = undefined as string[] | undefined;
+    const raw = combinationImages.trim();
+    if (raw) {
+      if (raw.includes('\n')) images = raw.split('\n').map(s => s.trim()).filter(Boolean);
+      else images = [raw];
+    }
+    const price = combinationPrice === '' ? undefined : Number(combinationPrice);
+    try {
+      if (editingSkuId) {
+        // update existing
+        const updated = await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, images, price });
+        // replace in createdCombinations if present
+        setCreatedCombinations(prev =>
+          prev.map(p =>
+            p.id === updated.id
+              ? { ...updated, attributes: updated.attributes ?? {} }
+              : p
+          )
+        );
+        setEditingSkuId(null);
+      } else {
+        const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, images, price });
+        // optimistic push — backend may return created object
+        let newItem: CreatedCombination;
+        if (typeof created === 'object' && created !== null) {
+          newItem = (created as unknown) as CreatedCombination;
+        } else {
+          newItem = { sku: sku || undefined, attributes: attrs, stock, images, price };
+        }
+        setCreatedCombinations(prev => [newItem, ...prev]);
+      }
+    } catch (err) {
+      console.error('Error creating/updating combination', err);
+    } finally {
+      setCombinationModalOpen(false);
+    }
+  };
+
+  const handleEditCombination = (skuId: string) => {
+    const sku = skus.find(s => s.id === skuId);
+    if (!sku) return;
+    setCombinationSku(sku.sku ?? '');
+    setCombinationStock(typeof sku.stock === 'number' ? sku.stock : '');
+    setCombinationImages(Array.isArray(sku.images) ? sku.images.join(', ') : '');
+    setCombinationPrice(typeof sku.price === 'number' ? sku.price : '');
+    setCombinationAttrs(sku.attributes ?? {});
+    setEditingSkuId(skuId);
+    setCombinationModalOpen(true);
+  };
+
+  const handleDeleteCombination = async (skuId: string) => {
+    if (!confirm('¿Eliminar esta combinación?')) return;
+    try {
+      await deleteVariantChild(productId, skuId);
+      // remove from local created list if present
+      setCreatedCombinations(prev => prev.filter(p => p.id !== skuId));
+    } catch (err) {
+      console.error('Error deleting combination', err);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <section className={styles.section}>
@@ -150,6 +256,94 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           onClose={() => setEditModal({ open: false, groupId: null })}
           onSave={handleSaveEditModal}
         />
+        <div style={{ marginTop: 16 }}>
+          <button type="button" onClick={openCombinationModal} className={styles.addCombinationBtn}>
+            Añadir Nueva Combinación
+          </button>
+        </div>
+
+        {combinationModalOpen && (
+          <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
+            <div className={styles.modal}>
+              <h3>Añadir combinación</h3>
+              {variants.length === 0 && <p className={styles.help}>No hay grupos de variantes para seleccionar.</p>}
+              {variants.map((g) => (
+                <div key={g.id} className={styles.fieldRow}>
+                  <label>{g.name}</label>
+                  <select value={combinationAttrs[g.name] ?? ''} onChange={e => setCombinationAttrs(a => ({ ...a, [g.name]: e.target.value }))}>
+                    <option value="">--</option>
+                    {g.values.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                </div>
+              ))}
+              <div className={styles.fieldRow}>
+                <label htmlFor="combination-sku">SKU</label>
+                <input id="combination-sku" value={combinationSku} onChange={e => setCombinationSku(e.target.value)} />
+              </div>
+              <div className={styles.fieldRow}>
+                <label htmlFor="combination-images">Imágenes (una URL por línea — recomendado)</label>
+                <textarea id="combination-images" placeholder="https://...\nhttps://..." rows={3} value={combinationImages} onChange={e => setCombinationImages(e.target.value)} />
+              </div>
+              <div className={styles.fieldRow}>
+                <label htmlFor="combination-price">Precio</label>
+                <input id="combination-price" type="number" step="0.01" value={combinationPrice === '' ? '' : String(combinationPrice)} onChange={e => setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value))} />
+              </div>
+              <div className={styles.fieldRow}>
+                <label htmlFor="combination-stock">Stock</label>
+                <input id="combination-stock" type="number" value={combinationStock === '' ? '' : String(combinationStock)} onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))} />
+              </div>
+              <div className={styles.modalActions}>
+                <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
+                <button type="button" onClick={handleCreateCombination}>Crear</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Render created combinations */}
+        <div className={styles.combinationsList}>
+          {/* Persisted SKUs first */}
+          {skus.map(s => (
+            <div key={s.id} className={styles.combinationItem}>
+              <div className={styles.combinationMeta}>
+                <div className={styles.combinationSku}>{s.sku ?? '—'}</div>
+                <div className={styles.combinationAttrs}>{Object.entries(s.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
+              </div>
+              <div className={styles.combinationRight}>
+                <div className={styles.combinationPrice}>{typeof s.price === 'number' ? `$${s.price.toLocaleString('es-AR')}` : ''}</div>
+                <div className={styles.combinationStock}>{typeof s.stock === 'number' ? `Stock: ${s.stock}` : 'Stock: N/A'}</div>
+              </div>
+              {Array.isArray(s.images) && s.images.length > 0 && (
+                <div className={styles.combinationImages}>
+                  {s.images.map((img, i) => <img key={i} src={img} alt={s.sku ?? 'imagen'} className={styles.combinationThumb} />)}
+                </div>
+              )}
+              <div className={styles.combinationActions}>
+                <button type="button" onClick={() => handleEditCombination(s.id)}>Editar</button>
+                <button type="button" onClick={() => handleDeleteCombination(s.id)}>Eliminar</button>
+              </div>
+            </div>
+          ))}
+
+          {/* Optimistic / newly created combos (local) */}
+          {createdCombinations.length === 0 ? null : createdCombinations.map((c, idx) => (
+            <div key={c.id ?? idx} className={styles.combinationItem}>
+              <div className={styles.combinationMeta}>
+                <div className={styles.combinationSku}>{c.sku ?? '—'}</div>
+                <div className={styles.combinationAttrs}>{Object.entries(c.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
+              </div>
+              <div className={styles.combinationRight}>
+                <div className={styles.combinationPrice}>{typeof c.price === 'number' ? `$${c.price.toLocaleString('es-AR')}` : ''}</div>
+                <div className={styles.combinationStock}>{typeof c.stock === 'number' ? `Stock: ${c.stock}` : 'Stock: N/A'}</div>
+              </div>
+              {Array.isArray(c.images) && c.images.length > 0 && (
+                <div className={styles.combinationImages}>
+                  {c.images.map((img, i) => <img key={i} src={img} alt={c.sku ?? 'imagen'} className={styles.combinationThumb} />)}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

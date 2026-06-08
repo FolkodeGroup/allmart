@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import type { VariantGroup } from '../../context/AdminProductsContext';
+import { useState, useEffect, useMemo } from 'react';
+import type { VariantGroup as AdminVariantGroup } from '../../context/AdminProductsContext';
 import { useParams, Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import type { Product } from '../../types';
@@ -15,6 +15,7 @@ import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import { ProductReviews } from '../../components/ProductReviews/ProductReviews';
+import VariantSelector from '../../components/VariantSelector/VariantSelector';
 
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
@@ -39,8 +40,13 @@ export function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [selectedSkuId, setSelectedSkuId] = useState<string | null>(null);
   const [addedFeedback, setAddedFeedback] = useState(false);
   const [dynamicDiscount, setDynamicDiscount] = useState<ProductDiscount | null>(null);
+
+  // Compute selected SKU and image set once to avoid repeated .find calls
+  const selectedSku = useMemo(() => product?.skus?.find(s => s.id === selectedSkuId) ?? null, [product?.skus, selectedSkuId]);
+  const skuImages = useMemo(() => (selectedSku?.images && selectedSku.images.length > 0) ? selectedSku.images : product?.images ?? [], [selectedSku, product?.images]);
 
   /* Cargar producto por slug */
   useEffect(() => {
@@ -110,6 +116,17 @@ export function ProductDetailPage() {
     };
   }, [slug]);
 
+  // When selected SKU changes, reset selected image to 0
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedSkuId]);
+
+  // debug: log selected SKU and images to help diagnose missing main image issue
+  useEffect(() => {
+
+    console.debug('selectedSkuId ->', selectedSkuId, 'selectedSku ->', selectedSku, 'skuImages ->', skuImages);
+  }, [selectedSkuId, selectedSku, skuImages]);
+
   /* Cargar descuento dinámico desde API */
   useEffect(() => {
     if (!product) return;
@@ -134,10 +151,10 @@ export function ProductDetailPage() {
     };
 
     loadDiscount();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
 
-  const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
+  const variantGroups = (product as unknown as { variants?: AdminVariantGroup[] }).variants ?? [];
   const isNew = product ? product.tags.includes('nuevo') : false;
   const isProductFavorite = product ? isFavorite(product.id) : false;
 
@@ -151,10 +168,18 @@ export function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    addToCart({ product, quantity });
+    const productForCart = selectedSku
+      ? { ...product, sku: selectedSku.sku, price: selectedSku.price ?? product.price }
+      : product;
+    addToCart({ product: productForCart, quantity });
     setAddedFeedback(true);
     setTimeout(() => setAddedFeedback(false), 2000);
   };
+
+  function looksLikeColor(value: string) {
+    if (!value) return false;
+    return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim()) || /^rgba?\(/i.test(value) || /^[a-z]+$/i.test(value.trim());
+  }
 
   if (loading) {
     return (
@@ -202,19 +227,18 @@ export function ProductDetailPage() {
           <div className={styles.mainImageWrapper}>
             <img
               className={styles.mainImage}
-              src={product.images[selectedImage]}
+              src={skuImages[selectedImage]}
               alt={product.name}
               loading="eager"
             />
           </div>
-          {product.images.length > 1 && (
+          {(skuImages || []).length > 1 && (
             <div className={styles.thumbnails} role="tablist" aria-label="Imágenes del producto">
-              {product.images.map((img, idx) => (
+              {(skuImages || []).map((img, idx) => (
                 <button
                   key={idx}
-                  className={`${styles.thumbnail} ${
-                    idx === selectedImage ? styles.active : ''
-                  }`}
+                  className={`${styles.thumbnail} ${idx === selectedImage ? styles.active : ''
+                    }`}
                   onClick={() => setSelectedImage(idx)}
                   tabIndex={0}
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedImage(idx)}
@@ -252,19 +276,63 @@ export function ProductDetailPage() {
 
           <span className={styles.sku}>SKU: {product.sku}</span>
 
+          {/* Product combinations / SKUs */}
+          {product.skus && product.skus.length > 0 && (
+            <div className={styles.skusBlock}>
+              <h4 className={styles.skusTitle}>Combinaciones</h4>
+              <div className={styles.skusList} role="list">
+                {product.skus.map(s => {
+                  const label = Object.entries(s.attributes || {}).map(([, v]) => `${v}`).join(' • ') || s.sku;
+                  const isSelected = selectedSkuId === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      className={`${styles.skuOption} ${isSelected ? styles.skuOptionSelected : ''}`}
+                      onClick={() => { setSelectedImage(0); setSelectedSkuId(s.id); }}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setSelectedImage(0), setSelectedSkuId(s.id))}
+                      aria-pressed={isSelected}
+                      title={`${label} — ${s.sku}`}
+                    >
+                      <div className={styles.skuOptionMain}>
+                        <div className={styles.skuAttrBadges}>
+                          {Object.entries(s.attributes || {}).map(([k, v]) => {
+                            const val = String(v);
+                            if (looksLikeColor(val)) {
+                              return <span key={k} className={styles.skuAttrColorCircle} style={{ background: val }} title={`${k}: ${val}`} />;
+                            }
+                            return <span key={k} className={styles.skuAttrBox}>{val}</span>;
+                          })}
+                        </div>
+                        <div className={styles.skuLabel}>{label}</div>
+                        <div className={styles.skuMeta}>{s.sku}</div>
+                      </div>
+                      <div className={styles.skuRight}>
+                        <div className={styles.skuPrice}>{s.price ? `$${s.price.toLocaleString('es-AR')}` : ''}</div>
+                        <div className={styles.skuStock}>{s.stock}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Price */}
           <div className={styles.priceBlock}>
-            {dynamicDiscount ? (
-              <ProductPrice
-                price={dynamicDiscount.finalPrice}
-                size="lg"
-              />
-            ) : (
-              <ProductPrice
-                price={product.price}
-                size="lg"
-              />
-            )}
+            {(() => {
+              // If a SKU is selected and it has a price, prefer it
+              const basePrice = selectedSku?.price ?? product.price;
+              if (dynamicDiscount) {
+                // If there is a dynamic discount, compute final price based on the selected base price
+                const final = dynamicDiscount.finalPrice && dynamicDiscount.originalPrice === product.price
+                  ? // scale discount proportionally if base price differs from product.price
+                  Math.max(0, Math.round((basePrice / product.price) * dynamicDiscount.finalPrice))
+                  : dynamicDiscount.finalPrice;
+                return <ProductPrice price={final} size="lg" />;
+              }
+              return <ProductPrice price={basePrice} size="lg" />;
+            })()}
           </div>
 
           {/* Promotion Information */}
@@ -285,28 +353,12 @@ export function ProductDetailPage() {
           {variantGroups.length > 0 && (
             <div className={styles.variantsBlock}>
               {variantGroups.map(group => (
-                <div key={group.id} className={styles.variantGroup}>
-                  <span className={styles.variantLabel}>{group.name}:</span>
-                  <div className={styles.variantOptions}>
-                    {group.values.map(val => (
-                      <button
-                        key={val}
-                        type="button"
-                        className={
-                          selectedVariants[group.id] === val
-                            ? styles.variantOptionSelected
-                            : styles.variantOption
-                        }
-                        onClick={() => setSelectedVariants(prev => ({ ...prev, [group.id]: val }))}
-                        tabIndex={0}
-                        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedVariants(prev => ({ ...prev, [group.id]: val }))}
-                        aria-pressed={selectedVariants[group.id] === val}
-                      >
-                        {val}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <VariantSelector
+                  key={group.id}
+                  group={group}
+                  selected={selectedVariants[group.id]}
+                  onSelect={(value) => setSelectedVariants(prev => ({ ...prev, [group.id]: value }))}
+                />
               ))}
             </div>
           )}
