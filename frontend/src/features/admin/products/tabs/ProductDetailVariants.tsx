@@ -130,7 +130,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
-  const [selectedCombinationKey, setSelectedCombinationKey] = useState<string>('original');
 
   useEffect(() => {
     if (product && product.sku) {
@@ -304,37 +303,8 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         {/* Render created combinations */}
         <div className={styles.combinationsList}>
           {/* Persisted SKUs first */}
-            {/* Original product combination card (selectable) */}
-            {product && (
-              <div
-                key="original"
-                role="button"
-                tabIndex={0}
-                className={styles.combinationItem}
-                onClick={() => setSelectedCombinationKey('original')}
-                onKeyDown={(e) => { if (e.key === 'Enter') setSelectedCombinationKey('original'); }}
-                style={selectedCombinationKey === 'original' ? { outline: '3px solid #3b82f6' } : undefined}
-              >
-                <div className={styles.combinationMeta}>
-                  <div className={styles.combinationSku}>Original</div>
-                  <div className={styles.combinationAttrs}>{Object.entries(product.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
-                </div>
-                <div className={styles.combinationRight}>
-                  <div className={styles.combinationPrice}>{typeof product.price === 'number' ? `$${product.price.toLocaleString('es-AR')}` : ''}</div>
-                  <div className={styles.combinationStock}>{product.stock !== undefined ? `Stock: ${product.stock}` : 'Stock: N/A'}</div>
-                </div>
-              </div>
-            )}
-            {skus.map(s => (
-              <div
-                key={s.id}
-                role="button"
-                tabIndex={0}
-                className={styles.combinationItem}
-                onClick={() => setSelectedCombinationKey(s.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter') setSelectedCombinationKey(s.id); }}
-                style={selectedCombinationKey === s.id ? { outline: '3px solid #3b82f6' } : undefined}
-              >
+          {skus.map(s => (
+            <div key={s.id} className={styles.combinationItem}>
               <div className={styles.combinationMeta}>
                 <div className={styles.combinationSku}>{s.sku ?? '—'}</div>
                 <div className={styles.combinationAttrs}>{Object.entries(s.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
@@ -357,15 +327,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
           {/* Optimistic / newly created combos (local) */}
           {createdCombinations.length === 0 ? null : createdCombinations.map((c, idx) => (
-            <div
-              key={c.id ?? idx}
-              role="button"
-              tabIndex={0}
-              className={styles.combinationItem}
-              onClick={() => setSelectedCombinationKey(c.id ?? `local-${idx}`)}
-              onKeyDown={(e) => { if (e.key === 'Enter') setSelectedCombinationKey(c.id ?? `local-${idx}`); }}
-              style={selectedCombinationKey === (c.id ?? `local-${idx}`) ? { outline: '3px solid #3b82f6' } : undefined}
-            >
+            <div key={c.id ?? idx} className={styles.combinationItem}>
               <div className={styles.combinationMeta}>
                 <div className={styles.combinationSku}>{c.sku ?? '—'}</div>
                 <div className={styles.combinationAttrs}>{Object.entries(c.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>

@@ -70,6 +70,8 @@ export function ProductDetailPage() {
 
         const mappedProduct = mapApiProductToProduct(apiProduct, categories);
         setProduct(mappedProduct);
+        // Ensure default selection is the original product combination
+        setSelectedSkuId(null);
         setLoading(false);
 
         // Cargar productos relacionados de la misma categoría
@@ -168,9 +170,23 @@ export function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    // Build a product object for the cart that includes which combination/variant was selected
+    const variantValues: string[] = selectedSku
+      ? Object.values(selectedSku.attributes || {}).filter(Boolean)
+      : Object.values(selectedVariants).filter(Boolean);
+
+    const nameWithVariants = variantValues.length > 0
+      ? `${product.name} + ${variantValues.join(' ')}`
+      : product.name;
+
+    const imagesForCart = selectedSku && Array.isArray(selectedSku.images) && selectedSku.images.length > 0
+      ? selectedSku.images
+      : product.images;
+
+    const cartProductId = selectedSku ? `${product.id}::${selectedSku.id}` : `${product.id}::original`;
     const productForCart = selectedSku
-      ? { ...product, sku: selectedSku.sku, price: selectedSku.price ?? product.price }
-      : product;
+      ? { ...product, id: cartProductId, name: nameWithVariants, sku: selectedSku.sku, price: selectedSku.price ?? product.price, images: imagesForCart }
+      : { ...product, id: cartProductId, name: nameWithVariants, images: imagesForCart };
     addToCart({ product: productForCart, quantity });
     setAddedFeedback(true);
     setTimeout(() => setAddedFeedback(false), 2000);
@@ -277,46 +293,67 @@ export function ProductDetailPage() {
           <span className={styles.sku}>SKU: {product.sku}</span>
 
           {/* Product combinations / SKUs */}
-          {product.skus && product.skus.length > 0 && (
-            <div className={styles.skusBlock}>
-              <h4 className={styles.skusTitle}>Combinaciones</h4>
-              <div className={styles.skusList} role="list">
-                {product.skus.map(s => {
-                  const label = Object.entries(s.attributes || {}).map(([, v]) => `${v}`).join(' • ') || s.sku;
-                  const isSelected = selectedSkuId === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      className={`${styles.skuOption} ${isSelected ? styles.skuOptionSelected : ''}`}
-                      onClick={() => { setSelectedImage(0); setSelectedSkuId(s.id); }}
-                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setSelectedImage(0), setSelectedSkuId(s.id))}
-                      aria-pressed={isSelected}
-                      title={`${label} — ${s.sku}`}
-                    >
-                      <div className={styles.skuOptionMain}>
-                        <div className={styles.skuAttrBadges}>
-                          {Object.entries(s.attributes || {}).map(([k, v]) => {
-                            const val = String(v);
-                            if (looksLikeColor(val)) {
-                              return <span key={k} className={styles.skuAttrColorCircle} style={{ background: val }} title={`${k}: ${val}`} />;
-                            }
-                            return <span key={k} className={styles.skuAttrBox}>{val}</span>;
-                          })}
-                        </div>
-                        <div className={styles.skuLabel}>{label}</div>
-                        <div className={styles.skuMeta}>{s.sku}</div>
+          <div className={styles.skusBlock}>
+            <h4 className={styles.skusTitle}>Combinaciones</h4>
+            <div className={styles.skusList} role="list">
+              {/* Original combination (base product) */}
+              <button
+                key="original"
+                type="button"
+                className={`${styles.skuOption} ${selectedSkuId === null ? styles.skuOptionSelected : ''}`}
+                onClick={() => { setSelectedImage(0); setSelectedSkuId(null); }}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setSelectedImage(0), setSelectedSkuId(null))}
+                aria-pressed={selectedSkuId === null}
+                title={`Original — ${product.sku}`}
+              >
+                <div className={styles.skuOptionMain}>
+                  <div className={styles.skuAttrBadges}>
+                    {/* No variant badges for original */}
+                  </div>
+                  <div className={styles.skuLabel}>Original</div>
+                  <div className={styles.skuMeta}>{product.sku}</div>
+                </div>
+                <div className={styles.skuRight}>
+                  <div className={styles.skuPrice}>{product.price ? `$${product.price.toLocaleString('es-AR')}` : ''}</div>
+                  <div className={styles.skuStock}>{''}</div>
+                </div>
+              </button>
+
+              {product.skus && product.skus.map(s => {
+                const label = Object.entries(s.attributes || {}).map(([, v]) => `${v}`).join(' • ') || s.sku;
+                const isSelected = selectedSkuId === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={`${styles.skuOption} ${isSelected ? styles.skuOptionSelected : ''}`}
+                    onClick={() => { setSelectedImage(0); setSelectedSkuId(s.id); }}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setSelectedImage(0), setSelectedSkuId(s.id))}
+                    aria-pressed={isSelected}
+                    title={`${label} — ${s.sku}`}
+                  >
+                    <div className={styles.skuOptionMain}>
+                      <div className={styles.skuAttrBadges}>
+                        {Object.entries(s.attributes || {}).map(([k, v]) => {
+                          const val = String(v);
+                          if (looksLikeColor(val)) {
+                            return <span key={k} className={styles.skuAttrColorCircle} style={{ background: val }} title={`${k}: ${val}`} />;
+                          }
+                          return <span key={k} className={styles.skuAttrBox}>{val}</span>;
+                        })}
                       </div>
-                      <div className={styles.skuRight}>
-                        <div className={styles.skuPrice}>{s.price ? `$${s.price.toLocaleString('es-AR')}` : ''}</div>
-                        <div className={styles.skuStock}>{s.stock}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                      <div className={styles.skuLabel}>{label}</div>
+                      <div className={styles.skuMeta}>{s.sku}</div>
+                    </div>
+                    <div className={styles.skuRight}>
+                      <div className={styles.skuPrice}>{s.price ? `$${s.price.toLocaleString('es-AR')}` : ''}</div>
+                      <div className={styles.skuStock}>{s.stock}</div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
 
           {/* Price */}
           <div className={styles.priceBlock}>
