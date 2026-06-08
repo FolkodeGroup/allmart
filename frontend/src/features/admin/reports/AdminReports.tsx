@@ -11,7 +11,7 @@ import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarnin
 import type { ReportsFiltersValue, PredefinedPeriod } from './components/ReportsFilters';
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
-import { Pagination } from './components/Pagination';
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { Suspense } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
@@ -765,19 +765,35 @@ export function AdminReports() {
                 <OrdersTable
                   orders={paginatedOrders}
                 />
-                {filteredOrdersTable.length > pageSize && (
-                  <p className={styles.moreHint + ' fadeInFast'}>
-                    Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
-                  </p>
-                )}
-                <Pagination
-                  page={page}
-                  pageSize={pageSize}
-                  total={filteredOrdersTable.length}
-                  onPageChange={setPage}
-                  onPageSizeChange={setPageSize}
-                  pageSizeOptions={[5, 10, 20, 50, 100]}
-                />
+
+                <div className={styles.paginationWrap}>
+                  <div className={styles.pageSizeWrap}>
+                    {filteredOrdersTable.length > pageSize && (
+                      <p className={styles.moreHint + ' fadeInFast'}>
+                        Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
+                      </p>
+                    )}
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setPage(1); // resetear página
+                      }}
+                      className={styles.pageSizeSelect}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
+                  <AdminPagination
+                    page={page}
+                    totalPages={Math.ceil(filteredOrdersTable.length / pageSize) || 1}
+                    onPageChange={setPage}
+                    ariaLabel="Paginación de pedidos del reporte"
+                  />
+                </div>
               </>
             )}
           </div>

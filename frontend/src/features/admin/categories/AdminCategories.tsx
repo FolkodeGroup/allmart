@@ -1,4 +1,3 @@
-import { CategoriesPagination } from './components/CategoriesPagination';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeSlideIn } from './animationConfig';
 // import type { Category } from './types/category';
@@ -26,6 +25,7 @@ import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { useCategoryBulkActions } from './hooks/useCategoryBulkActions';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
 import { CategoriesMasterDetailLayout } from './CategoriesMasterDetailLayout';
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 
 type CategorySortField = 'name' | 'slug' | 'itemCount' | 'isVisible';
 type CategorySortDirection = 'asc' | 'desc';
@@ -38,6 +38,7 @@ export function AdminCategories() {
   // Local state for pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(10); // Could be made configurable
+  console.log({ page, apiTotalPages, total });
   const { can, user } = useAdminAuth();
   const [search, setSearch] = useState('');
   // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
@@ -519,12 +520,18 @@ export function AdminCategories() {
               onSelectAll={handleSelectAllVisible}
             />
             {/* Controles de paginación extraídos a subcomponente */}
-            <CategoriesPagination
+            <AdminPagination
+              page={page}
+              totalPages={apiTotalPages}
+              onPageChange={handlePageChange}
+              ariaLabel="Paginación de categorías"
+            />
+            {/*<CategoriesPagination
               page={page}
               totalPages={apiTotalPages}
               loading={loading}
               onPageChange={handlePageChange}
-            />
+            />*/}
           </>
         )}
       </AnimatePresence>
