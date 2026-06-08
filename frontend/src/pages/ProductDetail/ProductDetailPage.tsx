@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { VariantGroup as AdminVariantGroup } from '../../context/AdminProductsContext';
+import type { VariantGroup } from '../../context/AdminProductsContext';
 import { useParams, Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import type { Product } from '../../types';
@@ -154,7 +154,7 @@ export function ProductDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
 
-  const variantGroups = (product as unknown as { variants?: AdminVariantGroup[] }).variants ?? [];
+  const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
   const isNew = product ? product.tags.includes('nuevo') : false;
   const isProductFavorite = product ? isFavorite(product.id) : false;
 
