@@ -43,15 +43,12 @@ export function AdminCategoriesProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const response = await categoriesService.fetchAdminCategories(token, params);
-      console.log('Categorías cargadas:', response);
       setCategories(response.data.map(categoriesService.mapApiCategoryToCategory));
-      console.log('RAW RESPONSE:', response);
       setPagination({
         total: response.total,
         page: response.page,
         totalPages: Math.max(1, response.totalPages),
       });
-      console.log('RAW RESPONSE:', response);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar categorías';
       setError(message);

@@ -265,8 +265,7 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       ));
 
       return variants;
-    } catch (err) {
-      console.error('Error al cargar variantes:', err);
+    } catch {
       return [];
     }
   };

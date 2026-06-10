@@ -103,8 +103,6 @@ export function ProductSupplierSection({
             await suppliersAdminService.setPrimarySupplier(productId, supplierId);
             onPrimaryChange(supplierId);
             loadLinks();
-        } catch (err) {
-            console.error('Error setting primary supplier:', err);
         } finally {
             setActionLoading(null);
         }
@@ -116,8 +114,6 @@ export function ProductSupplierSection({
             await suppliersAdminService.setPrimarySupplier(productId, supplierId);
             onPrimaryChange(supplierId);
             loadLinks();
-        } catch (err) {
-            console.error('Error setting primary supplier:', err);
         } finally {
             setActionLoading(null);
         }
@@ -130,8 +126,6 @@ export function ProductSupplierSection({
             await suppliersAdminService.removeProductSupplier(productId, supplierId);
             if (primarySupplierId === supplierId) onPrimaryChange(null);
             loadLinks();
-        } catch (err) {
-            console.error('Error removing supplier:', err);
         } finally {
             setActionLoading(null);
         }
@@ -144,9 +138,6 @@ export function ProductSupplierSection({
                 changeReason: data.changeReason,
             });
             loadLinks();
-        } catch (err) {
-            console.error('Error updating price:', err);
-            throw err;
         }
     }
     // ── Render ────────────────────────────────────────────────────────────

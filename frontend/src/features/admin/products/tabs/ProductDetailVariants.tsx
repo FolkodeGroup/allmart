@@ -71,7 +71,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       setNewGroupName('');
       setErrors(e => ({ ...e, group: '' }));
     } catch (err) {
-      console.error('Error adding variant group:', err);
       setErrors(e => ({ ...e, group: 'Error al crear grupo' }));
     }
   };
@@ -179,8 +178,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           setCreatedCombinations(prev => [newItem, ...prev]);
         }
       }
-    } catch (err) {
-      console.error('Error creating/updating combination', err);
     } finally {
       setCombinationModalOpen(false);
     }
@@ -214,7 +211,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     try {
       await deleteVariantChild(productId, id);
     } catch (err) {
-      console.error('Error deleting combination', err);
+      // Error handled silently
     }
   };
 

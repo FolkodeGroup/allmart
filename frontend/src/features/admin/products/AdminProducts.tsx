@@ -457,6 +457,7 @@ export function AdminProducts() {
           onSuccess={() => {
             // Keep editId to maintain product selection after save
             setViewMode('list');
+            setUnsavedChanges(false);
             refreshProducts({
               q: search,
               categoryId: categoryFilter,

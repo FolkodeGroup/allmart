@@ -111,7 +111,6 @@ export function ProductWizard({
       DraftService.savePersistentDraft(data);
       toast.success('Borrador guardado correctamente');
     } catch (err) {
-      console.error('Error al guardar el borrador', err);
       toast.error('Error al guardar el borrador');
     } finally {
       setIsSavingDraft(false);
