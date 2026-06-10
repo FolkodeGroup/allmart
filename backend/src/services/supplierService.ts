@@ -43,7 +43,6 @@ export const supplierService = {
       take: limit,
       include: {
         productSuppliers: {
-          where: { isActive: true },
           select: { id: true },
         },
         _count: {
@@ -74,7 +73,6 @@ export const supplierService = {
       where: { id },
       include: {
         productSuppliers: {
-          where: { isActive: true },
           select: { id: true },
         },
         _count: {
@@ -161,7 +159,7 @@ export const supplierService = {
     await supplierService.getById(supplierId);
 
     const rows = await prisma.productSupplier.findMany({
-      where: { supplierId, isActive: true },
+      where: { supplierId },
       include: {
         product: { select: { id: true, name: true, sku: true, price: true } },
       },

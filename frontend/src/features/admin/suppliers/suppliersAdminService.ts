@@ -204,7 +204,7 @@ export const suppliersAdminService = {
         });
     },
 
-    async updateProductSupplierPrice(productId: string, supplierId: string, data: { price: number; cost?: number; changeReason?: string }): Promise<void> {
+    async updateProductSupplierPrice(productId: string, supplierId: string, data: { price?: number; cost?: number; changeReason?: string }): Promise<void> {
         await apiFetch(`/api/admin/products/${productId}/suppliers/${supplierId}`, {
             method: 'PUT',
             body: JSON.stringify(data),

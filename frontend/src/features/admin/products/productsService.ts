@@ -92,6 +92,7 @@ export interface ProductPayload {
   reviewCount?: number;
   inStock?: boolean;
   isFeatured?: boolean;
+  primarySupplierId?: string | null;
   tags?: string[];
   features?: string[];
 }

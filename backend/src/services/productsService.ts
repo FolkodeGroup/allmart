@@ -92,6 +92,7 @@ function toProduct(row: any): Product {
     sku: row.sku ?? undefined,
     features: Array.isArray(row.features) ? row.features : [],
     isFeatured: row.isFeatured ?? false,
+    primarySupplierId: row.primarySupplierId ?? null,
     status: row.status as ProductStatus,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, Edit2, PowerOff, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     BarChart, Bar,
 } from 'recharts';
 import {
@@ -115,7 +115,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         history.forEach(h => {
             const day = h.createdAt.slice(0, 10);
             if (!byDate[day]) byDate[day] = {};
-            byDate[day][h.productName] = h.price;
+            // Graficar costo cuando está disponible, sino precio
+            byDate[day][h.productName] = h.cost !== null ? h.cost : h.price;
             productNames.add(h.productName);
         });
         const sorted = Object.keys(byDate).sort();
@@ -364,18 +365,45 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                             </div>
                                         ) : (
                                             <ResponsiveContainer width="100%" height={320}>
-                                                <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-                                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e5e7eb)" />
-                                                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                                                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => fmt.format(v)} />
-                                                    <Tooltip formatter={(v: number) => fmt.format(v)} />
-                                                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                                                <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+                                                    <defs>
+                                                        {chartProducts.map((name, i) => (
+                                                            <linearGradient key={name} id={`color${name.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="5%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.8}/>
+                                                                <stop offset="95%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.05}/>
+                                                            </linearGradient>
+                                                        ))}
+                                                    </defs>
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e0e0e0)" />
+                                                    <XAxis 
+                                                        dataKey="date" 
+                                                        tick={{ fontSize: 12, fontWeight: 500 }}
+                                                        stroke="var(--color-text-tertiary, #6b7280)"
+                                                    />
+                                                    <YAxis 
+                                                        tick={{ fontSize: 12 }}
+                                                        tickFormatter={(v: number) => fmt.format(v)}
+                                                        stroke="var(--color-text-tertiary, #6b7280)"
+                                                        width={90}
+                                                        label={{ value: 'Costo', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: 'var(--color-text-tertiary, #6b7280)' }}
+                                                    />
+                                                    <Tooltip 
+                                                        formatter={(v: number) => fmt.format(v)}
+                                                        cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
+                                                    />
+                                                    <Legend wrapperStyle={{ fontSize: 12, paddingTop: '16px' }} />
                                                     {chartProducts.map((name, i) => (
-                                                        <Line key={name} type="monotone" dataKey={name}
+                                                        <Area 
+                                                            key={name} 
+                                                            type="monotone" 
+                                                            dataKey={name}
                                                             stroke={LINE_COLORS[i % LINE_COLORS.length]}
-                                                            dot={false} strokeWidth={2} />
+                                                            strokeWidth={2}
+                                                            fill={`url(#color${name.replace(/\s+/g, '')})`}
+                                                            isAnimationActive={true}
+                                                        />
                                                     ))}
-                                                </LineChart>
+                                                </AreaChart>
                                             </ResponsiveContainer>
                                         )}
                                     </div>
