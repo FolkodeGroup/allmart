@@ -116,6 +116,7 @@ const adminProductSelect = {
   sku: true,
   features: true,
   isFeatured: true,
+  primarySupplierId: true,
   status: true,
   createdAt: true,
   updatedAt: true,
@@ -261,8 +262,12 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
         : null,
       features: Array.isArray(dto.features) ? dto.features : [],
       isFeatured: dto.isFeatured ?? false,
+      ...(dto.primarySupplierId !== undefined
+        ? { primarySupplierId: dto.primarySupplierId ?? null }
+        : {}),
     },
   });
+
 
   await updateProductCategories(row.id, normalizedCategoryIds);
   const refreshed = await prisma.product.findUnique({
