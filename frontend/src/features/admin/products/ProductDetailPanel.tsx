@@ -40,7 +40,7 @@ const TAB_LABELS: Record<Exclude<TabName, 'seo'>, string> = {
 
 const TAB_ORDER: Exclude<TabName, 'seo'>[] = ['basic', 'pricing', 'variants', 'images'];
 
-export function ProductDetailPanel({
+export const ProductDetailPanel = React.memo(function ProductDetailPanelComponent({
   product,
   onEdit,
   onDelete,
@@ -64,8 +64,6 @@ export function ProductDetailPanel({
     try {
       onDelete(product.id);
       setShowDeleteModal(false);
-    } catch (err) {
-      console.error('Error al eliminar:', err);
     } finally {
       setIsDeleting(false);
     }
@@ -222,7 +220,7 @@ export function ProductDetailPanel({
       )}
     </div>
   );
-}
+});
 
 function TabLoadingFallback() {
   return (

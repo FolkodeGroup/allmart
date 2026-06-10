@@ -15,7 +15,7 @@ export interface AssignSupplierInput {
 }
 
 export interface UpdatePriceInput {
-  price: number;
+  price?: number;
   cost?: number;
   changeReason?: string;
   changedBy?: string;
@@ -105,10 +105,12 @@ export const productSupplierService = {
 
   // ── Update price ─────────────────────────────────────────────────────────────
   async updatePrice(productId: string, supplierId: string, input: UpdatePriceInput) {
-    if (input.price <= 0) throw createError('El precio debe ser mayor a 0', 400);
+    if (input.price !== undefined && input.price <= 0) throw createError('El precio debe ser mayor a 0', 400);
     if (input.cost !== undefined && input.cost < 0)
       throw createError('El costo no puede ser negativo', 400);
-    if (input.cost !== undefined && input.cost > input.price)
+    
+    // If both price and cost are provided, validate relationship
+    if (input.price !== undefined && input.cost !== undefined && input.cost > input.price)
       throw createError('El costo no puede ser mayor al precio', 400);
 
     const existing = await prisma.productSupplier.findUnique({
@@ -116,20 +118,26 @@ export const productSupplierService = {
     });
     if (!existing) throw createError('Relación producto-proveedor no encontrada', 404);
 
+    // Only validate if both are provided
+    if (input.price !== undefined && input.cost !== undefined && input.cost > input.price) {
+      throw createError('El costo no puede ser mayor al precio de venta', 400);
+    }
+
+    const updateData: Record<string, unknown> = {};
+    if (input.price !== undefined) updateData['currentPrice'] = input.price;
+    if (input.cost !== undefined) updateData['cost'] = input.cost;
+
     const [updated] = await prisma.$transaction([
       prisma.productSupplier.update({
         where: { productId_supplierId: { productId, supplierId } },
-        data: {
-          currentPrice: input.price,
-          cost: input.cost ?? null,
-        },
+        data: updateData,
       }),
       prisma.supplierProductPrice.create({
         data: {
           productId,
           supplierId,
-          price: input.price,
-          cost: input.cost ?? null,
+          price: input.price ?? existing.currentPrice,
+          cost: input.cost ?? existing.cost,
           changeReason: input.changeReason ?? 'adjustment',
           changedBy: input.changedBy ?? null,
         },

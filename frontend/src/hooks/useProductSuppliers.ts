@@ -33,7 +33,7 @@ export function useProductSuppliers(productId: string | null) {
         await load();
     }, [productId, load]);
 
-    const updatePrice = useCallback(async (supplierId: string, data: { price: number; cost?: number; changeReason?: string }) => {
+    const updatePrice = useCallback(async (supplierId: string, data: { price?: number; cost?: number; changeReason?: string }) => {
         if (!productId) return;
         await suppliersAdminService.updateProductSupplierPrice(productId, supplierId, data);
         await load();

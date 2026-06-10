@@ -1,11 +1,8 @@
 // src/pages/Admin/AdminLayout.tsx
-import { Suspense, useState, useEffect, useCallback } from "react";
+import { Suspense, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { useLocation, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
-import { useAdminOrders } from "../../context/AdminOrdersContext";
-import { useAdminProducts } from "../../context/useAdminProductsContext";
-import { useAdminContact } from "../../context/AdminContactContext";
 import { AdminHeader } from "../../components/layout/AdminHeader/AdminHeader";
 import { UserProfileCard } from "../../components/layout/AdminSidebar/UserProfileCard";
 import { Button } from '../../components/ui/Button/Button';
@@ -14,7 +11,9 @@ import styles from "./AdminLayout.module.css";
 import { useUnsavedChanges } from '../../context/useUnsavedChanges';
 import { ModalConfirm } from "../../components/ui/ModalConfirm/ModalConfirm";
 import type { Permission } from "../../utils/permissions";
-import { getOutOfStockAlertCount } from "../../features/admin/outOfStockAlerts/services/outOfStockAlertsService";
+import { useNavBadges } from "./hooks/useNavBadges";
+import { useAdminTheme } from "./hooks/useAdminTheme";
+import { useExpandedNavGroups } from "./hooks/useExpandedNavGroups";
 
 type NavBadge = "pending" | "lowStock" | "outOfStock" | "unreadContacts" | null;
 
@@ -134,21 +133,8 @@ const navItems: NavItem[] = [
   },
 ];
 
-type Theme = 'light' | 'dark';
-
-/** Función pura para verificar si algún hijo (o descendiente) tiene la ruta activa */
-function hasActiveChildPath(children: NavItem[], pathname: string): boolean {
-  return children.some((child) => {
-    if (pathname === child.to || pathname.startsWith(child.to + '/')) return true;
-    if (child.children) return hasActiveChildPath(child.children, pathname);
-    return false;
-  });
-}
-
 export function AdminLayout() {
   const { can } = useAdminAuth();
-  const { getPendingOrdersCount } = useAdminOrders();
-  const { getLowStockCount } = useAdminProducts();
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -158,85 +144,17 @@ export function AdminLayout() {
     confirmNavigation,
     cancelNavigation,
   } = useUnsavedChanges();
-  const { getUnreadContactsCount } = useAdminContact();
 
-  // Out of stock alerts count
-  const [outOfStockCount, setOutOfStockCount] = useState(0);
+  // Extract badge logic into custom hook
+  const { getBadgeCount } = useNavBadges();
 
-  useEffect(() => {
-    const loadOutOfStockCount = async () => {
-      try {
-        const count = await getOutOfStockAlertCount();
-        setOutOfStockCount(count);
-      } catch (error) {
-        console.error('Error loading out of stock count:', error);
-      }
-    };
+  // Extract theme logic into custom hook
+  const { theme, setTheme } = useAdminTheme();
 
-    loadOutOfStockCount();
-    // Reload every 30 seconds
-    const interval = setInterval(loadOutOfStockCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-
-  // Dark mode state
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('admin-theme');
-    return stored === 'dark' ? 'dark' : 'light';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('admin-theme', theme);
-    // Los modales se renderizan por portal en document.body, por eso el tema
-    // del admin también se refleja en body para que los confirm/warning tomen
-    // los colores correctos en modo claro y oscuro.
-    document.body.setAttribute('data-admin-theme', theme);
-
-    return () => {
-      document.body.removeAttribute('data-admin-theme');
-    };
-  }, [theme]);
+  // Extract expandedGroups logic into custom hook
+  const { expandedGroups, toggleGroup } = useExpandedNavGroups(navItems);
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-
-  // Grupos colapsables: set de `to` de items padre que están abiertos
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
-
-  // Auto-expandir grupos que tienen un hijo activo según la ruta actual
-  useEffect(() => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      navItems.forEach((item) => {
-        if (item.children && hasActiveChildPath(item.children, location.pathname)) {
-          next.add(item.to);
-        }
-      });
-      return next;
-    });
-  }, [location.pathname]);
-
-  const toggleGroup = useCallback((to: string) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(to)) {
-        next.delete(to);
-      } else {
-        next.add(to);
-      }
-      return next;
-    });
-  }, []);
-
-
-
-  const getBadgeCount = (badge: NavBadge) => {
-    if (badge === 'pending') return getPendingOrdersCount();
-    if (badge === 'lowStock') return getLowStockCount();
-    if (badge === 'outOfStock') return outOfStockCount;
-    if (badge === 'unreadContacts') return getUnreadContactsCount();
-    return null;
-  };
 
   const handleNavItemClick =
     (to: string) => (e: ReactMouseEvent<HTMLAnchorElement>) => {

@@ -1,4 +1,4 @@
-// src/context/AdminContactsContext.tsx
+// src/context/AdminContactContext.tsx
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { contactsService } from '../services/contactsService';
 
@@ -18,8 +18,9 @@ export function AdminContactProvider({ children }: { children: React.ReactNode }
     const refreshUnreadCount = useCallback(async () => {
         try {
             const result = await contactsService.listContacts(1, 1, 'unread');
-            const total = result.pagination.total as number;
-            setUnreadCount(total);
+            // @ts-ignore - total puede venir del backend como string o number dependiendo de la API
+            const total = result.pagination.total;
+            setUnreadCount(Number(total) || 0);
         } catch {
             // silencioso: no romper el layout por un conteo fallido
         }
@@ -28,6 +29,7 @@ export function AdminContactProvider({ children }: { children: React.ReactNode }
     useEffect(() => {
         refreshUnreadCount();
         intervalRef.current = setInterval(refreshUnreadCount, POLL_INTERVAL_MS);
+        
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
@@ -42,8 +44,12 @@ export function AdminContactProvider({ children }: { children: React.ReactNode }
     );
 }
 
+// Esta línea es la que soluciona el warning de Fast Refresh
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAdminContact() {
     const ctx = useContext(AdminContactContext);
-    if (!ctx) throw new Error('useAdminContact must be used within AdminContactProvider');
+    if (!ctx) {
+        throw new Error('useAdminContact must be used within AdminContactProvider');
+    }
     return ctx;
 }

@@ -18,7 +18,7 @@ interface MasterDetailLayoutProps {
   defaultSelectedProductId?: string;
 }
 
-export function MasterDetailLayout({
+function MasterDetailLayoutInner({
   products,
   loading,
   error,
@@ -60,6 +60,19 @@ export function MasterDetailLayout({
     setSelectedProductId(id);
   }, []);
 
+  // Memoize the detail content to avoid re-rendering when props don't change
+  const detailContent = useMemo(() => {
+    if (!selectedProduct) return null;
+    return (
+      <ProductDetailPanel
+        product={selectedProduct}
+        onEdit={onEdit}
+        onDelete={onDeleteDirect || onDelete}
+        canEdit={canEdit}
+        canDelete={canDelete}
+      />
+    );
+  }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete]);
 
   return (
     <div className={styles.container}>
@@ -76,37 +89,30 @@ export function MasterDetailLayout({
         canDelete={canDelete && !!onDelete}
       />
 
-      {/* Detail Panel (Right) - Only show when product is selected */}
-      {selectedProduct && (
-        <AdminVariantsProvider>
-          <ProductDetailPanel
-            product={selectedProduct}
-            onEdit={onEdit}
-            onDelete={onDeleteDirect || onDelete}
-            canEdit={canEdit}
-            canDelete={canDelete}
-          />
-        </AdminVariantsProvider>
-      )}
-
-      {/* Empty state when no product selected */}
-      {!selectedProduct && !loading && products.length > 0 && (
-        <div className={styles.emptyDetail}>
-          <div className={styles.emptyDetailContent}>
-            <p>Selecciona un producto para ver sus detalles</p>
+      {/* Detail Panel (Right) - Keep provider mounted, conditionally render content */}
+      <AdminVariantsProvider>
+        {detailContent}
+        {/* Empty state when no product selected */}
+        {!selectedProduct && !loading && products.length > 0 && (
+          <div className={styles.emptyDetail}>
+            <div className={styles.emptyDetailContent}>
+              <p>Selecciona un producto para ver sus detalles</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Loading state */}
-      {loading && (
-        <div className={styles.loadingDetail}>
-          <div className={styles.spinner} />
-        </div>
-      )}
+        {/* Loading state */}
+        {loading && (
+          <div className={styles.loadingDetail}>
+            <div className={styles.spinner} />
+          </div>
+        )}
+      </AdminVariantsProvider>
 
       {/* Children toolbar (if provided) */}
       {children && <div className={styles.toolbarArea}>{children}</div>}
     </div>
   );
 }
+
+export const MasterDetailLayout = React.memo(MasterDetailLayoutInner);

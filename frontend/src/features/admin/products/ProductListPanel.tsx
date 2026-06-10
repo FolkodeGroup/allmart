@@ -19,7 +19,7 @@ interface ProductListPanelProps {
   scrollPreserveKey?: string;
 }
 
-export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPanelProps>(
+export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, ProductListPanelProps>(
   ({
     products,
     loading,
@@ -208,6 +208,6 @@ export const ProductListPanel = React.forwardRef<HTMLDivElement, ProductListPane
       </aside>
     );
   }
-);
+));
 
 ProductListPanel.displayName = 'ProductListPanel';

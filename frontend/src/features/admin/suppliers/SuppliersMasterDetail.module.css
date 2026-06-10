@@ -165,6 +165,14 @@
     background: var(--color-accent-bg, #f0f1fe);
 }
 
+.supplierCardActive .cardName {
+    color: var(--color-accent, #6366f1);
+}
+
+.supplierCardActive .cardStatus {
+    color: var(--color-text-secondary);
+}
+
 .cardTop {
     display: flex;
     align-items: center;

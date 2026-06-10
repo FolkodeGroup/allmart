@@ -176,6 +176,7 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
                     await uploadCategoryImage(categoryId_result, imgFile);
                     // Recargar la categoría del backend para asegurar que los datos estén sincronizados
                     await refreshCategory(categoryId_result);
+                    setImgFile(null); // Reset imgFile after upload
                 } catch (err) {
                     console.error('Error uploading image:', err);
                     setError('Error al subir la imagen. La categoría se guardó pero la imagen no se actualizó.');
@@ -183,7 +184,9 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
                     return;
                 }
             }
-
+            
+            // Actualizar initialForm para que la comparación de isDirty sea correcta después de guardar
+            setInitialForm(form);
             onSuccess();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al guardar la categoría');
