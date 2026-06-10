@@ -110,7 +110,8 @@ export function ProductWizard({
     try {
       DraftService.savePersistentDraft(data);
       toast.success('Borrador guardado correctamente');
-    } catch (err) {
+    } catch {
+      // Se eliminó 'err' para evitar el warning de variable no usada
       toast.error('Error al guardar el borrador');
     } finally {
       setIsSavingDraft(false);

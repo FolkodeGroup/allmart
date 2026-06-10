@@ -70,7 +70,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       await addVariant(productId, newGroupName.trim());
       setNewGroupName('');
       setErrors(e => ({ ...e, group: '' }));
-    } catch (err) {
+    } catch {
       setErrors(e => ({ ...e, group: 'Error al crear grupo' }));
     }
   };
@@ -210,7 +210,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     if (!window.confirm('¿Eliminar esta combinación?')) return;
     try {
       await deleteVariantChild(productId, id);
-    } catch (err) {
+    } catch {
       // Error handled silently
     }
   };

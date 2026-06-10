@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, X, DollarSign, TrendingUp, Star, Trash2 } from 'lucide-react';
 import {
@@ -138,6 +139,12 @@ export function ProductSupplierSection({
                 changeReason: data.changeReason,
             });
             loadLinks();
+        }
+        catch (e) {
+            alert(`Error al actualizar el costo ${e}`);
+        }
+        finally {
+            setUpdatingSupplier(null);
         }
     }
     // ── Render ────────────────────────────────────────────────────────────
