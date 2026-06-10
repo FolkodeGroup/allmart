@@ -61,3 +61,11 @@ export function getDayKeyLocalFromMs(ms: number): string {
     const d = new Date(ms);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+
+// Saludo contextual según la hora del día (panel de administración)
+export function getAdminGreeting(): { greeting: string; emoji: string } {
+    const h = new Date().getHours();
+    if (h >= 6 && h < 12) return { greeting: 'Buenos días', emoji: '🌅' };
+    if (h >= 12 && h < 20) return { greeting: 'Buenas tardes', emoji: '☀️' };
+    return { greeting: 'Buenas noches', emoji: '🌙' };
+}

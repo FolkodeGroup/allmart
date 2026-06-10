@@ -1,28 +1,9 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// AdminOrders.tsx
-// Página principal de gestión de pedidos del panel de administración.
-//
-// Responsabilidades:
-//  - Renderizar métricas de resumen por estado
-//  - Orquestar filtros, paginación y selección múltiple
-//  - Gestionar acciones masivas (confirmar / enviar / cancelar)
-//  - Exportar pedidos en distintos formatos
-//  - Abrir el modal de detalle de un pedido
-//
-// Flujo general:
-//  1. Al montar, los pedidos se inicializan con MOCK_ORDERS (modo dev).
-//  2. El hook useOrdersFilters filtra `orders` según los filtros activos.
-//  3. La tabla y la lista mobile consumen `filtered` (no `orders` directamente).
-//  4. La paginación opera sobre `orders` completo; el slice lo hace el backend
-//     cuando el fetch real esté activo.
-// ─────────────────────────────────────────────────────────────────────────────
-
-
 import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-import type { Order } from '../../../context/AdminOrdersContext';
+import { useAdminOrders } from '../../../context/AdminOrdersContext';
+import type { Order, OrderStatus } from '../../../context/AdminOrdersContext';
 import { STATUS_LABELS, STATUS_OPTIONS } from './utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -38,29 +19,16 @@ import { useOrdersFilters } from './hooks/useOrdersFilters';
 import { fetchAdminOrders, mapApiOrderToOrder } from './ordersService';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-/**
- * MOCK_ORDERS — datos de ejemplo para desarrollo local.
- * Reemplazar por el fetch real cuando el backend esté disponible
- * (descomentar el useEffect de fetchOrders más abajo).
- *
- * Estructura mínima esperada por el tipo Order:
- *  id, createdAt, customer, items, total, status, paymentStatus, statusHistory
- */
-import type { OrderStatus } from '../../../context/AdminOrdersContext';
-
-// Lazy load OrderDetailModal component (for future modal use if needed)
-
-
+import { SummarySkeleton, TableRowSkeleton, MobileCardSkeleton } from './components/OrderSkeletons';
 
 
 function AdminOrders() {
   const { token } = useAdminAuth();
+  const { bulkUpdateOrderStatus } = useAdminOrders();
   const navigate = useNavigate();
 
   /**
-   * Lista completa de pedidos cargados.
-   * En desarrollo se inicializa con MOCK_ORDERS.
-   * En producción, se pobla via fetchOrders (ver useEffect comentado más abajo).
+   * Lista completa de pedidos cargados desde el backend.
    */
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -74,19 +42,6 @@ function AdminOrders() {
 
   // IDs de pedidos seleccionados para acciones masivas
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  // Acceso al contexto global de cambios sin guardar
-  // Ya no es necesario con navegación a página dedicada
-  // const { setIsDirty: setGlobalDirty } = useUnsavedChanges();
-
-  // const [total, setTotal] = useState(0); // Si se requiere mostrar total, descomentar
-
-  // Las siguientes funciones pueden dejarse como mocks vacíos o comentarios si se usan en la UI
-  // Se aceptan argumentos para evitar errores de cantidad de argumentos
-  //const bulkUpdateOrderStatus = (..._args: any[]) => Promise.resolve({ success: 0, failed: 0 });
-  //const updateOrderStatus = (..._args: any[]) => Promise.resolve();
-  //const deleteOrder = (..._args: any[]) => Promise.resolve();
-  //const markAsPaid = (..._args: any[]) => Promise.resolve();
 
   // ── Filtros ─────────────────────────────────────────────────────
   /**
@@ -242,54 +197,6 @@ function AdminOrders() {
   /** Total de pedidos con paymentStatus === 'abonado' para la tarjeta de pagos. */
   const totalAbonados = useMemo(() => orders.filter(o => o.paymentStatus === 'abonado').length, [orders]);
 
-  // ── Skeletons de carga ──────────────────────────────────────────
-  // Definidos como componentes locales para mantener el JSX del return limpio.
-  // No reciben props; solo replican la estructura visual con placeholders animados.
-  const SummarySkeleton = () => (
-    <div className={styles.summaryCard}>
-      <div className={styles.skeletonSummaryIcon}></div>
-      <div className={styles.skeletonSummaryNum}></div>
-      <div className={styles.skeletonSummaryLabel}></div>
-    </div>
-  );
-  const TableRowSkeleton = () => (
-    <tr className={styles.row}>
-      <td className={styles.orderId}><div className={styles.skeletonOrderId}></div></td>
-      <td className={styles.orderDate}><div className={styles.skeletonOrderDate}></div></td>
-      <td>
-        <div className={styles.skeletonCustomerName}></div>
-        <div className={styles.skeletonCustomerEmail}></div>
-      </td>
-      <td className={styles.itemCount}><div className={styles.skeletonItemCount}></div></td>
-      <td className={styles.orderTotal}><div className={styles.skeletonOrderTotal}></div></td>
-      <td><div className={styles.skeletonStatusBadge}></div></td>
-      <td><div className={styles.skeletonButton}></div></td>
-    </tr>
-  );
-  const MobileCardSkeleton = () => (
-    <div className={styles.mobileCard}>
-      <div className={styles.mobileCardTop}>
-        <div className={styles.skeletonMobileCardId}></div>
-        <div className={styles.skeletonMobileBadge}></div>
-      </div>
-      <div className={styles.mobileCardMid}>
-        <div className={styles.mobileCardCustomer}>
-          <div className={styles.skeletonMobileAvatar}></div>
-          <div>
-            <div className={styles.skeletonMobileCardName}></div>
-            <div className={styles.skeletonMobileCardEmail}></div>
-          </div>
-        </div>
-      </div>
-      <div className={styles.mobileCardBottom}>
-        <div className={styles.skeletonMobileCardDate}></div>
-        <div className={styles.skeletonMobileCardItems}></div>
-        <div className={styles.skeletonMobileCardTotal}></div>
-      </div>
-    </div>
-  );
-
-
   // ── Modal de confirmación global ────────────────────────────────
   /**
    * `modal` centraliza el estado del ModalConfirm reutilizable.
@@ -369,23 +276,32 @@ function AdminOrders() {
   }, []);
 
   /**
-   * executeBulkAction — ejecuta la acción masiva confirmada.
-   * TODO: reemplazar el setTimeout simulado por la llamada real al contexto
-   * (ej: bulkUpdateOrderStatus de AdminOrdersContext).
+   * executeBulkAction — ejecuta la acción masiva confirmada llamando al
+   * contexto real (bulkUpdateOrderStatus). Refresca los pedidos afectados
+   * en la lista local y reporta el resultado al usuario.
    */
   const executeBulkAction = useCallback(async () => {
-    if (!bulkAction) return;
+    if (!bulkAction || selectedIds.length === 0) return;
     setBulkLoading(true);
-    // Aquí deberías llamar a la acción real del contexto si está disponible
-    // Por ahora, solo simula
-    setTimeout(() => {
-      toast.success('Acción masiva simulada');
+    try {
+      const result = await bulkUpdateOrderStatus({
+        orderIds: selectedIds,
+        action: bulkAction,
+      });
+      const failed = result.results.filter((r) => !r.success).length;
+      const ok = result.results.length - failed;
+      if (ok > 0) toast.success(`${ok} pedido${ok !== 1 ? 's' : ''} actualizado${ok !== 1 ? 's' : ''}`);
+      if (failed > 0) toast.error(`${failed} pedido${failed !== 1 ? 's' : ''} no pudieron actualizarse`);
+      await fetchOrders(true);
+    } catch {
+      toast.error('Error al aplicar la acción masiva');
+    } finally {
       setBulkModalOpen(false);
       setBulkLoading(false);
       setBulkAction(null);
       clearSelection();
-    }, 1000);
-  }, [bulkAction, clearSelection]);
+    }
+  }, [bulkAction, selectedIds, bulkUpdateOrderStatus, fetchOrders, clearSelection]);
 
   // ── Handlers del modal global ───────────────────────────────────
   const handleCloseModal = useCallback(() => {
@@ -393,15 +309,12 @@ function AdminOrders() {
   }, []);
 
   /**
-   * handleConfirmModal — simula la confirmación de una acción en el modal global.
-   * TODO: conectar con la acción real según modal.type (delete / status / paid).
+   * handleConfirmModal — cierra el modal global individual.
+   * Las acciones reales (delete / status / paid) se gestionan en la
+   * página de detalle de pedido; aquí solo se cierra de forma segura.
    */
   const handleConfirmModal = useCallback(async () => {
-    setModal(m => ({ ...m, isLoading: true }));
-    setTimeout(() => {
-      toast.success('Acción simulada');
-      setModal({ open: false, type: null, order: null });
-    }, 1000);
+    setModal({ open: false, type: null, order: null });
   }, []);
 
   // ── Render ──────────────────────────────────────────────────────

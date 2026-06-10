@@ -1,10 +1,14 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useMonthlyGoal } from '../../features/admin/goals/hooks/useMonthlyGoal';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { useAdminProducts } from '../../context/useAdminProductsContext';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
 import { useDashboardLayout } from '../../hooks/useDashboardLayout';
+import { useDragAndDropWidgets } from '../../hooks/useDragAndDropWidgets';
+import { useDashboardMetrics } from './hooks/useDashboardMetrics';
+import { useSystemStatus } from './hooks/useSystemStatus';
+import { getAdminGreeting } from '../../utils/date';
 import type { WidgetId } from '../../context/DashboardLayoutContext';
 
 // Widgets
@@ -18,8 +22,8 @@ import { ActivityFeed } from '../../components/ActivityFeed';
 import { DashboardWidgetSettings } from '../../components/ui/DashboardWidgetSettings';
 import StaffNotes from '../../components/StaffNotes';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
-import type { WeeklySalesData } from '../../components/ui/WeeklySalesWidget';
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
+import { MonthlyGoalCard } from '../../components/ui/MonthlyGoalCard';
 
 import styles from './AdminDashboard.module.css';
 
@@ -36,17 +40,8 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   weekly_sales: 'Ventas Semanales',
 };
 
-const CATEGORY_COLORS = [
-  '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#a4de6c',
-  '#d0ed57', '#8dd1e1', '#83a6ed', '#ea7e7e', '#b47ae7',
-];
-
-function getGreeting(): { greeting: string; emoji: string } {
-  const h = new Date().getHours();
-  if (h >= 6 && h < 12) return { greeting: 'Buenos días', emoji: '🌅' };
-  if (h >= 12 && h < 20) return { greeting: 'Buenas tardes', emoji: '☀️' };
-  return { greeting: 'Buenas noches', emoji: '🌙' };
-}
+const fmtCurrency = (n: number) =>
+  n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 });
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -55,195 +50,34 @@ export function AdminDashboard() {
   const { products, total: totalProducts } = useAdminProducts();
   const { can } = useAdminAuth();
   const { widgets, reorderWidgets, toggleWidget, resetLayout } = useDashboardLayout();
-  const { greeting, emoji } = getGreeting();
+  const { monthlyGoal, setMonthlyGoal } = useMonthlyGoal();
+  const { greeting, emoji } = getAdminGreeting();
 
-  // Drag state
-  const [draggedId, setDraggedId] = useState<WidgetId | null>(null);
-  const [dragOverId, setDragOverId] = useState<WidgetId | null>(null);
+  // Métricas y agregaciones centralizadas
+  const {
+    ingresos, totalPedidos, clientesUnicos, tasaConversion, ticketPromedio,
+    pendientes, lowStock, categoryData, topProducts, topClients,
+    currentMonthRevenue, weeklySalesData, weeklyTotalSales,
+  } = useDashboardMetrics(orders, products);
+
+  // Estado del sistema (latencia / online)
+  const { latency, statusLabel, statusColor } = useSystemStatus();
 
   // Settings panel
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
-  // System status
-  const [latency, setLatency] = useState(0);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    const check = async () => {
-      const start = Date.now();
-      try { await new Promise((r) => setTimeout(r, 80)); } catch { /* noop */ }
-      setLatency(Date.now() - start);
-    };
-    check();
-    const interval = setInterval(check, 30000);
-
-    const online = () => setIsOnline(true);
-    const offline = () => setIsOnline(false);
-    window.addEventListener('online', online);
-    window.addEventListener('offline', offline);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('online', online);
-      window.removeEventListener('offline', offline);
-    };
-  }, []);
-
-  // ─── Computed metrics ───────────────────────────────────────────────────────
-
-  const ingresos = useMemo(() => orders.reduce((s, o) => s + o.total, 0), [orders]);
-  const totalPedidos = orders.length;
-  const clientesUnicos = useMemo(
-    () => new Set(orders.map((o) => o.customer.email)).size,
-    [orders],
+  // Orden actual de widgets para drag & drop
+  const sortedWidgets = useMemo(
+    () => [...widgets].sort((a, b) => a.order - b.order).filter((w) => w.enabled),
+    [widgets],
   );
-  const tasaConversion = clientesUnicos === 0 ? 0 : (totalPedidos / clientesUnicos) * 100;
-  const ticketPromedio = totalPedidos === 0 ? 0 : ingresos / totalPedidos;
+  const widgetOrder = useMemo(() => sortedWidgets.map((w) => w.id), [sortedWidgets]);
 
-  const pendientes = useMemo(
-    () => orders.filter((o) => o.status === 'pendiente').length,
-    [orders],
-  );
-
-  const lowStock = useMemo(
-    () => products.filter((p) => typeof p.stock === 'number' && p.stock <= 5 && p.stock > 0).length,
-    [products],
-  );
-
-  const categoryData = useMemo(() => {
-    const productCatMap = products.reduce<Record<string, string>>((acc, p) => {
-      acc[p.id] = p.category?.name || 'Sin categoría';
-      return acc;
-    }, {});
-    const totals: Record<string, number> = {};
-    orders.forEach((o) =>
-      o.items.forEach((item) => {
-        const cat = productCatMap[item.productId] || 'Sin categoría';
-        totals[cat] = (totals[cat] || 0) + item.quantity;
-      }),
-    );
-    return Object.entries(totals)
-      .map(([category, value], i) => ({ category, value, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))
-      .sort((a, b) => b.value - a.value);
-  }, [orders, products]);
-
-  const topProducts = useMemo(() => {
-    const salesMap: Record<string, { name: string; sku: string; sales: number }> = {};
-    orders.forEach((o) =>
-      o.items.forEach((item) => {
-        if (!salesMap[item.productId]) {
-          const prod = products.find((p) => p.id === item.productId);
-          salesMap[item.productId] = { name: item.productName, sku: prod?.sku || '', sales: 0 };
-        }
-        salesMap[item.productId].sales += item.quantity;
-      }),
-    );
-    return Object.values(salesMap).sort((a, b) => b.sales - a.sales).slice(0, 10);
-  }, [orders, products]);
-
-  const topClients = useMemo(() => {
-    const clientMap: Record<string, { name: string; email: string; total: number; orders: number }> = {};
-    orders.forEach((o) => {
-      const key = o.customer.email;
-      if (!clientMap[key]) {
-        clientMap[key] = { name: `${o.customer.firstName} ${o.customer.lastName}`, email: key, total: 0, orders: 0 };
-      }
-      clientMap[key].total += o.total;
-      clientMap[key].orders += 1;
-    });
-    return Object.values(clientMap).sort((a, b) => b.total - a.total).slice(0, 5);
-  }, [orders]);
-
-  const { monthlyGoal, setMonthlyGoal } = useMonthlyGoal();
-  const [editingGoal, setEditingGoal] = useState(false);
-  const [goalInput, setGoalInput] = useState('');
-  const currentMonthRevenue = useMemo(() => {
-    const now = new Date();
-    return orders
-      .filter((o) => {
-        const d = new Date(o.createdAt);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      })
-      .reduce((s, o) => s + o.total, 0);
-  }, [orders]);
-  const goalProgress = Math.min(100, (currentMonthRevenue / monthlyGoal) * 100);
-
-  // recentOrders: disponible si se necesita mostrar en un widget futuro
-  const recentOrdersSorted = useMemo(
-    () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
-    [orders],
-  );
-  void recentOrdersSorted; // usado condicionalmente por widgets del dashboard
-
-  // ─── Weekly sales data ──────────────────────────────────────────────────────
-
-  const weeklySalesData = useMemo<WeeklySalesData[]>(() => {
-    const now = new Date();
-    const days: WeeklySalesData[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const dayStr = d.toLocaleDateString('es-AR', { weekday: 'short' });
-      const count = orders.filter((o) => {
-        const od = new Date(o.createdAt);
-        return od.toDateString() === d.toDateString();
-      }).length;
-      days.push({ day: dayStr, sales: count });
-    }
-    return days;
-  }, [orders]);
-
-  const weeklyTotalSales = useMemo(() => weeklySalesData.reduce((s, d) => s + d.sales, 0), [weeklySalesData]);
-
-
-
-  // ─── Drag handlers ─────────────────────────────────────────────────────────
-
-  const handleDragStart = useCallback((e: React.DragEvent, id: WidgetId) => {
-    e.dataTransfer.effectAllowed = 'move';
-    setDraggedId(id);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent, id: WidgetId) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverId(id);
-  }, []);
-
-  const handleDragLeave = useCallback(() => {
-    setDragOverId(null);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent, targetId: WidgetId) => {
-      e.preventDefault();
-      if (!draggedId || draggedId === targetId) {
-        setDraggedId(null);
-        setDragOverId(null);
-        return;
-      }
-      const sorted = [...widgets].sort((a, b) => a.order - b.order);
-      const order = sorted.map((w) => w.id);
-      const fromIdx = order.indexOf(draggedId);
-      const toIdx = order.indexOf(targetId);
-      order.splice(fromIdx, 1);
-      order.splice(toIdx, 0, draggedId);
-      reorderWidgets(order);
-      setDraggedId(null);
-      setDragOverId(null);
-    },
-    [draggedId, widgets, reorderWidgets],
-  );
-
-  const handleDragEnd = useCallback(() => {
-    setDraggedId(null);
-    setDragOverId(null);
-  }, []);
-
-  // ─── Status helpers ─────────────────────────────────────────────────────────
-  const statusLabel = !isOnline ? 'Offline' : latency > 500 ? 'Lento' : 'Online';
-  const statusColor = !isOnline ? '#ef4444' : latency > 500 ? '#f59e0b' : '#22c55e';
+  const { dragState, handlers } = useDragAndDropWidgets(widgetOrder, {
+    onReorder: reorderWidgets,
+  });
+  const { draggedId, dragOverId, isDragging } = dragState;
 
   // ─── Widget renderers ───────────────────────────────────────────────────────
 
@@ -252,10 +86,10 @@ export function AdminDashboard() {
       case 'metrics':
         return (
           <div className={styles.metricsGrid}>
-            <MetricCard title="Ingresos" icon={<span>💰</span>} value={ingresos.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })} variation={0} />
+            <MetricCard title="Ingresos" icon={<span>💰</span>} value={fmtCurrency(ingresos)} variation={0} />
             <MetricCard title="Pedidos" icon={<span>🛒</span>} value={totalPedidos} variation={0} />
             <MetricCard title="Clientes" icon={<span>👥</span>} value={clientesUnicos} variation={0} />
-            <MetricCard title="Ticket Promedio" icon={<span>🎫</span>} value={ticketPromedio.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })} variation={0} />
+            <MetricCard title="Ticket Promedio" icon={<span>🎫</span>} value={fmtCurrency(ticketPromedio)} variation={0} />
             <MetricCard title="Conversión" icon={<span>📊</span>} value={tasaConversion.toFixed(1) + '%'} variation={0} />
             <MetricCard title="Productos" icon={<span>📦</span>} value={totalProducts || products.length} variation={0} />
           </div>
@@ -293,59 +127,14 @@ export function AdminDashboard() {
         if (!can('reports.view')) return null;
         return (
           <div className={styles.analyticsLayout}>
-            {/* Row 1: Goal + Charts */}
+            {/* Row 1: Goal + Clients */}
             <div className={styles.analyticsTopRow}>
-              {/* Monthly Goal */}
-              <div className={styles.goalCard}>
-                <div className={styles.goalHeader}>
-                  <h4 className={styles.chartTitle}>Objetivo Mensual</h4>
-                  <button
-                    className={styles.goalEditBtn}
-                    onClick={() => { setGoalInput(String(monthlyGoal)); setEditingGoal(true); }}
-                    title="Editar objetivo"
-                  >
-                    ✏️
-                  </button>
-                </div>
-                {editingGoal ? (
-                  <div className={styles.goalEditForm}>
-                    <input
-                      type="number"
-                      className={styles.goalEditInput}
-                      value={goalInput}
-                      onChange={(e) => setGoalInput(e.target.value)}
-                      min={0}
-                      // eslint-disable-next-line jsx-a11y/no-autofocus
-                      autoFocus
-                    />
-                    <button
-                      className={styles.goalEditSave}
-                      onClick={() => {
-                        const val = Math.max(0, Number(goalInput) || 0);
-                        setMonthlyGoal(val);
-                        setEditingGoal(false);
-                      }}
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      className={styles.goalEditCancel}
-                      onClick={() => setEditingGoal(false)}
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                ) : (
-                  <div className={styles.goalValue}>
-                    {currentMonthRevenue.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
-                    <span className={styles.goalTarget}> / {monthlyGoal.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
-                  </div>
-                )}
-                <div className={styles.goalBarOuter}>
-                  <div className={styles.goalBarInner} style={{ width: `${goalProgress}%` }} />
-                </div>
-                <span className={styles.goalPercent}>{goalProgress.toFixed(1)}% completado</span>
-              </div>
+              <MonthlyGoalCard
+                currentMonthRevenue={currentMonthRevenue}
+                monthlyGoal={monthlyGoal}
+                onSaveGoal={setMonthlyGoal}
+                styles={styles}
+              />
               {/* Top Clients */}
               <div className={styles.clientsCard}>
                 <h4 className={styles.chartTitle}>Mejores Clientes</h4>
@@ -360,7 +149,7 @@ export function AdminDashboard() {
                           <span className={styles.clientName}>{c.name}</span>
                           <span className={styles.clientEmail}>{c.email}</span>
                         </div>
-                        <span className={styles.clientTotal}>{c.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}</span>
+                        <span className={styles.clientTotal}>{fmtCurrency(c.total)}</span>
                         <span className={styles.clientOrders}>{c.orders} pedidos</span>
                       </div>
                     ))
@@ -427,10 +216,7 @@ export function AdminDashboard() {
 
   // ─── Sorted, enabled widgets ────────────────────────────────────────────────
 
-  const sortedWidgets = useMemo(
-    () => [...widgets].sort((a, b) => a.order - b.order).filter((w) => w.enabled),
-    [widgets],
-  );
+  // (sortedWidgets y widgetOrder ya calculados arriba, junto a useDragAndDropWidgets)
 
   // ─── Render ─────────────────────────────────────────────────────────────────
 
@@ -491,12 +277,11 @@ export function AdminDashboard() {
       />
 
       {/* ── Draggable Widgets ── */}
-      <div className={styles.widgetsContainer}>
+      <div className={styles.widgetsContainer} data-dashboard-container>
         {sortedWidgets.map((widget) => {
           const content = renderWidget(widget.id);
           if (content === null) return null;
 
-          const isDragging = draggedId !== null;
           const isBeingDragged = draggedId === widget.id;
           const isDraggedOver = dragOverId === widget.id;
 
@@ -504,11 +289,11 @@ export function AdminDashboard() {
             <section
               key={widget.id}
               draggable
-              onDragStart={(e) => handleDragStart(e, widget.id)}
-              onDragOver={(e) => handleDragOver(e, widget.id)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, widget.id)}
-              onDragEnd={handleDragEnd}
+              onDragStart={(e) => handlers.handleDragStart(e, widget.id)}
+              onDragOver={(e) => handlers.handleDragOver(e, widget.id)}
+              onDragLeave={handlers.handleDragLeave}
+              onDrop={(e) => handlers.handleDrop(e, widget.id)}
+              onDragEnd={handlers.handleDragEnd}
               className={`${styles.widgetSection} ${isBeingDragged ? styles.widgetDragging : ''} ${isDraggedOver ? styles.widgetDragOver : ''} ${isDragging && !isBeingDragged ? styles.widgetDimmed : ''}`}
               data-widget-id={widget.id}
             >
