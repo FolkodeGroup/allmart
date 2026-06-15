@@ -3,14 +3,17 @@ import { render, screen } from '@testing-library/react';
 import CriticalStockAlert from './CriticalStockAlert';
 
 describe('CriticalStockAlert', () => {
-    it('should not render when there are no critical products', () => {
+    it('should show a positive message when there are no critical products', () => {
         const products = [
             { id: '1', name: 'Product 1', stock: 10 },
             { id: '2', name: 'Product 2', stock: 20 },
         ];
 
-        const { container } = render(<CriticalStockAlert products={products} />);
-        expect(container.firstChild).toBeNull();
+        render(<CriticalStockAlert products={products} />);
+
+        expect(
+            screen.getByText(/no hay productos con stock crítico/i)
+        ).toBeInTheDocument();
     });
 
     it('should render only products with stock <= 5', () => {
