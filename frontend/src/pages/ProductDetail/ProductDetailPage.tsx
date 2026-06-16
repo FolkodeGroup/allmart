@@ -46,8 +46,15 @@ export function ProductDetailPage() {
 
   // Compute selected SKU and image set once to avoid repeated .find calls
   const selectedSku = useMemo(() => product?.skus?.find(s => s.id === selectedSkuId) ?? null, [product?.skus, selectedSkuId]);
-  const skuImages = useMemo(() => (selectedSku?.images && selectedSku.images.length > 0) ? selectedSku.images : product?.images ?? [], [selectedSku, product?.images]);
 
+  const skuImages = useMemo(() => {
+    // Si no hay variantes seleccionadas → siempre imágenes del producto base
+    if (Object.keys(selectedVariants).length === 0) return product?.images ?? [];
+    // Si hay SKU seleccionado con imágenes propias → usarlas
+    if (selectedSku?.images && selectedSku.images.length > 0) return selectedSku.images;
+    // Fallback al producto base
+    return product?.images ?? [];
+  }, [selectedSku, selectedVariants, product?.images]);
   /* Cargar producto por slug */
   useEffect(() => {
     if (!slug) return;
@@ -264,24 +271,56 @@ export function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    // Build a product object for the cart that includes which combination/variant was selected
-    const variantValues: string[] = selectedSku
-      ? Object.values(selectedSku.attributes || {}).filter(Boolean)
-      : Object.values(selectedVariants).filter(Boolean);
 
-    const nameWithVariants = variantValues.length > 0
-      ? `${product.name} + ${variantValues.join(' ')}`
-      : product.name;
+    const isOriginal = Object.keys(selectedVariants).length === 0;
 
-    const imagesForCart = selectedSku && Array.isArray(selectedSku.images) && selectedSku.images.length > 0
-      ? selectedSku.images
-      : product.images;
+    if (isOriginal) {
+      // Producto base sin combinación seleccionada
+      addToCart({
+        product: {
+          ...product,
+          id: `${product.id}::original`,
+        },
+        quantity,
+      });
+    } else {
+      // Combinación seleccionada
+      const variantValues = selectedSku
+        ? Object.values(selectedSku.attributes || {}).filter(Boolean)
+        : Object.values(selectedVariants).filter(Boolean);
 
-    const cartProductId = selectedSku ? `${product.id}::${selectedSku.id}` : `${product.id}::original`;
-    const productForCart = selectedSku
-      ? { ...product, id: cartProductId, name: nameWithVariants, sku: selectedSku.sku, price: selectedSku.price ?? product.price, images: imagesForCart }
-      : { ...product, id: cartProductId, name: nameWithVariants, images: imagesForCart };
-    addToCart({ product: productForCart, quantity });
+      const nameWithVariants = variantValues.length > 0
+        ? `${product.name} + ${variantValues.join(' ')}`
+        : product.name;
+
+      const imagesForCart =
+        selectedSku && Array.isArray(selectedSku.images) && selectedSku.images.length > 0
+          ? selectedSku.images
+          : product.images;
+
+      const cartProductId = selectedSku
+        ? `${product.id}::${selectedSku.id}`
+        : `${product.id}::original`;
+
+      const productForCart = selectedSku
+        ? {
+          ...product,
+          id: cartProductId,
+          name: nameWithVariants,
+          sku: selectedSku.sku,
+          price: selectedSku.price ?? product.price,
+          images: imagesForCart,
+        }
+        : {
+          ...product,
+          id: cartProductId,
+          name: nameWithVariants,
+          images: imagesForCart,
+        };
+
+      addToCart({ product: productForCart, quantity });
+    }
+
     setAddedFeedback(true);
     setTimeout(() => setAddedFeedback(false), 2000);
   };
@@ -379,16 +418,35 @@ export function ProductDetailPage() {
             </span>
           </div>
 
-          <span className={styles.sku}>SKU: {selectedSku?.sku ?? product.sku}</span>
+          <span className={styles.sku}>
+            SKU: {Object.keys(selectedVariants).length === 0 ? product.sku : (selectedSku?.sku ?? product.sku)}
+          </span>
 
           {/* Product combinations / SKUs */}
-          <div className={styles.variantsBlock}>
-            {Object.entries(variantMap).map(([attr, values]) => {
-              console.log('Rendering variant group', attr, 'with values', values, 'selectedVariants', selectedVariants);
-              return (
+          {Object.keys(variantMap).length > 0 && (
+            <div className={styles.variantsBlock}>
+              {/* Fila "Original" — siempre visible, representa el producto base */}
+              <div className={styles.variantGroup}>
+                <span className={styles.variantLabel}>Original</span>
+                <div className={styles.variantOptions}>
+                  <button
+                    className={[
+                      styles.variantOption,
+                      Object.keys(selectedVariants).length === 0
+                        ? styles.variantOptionSelected
+                        : '',
+                    ].join(' ').trim()}
+                    onClick={() => setSelectedVariants({})}
+                  >
+                    {product.name}
+                  </button>
+                </div>
+              </div>
+
+              {/* Grupos de variantes normales */}
+              {Object.entries(variantMap).map(([attr, values]) => (
                 <div key={attr} className={styles.variantGroup}>
                   <span className={styles.variantLabel}>{attr}</span>
-
                   <div className={styles.variantOptions}>
                     {[...values].map(val => {
                       const selected = selectedVariants[attr] === val;
@@ -408,7 +466,6 @@ export function ProductDetailPage() {
                           onClick={() =>
                             setSelectedVariants(prev => {
                               if (prev[attr] === val) {
-                                // Toggle: deseleccionar esta dimensión
                                 const next = { ...prev };
                                 delete next[attr];
                                 return next;
@@ -430,9 +487,9 @@ export function ProductDetailPage() {
                     })}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Price */}
           <div className={styles.priceBlock}>
