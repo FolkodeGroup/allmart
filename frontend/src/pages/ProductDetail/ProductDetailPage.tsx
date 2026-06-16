@@ -379,7 +379,7 @@ export function ProductDetailPage() {
             </span>
           </div>
 
-          <span className={styles.sku}>SKU: {product.sku}</span>
+          <span className={styles.sku}>SKU: {selectedSku?.sku ?? product.sku}</span>
 
           {/* Product combinations / SKUs */}
           <div className={styles.variantsBlock}>
