@@ -15,8 +15,15 @@
 /* ── Welcome Banner ──────────────────────────────────────────── */
 
 @keyframes bannerIn {
-  from { opacity: 0; transform: translateY(-12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .banner {
@@ -26,8 +33,8 @@
   gap: var(--space-6);
   padding: var(--space-6) var(--space-8);
   background: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-primary)) 0%,
-    color-mix(in srgb, var(--color-accent) 12%, var(--color-bg-primary)) 100%);
+      color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-primary)) 0%,
+      color-mix(in srgb, var(--color-accent) 12%, var(--color-bg-primary)) 100%);
   border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
   border-radius: 16px;
   animation: bannerIn 0.5s ease-out both;
@@ -154,7 +161,7 @@
 .widgetDragOver {
   border-color: var(--color-primary);
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent),
-              0 0 20px color-mix(in srgb, var(--color-primary) 10%, transparent);
+    0 0 20px color-mix(in srgb, var(--color-primary) 10%, transparent);
   transform: scaleY(1.02);
   transition: all 0.2s ease-out;
 }
@@ -560,10 +567,21 @@
   outline-offset: 2px;
 }
 
-.quick_primary { border-left: 3px solid var(--color-primary); }
-.quick_accent  { border-left: 3px solid var(--color-accent); }
-.quick_warm    { border-left: 3px solid var(--color-warm-gray); }
-.quick_secondary { border-left: 3px solid var(--color-border); }
+.quick_primary {
+  border-left: 3px solid var(--color-primary);
+}
+
+.quick_accent {
+  border-left: 3px solid var(--color-accent);
+}
+
+.quick_warm {
+  border-left: 3px solid var(--color-warm-gray);
+}
+
+.quick_secondary {
+  border-left: 3px solid var(--color-border);
+}
 
 .quickIcon {
   font-size: 1.5rem;
@@ -738,8 +756,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .statusText {
