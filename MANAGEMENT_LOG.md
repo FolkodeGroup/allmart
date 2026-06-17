@@ -1916,15 +1916,32 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1075: 1067 eliminar el árbol de categorías y subcategorías como filtros en el sidebar de la vista de productoscategorías | 2026-06-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1074: 1066 optimizar el flujo de actualización e impacto visual inmediato en la edición de banners del panel administrador | 2026-06-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1073: Se implementa unificación de barras de búsqueda basadas en Promocione… | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1071: Se implementa unificación estética de tablas y soporte para modo clar… | 2026-06-03 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1073: Se implementa unificación de barras de búsqueda basadas en Promocione… | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1074: 1066 optimizar el flujo de actualización e impacto visual inmediato en la edición de banners del panel administrador | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1075: 1067 eliminar el árbol de categorías y subcategorías como filtros en el sidebar de la vista de productoscategorías | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1076: 1068 transformar el componente de colecciones en un banner de ancho completo dentro de la vista de categoríasproductos | 2026-06-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1081: 1064 replicar diseño base de paginación de productos en el resto del sitio | 2026-06-08 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1083: 🔄 Actualización automática de puntajes semanal | 2026-06-08 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1085: 1069 implementar la selección dinámica de variantes en la vista de detalle del producto antes de habilitar la acción de compra | 2026-06-08 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1083: 🔄 Actualización automática de puntajes semanal | 2026-06-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1086: 🔄 Registrar puntaje de gestión | 2026-06-08 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1084: 🔄 Registrar puntaje de gestión | 2026-06-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1086: 🔄 Registrar puntaje de gestión | 2026-06-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1085: 1069 implementar la selección dinámica de variantes en la vista de detalle del producto antes de habilitar la acción de compra | 2026-06-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1084: 🔄 Registrar puntaje de gestión | 2026-06-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1083: 🔄 Actualización automática de puntajes semanal | 2026-06-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1082: 🔄 Registrar puntaje de gestión | 2026-06-08 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1081: 1064 replicar diseño base de paginación de productos en el resto del sitio | 2026-06-08 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1091: 991 implementar pestañas dinámicas por proveedor con detalle y análisis de productos | 2026-06-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1088: 🔄 Registrar puntaje de gestión | 2026-06-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1091: 991 implementar pestañas dinámicas por proveedor con detalle y análisis de productos | 2026-06-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1090: Optimizar UI de variantes en Admin para ocupar menos espacio y ser más entendible | 2026-06-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1089: Mejorar UI de variantes de producto en el Home usando variantes creadas y referencia de Mercado Libre | 2026-06-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1087: Mantener visible el apartado de “Productos en Stock Crítico” en el Dashboard aunque no haya items con bajo stock | 2026-06-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1092: 🔄 Actualización automática de puntajes semanal | 2026-06-14 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1100: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1099: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1098: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1100: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1099: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1098: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1097: 1095 validar formulario de creaciónedición de combinaciones SKU imagen precio | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1094: 1089 mejorar UI de variantes de producto en el home usando variantes creadas y referencia de mercado libre | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1093: 1087 mantener visible el apartado de productos en stock crítico en el dashboard aunque no haya items con bajo stock | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1093: 1087 mantener visible el apartado de productos en stock crítico en el dashboard aunque no haya items con bajo stock | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1088: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1096: Subida de imágenes desde escritorio y gestión avanzada de imágenes en creación/edición de combinaciones | 2026-06-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1093: 1087 mantener visible el apartado de productos en stock crítico en el dashboard aunque no haya items con bajo stock | 2026-06-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1094: 1089 mejorar UI de variantes de producto en el home usando variantes creadas y referencia de mercado libre | 2026-06-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1097: 1095 validar formulario de creaciónedición de combinaciones SKU imagen precio | 2026-06-17 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1095: Validar formulario de creación/edición de combinaciones (SKU, imagen, precio) | 2026-06-17 |
