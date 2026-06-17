@@ -1945,3 +1945,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1088: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1096: Subida de imágenes desde escritorio y gestión avanzada de imágenes en creación/edición de combinaciones | 2026-06-17 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1095: Validar formulario de creación/edición de combinaciones (SKU, imagen, precio) | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1092: 🔄 Actualización automática de puntajes semanal | 2026-06-17 |
