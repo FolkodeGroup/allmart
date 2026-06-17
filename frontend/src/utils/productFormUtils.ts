@@ -269,3 +269,71 @@ export const extractUniqueFieldValues = (
 
   return Array.from(values).sort();
 };
+
+/**
+ * Resultado tipado de validación para una combinación (variant/sku)
+ */
+export interface CombinationValidationErrors {
+  sku?: string;
+  images?: string;
+  price?: string;
+}
+
+/**
+ * Valida una combinación (SKU, imágenes, precio).
+ * - sku: obligatorio, distinto al skuBase (si provisto), formato básico (mayúsculas/números/guiones)
+ * - images: debe contener al menos una imagen (array o string que al split produce al menos 1)
+ * - price: obligatorio, numérico, >= 0
+ *
+ * Retorna un objeto con mensajes de error por campo (vacío si no hay errores).
+ */
+export const validateCombination = (input: {
+  sku?: unknown;
+  skuBase?: string | null | undefined;
+  images?: unknown; // string | string[]
+  price?: unknown; // number | string
+}): CombinationValidationErrors => {
+  const errors: CombinationValidationErrors = {};
+
+  const skuRaw = typeof input.sku === 'string' ? input.sku.trim() : '';
+  if (!skuRaw) {
+    errors.sku = 'El SKU es obligatorio';
+  } else {
+    // SKU debe ser distinto al skuBase
+    if (input.skuBase && typeof input.skuBase === 'string' && skuRaw === input.skuBase) {
+      errors.sku = 'El SKU debe ser distinto al SKU del producto base';
+    }
+    // formato básico: reuse isValidSku
+    if (!errors.sku && !isValidSku(skuRaw)) {
+      errors.sku = 'Formato inválido: solo mayúsculas, números y guiones';
+    }
+  }
+
+  // Images: aceptar string (newline-separated) o array
+  let imagesArr: string[] = [];
+  if (typeof input.images === 'string') {
+    const s = input.images.trim();
+    if (s) {
+      imagesArr = s.includes('\n') ? s.split('\n').map(x => x.trim()).filter(Boolean) : [s];
+    }
+  } else if (Array.isArray(input.images)) {
+    imagesArr = (input.images as Array<unknown>).map(i => String(i)).map(x => x.trim()).filter(Boolean);
+  }
+  if (imagesArr.length === 0) {
+    errors.images = 'Debe existir al menos una imagen para la combinación';
+  }
+
+  // Price: aceptar number o numeric string
+  if (input.price === undefined || input.price === null || input.price === '') {
+    errors.price = 'El precio es obligatorio';
+  } else {
+    const priceNum = typeof input.price === 'number' ? input.price : Number(String(input.price));
+    if (Number.isNaN(priceNum)) {
+      errors.price = 'El precio debe ser un número válido';
+    } else if (priceNum < 0) {
+      errors.price = 'El precio debe ser mayor o igual a 0';
+    }
+  }
+
+  return errors;
+};

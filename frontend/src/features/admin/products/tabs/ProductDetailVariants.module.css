@@ -216,3 +216,16 @@
   border-radius: 6px;
   border: 1px solid var(--color-border-light);
 }
+
+/* Error styles used by variant modal */
+.inputError {
+  border-color: var(--color-danger, #dc2626) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.06);
+}
+
+.errorText {
+  color: var(--color-danger, #dc2626);
+  font-size: 0.875rem;
+  margin: 0 0 0.5rem 150px;
+  /* align under labels which have 150px width */
+}
