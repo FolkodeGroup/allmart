@@ -2,6 +2,9 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import styles from './ProductDetailVariants.module.css';
+import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
+import type { UploadFileState } from '../../images';
+import { getStoredToken } from '../../../../utils/apiClient';
 import { useAdminVariants } from '../../../../context/AdminVariantsContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
@@ -132,6 +135,10 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
+  // Image upload hook for combinations (product-level by default)
+  const token = getStoredToken() ?? '';
+  const { files: uploadedFiles, addFiles, remove: removeFile, setPrimary, uploadAll, retry } = useImageUpload({ token, productId, skuId: editingSkuId ?? undefined });
+  const imagesProvidedViaUrls = Boolean(combinationImages.trim());
 
   useEffect(() => {
     if (product && product.sku) {
@@ -177,6 +184,16 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     const validation = runCombinationValidation();
     if (validation && (validation.sku || validation.images || validation.price)) {
       // keep modal open and show errors
+      return;
+    }
+
+    // Upload any pending files first
+    await uploadAll();
+
+    // Business rule: require at least one image
+    const currentImagesCount = uploadedFiles.filter((f: UploadFileState) => f.status === 'success' || Boolean(f.remoteUrl)).length;
+    if (currentImagesCount === 0 && !imagesProvidedViaUrls) {
+      setCombinationErrors(prev => ({ ...prev, images: 'Se requiere al menos una imagen para la combinación' }));
       return;
     }
 
@@ -306,19 +323,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
               </div>
               {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
               <div className={styles.fieldRow}>
-                <label htmlFor="combination-images">Imágenes (una URL por línea — recomendado)</label>
-                <textarea
-                  id="combination-images"
-                  placeholder="https://...\nhttps://..."
-                  rows={3}
-                  value={combinationImages}
-                  onChange={e => {
-                    setCombinationImages(e.target.value);
-                    runCombinationValidation();
-                  }}
-                  onBlur={() => runCombinationValidation()}
-                  className={combinationErrors.images ? styles.inputError : ''}
-                />
+                <label htmlFor="combination-images">Imágenes</label>
+                <div className={styles.imageUploaderContainer}>
+                  <ImageUploader onAddFiles={(f: File[]) => addFiles(f)} />
+                  <ImagePreviewList items={uploadedFiles} onRemove={(id: string) => removeFile(id)} onRetry={(id: string) => retry(id)} onSetPrimary={(id: string) => setPrimary(id)} />
+                </div>
               </div>
               {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
               <div className={styles.fieldRow}>

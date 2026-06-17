@@ -125,6 +125,12 @@
   background: var(--color-bg-primary);
 }
 
+.imageUploaderContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
 .modalActions {
   display: flex;
   gap: 0.5rem;
