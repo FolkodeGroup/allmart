@@ -96,11 +96,9 @@ export async function createSku(productId: string, dto: { sku?: string; attribut
         }
     }
     const attrsToSave = { ...(dto.attributes ?? {}) } as Record<string, any>;
-    const providedImages = (dto as any).images ?? attrsToSave.images;
-    if (!providedImages || (Array.isArray(providedImages) && providedImages.filter(Boolean).length === 0)) {
-        // If no images provided, reject creation
-        throw createError('La combinación debe incluir al menos una imagen', 400, ['images']);
-    }
+    // Images are optional at creation time. When present, merge into attributes.
+    // Images may be provided in dto.images or inside attributes; they will be merged below when present.
+    // (We intentionally do not enforce presence of images at create time.)
     // Merge images into attributes if provided in dto.images
     if ((dto as any).images && Array.isArray((dto as any).images)) {
         attrsToSave.images = (dto as any).images;

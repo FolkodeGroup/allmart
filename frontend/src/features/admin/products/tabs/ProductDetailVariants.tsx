@@ -2,6 +2,9 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import styles from './ProductDetailVariants.module.css';
+import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
+import type { UploadFileState } from '../../images';
+import { getStoredToken } from '../../../../utils/apiClient';
 import { useAdminVariants } from '../../../../context/AdminVariantsContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
@@ -132,6 +135,21 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
+  // Image upload hook for combinations (product-level by default)
+  const token = getStoredToken() ?? '';
+  const { files: uploadedFiles, addFiles, remove: removeFile, setPrimary, uploadAll, retry, setFiles } = useImageUpload({ token, productId, skuId: editingSkuId ?? undefined });
+  // whether user manually provided URLs in the textarea
+  // (kept as a comment — validation is handled later after uploads)
+
+  // Ensure the first uploaded image is marked as primary by default
+  useEffect(() => {
+    if (!uploadedFiles || uploadedFiles.length === 0) return;
+    const hasPrimary = uploadedFiles.some(f => f.isPrimary);
+    if (!hasPrimary) {
+      const first = uploadedFiles[0];
+      if (first) setPrimary(first.uid);
+    }
+  }, [uploadedFiles, setPrimary]);
 
   useEffect(() => {
     if (product && product.sku) {
@@ -142,21 +160,40 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   // Validate the current combination inputs and update combinationErrors
   const runCombinationValidation = useCallback(() => {
-    const result = validateCombination({ sku: combinationSku, skuBase: product?.sku, images: combinationImages, price: combinationPrice });
+    // If user provided newline URLs, pass them through. Otherwise, if there are uploaded files (local or remote),
+    // treat that as having images so validation passes.
+    let imagesInput: unknown = combinationImages;
+    if (!combinationImages.trim()) {
+      if (uploadedFiles && uploadedFiles.length > 0) {
+        // provide a non-empty array so validateCombination sees images present
+        imagesInput = uploadedFiles.map(f => f.remoteUrl ?? f.previewUrl ?? f.uid);
+      } else {
+        imagesInput = '';
+      }
+    }
+
+    const result = validateCombination({ sku: combinationSku, skuBase: product?.sku, images: imagesInput, price: combinationPrice });
     setCombinationErrors(result);
     return result;
-  }, [combinationSku, combinationImages, combinationPrice, product?.sku]);
+  }, [combinationSku, combinationImages, combinationPrice, product?.sku, uploadedFiles]);
 
   const openCombinationModal = () => {
-    // initialize attributes with first available value (if any)
+    // initialize attributes with empty values (no defaults)
     const initial: Record<string, string> = {};
     variants.forEach(v => {
-      initial[v.name] = v.values[0] ?? '';
+      initial[v.name] = '';
     });
     setCombinationAttrs(initial);
     setCombinationStock('');
     setCombinationImages('');
     setCombinationPrice('');
+    // ensure we are in create mode (no editing SKU) and clear any staged files
+    setEditingSkuId(null);
+    try {
+      setFiles([] as UploadFileState[]);
+    } catch {
+      // ignore if hook not available
+    }
     setCombinationModalOpen(true);
   };
 
@@ -180,23 +217,50 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       return;
     }
 
+    // Create or update SKU first (so we have an SKU id to upload files into storage if needed)
+    let persistedSkuId: string | undefined = undefined;
+    if (editingSkuId) {
+      await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price });
+      persistedSkuId = editingSkuId;
+    } else {
+      const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price });
+      if (created && typeof created === 'object' && (created as Record<string, unknown>).id) {
+        persistedSkuId = String((created as Record<string, unknown>).id);
+      }
+    }
+
+    // If we have a persisted SKU id, upload pending files into SKU storage and collect URLs
+    let uploadedRemoteUrls: string[] = [];
+    if (persistedSkuId) {
+      const results = await uploadAll(persistedSkuId);
+      uploadedRemoteUrls = results.filter(r => r.status === 'success' && r.url).map(r => r.url!) as string[];
+    }
+
+    // Combine any user-provided URLs with uploaded ones
+    if (images && Array.isArray(images)) {
+      images = [...uploadedRemoteUrls, ...images];
+    } else if (uploadedRemoteUrls.length > 0) {
+      images = uploadedRemoteUrls;
+    } else {
+      images = undefined;
+    }
+
+    // If we have a persisted SKU, ensure images are attached via updateVariantChild
     try {
-      if (editingSkuId) {
-        // update existing persisted SKU; server refresh will update list
-        await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, images, price });
-        setEditingSkuId(null);
+      if (persistedSkuId) {
+        // include attributes to avoid accidental overwrite on backend merge
+        await updateVariantChild(productId, persistedSkuId, { images, price, attributes: attrs });
+      } else if (!editingSkuId) {
+        // No persisted id returned — fall back to optimistic local entry
+        const newItem: CreatedCombination = { sku: sku || undefined, attributes: attrs, stock, images, price };
+        setCreatedCombinations(prev => [newItem, ...prev]);
       } else {
-        const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, images, price });
-        // If backend returned a persisted object (with id), it will be present in `skus` after the context refresh.
-        // Only keep optimistic entry if backend didn't return an id.
-        const createdObj = created as CreatedCombination | undefined;
-        if (!(createdObj && createdObj.id)) {
-          const newItem: CreatedCombination = { sku: sku || undefined, attributes: attrs, stock, images, price };
-          setCreatedCombinations(prev => [newItem, ...prev]);
-        }
+        // Editing existing but no persistedSkuId (shouldn't happen) — still attempt to update
+        if (editingSkuId) await updateVariantChild(productId, editingSkuId, { images, price, attributes: attrs });
       }
     } finally {
       setCombinationModalOpen(false);
+      setEditingSkuId(null);
     }
   };
 
@@ -220,6 +284,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationPrice(typeof sku.price === 'number' ? sku.price : '');
     setCombinationImages(Array.isArray(sku.images) ? sku.images.join('\n') : '');
     setEditingSkuId(id);
+    // Prefill image previews from existing SKU images (remote URLs)
+    if (Array.isArray(sku.images) && sku.images.length > 0) {
+      const initial: UploadFileState[] = sku.images.map((url) => ({ uid: `remote-${Math.random().toString(36).slice(2, 8)}`, previewUrl: url, remoteUrl: url, status: 'success' } as UploadFileState));
+      setFiles(initial);
+    } else {
+      setFiles([] as UploadFileState[]);
+    }
     setCombinationModalOpen(true);
   };
 
@@ -279,7 +350,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         {combinationModalOpen && (
           <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
             <div className={styles.modal}>
-              <h3>Añadir combinación</h3>
+              <h3>{editingSkuId ? 'Editar combinación' : 'Añadir combinación'}</h3>
               {variants.length === 0 && <p className={styles.help}>No hay grupos de variantes para seleccionar.</p>}
               {variants.map((g) => (
                 <div key={g.id} className={styles.fieldRow}>
@@ -306,19 +377,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
               </div>
               {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
               <div className={styles.fieldRow}>
-                <label htmlFor="combination-images">Imágenes (una URL por línea — recomendado)</label>
-                <textarea
-                  id="combination-images"
-                  placeholder="https://...\nhttps://..."
-                  rows={3}
-                  value={combinationImages}
-                  onChange={e => {
-                    setCombinationImages(e.target.value);
-                    runCombinationValidation();
-                  }}
-                  onBlur={() => runCombinationValidation()}
-                  className={combinationErrors.images ? styles.inputError : ''}
-                />
+                <label htmlFor="combination-images">Imágenes</label>
+                <div className={styles.imageUploaderContainer}>
+                  <ImageUploader onAddFiles={(f: File[]) => addFiles(f)} />
+                  <ImagePreviewList items={uploadedFiles} onRemove={(id: string) => removeFile(id)} onRetry={(id: string) => retry(id)} onSetPrimary={(id: string) => setPrimary(id)} />
+                </div>
               </div>
               {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
               <div className={styles.fieldRow}>
@@ -343,7 +406,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
               </div>
               <div className={styles.modalActions}>
                 <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
-                <button type="button" onClick={handleCreateCombination} disabled={!!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}>Crear</button>
+                <button type="button" onClick={handleCreateCombination} disabled={!!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}>{editingSkuId ? 'Editar' : 'Crear'}</button>
               </div>
             </div>
           </div>
@@ -364,7 +427,8 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
               </div>
               {Array.isArray(s.images) && s.images.length > 0 && (
                 <div className={styles.combinationImages}>
-                  {s.images.map((img, i) => <img key={i} src={img} alt={s.sku ?? 'imagen'} className={styles.combinationThumb} />)}
+                  {/* Show only the first (primary) image for compact list view to avoid accumulated galleries */}
+                  <img src={s.images[0]} alt={s.sku ?? 'imagen'} className={styles.combinationThumb} />
                 </div>
               )}
               <div className={styles.combinationActions}>
@@ -387,7 +451,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
               </div>
               {Array.isArray(c.images) && c.images.length > 0 && (
                 <div className={styles.combinationImages}>
-                  {c.images.map((img, i) => <img key={i} src={img} alt={c.sku ?? 'imagen'} className={styles.combinationThumb} />)}
+                  <img src={c.images[0]} alt={c.sku ?? 'imagen'} className={styles.combinationThumb} />
                 </div>
               )}
             </div>

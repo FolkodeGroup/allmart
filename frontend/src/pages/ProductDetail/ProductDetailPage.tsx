@@ -49,12 +49,21 @@ export function ProductDetailPage() {
 
   const skuImages = useMemo(() => {
     // Si no hay variantes seleccionadas → siempre imágenes del producto base
-    if (Object.keys(selectedVariants).length === 0) return product?.images ?? [];
+    if (Object.keys(selectedVariants).length === 0) return (product?.images ?? []).filter(Boolean);
     // Si hay SKU seleccionado con imágenes propias → usarlas
-    if (selectedSku?.images && selectedSku.images.length > 0) return selectedSku.images;
-    // Fallback al producto base
-    return product?.images ?? [];
+    const source = (selectedSku?.images && selectedSku.images.length > 0) ? selectedSku.images : (product?.images ?? []);
+    // Normalize and deduplicate URLs to avoid duplicates showing in the gallery
+    const normalized = Array.isArray(source) ? source.map(String).filter(Boolean) : [];
+    const unique = Array.from(new Set(normalized));
+    return unique;
   }, [selectedSku, selectedVariants, product?.images]);
+
+  // Ensure selectedImage index stays in bounds when skuImages changes
+  useEffect(() => {
+    if (selectedImage >= (skuImages?.length ?? 0)) {
+      setSelectedImage(0);
+    }
+  }, [skuImages, selectedImage]);
   /* Cargar producto por slug */
   useEffect(() => {
     if (!slug) return;

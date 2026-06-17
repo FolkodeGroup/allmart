@@ -11,6 +11,7 @@ import { authMiddleware } from '../../../middlewares/auth';
 import { requireRole } from '../../../middlewares/permissions';
 import { UserRole } from '../../../types';
 import childrenRouter from './variants/children';
+import skuImagesRouter from './skuImages';
 
 const router = Router({ mergeParams: true }); // mergeParams para acceder a :productId
 
@@ -23,6 +24,9 @@ router.post('/', requireRole(UserRole.ADMIN), ctrl.create);
 // Mount this before the parameterized routes so the literal 'children' path isn't
 // captured by the ':variantId' route which would treat it as a UUID.
 router.use('/children', childrenRouter);
+
+// SKU images router mounted at /api/admin/products/:productId/skus/:skuId/images
+router.use('/skus/:skuId/images', skuImagesRouter);
 
 router.get('/:variantId', requireRole(UserRole.ADMIN), ctrl.show);
 router.put('/:variantId', requireRole(UserRole.ADMIN), ctrl.update);

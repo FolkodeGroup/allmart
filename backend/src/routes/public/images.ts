@@ -80,4 +80,9 @@ router.get('/categories/:id', async (req: Request, res: Response, next: NextFunc
 router.get('/banners/:id/thumb', bannersCtrl.getBannerThumbnail);
 router.get('/banners/:id', bannersCtrl.getBannerImage);
 
+// SKU images
+import * as skuPublic from '../../controllers/public/skuImagePublicController';
+router.get('/sku/:id/thumb', skuPublic.serveSkuImageThumb);
+router.get('/sku/:id', skuPublic.serveSkuImage);
+
 export default router;

@@ -65,7 +65,10 @@
   outline: none;
   transition: border-color 0.15s;
 }
-.searchInput:focus { border-color: var(--color-primary); }
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+}
 
 .productList {
   list-style: none;
@@ -93,7 +96,11 @@
   transition: background 0.15s;
   border: 1px solid transparent;
 }
-.productItem:hover { background: var(--color-bg-secondary); }
+
+.productItem:hover {
+  background: var(--color-bg-secondary);
+}
+
 .productItem.selected {
   background: var(--color-bg-tertiary);
   border-color: var(--color-primary);
@@ -189,7 +196,10 @@
   overflow: hidden;
   transition: box-shadow 0.15s;
 }
-.imageCard:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+
+.imageCard:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
 
 /* Thumbnail */
 .thumbnail {
@@ -222,7 +232,7 @@
   position: absolute;
   top: 6px;
   left: 6px;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   color: var(--color-neutral-light);
   font-family: var(--font-ui);
   font-size: 10px;
@@ -285,8 +295,14 @@
   outline: none;
   transition: border-color 0.15s;
 }
-.editInput:focus { border-color: var(--color-primary); }
-.editInput::placeholder { color: var(--color-text-tertiary); }
+
+.editInput:focus {
+  border-color: var(--color-primary);
+}
+
+.editInput::placeholder {
+  color: var(--color-text-tertiary);
+}
 
 .inputError {
   border-color: var(--color-error) !important;
@@ -318,8 +334,15 @@
   transition: background 0.15s;
   flex-shrink: 0;
 }
-.saveBtn:hover:not(:disabled) { background: var(--color-primary-dark); }
-.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .cancelEditBtn {
   font-family: var(--font-ui);
@@ -332,7 +355,10 @@
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.cancelEditBtn:hover { border-color: var(--color-text-secondary); }
+
+.cancelEditBtn:hover {
+  border-color: var(--color-text-secondary);
+}
 
 .editBtn {
   font-family: var(--font-ui);
@@ -345,7 +371,10 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.editBtn:hover { background: rgba(118,146,130,0.1); }
+
+.editBtn:hover {
+  background: rgba(118, 146, 130, 0.1);
+}
 
 .deleteBtn {
   font-family: var(--font-ui);
@@ -358,8 +387,15 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.deleteBtn:hover:not(:disabled) { background: rgba(192,57,43,0.07); }
-.deleteBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.deleteBtn:hover:not(:disabled) {
+  background: rgba(192, 57, 43, 0.07);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* ── Sección de agregar imagen ── */
 .addSection {
@@ -380,7 +416,10 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.addImageBtn:hover { background: var(--color-primary-dark); }
+
+.addImageBtn:hover {
+  background: var(--color-primary-dark);
+}
 
 .addForm {
   background: var(--color-bg-secondary);
@@ -450,7 +489,7 @@
   position: absolute;
   bottom: 5px;
   right: 5px;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   color: var(--color-neutral-light);
   font-family: var(--font-ui);
   font-size: 9px;
@@ -481,13 +520,15 @@
   justify-content: center;
   background: var(--color-bg-primary);
 }
+
 .dropZone:hover {
   border-color: var(--color-primary);
-  background: rgba(118,146,130,0.04);
+  background: rgba(118, 146, 130, 0.04);
 }
+
 .dropZoneHasFile {
   border-color: var(--color-primary);
-  background: rgba(118,146,130,0.06);
+  background: rgba(118, 146, 130, 0.06);
   padding: var(--space-2);
   min-height: 160px;
 }
@@ -547,4 +588,134 @@
 
 .uploadErr {
   color: var(--color-error, #c0392b);
+}
+
+/* --- Small components for inline preview (used in variant modal) --- */
+.previewList {
+  max-width: 450px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 6px 0;
+}
+
+.previewItem {
+  position: relative;
+  width: 140px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-primary);
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.previewThumb {
+  width: 100%;
+  height: 90px;
+  background: var(--color-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbPlaceholder {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.previewMeta {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.previewFileName {
+  /* filenames should not be visible */
+  display: none;
+}
+
+.previewActions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.progress {
+  width: 100%;
+}
+
+.retryBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.deleteBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  background: rgba(0, 0, 0, 0.0);
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s, background 0.12s, color 0.12s;
+}
+
+
+
+.previewItem:hover .deleteBtn {
+  opacity: 1;
+  background: #f3f3f3;
+  color: var(--color-text-primary);
+}
+
+.previewItem:hover .deleteBtn:hover {
+  background: var(--color-bg-secondary);
+  ;
+  color: var(--color-primary);
+}
+
+.primaryBtn {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.primaryActive {
+  background: rgba(118, 146, 130, 0.12);
+  /* subtle tint matching UI */
+  color: var(--color-primary);
+  border-color: rgba(118, 146, 130, 0.18);
+}
+
+.errorText {
+  color: var(--color-error);
+  font-size: var(--text-xs);
 }
