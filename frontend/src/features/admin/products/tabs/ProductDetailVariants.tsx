@@ -1,4 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { validateCombination } from '../../../../utils/productFormUtils';
+import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import styles from './ProductDetailVariants.module.css';
 import { useAdminVariants } from '../../../../context/AdminVariantsContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
@@ -126,6 +128,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [combinationImages, setCombinationImages] = useState<string>('');
   const [combinationPrice, setCombinationPrice] = useState<number | ''>('');
   const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
+  const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
   type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
@@ -136,6 +139,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       setCombinationSku(product.sku + '-');
     }
   }, [product]);
+
+  // Validate the current combination inputs and update combinationErrors
+  const runCombinationValidation = useCallback(() => {
+    const result = validateCombination({ sku: combinationSku, skuBase: product?.sku, images: combinationImages, price: combinationPrice });
+    setCombinationErrors(result);
+    return result;
+  }, [combinationSku, combinationImages, combinationPrice, product?.sku]);
 
   const openCombinationModal = () => {
     // initialize attributes with first available value (if any)
@@ -162,6 +172,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       else images = [raw];
     }
     const price = combinationPrice === '' ? undefined : Number(combinationPrice);
+
+    // Run validation and prevent submit if errors
+    const validation = runCombinationValidation();
+    if (validation && (validation.sku || validation.images || validation.price)) {
+      // keep modal open and show errors
+      return;
+    }
 
     try {
       if (editingSkuId) {
@@ -275,23 +292,58 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
               ))}
               <div className={styles.fieldRow}>
                 <label htmlFor="combination-sku">SKU</label>
-                <input id="combination-sku" value={combinationSku} onChange={e => setCombinationSku(e.target.value)} />
+                <input
+                  id="combination-sku"
+                  value={combinationSku}
+                  onChange={e => {
+                    setCombinationSku(e.target.value);
+                    // realtime validate
+                    runCombinationValidation();
+                  }}
+                  onBlur={() => runCombinationValidation()}
+                  className={combinationErrors.sku ? styles.inputError : ''}
+                />
               </div>
+              {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
               <div className={styles.fieldRow}>
                 <label htmlFor="combination-images">Imágenes (una URL por línea — recomendado)</label>
-                <textarea id="combination-images" placeholder="https://...\nhttps://..." rows={3} value={combinationImages} onChange={e => setCombinationImages(e.target.value)} />
+                <textarea
+                  id="combination-images"
+                  placeholder="https://...\nhttps://..."
+                  rows={3}
+                  value={combinationImages}
+                  onChange={e => {
+                    setCombinationImages(e.target.value);
+                    runCombinationValidation();
+                  }}
+                  onBlur={() => runCombinationValidation()}
+                  className={combinationErrors.images ? styles.inputError : ''}
+                />
               </div>
+              {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
               <div className={styles.fieldRow}>
                 <label htmlFor="combination-price">Precio</label>
-                <input id="combination-price" type="number" step="0.01" value={combinationPrice === '' ? '' : String(combinationPrice)} onChange={e => setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value))} />
+                <input
+                  id="combination-price"
+                  type="number"
+                  step="0.01"
+                  value={combinationPrice === '' ? '' : String(combinationPrice)}
+                  onChange={e => {
+                    setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
+                    runCombinationValidation();
+                  }}
+                  onBlur={() => runCombinationValidation()}
+                  className={combinationErrors.price ? styles.inputError : ''}
+                />
               </div>
+              {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
               <div className={styles.fieldRow}>
                 <label htmlFor="combination-stock">Stock</label>
                 <input id="combination-stock" type="number" value={combinationStock === '' ? '' : String(combinationStock)} onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))} />
               </div>
               <div className={styles.modalActions}>
                 <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
-                <button type="button" onClick={handleCreateCombination}>Crear</button>
+                <button type="button" onClick={handleCreateCombination} disabled={!!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}>Crear</button>
               </div>
             </div>
           </div>

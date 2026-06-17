@@ -84,17 +84,32 @@ export async function getSkuById(productId: string, skuId: string): Promise<Prod
 export async function createSku(productId: string, dto: { sku?: string; attributes?: Record<string, any>; stock?: number; price?: number }): Promise<ProductSkuRow> {
     ensureModelAvailable();
     await productsService.getProductById(productId);
-    // @ts-ignore
+    // Server-side validation: SKU must not equal product SKU, price valid, images present in attributes
+    const product = await productsService.getProductById(productId);
+    if (dto.sku && product.sku && dto.sku === product.sku) {
+        throw createError('El SKU de la combinación no puede ser igual al SKU del producto base', 400, ['sku']);
+    }
+    if (dto.price !== undefined && dto.price !== null) {
+        const priceNum = Number(dto.price);
+        if (Number.isNaN(priceNum) || priceNum < 0) {
+            throw createError('Precio inválido para la combinación', 400, ['price']);
+        }
+    }
+    const attrsToSave = { ...(dto.attributes ?? {}) } as Record<string, any>;
+    const providedImages = (dto as any).images ?? attrsToSave.images;
+    if (!providedImages || (Array.isArray(providedImages) && providedImages.filter(Boolean).length === 0)) {
+        // If no images provided, reject creation
+        throw createError('La combinación debe incluir al menos una imagen', 400, ['images']);
+    }
     // Merge images into attributes if provided in dto.images
-    const attributes = { ...(dto.attributes ?? {}) };
     if ((dto as any).images && Array.isArray((dto as any).images)) {
-        attributes.images = (dto as any).images;
+        attrsToSave.images = (dto as any).images;
     }
     const row = await (prisma as any).productSku.create({
         data: {
             productId,
             sku: dto.sku ?? '',
-            attributes: attributes,
+            attributes: attrsToSave,
             stock: dto.stock ?? 0,
             ...(dto.price !== undefined && { price: dto.price }),
         }
@@ -105,6 +120,17 @@ export async function createSku(productId: string, dto: { sku?: string; attribut
 export async function updateSku(productId: string, skuId: string, dto: { sku?: string; attributes?: Record<string, any>; stock?: number; price?: number; isActive?: boolean }): Promise<ProductSkuRow> {
     ensureModelAvailable();
     await getSkuById(productId, skuId);
+    // Validate SKU and price on update as well
+    const product = await productsService.getProductById(productId);
+    if (dto.sku && product.sku && dto.sku === product.sku) {
+        throw createError('El SKU de la combinación no puede ser igual al SKU del producto base', 400, ['sku']);
+    }
+    if (dto.price !== undefined && dto.price !== null) {
+        const priceNum = Number(dto.price);
+        if (Number.isNaN(priceNum) || priceNum < 0) {
+            throw createError('Precio inválido para la combinación', 400, ['price']);
+        }
+    }
     // Merge attributes/images when updating: if dto.images present, include in attributes
     const dataToUpdate: any = {};
     if (dto.sku !== undefined) dataToUpdate.sku = dto.sku;
