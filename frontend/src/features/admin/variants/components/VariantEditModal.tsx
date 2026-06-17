@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -25,6 +25,16 @@ export function VariantEditModal({ open, initialName, initialValues, onClose, on
   const [newValue, setNewValue] = useState('');
   const [error, setError] = useState('');
 
+  // Keep local state in sync when the modal is opened or the initial props change.
+  useEffect(() => {
+    if (open) {
+      setName(initialName);
+      setValues(initialValues);
+      setNewValue('');
+      setError('');
+    }
+  }, [open, initialName, initialValues]);
+
   const handleAddValue = () => {
     if (!newValue.trim()) return;
     if (values.includes(newValue.trim())) {
@@ -43,6 +53,10 @@ export function VariantEditModal({ open, initialName, initialValues, onClose, on
   const handleSave = () => {
     if (!name.trim()) {
       setError('El nombre es requerido');
+      return;
+    }
+    if (!values || values.length === 0) {
+      setError('Debe agregar al menos un valor');
       return;
     }
     onSave(name.trim(), values);

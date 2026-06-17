@@ -20,16 +20,17 @@ export async function uploadSkuImage(token: string, productId: string, skuId: st
     if (altText !== undefined) form.append('altText', altText);
     if (position !== undefined) form.append('position', String(position));
     if (isPrimary !== undefined) form.append('isPrimary', String(isPrimary));
-    const body = await apiFetch<ApiSuccess<ApiSkuImage>>(`/api/admin/products/${productId}/skus/${skuId}/images/upload`, { method: 'POST', body: form }, token);
+    // NOTE: backend mounts the SKU images router under /api/admin/products/:productId/variants/skus/:skuId/images
+    const body = await apiFetch<ApiSuccess<ApiSkuImage>>(`/api/admin/products/${productId}/variants/skus/${skuId}/images/upload`, { method: 'POST', body: form }, token);
     return body.data;
 }
 
 export async function fetchSkuImages(token: string, productId: string, skuId: string): Promise<ApiSkuImage[]> {
-    const body = await apiFetch<ApiSuccess<ApiSkuImage[]>>(`/api/admin/products/${productId}/skus/${skuId}/images`, {}, token);
+    const body = await apiFetch<ApiSuccess<ApiSkuImage[]>>(`/api/admin/products/${productId}/variants/skus/${skuId}/images`, {}, token);
     return body.data ?? [];
 }
 
 export async function updateSkuImageMeta(token: string, productId: string, skuId: string, imageId: string, payload: { altText?: string | null; position?: number; isPrimary?: boolean }) {
-    const body = await apiFetch<ApiSuccess<ApiSkuImage>>(`/api/admin/products/${productId}/skus/${skuId}/images/${imageId}/meta`, { method: 'PATCH', body: JSON.stringify(payload) }, token);
+    const body = await apiFetch<ApiSuccess<ApiSkuImage>>(`/api/admin/products/${productId}/variants/skus/${skuId}/images/${imageId}/meta`, { method: 'PATCH', body: JSON.stringify(payload) }, token);
     return body.data;
 }

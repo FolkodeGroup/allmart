@@ -43,15 +43,19 @@ export function useImageUpload({ token, productId, skuId, maxSizeBytes = 5 * 102
         setFiles((s) => s.map(x => ({ ...x, isPrimary: x.uid === uid })));
     }, []);
 
-    const uploadAll = useCallback(async () => {
+    type UploadResult = { uid: string; url?: string; id?: string; status: UploadStatus; errorMessage?: string | null };
+    const uploadAll = useCallback(async (overrideSkuId?: string): Promise<UploadResult[]> => {
+        const results: UploadResult[] = [];
+        const targetSku = overrideSkuId ?? skuId;
         for (const f of files) {
             if (f.status !== 'pending' || !f.file) continue;
             try {
                 setFiles(s => s.map(x => x.uid === f.uid ? { ...x, status: 'uploading', progress: 10 } : x));
-                const res = skuId
-                    ? await uploadSkuImage(token ?? '', productId, skuId, f.file!)
+                const res = targetSku
+                    ? await uploadSkuImage(token ?? '', productId, targetSku, f.file!)
                     : await uploadProductImage(token ?? '', productId, f.file!);
                 setFiles(s => s.map(x => x.uid === f.uid ? { ...x, status: 'success', progress: 100, remoteUrl: res.url, id: res.id } : x));
+                results.push({ uid: f.uid, url: res.url, id: res.id, status: 'success' });
             } catch (err: unknown) {
                 let msg = 'Error';
                 if (err && typeof err === 'object' && 'message' in err) {
@@ -59,8 +63,10 @@ export function useImageUpload({ token, productId, skuId, maxSizeBytes = 5 * 102
                     if (typeof m === 'string') msg = m;
                 }
                 setFiles(s => s.map(x => x.uid === f.uid ? { ...x, status: 'error', errorMessage: msg ?? 'Error', progress: 0 } : x));
+                results.push({ uid: f.uid, status: 'error', errorMessage: msg ?? 'Error' });
             }
         }
+        return results;
     }, [files, productId, token, skuId]);
 
     const retry = useCallback(async (uid: string) => {
