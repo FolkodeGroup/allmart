@@ -1926,3 +1926,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1085: 1069 implementar la selección dinámica de variantes en la vista de detalle del producto antes de habilitar la acción de compra | 2026-06-08 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1096: Subida de imágenes desde escritorio y gestión avanzada de imágenes en creación/edición de combinaciones | 2026-06-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1093: 1087 mantener visible el apartado de productos en stock crítico en el dashboard aunque no haya items con bajo stock | 2026-06-17 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1094: 1089 mejorar UI de variantes de producto en el home usando variantes creadas y referencia de mercado libre | 2026-06-17 |
