@@ -46,8 +46,15 @@ export function ProductDetailPage() {
 
   // Compute selected SKU and image set once to avoid repeated .find calls
   const selectedSku = useMemo(() => product?.skus?.find(s => s.id === selectedSkuId) ?? null, [product?.skus, selectedSkuId]);
-  const skuImages = useMemo(() => (selectedSku?.images && selectedSku.images.length > 0) ? selectedSku.images : product?.images ?? [], [selectedSku, product?.images]);
 
+  const skuImages = useMemo(() => {
+    // Si no hay variantes seleccionadas → siempre imágenes del producto base
+    if (Object.keys(selectedVariants).length === 0) return product?.images ?? [];
+    // Si hay SKU seleccionado con imágenes propias → usarlas
+    if (selectedSku?.images && selectedSku.images.length > 0) return selectedSku.images;
+    // Fallback al producto base
+    return product?.images ?? [];
+  }, [selectedSku, selectedVariants, product?.images]);
   /* Cargar producto por slug */
   useEffect(() => {
     if (!slug) return;
@@ -58,6 +65,7 @@ export function ProductDetailPage() {
     setError(null);
     setSelectedImage(0);
     setRelatedProducts([]);
+    setSelectedVariants({});
 
     const loadProduct = async () => {
       try {
@@ -113,6 +121,7 @@ export function ProductDetailPage() {
 
     loadProduct();
 
+
     return () => {
       cancelled = true;
     };
@@ -122,6 +131,25 @@ export function ProductDetailPage() {
   useEffect(() => {
     setSelectedImage(0);
   }, [selectedSkuId]);
+
+  // Pre-seleccionar el primer SKU activo como combinación default
+  /*useEffect(() => {
+    if (!product?.skus?.length) return;
+    // Si ya hay variantes seleccionadas (ej: navegación de vuelta), no pisar
+    if (Object.keys(selectedVariants).length > 0) return;
+
+    const firstActiveSku = product.skus[0] ?? null;
+    if (!firstActiveSku?.attributes) return;
+
+    const defaultSelection: Record<string, string> = {};
+    Object.entries(firstActiveSku.attributes).forEach(([k, v]) => {
+      // Normalizar la key a lowercase para que coincida con variantMap
+      defaultSelection[k.toLowerCase()] = String(v);
+    });
+
+  setSelectedVariants(defaultSelection);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [product]);*/
 
   // debug: log selected SKU and images to help diagnose missing main image issue
   useEffect(() => {
@@ -160,6 +188,79 @@ export function ProductDetailPage() {
   const isNew = product ? product.tags.includes('nuevo') : false;
   const isProductFavorite = product ? isFavorite(product.id) : false;
 
+  const variantMap = useMemo(() => {
+    const map: Record<string, Set<string>> = {};
+
+    product?.skus?.forEach(sku => {
+      Object.entries(sku.attributes || {}).forEach(([k, v]) => {
+        const key = k.toLowerCase();
+        const value = String(v).trim();
+        if (!value) return; // ← ignorar valores vacíos
+
+        if (!map[key]) map[key] = new Set();
+        map[key].add(value);
+      });
+    });
+
+    // Eliminar grupos que quedaron sin valores
+    Object.keys(map).forEach(k => {
+      if (map[k].size === 0) delete map[k];
+    });
+
+    return map;
+  }, [product]);
+
+  function getAttr(sku: { attributes?: Record<string, string> }, key: string) {
+    const entries = Object.entries(sku.attributes || {});
+    const found = entries.find(([k]) => k.toLowerCase() === key.toLowerCase());
+    return found ? found[1] : undefined;
+  }
+
+  const matchingSku = useMemo(() => {
+    if (!product?.skus) return null;
+
+    return product.skus.find(sku => {
+      return Object.entries(selectedVariants).every(([k, v]) => {
+        return getAttr(sku, k) === v;
+      });
+    }) || null;
+  }, [product, selectedVariants]);
+
+  useEffect(() => {
+    if (matchingSku) {
+      setSelectedSkuId(matchingSku.id);
+    } else if (Object.keys(selectedVariants).length === 0) {
+      // Sin selección → volver al producto original
+      setSelectedSkuId(null);
+    }
+  }, [matchingSku, selectedVariants]);
+
+  function isOptionAvailable(attr: string, value: string) {
+    return product?.skus?.some(sku => {
+      const matchesOther = Object.entries(selectedVariants).every(([k, v]) => {
+        if (k === attr) return true;
+        return getAttr(sku, k) === v;
+      });
+
+      return matchesOther && getAttr(sku, attr) === value;
+    });
+  }
+  function normalizeColor(value: string): string | null {
+    // Solo considerar color si parece un valor CSS de color explícito
+    // (hex, rgb/rgba, hsl, o nombre con más de 3 chars que no sea texto genérico)
+    const trimmed = value.trim();
+    const looksLikeColorSyntax =
+      /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(trimmed) ||
+      /^rgba?\s*\(/i.test(trimmed) ||
+      /^hsla?\s*\(/i.test(trimmed);
+
+    if (!looksLikeColorSyntax) return null;
+
+    const el = document.createElement('div');
+    el.style.color = trimmed;
+    return el.style.color || null;
+  }
+
   useEffect(() => {
     if (!product || !isProductFavorite) {
       return;
@@ -170,32 +271,59 @@ export function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    // Build a product object for the cart that includes which combination/variant was selected
-    const variantValues: string[] = selectedSku
-      ? Object.values(selectedSku.attributes || {}).filter(Boolean)
-      : Object.values(selectedVariants).filter(Boolean);
 
-    const nameWithVariants = variantValues.length > 0
-      ? `${product.name} + ${variantValues.join(' ')}`
-      : product.name;
+    const isOriginal = Object.keys(selectedVariants).length === 0;
 
-    const imagesForCart = selectedSku && Array.isArray(selectedSku.images) && selectedSku.images.length > 0
-      ? selectedSku.images
-      : product.images;
+    if (isOriginal) {
+      // Producto base sin combinación seleccionada
+      addToCart({
+        product: {
+          ...product,
+          id: `${product.id}::original`,
+        },
+        quantity,
+      });
+    } else {
+      // Combinación seleccionada
+      const variantValues = selectedSku
+        ? Object.values(selectedSku.attributes || {}).filter(Boolean)
+        : Object.values(selectedVariants).filter(Boolean);
 
-    const cartProductId = selectedSku ? `${product.id}::${selectedSku.id}` : `${product.id}::original`;
-    const productForCart = selectedSku
-      ? { ...product, id: cartProductId, name: nameWithVariants, sku: selectedSku.sku, price: selectedSku.price ?? product.price, images: imagesForCart }
-      : { ...product, id: cartProductId, name: nameWithVariants, images: imagesForCart };
-    addToCart({ product: productForCart, quantity });
+      const nameWithVariants = variantValues.length > 0
+        ? `${product.name} + ${variantValues.join(' ')}`
+        : product.name;
+
+      const imagesForCart =
+        selectedSku && Array.isArray(selectedSku.images) && selectedSku.images.length > 0
+          ? selectedSku.images
+          : product.images;
+
+      const cartProductId = selectedSku
+        ? `${product.id}::${selectedSku.id}`
+        : `${product.id}::original`;
+
+      const productForCart = selectedSku
+        ? {
+          ...product,
+          id: cartProductId,
+          name: nameWithVariants,
+          sku: selectedSku.sku,
+          price: selectedSku.price ?? product.price,
+          images: imagesForCart,
+        }
+        : {
+          ...product,
+          id: cartProductId,
+          name: nameWithVariants,
+          images: imagesForCart,
+        };
+
+      addToCart({ product: productForCart, quantity });
+    }
+
     setAddedFeedback(true);
     setTimeout(() => setAddedFeedback(false), 2000);
   };
-
-  function looksLikeColor(value: string) {
-    if (!value) return false;
-    return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim()) || /^rgba?\(/i.test(value) || /^[a-z]+$/i.test(value.trim());
-  }
 
   if (loading) {
     return (
@@ -290,70 +418,78 @@ export function ProductDetailPage() {
             </span>
           </div>
 
-          <span className={styles.sku}>SKU: {product.sku}</span>
+          <span className={styles.sku}>
+            SKU: {Object.keys(selectedVariants).length === 0 ? product.sku : (selectedSku?.sku ?? product.sku)}
+          </span>
 
           {/* Product combinations / SKUs */}
-          <div className={styles.skusBlock}>
-            <h4 className={styles.skusTitle}>Combinaciones</h4>
-            <div className={styles.skusList} role="list">
-              {/* Original combination (base product) */}
-              <button
-                key="original"
-                type="button"
-                className={`${styles.skuOption} ${selectedSkuId === null ? styles.skuOptionSelected : ''}`}
-                onClick={() => { setSelectedImage(0); setSelectedSkuId(null); }}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setSelectedImage(0), setSelectedSkuId(null))}
-                aria-pressed={selectedSkuId === null}
-                title={`Original — ${product.sku}`}
-              >
-                <div className={styles.skuOptionMain}>
-                  <div className={styles.skuAttrBadges}>
-                    {/* No variant badges for original */}
-                  </div>
-                  <div className={styles.skuLabel}>Original</div>
-                  <div className={styles.skuMeta}>{product.sku}</div>
-                </div>
-                <div className={styles.skuRight}>
-                  <div className={styles.skuPrice}>{product.price ? `$${product.price.toLocaleString('es-AR')}` : ''}</div>
-                  <div className={styles.skuStock}>{''}</div>
-                </div>
-              </button>
-
-              {product.skus && product.skus.map(s => {
-                const label = Object.entries(s.attributes || {}).map(([, v]) => `${v}`).join(' • ') || s.sku;
-                const isSelected = selectedSkuId === s.id;
-                return (
+          {Object.keys(variantMap).length > 0 && (
+            <div className={styles.variantsBlock}>
+              {/* Fila "Original" — siempre visible, representa el producto base */}
+              <div className={styles.variantGroup}>
+                <span className={styles.variantLabel}>Original</span>
+                <div className={styles.variantOptions}>
                   <button
-                    key={s.id}
-                    type="button"
-                    className={`${styles.skuOption} ${isSelected ? styles.skuOptionSelected : ''}`}
-                    onClick={() => { setSelectedImage(0); setSelectedSkuId(s.id); }}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (setSelectedImage(0), setSelectedSkuId(s.id))}
-                    aria-pressed={isSelected}
-                    title={`${label} — ${s.sku}`}
+                    className={[
+                      styles.variantOption,
+                      Object.keys(selectedVariants).length === 0
+                        ? styles.variantOptionSelected
+                        : '',
+                    ].join(' ').trim()}
+                    onClick={() => setSelectedVariants({})}
                   >
-                    <div className={styles.skuOptionMain}>
-                      <div className={styles.skuAttrBadges}>
-                        {Object.entries(s.attributes || {}).map(([k, v]) => {
-                          const val = String(v);
-                          if (looksLikeColor(val)) {
-                            return <span key={k} className={styles.skuAttrColorCircle} style={{ background: val }} title={`${k}: ${val}`} />;
-                          }
-                          return <span key={k} className={styles.skuAttrBox}>{val}</span>;
-                        })}
-                      </div>
-                      <div className={styles.skuLabel}>{label}</div>
-                      <div className={styles.skuMeta}>{s.sku}</div>
-                    </div>
-                    <div className={styles.skuRight}>
-                      <div className={styles.skuPrice}>{s.price ? `$${s.price.toLocaleString('es-AR')}` : ''}</div>
-                      <div className={styles.skuStock}>{s.stock}</div>
-                    </div>
+                    {product.name}
                   </button>
-                );
-              })}
+                </div>
+              </div>
+
+              {/* Grupos de variantes normales */}
+              {Object.entries(variantMap).map(([attr, values]) => (
+                <div key={attr} className={styles.variantGroup}>
+                  <span className={styles.variantLabel}>{attr}</span>
+                  <div className={styles.variantOptions}>
+                    {[...values].map(val => {
+                      const selected = selectedVariants[attr] === val;
+                      const available = isOptionAvailable(attr, val);
+                      const cssColor = normalizeColor(val);
+                      const isColor = !!cssColor;
+
+                      return (
+                        <button
+                          key={val}
+                          disabled={!available}
+                          className={[
+                            styles.variantOption,
+                            selected ? styles.variantOptionSelected : '',
+                            !available ? styles.variantDisabled : '',
+                          ].join(' ').trim()}
+                          onClick={() =>
+                            setSelectedVariants(prev => {
+                              if (prev[attr] === val) {
+                                const next = { ...prev };
+                                delete next[attr];
+                                return next;
+                              }
+                              return { ...prev, [attr]: val };
+                            })
+                          }
+                        >
+                          {isColor ? (
+                            <span
+                              className={styles.colorCircle}
+                              style={{ background: cssColor }}
+                            />
+                          ) : (
+                            val
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
 
           {/* Price */}
           <div className={styles.priceBlock}>
@@ -481,21 +617,23 @@ export function ProductDetailPage() {
       </div>
 
       {/* Related Products */}
-      {relatedProducts.length > 0 && (
-        <section className={styles.relatedSection} aria-label="Productos relacionados">
-          <h2 className={styles.relatedTitle}>También te puede interesar</h2>
-          <div className={styles.relatedGrid}>
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        </section>
-      )}
+      {
+        relatedProducts.length > 0 && (
+          <section className={styles.relatedSection} aria-label="Productos relacionados">
+            <h2 className={styles.relatedTitle}>También te puede interesar</h2>
+            <div className={styles.relatedGrid}>
+              {relatedProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </section>
+        )
+      }
 
       {/* Reviews section */}
       <div className={styles.reviewsSection}>
         <ProductReviews productId={product.id} />
       </div>
-    </main>
+    </main >
   );
 }

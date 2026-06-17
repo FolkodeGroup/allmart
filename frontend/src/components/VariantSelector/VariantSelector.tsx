@@ -11,32 +11,42 @@ type Props = {
     group: VariantGroup;
     selected?: string;
     onSelect: (value: string) => void;
+    isValueDisabled?: (value: string) => boolean;
 };
 
 function looksLikeColor(value: string): boolean {
     if (!value) return false;
-    // simple heuristics: hex (#fff, #ffffff) or rgb/rgba or common color names (letters only)
     return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim()) || /^rgba?\(/i.test(value) || /^[a-z]+$/i.test(value.trim());
 }
 
-export const VariantSelector: React.FC<Props> = ({ group, selected, onSelect }) => {
+export const VariantSelector: React.FC<Props> = ({ group, selected, onSelect, isValueDisabled }) => {
     const isColorGroup = group.name.toLowerCase().includes('color') || group.values.every(v => looksLikeColor(String(v)));
 
     return (
         <div className={styles.wrapper} role="group" aria-label={group.name}>
-            <div className={styles.label}>{group.name}:</div>
+            <div className={styles.label}>
+                {group.name}
+                {selected && <span className={styles.selectedValue}>: {selected}</span>}
+            </div>
             <div className={styles.options}>
                 {group.values.map((val) => {
                     const value = String(val);
+                    const disabled = isValueDisabled?.(value) ?? false;
+                    const commonProps = {
+                        type: 'button' as const,
+                        disabled,
+                        'aria-pressed': selected === value,
+                        'aria-disabled': disabled,
+                        onClick: () => !disabled && onSelect(value),
+                        title: disabled ? `${value} (no disponible con esta combinación)` : value,
+                    };
+
                     if (isColorGroup) {
                         return (
                             <button
                                 key={value}
-                                type="button"
-                                className={`${styles.colorCircle} ${selected === value ? styles.selected : ''}`}
-                                onClick={() => onSelect(value)}
-                                aria-pressed={selected === value}
-                                title={value}
+                                {...commonProps}
+                                className={`${styles.colorCircle} ${selected === value ? styles.selected : ''} ${disabled ? styles.unavailable : ''}`}
                                 style={{ background: value }}
                             >
                                 <span className={styles.srOnly}>{value}</span>
@@ -47,10 +57,8 @@ export const VariantSelector: React.FC<Props> = ({ group, selected, onSelect }) 
                     return (
                         <button
                             key={value}
-                            type="button"
-                            className={`${styles.optionBox} ${selected === value ? styles.selectedBox : ''}`}
-                            onClick={() => onSelect(value)}
-                            aria-pressed={selected === value}
+                            {...commonProps}
+                            className={`${styles.optionBox} ${selected === value ? styles.selectedBox : ''} ${disabled ? styles.unavailable : ''}`}
                         >
                             {value}
                         </button>
