@@ -28,9 +28,19 @@ export default function CriticalStockAlert({ products }: Props) {
     });
   }
 
-  // Si no hay productos con stock crítico, no mostrar nada
   if (sorted.length === 0) {
-    return null;
+    return (
+      <section className={styles.criticalStockSection}>
+        <div className={styles.criticalStockHeader}>
+          <h2 className={styles.title}>
+            <span className={styles.icon}>⚠️</span> Alerta de Stock Crítico
+          </h2>
+        </div>
+        <div className={styles.emptyState}>
+          <p className={styles.emptyText}>¡Excelente! No hay productos con stock crítico.</p>
+        </div>
+      </section>
+    );
   }
 
   return (
