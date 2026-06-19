@@ -9,7 +9,6 @@ import { useAdminVariants } from '../../../../context/AdminVariantsContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
 import { VariantForm } from '../../variants/components/VariantForm';
-import { VariantHeader } from '../../variants/components/VariantHeader';
 import { VariantEditModal } from '../../variants/components/VariantEditModal';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 
