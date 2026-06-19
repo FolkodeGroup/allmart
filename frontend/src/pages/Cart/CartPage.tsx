@@ -43,7 +43,7 @@ export function CartPage() {
 
   const shippingThreshold = 50000;
   const freeShipping = totalPrice >= shippingThreshold;
-
+  console.log(items);
   return (
     <main className={styles.page}>
       <h1 className={styles.heading}>
@@ -73,7 +73,22 @@ export function CartPage() {
                 <Link to={`/producto/${product.slug}`} className={styles.itemName}>
                   {product.name}
                 </Link>
-                <span className={styles.itemCategory}>{product.category.name}</span>
+                {/* Variantes seleccionadas estilo Mercado Libre */}
+                {product.selectedAttributes && Object.keys(product.selectedAttributes).length > 0 ? (
+                  <div className={styles.itemVariants}>
+                    {Object.entries(product.selectedAttributes).map(([key, value], idx, arr) => (
+                      <span key={key} className={styles.itemVariantChip}>
+                        <span className={styles.itemVariantKey}>
+                          {key.charAt(0).toUpperCase() + key.slice(1)}:
+                        </span>{' '}
+                        <span className={styles.itemVariantVal}>{value}</span>
+                        {idx < arr.length - 1 && <span className={styles.itemVariantSep}>, </span>}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className={styles.itemCategory}>{product.category.name}</span>
+                )}
                 <span className={styles.itemUnitPrice}>
                   {formatPrice(product.price)} c/u
                 </span>
