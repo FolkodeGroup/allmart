@@ -1,0 +1,358 @@
+/* ── CombinationsTable ── */
+
+.tableWrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--color-border-light);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+}
+
+/* ── Encabezado ── */
+.table thead {
+    background: var(--color-bg-secondary);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.table th {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.thImg {
+    width: 64px;
+}
+
+.thVariant {
+    min-width: 180px;
+}
+
+.thSku {
+    min-width: 120px;
+}
+
+.thPrice {
+    width: 100px;
+    text-align: right;
+}
+
+.thStock {
+    width: 80px;
+    text-align: center;
+}
+
+.thActions {
+    width: 140px;
+    text-align: right;
+}
+
+/* ── Filas ── */
+.row {
+    border-bottom: 1px solid var(--color-border-light);
+    transition: background 0.12s;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.row:hover {
+    background: var(--color-bg-secondary);
+}
+
+.rowOptimistic {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ── Celdas ── */
+.table td {
+    padding: var(--space-3) var(--space-4);
+    vertical-align: middle;
+}
+
+.tdImg {
+    width: 64px;
+}
+
+.tdVariant {}
+
+.tdSku {}
+
+.tdPrice {
+    text-align: right;
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+}
+
+.tdStock {
+    text-align: center;
+}
+
+.tdActions {
+    text-align: right;
+}
+
+/* ── Thumbnail ── */
+.thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--color-border-light);
+    display: block;
+}
+
+.noThumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    background: var(--color-bg-tertiary);
+    border: 1px dashed var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-quaternary);
+    font-size: var(--text-xs);
+}
+
+/* ── Chips de atributos ── */
+.attrList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+}
+
+.attrChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border-radius: 999px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-light);
+    padding: 2px 8px;
+    font-size: var(--text-xs);
+    line-height: 1.4;
+}
+
+.attrKey {
+    color: var(--color-text-tertiary);
+    font-weight: var(--font-medium);
+}
+
+.attrKey::after {
+    content: ':';
+    margin-right: 2px;
+}
+
+.attrVal {
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold);
+}
+
+/* ── SKU code ── */
+.skuCode {
+    font-family: var(--font-mono, monospace);
+    font-size: var(--text-xs);
+    background: var(--color-bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--color-primary-dark);
+}
+
+/* ── Stock ── */
+.stockOk {
+    font-weight: var(--font-bold);
+    color: #16a34a;
+}
+
+.stockZero {
+    font-weight: var(--font-bold);
+    color: #ef4444;
+}
+
+.na {
+    color: var(--color-text-quaternary);
+}
+
+.noAttr {
+    color: var(--color-text-quaternary);
+    font-size: var(--text-xs);
+}
+
+/* ── Acciones: menú de tres puntos ── */
+.thActions {
+    width: 48px;
+    text-align: center;
+}
+
+.tdActions {
+    text-align: center;
+    /* Necesario para que el dropdown use position: absolute sin afectar el layout */
+    position: relative;
+}
+
+.rowMenuWrapper {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+}
+
+.menuTrigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: background 0.13s, border-color 0.13s, color 0.13s;
+}
+
+.menuTrigger:hover,
+.menuTriggerActive {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.rowDropdown {
+    position: absolute;
+    right: 0;
+    min-width: 150px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 200;
+    padding: var(--space-1);
+    animation: dropdownIn 0.14s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hacia abajo (default) */
+.rowDropdownDown {
+    top: calc(100% + 4px);
+    transform-origin: top right;
+}
+
+/* Hacia arriba (cuando no hay espacio debajo) */
+.rowDropdownUp {
+    bottom: calc(100% + 4px);
+    transform-origin: bottom right;
+}
+
+@keyframes dropdownIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.dropdownItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    background: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s;
+}
+
+.dropdownItem:hover {
+    background: var(--color-bg-secondary);
+}
+
+.dropdownItemDanger {
+    color: #ef4444;
+}
+
+.dropdownItemDanger:hover {
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.dropdownDivider {
+    height: 1px;
+    background: var(--color-border-light);
+    margin: var(--space-1) 0;
+}
+
+
+/* ── Badge de guardado ── */
+.savingBadge {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+/* ── Estado vacío ── */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-8) var(--space-4);
+    border: 2px dashed var(--color-border);
+    border-radius: 10px;
+    text-align: center;
+    color: var(--color-text-tertiary);
+}
+
+.emptyIcon {
+    font-size: 2rem;
+}
+
+.emptyState p {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-secondary);
+}
+
+.emptyState small {
+    font-size: var(--text-xs);
+    color: var(--color-text-quaternary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+
+    .table th,
+    .table td {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .thPrice,
+    .tdPrice,
+    .thStock,
+    .tdStock {
+        display: none;
+    }
+}

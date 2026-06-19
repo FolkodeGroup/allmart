@@ -400,7 +400,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-2);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-border-light);
 }
@@ -467,15 +467,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  margin-top: var(--space-1);
   border-top: 1px solid var(--color-border-light);
-  padding-top: var(--space-3);
 }
 
-.addValueRow {
-  display: flex;
-  gap: var(--space-2);
-}
 
 .groupInput {
   flex: 1;
@@ -531,12 +525,13 @@
 /* ── Grid de tarjetas de grupo ── */
 .groupsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: var(--space-4);
 }
 
 /* ── Tarjeta de grupo ── */
 .groupCard {
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -557,6 +552,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
 }
 
 .groupName {
@@ -847,10 +844,22 @@
 /* Input de agregar valor */
 .addValueRow {
   display: flex;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
-  border-top: 1px solid var(--color-border-light);
-  padding-top: var(--space-3);
+  align-items: center;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.addValueRow:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.12);
+}
+
+.addValueRowError {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08) !important;
 }
 
 .valueInput {
@@ -859,11 +868,10 @@
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   color: var(--color-text-primary);
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
+  background: transparent;
+  border: none;
   outline: none;
-  transition: border-color 0.15s;
+  min-width: 0;
 }
 
 .valueInput:focus {
@@ -874,24 +882,30 @@
   color: var(--color-text-tertiary);
 }
 
+.addValueDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
 .addValueBtn {
   font-family: var(--font-ui);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: var(--font-bold);
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  border: none;
   padding: var(--space-2) var(--space-3);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.13s, color 0.13s;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 .addValueBtn:hover {
   background: var(--color-primary);
   color: var(--color-neutral-light);
-  border-color: var(--color-primary);
 }
 
 /* ── Filtros de variantes ── */
@@ -1046,3 +1060,97 @@
   }
 }
 
+/* ── Menú de tres puntos en VariantGroupCard ── */
+.groupActionsMenu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuTriggerBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.menuTriggerBtn:hover,
+.menuTriggerActive {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.actionsDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  padding: var(--space-1);
+  animation: scaleInAnim 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top right;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.dropdownItem:hover {
+  background: var(--color-bg-secondary);
+}
+
+.dropdownItemDanger {
+  color: #ef4444;
+}
+
+.dropdownItemDanger:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: var(--space-1) 0;
+}
+
+/* Indicadores de estado dentro del menú */
+.dotActive,
+.dotInactive {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotActive {
+  background: #22c55e;
+}
+
+.dotInactive {
+  background: #ef4444;
+}
