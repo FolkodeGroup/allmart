@@ -1,11 +1,9 @@
-// src/features/admin/products/components/tabs/TabSEOPublicacion.tsx
 import { memo } from 'react';
 import type { TabSEOPublicacionProps } from '../components/types';
 import styles from '../AdminProductFormPage.module.css';
 
 export const TabSEOPublicacion = memo(function TabSEOPublicacion({
     form,
-    // FIX: fieldErrors no se usa en este tab — se prefija con _ para silenciar el warning
     fieldErrors: _fieldErrors,
     setField,
 }: TabSEOPublicacionProps) {
@@ -17,12 +15,10 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
 
     return (
         <>
-            {/* ── SEO básico ── */}
             <fieldset className={styles.fieldset}>
-                <legend className={styles.legend}>SEO y URL</legend>
-
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="product-slug">
+                        <i className="bi bi-link-45deg" style={{ color: 'var(--color-primary)', marginRight: '6px' }}></i>
                         Slug (URL amigable)
                     </label>
                     <input
@@ -37,9 +33,11 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
                     </span>
                 </div>
 
-                {/* FIX: los `<label>` sin control asociado deben ser `<p>` o `<span>` descriptivos */}
                 <div className={styles.field}>
-                    <p className={styles.label}>Nombre del producto</p>
+                    <p className={styles.label}>
+                        <i className="bi bi-chat-left-text" style={{ color: 'var(--color-primary)', marginRight: '6px' }}></i>
+                        Nombre del producto
+                    </p>
                     <p className={styles.fieldHint}>
                         {nameLen} caracteres{' '}
                         <span style={{ color: nameLen >= 30 && nameLen <= 60 ? '#059669' : '#d97706' }}>
@@ -49,7 +47,10 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
                 </div>
 
                 <div className={styles.field}>
-                    <p className={styles.label}>Descripción corta (meta description)</p>
+                    <p className={styles.label}>
+                        <i className="bi bi-card-text" style={{ color: 'var(--color-primary)', marginRight: '6px' }}></i>
+                        Descripción corta (meta description)
+                    </p>
                     <p className={styles.fieldHint}>
                         {descLen} caracteres{' '}
                         <span style={{ color: descLen >= 120 && descLen <= 160 ? '#059669' : '#d97706' }}>
@@ -59,9 +60,10 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
                 </div>
             </fieldset>
 
-            {/* ── Calidad de contenido ── */}
             <fieldset className={styles.fieldset}>
-                <legend className={styles.legend}>Calidad del contenido</legend>
+                <legend className={styles.legend} style={{ color: 'var(--color-text-primary)' }}>
+                    Checklist de SEO y publicación
+                </legend>
 
                 <div
                     style={{
@@ -71,15 +73,15 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
                     }}
                 >
                     {[
-                        { label: 'Nombre', ok: !!form.name, hint: '' },
-                        { label: 'Descripción completa', ok: !!form.description, hint: '' },
-                        { label: 'Descripción corta', ok: !!form.shortDescription, hint: '' },
-                        { label: 'Categoría', ok: !!form.category?.id, hint: '' },
-                        { label: 'Precio', ok: form.price > 0, hint: '' },
-                        { label: 'SKU', ok: !!form.sku, hint: '' },
-                        { label: 'Etiquetas', ok: form.tags.length > 0, hint: '' },
-                        { label: 'Características', ok: (form.features ?? []).length > 0, hint: 'Agregar en sección Básico' },
-                    ].map(({ label, ok, hint }) => (
+                        { label: 'Nombre', ok: !!form.name, icon: 'bi-fonts' },
+                        { label: 'Descripción completa', ok: !!form.description, icon: 'bi-justify-left' },
+                        { label: 'Descripción corta', ok: !!form.shortDescription, icon: 'bi-card-text' },
+                        { label: 'Categoría', ok: !!form.category?.id, icon: 'bi-tag' },
+                        { label: 'Precio', ok: form.price > 0, icon: 'bi-currency-dollar' },
+                        { label: 'SKU', ok: !!form.sku, icon: 'bi-hash' },
+                        { label: 'Etiquetas', ok: form.tags.length > 0, icon: 'bi-tags' },
+                        { label: 'Características', ok: (form.features ?? []).length > 0, icon: 'bi-list-check' },
+                    ].map(({ label, ok, icon }) => (
                         <div
                             key={label}
                             style={{
@@ -88,22 +90,19 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
                                 alignItems: 'center',
                                 padding: '6px 10px',
                                 borderRadius: '6px',
-                                background: ok ? '#f0fdf4' : '#fffbeb',
+                                background: ok ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)',
                                 border: `1px solid ${ok ? '#bbf7d0' : '#fde68a'}`,
                                 fontSize: '0.82rem',
                             }}
                         >
-                            <span style={{ color: '#374151' }}>
+                            <span style={{ color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <i className={`bi ${icon}`} style={{ color: ok ? 'var(--color-primary)' : 'var(--color-accent-dark)' }}></i>
                                 {label}
-                                {!ok && hint && (
-                                    <span style={{ color: '#92400e', fontSize: '0.73rem', marginLeft: '6px', opacity: 0.85 }}>
-                                        — {hint}
-                                    </span>
-                                )}
                             </span>
-                            <span style={{ fontWeight: 700, color: ok ? '#059669' : '#d97706' }}>
-                                {ok ? '✓' : '⚠'}
-                            </span>
+                            <i 
+                                className={ok ? "bi bi-check-circle-fill" : "bi bi-exclamation-triangle-fill"} 
+                                style={{ color: ok ? '#059669' : '#d97706' }}
+                            ></i>
                         </div>
                     ))}
                 </div>

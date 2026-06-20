@@ -1,10 +1,8 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { RefObject } from 'react';
 import styles from '../AdminProductFormPage.module.css';
-import { Delete } from 'lucide-react';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 
-/** Imagen de producto en el frontend */
 export interface ProductImageItem {
     id: string;
     productId: string;
@@ -91,16 +89,15 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
     };
 
     if (isEdit) {
-        // Modo edición: mostrar imágenes de API
         return (
             <>
                 <fieldset className={styles.fieldset}>
-                    <legend className={styles.legend}>Imágenes del producto</legend>
+                    
                     <p className={styles.fieldHint}>
                         Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                     </p>
                     <div className={styles.uploadSection}>
-                        <label className={styles.uploadLabel} htmlFor="file-upload-input" aria-label="Carga de imágenes del producto">
+                        <label className={styles.uploadLabel} htmlFor="file-upload-input">
                             <input
                                 id="file-upload-input"
                                 type="file"
@@ -112,8 +109,8 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                     if (files && files.length > 0) {
                                         const file = files[0];
                                         setImgFile(file);
-                                        await onApiUploadImage(file); // pasa el file directo, sin depender del estado
-                                        if (e.target) e.target.value = ''; // permite re-seleccionar el mismo archivo
+                                        await onApiUploadImage(file);
+                                        if (e.target) e.target.value = '';
                                     }
                                 }}
                                 style={{ display: 'none' }}
@@ -123,19 +120,21 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 onClick={() => fileInputRef.current?.click()}
                                 className={styles.uploadButton}
                             >
-                                <span className={styles.uploadButton}>
-                                    {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : '+ Agregar imágenes'}
-                                </span>
+                                <i className="bi bi-cloud-arrow-up-fill" style={{ marginRight: '8px' }}></i>
+                                {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : 'Agregar imágenes'}
                             </button>
                         </label>
                         {imgError && <div className={styles.errorText}>{imgError}</div>}
                     </div>
 
                     {imagesLoading ? (
-                        <div>Cargando imágenes...</div>
+                        <div className={styles.loadingContainer}>
+                             <div className={styles.spinner}></div>
+                             <span>Cargando imágenes...</span>
+                        </div>
                     ) : (
                         <div className={styles.imagesGrid}>
-                            {apiImages.length === 0 && <p>No hay imágenes para este producto.</p>}
+                            {apiImages.length === 0 && <p className={styles.fieldHint}>No hay imágenes para este producto.</p>}
                             {apiImages.map((img) => (
                                 <div key={img.id} className={styles.imageCard}>
                                     <div className={styles.imagePreview}>
@@ -149,7 +148,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                             className={styles.deleteBtn}
                                             title="Eliminar imagen"
                                         >
-                                            <Delete size={16} />
+                                            <i className="bi bi-trash3-fill"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -175,15 +174,13 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
         );
     }
 
-    // Modo creación: solo subida por archivo, todo envuelto en un solo fragmento
     return (
         <>
             <fieldset className={styles.fieldset}>
-                <legend className={styles.legend}>Imágenes del producto</legend>
+                
                 <p className={styles.fieldHint}>
                     Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                 </p>
-                {/* Upload Input */}
                 <div className={styles.uploadSection}>
                     <label className={styles.uploadLabel}>
                         <input
@@ -194,12 +191,12 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                             style={{ display: 'none' }}
                         />
                         <span className={styles.uploadButton}>
-                            {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : '+ Agregar imágenes'}
+                            <i className="bi bi-cloud-arrow-up-fill" style={{ marginRight: '8px' }}></i>
+                            {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : 'Agregar imágenes'}
                         </span>
                     </label>
                 </div>
                 {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
-                {/* Images Grid - Static (no drag & drop) */}
                 {images.filter(img => img.trim()).length > 0 ? (
                     <div className={styles.imagesGrid}>
                         {images.map((url: string, index: number) =>
@@ -215,7 +212,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                             onClick={() => setDeleteConfirmImageId(index.toString())}
                                             title="Eliminar imagen"
                                         >
-                                            <Delete size={16} />
+                                            <i className="bi bi-trash3-fill"></i>
                                         </button>
                                     </div>
                                 </div>
