@@ -14,6 +14,7 @@ import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
 import { Search } from 'lucide-react';
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 
 type ViewMode = 'list' | 'form';
 type MainTab = 'campaigns' | 'matrix';
@@ -79,12 +80,6 @@ const AdminPromotions: React.FC = () => {
       setActionPromotionId(null);
       setActionPromotionName('');
     }
-  }
-
-  function handleDuplicateClick(id: string, name: string) {
-    setActionPromotionId(id);
-    setActionPromotionName(name);
-    setDuplicateConfirmOpen(true);
   }
 
   async function handleConfirmDuplicate() {
@@ -166,13 +161,13 @@ const AdminPromotions: React.FC = () => {
           className={mainTab === 'campaigns' ? styles.mainTabActive : styles.mainTab}
           onClick={() => setMainTab('campaigns')}
         >
-          📣 Campañas
+          Campañas
         </button>
         <button
           className={mainTab === 'matrix' ? styles.mainTabActive : styles.mainTab}
           onClick={() => setMainTab('matrix')}
         >
-          🗂️ Matriz de Productos
+          Matriz de Productos
         </button>
       </div>
 
@@ -181,21 +176,21 @@ const AdminPromotions: React.FC = () => {
         <>
           <div className={styles.filters}>
             <div className={styles.searchWrap}>
-            <Search size={16} className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Buscar promociones..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className={styles.searchInput}
-              autoComplete="off"
-              spellCheck="false"
-              autoCorrect="off"
-              autoCapitalize="off"
-            />
+              <Search size={16} className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Buscar promociones..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className={styles.searchInput}
+                autoComplete="off"
+                spellCheck="false"
+                autoCorrect="off"
+                autoCapitalize="off"
+              />
             </div>
             <select
               value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
@@ -252,21 +247,21 @@ const AdminPromotions: React.FC = () => {
                       </td>
                       <td>
                         <Badge
-                        variant={
-                          promo.type === 'percentage'
-                            ? 'discount'
+                          variant={
+                            promo.type === 'percentage'
+                              ? 'discount'
+                              : promo.type === 'fixed'
+                                ? 'new'
+                                : 'limited'
+                          }
+                        >
+                          {promo.type === 'percentage'
+                            ? '%'
                             : promo.type === 'fixed'
-                            ? 'new'
-                            : 'limited'
-                        }
-                      >
-                        {promo.type === 'percentage'
-                          ? '%'
-                          : promo.type === 'fixed'
-                          ? '$'
-                          : 'BOGO'}
-                      </Badge>
-                    </td>
+                              ? '$'
+                              : 'BOGO'}
+                        </Badge>
+                      </td>
                       <td className={styles.tdValue}> {promo.value} </td>
                       <td className={styles.tdDate}>
                         {new Date(promo.startDate).toLocaleDateString()}
@@ -284,12 +279,6 @@ const AdminPromotions: React.FC = () => {
                           EDITAR
                         </button>
                         <button
-                          onClick={() => handleDuplicateClick(promo.id, promo.name)}
-                          className={styles.btnSmallSecondary}
-                        >
-                          DUPLICAR
-                        </button>
-                        <button
                           onClick={() => handleDeleteClick(promo.id, promo.name)}
                           className={styles.btnSmallDanger}
                         >
@@ -303,27 +292,12 @@ const AdminPromotions: React.FC = () => {
             </table>
           </div>
 
-          {promotions.length > 0 && pages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-                className={styles.btnSmall}
-              >
-                Anterior
-              </button>
-              <span>
-                Página {page} de {pages}
-              </span>
-              <button
-                disabled={page === pages}
-                onClick={() => setPage(page + 1)}
-                className={styles.btnSmall}
-              >
-                Siguiente
-              </button>
-            </div>
-          )}
+          <AdminPagination
+            page={page}
+            totalPages={pages}
+            onPageChange={setPage}
+            ariaLabel="Paginación de promociones"
+          />
         </>
       )}
 

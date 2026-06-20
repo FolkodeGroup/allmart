@@ -39,15 +39,7 @@
   pointer-events: none;
 }
 
-.searchInput {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-primary);
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
-}
+
 
 .selectFilter {
   background: var(--color-bg-secondary);
@@ -155,6 +147,12 @@
   flex-wrap: wrap;
 }
 
+.pageInfo {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  margin: 0 12px;
+}
+
 .btnPrimary,
 .btnSmall,
 .btnSmallSecondary,
@@ -184,7 +182,8 @@
   background-color: transparent;
   color: var(--color-primary);
   border: 2px solid var(--color-primary);
-  padding: 0.75rem 1rem !important;;
+  padding: 0.75rem 1rem !important;
+  ;
   font-size: 12px;
   font-weight: 600;
 }
@@ -248,7 +247,6 @@ button:disabled {
   gap: 16px;
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
 }
 
 .error {
@@ -490,27 +488,30 @@ button:disabled {
 }
 
 .btnLink {
-  background: none;
   border: none;
   color: #769282;
-  font-size: 13px;
   cursor: pointer;
-  padding: 4px 0;
-  text-decoration: underline;
   white-space: nowrap;
+  background-color: transparent;
+  border: 2px solid var(--color-primary);
+  padding: 0.75rem 1rem !important;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .btnLink:hover {
-  color: #1d4ed8;
+  background-color: var(--color-primary);
+  color: white;
 }
 
 .searchInput {
+  height: 100%;
   width: 100%;
-  padding: 8px 12px;
-  margin-bottom: 12px;
+  padding: 10px 12px 10px 36px;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: 6px;
+  color: var(--color-text-primary);
   font-size: 14px;
   transition: border-color 0.2s;
 }
@@ -902,5 +903,3 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
-
-

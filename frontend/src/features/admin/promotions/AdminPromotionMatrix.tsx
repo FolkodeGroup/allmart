@@ -10,6 +10,7 @@ import { promotionsService } from './promotionsService';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 import { Search } from 'lucide-react';
+import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   active: { label: 'Activa', className: 'badgeActive' },
@@ -37,6 +38,10 @@ const AdminPromotionMatrix: React.FC = () => {
   const [matrix, setMatrix] = useState<PromotionMatrixItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination
+  const [matrixPage, setMatrixPage] = useState(1);
+  const MATRIX_LIMIT = 10;
 
   // Expanded row detail
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -156,6 +161,12 @@ const AdminPromotionMatrix: React.FC = () => {
     return statusMatch && searchMatch;
   });
 
+  const totalMatrixPages = Math.ceil(filtered.length / MATRIX_LIMIT);
+  const paginatedFiltered = filtered.slice(
+    (matrixPage - 1) * MATRIX_LIMIT,
+    matrixPage * MATRIX_LIMIT
+  );
+
   // Summary counts
   const activeCount = matrix.filter((i) => getPromotionStatus(i) === 'active').length;
   const upcomingCount = matrix.filter((i) => getPromotionStatus(i) === 'upcoming').length;
@@ -165,19 +176,19 @@ const AdminPromotionMatrix: React.FC = () => {
     <div className={styles.matrixContainer}>
       {/* ─── Stats row ───────────────────────────────────────────────── */}
       <div className={styles.matrixStats}>
-        <button type="button" className={styles.statCard} onClick={() => setFilterStatus('all')}>
+        <button type="button" className={styles.statCard} onClick={() => { setFilterStatus('all'); setMatrixPage(1); }}>
           <span className={styles.statNumber}>{matrix.length}</span>
           <span className={styles.statLabel}>Total</span>
         </button>
-        <button type="button" className={`${styles.statCard} ${styles.statCardGreen}`} onClick={() => setFilterStatus('active')}>
+        <button type="button" className={`${styles.statCard} ${styles.statCardGreen}`} onClick={() => { setFilterStatus('active'); setMatrixPage(1); }}>
           <span className={styles.statNumber}>{activeCount}</span>
           <span className={styles.statLabel}>Activas</span>
         </button>
-        <button type="button" className={`${styles.statCard} ${styles.statCardBlue}`} onClick={() => setFilterStatus('upcoming')}>
+        <button type="button" className={`${styles.statCard} ${styles.statCardBlue}`} onClick={() => { setFilterStatus('upcoming'); setMatrixPage(1); }}>
           <span className={styles.statNumber}>{upcomingCount}</span>
           <span className={styles.statLabel}>Próximas</span>
         </button>
-        <button type="button" className={`${styles.statCard} ${styles.statCardGray}`} onClick={() => setFilterStatus('expired')}>
+        <button type="button" className={`${styles.statCard} ${styles.statCardGray}`} onClick={() => { setFilterStatus('expired'); setMatrixPage(1); }}>
           <span className={styles.statNumber}>{expiredCount}</span>
           <span className={styles.statLabel}>Vencidas</span>
         </button>
@@ -186,23 +197,23 @@ const AdminPromotionMatrix: React.FC = () => {
       {/* ─── Filters ─────────────────────────────────────────────────── */}
       <div className={styles.filters}>
         <div className={styles.searchWrap}>
-        <Search size={16} className={styles.searchIcon} />
-        <input
-          type="text"
-          className={styles.searchInput}
-          placeholder="Buscar promoción..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          autoComplete="off"
-          spellCheck="false"
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
+          <Search size={16} className={styles.searchIcon} />
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Buscar promoción..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setMatrixPage(1); }}
+            autoComplete="off"
+            spellCheck="false"
+            autoCorrect="off"
+            autoCapitalize="off"
+          />
         </div>
         <select
           className={styles.selectFilter}
           value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
+          onChange={(e) => { setFilterStatus(e.target.value as typeof filterStatus); setMatrixPage(1); }}
         >
           <option value="all">Todos los estados</option>
           <option value="active">Activas</option>
@@ -225,7 +236,7 @@ const AdminPromotionMatrix: React.FC = () => {
           {filtered.length === 0 ? (
             <p className={styles.empty}>No hay promociones que coincidan</p>
           ) : (
-            filtered.map((item) => {
+            paginatedFiltered.map((item) => {
               const status = getPromotionStatus(item);
               const statusCfg = STATUS_CONFIG[status];
               const isExpanded = expandedId === item.id;
@@ -241,10 +252,10 @@ const AdminPromotionMatrix: React.FC = () => {
                     </div>
                     <div className={styles.matrixRowCounts}>
                       <span className={styles.matrixCount} title="Productos directos">
-                        📦 {item.directProductCount}
+                        Productos directos: {item.directProductCount}
                       </span>
                       <span className={styles.matrixCount} title="Categorías">
-                        🏷️ {item.categoryCount}
+                        Categorías: {item.categoryCount}
                       </span>
                       <span className={styles.matrixCountTotal} title="Total afectados">
                         ≈ {item.totalAffectedProducts} productos
@@ -269,7 +280,7 @@ const AdminPromotionMatrix: React.FC = () => {
                           {detail.categories.length > 0 && (
                             <div className={styles.matrixDetailSection}>
                               <h4 className={styles.matrixDetailTitle}>
-                                🏷️ Categorías asignadas ({detail.categories.length})
+                                Categorías asignadas ({detail.categories.length})
                               </h4>
                               <div className={styles.matrixTagList}>
                                 {detail.categories.map((cat) => (
@@ -290,7 +301,7 @@ const AdminPromotionMatrix: React.FC = () => {
                           {detail.categoryProducts.length > 0 && (
                             <div className={styles.matrixDetailSection}>
                               <h4 className={styles.matrixDetailTitle}>
-                                📂 Incluidos vía categoría ({detail.categoryProducts.length})
+                                Incluidos vía categoría ({detail.categoryProducts.length})
                               </h4>
                               <div className={styles.matrixProductList}>
                                 {detail.categoryProducts.slice(0, 10).map((p) => (
@@ -310,7 +321,7 @@ const AdminPromotionMatrix: React.FC = () => {
                           {/* Productos directos */}
                           <div className={styles.matrixDetailSection}>
                             <h4 className={styles.matrixDetailTitle}>
-                              📦 Productos directos ({detail.directProducts.length})
+                              Productos directos ({detail.directProducts.length})
                             </h4>
                             {detail.directProducts.length === 0 ? (
                               <p className={styles.matrixEmptySection}>Ninguno</p>
@@ -358,6 +369,13 @@ const AdminPromotionMatrix: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
         loading={deletingLoading}
+      />
+
+      <AdminPagination
+        page={matrixPage}
+        totalPages={totalMatrixPages}
+        onPageChange={setMatrixPage}
+        ariaLabel="Paginación de matriz de promociones"
       />
     </div>
   );
