@@ -1953,3 +1953,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1124: 988 eliminar campo n de orden en banners y renderizar por fecha de creación lifo | 2026-06-20 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1106: Mejorar iconografía y espaciado en Dashboard y Sidebar | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1127: 1106 mejorar iconografía y espaciado en dashboard y sidebar | 2026-06-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1132: 1108 ajustar búsqueda de productos por nombresku y mejorar contraste de cards de detalles en vista de producto | 2026-06-20 |
