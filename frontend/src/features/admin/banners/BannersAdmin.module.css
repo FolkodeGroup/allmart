@@ -1,4 +1,4 @@
-/* ── Validación visual de errores (copiado de OrderConfirmationForm.module.css) ── */
+/* ── Validación visual de errores ── */
 .inputError {
   border-color: var(--color-error) !important;
   box-shadow: 0 0 0 3px rgba(199, 80, 80, 0.1) !important;
@@ -14,7 +14,6 @@
   font-weight: var(--font-medium);
   color: var(--color-text-primary);
   margin-bottom: 8px;
-
 }
 
 .errorMsg {
@@ -34,16 +33,13 @@
 }
 
 @keyframes shake {
-
   0%,
   100% {
     transform: translateX(0);
   }
-
   25% {
     transform: translateX(-4px);
   }
-
   75% {
     transform: translateX(4px);
   }
@@ -278,11 +274,17 @@
   color: #9ca3af;
 }
 
-.order {
-  padding: 2px 6px;
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border);
-  border-radius: 3px;
+.badgePinned {
+  padding: 2px 8px;
+  background: rgba(221, 176, 140, 0.2);
+  color: var(--color-accent-dark, #c89a70);
+  border: 1px solid var(--color-accent);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .bannerActions {
