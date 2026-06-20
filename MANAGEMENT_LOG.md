@@ -1958,3 +1958,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1134: 1110 agregar botón agregar combinación dentro del formulario de ediciónalta de producto | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1135: Vista de colecciones, botón de selección masiva en el encabezado de la tabla eliminado | 2026-06-20 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1142: El problema ocurre porque la aplicación carga en el contexto global (… | 2026-06-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1143: iconos eliminados y paginación ajustada en la vista de reportes | 2026-06-20 |
