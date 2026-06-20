@@ -16,12 +16,12 @@ export function HomePage() {
   const [collections, setCollections] = useState<PublicCollection[]>(
     () => publicCollectionsService.getCached() ?? []
   );
+  
+  // SE MODIFICA: Se remueve la ordenación manual por displayOrder del caché inicial
   const [banners, setBanners] = useState<PublicBanner[]>(
-    () => {
-      const cached = publicBannersService.getCached();
-      return cached ? cached.sort((a, b) => a.displayOrder - b.displayOrder) : [];
-    }
+    () => publicBannersService.getCached() ?? []
   );
+  
   const [loading, setLoading] = useState(
     () => publicCollectionsService.getCached() === null
   );
@@ -46,10 +46,11 @@ export function HomePage() {
     }
   }
 
+  // SE MODIFICA: Se remueve la ordenación por displayOrder de la respuesta del servicio
   async function loadBanners() {
     try {
       const data = await publicBannersService.getActiveBanners();
-      setBanners(data.sort((a, b) => a.displayOrder - b.displayOrder));
+      setBanners(data);
     } catch (err) {
       console.error('Error loading banners:', err);
       // No mostrar error al usuario - los banners son opcionales

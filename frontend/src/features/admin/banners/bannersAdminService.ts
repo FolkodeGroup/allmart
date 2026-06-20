@@ -17,7 +17,7 @@ export interface AdminBanner {
   title: string;
   description?: string;
   filterConfig?: BannerFilterConfig;
-  displayOrder: number;
+  isPinned: boolean;
   isActive: boolean;
   width: number;
   height: number;
@@ -52,13 +52,13 @@ export const bannersAdminService = {
   /**
    * Crea un nuevo banner con imagen
    */
-  async createBanner(data: { title: string; description?: string; altText?: string; displayOrder?: number; isActive?: boolean; filterConfig?: BannerFilterConfig }, imageFile: File): Promise<AdminBanner> {
+  async createBanner(data: { title: string; description?: string; altText?: string; isPinned?: boolean; isActive?: boolean; filterConfig?: BannerFilterConfig }, imageFile: File): Promise<AdminBanner> {
     const formData = new FormData();
     formData.append('title', data.title);
     if (data.filterConfig) formData.append('filterConfig', JSON.stringify(data.filterConfig));
     if (data.description) formData.append('description', data.description);
     if (data.altText) formData.append('altText', data.altText);
-    if (data.displayOrder !== undefined) formData.append('displayOrder', String(data.displayOrder));
+    if (data.isPinned !== undefined) formData.append('isPinned', String(data.isPinned));
     if (data.isActive !== undefined) formData.append('isActive', String(data.isActive));
     formData.append('image', imageFile);
 
@@ -72,7 +72,7 @@ export const bannersAdminService = {
   /**
    * Actualiza metadatos de un banner (sin cambiar imagen)
    */
-  async updateBanner(id: string, data: Partial<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string; filterConfig: BannerFilterConfig }>): Promise<AdminBanner> {
+  async updateBanner(id: string, data: Partial<{ title: string; description: string; isPinned: boolean; isActive: boolean; altText: string; filterConfig: BannerFilterConfig }>): Promise<AdminBanner> {
     const body = await apiFetch<ApiSuccess<AdminBanner>>(`/api/admin/banners/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -101,16 +101,5 @@ export const bannersAdminService = {
     return apiFetch(`/api/admin/banners/${id}`, {
       method: 'DELETE',
     });
-  },
-
-  /**
-   * Reordena banners según su displayOrder
-   */
-  async reorderBanners(bannerIds: string[]): Promise<AdminBanner[]> {
-    const body = await apiFetch<ApiSuccess<AdminBanner[]>>('/api/admin/banners/reorder', {
-      method: 'POST',
-      body: JSON.stringify({ bannerIds }),
-    });
-    return body.data ?? [];
   },
 };

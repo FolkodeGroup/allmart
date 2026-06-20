@@ -7,7 +7,7 @@ export interface Banner {
   id: string;
   title: string;
   description?: string;
-  displayOrder: number;
+  isPinned: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -27,4 +27,3 @@ export interface BannerWithImageMeta extends Banner {
 
 export type CreateBannerDTO = Omit<Banner, 'id' | 'createdAt' | 'updatedAt'>;
 export type UpdateBannerDTO = Partial<Omit<Banner, 'id' | 'createdAt' | 'updatedAt'>> & { altText?: string };
-
