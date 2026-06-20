@@ -151,21 +151,21 @@ const AdminCollections: React.FC = () => {
 
       <div className={styles.filters}>
         <div className={styles.searchWrap}>
-        <Search size={16} className={styles.searchIcon} />
-        <input
-          type="text"
-          placeholder="Buscar colecciones..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className={styles.searchInput}
-          autoComplete="off"
-          spellCheck="false"
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
+          <Search size={16} className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Buscar colecciones..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className={styles.searchInput}
+            autoComplete="off"
+            spellCheck="false"
+            autoCorrect="off"
+            autoCapitalize="off"
+          />
         </div>
         <select
           value={displayPosition}
@@ -212,21 +212,6 @@ const AdminCollections: React.FC = () => {
               <th className={styles.selectColHeader}>
                 <div className={styles.selectColHeaderContent}>
                   <span className={styles.selectColLabel}>SELECCIÓN</span>
-                  <input
-                    type="checkbox"
-                    aria-label="Seleccionar todas"
-                    checked={collections.length > 0 && selectedIds.length === collections.length}
-                    ref={el => {
-                      if (el) el.indeterminate = selectedIds.length > 0 && selectedIds.length < collections.length;
-                    }}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(collections.map((c) => c.id));
-                      } else {
-                        setSelectedIds([]);
-                      }
-                    }}
-                  />
                 </div>
               </th>
             </tr>
