@@ -191,32 +191,69 @@ export function AdminProducts() {
   // Search & filter
   useEffect(() => {
     const timer = setTimeout(() => {
-      refreshProducts({
-        q: search,
-        categoryId: categoryFilter,
-        status: statusFilter,
-        stockLevel: stockLevelFilter,
-        page: 1,
-        limit: 10
-      });
+      // If there's an active search we fetch a larger page and perform
+      // client-side filtering to ensure matches only by name/SKU (backend
+      // may search descriptions or split words). Otherwise use normal
+      // paginated fetch.
+      if (search && search.trim().length > 0) {
+        refreshProducts({
+          categoryId: categoryFilter,
+          status: statusFilter,
+          stockLevel: stockLevelFilter,
+          page: 1,
+          limit: 500,
+        });
+      } else {
+        refreshProducts({
+          q: search,
+          categoryId: categoryFilter,
+          status: statusFilter,
+          stockLevel: stockLevelFilter,
+          page: 1,
+          limit: 10,
+        });
+      }
     }, 400);
     return () => clearTimeout(timer);
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
   const handlePageChange = useCallback((newPage: number) => {
-    refreshProducts({
-      q: search,
-      categoryId: categoryFilter,
-      status: statusFilter,
-      stockLevel: stockLevelFilter,
-      page: newPage,
-      limit: 10
-    });
+    // When searching we kept a larger limit to allow client-side filtering;
+    // keep same behaviour when paginating without active search.
+    if (search && search.trim().length > 0) {
+      refreshProducts({
+        categoryId: categoryFilter,
+        status: statusFilter,
+        stockLevel: stockLevelFilter,
+        page: 1,
+        limit: 500,
+      });
+    } else {
+      refreshProducts({
+        q: search,
+        categoryId: categoryFilter,
+        status: statusFilter,
+        stockLevel: stockLevelFilter,
+        page: newPage,
+        limit: 10,
+      });
+    }
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
+
+  // Client-side filtering: only match by name or SKU to avoid matches on
+  // description or splitted words. This ensures the search behaves as
+  // expected regardless of backend search logic.
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter(p =>
+      (p.name || '').toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q)
+    );
+  }, [products, search]);
 
   // Sort products based on sort field and direction
   const sortedProducts = useMemo(() => {
-    const ordered = [...products];
+    const ordered = [...filteredProducts];
 
     ordered.sort((a, b) => {
       let result = 0;
