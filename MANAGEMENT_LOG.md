@@ -1950,3 +1950,4 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1121: Reubicar botones de Editar y Eliminar al nivel del título del producto en la vista de detalle | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1104: 1090 optimizar UI de variantes en admin para ocupar menos espacio y ser más entendible | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1105: Subtitulo del producto al añadirse al carrito muestra las variantes y valores seleccionadas como mercado libre | 2026-06-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1124: 988 eliminar campo n de orden en banners y renderizar por fecha de creación lifo | 2026-06-20 |
