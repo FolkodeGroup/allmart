@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
-import { PackageSearch, AlertCircle, Pencil, Trash2 } from 'lucide-react';
+import { PackageSearch, AlertCircle } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../../../utils/imageUrl';
@@ -38,7 +38,6 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
       []
     );
 
-    // Preserve scroll position
     useEffect(() => {
       const scrollPos = sessionStorage.getItem(scrollPreserveKey);
       if (scrollPos && containerRef.current) {
@@ -51,7 +50,6 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
       onSelectProduct(id);
     };
 
-    // Keyboard navigation: arrow keys to move between products
     const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
@@ -187,8 +185,9 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
                     title="Editar"
                     onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
                     aria-label={`Editar ${product.name}`}
+                    style={{ color: 'var(--color-primary)' }}
                   >
-                    <Pencil size={14} />
+                    <i className="bi bi-pencil-fill" />
                   </button>
                 )}
                 {canDelete && onDelete && (
@@ -197,8 +196,9 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
                     title="Eliminar"
                     onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}
                     aria-label={`Eliminar ${product.name}`}
+                    style={{ color: 'var(--color-error)' }}
                   >
-                    <Trash2 size={14} />
+                    <i className="bi bi-trash-fill" />
                   </button>
                 )}
               </div>
