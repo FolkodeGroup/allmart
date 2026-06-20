@@ -37,6 +37,5 @@ router.post('/', requireRole(UserRole.ADMIN), upload.single('image'), ctrl.creat
 router.put('/:id', requireRole(UserRole.ADMIN), ctrl.update);
 router.patch('/:id/image', requireRole(UserRole.ADMIN), upload.single('image'), ctrl.updateImage);
 router.delete('/:id', requireRole(UserRole.ADMIN), ctrl.remove);
-router.post('/reorder', requireRole(UserRole.ADMIN), ctrl.reorder);
 
 export default router;
