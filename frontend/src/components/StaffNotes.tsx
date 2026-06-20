@@ -198,7 +198,7 @@ const NoteCard = memo(({
                                     onStartEdit();
                                 }}
                             >
-                                ✏️
+                                <i className="bi bi-pencil"></i>
                             </button>
                             <button
                                 className={styles['delete-btn']}
@@ -206,7 +206,7 @@ const NoteCard = memo(({
                                 disabled={isDeleting}
                                 onClick={handleDeleteClick}
                             >
-                                🗑️
+                                <i className="bi bi-trash"></i>
                             </button>
                         </div>
                     ) : null}

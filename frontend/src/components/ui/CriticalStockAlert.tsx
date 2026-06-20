@@ -33,7 +33,7 @@ export default function CriticalStockAlert({ products }: Props) {
       <section className={styles.criticalStockSection}>
         <div className={styles.criticalStockHeader}>
           <h2 className={styles.title}>
-            <span className={styles.icon}>⚠️</span> Alerta de Stock Crítico
+            Alerta de Stock Crítico
           </h2>
         </div>
         <div className={styles.emptyState}>
@@ -45,27 +45,31 @@ export default function CriticalStockAlert({ products }: Props) {
 
   return (
     <section className={styles.criticalStockSection}>
-      <h2 className={styles.title}>
-        <span className={styles.icon}>⚠️</span> Alerta de Stock Crítico
-      </h2>
-      <div className={styles.list}>
-        {sorted.map(product => (
-          <div key={product.id} className={styles.item}>
-            <div className={styles.info}>
-              <span className={styles.productName}>{product.name}</span>
-              <span className={styles.stockCount}>{product.stock} en stock</span>
+      <div className={styles.criticalStockHeader}>
+        <h2 className={styles.title}>
+          Alerta de Stock Crítico
+        </h2>
+      </div>
+      <div className={styles.listContainer}>
+        <div className={styles.list}>
+          {sorted.map(product => (
+            <div key={product.id} className={styles.item}>
+              <div className={styles.info}>
+                <span className={styles.productName}>{product.name}</span>
+                <span className={styles.stockCount}>{product.stock} en stock</span>
+              </div>
+              <div className={styles.progressBarWrapper}>
+                <div
+                  className={styles.progressBar}
+                  style={{
+                    width: `${Math.min(100, product.stock * 10)}%`,
+                    backgroundColor: product.stock === 0 ? '#d32f2f' : '#ff6f00',
+                  }}
+                />
+              </div>
             </div>
-            <div className={styles.progressBarWrapper}>
-              <div
-                className={styles.progressBar}
-                style={{
-                  width: `${Math.min(100, product.stock * 10)}%`,
-                  backgroundColor: product.stock === 0 ? '#d32f2f' : '#ff6f00',
-                }}
-              />
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -24,6 +24,10 @@
   border-radius: 8px;
 }
 
+.listContainer {
+  padding: var(--space-4);
+}
+
 .emptyState {
   color: var(--color-text-tertiary);
   font-size: var(--text-sm);

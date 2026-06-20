@@ -45,17 +45,14 @@ export default function RequiredActionsAccordion() {
     {
       id: 'pending',
       label: 'Órdenes Pendientes',
-      icon: '⏳',
     },
     {
       id: 'shipping',
       label: 'Preparadas para Envío',
-      icon: '📦',
     },
     {
       id: 'payment',
       label: 'Pagos Pendientes',
-      icon: '💰',
     },
   ];
 
@@ -224,7 +221,6 @@ export default function RequiredActionsAccordion() {
             {isExpanded ? '▼' : '▶'}
           </span>
           <h2 className={styles.accordionTitle}>
-            <span className={styles.titleIcon}>⚡</span>
             Acciones Requeridas
           </h2>
         </div>

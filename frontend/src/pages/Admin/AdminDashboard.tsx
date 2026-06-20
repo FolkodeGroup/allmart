@@ -51,7 +51,7 @@ export function AdminDashboard() {
   const { can } = useAdminAuth();
   const { widgets, reorderWidgets, toggleWidget, resetLayout } = useDashboardLayout();
   const { monthlyGoal, setMonthlyGoal } = useMonthlyGoal();
-  const { greeting, emoji } = getAdminGreeting();
+  const { greeting } = getAdminGreeting();
 
   // Métricas y agregaciones centralizadas
   const {
@@ -86,12 +86,12 @@ export function AdminDashboard() {
       case 'metrics':
         return (
           <div className={styles.metricsGrid}>
-            <MetricCard title="Ingresos" icon={<span>💰</span>} value={fmtCurrency(ingresos)} variation={0} />
-            <MetricCard title="Pedidos" icon={<span>🛒</span>} value={totalPedidos} variation={0} />
-            <MetricCard title="Clientes" icon={<span>👥</span>} value={clientesUnicos} variation={0} />
-            <MetricCard title="Ticket Promedio" icon={<span>🎫</span>} value={fmtCurrency(ticketPromedio)} variation={0} />
-            <MetricCard title="Conversión" icon={<span>📊</span>} value={tasaConversion.toFixed(1) + '%'} variation={0} />
-            <MetricCard title="Productos" icon={<span>📦</span>} value={totalProducts || products.length} variation={0} />
+            <MetricCard title="Ingresos" value={fmtCurrency(ingresos)} variation={0} />
+            <MetricCard title="Pedidos" value={totalPedidos} variation={0} />
+            <MetricCard title="Clientes" value={clientesUnicos} variation={0} />
+            <MetricCard title="Ticket Promedio" value={fmtCurrency(ticketPromedio)} variation={0} />
+            <MetricCard title="Conversión" value={tasaConversion.toFixed(1) + '%'} variation={0} />
+            <MetricCard title="Productos" value={totalProducts || products.length} variation={0} />
           </div>
         );
 
@@ -226,7 +226,7 @@ export function AdminDashboard() {
       <header className={styles.banner}>
         <div className={styles.bannerLeft}>
           <h1 className={styles.bannerGreeting}>
-            {greeting}, administrador {emoji}
+            {greeting}, administrador
           </h1>
           <p className={styles.bannerSub}>
             Arrastrá los widgets para reorganizar tu panel.

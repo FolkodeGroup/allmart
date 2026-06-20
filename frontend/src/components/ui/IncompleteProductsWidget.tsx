@@ -47,7 +47,7 @@ export default function IncompleteProductsWidget() {
       <section className={styles.section}>
         <div className={styles.header}>
           <h2 className={styles.title}>
-            <span className={styles.icon}>📝</span> Productos Incompletos
+            Productos Incompletos
           </h2>
           <span className={styles.badge}>0</span>
         </div>
@@ -62,7 +62,7 @@ export default function IncompleteProductsWidget() {
     <section className={styles.section}>
       <div className={styles.header}>
         <h2 className={styles.title}>
-          <span className={styles.icon}>⚠️</span> Productos Incompletos
+          Productos Incompletos
         </h2>
         <span className={`${styles.badge} ${styles.badgeAlert}`}>{count}</span>
       </div>
