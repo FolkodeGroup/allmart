@@ -1948,3 +1948,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1092: 🔄 Actualización automática de puntajes semanal | 2026-06-17 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1102: 1096 subida de imágenes desde escritorio y gestión avanzada de imágenes en creaciónedición de combinaciones | 2026-06-17 |
 | FedericoPaal | 3 | Creación de issue | Issue #1121: Reubicar botones de Editar y Eliminar al nivel del título del producto en la vista de detalle | 2026-06-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1104: 1090 optimizar UI de variantes en admin para ocupar menos espacio y ser más entendible | 2026-06-20 |
