@@ -10,24 +10,15 @@ interface Params {
 
 export function useProductSearch({ query, products }: Omit<Params, 'categories'>) {
     const normalizedQuery = query.toLowerCase().trim();
-
     return useMemo(() => {
         if (!normalizedQuery) return [];
 
         return products.filter((product) => {
-            const nameMatch = product.name.toLowerCase().includes(normalizedQuery);
+            const nameMatch = product.name?.toLowerCase().includes(normalizedQuery);
+            const skuMatch = (product.sku ?? '').toLowerCase().includes(normalizedQuery);
 
-            const categoryMatch =
-                product.category?.name.toLowerCase().includes(normalizedQuery) ||
-                product.categories?.some((c) =>
-                    c.name.toLowerCase().includes(normalizedQuery)
-                );
-
-            const tagsMatch = product.tags?.some((tag) =>
-                tag.toLowerCase().includes(normalizedQuery)
-            );
-
-            return nameMatch || categoryMatch || tagsMatch;
+            // Only match by name or SKU (no description, tags or category matches)
+            return Boolean(nameMatch || skuMatch);
         });
     }, [normalizedQuery, products]);
 }
