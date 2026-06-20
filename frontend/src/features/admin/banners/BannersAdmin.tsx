@@ -1,8 +1,3 @@
-type FieldErrors = {
-  title?: string;
-  imageFile?: string;
-  displayOrder?: string;
-};
 /**
  * features/admin/banners/BannersAdmin.tsx
  * Página de administración de banners de la homepage
@@ -28,11 +23,15 @@ import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 interface FormData {
   title: string;
   imageFile: File | null;
-  displayOrder: number;
   isActive: boolean;
   altText: string;
   filterConfig: BannerFilterConfig;
 }
+
+type FieldErrors = {
+  title?: string;
+  imageFile?: string;
+};
 
 function appendCacheBusting(url: string, updatedAt?: string): string {
   if (!url) return url;
@@ -46,7 +45,6 @@ export function BannersAdmin() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAltManuallyEdited, setIsAltManuallyEdited] = useState(false);
-  const [displayOrderInput, setDisplayOrderInput] = useState('0');
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -56,7 +54,6 @@ export function BannersAdmin() {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     imageFile: null,
-    displayOrder: 0,
     isActive: true,
     altText: '',
     filterConfig: {},
@@ -64,10 +61,9 @@ export function BannersAdmin() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Unsaved changes detection
-  const initialFormDataRef = useRef<{ title: string; description: string; displayOrder: number; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
+  const initialFormDataRef = useRef<{ title: string; description: string; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
     title: '',
     description: '',
-    displayOrder: 0,
     isActive: true,
     altText: '',
     filterConfig: {},
@@ -75,12 +71,10 @@ export function BannersAdmin() {
 
   const isDirty = showForm && (
     formData.title !== initialFormDataRef.current.title ||
-    formData.displayOrder !== initialFormDataRef.current.displayOrder ||
     formData.isActive !== initialFormDataRef.current.isActive ||
     formData.altText !== initialFormDataRef.current.altText ||
     formData.filterConfig !== initialFormDataRef.current.filterConfig ||
     formData.imageFile !== null
-
   );
 
   const {
@@ -119,7 +113,8 @@ export function BannersAdmin() {
     try {
       setLoading(true);
       const data = await bannersAdminService.getAllBanners();
-      setBanners(data.sort((a, b) => a.displayOrder - b.displayOrder));
+      // Ordenamiento local explícito por LIFO (createdAt desc)
+      setBanners(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     } catch (err) {
       toast.error('Error al cargar banners');
       console.error(err);
@@ -136,7 +131,6 @@ export function BannersAdmin() {
     setFormData({
       title: '',
       imageFile: null,
-      displayOrder: 0,
       isActive: true,
       altText: '',
       filterConfig: {},
@@ -150,7 +144,6 @@ export function BannersAdmin() {
     initialFormDataRef.current = {
       title: banner.title,
       description: banner.description || '',
-      displayOrder: banner.displayOrder,
       isActive: banner.isActive,
       altText: banner.altText || '',
       filterConfig: banner.filterConfig || {},
@@ -158,20 +151,17 @@ export function BannersAdmin() {
     setFormData({
       title: banner.title,
       imageFile: null,
-      displayOrder: banner.displayOrder,
       isActive: banner.isActive,
       altText: banner.altText || '',
       filterConfig: banner.filterConfig || {},
     });
     setEditingId(banner.id);
     setShowForm(true);
-    setDisplayOrderInput(String(banner.displayOrder));
     // Si el alt existente difiere del título, el usuario lo editó manualmente en algún momento
     setIsAltManuallyEdited(
       !!banner.altText && banner.altText !== banner.title
     );
   }
-
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -189,7 +179,6 @@ export function BannersAdmin() {
       if (editingId) {
         await bannersAdminService.updateBanner(editingId, {
           title: formData.title,
-          displayOrder: formData.displayOrder,
           isActive: formData.isActive,
           altText: formData.altText,
           filterConfig: formData.filterConfig,
@@ -203,7 +192,6 @@ export function BannersAdmin() {
           {
             title: formData.title,
             filterConfig: formData.filterConfig,
-            displayOrder: formData.displayOrder,
             isActive: formData.isActive,
             altText: formData.altText,
           },
@@ -294,31 +282,6 @@ export function BannersAdmin() {
     }
   }
 
-  // ─── Helper: calcula el siguiente displayOrder disponible ────────────────
-  function getNextAvailableOrder(banners: AdminBanner[]): number {
-    const used = new Set(banners.map((b) => b.displayOrder));
-    let next = 0;
-    while (used.has(next)) next++;
-    return next;
-  }
-
-  // ─── Helper: posiciones libres para el select de edición ─────────────────
-
-  function getAvailableOrders(banners: AdminBanner[], editingId: string | null): number[] {
-    const usedByOthers = new Set(
-      banners
-        .filter((b) => b.id !== editingId)
-        .map((b) => b.displayOrder)
-    );
-    const max = Math.max(...banners.map((b) => b.displayOrder), -1);
-    // Mostramos hasta max + 10 posiciones libres adelante
-    const EXTRA_SLOTS = 10;
-    const upperBound = max + EXTRA_SLOTS;
-    return Array.from({ length: upperBound + 1 }, (_, i) => i).filter(
-      (n) => !usedByOthers.has(n)
-    );
-  }
-
   function validateForm(): FieldErrors {
     const errors: FieldErrors = {};
 
@@ -328,15 +291,6 @@ export function BannersAdmin() {
 
     if (!editingId && !formData.imageFile) {
       errors.imageFile = 'La imagen es obligatoria';
-    }
-
-    const occupied = banners
-      .filter((b) => b.id !== editingId)
-      .some((b) => b.displayOrder === formData.displayOrder);
-
-    if (occupied) {
-      const available = getAvailableOrders(banners, editingId).slice(0, 5);
-      errors.displayOrder = `Posición ocupada. Disponibles: ${available.join(', ')}`;
     }
 
     return errors;
@@ -355,19 +309,14 @@ export function BannersAdmin() {
         </div>
         <Button
           onClick={() => {
-            const nextOrder = getNextAvailableOrder(banners);   // ← aquí
-            const firstFree = getAvailableOrders(banners, null)[0] ?? 0;
-            setDisplayOrderInput(String(firstFree));
             resetForm();
             initialFormDataRef.current = {
               title: '',
               description: '',
-              displayOrder: nextOrder,
               isActive: true,
               altText: '',
               filterConfig: {},
             };
-            setFormData((prev) => ({ ...prev, displayOrder: nextOrder }));
             setShowForm(true);
           }}
         >
@@ -399,7 +348,7 @@ export function BannersAdmin() {
               )}
             </div>
 
-            <div >
+            <div>
               <fieldset className={styles.formGroup} style={{ border: "none" }}>
                 <legend className={styles.legend}>Destino del banner</legend>
                 <BannerFilterBuilder
@@ -457,66 +406,13 @@ export function BannersAdmin() {
                 placeholder="Descripción para accesibilidad"
                 value={formData.altText}
                 onChange={(e) => {
-                  setIsAltManuallyEdited(true); // ← el usuario tomó control
+                  setIsAltManuallyEdited(true);
                   setFormData({ ...formData, altText: e.target.value });
                 }}
               />
             </div>
 
             <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label htmlFor="displayOrder">Orden de Visualización</label>
-                <input
-                  id="displayOrder"
-                  type="number"
-                  min="0"
-                  value={displayOrderInput}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    setDisplayOrderInput(raw); // permite vacío mientras escribe
-
-                    const order = parseInt(raw, 10);
-                    if (!Number.isNaN(order) && order >= 0) {
-                      setFormData((prev) => ({ ...prev, displayOrder: order }));
-
-                      const occupied = banners
-                        .filter((b) => b.id !== editingId)
-                        .some((b) => b.displayOrder === order);
-
-                      if (occupied) {
-                        const available = getAvailableOrders(banners, editingId).slice(0, 5);
-                        setFieldErrors((prev) => ({
-                          ...prev,
-                          displayOrder: `Posición ocupada. Disponibles: ${available.join(', ')}`,
-                        }));
-                      } else {
-                        setFieldErrors((prev) => ({ ...prev, displayOrder: undefined }));
-                      }
-                    } else {
-                      // Campo vacío o inválido: limpiar error, no actualizar formData todavía
-                      setFieldErrors((prev) => ({ ...prev, displayOrder: undefined }));
-                    }
-                  }}
-                  onBlur={() => {
-                    const order = parseInt(displayOrderInput, 10);
-                    if (Number.isNaN(order) || order < 0) {
-                      setDisplayOrderInput(String(formData.displayOrder));
-                    } else {
-                      // ← forzar sincronización aunque el onChange ya lo haya hecho
-                      setFormData((prev) => ({ ...prev, displayOrder: order }));
-                    }
-                  }}
-                  className={fieldErrors.displayOrder ? styles.inputError : ''}
-                  aria-invalid={!!fieldErrors.displayOrder}
-                  aria-describedby={fieldErrors.displayOrder ? 'order-error' : undefined}
-                />
-                {fieldErrors.displayOrder && (
-                  <span id="order-error" className={styles.errorMsg} role="alert">
-                    {fieldErrors.displayOrder}
-                  </span>
-                )}
-              </div>
-
               <div className={styles.formGroup}>
                 <label className={styles.checkboxLabel}>
                   <input
@@ -568,7 +464,7 @@ export function BannersAdmin() {
                   <p className={styles.bannerDescription}>{banner.description}</p>
                 )}
                 <div className={styles.bannerMeta}>
-                  <span className={styles.order}>Orden: {banner.displayOrder}</span>
+                  <span className={styles.order}>Creado: {new Date(banner.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
 
