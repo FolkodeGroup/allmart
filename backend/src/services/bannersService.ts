@@ -18,7 +18,7 @@ function toBannerWithMeta(row: any): BannerWithImageMeta {
     id: row.id,
     title: row.title,
     description: row.description ?? undefined,
-    displayOrder: row.displayOrder,
+    isPinned: row.isPinned,
     isActive: row.isActive,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -39,7 +39,7 @@ function toBannerPublic(row: any): any {
     id: row.id,
     title: row.title,
     description: row.description ?? undefined,
-    displayOrder: row.displayOrder,
+    isPinned: row.isPinned,
     isActive: row.isActive,
     imageUrl: `/api/images/banners/${row.id}`,
     thumbUrl: `/api/images/banners/${row.id}/thumb`,
@@ -52,7 +52,10 @@ function toBannerPublic(row: any): any {
 
 export async function getAllBanners(): Promise<BannerWithImageMeta[]> {
   const rows = await prisma.banner.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: [
+      { isPinned: 'desc' },
+      { createdAt: 'desc' }
+    ],
   });
   return rows.map(toBannerWithMeta);
 }
@@ -60,7 +63,10 @@ export async function getAllBanners(): Promise<BannerWithImageMeta[]> {
 export async function getActiveBannersPublic(): Promise<any[]> {
   const rows = await prisma.banner.findMany({
     where: { isActive: true },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [
+      { isPinned: 'desc' },
+      { createdAt: 'desc' }
+    ],
   });
   return rows.map(toBannerPublic);
 }
@@ -100,7 +106,7 @@ export async function createBanner(
   title: string,
   description: string | undefined,
   altText: string | undefined,
-  displayOrder: number,
+  isPinned: boolean,
   isActive: boolean,
   imageData: {
     data: Buffer;
@@ -123,7 +129,7 @@ export async function createBanner(
       title,
       description: description ?? null,
       altText: altText ?? null,
-      displayOrder,
+      isPinned,
       isActive,
       data: new Uint8Array(imageData.data),
       width: imageData.width,
@@ -146,7 +152,7 @@ export async function updateBanner(
   updates: Partial<{
     title: string;
     description: string | null;
-    displayOrder: number;
+    isPinned: boolean;
     isActive: boolean;
     altText: string | null;
     filterConfig: Record<string, unknown>;
@@ -162,7 +168,7 @@ export async function updateBanner(
     data: {
       title: updates.title ?? existing.title,
       description: updates.description !== undefined ? updates.description : existing.description,
-      displayOrder: updates.displayOrder ?? existing.displayOrder,
+      isPinned: updates.isPinned ?? false,
       isActive: updates.isActive ?? existing.isActive,
       altText: updates.altText !== undefined ? updates.altText : existing.altText,
       filterConfig: (updates.filterConfig !== undefined
@@ -219,16 +225,4 @@ export async function deleteBanner(id: string): Promise<void> {
   await prisma.banner.delete({
     where: { id },
   });
-}
-
-export async function reorderBanners(bannerIds: string[]): Promise<BannerWithImageMeta[]> {
-  const updates = bannerIds.map((id, index) =>
-    prisma.banner.update({
-      where: { id },
-      data: { displayOrder: index },
-    })
-  );
-
-  const results = await Promise.all(updates);
-  return results.map(toBannerWithMeta);
 }
