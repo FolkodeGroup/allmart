@@ -1956,3 +1956,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1132: 1108 ajustar búsqueda de productos por nombresku y mejorar contraste de cards de detalles en vista de producto | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1133: iconos eliminados estilos ajustados y paginación en matriz de productos agregada | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1134: 1110 agregar botón agregar combinación dentro del formulario de ediciónalta de producto | 2026-06-20 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1135: Vista de colecciones, botón de selección masiva en el encabezado de la tabla eliminado | 2026-06-20 |
