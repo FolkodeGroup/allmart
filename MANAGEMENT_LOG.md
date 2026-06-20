@@ -1951,3 +1951,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1104: 1090 optimizar UI de variantes en admin para ocupar menos espacio y ser más entendible | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1105: Subtitulo del producto al añadirse al carrito muestra las variantes y valores seleccionadas como mercado libre | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1124: 988 eliminar campo n de orden en banners y renderizar por fecha de creación lifo | 2026-06-20 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1106: Mejorar iconografía y espaciado en Dashboard y Sidebar | 2026-06-20 |
