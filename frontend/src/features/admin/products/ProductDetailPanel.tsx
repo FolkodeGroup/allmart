@@ -1,8 +1,7 @@
-import React, { useState, Suspense, useCallback, useEffect } from 'react';
+import React, { useState, Suspense, useCallback } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import styles from './ProductDetailPanel.module.css';
-import { useAdminVariants } from '../../../context/AdminVariantsContext';
 
 // Lazy load tab components
 const ProductDetailBasic = React.lazy(() =>
@@ -71,12 +70,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   const handleCancelDelete = useCallback(() => {
     setShowDeleteModal(false);
   }, []);
-
-  const { variants, loadVariants } = useAdminVariants();
-
-  useEffect(() => {
-    loadVariants(product.id);
-  }, [product.id, loadVariants]);
 
   // Render tab content with suspense fallback
   const renderTabContent = () => {
