@@ -279,13 +279,13 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
       {/* ─── Tabs ─────────────────────────────────────────────────────── */}
       <div className={styles.formTabs}>
         <button type="button" className={activeTab === 'details' ? styles.formTabActive : styles.formTab} onClick={() => setActiveTab('details')}>
-          📋 Detalles
+          Detalles
         </button>
         <button type="button" className={activeTab === 'products' ? styles.formTabActive : styles.formTab} onClick={() => setActiveTab('products')}>
-          📦 Productos {selectedProductIds.length > 0 && <span className={styles.tabBadge}>{selectedProductIds.length}</span>}
+          Productos {selectedProductIds.length > 0 && <span className={styles.tabBadge}>{selectedProductIds.length}</span>}
         </button>
         <button type="button" className={activeTab === 'categories' ? styles.formTabActive : styles.formTab} onClick={() => setActiveTab('categories')}>
-          🏷️ Categorías {selectedCategoryIds.length > 0 && <span className={styles.tabBadge}>{selectedCategoryIds.length}</span>}
+          Categorías {selectedCategoryIds.length > 0 && <span className={styles.tabBadge}>{selectedCategoryIds.length}</span>}
         </button>
       </div>
 
@@ -359,18 +359,18 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               También podés aplicarla a categorías enteras en la pestaña <strong>Categorías</strong>.
             </p>
             <div className={styles.searchWrap}>
-            <Search size={16} className={styles.searchIcon} />
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="Buscar producto..."
-              value={productSearch}
-              onChange={(e) => setProductSearch(e.target.value)}
-              autoComplete="off"
-              spellCheck="false"
-              autoCorrect="off"
-              autoCapitalize="off"
-            />
+              <Search size={16} className={styles.searchIcon} />
+              <input
+                type="text"
+                className={styles.searchInput}
+                placeholder="Buscar producto..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                autoComplete="off"
+                spellCheck="false"
+                autoCorrect="off"
+                autoCapitalize="off"
+              />
             </div>
             {loadingSelectors ? (
               <p className={styles.loading}>Cargando productos...</p>
@@ -415,18 +415,18 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               incluidos en la promoción automáticamente.
             </p>
             <div className={styles.searchWrap}>
-            <Search size={16} className={styles.searchIcon} />
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="Buscar categoría..."
-              value={categorySearch}
-              onChange={(e) => setCategorySearch(e.target.value)}
-              autoComplete="off"
-              spellCheck="false"
-              autoCorrect="off"
-              autoCapitalize="off"
-            />
+              <Search size={16} className={styles.searchIcon} />
+              <input
+                type="text"
+                className={styles.searchInput}
+                placeholder="Buscar categoría..."
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                autoComplete="off"
+                spellCheck="false"
+                autoCorrect="off"
+                autoCapitalize="off"
+              />
             </div>
             {loadingSelectors ? (
               <p className={styles.loading}>Cargando categorías...</p>
