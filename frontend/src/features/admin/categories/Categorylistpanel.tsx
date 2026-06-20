@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import type { Category } from '../../../types';
-import { FolderSearch, AlertCircle, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
+import { FolderSearch, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { ProductImage } from '../../../components/ui/ProductImage';
 import styles from './Categorylistpanel.module.css';
@@ -155,7 +155,6 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                             <span className={styles.slug} title={`Slug: ${cat.slug}`}>
                                                 {cat.slug}
                                             </span>
-
                                         </div>
 
                                         <div className={styles.metaLine}>
@@ -187,8 +186,9 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                                 onClick={(e) => { e.stopPropagation(); onEdit(cat.id); }}
                                                 aria-label={`Editar ${displayName}`}
                                                 type="button"
+                                                style={{ color: 'var(--color-primary)' }}
                                             >
-                                                <Pencil size={14} />
+                                                <i className="bi bi-pencil-fill" />
                                             </button>
                                         )}
                                         {canEdit && onToggleVisibility && (
@@ -209,8 +209,9 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                                 onClick={(e) => { e.stopPropagation(); onDelete(cat.id); }}
                                                 aria-label={`Eliminar ${displayName}`}
                                                 type="button"
+                                                style={{ color: 'var(--color-error)' }}
                                             >
-                                                <Trash2 size={14} />
+                                                <i className="bi bi-trash-fill" />
                                             </button>
                                         )}
                                     </div>

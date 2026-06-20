@@ -20,8 +20,9 @@ export const ProductCardActions: React.FC<ProductCardActionsProps> = ({ canEdit,
           aria-label={`Editar producto ${name}`}
           tabIndex={0}
           type="button"
+          style={{ color: 'var(--color-primary)' }}
         >
-          <span aria-hidden="true">✏️</span>
+          <i className="bi bi-pencil-fill" aria-hidden="true" />
         </button>
       </Tooltip>
     )}
@@ -33,8 +34,9 @@ export const ProductCardActions: React.FC<ProductCardActionsProps> = ({ canEdit,
           aria-label={`Eliminar producto ${name}`}
           tabIndex={0}
           type="button"
+          style={{ color: 'var(--color-error)' }}
         >
-          <span aria-hidden="true">🗑️</span>
+          <i className="bi bi-trash-fill" aria-hidden="true" />
         </button>
       </Tooltip>
     )}

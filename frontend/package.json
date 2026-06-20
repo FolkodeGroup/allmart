@@ -20,6 +20,7 @@
     "@mui/lab": "^7.0.1-beta.23",
     "@mui/material": "^7.3.9",
     "@types/dompurify": "^3.0.5",
+    "bootstrap-icons": "^1.13.1",
     "dompurify": "^3.3.3",
     "dotenv": "^17.3.1",
     "framer-motion": "^12.36.0",

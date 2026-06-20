@@ -1,8 +1,5 @@
-// src/features/admin/products/components/tabs/TabCategorias.tsx
 import { memo } from 'react';
 import type { TabFormState, SetField } from '../components/types';
-// FIX: importar Category desde los tipos del dominio, no AdminCategory del contexto
-// (AdminCategoriesContext no exporta `AdminCategory`)
 import type { Category } from '../../../../types';
 import styles from '../AdminProductFormPage.module.css';
 
@@ -26,10 +23,10 @@ export const TabCategorias = memo(function TabCategorias({
 }: TabCategoriasProps) {
     return (
         <fieldset className={styles.fieldset}>
-            <legend className={styles.legend}>Categoría y etiquetas</legend>
-
             <div className={styles.field}>
-                <label className={styles.label} htmlFor="product-category">Categoría *</label>
+                <label className={styles.label} htmlFor="product-category">
+                    Categoría Principal *
+                </label>
                 <select
                     className={`${styles.input} ${fieldErrors.category ? styles.inputError : ''}`}
                     id="product-category"
@@ -49,7 +46,9 @@ export const TabCategorias = memo(function TabCategorias({
             </div>
 
             <div className={styles.field}>
-                <label className={styles.label} htmlFor="product-categories">Categorías adicionales</label>
+                <label className={styles.label} htmlFor="product-categories">
+                    Categorías adicionales
+                </label>
                 <select
                     className={styles.input}
                     id="product-categories"

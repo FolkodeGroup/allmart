@@ -1,20 +1,18 @@
-import React from 'react';
+
 import styles from './MetricCard.module.css';
 
 interface MetricCardProps {
   title: string;
-  icon: React.ReactNode;
   value: string | number;
   variation: number; // porcentaje
 }
 
-export function MetricCard({ title, icon, value, variation }: MetricCardProps) {
+export function MetricCard({ title, value, variation }: MetricCardProps) {
   const isPositive = variation >= 0;
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <span className={styles.title}>{title}</span>
-        <span className={styles.icon}>{icon}</span>
       </div>
       <div className={styles.value}>{value}</div>
       <div className={styles.variation}>

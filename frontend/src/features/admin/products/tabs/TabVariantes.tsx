@@ -1,11 +1,10 @@
-// src/features/admin/products/components/tabs/TabVariantes.tsx
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { TabVariantesProps } from '../components/types';
+import styles from '../AdminProductFormPage.module.css';
 
 export type TabVariantesRef = {
     validate: () => Record<string, string>;
 };
-import styles from '../AdminProductFormPage.module.css';
 
 export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(function TabVariantes({
     form,
@@ -18,13 +17,12 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     onAddVariantValue,
     onRemoveVariantValue,
     errors = {},
-}: TabVariantesProps, ref) {
+}, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
 
     useImperativeHandle(ref, () => ({
         validate: () => {
             const errs: Record<string, string> = {};
-            // Ejemplo: validar que haya al menos un grupo de variantes
             if (!form.variants || form.variants.length === 0) errs.variants = 'Agrega al menos un grupo de variantes';
             setLocalErrors(errs);
             return errs;
@@ -33,13 +31,11 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
 
     return (
         <fieldset className={styles.fieldset}>
-            <legend className={styles.legend}>Variantes</legend>
             <p className={styles.fieldHint}>
                 Agrupá opciones como Color o Tamaño. Gestiona todas tus variantes desde la pestaña de
                 Variantes en esta vista.
             </p>
 
-            {/* Agregar nuevo grupo */}
             <div className={styles.tagRow}>
                 <input
                     className={styles.input}
@@ -54,23 +50,25 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     onClick={onAddVariantGroup}
                     aria-label="Agregar grupo de variantes"
                 >
-                    + Grupo
+                    <i className="bi bi-plus-lg" style={{ marginRight: '4px' }}></i> Grupo
                 </button>
             </div>
             {localErrors.variants && <span className={styles.errorText}>{localErrors.variants}</span>}
 
-            {/* Grupos existentes */}
             {(form.variants ?? []).map(group => (
                 <div key={group.id} className={styles.variantGroup}>
                     <div className={styles.variantGroupHeader}>
-                        <span className={styles.variantGroupName}>{group.name}</span>
+                        <span className={styles.variantGroupName}>
+                            <i className="bi bi-layers-half" style={{ marginRight: '8px', color: 'var(--color-primary)' }}></i>
+                            {group.name}
+                        </span>
                         <button
                             type="button"
                             className={styles.removeBtn}
                             onClick={() => onRemoveVariantGroup(group.id)}
                             aria-label={`Eliminar grupo ${group.name}`}
                         >
-                            ✕
+                            <i className="bi bi-trash" style={{ color: 'var(--color-error)' }}></i>
                         </button>
                     </div>
 
@@ -84,7 +82,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                     onClick={() => onRemoveVariantValue(group.id, val)}
                                     aria-label={`Eliminar variante ${val}`}
                                 >
-                                    ✕
+                                    <i className="bi bi-x-lg"></i>
                                 </button>
                             </span>
                         ))}
@@ -108,7 +106,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             onClick={() => onAddVariantValue(group.id)}
                             aria-label={`Agregar valor a ${group.name}`}
                         >
-                            ＋
+                            <i className="bi bi-plus"></i>
                         </button>
                     </div>
                 </div>

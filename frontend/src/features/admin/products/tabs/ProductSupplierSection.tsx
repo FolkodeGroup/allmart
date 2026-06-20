@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDown, X, DollarSign, TrendingUp, Star, Trash2 } from 'lucide-react';
 import {
     suppliersAdminService,
     type AdminSupplierV2,
@@ -9,14 +8,21 @@ import {
 import { PriceUpdateModal } from '../../suppliers/PriceUpdateModal';
 import { PriceHistoryModal } from '../../suppliers/PriceHistoryModal';
 import styles from './ProductSupplierSection.module.css';
-const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+
+const fmt = new Intl.NumberFormat('es-AR', { 
+    style: 'currency', 
+    currency: 'ARS', 
+    maximumFractionDigits: 0 
+});
+
 interface ProductSupplierSectionProps {
-    productId: string | null;          // null = create mode
+    productId: string | null;          // null = modo creación
     productName?: string;
-    currentProductPrice?: number;      // used as default price when assigning
+    currentProductPrice?: number;      // precio base del producto
     primarySupplierId: string | null | undefined;
     onPrimaryChange: (id: string | null) => void;
 }
+
 export function ProductSupplierSection({
     productId,
     productName = '',
@@ -24,22 +30,27 @@ export function ProductSupplierSection({
     primarySupplierId,
     onPrimaryChange,
 }: ProductSupplierSectionProps) {
-    // ── All suppliers (for dropdown) ──────────────────────────────────────
+    // ── Todos los proveedores (para el dropdown) ──
     const [allSuppliers, setAllSuppliers] = useState<AdminSupplierV2[]>([]);
     const [suppliersLoading, setSuppliersLoading] = useState(false);
-    // ── Product-supplier links (edit mode) ────────────────────────────────
+
+    // ── Vínculos actuales del producto (modo edición) ──
     const [productLinks, setProductLinks] = useState<ProductSupplierEntry[]>([]);
     const [linksLoading, setLinksLoading] = useState(false);
-    // ── Dropdown ──────────────────────────────────────────────────────────
+
+    // ── Estado del Dropdown ──
     const [search, setSearch] = useState('');
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    // ── Modals ────────────────────────────────────────────────────────────
+
+    // ── Modales ──
     const [updatingSupplier, setUpdatingSupplier] = useState<ProductSupplierEntry | null>(null);
     const [viewingHistory, setViewingHistory] = useState<ProductSupplierEntry | null>(null);
-    // ── Loading action ────────────────────────────────────────────────────
+
+    // ── Cargando acción ──
     const [actionLoading, setActionLoading] = useState<string | null>(null);
-    // ── Load all suppliers ────────────────────────────────────────────────
+
+    // Cargar todos los proveedores disponibles
     useEffect(() => {
         setSuppliersLoading(true);
         suppliersAdminService.listSuppliers({ limit: 200, isActive: true })
@@ -47,7 +58,8 @@ export function ProductSupplierSection({
             .catch(() => setAllSuppliers([]))
             .finally(() => setSuppliersLoading(false));
     }, []);
-    // ── Load product links (edit mode only) ───────────────────────────────
+
+    // Cargar vínculos específicos del producto
     const loadLinks = useCallback(() => {
         if (!productId) return;
         setLinksLoading(true);
@@ -56,37 +68,41 @@ export function ProductSupplierSection({
             .catch(() => setProductLinks([]))
             .finally(() => setLinksLoading(false));
     }, [productId]);
+
     useEffect(() => { loadLinks(); }, [loadLinks]);
-    // ── Close dropdown on outside click ──────────────────────────────────
+
+    // Cerrar dropdown al hacer clic fuera
     useEffect(() => {
-        function handle(e: MouseEvent) {
+        function handleClickOutside(e: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
                 setOpen(false);
             }
         }
-        document.addEventListener('mousedown', handle);
-        return () => document.removeEventListener('mousedown', handle);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-    // ── Derived ───────────────────────────────────────────────────────────
+
+    // Datos derivados
     const primaryLink = productLinks.find(l => l.supplierId === primarySupplierId) ?? null;
     const otherLinks = productLinks.filter(l => l.supplierId !== primarySupplierId);
+    
     const selectedSupplierName = primarySupplierId
         ? allSuppliers.find(s => s.id === primarySupplierId)?.name ?? 'Proveedor seleccionado'
         : null;
+
     const filtered = allSuppliers.filter(s =>
         !search || s.name.toLowerCase().includes(search.toLowerCase())
     );
-    // ── Handlers ──────────────────────────────────────────────────────────
+
+    // ── Handlers ──
     async function handleSelect(supplierId: string | null) {
         setOpen(false);
         setSearch('');
         if (!productId) {
-            // create mode: just store the selection in parent form
             onPrimaryChange(supplierId);
             return;
         }
         if (!supplierId) {
-            // clear primary
             onPrimaryChange(null);
             return;
         }
@@ -94,7 +110,6 @@ export function ProductSupplierSection({
         try {
             const alreadyLinked = productLinks.some(l => l.supplierId === supplierId);
             if (!alreadyLinked) {
-                // assign with current product price as default
                 await suppliersAdminService.assignSupplier(productId, {
                     supplierId,
                     currentPrice: currentProductPrice || 1,
@@ -108,6 +123,7 @@ export function ProductSupplierSection({
             setActionLoading(null);
         }
     }
+
     async function handleSetPrimary(supplierId: string) {
         if (!productId) return;
         setActionLoading(`primary-${supplierId}`);
@@ -119,9 +135,10 @@ export function ProductSupplierSection({
             setActionLoading(null);
         }
     }
+
     async function handleRemove(supplierId: string) {
         if (!productId) return;
-        if (!confirm('Deseas remover este proveedor del producto?')) return;
+        if (!confirm('¿Deseas remover este proveedor del producto?')) return;
         setActionLoading(`remove-${supplierId}`);
         try {
             await suppliersAdminService.removeProductSupplier(productId, supplierId);
@@ -131,6 +148,7 @@ export function ProductSupplierSection({
             setActionLoading(null);
         }
     }
+
     async function handlePriceSave(data: { cost: number; changeReason: string }) {
         if (!productId || !updatingSupplier) return;
         try {
@@ -139,20 +157,21 @@ export function ProductSupplierSection({
                 changeReason: data.changeReason,
             });
             loadLinks();
-        }
-        catch (e) {
-            alert(`Error al actualizar el costo ${e}`);
-        }
-        finally {
+        } catch (e) {
+            console.error('Error al actualizar costo:', e);
+        } finally {
             setUpdatingSupplier(null);
         }
     }
-    // ── Render ────────────────────────────────────────────────────────────
+
     return (
         <div className={styles.section}>
-            {/* ── Dropdown ── */}
+            {/* ── Dropdown de Proveedor Principal ── */}
             <div className={styles.fieldGroup}>
-                <label htmlFor="primary-supplier-select" className={styles.label}>Proveedor Principal</label>
+                <label htmlFor="primary-supplier-select" className={styles.label}>
+                    <i className="bi bi-truck" style={{ marginRight: '8px', color: 'var(--color-primary)' }}></i>
+                    Proveedor Principal
+                </label>
                 <div className={styles.dropdown} ref={dropdownRef}>
                     <button
                         id="primary-supplier-select"
@@ -174,10 +193,10 @@ export function ProductSupplierSection({
                                 role="button"
                                 tabIndex={0}
                             >
-                                <X size={13} />
+                                <i className="bi bi-x-circle"></i>
                             </div>
                         )}
-                        <ChevronDown size={15} className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`} />
+                        <i className={`bi bi-chevron-down ${styles.chevron} ${open ? styles.chevronOpen : ''}`}></i>
                     </button>
                     {open && (
                         <div className={styles.dropdownList}>
@@ -204,7 +223,9 @@ export function ProductSupplierSection({
                                         onClick={() => handleSelect(s.id)}
                                     >
                                         <span className={styles.optionName}>{s.name}</span>
-                                        {s.id === primarySupplierId && <Star size={12} className={styles.activeStar} />}
+                                        {s.id === primarySupplierId && (
+                                            <i className="bi bi-star-fill" style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}></i>
+                                        )}
                                     </button>
                                 ))}
                             </div>
@@ -212,11 +233,15 @@ export function ProductSupplierSection({
                     )}
                 </div>
             </div>
-            {/* ── Primary supplier info (edit mode only) ── */}
+
+            {/* ── Card del Proveedor Principal ── */}
             {primarySupplierId && productId && (
                 <div className={styles.supplierCard}>
                     {linksLoading ? (
-                        <div className={styles.cardLoading}>Cargando datos del proveedor...</div>
+                        <div className={styles.cardLoading}>
+                             <div className={styles.spinner}></div>
+                             <span>Cargando datos del proveedor...</span>
+                        </div>
                     ) : primaryLink ? (
                         <>
                             <div className={styles.cardStats}>
@@ -234,9 +259,9 @@ export function ProductSupplierSection({
                                     <span className={styles.statLabel}>Margen</span>
                                     <span className={`${styles.statValue} ${
                                         primaryLink.cost && primaryLink.currentPrice
-                                            ? (((primaryLink.currentPrice - primaryLink.cost) / primaryLink.cost) * 100) < 10
+                                            ? (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 10
                                                 ? styles.statDanger
-                                                : (((primaryLink.currentPrice - primaryLink.cost) / primaryLink.cost) * 100) < 15
+                                                : (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 15
                                                     ? styles.statWarn
                                                     : styles.statOk
                                             : ''
@@ -253,23 +278,24 @@ export function ProductSupplierSection({
                                     className={styles.actionBtn}
                                     onClick={() => setUpdatingSupplier(primaryLink)}
                                 >
-                                    <DollarSign size={14} /> Actualizar Costo
+                                    <i className="bi bi-currency-dollar"></i> Actualizar Costo
                                 </button>
                                 <button
                                     type="button"
                                     className={`${styles.actionBtn} ${styles.actionBtnGhost}`}
                                     onClick={() => setViewingHistory(primaryLink)}
                                 >
-                                    <TrendingUp size={14} /> Ver Histrico
+                                    <i className="bi bi-graph-up-arrow"></i> Ver Histórico
                                 </button>
                             </div>
                         </>
                     ) : (
-                        <div className={styles.cardLoading}>Proveedor asignado — sin datos de precio an</div>
+                        <div className={styles.cardLoading}>Proveedor asignado — sin datos de precio aún</div>
                     )}
                 </div>
             )}
-            {/* ── Otros Proveedores (edit mode only) ── */}
+
+            {/* ── Tabla de Otros Proveedores ── */}
             {productId && otherLinks.length > 0 && (
                 <div className={styles.otherSection}>
                     <div className={styles.otherTitle}>Otros proveedores asignados</div>
@@ -303,7 +329,7 @@ export function ProductSupplierSection({
                                                     onClick={() => setUpdatingSupplier(link)}
                                                     title="Actualizar costo"
                                                 >
-                                                    <DollarSign size={13} />
+                                                    <i className="bi bi-currency-dollar" style={{ color: 'var(--color-primary)' }}></i>
                                                 </button>
                                                 <button
                                                     type="button"
@@ -312,7 +338,7 @@ export function ProductSupplierSection({
                                                     onClick={() => handleSetPrimary(link.supplierId)}
                                                     title="Establecer como principal"
                                                 >
-                                                    <Star size={13} />
+                                                    <i className="bi bi-star" style={{ color: 'var(--color-accent)' }}></i>
                                                 </button>
                                                 <button
                                                     type="button"
@@ -321,7 +347,7 @@ export function ProductSupplierSection({
                                                     onClick={() => handleRemove(link.supplierId)}
                                                     title="Remover proveedor"
                                                 >
-                                                    <Trash2 size={13} />
+                                                    <i className="bi bi-trash" style={{ color: 'var(--color-error)' }}></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -332,7 +358,8 @@ export function ProductSupplierSection({
                     </div>
                 </div>
             )}
-            {/* ── Modals ── */}
+
+            {/* ── Modales ── */}
             {updatingSupplier && (
                 <PriceUpdateModal
                     productName={productName || updatingSupplier.supplierName}

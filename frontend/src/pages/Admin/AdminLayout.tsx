@@ -21,6 +21,7 @@ interface NavItem {
   label: string;
   to: string;
   icon: string;
+  iconColor?: string; // <-- Propiedad para inyectar el color de la marca
   permission: Permission | null;
   badge: NavBadge;
   children?: NavItem[];
@@ -30,28 +31,32 @@ const navItems: NavItem[] = [
   {
     label: "Dashboard",
     to: "/admin/dashboard",
-    icon: "🏠",
+    icon: "bi bi-house-door",
+    iconColor: "var(--color-accent)", // Dorado/Arena
     permission: null,
     badge: null,
   },
   {
-    label: "Catalogo",
+    label: "Catálogo",
     to: "/admin/productos",
-    icon: "🗂️",
+    icon: "bi bi-box-seam",
+    iconColor: "var(--color-primary)", // Verde Salvia
     permission: null,
     badge: null,
     children: [
       {
-        label: "Producto",
+        label: "Productos",
         to: "/admin/productos",
-        icon: "📦",
+        icon: "bi bi-box",
+        iconColor: "var(--color-primary-light)",
         permission: null,
         badge: "lowStock",
       },
       {
         label: "Categorías",
         to: "/admin/categorias",
-        icon: "🏷️",
+        icon: "bi bi-tags",
+        iconColor: "var(--color-warm-gray)",
         permission: null,
         badge: null,
       },
@@ -60,21 +65,24 @@ const navItems: NavItem[] = [
   {
     label: "Pedidos",
     to: "/admin/pedidos",
-    icon: "🛒",
+    icon: "bi bi-cart3",
+    iconColor: "var(--color-accent)",
     permission: null,
     badge: "pending",
     children: [
       {
         label: "Todos los pedidos",
         to: "/admin/pedidos",
-        icon: "🛒",
+        icon: "bi bi-cart",
+        iconColor: "var(--color-accent)",
         permission: null,
         badge: "pending",
       },
       {
-        label: "⚠️ Sin stock",
+        label: "Sin stock",
         to: "/admin/alertas-sin-stock",
-        icon: "🚨",
+        icon: "bi bi-exclamation-triangle",
+        iconColor: "var(--color-error)", // Rojo suave (Alerta)
         permission: null,
         badge: "outOfStock",
       },
@@ -83,28 +91,32 @@ const navItems: NavItem[] = [
   {
     label: "Marketing",
     to: "/admin/promociones",
-    icon: "📣",
+    icon: "bi bi-megaphone",
+    iconColor: "var(--color-primary)",
     permission: null,
     badge: null,
     children: [
       {
         label: "Promociones",
         to: "/admin/promociones",
-        icon: "🎉",
+        icon: "bi bi-star",
+        iconColor: "var(--color-accent)",
         permission: null,
         badge: null,
       },
       {
         label: "Colecciones",
         to: "/admin/colecciones",
-        icon: "📚",
+        icon: "bi bi-collection",
+        iconColor: "var(--color-primary-light)",
         permission: null,
         badge: null,
       },
       {
         label: "Banners",
         to: "/admin/banners",
-        icon: "🖼️",
+        icon: "bi bi-image",
+        iconColor: "var(--color-warm-gray)",
         permission: null,
         badge: null,
       },
@@ -113,21 +125,24 @@ const navItems: NavItem[] = [
   {
     label: "Reportes",
     to: "/admin/reportes",
-    icon: "📊",
+    icon: "bi bi-bar-chart",
+    iconColor: "var(--color-accent)",
     permission: "reports.view",
     badge: null,
   },
   {
     label: "Proveedores",
     to: "/admin/proveedores",
-    icon: "🏭",
+    icon: "bi bi-truck",
+    iconColor: "var(--color-primary)",
     permission: "suppliers.view",
     badge: null,
   },
   {
     label: "Consultas",
     to: "/admin/contactos",
-    icon: "💬",
+    icon: "bi bi-chat-dots",
+    iconColor: "var(--color-warm-gray)",
     permission: "contacts.view",
     badge: "unreadContacts",
   },
@@ -145,13 +160,8 @@ export function AdminLayout() {
     cancelNavigation,
   } = useUnsavedChanges();
 
-  // Extract badge logic into custom hook
   const { getBadgeCount } = useNavBadges();
-
-  // Extract theme logic into custom hook
   const { theme, setTheme } = useAdminTheme();
-
-  // Extract expandedGroups logic into custom hook
   const { expandedGroups, toggleGroup } = useExpandedNavGroups(navItems);
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -181,7 +191,6 @@ export function AdminLayout() {
     const hasChildren = !!item.children?.length;
     const isExpanded = expandedGroups.has(item.to);
 
-    // Items padre con hijos: botón de toggle (no navega)
     if (hasChildren && level === 0) {
       return (
         <div key={item.to} className={styles.navSection}>
@@ -199,7 +208,9 @@ export function AdminLayout() {
             aria-expanded={isExpanded}
             aria-label={breadcrumbLabel}
           >
-            <span className={styles.navIcon}>{item.icon}</span>
+            <span className={styles.navIcon}>
+              <i className={item.icon} style={{ color: item.iconColor || 'inherit' }}></i>
+            </span>
             <span className={styles.navLabel}>{item.label}</span>
             {locked && <span className={styles.navLockIcon}>🔒</span>}
             {badgeCount !== null && badgeCount > 0 && (
@@ -223,7 +234,6 @@ export function AdminLayout() {
       );
     }
 
-    // Items normales (sin hijos o anidados): NavLink
     return (
       <div key={item.to} className={level > 0 ? styles.navBranch : styles.navSection}>
         <NavLink
@@ -245,7 +255,9 @@ export function AdminLayout() {
           }}
           aria-label={breadcrumbLabel}
         >
-          <span className={styles.navIcon}>{item.icon}</span>
+          <span className={styles.navIcon}>
+            <i className={item.icon} style={{ color: item.iconColor || 'inherit' }}></i>
+          </span>
           <span className={styles.navLabel}>{item.label}</span>
           {locked && <span className={styles.navLockIcon}>🔒</span>}
           {badgeCount !== null && badgeCount > 0 && (
@@ -291,7 +303,6 @@ export function AdminLayout() {
           <span className={styles.brandTag}>Admin</span>
         </div>
 
-        {/* Agrupación: Dark mode + navItems en un solo bloque */}
         <div className={styles.navGroup}>
           <Button
             className={`${styles.darkToggle} ${styles.darkToggleExpanded}`}
@@ -301,8 +312,10 @@ export function AdminLayout() {
             variant="ghost"
           >
             <p className={styles.navItem} style={{ color: '#000', background: 'none', width: 48, height: 32 }}>
-              {theme === 'dark' ? '🌙' : '☀️'}
-
+              <i 
+                className={theme === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill'}
+                style={{ color: theme === 'dark' ? 'var(--color-accent)' : 'var(--color-primary)' }}
+              ></i>
             </p>
           </Button>
           <nav className={styles.nav}>
@@ -315,7 +328,6 @@ export function AdminLayout() {
 
       <main className={styles.main}>
         <AdminHeader />
-        {/* Contenedor relativo para evitar saltos */}
         <div
           className={styles.content}
           style={{ display: "flex", flexDirection: "column" }}

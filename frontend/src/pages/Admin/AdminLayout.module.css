@@ -113,16 +113,9 @@
 .nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-6) var(--space-3);
-  /* Elimina flex-grow para evitar separación excesiva */
-  /* Nuevo contenedor para agrupar darkToggle y nav */
-  display: flex;
-  flex-direction: column;
   gap: 0;
-  margin-top: var(--space-6);
+  margin-top: 20px; 
   margin-bottom: 0;
-  margin-top: 20px; /* Espaciado compacto debajo del darkToggle */
 }
 
 .navGroup {
@@ -148,7 +141,6 @@
   margin-top: 2px;
 }
 
-/* ── Botón de toggle para grupos colapsables ── */
 .navGroupToggle {
   width: 100%;
   background: none;
@@ -164,7 +156,6 @@
   outline-offset: -2px;
 }
 
-/* ── Chevron (›) rotado 90° al abrir ── */
 .navChevron {
   margin-left: auto;
   font-size: 1rem;
@@ -180,7 +171,6 @@
   color: var(--color-accent);
 }
 
-/* ── Contenedor colapsable animado con grid ── */
 .navChildrenCollapsible {
   display: grid;
   grid-template-rows: 0fr;
@@ -251,6 +241,11 @@
   font-weight: var(--font-semibold);
 }
 
+/* Forzamos que el icono se vuelva blanco puro al activar el item */
+.navItemActive .navIcon i {
+  color: var(--color-neutral-light) !important;
+}
+
 .navItemActive:hover {
   background: var(--color-active-mode);
 }
@@ -262,14 +257,11 @@
   flex-shrink: 0;
 }
 
-/* ── Tooltip (CSS Puro) ── */
-
 .navLabel {
   flex: 1;
   transition: opacity 0.3s ease;
 }
 
-/* ── Footer sidebar ── */
 .sidebarFooter {
   padding: var(--space-4) var(--space-5);
   border-top: 1px solid rgba(255,255,255,0.08);
@@ -359,7 +351,6 @@
   transform: rotate(180deg);
 }
 
-/* ── Dropdown Menu ── */
 .dropdown {
   position: absolute;
   bottom: calc(100% + var(--space-2));
@@ -375,14 +366,8 @@
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdownItem {
@@ -422,7 +407,6 @@
   flex-shrink: 0;
 }
 
-/* ── Main content ── */
 .main {
   grid-column: 2;
   grid-row: 1;
@@ -446,7 +430,6 @@
   flex-direction: column;
 }
 
-/* ── Nav locked (sin permiso) ── */
 .navItemLocked {
   cursor: not-allowed;
   opacity: 0.4;
@@ -481,9 +464,8 @@
   flex-shrink: 0;
 }
 
-/* Botón Hamburguesa para Mobile */
 .mobileToggle {
-  display: none; /* Se activa en el media query abajo */
+  display: none; 
   position: fixed;
   top: var(--space-4);
   left: var(--space-4);
@@ -497,7 +479,6 @@
   box-shadow: var(--shadow-md);
 }
 
-/* Capa oscura de fondo para mobile */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -519,7 +500,6 @@
     max-width: 100%;
   }
 
-  /* En mobile, la sidebar siempre es ancha (drawer) */
   .sidebar {
     position: fixed;
     top: 0;
@@ -560,7 +540,6 @@
     display: block;
   }
 
-  /* Cuando el drawer está visible, mostrar todo el contenido */
   .mobileVisible .navLabel,
   .mobileVisible .brandTag,
   .mobileVisible .userName,
@@ -570,7 +549,6 @@
   }
 }
 
-/* ── Toast Notifications (react-hot-toast) ── */
 :global(.react-hot-toast) {
   animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -580,25 +558,13 @@
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes slideOut {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
 }
 
 :global(.react-hot-toast svg) {

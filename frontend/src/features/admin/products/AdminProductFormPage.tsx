@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileText, DollarSign, Tag, Image, Layers, Globe, ArrowLeft, AlertCircle } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { useProductForm } from '../../../hooks/useProductFormPage';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
@@ -22,29 +21,27 @@ interface Props {
     onUnsavedChanges?: (unsaved: boolean) => void;
 }
 
-// ── Section definitions ────────────────────────────────────────────────────
+// ── Section definitions with Bootstrap Icons ────────────────────────────────
 const SECTIONS = [
-    { id: 'basico',     label: 'Básico',           Icon: FileText   },
-    { id: 'precios',    label: 'Precios',           Icon: DollarSign },
-    { id: 'categorias', label: 'Categorías',        Icon: Tag        },
-    { id: 'imagenes',   label: 'Imágenes',          Icon: Image      },
-    { id: 'variantes',  label: 'Variantes',         Icon: Layers     },
-    { id: 'seo',        label: 'SEO / Publicación', Icon: Globe      },
+    { id: 'basico',     label: 'Básico',           icon: 'bi bi-file-earmark-text' },
+    { id: 'precios',    label: 'Precios',           icon: 'bi bi-currency-dollar'   },
+    { id: 'categorias', label: 'Categorías',        icon: 'bi bi-tags'              },
+    { id: 'imagenes',   label: 'Imágenes',          icon: 'bi bi-image'             },
+    { id: 'variantes',  label: 'Variantes',         icon: 'bi bi-layers'            },
+    { id: 'seo',        label: 'SEO / Publicación', icon: 'bi bi-globe'             },
 ] as const;
 
 type SectionId = typeof SECTIONS[number]['id'];
 
-// ── Component ──────────────────────────────────────────────────────────────
 export function AdminProductFormPage({
     productId,
     onBack,
     onSuccess,
     onUnsavedChanges,
 }: Props) {
-    // Ref para el form
     const formRef = React.useRef<HTMLFormElement | null>(null);
 
-    // Track which section is visible for sidebar highlight (IntersectionObserver)
+    // Track which section is visible for sidebar highlight
     const [activeSection, setActiveSection] = React.useState<SectionId>('basico');
     const sectionRefs = useRef<Record<SectionId, HTMLElement | null>>({
         basico: null, precios: null, categorias: null,
@@ -52,37 +49,36 @@ export function AdminProductFormPage({
     });
     const observerRef = useRef<IntersectionObserver | null>(null);
 
-    // All form state + handlers come from the stable hook
     const formProps = useProductForm({
         productId,
         onSuccess,
         onUnsavedChanges,
     });
 
-
-    // Optimized isDirty: compara solo campos relevantes
-    const shallowCompareRelevantFields = React.useCallback((a: typeof formProps.form, b: typeof formProps.form): boolean => {
-        const keys: (keyof typeof formProps.form)[] = [
+    // ── Cálculo de isDirty (Corregido para evitar errores de ESLint) ────────
+    const isDirty = useMemo(() => {
+        const a = formProps.form;
+        const b = formProps.initialForm;
+        
+        const keys: (keyof typeof a)[] = [
             'name', 'slug', 'description', 'shortDescription', 'price',
             'images', 'category', 'categoryIds', 'tags', 'inStock', 'isFeatured', 'sku', 'features', 'stock', 'variants'
         ];
+
         for (const key of keys) {
             const valA = a[key];
             const valB = b[key];
+            
             if (Array.isArray(valA) && Array.isArray(valB)) {
-                if (valA.length !== valB.length || valA.some((v, i) => v !== valB[i])) return false;
+                if (valA.length !== valB.length || valA.some((v, i) => v !== valB[i])) return true;
             } else if (typeof valA === 'object' && valA && valB) {
-                if (JSON.stringify(valA) !== JSON.stringify(valB)) return false;
+                if (JSON.stringify(valA) !== JSON.stringify(valB)) return true;
             } else if (valA !== valB) {
-                return false;
+                return true;
             }
         }
-        return true;
-    }, [formProps]); // stable — pure comparison function needs no deps
-    const isDirty = useMemo(
-        () => !shallowCompareRelevantFields(formProps.form, formProps.initialForm),
-        [formProps.form, formProps.initialForm, shallowCompareRelevantFields]
-    );
+        return false;
+    }, [formProps.form, formProps.initialForm]);
 
     const {
         showWarning,
@@ -95,12 +91,10 @@ export function AdminProductFormPage({
         onConfirmExit: onBack,
     });
 
-    // Sync external isDirty into the hook's internal state so interceptNavigation fires
     useEffect(() => {
         setIsDirty(isDirty);
     }, [isDirty, setIsDirty]);
 
-    // Block in-app SPA navigation when there are unsaved changes
     const blocker = useBlocker(isDirty);
 
     const handleCancel = useCallback(() => {
@@ -114,7 +108,6 @@ export function AdminProductFormPage({
         observerRef.current?.disconnect();
         observerRef.current = new IntersectionObserver(
             entries => {
-                // Pick the topmost intersecting section
                 const visible = entries
                     .filter(e => e.isIntersecting)
                     .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
@@ -138,7 +131,6 @@ export function AdminProductFormPage({
         sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, []);
 
-    // ── Section ref setter factory (stable) ───────────────────────────────
     const setSectionRef = useCallback(
         (id: SectionId) => (el: HTMLElement | null) => {
             sectionRefs.current[id] = el;
@@ -159,7 +151,6 @@ export function AdminProductFormPage({
 
     return (
         <div className={styles.page}>
-            {/* ── Page header ──────────────────────────────────────────────── */}
             <header className={styles.pageHeader}>
                 <div className={styles.pageHeaderInner}>
                     <button
@@ -168,7 +159,7 @@ export function AdminProductFormPage({
                         className={styles.backBtn}
                         aria-label="Volver al listado"
                     >
-                        <ArrowLeft size={14} />
+                        <i className="bi bi-arrow-left" style={{ fontSize: '0.9rem' }}></i>
                         Productos
                     </button>
                     <h1 className={styles.pageTitle}>
@@ -196,29 +187,31 @@ export function AdminProductFormPage({
             </header>
 
             <div className={styles.layout}>
-                {/* ── Sticky sidebar nav ───────────────────────────────────── */}
                 <nav className={styles.sidebar} aria-label="Secciones del formulario">
                     <ul className={styles.sidebarList}>
                         {SECTIONS.map(section => {
                             const hasError = sectionErrors[section.id as keyof typeof sectionErrors];
+                            const isActive = activeSection === section.id;
                             return (
                                 <li key={section.id}>
                                     <button
                                         type="button"
-                                        className={`${styles.sidebarItem} ${activeSection === section.id ? styles.sidebarItemActive : ''}`}
+                                        className={`${styles.sidebarItem} ${isActive ? styles.sidebarItemActive : ''}`}
                                         onClick={() => scrollToSection(section.id)}
                                     >
-                                        <section.Icon
-                                            size={15}
-                                            className={styles.sidebarIcon}
-                                            strokeWidth={activeSection === section.id ? 2.5 : 1.8}
+                                        <i 
+                                            className={`${section.icon} ${styles.sidebarIcon}`} 
+                                            style={{ 
+                                                color: isActive ? 'white' : 'var(--color-primary)',
+                                                fontSize: '1.1rem'
+                                            }}
                                         />
                                         <span className={styles.sidebarLabel}>{section.label}</span>
                                         {hasError && (
-                                            <AlertCircle
-                                                size={13}
-                                                className={styles.errorDotIcon}
-                                                aria-label="Sección con errores"
+                                            <i 
+                                                className="bi bi-exclamation-circle-fill" 
+                                                style={{ color: 'var(--color-error)', marginLeft: 'auto', fontSize: '0.8rem' }}
+                                                title="Sección con errores"
                                             />
                                         )}
                                     </button>
@@ -227,7 +220,6 @@ export function AdminProductFormPage({
                         })}
                     </ul>
 
-                    {/* Progress indicator */}
                     <div className={styles.sidebarProgress}>
                         <div
                             className={styles.sidebarProgressBar}
@@ -238,24 +230,15 @@ export function AdminProductFormPage({
                     </div>
                 </nav>
 
-                {/* ── Scrollable form content ──────────────────────────────── */}
-                {/* NOTE: form wraps all sections so a single onSubmit handles Enter key.
-            Sections are always rendered (no conditional mount) — this is what
-            keeps inputs stable across "tab" switches. */}
                 <form
                     ref={formRef}
                     className={styles.content}
                     onSubmit={formProps.handleSubmit}
                     noValidate
                 >
-                    {/* ── Básico ─────────────────────────────────────────────── */}
-                    <section
-                        id="basico"
-                        ref={setSectionRef('basico')}
-                        className={styles.section}
-                    >
+                    <section id="basico" ref={setSectionRef('basico')} className={styles.section}>
                         <h2 className={styles.sectionTitle}>
-                            <FileText size={17} strokeWidth={1.8} /> Información básica
+                            <legend >Información Básica</legend>
                         </h2>
                         <TabBasico
                             form={formProps.form}
@@ -281,14 +264,9 @@ export function AdminProductFormPage({
                         />
                     </section>
 
-                    {/* ── Precios ────────────────────────────────────────────── */}
-                    <section
-                        id="precios"
-                        ref={setSectionRef('precios')}
-                        className={styles.section}
-                    >
+                    <section id="precios" ref={setSectionRef('precios')} className={styles.section}>
                         <h2 className={styles.sectionTitle}>
-                            <DollarSign size={17} strokeWidth={1.8} /> Precios e inventario
+                            <legend >Precio y stock</legend>
                         </h2>
                         <TabPreciosInventario
                             form={formProps.form}
@@ -298,14 +276,9 @@ export function AdminProductFormPage({
                         />
                     </section>
 
-                    {/* ── Categorías ─────────────────────────────────────────── */}
-                    <section
-                        id="categorias"
-                        ref={setSectionRef('categorias')}
-                        className={styles.section}
-                    >
+                    <section id="categorias" ref={setSectionRef('categorias')} className={styles.section}>
                         <h2 className={styles.sectionTitle}>
-                            <Tag size={17} strokeWidth={1.8} /> Categorías
+                            <legend >Categorías</legend>
                         </h2>
                         <TabCategorias
                             form={formProps.form}
@@ -320,14 +293,9 @@ export function AdminProductFormPage({
                         />
                     </section>
 
-                    {/* ── Imágenes ───────────────────────────────────────────── */}
-                    <section
-                        id="imagenes"
-                        ref={setSectionRef('imagenes')}
-                        className={styles.section}
-                    >
+                    <section id="imagenes" ref={setSectionRef('imagenes')} className={styles.section}>
                         <h2 className={styles.sectionTitle}>
-                            <Image size={17} strokeWidth={1.8} /> Imágenes
+                            <legend >Imágenes</legend>
                         </h2>
                         <TabImagenes
                             isEdit={formProps.isEdit}
@@ -354,14 +322,9 @@ export function AdminProductFormPage({
                         />
                     </section>
 
-                    {/* ── Variantes ──────────────────────────────────────────── */}
-                    <section
-                        id="variantes"
-                        ref={setSectionRef('variantes')}
-                        className={styles.section}
-                    >
+                    <section id="variantes" ref={setSectionRef('variantes')} className={styles.section}>
                         <h2 className={styles.sectionTitle}>
-                            <Layers size={17} strokeWidth={1.8} /> Variantes
+                            <legend >Variantes</legend>
                         </h2>
                         <TabVariantes
                             form={formProps.form}
@@ -379,14 +342,9 @@ export function AdminProductFormPage({
                         />
                     </section>
 
-                    {/* ── SEO ────────────────────────────────────────────────── */}
-                    <section
-                        id="seo"
-                        ref={setSectionRef('seo')}
-                        className={styles.section}
-                    >
+                    <section id="seo" ref={setSectionRef('seo')} className={styles.section}>
                         <h2 className={styles.sectionTitle}>
-                            <Globe size={17} strokeWidth={1.8} /> SEO / Publicación
+                            <legend>SEO / Publicación</legend>
                         </h2>
                         <TabSEOPublicacion
                             form={formProps.form}
@@ -396,14 +354,13 @@ export function AdminProductFormPage({
                         />
                     </section>
 
-                    {/* ── Global error ───────────────────────────────────────── */}
                     {error && (
                         <div className={styles.globalError} role="alert">
+                            <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: '8px' }}></i>
                             {error}
                         </div>
                     )}
 
-                    {/* ── Bottom submit bar ──────────────────────────────────── */}
                     <div className={styles.bottomBar}>
                         <button
                             type="button"

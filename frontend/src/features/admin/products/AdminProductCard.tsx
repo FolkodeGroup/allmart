@@ -1,5 +1,3 @@
-
-
 import React, { memo } from 'react';
 import { ProductCardCheckbox } from '../../../components/ui/ProductCardCheckbox';
 import { ProductCardImage } from '../../../components/ui/ProductCardImage';
@@ -50,7 +48,6 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = memo(({
   onSelectChange,
   showCheckbox = false,
 }) => {
-
   return (
     <section
       className={styles.card}
@@ -91,4 +88,3 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = memo(({
 });
 
 AdminProductCard.displayName = 'AdminProductCard';
-
