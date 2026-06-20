@@ -471,11 +471,13 @@ model Banner {
   sizeBytes        Int      @map("size_bytes")
   altText          String?  @map("alt_text") @db.VarChar(500)
   displayOrder     Int      @default(0) @map("display_order")
+  isPinned         Boolean  @default(false) @map("is_pinned")
   isActive         Boolean  @default(true) @map("is_active")
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([isActive], map: "idx_banners_is_active")
+  @@index([isPinned], map: "idx_banners_is_pinned")
   @@index([displayOrder], map: "idx_banners_display_order")
   @@map("banners")
 }
