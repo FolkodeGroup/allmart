@@ -359,6 +359,127 @@
     transition: color 0.15s;
 }
 
+.combinationsSection {
+    margin-top: var(--space-5);
+}
+
+.combinationsToolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--space-3);
+}
+
+.addCombinationBtn {
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.12s ease;
+}
+
+.addCombinationBtn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.addCombinationBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+}
+
+.modal {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 720px;
+    padding: 1.25rem;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.fieldRow {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.fieldRow label {
+    width: 150px;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.fieldRow input,
+.fieldRow select {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-bg-primary);
+}
+
+.imageUploaderContainer {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5rem;
+}
+
+.modalActions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.modalActions button {
+    padding: 0.55rem 0.9rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.modalActions button[type="button"] {
+    background: transparent;
+    border: 1px solid var(--color-border-light);
+    color: var(--color-text-primary);
+}
+
+.modalActions button[type="submit"] {
+    background: var(--color-primary-dark);
+    color: #fff;
+}
+
+.inputError {
+    border-color: var(--color-danger, #dc2626) !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.06);
+}
+
+.errorText {
+    color: var(--color-danger, #dc2626);
+    font-size: 0.875rem;
+    margin: 0 0 0.5rem 150px;
+}
+
+.help {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+}
+
 .removeBtn:hover {
     color: var(--color-error);
 }

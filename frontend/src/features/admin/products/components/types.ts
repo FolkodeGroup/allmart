@@ -44,6 +44,8 @@ export interface TabPreciosInventarioProps extends TabFormState {
 export interface TabVariantesProps extends TabFormState {
     errors?: Record<string, string>;
     setField: SetField;
+    productId: string | null;
+    isEdit: boolean;
     newGroupName: string;
     setNewGroupName: (v: string) => void;
     newGroupValues: Record<string, string>;

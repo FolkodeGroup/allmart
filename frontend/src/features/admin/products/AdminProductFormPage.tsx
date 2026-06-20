@@ -59,7 +59,7 @@ export function AdminProductFormPage({
     const isDirty = useMemo(() => {
         const a = formProps.form;
         const b = formProps.initialForm;
-        
+
         const keys: (keyof typeof a)[] = [
             'name', 'slug', 'description', 'shortDescription', 'price',
             'images', 'category', 'categoryIds', 'tags', 'inStock', 'isFeatured', 'sku', 'features', 'stock', 'variants'
@@ -68,7 +68,7 @@ export function AdminProductFormPage({
         for (const key of keys) {
             const valA = a[key];
             const valB = b[key];
-            
+
             if (Array.isArray(valA) && Array.isArray(valB)) {
                 if (valA.length !== valB.length || valA.some((v, i) => v !== valB[i])) return true;
             } else if (typeof valA === 'object' && valA && valB) {
@@ -199,17 +199,17 @@ export function AdminProductFormPage({
                                         className={`${styles.sidebarItem} ${isActive ? styles.sidebarItemActive : ''}`}
                                         onClick={() => scrollToSection(section.id)}
                                     >
-                                        <i 
-                                            className={`${section.icon} ${styles.sidebarIcon}`} 
-                                            style={{ 
+                                        <i
+                                            className={`${section.icon} ${styles.sidebarIcon}`}
+                                            style={{
                                                 color: isActive ? 'white' : 'var(--color-primary)',
                                                 fontSize: '1.1rem'
                                             }}
                                         />
                                         <span className={styles.sidebarLabel}>{section.label}</span>
                                         {hasError && (
-                                            <i 
-                                                className="bi bi-exclamation-circle-fill" 
+                                            <i
+                                                className="bi bi-exclamation-circle-fill"
                                                 style={{ color: 'var(--color-error)', marginLeft: 'auto', fontSize: '0.8rem' }}
                                                 title="Sección con errores"
                                             />
@@ -330,6 +330,7 @@ export function AdminProductFormPage({
                             form={formProps.form}
                             fieldErrors={formProps.fieldErrors}
                             isEdit={formProps.isEdit}
+                            productId={productId}
                             setField={formProps.setField}
                             newGroupName={formProps.newGroupName}
                             setNewGroupName={formProps.setNewGroupName}
