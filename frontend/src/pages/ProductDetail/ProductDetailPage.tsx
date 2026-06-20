@@ -289,19 +289,11 @@ export function ProductDetailPage() {
         product: {
           ...product,
           id: `${product.id}::original`,
+          selectedAttributes: {},
         },
         quantity,
       });
     } else {
-      // Combinación seleccionada
-      const variantValues = selectedSku
-        ? Object.values(selectedSku.attributes || {}).filter(Boolean)
-        : Object.values(selectedVariants).filter(Boolean);
-
-      const nameWithVariants = variantValues.length > 0
-        ? `${product.name} + ${variantValues.join(' ')}`
-        : product.name;
-
       const imagesForCart =
         selectedSku && Array.isArray(selectedSku.images) && selectedSku.images.length > 0
           ? selectedSku.images
@@ -315,16 +307,18 @@ export function ProductDetailPage() {
         ? {
           ...product,
           id: cartProductId,
-          name: nameWithVariants,
+          name: product.name,
           sku: selectedSku.sku,
           price: selectedSku.price ?? product.price,
           images: imagesForCart,
+          selectedAttributes: selectedSku.attributes ?? {},
         }
         : {
           ...product,
           id: cartProductId,
-          name: nameWithVariants,
+          name: product.name,
           images: imagesForCart,
+          selectedAttributes: selectedVariants,
         };
 
       addToCart({ product: productForCart, quantity });

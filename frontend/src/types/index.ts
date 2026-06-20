@@ -22,6 +22,7 @@ export interface Product {
   isFeatured?: boolean;
   primarySupplierId?: string | null;
   skus?: Array<{ id: string; sku: string; attributes: Record<string, string>; stock: number; price?: number; images?: string[] }>
+  selectedAttributes?: Record<string, string>;
 }
 
 export interface Category {
