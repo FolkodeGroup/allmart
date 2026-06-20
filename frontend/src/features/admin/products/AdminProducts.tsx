@@ -21,6 +21,7 @@ import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductHeader } from '../../../components/ui/ProductHeader';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { ProductFilters } from '../../../components/ui/ProductFilters';
+import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 
 // Styles
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -67,6 +68,10 @@ export function AdminProducts() {
   // PDF export
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [exportLoadingFormat, setExportLoadingFormat] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
+
+  // Initial Load State
+  const isFirstRender = useRef(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // ─── Auto-open edit form if 'edit' param is present ───────────────────────
   useEffect(() => {
@@ -190,13 +195,9 @@ export function AdminProducts() {
 
   // Search & filter
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // If there's an active search we fetch a larger page and perform
-      // client-side filtering to ensure matches only by name/SKU (backend
-      // may search descriptions or split words). Otherwise use normal
-      // paginated fetch.
+    const executeFetch = async () => {
       if (search && search.trim().length > 0) {
-        refreshProducts({
+        await refreshProducts({
           categoryId: categoryFilter,
           status: statusFilter,
           stockLevel: stockLevelFilter,
@@ -204,7 +205,7 @@ export function AdminProducts() {
           limit: 500,
         });
       } else {
-        refreshProducts({
+        await refreshProducts({
           q: search,
           categoryId: categoryFilter,
           status: statusFilter,
@@ -213,13 +214,19 @@ export function AdminProducts() {
           limit: 10,
         });
       }
-    }, 400);
+    };
+
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      executeFetch().finally(() => setIsInitialLoad(false));
+      return;
+    }
+
+    const timer = setTimeout(executeFetch, 400);
     return () => clearTimeout(timer);
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
   const handlePageChange = useCallback((newPage: number) => {
-    // When searching we kept a larger limit to allow client-side filtering;
-    // keep same behaviour when paginating without active search.
     if (search && search.trim().length > 0) {
       refreshProducts({
         categoryId: categoryFilter,
@@ -240,9 +247,7 @@ export function AdminProducts() {
     }
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
-  // Client-side filtering: only match by name or SKU to avoid matches on
-  // description or splitted words. This ensures the search behaves as
-  // expected regardless of backend search logic.
+  // Client-side filtering: only match by name or SKU
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return products;
@@ -274,7 +279,7 @@ export function AdminProducts() {
     });
 
     return ordered;
-  }, [products, sortField, sortDirection]);
+  }, [filteredProducts, sortField, sortDirection]);
 
   // === FORM/EDIT HANDLERS ===
 
@@ -300,7 +305,7 @@ export function AdminProducts() {
     }
   }, [unsavedChanges, interceptNavigation, apiPage]);
 
-  // Solicitar confirmación de eliminación (usado en el listado)
+  // Solicitar confirmación de eliminación
   const handleDelete = useCallback((id: string) => {
     const productToDelete = products.find(p => p.id === id);
     if (productToDelete) {
@@ -326,7 +331,7 @@ export function AdminProducts() {
 
     setIsDeleting(true);
     try {
-      deleteProduct(productToDelete.id);
+      await deleteProduct(productToDelete.id);
       toast.success('Producto eliminado con éxito');
       setShowDeleteModal(false);
       setProductToDelete(null);
@@ -371,91 +376,100 @@ export function AdminProducts() {
             total={total}
           />
 
-          {!loading && !error && products.length > 0 && (
-            <div className={styles.actionsBar}>
-              <div className={styles.exportBtnContainer}>
-                <ExportButtons
-                  onExportCSV={handleExportCSV}
-                  onExportExcel={handleExportExcel}
-                  onExportPDF={handleExportPdf}
-                  loading={exportLoadingFormat ?? (isExportingPdf ? 'pdf' : null)}
-                />
-              </div>
-
-              <div className={styles.sortContainer}>
-                <div className={styles.sortControls}>
-                  <span className={styles.sortLabel}>Ordenar:</span>
-                  <select
-                    value={sortField}
-                    onChange={(e) => setSortField(e.target.value as ProductSortField)}
-                    className={styles.sortSelect}
-                  >
-                    <option value="name">Nombre</option>
-                    <option value="sku">SKU</option>
-                    <option value="category">Categoría</option>
-                  </select>
-                  <button
-                    onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                    className={styles.sortButton}
-                    title={`Ordenar ${sortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
-                    type="button"
-                  >
-                    {sortDirection === 'asc' ? '▲' : '▼'}
-                  </button>
-                </div>
-              </div>
+          {isInitialLoad ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+              <LoadingSpinner message="Cargando productos..." size="lg" />
             </div>
-          )}
+          ) : (
+            <>
+              {/* Acciones mostradas incluso si está cargando, si hay productos en el render actual */}
+              {!error && (products.length > 0 || loading) && (
+                <div className={styles.actionsBar} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                  <div className={styles.exportBtnContainer}>
+                    <ExportButtons
+                      onExportCSV={handleExportCSV}
+                      onExportExcel={handleExportExcel}
+                      onExportPDF={handleExportPdf}
+                      loading={exportLoadingFormat ?? (isExportingPdf ? 'pdf' : null)}
+                    />
+                  </div>
 
-          {!loading && error && (
-            <EmptyState
-              icon={<AlertCircle size={48} color="#ef4444" />}
-              title="Error al cargar productos"
-              description={error}
-              action={{ label: 'Reintentar', onClick: () => window.location.reload() }}
-            />
-          )}
+                  <div className={styles.sortContainer}>
+                    <div className={styles.sortControls}>
+                      <span className={styles.sortLabel}>Ordenar:</span>
+                      <select
+                        value={sortField}
+                        onChange={(e) => setSortField(e.target.value as ProductSortField)}
+                        className={styles.sortSelect}
+                      >
+                        <option value="name">Nombre</option>
+                        <option value="sku">SKU</option>
+                        <option value="category">Categoría</option>
+                      </select>
+                      <button
+                        onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                        className={styles.sortButton}
+                        title={`Ordenar ${sortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
+                        type="button"
+                      >
+                        {sortDirection === 'asc' ? '▲' : '▼'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-          {!loading && !error && products.length === 0 && (
-            <EmptyState
-              icon={<PackageSearch size={48} color="#94a3b8" />}
-              title="No se encontraron productos"
-              description={
-                search || categoryFilter
-                  ? 'Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás.'
-                  : 'Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!'
-              }
-              action={
-                can('products.create')
-                  ? { label: 'Nuevo Producto', onClick: handleNew }
-                  : undefined
-              }
-            />
-          )}
-
-          {!loading && !error && products.length > 0 && (
-            <div className={styles.contentArea}>
-              <MasterDetailLayout
-                products={sortedProducts}
-                loading={loading}
-                error={error}
-                onEdit={can('products.edit') ? handleEdit : undefined}
-                onDelete={can('products.delete') ? handleDelete : undefined}
-                onDeleteDirect={can('products.delete') ? handleDirectDelete : undefined}
-                canEdit={can('products.edit')}
-                canDelete={can('products.delete')}
-                defaultSelectedProductId={editId || undefined}
-              />
-
-              {total > 10 && (
-                <AdminPagination
-                  page={apiPage}
-                  totalPages={apiTotalPages}
-                  onPageChange={handlePageChange}
-                  ariaLabel="Paginación de productos"
+              {!loading && error && (
+                <EmptyState
+                  icon={<AlertCircle size={48} color="#ef4444" />}
+                  title="Error al cargar productos"
+                  description={error}
+                  action={{ label: 'Reintentar', onClick: () => window.location.reload() }}
                 />
               )}
-            </div>
+
+              {!loading && !error && products.length === 0 && (
+                <EmptyState
+                  icon={<PackageSearch size={48} color="#94a3b8" />}
+                  title="No se encontraron productos"
+                  description={
+                    search || categoryFilter
+                      ? 'Probá ajustando los filtros o la búsqueda para encontrar lo que necesitás.'
+                      : 'Todavía no cargaste ningún producto al catálogo. ¡Empezá ahora!'
+                  }
+                  action={
+                    can('products.create')
+                      ? { label: 'Nuevo Producto', onClick: handleNew }
+                      : undefined
+                  }
+                />
+              )}
+
+              {!error && (products.length > 0 || loading) && (
+                <div className={styles.contentArea} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                  <MasterDetailLayout
+                    products={sortedProducts}
+                    loading={loading && products.length === 0}
+                    error={error}
+                    onEdit={can('products.edit') ? handleEdit : undefined}
+                    onDelete={can('products.delete') ? handleDelete : undefined}
+                    onDeleteDirect={can('products.delete') ? handleDirectDelete : undefined}
+                    canEdit={can('products.edit')}
+                    canDelete={can('products.delete')}
+                    defaultSelectedProductId={editId || undefined}
+                  />
+
+                  {total > 10 && (
+                    <AdminPagination
+                      page={apiPage}
+                      totalPages={apiTotalPages}
+                      onPageChange={handlePageChange}
+                      ariaLabel="Paginación de productos"
+                    />
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           {showWarning && (
@@ -492,7 +506,6 @@ export function AdminProducts() {
             setEditId(null);
           }}
           onSuccess={() => {
-            // Keep editId to maintain product selection after save
             setViewMode('list');
             setUnsavedChanges(false);
             refreshProducts({
