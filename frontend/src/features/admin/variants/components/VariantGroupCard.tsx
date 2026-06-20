@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Tooltip from '@mui/material/Tooltip';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, MoreVertical } from 'lucide-react';
 import { VariantValueChip } from './VariantValueChip';
 import styles from '../AdminVariants.module.css';
 
 import type { VariantGroup } from '../../../../context/AdminVariantsContext';
 
-type VariantValue = string | { id?: string; label?: string; [key: string]: unknown };
+type VariantValue = string | { id?: string; label?: string;[key: string]: unknown };
 
 const getVariantValueKey = (value: VariantValue): string => {
   if (typeof value === 'string') return value;
@@ -64,6 +64,30 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(group.name);
   const [editError, setEditError] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar menú al hacer clic afuera
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
+
+  // Cerrar menú con Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [menuOpen]);
 
   const startEdit = () => {
     if (!canEdit) return;
@@ -105,6 +129,12 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
     if (e.key === 'Enter') handleAddValue();
   };
 
+  // Helper: ejecutar acción del menú y cerrarlo
+  const menuAction = (fn: () => void) => {
+    fn();
+    setMenuOpen(false);
+  };
+
   return (
     <div className={`${styles.groupCard} fadeIn slideUpIn microHover`} style={{ willChange: 'opacity, transform' }}>
       {/* Header del grupo */}
@@ -126,7 +156,11 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
             {editError && <div className={styles.errorText}>{editError}</div>}
           </div>
         ) : (
-          <Tooltip title={canEdit ? 'Hacer clic para editar el nombre del grupo de variantes' : 'No tienes permisos para editar'} placement="top" arrow>
+          <Tooltip
+            title={canEdit ? 'Clic para editar el nombre' : 'Sin permisos de edición'}
+            placement="top"
+            arrow
+          >
             <button
               className={styles.groupName}
               onClick={startEdit}
@@ -134,7 +168,11 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
               style={canEdit ? undefined : { cursor: 'default' }}
             >
               {group.values.length === 0 && (
-                <Tooltip title="Esta variante no tiene valores definidos. Agrega valores para completarla." placement="top" arrow>
+                <Tooltip
+                  title="Sin valores definidos. Agregá valores para completar esta variante."
+                  placement="top"
+                  arrow
+                >
                   <span className={styles.incompleteIndicator}>
                     <AlertTriangle size={16} />
                   </span>
@@ -145,48 +183,104 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
             </button>
           </Tooltip>
         )}
-        <div className={styles.groupActions}>
-          <Tooltip title="Editar grupo (avanzado)" placement="top" arrow>
+
+        {/* Menú de tres puntos */}
+        <div className={styles.groupActionsMenu} ref={menuRef}>
+          <Tooltip title="Más acciones" placement="top" arrow>
             <button
-              className={styles.editGroupBtn}
-              onClick={() => onOpenEditModal(group.id)}
+              className={`${styles.menuTriggerBtn} ${menuOpen ? styles.menuTriggerActive : ''}`}
               type="button"
+              onClick={() => setMenuOpen(prev => !prev)}
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
             >
-              🛠️
+              <MoreVertical size={20} />
             </button>
           </Tooltip>
-          <Tooltip title="Duplicar grupo de variantes" placement="top" arrow>
-            <button
-              className={styles.duplicateGroupBtn}
-              onClick={() => onDuplicate(group)}
-              type="button"
-            >
-              ⧉
-            </button>
-          </Tooltip>
-          <Tooltip title={group.isActive ? 'Desactivar variante' : 'Activar variante'} placement="top" arrow>
-            <button
-              className={`${styles.statusToggleBtn} ${group.isActive ? styles.statusActive : styles.statusInactive}`}
-              onClick={() => onToggleStatus(group.id, !group.isActive)}
-              type="button"
-            >
-              {group.isActive ? '✓' : '✕'}
-            </button>
-          </Tooltip>
-          {canDelete && (
-            <Tooltip title="Eliminar este grupo de variantes y todos sus valores asociados" placement="top" arrow>
+
+          {menuOpen && (
+            <div className={styles.actionsDropdown} role="menu">
+              {/* Toggle estado */}
               <button
-                className={styles.deleteGroupBtn}
-                onClick={() => onDelete(group.id)}
+                className={styles.dropdownItem}
                 type="button"
+                role="menuitem"
+                onClick={() => menuAction(() => onToggleStatus(group.id, !group.isActive))}
               >
-                🗑️
+                <span className={group.isActive ? styles.dotActive : styles.dotInactive} />
+                {group.isActive ? 'Desactivar variante' : 'Activar variante'}
               </button>
-            </Tooltip>
+
+              {/* Editar avanzado */}
+              <button
+                className={styles.dropdownItem}
+                type="button"
+                role="menuitem"
+                onClick={() => menuAction(() => onOpenEditModal(group.id))}
+              >
+                🛠️ Editar (avanzado)
+              </button>
+
+              {/* Duplicar */}
+              <button
+                className={styles.dropdownItem}
+                type="button"
+                role="menuitem"
+                onClick={() => menuAction(() => onDuplicate(group))}
+              >
+                ⧉ Duplicar grupo
+              </button>
+
+              {/* Separador antes de eliminar */}
+              {canDelete && <div className={styles.dropdownDivider} />}
+
+              {/* Eliminar */}
+              {canDelete && (
+                <button
+                  className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => menuAction(() => onDelete(group.id))}
+                >
+                  🗑️ Eliminar grupo
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
 
+
+
+      {/* Input para agregar valor */}
+      {canEdit && (
+        <div className={styles.addValueSection}>
+          <div className={`${styles.addValueRow} ${error ? styles.addValueRowError : ''}`}>
+            <input
+              className={styles.valueInput}
+              type="text"
+              placeholder={`Agregar valor a ${group.name}...`}
+              value={newValue}
+              onChange={e => {
+                setNewValue(e.target.value);
+                setIsDirty?.(true);
+              }}
+              onKeyDown={handleValueKeyDown}
+            />
+            <div className={styles.addValueDivider} />
+            <Tooltip title={`Agregar valor al grupo "${group.name}"`} placement="top" arrow>
+              <button
+                className={styles.addValueBtn}
+                type="button"
+                onClick={handleAddValue}
+              >
+                ＋
+              </button>
+            </Tooltip>
+          </div>
+          {error && <span className={styles.errorText}>{error}</span>}
+        </div>
+      )}
       {/* Valores / chips */}
       <div className={styles.valuesContainer}>
         {group.values.length === 0 && (
@@ -203,35 +297,6 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
           />
         ))}
       </div>
-
-      {/* Input para agregar valor */}
-      {canEdit && (
-        <div className={styles.addValueSection}>
-          <div className={styles.addValueRow}>
-            <input
-              className={`${styles.valueInput} ${error ? styles.inputError : ''}`}
-              type="text"
-              placeholder={`Agregar valor a ${group.name}...`}
-              value={newValue}
-              onChange={e => {
-                setNewValue(e.target.value);
-                setIsDirty?.(true);
-              }}
-              onKeyDown={handleValueKeyDown}
-            />
-            <Tooltip title={`Agregar un nuevo valor al grupo "${group.name}"`} placement="top" arrow>
-              <button
-                className={styles.addValueBtn}
-                type="button"
-                onClick={handleAddValue}
-              >
-                ＋
-              </button>
-            </Tooltip>
-          </div>
-          {error && <span className={styles.errorText}>{error}</span>}
-        </div>
-      )}
     </div>
   );
 };

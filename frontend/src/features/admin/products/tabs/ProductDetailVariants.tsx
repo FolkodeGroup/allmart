@@ -9,9 +9,8 @@ import { useAdminVariants } from '../../../../context/AdminVariantsContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
 import { VariantForm } from '../../variants/components/VariantForm';
-import { VariantHeader } from '../../variants/components/VariantHeader';
 import { VariantEditModal } from '../../variants/components/VariantEditModal';
-
+import { CombinationsTable } from '../../variants/components/CombinationTable';
 
 interface ProductDetailVariantsProps {
   productId: string;
@@ -305,10 +304,21 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   return (
     <div className={styles.container}>
+      {/* ── 1. Opciones del producto ── */}
       <section className={styles.section}>
-        {product && (
+
+        {/*{product && (
           <VariantHeader selectedProduct={product} groupCount={variants.length} />
-        )}
+        )}*/}
+        <div className={styles.sectionHeading}>
+          <span className={styles.sectionStep}>1</span>
+          <div>
+            <h2 className={styles.sectionTitle}>Opciones del producto</h2>
+            <p className={styles.sectionDesc}>
+              Definí los grupos de variantes (ej. Color, Talle) y sus valores posibles.
+            </p>
+          </div>
+        </div>
         <VariantForm
           newGroupName={newGroupName}
           setNewGroupName={setNewGroupName}
@@ -341,123 +351,120 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           onClose={() => setEditModal({ open: false, groupId: null })}
           onSave={handleSaveEditModal}
         />
-        <div style={{ marginTop: 16 }}>
-          <button type="button" onClick={openCombinationModal} className={styles.addCombinationBtn}>
-            Añadir Nueva Combinación
+      </section>
+
+      {/* ── 2. Combinaciones ── */}
+      <section className={styles.section}>
+        <div className={styles.sectionHeading}>
+          <span className={styles.sectionStep}>2</span>
+          <div>
+            <h2 className={styles.sectionTitle}>Combinaciones</h2>
+            <p className={styles.sectionDesc}>
+              Cada combinación es un SKU vendible con su precio, stock e imágenes propias.
+            </p>
+          </div>
+        </div>
+
+        <div className={styles.combinationsToolbar}>
+          <button
+            type="button"
+            onClick={openCombinationModal}
+            className={styles.addCombinationBtn}
+          >
+            + Nueva combinación
           </button>
         </div>
 
-        {combinationModalOpen && (
-          <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
-            <div className={styles.modal}>
-              <h3>{editingSkuId ? 'Editar combinación' : 'Añadir combinación'}</h3>
-              {variants.length === 0 && <p className={styles.help}>No hay grupos de variantes para seleccionar.</p>}
-              {variants.map((g) => (
-                <div key={g.id} className={styles.fieldRow}>
-                  <label>{g.name}</label>
-                  <select value={combinationAttrs[g.name] ?? ''} onChange={e => setCombinationAttrs(a => ({ ...a, [g.name]: e.target.value }))}>
-                    <option value="">--</option>
-                    {g.values.map(v => <option key={v} value={v}>{v}</option>)}
-                  </select>
-                </div>
-              ))}
-              <div className={styles.fieldRow}>
-                <label htmlFor="combination-sku">SKU</label>
-                <input
-                  id="combination-sku"
-                  value={combinationSku}
-                  onChange={e => {
-                    setCombinationSku(e.target.value);
-                    // realtime validate
-                    runCombinationValidation();
-                  }}
-                  onBlur={() => runCombinationValidation()}
-                  className={combinationErrors.sku ? styles.inputError : ''}
+        <CombinationsTable
+          skus={skus}
+          localCombinations={createdCombinations}
+          onEdit={handleEditCombination}
+          onDelete={handleDeleteCombination}
+        />
+      </section>
+
+      {/* ── Modal de combinación (sin cambios) ── */}
+      {combinationModalOpen && (
+        <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
+          <div className={styles.modal}>
+            <h3>{editingSkuId ? 'Editar combinación' : 'Añadir combinación'}</h3>
+            {variants.length === 0 && (
+              <p className={styles.help}>No hay grupos de variantes para seleccionar.</p>
+            )}
+            {variants.map((g) => (
+              <div key={g.id} className={styles.fieldRow}>
+                <label>{g.name}</label>
+                <select
+                  value={combinationAttrs[g.name] ?? ''}
+                  onChange={e => setCombinationAttrs(a => ({ ...a, [g.name]: e.target.value }))}
+                >
+                  <option value="">--</option>
+                  {g.values.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+            ))}
+            <div className={styles.fieldRow}>
+              <label htmlFor="combination-sku">SKU</label>
+              <input
+                id="combination-sku"
+                value={combinationSku}
+                onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
+                onBlur={() => runCombinationValidation()}
+                className={combinationErrors.sku ? styles.inputError : ''}
+              />
+            </div>
+            {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
+            <div className={styles.fieldRow}>
+              <label htmlFor="combination-images">Imágenes</label>
+              <div className={styles.imageUploaderContainer}>
+                <ImageUploader onAddFiles={(f: File[]) => addFiles(f)} />
+                <ImagePreviewList
+                  items={uploadedFiles}
+                  onRemove={(id: string) => removeFile(id)}
+                  onRetry={(id: string) => retry(id)}
+                  onSetPrimary={(id: string) => setPrimary(id)}
                 />
               </div>
-              {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
-              <div className={styles.fieldRow}>
-                <label htmlFor="combination-images">Imágenes</label>
-                <div className={styles.imageUploaderContainer}>
-                  <ImageUploader onAddFiles={(f: File[]) => addFiles(f)} />
-                  <ImagePreviewList items={uploadedFiles} onRemove={(id: string) => removeFile(id)} onRetry={(id: string) => retry(id)} onSetPrimary={(id: string) => setPrimary(id)} />
-                </div>
-              </div>
-              {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
-              <div className={styles.fieldRow}>
-                <label htmlFor="combination-price">Precio</label>
-                <input
-                  id="combination-price"
-                  type="number"
-                  step="0.01"
-                  value={combinationPrice === '' ? '' : String(combinationPrice)}
-                  onChange={e => {
-                    setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
-                    runCombinationValidation();
-                  }}
-                  onBlur={() => runCombinationValidation()}
-                  className={combinationErrors.price ? styles.inputError : ''}
-                />
-              </div>
-              {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
-              <div className={styles.fieldRow}>
-                <label htmlFor="combination-stock">Stock</label>
-                <input id="combination-stock" type="number" value={combinationStock === '' ? '' : String(combinationStock)} onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))} />
-              </div>
-              <div className={styles.modalActions}>
-                <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
-                <button type="button" onClick={handleCreateCombination} disabled={!!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}>{editingSkuId ? 'Editar' : 'Crear'}</button>
-              </div>
+            </div>
+            {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
+            <div className={styles.fieldRow}>
+              <label htmlFor="combination-price">Precio</label>
+              <input
+                id="combination-price"
+                type="number"
+                step="0.01"
+                value={combinationPrice === '' ? '' : String(combinationPrice)}
+                onChange={e => {
+                  setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
+                  runCombinationValidation();
+                }}
+                onBlur={() => runCombinationValidation()}
+                className={combinationErrors.price ? styles.inputError : ''}
+              />
+            </div>
+            {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
+            <div className={styles.fieldRow}>
+              <label htmlFor="combination-stock">Stock</label>
+              <input
+                id="combination-stock"
+                type="number"
+                value={combinationStock === '' ? '' : String(combinationStock)}
+                onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </div>
+            <div className={styles.modalActions}>
+              <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
+              <button
+                type="button"
+                onClick={handleCreateCombination}
+                disabled={!!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
+              >
+                {editingSkuId ? 'Guardar cambios' : 'Crear'}
+              </button>
             </div>
           </div>
-        )}
-
-        {/* Render created combinations */}
-        <div className={styles.combinationsList}>
-          {/* Persisted SKUs first */}
-          {skus.map(s => (
-            <div key={s.id} className={styles.combinationItem}>
-              <div className={styles.combinationMeta}>
-                <div className={styles.combinationSku}>{s.sku ?? '—'}</div>
-                <div className={styles.combinationAttrs}>{Object.entries(s.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
-              </div>
-              <div className={styles.combinationRight}>
-                <div className={styles.combinationPrice}>{typeof s.price === 'number' ? `$${s.price.toLocaleString('es-AR')}` : ''}</div>
-                <div className={styles.combinationStock}>{typeof s.stock === 'number' ? `Stock: ${s.stock}` : 'Stock: N/A'}</div>
-              </div>
-              {Array.isArray(s.images) && s.images.length > 0 && (
-                <div className={styles.combinationImages}>
-                  {/* Show only the first (primary) image for compact list view to avoid accumulated galleries */}
-                  <img src={s.images[0]} alt={s.sku ?? 'imagen'} className={styles.combinationThumb} />
-                </div>
-              )}
-              <div className={styles.combinationActions}>
-                <button type="button" onClick={() => handleEditCombination(s.id)}>Editar</button>
-                <button type="button" onClick={() => handleDeleteCombination(s.id)}>Eliminar</button>
-              </div>
-            </div>
-          ))}
-
-          {/* Optimistic / newly created combos (local) */}
-          {createdCombinations.length === 0 ? null : createdCombinations.map((c, idx) => (
-            <div key={c.id ?? idx} className={styles.combinationItem}>
-              <div className={styles.combinationMeta}>
-                <div className={styles.combinationSku}>{c.sku ?? '—'}</div>
-                <div className={styles.combinationAttrs}>{Object.entries(c.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')}</div>
-              </div>
-              <div className={styles.combinationRight}>
-                <div className={styles.combinationPrice}>{typeof c.price === 'number' ? `$${c.price.toLocaleString('es-AR')}` : ''}</div>
-                <div className={styles.combinationStock}>{typeof c.stock === 'number' ? `Stock: ${c.stock}` : 'Stock: N/A'}</div>
-              </div>
-              {Array.isArray(c.images) && c.images.length > 0 && (
-                <div className={styles.combinationImages}>
-                  <img src={c.images[0]} alt={c.sku ?? 'imagen'} className={styles.combinationThumb} />
-                </div>
-              )}
-            </div>
-          ))}
         </div>
-      </section>
+      )}
     </div>
   );
 }
