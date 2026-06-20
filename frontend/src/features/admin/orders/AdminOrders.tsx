@@ -1,10 +1,8 @@
-import { Tooltip } from '../../../components/ui/Tooltip/Tooltip';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
-import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order, OrderStatus } from '../../../context/AdminOrdersContext';
-import { STATUS_LABELS, STATUS_OPTIONS } from './utils/ordersHelpers';
+import { STATUS_OPTIONS } from './utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminOrders.module.css';
@@ -24,7 +22,6 @@ import { SummarySkeleton, TableRowSkeleton, MobileCardSkeleton } from './compone
 
 function AdminOrders() {
   const { token } = useAdminAuth();
-  const { bulkUpdateOrderStatus } = useAdminOrders();
   const navigate = useNavigate();
 
   /**
@@ -176,8 +173,6 @@ function AdminOrders() {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   }, []);
 
-  /** Limpia toda la selección. Llamado tras ejecutar una acción masiva. */
-  const clearSelection = useCallback(() => setSelectedIds([]), []);
 
   // ── Métricas de resumen ─────────────────────────────────────────
   /**
@@ -197,32 +192,6 @@ function AdminOrders() {
   /** Total de pedidos con paymentStatus === 'abonado' para la tarjeta de pagos. */
   const totalAbonados = useMemo(() => orders.filter(o => o.paymentStatus === 'abonado').length, [orders]);
 
-  // ── Modal de confirmación global ────────────────────────────────
-  /**
-   * `modal` centraliza el estado del ModalConfirm reutilizable.
-   * `type` determina qué mensaje y título se muestran.
-   * `payload` transporta datos extra (ej: el nuevo status a aplicar).
-   */
-  const [modal, setModal] = useState<{
-    open: boolean;
-    type: 'delete' | 'status' | 'paid' | null;
-    order: Order | null;
-    payload?: Record<string, unknown>;
-    isLoading?: boolean;
-    message?: string;
-  }>({ open: false, type: null, order: null });
-
-  // ── Acciones masivas ────────────────────────────────────────────
-  /**
-   * BulkAction — acciones disponibles para pedidos seleccionados en bloque.
-   *  - 'confirm': pendiente → confirmado
-   *  - 'ship':    confirmado/en-preparacion → enviado
-   *  - 'cancel':  cualquier estado excepto enviado/entregado/cancelado
-   */
-  type BulkAction = 'confirm' | 'ship' | 'cancel';
-  const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
-  const [bulkModalOpen, setBulkModalOpen] = useState(false);
-  const [bulkLoading, setBulkLoading] = useState(false);
 
   // ── Exportación ─────────────────────────────────────────────────
   const {
@@ -244,78 +213,6 @@ function AdminOrders() {
     setTimeout(() => setShowExportModal(true), 0);
   }, [filtered.length, setExportFormat, setShowExportModal, setNotif]);
 
-  // ── Validaciones de acciones masivas ───────────────────────────
-  /**
-   * canBulkAction — valida si una acción masiva es aplicable a los pedidos seleccionados.
-   * Devuelve false si alguno de los pedidos seleccionados tiene un estado incompatible.
-   *
-   * Reglas:
-   *  - 'confirm': todos deben estar en 'pendiente'
-   *  - 'ship':    todos deben estar en 'confirmado' o 'en-preparacion'
-   *  - 'cancel':  ninguno puede estar en 'enviado', 'entregado' o 'cancelado'
-   */
-  const canBulkAction = useCallback((action: BulkAction, orders: Order[]): boolean => {
-    if (action === 'confirm') return orders.every(o => o.status === 'pendiente');
-    if (action === 'ship') return orders.every(o => o.status === 'confirmado' || o.status === 'en-preparacion');
-    if (action === 'cancel') return orders.every(o => o.status !== 'enviado' && o.status !== 'entregado' && o.status !== 'cancelado');
-    return false;
-  }, []);
-
-  /** Texto legible para mostrar en el modal de confirmación de acción masiva. */
-  const getBulkActionLabel = (action: BulkAction): string => {
-    if (action === 'confirm') return 'Confirmar';
-    if (action === 'ship') return 'Marcar como Enviado';
-    if (action === 'cancel') return 'Cancelar';
-    return '';
-  };
-
-  /** Abre el modal de confirmación de acción masiva con la acción seleccionada. */
-  const handleBulkAction = useCallback((action: BulkAction) => {
-    setBulkAction(action);
-    setBulkModalOpen(true);
-  }, []);
-
-  /**
-   * executeBulkAction — ejecuta la acción masiva confirmada llamando al
-   * contexto real (bulkUpdateOrderStatus). Refresca los pedidos afectados
-   * en la lista local y reporta el resultado al usuario.
-   */
-  const executeBulkAction = useCallback(async () => {
-    if (!bulkAction || selectedIds.length === 0) return;
-    setBulkLoading(true);
-    try {
-      const result = await bulkUpdateOrderStatus({
-        orderIds: selectedIds,
-        action: bulkAction,
-      });
-      const failed = result.results.filter((r) => !r.success).length;
-      const ok = result.results.length - failed;
-      if (ok > 0) toast.success(`${ok} pedido${ok !== 1 ? 's' : ''} actualizado${ok !== 1 ? 's' : ''}`);
-      if (failed > 0) toast.error(`${failed} pedido${failed !== 1 ? 's' : ''} no pudieron actualizarse`);
-      await fetchOrders(true);
-    } catch {
-      toast.error('Error al aplicar la acción masiva');
-    } finally {
-      setBulkModalOpen(false);
-      setBulkLoading(false);
-      setBulkAction(null);
-      clearSelection();
-    }
-  }, [bulkAction, selectedIds, bulkUpdateOrderStatus, fetchOrders, clearSelection]);
-
-  // ── Handlers del modal global ───────────────────────────────────
-  const handleCloseModal = useCallback(() => {
-    setModal({ open: false, type: null, order: null });
-  }, []);
-
-  /**
-   * handleConfirmModal — cierra el modal global individual.
-   * Las acciones reales (delete / status / paid) se gestionan en la
-   * página de detalle de pedido; aquí solo se cierra de forma segura.
-   */
-  const handleConfirmModal = useCallback(async () => {
-    setModal({ open: false, type: null, order: null });
-  }, []);
 
   // ── Render ──────────────────────────────────────────────────────
   return (
@@ -486,118 +383,9 @@ function AdminOrders() {
             ariaLabel="Paginación de pedidos"
           />
 
-          {/* ── Toolbar de acciones masivas ── */}
-          {/*
-            Solo visible cuando hay al menos un pedido seleccionado.
-            Aparece como barra fija en la parte inferior de la pantalla (posición fixed en CSS).
-            Los botones se deshabilitan si la acción no es compatible con la selección actual.
-          */}
-          {
-            selectedIds.length > 0 && (
-              <div className={styles.bulkActionsContainer}>
-                <div className={styles.bulkActionsBox}>
-                  <span className={styles.bulkActionsTitle}>
-                    {selectedIds.length} seleccionados
-                  </span>
-
-                  <Tooltip content="Confirmar todos los pedidos seleccionados">
-                    <button
-                      type="button"
-                      // Solo habilitado si TODOS los seleccionados están en 'pendiente'
-                      disabled={!canBulkAction('confirm', orders.filter(o => selectedIds.includes(o.id)))}
-                      onClick={() => handleBulkAction('confirm')}
-                      className={`${styles.bulkBtn} ${styles.bulkBtnConfirm}`}
-                      aria-label="Confirmar pedidos seleccionados"
-                    >
-                      Confirmar
-                    </button>
-                  </Tooltip>
-
-                  <Tooltip content="Marcar como enviados los pedidos seleccionados">
-                    <button
-                      type="button"
-                      // Solo habilitado si TODOS están en 'confirmado' o 'en-preparacion'
-                      disabled={!canBulkAction('ship', orders.filter(o => selectedIds.includes(o.id)))}
-                      onClick={() => handleBulkAction('ship')}
-                      className={`${styles.bulkBtn} ${styles.bulkBtnShip}`}
-                      aria-label="Marcar como enviados"
-                    >
-                      Enviado
-                    </button>
-                  </Tooltip>
-
-                  <Tooltip content="Cancelar todos los pedidos seleccionados">
-                    <button
-                      type="button"
-                      // Bloqueado si alguno ya está en 'enviado', 'entregado' o 'cancelado'
-                      disabled={!canBulkAction('cancel', orders.filter(o => selectedIds.includes(o.id)))}
-                      onClick={() => handleBulkAction('cancel')}
-                      className={`${styles.bulkBtn} ${styles.bulkBtnCancel}`}
-                      aria-label="Cancelar pedidos seleccionados"
-                    >
-                      Cancelar
-                    </button>
-                  </Tooltip>
-
-                  <button
-                    type="button"
-                    onClick={clearSelection}
-                    className={styles.bulkBtnClear}
-                  >
-                    Limpiar
-                  </button>
-                </div>
-              </div>
-            )
-          }
-
-          {/* Modal de confirmación de acción masiva */}
-          {
-            bulkModalOpen && bulkAction && (
-              <ModalConfirm
-                open={bulkModalOpen}
-                title={`Acción masiva: ${getBulkActionLabel(bulkAction!)}`}
-                message={`¿Seguro que deseas aplicar "${getBulkActionLabel(bulkAction!)}" a los ${selectedIds.length} pedidos seleccionados? Esta acción no se puede deshacer.`}
-                confirmText={bulkLoading ? 'Procesando...' : 'Confirmar'}
-                cancelText={'Cancelar'}
-                // Bloquear los handlers mientras carga para evitar doble envío
-                onConfirm={bulkLoading ? () => { } : executeBulkAction}
-                onCancel={bulkLoading ? () => { } : () => setBulkModalOpen(false)}
-              />
-            )
-          }
         </>
       )
       }
-
-      {/* ── Modal global de confirmación (delete / status / paid) ── */}
-      {/*
-        Modal reutilizable para acciones críticas individuales.
-        El título y mensaje se derivan de `modal.type` y `modal.payload`.
-        Los handlers se bloquean durante modal.isLoading para evitar doble envío.
-      */}
-      <ModalConfirm
-        open={modal.open}
-        title={
-          modal.type === 'delete' ? 'Eliminar pedido' :
-            modal.type === 'status' ? 'Actualizar estado' :
-              modal.type === 'paid' ? 'Confirmar pago' :
-                'Confirmar acción'
-        }
-        message={
-          modal.type === 'delete'
-            ? '¿Seguro que deseas eliminar este pedido? Esta acción no se puede deshacer.'
-            : modal.type === 'status' && typeof modal.payload?.status === 'string'
-              ? `¿Confirmar cambio de estado a "${STATUS_LABELS[modal.payload.status as OrderStatus]}"?`
-              : modal.type === 'paid'
-                ? '¿Confirmar que el cliente abonó este pedido?'
-                : ''
-        }
-        confirmText={modal.isLoading ? 'Procesando...' : 'Confirmar'}
-        cancelText={'Cancelar'}
-        onConfirm={modal.isLoading ? () => { } : handleConfirmModal}
-        onCancel={modal.isLoading ? () => { } : handleCloseModal}
-      />
 
     </main>
   );
