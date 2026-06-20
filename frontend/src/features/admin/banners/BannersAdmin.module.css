@@ -1,3 +1,63 @@
+.container {
+  padding: 24px;
+  background: var(--color-bg-primary);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.headerText {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.actions {
+  width: 50%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.actions button {
+  padding: 0;
+  min-height: fit-content;
+  height: fit-content;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.actions button span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-transform: capitalize;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.actions button {
+  background: var(--color-primary);
+  color: white;
+}
+
+.actions button :hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
 /* ── Validación visual de errores ── */
 .inputError {
   border-color: var(--color-error) !important;
@@ -33,13 +93,16 @@
 }
 
 @keyframes shake {
+
   0%,
   100% {
     transform: translateX(0);
   }
+
   25% {
     transform: translateX(-4px);
   }
+
   75% {
     transform: translateX(4px);
   }
@@ -135,17 +198,14 @@
 .formActions {
   display: flex;
   gap: 12px;
-  justify-content: flex-end;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }
 
-.btnPrimary,
 .btnSmall,
 .btnSmallSecondary,
-.btnSmallDanger,
-.btnSecondary {
+.btnSmallDanger {
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
@@ -157,38 +217,46 @@
   flex-shrink: 0;
 }
 
-.btnPrimary,
-.btnSecondary {
+.formActions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: auto;
+  flex-shrink: 0;
+  text-transform: capitalize;
+}
+
+.formActions .btnPrimary,
+.formActions .btnSecondary {
   width: auto;
   padding: 10px 16px;
 }
 
-.btnPrimary {
+.formActions .btnPrimary {
   background: var(--color-primary);
   color: white;
 }
 
-.btnPrimary:hover:not(:disabled) {
+.formActions .btnPrimary:hover:not(:disabled) {
   background-color: #5d7568;
 }
 
-.btnSecondary {
-  padding: 8px 18px;
+.formActions .btnSecondary {
   border: 1px solid var(--color-border);
-  border-radius: 6px;
   background: var(--color-bg-secondary);
   color: var(--color-text-muted, #64748b);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
   transition: background 0.15s;
 }
 
-.btnSecondary:hover:not(:disabled),
-.btnSecondary:focus-visible {
-  background: var(--color-bg-secondary, #f3f4f6);
+.formActions .btnSecondary:hover:not(:disabled),
+.formActions .btnSecondary:focus-visible {
+  background: var(--color-bg-tertiary, #f3f4f6);
   color: var(--color-primary, #2563eb);
-  border-color: var(--color-primary, #2563eb);
+  border-color: var(--color-primary, #0051ff);
 }
 
 .bannersGrid {
