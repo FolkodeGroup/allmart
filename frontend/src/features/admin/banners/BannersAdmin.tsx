@@ -20,18 +20,19 @@ import { BannerFilterBuilder } from './BannerFilterBuilder';
 import type { BannerFilterConfig } from '../../../types/bannerFilter';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 
-interface FormData {
-  title: string;
-  imageFile: File | null;
-  isActive: boolean;
-  altText: string;
-  filterConfig: BannerFilterConfig;
-}
-
 type FieldErrors = {
   title?: string;
   imageFile?: string;
 };
+
+interface FormData {
+  title: string;
+  imageFile: File | null;
+  isPinned: boolean;
+  isActive: boolean;
+  altText: string;
+  filterConfig: BannerFilterConfig;
+}
 
 function appendCacheBusting(url: string, updatedAt?: string): string {
   if (!url) return url;
@@ -54,6 +55,7 @@ export function BannersAdmin() {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     imageFile: null,
+    isPinned: false,
     isActive: true,
     altText: '',
     filterConfig: {},
@@ -61,9 +63,10 @@ export function BannersAdmin() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Unsaved changes detection
-  const initialFormDataRef = useRef<{ title: string; description: string; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
+  const initialFormDataRef = useRef<{ title: string; description: string; isPinned: boolean; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
     title: '',
     description: '',
+    isPinned: false,
     isActive: true,
     altText: '',
     filterConfig: {},
@@ -71,6 +74,7 @@ export function BannersAdmin() {
 
   const isDirty = showForm && (
     formData.title !== initialFormDataRef.current.title ||
+    formData.isPinned !== initialFormDataRef.current.isPinned ||
     formData.isActive !== initialFormDataRef.current.isActive ||
     formData.altText !== initialFormDataRef.current.altText ||
     formData.filterConfig !== initialFormDataRef.current.filterConfig ||
@@ -113,8 +117,7 @@ export function BannersAdmin() {
     try {
       setLoading(true);
       const data = await bannersAdminService.getAllBanners();
-      // Ordenamiento local explícito por LIFO (createdAt desc)
-      setBanners(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      setBanners(data);
     } catch (err) {
       toast.error('Error al cargar banners');
       console.error(err);
@@ -131,6 +134,7 @@ export function BannersAdmin() {
     setFormData({
       title: '',
       imageFile: null,
+      isPinned: false,
       isActive: true,
       altText: '',
       filterConfig: {},
@@ -144,6 +148,7 @@ export function BannersAdmin() {
     initialFormDataRef.current = {
       title: banner.title,
       description: banner.description || '',
+      isPinned: banner.isPinned,
       isActive: banner.isActive,
       altText: banner.altText || '',
       filterConfig: banner.filterConfig || {},
@@ -151,13 +156,13 @@ export function BannersAdmin() {
     setFormData({
       title: banner.title,
       imageFile: null,
+      isPinned: banner.isPinned,
       isActive: banner.isActive,
       altText: banner.altText || '',
       filterConfig: banner.filterConfig || {},
     });
     setEditingId(banner.id);
     setShowForm(true);
-    // Si el alt existente difiere del título, el usuario lo editó manualmente en algún momento
     setIsAltManuallyEdited(
       !!banner.altText && banner.altText !== banner.title
     );
@@ -179,6 +184,7 @@ export function BannersAdmin() {
       if (editingId) {
         await bannersAdminService.updateBanner(editingId, {
           title: formData.title,
+          isPinned: formData.isPinned,
           isActive: formData.isActive,
           altText: formData.altText,
           filterConfig: formData.filterConfig,
@@ -192,6 +198,7 @@ export function BannersAdmin() {
           {
             title: formData.title,
             filterConfig: formData.filterConfig,
+            isPinned: formData.isPinned,
             isActive: formData.isActive,
             altText: formData.altText,
           },
@@ -313,10 +320,12 @@ export function BannersAdmin() {
             initialFormDataRef.current = {
               title: '',
               description: '',
+              isPinned: false,
               isActive: true,
               altText: '',
               filterConfig: {},
             };
+            setFormData((prev) => ({ ...prev, isPinned: false }));
             setShowForm(true);
           }}
         >
@@ -417,6 +426,17 @@ export function BannersAdmin() {
                 <label className={styles.checkboxLabel}>
                   <input
                     type="checkbox"
+                    checked={formData.isPinned}
+                    onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
+                  />
+                  Fijar al inicio 📌
+                </label>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
                     checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                   />
@@ -464,7 +484,7 @@ export function BannersAdmin() {
                   <p className={styles.bannerDescription}>{banner.description}</p>
                 )}
                 <div className={styles.bannerMeta}>
-                  <span className={styles.order}>Creado: {new Date(banner.createdAt).toLocaleDateString()}</span>
+                  {banner.isPinned && <span className={styles.badgePinned}>📌 Fijado</span>}
                 </div>
               </div>
 
