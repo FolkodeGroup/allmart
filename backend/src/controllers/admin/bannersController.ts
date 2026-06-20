@@ -12,12 +12,11 @@ import { AuthenticatedRequest } from '../../types';
 export async function index(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const banners = await bannersService.getAllBanners();
-    // No enviar datos binarios de imágenes, solo metadatos
     const response = banners.map(b => ({
       id: b.id,
       title: b.title,
       description: b.description,
-      displayOrder: b.displayOrder,
+      isPinned: b.isPinned,
       isActive: b.isActive,
       width: b.width,
       height: b.height,
@@ -45,7 +44,7 @@ export async function show(req: AuthenticatedRequest, res: Response, next: NextF
       id: banner.id,
       title: banner.title,
       description: banner.description,
-      displayOrder: banner.displayOrder,
+      isPinned: banner.isPinned,
       isActive: banner.isActive,
       width: banner.width,
       height: banner.height,
@@ -67,9 +66,8 @@ export async function show(req: AuthenticatedRequest, res: Response, next: NextF
 
 export async function create(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    let { title, description, displayOrder, isActive, altText } = req.body;
-    // Convertir a tipos correctos (FormData envía todo como string)
-    displayOrder = displayOrder ? parseInt(displayOrder, 10) : 0;
+    let { title, description, isPinned, isActive, altText } = req.body;
+    isPinned = isPinned === 'true' || isPinned === true;
     isActive = isActive === 'true' || isActive === true;
 
     if (!req.file) {
@@ -94,19 +92,17 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
       title,
       description || undefined,
       altText || undefined,
-      displayOrder || 0,
-      isActive !== false,
+      isPinned,
+      isActive,
       imageData,
       filterConfig,
     );
-
-
 
     const response = {
       id: banner.id,
       title: banner.title,
       description: banner.description,
-      displayOrder: banner.displayOrder,
+      isPinned: banner.isPinned,
       isActive: banner.isActive,
       width: banner.width,
       height: banner.height,
@@ -130,17 +126,18 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
 
 export async function update(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { title, description, displayOrder, isActive, altText } = req.body;
+    const { title, description, isPinned, isActive, altText } = req.body;
     const filterConfig = req.body.filterConfig
       ? (typeof req.body.filterConfig === 'string'
         ? JSON.parse(req.body.filterConfig)
         : req.body.filterConfig)
       : undefined;
+
     const banner = await bannersService.updateBanner(req.params.id, {
       title,
       description: description !== undefined ? description : undefined,
-      displayOrder,
-      isActive,
+      isPinned: isPinned !== undefined ? (isPinned === 'true' || isPinned === true) : undefined,
+      isActive: isActive !== undefined ? (isActive === 'true' || isActive === true) : undefined,
       altText: altText !== undefined ? altText : undefined,
       filterConfig,
     });
@@ -149,7 +146,7 @@ export async function update(req: AuthenticatedRequest, res: Response, next: Nex
       id: banner.id,
       title: banner.title,
       description: banner.description,
-      displayOrder: banner.displayOrder,
+      isPinned: banner.isPinned,
       isActive: banner.isActive,
       width: banner.width,
       height: banner.height,
@@ -193,7 +190,7 @@ export async function updateImage(req: AuthenticatedRequest, res: Response, next
       id: banner.id,
       title: banner.title,
       description: banner.description,
-      displayOrder: banner.displayOrder,
+      isPinned: banner.isPinned,
       isActive: banner.isActive,
       width: banner.width,
       height: banner.height,
@@ -222,28 +219,3 @@ export async function remove(req: AuthenticatedRequest, res: Response, next: Nex
     next(err);
   }
 }
-
-export async function reorder(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const { bannerIds } = req.body as { bannerIds: string[] };
-    if (!Array.isArray(bannerIds)) {
-      throw new Error('bannerIds debe ser un array');
-    }
-    const banners = await bannersService.reorderBanners(bannerIds);
-    const response = banners.map(b => ({
-      id: b.id,
-      title: b.title,
-      description: b.description,
-      displayOrder: b.displayOrder,
-      isActive: b.isActive,
-      imageUrl: `/api/images/banners/${b.id}`,
-      thumbUrl: `/api/images/banners/${b.id}/thumb`,
-      createdAt: b.createdAt,
-      updatedAt: b.updatedAt,
-    }));
-    sendSuccess(res, response, 200, 'Orden de banners actualizado');
-  } catch (err) {
-    next(err);
-  }
-}
-
