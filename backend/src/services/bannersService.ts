@@ -52,7 +52,7 @@ function toBannerPublic(row: any): any {
 
 export async function getAllBanners(): Promise<BannerWithImageMeta[]> {
   const rows = await prisma.banner.findMany({
-    orderBy: { displayOrder: 'asc' },
+    orderBy: { createdAt: 'desc' },
   });
   return rows.map(toBannerWithMeta);
 }
@@ -60,7 +60,7 @@ export async function getAllBanners(): Promise<BannerWithImageMeta[]> {
 export async function getActiveBannersPublic(): Promise<any[]> {
   const rows = await prisma.banner.findMany({
     where: { isActive: true },
-    orderBy: { displayOrder: 'asc' },
+    orderBy: { createdAt: 'desc' },
   });
   return rows.map(toBannerPublic);
 }
@@ -232,4 +232,3 @@ export async function reorderBanners(bannerIds: string[]): Promise<BannerWithIma
   const results = await Promise.all(updates);
   return results.map(toBannerWithMeta);
 }
-
