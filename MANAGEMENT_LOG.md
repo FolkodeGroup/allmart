@@ -1959,3 +1959,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1135: Vista de colecciones, botón de selección masiva en el encabezado de la tabla eliminado | 2026-06-20 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1142: El problema ocurre porque la aplicación carga en el contexto global (… | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1143: iconos eliminados y paginación ajustada en la vista de reportes | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1156: Al crearse nueva combinación cuando seleccionas valores de variantes se van agregando al sku automaticamente | 2026-06-21 |
