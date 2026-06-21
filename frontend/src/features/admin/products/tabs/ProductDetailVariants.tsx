@@ -23,7 +23,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     addVariant,
     updateVariant,
     deleteVariant,
-    toggleVariantStatus,
     addValueToVariant,
     removeValueFromVariant,
     createVariantChild,
@@ -54,17 +53,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   }, [productId]);
 
   // Handlers para acciones inline
-  type VariantGroup = { name: string; values: string[] };
-  const handleDuplicate = async (group: VariantGroup) => {
-    const baseName = group.name + ' (Copia)';
-    let name = baseName;
-    let i = 2;
-    while (variants.some((v: VariantGroup) => v.name === name)) {
-      name = `${baseName} ${i++}`;
-    }
-    await addVariant(productId, name, group.values);
-  };
-
   const handleAddGroup = async () => {
     if (!newGroupName.trim()) {
       setErrors(e => ({ ...e, group: 'El nombre es requerido' }));
@@ -88,9 +76,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     await deleteVariant(productId, id);
   };
 
-  const handleToggleStatus = async (id: string, newStatus: boolean) => {
-    await toggleVariantStatus(productId, id, newStatus);
-  };
 
   const handleAddValue = async (groupId: string, value: string) => {
     if (!value.trim()) return;
@@ -330,9 +315,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           groups={variants}
           onEditName={handleEditName}
           onDelete={handleDelete}
-          onDuplicate={handleDuplicate}
           onEditValue={handleEditValue}
-          onToggleStatus={handleToggleStatus}
           onAddValue={handleAddValue}
           onRemoveValue={handleRemoveValue}
           canEdit={true}

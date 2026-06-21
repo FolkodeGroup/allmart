@@ -103,7 +103,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                         role="menuitem"
                         onClick={() => run(onEdit)}
                     >
-                        ✏️ Editar
+                        Editar
                     </button>
                     <div className={styles.dropdownDivider} />
                     <button
@@ -112,7 +112,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                         role="menuitem"
                         onClick={() => run(onDelete)}
                     >
-                        🗑️ Eliminar
+                        Eliminar
                     </button>
                 </div>
             )}
@@ -132,7 +132,6 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
     if (isEmpty) {
         return (
             <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>📦</span>
                 <p>Todavía no hay combinaciones.</p>
                 <small>Usá el botón de arriba para agregar la primera.</small>
             </div>
