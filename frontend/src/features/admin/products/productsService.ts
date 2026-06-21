@@ -30,8 +30,19 @@ export interface ApiProduct {
   isFeatured?: boolean;
   features: string[];
   primarySupplierId?: string | null;
+  skus?: ApiProductSku[];
   createdAt: string;
   updatedAt: string;
+}
+
+/** Combinación (SKU) de variante tal como la devuelve el backend */
+export interface ApiProductSku {
+  id: string;
+  sku: string;
+  attributes: Record<string, string>;
+  stock: number;
+  price?: number;
+  images?: string[];
 }
 
 /** Respuesta paginada del endpoint público de productos */
@@ -180,19 +191,15 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     sku: api.sku ?? '',
     features: Array.isArray(api.features) ? api.features : [],
     primarySupplierId: api.primarySupplierId ?? null,
-    skus: Array.isArray((api as any).skus)
-      ? (api as any).skus.map((s: unknown) => {
-        const row = s as unknown as Record<string, unknown>;
-        return {
-          id: String(row.id),
-          sku: String(row.sku),
-          attributes: (row.attributes ?? {}) as Record<string, unknown>,
+    skus: Array.isArray(api.skus)
+      ? api.skus.map((row) => ({
+          id: row.id,
+          sku: row.sku,
+          attributes: row.attributes ?? {},
           stock: typeof row.stock === 'number' ? row.stock : Number(row.stock ?? 0),
-          price: typeof row.price === 'number' ? row.price : row.price !== undefined ? Number(row.price as unknown) : undefined,
-          images: Array.isArray(row.images) ? (row.images as unknown[]).map(i => String(i)).filter(Boolean) : undefined,
-          isActive: row.isActive === true || row.isActive === false ? Boolean(row.isActive) : row.is_active === false ? false : true,
-        };
-      })
+          price: typeof row.price === 'number' ? row.price : row.price !== undefined ? Number(row.price) : undefined,
+          images: Array.isArray(row.images) ? row.images.filter(Boolean) : undefined,
+        }))
       : undefined,
   };
 }

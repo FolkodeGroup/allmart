@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { fadeSlideIn } from './animationConfig';
-// import type { Category } from './types/category';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -20,7 +19,6 @@ import { exportCategoriesToCSV, exportCategoriesToExcel, exportCategoriesToPDF }
 import { ExportButtons } from '../../../components/ui/ExportButtons';
 import type { ExportFormat } from '../../../components/ui/ExportButtons';
 import { CategoriesFilters } from './components/CategoriesFilters';
-// import { CategorySearchInput } from '../../../components/ui/CategorySearchInput';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { useCategoryBulkActions } from './hooks/useCategoryBulkActions';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
@@ -30,17 +28,18 @@ import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPag
 type CategorySortField = 'name' | 'slug' | 'itemCount' | 'isVisible';
 type CategorySortDirection = 'asc' | 'desc';
 
-
 export function AdminCategories() {
   const navigate = useNavigate();
   const location = useLocation();
   const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory, uploadCategoryImage } = useAdminCategories();
-  // Local state for pagination
+  
+  // Estado local para paginación
   const [page, setPage] = useState(1);
-  const [limit] = useState(10); // Could be made configurable
-  console.log({ page, apiTotalPages, total });
+  const [limit] = useState(10);
+  
   const { can, user } = useAdminAuth();
   const [search, setSearch] = useState('');
+  
   // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -51,14 +50,17 @@ export function AdminCategories() {
   const [deleting, setDeleting] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     parentId: '',
     isVisible: true,
   });
+  
   const [formImageFile, setFormImageFile] = useState<File | null>(null);
   const [formImagePreview, setFormImagePreview] = useState<string>('');
+  
   // Estado para cambio de visibilidad
   const [toggleConfirm, setToggleConfirm] = useState<{ id: string; newVisible: boolean } | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -93,7 +95,7 @@ export function AdminCategories() {
     closeBulkAction
   } = useCategoryBulkActions();
 
-  // Fetch categories when filtros cambian
+  // Fetch categories cuando los filtros cambian
   useEffect(() => {
     refreshCategories({
       q: selectedSuggestion || debouncedSearch,
@@ -106,7 +108,7 @@ export function AdminCategories() {
     if (selectedSuggestion) setSelectedSuggestion(null);
   }, [debouncedSearch, selectedSuggestion, page, limit, minProducts, maxProducts, isVisible, refreshCategories]);
 
-  // Cuando se regresa a la página (ej: desde crear/editar categoría), refetch para mostrar cambios
+  // Cuando se regresa a la página, refetch para mostrar cambios
   useEffect(() => {
     refreshCategories({
       q: selectedSuggestion || debouncedSearch,
@@ -117,7 +119,6 @@ export function AdminCategories() {
       isVisible: isVisible === 'all' ? undefined : isVisible === 'visible' ? true : false,
     });
   }, [location.pathname, debouncedSearch, selectedSuggestion, page, limit, minProducts, maxProducts, isVisible, refreshCategories]);
-
 
   const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
@@ -264,10 +265,7 @@ export function AdminCategories() {
       setFormSubmitting(false);
     }
   };
-  // const auth = useAdminAuth ? useAdminAuth() : null;
-  // const userEmail = (auth && (auth.user as any)?.email) || 'desconocido';
 
-  // Eliminar categoría con confirmación y feedback
   const handleDelete = async (id: string) => {
     setDeleting(true);
     try {
@@ -291,14 +289,10 @@ export function AdminCategories() {
     }
   };
 
-  // (Eliminado: handleBulkEdit inline, ahora se usa el del hook personalizado)
-
-  // Handler para toggle de visibilidad (abre modal de confirmación)
   const handleToggleVisibility = (id: string, newVisible: boolean) => {
     setToggleConfirm({ id, newVisible });
   };
 
-  // Confirmar cambio de visibilidad
   const confirmToggleVisibility = async () => {
     if (!toggleConfirm) return;
     const { id, newVisible } = toggleConfirm;
@@ -325,10 +319,10 @@ export function AdminCategories() {
     }
   };
 
-  // Pasar estado optimista a las categorías
   const categoriesWithOptimism = categories.map(cat =>
     optimisticVis[cat.id] !== undefined ? { ...cat, isVisible: optimisticVis[cat.id] } : cat
   );
+
   const sortedCategories = useMemo(() => {
     const ordered = [...categoriesWithOptimism];
 
@@ -355,10 +349,10 @@ export function AdminCategories() {
 
     return ordered;
   }, [categoriesWithOptimism, sortField, sortDirection]);
+
   const hasChildren = editId ? categories.some((cat) => cat.parentId === editId) : false;
   const parentOptions = categories.filter((cat) => !cat.parentId && cat.id !== editId);
 
-  // Export handlers
   const [exportLoadingCat, setExportLoadingCat] = useState<ExportFormat | null>(null);
 
   const handleExportCSV = () => {
@@ -368,6 +362,7 @@ export function AdminCategories() {
     }
     exportCategoriesToCSV(categoriesWithOptimism);
   };
+
   const handleExportExcel = async () => {
     if (!categoriesWithOptimism.length) {
       showNotification('info', 'No hay categorías para exportar.');
@@ -376,6 +371,7 @@ export function AdminCategories() {
     setExportLoadingCat('xlsx');
     try { await exportCategoriesToExcel(categoriesWithOptimism); } finally { setExportLoadingCat(null); }
   };
+
   const handleExportPDF = async () => {
     if (!categoriesWithOptimism.length) {
       showNotification('info', 'No hay categorías para exportar.');
@@ -389,7 +385,6 @@ export function AdminCategories() {
     <div className={`${sectionStyles.page} dark:bg-gray-900 dark:text-gray-100`}>
 
       {/* Header */}
-
       <CategoriesHeader
         canCreate={can('categories.create')}
         onNew={handleNew}
@@ -449,8 +444,6 @@ export function AdminCategories() {
                 {sortDirection === 'asc' ? '▲' : '▼'}
               </button>
             </div>
-
-
           </div>
         </div>
       )}
@@ -519,19 +512,13 @@ export function AdminCategories() {
               allSelected={allVisibleSelected}
               onSelectAll={handleSelectAllVisible}
             />
-            {/* Controles de paginación extraídos a subcomponente */}
+            {/* Controles de paginación */}
             <AdminPagination
               page={page}
               totalPages={apiTotalPages}
               onPageChange={handlePageChange}
               ariaLabel="Paginación de categorías"
             />
-            {/*<CategoriesPagination
-              page={page}
-              totalPages={apiTotalPages}
-              loading={loading}
-              onPageChange={handlePageChange}
-            />*/}
           </>
         )}
       </AnimatePresence>
@@ -548,6 +535,7 @@ export function AdminCategories() {
               onClick={confirmToggleVisibility}
               disabled={!!togglingId}
               style={{ minWidth: 100 }}
+              type="button"
             >
               {togglingId ? 'Guardando...' : 'Confirmar'}
             </button>
@@ -556,6 +544,7 @@ export function AdminCategories() {
               onClick={() => setToggleConfirm(null)}
               disabled={!!togglingId}
               style={{ minWidth: 100 }}
+              type="button"
             >Cancelar</button>
           </>
         }
@@ -567,7 +556,6 @@ export function AdminCategories() {
             : '¿Ocultar esta categoría? No será visible para los usuarios.'}
         </p>
       </Modal>
-
 
       {/* Modal de confirmación de eliminación */}
       <Modal
@@ -581,6 +569,7 @@ export function AdminCategories() {
               onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
               disabled={deleting}
               style={{ minWidth: 100 }}
+              type="button"
             >
               {deleting ? 'Eliminando...' : 'Confirmar'}
             </button>
@@ -589,6 +578,7 @@ export function AdminCategories() {
               onClick={() => setDeleteConfirm(null)}
               disabled={deleting}
               style={{ minWidth: 100 }}
+              type="button"
             >Cancelar</button>
           </>
         }
@@ -597,6 +587,7 @@ export function AdminCategories() {
         <p>¿Estás seguro de que querés eliminar esta categoría?</p>
       </Modal>
 
+      {/* Formulario en modal para creación rápida */}
       <Modal
         open={showForm}
         onClose={closeForm}
@@ -632,9 +623,11 @@ export function AdminCategories() {
             </p>
           )}
 
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label style={{ display: 'grid', gap: 6 }} htmlFor="modal-category-name">
             <span style={{ fontWeight: 600 }}>Nombre *</span>
             <input
+              id="modal-category-name"
+              name="modalCategoryName"
               type="text"
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
@@ -646,9 +639,11 @@ export function AdminCategories() {
             />
           </label>
 
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label style={{ display: 'grid', gap: 6 }} htmlFor="modal-category-description">
             <span style={{ fontWeight: 600 }}>Descripción</span>
             <textarea
+              id="modal-category-description"
+              name="modalCategoryDescription"
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Descripción corta para la categoría"
@@ -659,9 +654,11 @@ export function AdminCategories() {
             />
           </label>
 
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label style={{ display: 'grid', gap: 6 }} htmlFor="modal-category-parent">
             <span style={{ fontWeight: 600 }}>Categoría padre</span>
             <select
+              id="modal-category-parent"
+              name="modalCategoryParent"
               value={formData.parentId}
               onChange={(e) => setFormData((prev) => ({ ...prev, parentId: e.target.value }))}
               disabled={formSubmitting || hasChildren}
@@ -681,9 +678,11 @@ export function AdminCategories() {
             )}
           </label>
 
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label style={{ display: 'grid', gap: 6 }} htmlFor="modal-category-image">
             <span style={{ fontWeight: 600 }}>Imagen</span>
             <input
+              id="modal-category-image"
+              name="modalCategoryImage"
               type="file"
               accept="image/*"
               onChange={handleImageFileChange}
@@ -720,14 +719,16 @@ export function AdminCategories() {
             </div>
           )}
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }} htmlFor="modal-category-visible">
             <input
+              id="modal-category-visible"
+              name="modalCategoryVisible"
               type="checkbox"
               checked={formData.isVisible}
               onChange={(e) => setFormData((prev) => ({ ...prev, isVisible: e.target.checked }))}
               disabled={formSubmitting}
             />
-            Visible en tienda
+            <span className={styles.checkboxLabel}>Visible en tienda</span>
           </label>
         </form>
       </Modal>
@@ -768,6 +769,7 @@ export function AdminCategories() {
               }}
               disabled={bulkActionLoading}
               style={{ minWidth: 100 }}
+              type="button"
             >
               {bulkActionLoading ? 'Eliminando...' : 'Eliminar'}
             </button>
@@ -776,6 +778,7 @@ export function AdminCategories() {
               onClick={() => closeBulkAction()}
               disabled={bulkActionLoading}
               style={{ minWidth: 100 }}
+              type="button"
             >Cancelar</button>
           </>
         }
@@ -810,6 +813,7 @@ export function AdminCategories() {
               }}
               disabled={bulkActionLoading}
               style={{ minWidth: 100 }}
+              type="button"
             >
               {bulkActionLoading ? 'Guardando...' : 'Confirmar'}
             </button>
@@ -818,6 +822,7 @@ export function AdminCategories() {
               onClick={() => closeBulkAction()}
               disabled={bulkActionLoading}
               style={{ minWidth: 100 }}
+              type="button"
             >Cancelar</button>
           </>
         }

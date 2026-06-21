@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { MoreVertical } from 'lucide-react';
 import styles from './CombinationTable.module.css';
 
@@ -30,31 +31,47 @@ interface CombinationsTableProps {
 }
 
 // ── Menú de tres puntos para cada fila ──────────────────────────────────────
+// Se renderiza en un portal a document.body con position:fixed, calculando
+// sus coordenadas desde el botón disparador. Esto lo desacopla por completo
+// del overflow de .tableWrapper (que es scrolleable) evitando que el menú
+// "empuje" scroll horizontal/vertical en la tabla al abrirse.
 interface RowMenuProps {
     onEdit: () => void;
     onDelete: () => void;
 }
 
+const MENU_WIDTH = 150;
+const MENU_HEIGHT_ESTIMATE = 100; // ajustar si se agregan/quitan items del menú
+const VIEWPORT_MARGIN = 8;
+
 const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
     const [open, setOpen] = useState(false);
-    const [openUpward, setOpenUpward] = useState(false);
+    const [coords, setCoords] = useState<{ top: number; left: number; openUpward: boolean } | null>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Detectar si el menú debe abrirse hacia arriba
-    const checkPosition = useCallback(() => {
+    // Calcula la posición fija del menú en base al botón disparador,
+    // evitando que se salga del viewport por abajo o por los costados.
+    const computeCoords = useCallback(() => {
         if (!triggerRef.current) return;
         const rect = triggerRef.current.getBoundingClientRect();
         const spaceBelow = window.innerHeight - rect.bottom;
-        setOpenUpward(spaceBelow < 120);
+        const openUpward = spaceBelow < MENU_HEIGHT_ESTIMATE + 12;
+
+        let left = rect.right - MENU_WIDTH;
+        left = Math.max(VIEWPORT_MARGIN, Math.min(left, window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN));
+
+        const top = openUpward ? rect.top - 4 : rect.bottom + 4;
+
+        setCoords({ top, left, openUpward });
     }, []);
 
     const handleOpen = () => {
-        checkPosition();
+        computeCoords();
         setOpen(prev => !prev);
     };
 
-    // Cerrar al hacer clic afuera
+    // Cerrar al hacer clic afuera (considera también el menú portaleado)
     useEffect(() => {
         if (!open) return;
         const handler = (e: MouseEvent) => {
@@ -77,6 +94,20 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
         return () => document.removeEventListener('keydown', handler);
     }, [open]);
 
+    // Al ser position:fixed, sus coordenadas quedan obsoletas si el usuario
+    // scrollea (la tabla, la página, etc.) o redimensiona la ventana.
+    // Cerrarlo es la solución más simple y robusta para ese caso.
+    useEffect(() => {
+        if (!open) return;
+        const close = () => setOpen(false);
+        window.addEventListener('scroll', close, true);
+        window.addEventListener('resize', close);
+        return () => {
+            window.removeEventListener('scroll', close, true);
+            window.removeEventListener('resize', close);
+        };
+    }, [open]);
+
     const run = (fn: () => void) => { fn(); setOpen(false); };
 
     return (
@@ -93,10 +124,11 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                 <MoreVertical size={15} />
             </button>
 
-            {open && (
+            {open && coords && createPortal(
                 <div
                     ref={menuRef}
-                    className={`${styles.rowDropdown} ${openUpward ? styles.rowDropdownUp : styles.rowDropdownDown}`}
+                    className={`${styles.rowDropdown} ${coords.openUpward ? styles.rowDropdownUp : styles.rowDropdownDown}`}
+                    style={{ position: 'fixed', top: coords.top, left: coords.left, width: MENU_WIDTH }}
                     role="menu"
                 >
                     <button
@@ -116,7 +148,8 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                     >
                         Eliminar
                     </button>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

@@ -73,10 +73,10 @@ export function SupplierModal({ supplierId, onClose, onSaved }: SupplierModalPro
     return (
         <div className={styles.overlay} onClick={onClose} role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-            <div className={styles.modal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="supplier-modal-title">
+            <div className={styles.modal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="modal-supplier-title">
                 <div className={styles.header}>
-                    <h3 id="supplier-modal-title">{supplierId ? 'Editar proveedor' : 'Nuevo proveedor'}</h3>
-                    <button type="button" className={styles.closeBtn} onClick={onClose}><X size={18} /></button>
+                    <h3 id="modal-supplier-title">{supplierId ? 'Editar proveedor' : 'Nuevo proveedor'}</h3>
+                    <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar modal"><X size={18} /></button>
                 </div>
 
                 {loading ? (
@@ -85,41 +85,43 @@ export function SupplierModal({ supplierId, onClose, onSaved }: SupplierModalPro
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <div className={styles.row}>
                             <div className={styles.field}>
-                                <label htmlFor="supplier-name">Nombre *</label>
-                                <input id="supplier-name" value={form.name} onChange={field('name')} placeholder="Distribuidor ABC" className={errors.name ? styles.inputError : ''} />
+                                <label htmlFor="modal-supplier-name">Nombre *</label>
+                                <input id="modal-supplier-name" name="modalSupplierName" value={form.name} onChange={field('name')} placeholder="Distribuidor ABC" className={errors.name ? styles.inputError : ''} />
                                 {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
                             </div>
                             <div className={styles.field}>
-                                <label htmlFor="supplier-email">Email *</label>
-                                <input id="supplier-email" type="email" value={form.email} onChange={field('email')} placeholder="ventas@proveedor.com" className={errors.email ? styles.inputError : ''} />
+                                <label htmlFor="modal-supplier-email">Email *</label>
+                                <input id="modal-supplier-email" name="modalSupplierEmail" type="email" value={form.email} onChange={field('email')} placeholder="ventas@proveedor.com" className={errors.email ? styles.inputError : ''} />
                                 {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
                             </div>
                         </div>
 
                         <div className={styles.row}>
                             <div className={styles.field}>
-                                <label htmlFor="supplier-phone">Teléfono *</label>
-                                <input id="supplier-phone" value={form.phone} onChange={field('phone')} placeholder="+54 11 4000-0000" className={errors.phone ? styles.inputError : ''} />
+                                <label htmlFor="modal-supplier-phone">Teléfono *</label>
+                                <input id="modal-supplier-phone" name="modalSupplierPhone" value={form.phone} onChange={field('phone')} placeholder="+54 11 4000-0000" className={errors.phone ? styles.inputError : ''} />
                                 {errors.phone && <span className={styles.errorMsg}>{errors.phone}</span>}
                             </div>
                             <div className={styles.field}>
-                                <label htmlFor="supplier-url">Web / URL</label>
-                                <input id="supplier-url" value={form.url} onChange={field('url')} placeholder="https://proveedor.com" />
+                                <label htmlFor="modal-supplier-url">Web / URL</label>
+                                <input id="modal-supplier-url" name="modalSupplierUrl" value={form.url} onChange={field('url')} placeholder="https://proveedor.com" />
                             </div>
                         </div>
 
                         <div className={styles.field}>
-                            <label htmlFor="supplier-address">Dirección</label>
-                            <input id="supplier-address" value={form.address} onChange={field('address')} placeholder="Av. Corrientes 1234, CABA" />
+                            <label htmlFor="modal-supplier-address">Dirección</label>
+                            <input id="modal-supplier-address" name="modalSupplierAddress" value={form.address} onChange={field('address')} placeholder="Av. Corrientes 1234, CABA" />
                         </div>
 
                         <div className={styles.field}>
-                            <label htmlFor="supplier-description">Descripción</label>
-                            <textarea id="supplier-description" value={form.description} onChange={field('description')} rows={3} placeholder="Descripción del proveedor..." />
+                            <label htmlFor="modal-supplier-description">Descripción</label>
+                            <textarea id="modal-supplier-description" name="modalSupplierDescription" value={form.description} onChange={field('description')} rows={3} placeholder="Descripción del proveedor..." />
                         </div>
 
-                        <label className={styles.checkboxRow}>
+                        <label className={styles.checkboxRow} htmlFor="modal-supplier-active">
                             <input
+                                id="modal-supplier-active"
+                                name="modalSupplierActive"
                                 type="checkbox"
                                 checked={form.isActive}
                                 onChange={e => setForm(prev => ({ ...prev, isActive: e.target.checked }))}

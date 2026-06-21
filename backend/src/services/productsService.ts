@@ -169,25 +169,42 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
   return where;
 }
 
+// Optimización: Agrupación en una única consulta para la hidratación sin escrituras en disco
 async function hydrateProductImagesFromStorage(rows: Array<{ id: string; images: unknown }>): Promise<void> {
-  for (const row of rows) {
-    const imagesArray = Array.isArray(row.images) ? row.images : [];
-    if (imagesArray.length === 0) {
-      const storageImages = await prisma.productImageStorage.findMany({
-        where: { productId: row.id },
-        select: { id: true },
-        orderBy: { position: 'asc' },
-      });
-      if (storageImages.length > 0) {
-        const syncedImages = storageImages.map((img) => `/api/images/products/${img.id}`);
-        await prisma.product.update({
-          where: { id: row.id },
-          data: { images: syncedImages as any },
-        });
-        (row as any).images = syncedImages;
-      }
-    }
+  const rowsToHydrate = rows.filter(row => {
+    const arr = Array.isArray(row.images) ? row.images : [];
+    return arr.length === 0;
+  });
+
+  if (rowsToHydrate.length === 0) return;
+
+  const productIds = rowsToHydrate.map(r => r.id);
+
+  const storageImages = await prisma.productImageStorage.findMany({
+    where: { productId: { in: productIds } },
+    select: { id: true, productId: true },
+    orderBy: { position: 'asc' },
+  });
+
+  const imagesByProduct = new Map<string, string[]>();
+  for (const img of storageImages) {
+    const list = imagesByProduct.get(img.productId) || [];
+    list.push(`/api/images/products/${img.id}`);
+    imagesByProduct.set(img.productId, list);
   }
+
+  for (const row of rowsToHydrate) {
+    const syncedImages = imagesByProduct.get(row.id) || [];
+    (row as any).images = syncedImages;
+  }
+}
+
+// Método ultra-rápido para validaciones de existencia sin cargar relaciones pesadas
+export async function checkProductExists(id: string): Promise<boolean> {
+  const count = await prisma.product.count({
+    where: { id },
+  });
+  return count > 0;
 }
 
 export async function getAllProducts(): Promise<Product[]> {
@@ -201,30 +218,88 @@ export async function getAllProducts(): Promise<Product[]> {
 export async function getProductById(id: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { id },
-    include: { productCategories: { select: { categoryId: true } } },
+    include: {
+      productCategories: { select: { categoryId: true } },
+      productOptions: {
+        where: { isActive: true },
+        include: {
+          values: true
+        }
+      },
+      productSkus: {
+        where: { isActive: true },
+        include: {
+          skuValues: {
+            include: {
+              optionValue: {
+                include: {
+                  option: true
+                }
+              }
+            }
+          },
+          productSkuImages: {
+            select: { id: true }
+          }
+        }
+      }
+    },
   });
   if (!row) throw createError('Producto no encontrado', 404);
 
-  // Sincronizar imágenes si el producto tiene imágenes en storage pero product.images está vacío
+  // Sincronizar únicamente en memoria si el array está vacío
   const imagesArray = Array.isArray(row.images) ? row.images : [];
-  const hasStorageImages = imagesArray.length === 0;
-  if (hasStorageImages) {
+  if (imagesArray.length === 0) {
     const storageImages = await prisma.productImageStorage.findMany({
       where: { productId: id },
       select: { id: true },
       orderBy: { position: 'asc' },
     });
     if (storageImages.length > 0) {
-      const syncedImages = storageImages.map(img => `/api/images/products/${img.id}`);
-      await prisma.product.update({
-        where: { id },
-        data: { images: syncedImages as any },
-      });
-      (row as any).images = syncedImages;
+      (row as any).images = storageImages.map(img => `/api/images/products/${img.id}`);
     }
   }
 
-  return toProduct(row);
+  const base = toProduct(row);
+
+  const variants = (row as any).productOptions?.map((opt: any) => ({
+    id: opt.id,
+    name: opt.name,
+    values: opt.values?.map((val: any) => val.name) ?? [],
+  })) ?? [];
+  (base as any).variants = variants;
+
+  if (Array.isArray((row as any).productSkus)) {
+    const skus = (row as any).productSkus.map((s: any) => {
+      const attributes: Record<string, string> = {};
+      if (Array.isArray(s.skuValues)) {
+        s.skuValues.forEach((sv: any) => {
+          const optName = sv.optionValue?.option?.name;
+          const valName = sv.optionValue?.name;
+          if (optName && valName) {
+            attributes[optName] = valName;
+          }
+        });
+      }
+
+      const images = Array.isArray(s.productSkuImages)
+        ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+        : [];
+
+      return {
+        id: s.id,
+        sku: s.sku,
+        attributes,
+        images,
+        stock: s.stock,
+        price: s.price ? Number(s.price) : undefined,
+        isActive: s.isActive,
+      };
+    });
+    (base as any).skus = skus;
+  }
+
+  return base;
 }
 
 export async function createProduct(dto: CreateProductDTO): Promise<Product> {
@@ -267,7 +342,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
         : {}),
     },
   });
-
 
   await updateProductCategories(row.id, normalizedCategoryIds);
   const refreshed = await prisma.product.findUnique({
@@ -327,8 +401,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
       rating: dto.rating !== undefined ? dto.rating : existing.rating,
       reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : existing.reviewCount,
-      // Si el admin actualiza stock, sincronizar inStock automáticamente
-      // (explícito > derivado del stock > valor actual)
       inStock: dto.inStock !== undefined
         ? dto.inStock
         : dto.stock !== undefined
@@ -337,7 +409,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       tags: Array.isArray(dto.tags) ? dto.tags : (existing.tags ?? Prisma.JsonNull),
       novedadSince: (() => {
         const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
-        if (incomingTags === null) return undefined; // no se tocaron los tags
+        if (incomingTags === null) return undefined;
 
         const teniaNovedad = Array.isArray(existing.tags)
           ? (existing.tags as string[]).includes('novedad')
@@ -345,12 +417,12 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
         const tieneNovedad = incomingTags.includes('novedad');
 
         if (tieneNovedad && !teniaNovedad) {
-          return new Date(); // se acaba de agregar
+          return new Date();
         }
         if (!tieneNovedad) {
-          return null; // se quitó el tag
+          return null;
         }
-        return undefined; // no cambió, mantener valor actual
+        return undefined;
       })(),
       features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
       isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : existing.isFeatured,
@@ -377,12 +449,10 @@ export async function deleteProduct(id: string): Promise<void> {
   await prisma.product.delete({ where: { id } });
 }
 
-/** Devuelve el total de productos con stock < 5 (sin paginación). */
 export async function getLowStockCount(): Promise<number> {
   return prisma.product.count({ where: { stock: { lt: 5 } } });
 }
 
-// Función para obtener productos con búsqueda y paginación (Admin)
 export async function getAdminProducts(query: {
   q?: string;
   categoryId?: string;
@@ -416,11 +486,6 @@ export async function getAdminProducts(query: {
   };
 }
 
-/**
- * Para el export de catálogo: prefiere siempre las imágenes del storage (binarias)
- * sobre URLs externas (e.g. Unsplash), usando una sola consulta batch.
- * No actualiza la DB, solo sobreescribe en memoria.
- */
 async function preferStorageImagesForExport(rows: Array<{ id: string; images: unknown }>): Promise<void> {
   if (rows.length === 0) return;
   const productIds = rows.map((r) => r.id);
@@ -430,7 +495,6 @@ async function preferStorageImagesForExport(rows: Array<{ id: string; images: un
     orderBy: { position: 'asc' },
   });
 
-  // Agrupar por producto
   const byProduct = new Map<string, string[]>();
   for (const rec of storageRecords) {
     const urls = byProduct.get(rec.productId) ?? [];
@@ -438,7 +502,6 @@ async function preferStorageImagesForExport(rows: Array<{ id: string; images: un
     byProduct.set(rec.productId, urls);
   }
 
-  // Sobreescribir en memoria si hay imágenes en storage
   for (const row of rows) {
     const storageUrls = byProduct.get(row.id);
     if (storageUrls && storageUrls.length > 0) {
@@ -464,15 +527,12 @@ export async function getProductsForCatalogExport(query: {
     select: adminProductSelect,
   });
 
-  // Hidratar productos con images vacías (también actualiza la DB)
   await hydrateProductImagesFromStorage(rows);
-  // Para el export, preferir siempre imágenes binarias del storage sobre URLs externas
   await preferStorageImagesForExport(rows);
 
   return rows.map(toProduct);
 }
 
-// Función para obtener productos del catálogo (con filtros)
 type ProductQuery = {
   category?: string;
   q?: string;
@@ -487,46 +547,40 @@ type ProductQuery = {
   priceRanges?: string;
 };
 
-
 export async function getPublicProducts(query: ProductQuery) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
-  const where: Record<string, unknown> = { status: 'active' };
+  const where: Record<string, any> = {};
 
-  // ⭐ Featured
+  if (Array.isArray(slugs) && slugs.length > 0) {
+    where.slug = { in: slugs };
+  }
+
   if (typeof isFeatured === 'boolean') {
     where.isFeatured = isFeatured;
   }
 
-  // 🏷️ TAG dinámico
   if (tag) {
-    // Filtrar IDs primero, luego aplicar al where principal
     const taggedProducts = await prisma.$queryRaw<{ id: string }[]>`
-    SELECT id FROM products
-    WHERE tags::jsonb @> to_jsonb(ARRAY[${tag.toLowerCase()}]::text[])
-  `;
+      SELECT id FROM products
+      WHERE tags::jsonb @> to_jsonb(ARRAY[${tag.toLowerCase()}]::text[])
+    `;
 
     const ids = taggedProducts.map(r => r.id);
     if (ids.length === 0) {
       return { data: [], total: 0, page, limit, totalPages: 0 };
     }
 
-    // Combinar con otros filtros existentes
     where.id = where.id
       ? { in: (where.id as any).in.filter((id: string) => ids.includes(id)) }
       : { in: ids };
   }
 
-  // 📦 SLUGS (productos específicos)
   if (slugs) {
     const slugArray = slugs.split(',').map(s => s.trim()).filter(Boolean);
-
-    where.slug = {
-      in: slugArray,
-    };
+    where.slug = { in: slugArray };
   }
 
-  // 📂 CATEGORÍA (slug + hijos)
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
 
@@ -549,7 +603,6 @@ export async function getPublicProducts(query: ProductQuery) {
     };
   }
 
-  // � RANGOS DE PRECIO
   if (query.priceRanges) {
     const ranges = query.priceRanges
       .split(',')
@@ -579,7 +632,6 @@ export async function getPublicProducts(query: ProductQuery) {
     }
   }
 
-  // �🔎 BÚSQUEDA
   if (q) {
     const search = q.toLowerCase();
     where.OR = [
@@ -588,7 +640,6 @@ export async function getPublicProducts(query: ProductQuery) {
     ];
   }
 
-  // 📊 ORDEN
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   switch (sort) {
     case 'price_asc': orderBy.price = 'asc'; break;
@@ -598,7 +649,6 @@ export async function getPublicProducts(query: ProductQuery) {
     default: orderBy.createdAt = 'desc';
   }
 
-  // 📦 QUERY FINAL
   const [total, rows] = await Promise.all([
     prisma.product.count({ where }),
     prisma.product.findMany({
@@ -622,46 +672,78 @@ export async function getPublicProducts(query: ProductQuery) {
 export async function getProductBySlug(slug: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { slug },
-    include: { productCategories: { select: { categoryId: true } }, productSkus: true },
+    include: {
+      productCategories: { select: { categoryId: true } },
+      productOptions: {
+        where: { isActive: true },
+        include: {
+          values: true
+        }
+      },
+      productSkus: {
+        where: { isActive: true },
+        include: {
+          skuValues: {
+            include: {
+              optionValue: {
+                include: {
+                  option: true
+                }
+              }
+            }
+          },
+          productSkuImages: {
+            select: { id: true }
+          }
+        }
+      }
+    },
   });
   if (!row) throw createError('Producto no encontrado', 404);
   const base = toProduct(row);
-  // Attach product SKUs to the returned object for public API consumption
-  // Map prisma productSkus rows to a lightweight shape
+
+  const variants = (row as any).productOptions?.map((opt: any) => ({
+    id: opt.id,
+    name: opt.name,
+    values: opt.values?.map((val: any) => val.name) ?? [],
+  })) ?? [];
+  (base as any).variants = variants;
+
   if (Array.isArray((row as any).productSkus)) {
     const skus = (row as any).productSkus.map((s: any) => {
-      let images: string[] | undefined = undefined;
-      let attrs = s.attributes ?? {};
-      try {
-        if (attrs && typeof attrs === 'object' && Array.isArray(attrs.images)) {
-          images = attrs.images;
-          const { images: _img, ...rest } = attrs;
-          attrs = rest;
-        }
-      } catch {
-        // ignore
+      const attributes: Record<string, string> = {};
+      if (Array.isArray(s.skuValues)) {
+        s.skuValues.forEach((sv: any) => {
+          const optName = sv.optionValue?.option?.name;
+          const valName = sv.optionValue?.name;
+          if (optName && valName) {
+            attributes[optName] = valName;
+          }
+        });
       }
+
+      const images = Array.isArray(s.productSkuImages)
+        ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+        : [];
+
       return {
         id: s.id,
         sku: s.sku,
-        attributes: attrs,
+        attributes,
         images,
         stock: s.stock,
         price: s.price ? Number(s.price) : undefined,
         isActive: s.isActive,
       };
     });
-    // Attach using a non-invasive cast so existing callers don't break
     (base as any).skus = skus;
   }
   return base;
 }
 
-// ─── Historial de precios por producto ────────────────────────────────────────
-
 export interface ProductPriceHistoryEntry {
-  monthKey: string;    // "2025-01"
-  month: string;       // "Ene 2025"
+  monthKey: string;
+  month: string;
   avgPrice: number;
   minPrice: number;
   maxPrice: number;
@@ -723,4 +805,3 @@ export async function getProductPriceHistory(productId: string): Promise<Product
     };
   });
 }
-

@@ -1,13 +1,6 @@
 /**
- * Adapter service that reuses the existing ProductVariant logic to store
- * combination (SKU) entries without schema changes.
- *
- * Strategy:
- * - Create ProductVariant rows with name='__combination__' and values = [ JSON.stringify({ sku, attributes, stock, price }) ]
- * - List/read operations read ProductVariant rows with that name and parse payload.
- *
- * This is an adapter to avoid changing DB schema while the proper ProductSku model
- * is planned.
+ * backend/src/services/productSkusService.ts
+ * Servicio para la gestión de combinaciones (SKUs) usando el esquema relacional normalizado.
  */
 
 import { prisma } from '../config/prisma';
@@ -18,7 +11,7 @@ export interface ProductSkuRow {
     id: string;
     productId: string;
     sku: string;
-    attributes: unknown;
+    attributes: Record<string, string>;
     images?: string[];
     stock: number;
     price?: number | null;
@@ -28,24 +21,27 @@ export interface ProductSkuRow {
 }
 
 function toDto(row: any): ProductSkuRow {
-    // Extract images from attributes if present (store as top-level for frontend convenience)
-    let images: string[] | undefined = undefined;
-    let attrs = row.attributes ?? {};
-    try {
-        if (attrs && typeof attrs === 'object' && Array.isArray((attrs as any).images)) {
-            images = (attrs as any).images;
-            // create a shallow copy without images
-            const { images: _img, ...rest } = attrs as any;
-            attrs = rest;
-        }
-    } catch {
-        // ignore
+    const attributes: Record<string, string> = {};
+    
+    if (Array.isArray(row.skuValues)) {
+        row.skuValues.forEach((sv: any) => {
+            const optName = sv.optionValue?.option?.name;
+            const valName = sv.optionValue?.name;
+            if (optName && valName) {
+                attributes[optName] = valName;
+            }
+        });
     }
+
+    const images = Array.isArray(row.productSkuImages)
+        ? row.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+        : [];
+
     return {
         id: row.id,
         productId: row.productId,
         sku: row.sku,
-        attributes: attrs,
+        attributes,
         images,
         stock: row.stock,
         price: row.price === null ? undefined : Number(row.price),
@@ -56,100 +52,249 @@ function toDto(row: any): ProductSkuRow {
 }
 
 function ensureModelAvailable(): void {
-    // If the generated Prisma client doesn't include `productSku`, accessing it will
-    // throw an unclear runtime error. Provide a helpful message instead.
-    // @ts-ignore
     if (!prisma || !(prisma as any).productSku) {
-        throw createError('ProductSku model not available in Prisma client. Run `npx prisma generate` and restart the backend.', 500);
+        throw createError('El modelo ProductSku no está disponible en el cliente de Prisma.', 500);
     }
 }
 
 export async function getSkusByProduct(productId: string): Promise<ProductSkuRow[]> {
     ensureModelAvailable();
-    await productsService.getProductById(productId);
-    // @ts-ignore
-    const rows = await (prisma as any).productSku.findMany({ where: { productId } });
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
+    
+    const rows = await (prisma as any).productSku.findMany({
+        where: { productId },
+        include: {
+            skuValues: {
+                include: {
+                    optionValue: {
+                        include: {
+                            option: true
+                        }
+                    }
+                }
+            },
+            productSkuImages: {
+                select: { id: true }
+            }
+        }
+    });
     return rows.map(toDto);
 }
 
 export async function getSkuById(productId: string, skuId: string): Promise<ProductSkuRow> {
     ensureModelAvailable();
-    await productsService.getProductById(productId);
-    // @ts-ignore
-    const row = await (prisma as any).productSku.findFirst({ where: { id: skuId, productId } });
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
+    
+    const row = await (prisma as any).productSku.findFirst({
+        where: { id: skuId, productId },
+        include: {
+            skuValues: {
+                include: {
+                    optionValue: {
+                        include: {
+                            option: true
+                        }
+                    }
+                }
+            },
+            productSkuImages: {
+                select: { id: true }
+            }
+        }
+    });
     if (!row) throw createError('SKU no encontrado', 404);
     return toDto(row);
 }
 
-export async function createSku(productId: string, dto: { sku?: string; attributes?: Record<string, any>; stock?: number; price?: number }): Promise<ProductSkuRow> {
+export async function createSku(
+    productId: string, 
+    dto: { sku?: string; attributes?: Record<string, string>; stock?: number; price?: number }
+): Promise<ProductSkuRow> {
     ensureModelAvailable();
-    await productsService.getProductById(productId);
-    // Server-side validation: SKU must not equal product SKU, price valid, images present in attributes
-    const product = await productsService.getProductById(productId);
-    if (dto.sku && product.sku && dto.sku === product.sku) {
-        throw createError('El SKU de la combinación no puede ser igual al SKU del producto base', 400, ['sku']);
+    
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
+
+    const skuCode = dto.sku?.trim() || '';
+    if (!skuCode) {
+        throw createError('El SKU es obligatorio', 400);
     }
-    if (dto.price !== undefined && dto.price !== null) {
-        const priceNum = Number(dto.price);
-        if (Number.isNaN(priceNum) || priceNum < 0) {
-            throw createError('Precio inválido para la combinación', 400, ['price']);
-        }
-    }
-    const attrsToSave = { ...(dto.attributes ?? {}) } as Record<string, any>;
-    // Images are optional at creation time. When present, merge into attributes.
-    // Images may be provided in dto.images or inside attributes; they will be merged below when present.
-    // (We intentionally do not enforce presence of images at create time.)
-    // Merge images into attributes if provided in dto.images
-    if ((dto as any).images && Array.isArray((dto as any).images)) {
-        attrsToSave.images = (dto as any).images;
-    }
-    const row = await (prisma as any).productSku.create({
-        data: {
-            productId,
-            sku: dto.sku ?? '',
-            attributes: attrsToSave,
-            stock: dto.stock ?? 0,
-            ...(dto.price !== undefined && { price: dto.price }),
-        }
+
+    const skuExists = await (prisma as any).productSku.findUnique({
+        where: { sku: skuCode }
     });
-    return toDto(row);
+    if (skuExists) {
+        throw createError('El SKU ya está en uso', 409);
+    }
+
+    const attrs = dto.attributes ?? {};
+
+    return await prisma.$transaction(async (tx) => {
+        const newSku = await (tx as any).productSku.create({
+            data: {
+                productId,
+                sku: skuCode,
+                stock: dto.stock ?? 0,
+                price: dto.price !== undefined && dto.price !== null ? dto.price : null,
+                isActive: true
+            }
+        });
+
+        for (const [optionName, valueName] of Object.entries(attrs)) {
+            let option = await tx.productOption.findFirst({
+                where: { productId, name: optionName }
+            });
+            if (!option) {
+                option = await tx.productOption.create({
+                    data: { productId, name: optionName, isActive: true }
+                });
+            }
+
+            let optionValue = await tx.productOptionValue.findFirst({
+                where: { optionId: option.id, name: valueName }
+            });
+            if (!optionValue) {
+                optionValue = await tx.productOptionValue.create({
+                    data: { optionId: option.id, name: valueName }
+                });
+            }
+
+            await tx.productSkuValue.create({
+                data: {
+                    skuId: newSku.id,
+                    optionValueId: optionValue.id
+                }
+            });
+        }
+
+        const populated = await (tx as any).productSku.findUnique({
+            where: { id: newSku.id },
+            include: {
+                skuValues: {
+                    include: {
+                        optionValue: {
+                            include: {
+                                option: true
+                              }
+                        }
+                    }
+                },
+                productSkuImages: {
+                    select: { id: true }
+                }
+            }
+        });
+
+        return toDto(populated);
+    });
 }
 
-export async function updateSku(productId: string, skuId: string, dto: { sku?: string; attributes?: Record<string, any>; stock?: number; price?: number; isActive?: boolean }): Promise<ProductSkuRow> {
+export async function updateSku(
+    productId: string, 
+    skuId: string, 
+    dto: { sku?: string; attributes?: Record<string, string>; stock?: number; price?: number; isActive?: boolean }
+): Promise<ProductSkuRow> {
     ensureModelAvailable();
-    await getSkuById(productId, skuId);
-    // Validate SKU and price on update as well
-    const product = await productsService.getProductById(productId);
-    if (dto.sku && product.sku && dto.sku === product.sku) {
-        throw createError('El SKU de la combinación no puede ser igual al SKU del producto base', 400, ['sku']);
-    }
-    if (dto.price !== undefined && dto.price !== null) {
-        const priceNum = Number(dto.price);
-        if (Number.isNaN(priceNum) || priceNum < 0) {
-            throw createError('Precio inválido para la combinación', 400, ['price']);
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
+
+    const skuRow = await (prisma as any).productSku.findFirst({
+        where: { id: skuId, productId },
+        select: { sku: true }
+    });
+    if (!skuRow) throw createError('SKU no encontrado', 404);
+
+    const skuCode = dto.sku?.trim() ?? skuRow.sku;
+
+    if (dto.sku && dto.sku !== skuRow.sku) {
+        const skuExists = await (prisma as any).productSku.findUnique({
+            where: { sku: skuCode }
+        });
+        if (skuExists) {
+            throw createError('El SKU ya está en uso', 409);
         }
     }
-    // Merge attributes/images when updating: if dto.images present, include in attributes
-    const dataToUpdate: any = {};
-    if (dto.sku !== undefined) dataToUpdate.sku = dto.sku;
-    if (dto.stock !== undefined) dataToUpdate.stock = dto.stock;
-    if (dto.price !== undefined) dataToUpdate.price = dto.price;
-    if (dto.isActive !== undefined) dataToUpdate.isActive = dto.isActive;
-    if (dto.attributes !== undefined || (dto as any).images !== undefined) {
-        const attrs = { ...(dto.attributes ?? {}) };
-        if ((dto as any).images !== undefined && Array.isArray((dto as any).images)) {
-            attrs.images = (dto as any).images;
+
+    return await prisma.$transaction(async (tx) => {
+        const dataToUpdate: any = {
+            sku: skuCode,
+            stock: dto.stock !== undefined ? dto.stock : undefined,
+            price: dto.price !== undefined ? dto.price : undefined,
+            isActive: dto.isActive !== undefined ? dto.isActive : undefined,
+        };
+
+        await (tx as any).productSku.update({
+            where: { id: skuId },
+            data: dataToUpdate
+        });
+
+        if (dto.attributes !== undefined) {
+            await tx.productSkuValue.deleteMany({
+                where: { skuId }
+            });
+
+            for (const [optionName, valueName] of Object.entries(dto.attributes)) {
+                let option = await tx.productOption.findFirst({
+                    where: { productId, name: optionName }
+                });
+                if (!option) {
+                    option = await tx.productOption.create({
+                        data: { productId, name: optionName, isActive: true }
+                    });
+                }
+
+                let optionValue = await tx.productOptionValue.findFirst({
+                    where: { optionId: option.id, name: valueName }
+                });
+                if (!optionValue) {
+                    optionValue = await tx.productOptionValue.create({
+                        data: { optionId: option.id, name: valueName }
+                    });
+                }
+
+                await tx.productSkuValue.create({
+                    data: {
+                        skuId,
+                        optionValueId: optionValue.id
+                    }
+                });
+            }
         }
-        dataToUpdate.attributes = attrs;
-    }
-    // @ts-ignore
-    const row = await (prisma as any).productSku.update({ where: { id: skuId }, data: dataToUpdate });
-    return toDto(row);
+
+        const populated = await (tx as any).productSku.findUnique({
+            where: { id: skuId },
+            include: {
+                skuValues: {
+                    include: {
+                        optionValue: {
+                            include: {
+                                option: true
+                            }
+                        }
+                    }
+                },
+                productSkuImages: {
+                    select: { id: true }
+                }
+            }
+        });
+
+        return toDto(populated);
+    });
 }
 
 export async function deleteSku(productId: string, skuId: string): Promise<void> {
     ensureModelAvailable();
-    await getSkuById(productId, skuId);
-    // @ts-ignore
-    await (prisma as any).productSku.delete({ where: { id: skuId } });
+    // Optimización: Unica consulta de eliminación por coincidencia y cascada directa
+    const result = await (prisma as any).productSku.deleteMany({
+        where: {
+            id: skuId,
+            productId
+        }
+    });
+    if (result.count === 0) {
+        throw createError('SKU no encontrado', 404);
+    }
 }
