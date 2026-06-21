@@ -17,13 +17,14 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
         <>
             <fieldset className={styles.fieldset}>
                 <div className={styles.field}>
-                    <label className={styles.label} htmlFor="product-slug">
+                    <label className={styles.label} htmlFor="product-slug-seo">
                         <i className="bi bi-link-45deg" style={{ color: 'var(--color-primary)', marginRight: '6px' }}></i>
                         Slug (URL amigable)
                     </label>
                     <input
                         className={styles.input}
-                        id="product-slug"
+                        id="product-slug-seo"
+                        name="productSlugSeo"
                         value={form.slug}
                         onChange={e => setField('slug', e.target.value)}
                         placeholder="se-genera-automaticamente"

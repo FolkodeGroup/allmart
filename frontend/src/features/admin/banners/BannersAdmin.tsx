@@ -3,7 +3,7 @@
  * Página de administración de banners de la homepage
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBlocker } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
@@ -63,9 +63,8 @@ export function BannersAdmin() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Unsaved changes detection
-  const initialFormDataRef = useRef<{ title: string; description: string; isPinned: boolean; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
+  const initialFormDataRef = useRef<{ title: string; isPinned: boolean; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
     title: '',
-    description: '',
     isPinned: false,
     isActive: true,
     altText: '',
@@ -147,7 +146,6 @@ export function BannersAdmin() {
   function handleEdit(banner: AdminBanner) {
     initialFormDataRef.current = {
       title: banner.title,
-      description: banner.description || '',
       isPinned: banner.isPinned,
       isActive: banner.isActive,
       altText: banner.altText || '',
@@ -319,7 +317,6 @@ export function BannersAdmin() {
             resetForm();
             initialFormDataRef.current = {
               title: '',
-              description: '',
               isPinned: false,
               isActive: true,
               altText: '',
@@ -339,9 +336,10 @@ export function BannersAdmin() {
           <h2 className={styles.formTitle}>{editingId ? 'Editar Banner' : 'Nuevo Banner'}</h2>
           <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.formGroup}>
-              <label htmlFor="title">Título *</label>
+              <label htmlFor="banner-title">Título *</label>
               <input
-                id="title"
+                id="banner-title"
+                name="bannerTitle"
                 type="text"
                 placeholder="Título del banner"
                 value={formData.title}
@@ -369,9 +367,10 @@ export function BannersAdmin() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="image">Imagen del Banner {!editingId && '*'}</label>
+              <label htmlFor="banner-image">Imagen del Banner {!editingId && '*'}</label>
               <input
-                id="image"
+                id="banner-image"
+                name="bannerImage"
                 type="file"
                 accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp,image/tiff"
                 onChange={handleImageChange}
@@ -408,9 +407,10 @@ export function BannersAdmin() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="altText">Texto Alternativo de Imagen</label>
+              <label htmlFor="banner-alt-text">Texto Alternativo de Imagen</label>
               <input
-                id="altText"
+                id="banner-alt-text"
+                name="bannerAltText"
                 type="text"
                 placeholder="Descripción para accesibilidad"
                 value={formData.altText}
@@ -423,8 +423,10 @@ export function BannersAdmin() {
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label className={styles.checkboxLabel}>
+                <label className={styles.checkboxLabel} htmlFor="banner-is-pinned">
                   <input
+                    id="banner-is-pinned"
+                    name="bannerIsPinned"
                     type="checkbox"
                     checked={formData.isPinned}
                     onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
@@ -434,8 +436,10 @@ export function BannersAdmin() {
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.checkboxLabel}>
+                <label className={styles.checkboxLabel} htmlFor="banner-is-active">
                   <input
+                    id="banner-is-active"
+                    name="bannerIsActive"
                     type="checkbox"
                     checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
@@ -480,9 +484,6 @@ export function BannersAdmin() {
 
               <div className={styles.bannerInfo}>
                 <h3 className={styles.bannerTitle}>{banner.title}</h3>
-                {banner.description && (
-                  <p className={styles.bannerDescription}>{banner.description}</p>
-                )}
                 <div className={styles.bannerMeta}>
                   {banner.isPinned && <span className={styles.badgePinned}>📌 Fijado</span>}
                 </div>
