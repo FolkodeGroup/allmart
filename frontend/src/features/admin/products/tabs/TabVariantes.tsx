@@ -6,6 +6,7 @@ import type { CombinationValidationErrors } from '../../../../utils/productFormU
 import { getStoredToken } from '../../../../utils/apiClient';
 import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
+import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 import type { UploadFileState } from '../../images';
 import styles from '../AdminProductFormPage.module.css';
 
@@ -75,6 +76,10 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
     const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
 
+    // Estados para el Modal de Confirmación de Generación Masiva
+    const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+    const [combosToCreate, setCombosToCreate] = useState<CreatedCombination[]>([]);
+
     useEffect(() => {
         if (!productId) return;
         loadSkus(productId);
@@ -87,6 +92,28 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             return !skus.some((s: Sku) => (local.id && s.id === local.id) || (local.sku && s.sku === local.sku));
         }));
     }, [skus]);
+
+    // ─── 1. SKU Automático Reactivo ─────────────────────────────────────────────
+    useEffect(() => {
+        if (combinationModalOpen && !editingSkuId && form.sku) {
+            const attrValues = Object.values(combinationAttrs).filter(Boolean);
+            if (attrValues.length > 0) {
+                const suffix = attrValues.map(v => v.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()).join('-');
+                const generatedSku = `${form.sku}-${suffix}`;
+                setCombinationSku(generatedSku);
+                
+                if (generatedSku && !/[^A-Z0-9-]/.test(generatedSku)) {
+                    setCombinationErrors(prev => {
+                        const next = { ...prev };
+                        delete next.sku;
+                        return next;
+                    });
+                }
+            } else {
+                setCombinationSku(`${form.sku}-`);
+            }
+        }
+    }, [combinationAttrs, combinationModalOpen, editingSkuId, form.sku]);
 
     const runCombinationValidation = useCallback(() => {
         let imagesInput: unknown = combinationImages;
@@ -116,7 +143,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationAttrs(initial);
         setCombinationStock('');
         setCombinationImages('');
-        setCombinationPrice('');
+        
+        // ─── 2. Precio Heredado ──────────────────────────────────────────────────
+        setCombinationPrice(form.price > 0 ? form.price : '');
         setCombinationSku(form.sku ? `${form.sku}-` : '');
         setEditingSkuId(null);
         setCombinationErrors({});
@@ -126,6 +155,93 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             // ignore if hook is unavailable
         }
         setCombinationModalOpen(true);
+    };
+
+    // ─── 3. Preparar la Generación en Matriz (Abre el Modal) ─────────────────
+    const handleBulkGenerate = () => {
+        if (!productId) return;
+        if (!form.variants || form.variants.length === 0) {
+            alert('Agregá al menos un grupo de variantes con valores.');
+            return;
+        }
+
+        const variantNames = form.variants.map(g => g.name);
+        const variantValuesLists = form.variants.map(g => g.values);
+
+        if (variantValuesLists.some(list => list.length === 0)) {
+            alert('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
+            return;
+        }
+
+        const cartesian = (arrays: string[][]): string[][] => {
+            return arrays.reduce<string[][]>((a, b) =>
+                a.flatMap(d => b.map(e => [...d, e])),
+                [[]]
+            );
+        };
+
+        const allCombos = cartesian(variantValuesLists);
+        const newCombosToCreate: CreatedCombination[] = [];
+
+        for (const combo of allCombos) {
+            const attrs: Record<string, string> = {};
+            combo.forEach((val, idx) => {
+                attrs[variantNames[idx]] = val;
+            });
+
+            const exists = skus.some((s: Sku) => {
+                const sAttrs = s.attributes || {};
+                const keys1 = Object.keys(attrs);
+                const keys2 = Object.keys(sAttrs);
+                if (keys1.length !== keys2.length) return false;
+                return keys1.every(k => sAttrs[k] === attrs[k]);
+            });
+
+            if (!exists) {
+                const suffix = combo.map(v => v.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()).join('-');
+                const sku = form.sku ? `${form.sku}-${suffix}` : suffix;
+                
+                newCombosToCreate.push({
+                    sku,
+                    attributes: attrs,
+                    price: form.price > 0 ? form.price : undefined,
+                    stock: 0, 
+                });
+            }
+        }
+
+        if (newCombosToCreate.length === 0) {
+            alert('Todas las combinaciones posibles ya fueron generadas.');
+            return;
+        }
+
+        // En lugar del window.confirm nativo, abrimos el modal de la app
+        setCombosToCreate(newCombosToCreate);
+        setBulkConfirmOpen(true);
+    };
+
+    // ─── 4. Ejecutar la Generación en Matriz (Desde el Modal) ────────────────
+    const executeBulkGenerate = async () => {
+        if (!productId) return;
+        setBulkConfirmOpen(false);
+
+        // UI Optimista
+        setCreatedCombinations(prev => [...combosToCreate, ...prev]);
+
+        for (const combo of combosToCreate) {
+            try {
+                await createVariantChild(productId, {
+                    sku: combo.sku,
+                    attributes: combo.attributes,
+                    price: combo.price,
+                    stock: combo.stock
+                });
+            } catch (err) {
+                console.error('Error creando la combinación', combo, err);
+            }
+        }
+        await loadSkus(productId);
+        setCombosToCreate([]);
     };
 
     const handleCreateCombination = async () => {
@@ -171,17 +287,19 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             images = undefined;
         }
 
-        if (persistedSkuId) {
-            await updateVariantChild(productId, persistedSkuId, { images, price, attributes: attrs });
-        } else if (!editingSkuId) {
-            setCreatedCombinations(prev => [
-                { sku: sku || undefined, attributes: attrs, stock, images, price },
-                ...prev,
-            ]);
+        try {
+            if (persistedSkuId) {
+                await updateVariantChild(productId, persistedSkuId, { images, price, attributes: attrs });
+            } else if (!editingSkuId) {
+                const newItem: CreatedCombination = { sku: sku || undefined, attributes: attrs, stock, images, price };
+                setCreatedCombinations(prev => [newItem, ...prev]);
+            } else {
+                if (editingSkuId) await updateVariantChild(productId, editingSkuId, { images, price, attributes: attrs });
+            }
+        } finally {
+            setCombinationModalOpen(false);
+            setEditingSkuId(null);
         }
-
-        setCombinationModalOpen(false);
-        setEditingSkuId(null);
     };
 
     const handleEditCombination = (id: string) => {
@@ -312,14 +430,23 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             )}
 
             <div className={styles.combinationsSection}>
-                <div className={styles.combinationsToolbar}>
+                <div className={styles.combinationsToolbar} style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                    <button
+                        type="button"
+                        className={styles.addCombinationBtn}
+                        onClick={handleBulkGenerate}
+                        disabled={!isEdit || !productId || (form.variants ?? []).length === 0}
+                        style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', boxShadow: 'none' }}
+                    >
+                        ⚡ Generar matriz de combinaciones
+                    </button>
                     <button
                         type="button"
                         className={styles.addCombinationBtn}
                         onClick={openCombinationModal}
                         disabled={!isEdit || !productId}
                     >
-                        + Agregar combinación
+                        + Agregar a mano
                     </button>
                 </div>
 
@@ -337,6 +464,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 />
             </div>
 
+            {/* Modal Manual de Agregar/Editar Combinación */}
             {combinationModalOpen && (
                 <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
                     <div className={styles.modal}>
@@ -420,6 +548,20 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     </div>
                 </div>
             )}
+
+            {/* Modal de Confirmación de Generación Masiva con estilos de UI uniformes */}
+            <ModalConfirm
+                open={bulkConfirmOpen}
+                title="Generar combinaciones"
+                description={`Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0. ¿Continuar?`}
+                confirmText="Aceptar"
+                cancelText="Cancelar"
+                onConfirm={executeBulkGenerate}
+                onCancel={() => {
+                    setBulkConfirmOpen(false);
+                    setCombosToCreate([]);
+                }}
+            />
         </fieldset>
     );
 });

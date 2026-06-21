@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import styles from './ProductDetailVariants.module.css';
@@ -11,6 +12,7 @@ import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
 import { VariantForm } from '../../variants/components/VariantForm';
 import { VariantEditModal } from '../../variants/components/VariantEditModal';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
+import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 
 interface ProductDetailVariantsProps {
   productId: string;
@@ -32,6 +34,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     updateVariantChild,
     deleteVariantChild,
   } = useAdminVariants();
+
   const { getProduct } = useAdminProducts();
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
@@ -123,7 +126,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setEditModal({ open: false, groupId: null });
   };
 
-  // --- New: Create variant combination (SKU + attributes + stock)
+  // --- Modal Combination ---
   const [combinationModalOpen, setCombinationModalOpen] = useState(false);
   const [combinationSku, setCombinationSku] = useState('');
   const [combinationStock, setCombinationStock] = useState<number | ''>('');
@@ -131,16 +134,20 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [combinationPrice, setCombinationPrice] = useState<number | ''>('');
   const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
   const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
+
+  // --- Modal de confirmación de generación masiva ---
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+  const [combosToCreate, setCombosToCreate] = useState<
+    { sku?: string; attributes: Record<string, string>; price?: number; stock?: number }[]
+  >([]);
+
   type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
-  // Image upload hook for combinations (product-level by default)
+
   const token = getStoredToken() ?? '';
   const { files: uploadedFiles, addFiles, remove: removeFile, setPrimary, uploadAll, retry, setFiles } = useImageUpload({ token, productId, skuId: editingSkuId ?? undefined });
-  // whether user manually provided URLs in the textarea
-  // (kept as a comment — validation is handled later after uploads)
 
-  // Ensure the first uploaded image is marked as primary by default
   useEffect(() => {
     if (!uploadedFiles || uploadedFiles.length === 0) return;
     const hasPrimary = uploadedFiles.some(f => f.isPrimary);
@@ -150,21 +157,32 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   }, [uploadedFiles, setPrimary]);
 
+  // ─── 1. SKU Automático Reactivo ─────────────────────────────────────────────
   useEffect(() => {
-    if (product && product.sku) {
-      // prefill sku base, actual initials will be appended when user focuses input
-      setCombinationSku(product.sku + '-');
-    }
-  }, [product]);
+    if (combinationModalOpen && !editingSkuId && product?.sku) {
+      const attrValues = Object.values(combinationAttrs).filter(Boolean);
+      if (attrValues.length > 0) {
+        const suffix = attrValues.map(v => v.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()).join('-');
+        const generatedSku = `${product.sku}-${suffix}`;
+        setCombinationSku(generatedSku);
 
-  // Validate the current combination inputs and update combinationErrors
+        if (generatedSku && !/[^A-Z0-9-]/.test(generatedSku)) {
+          setCombinationErrors(prev => {
+            const next = { ...prev };
+            delete next.sku;
+            return next;
+          });
+        }
+      } else {
+        setCombinationSku(`${product.sku}-`);
+      }
+    }
+  }, [combinationAttrs, combinationModalOpen, editingSkuId, product?.sku]);
+
   const runCombinationValidation = useCallback(() => {
-    // If user provided newline URLs, pass them through. Otherwise, if there are uploaded files (local or remote),
-    // treat that as having images so validation passes.
     let imagesInput: unknown = combinationImages;
     if (!combinationImages.trim()) {
       if (uploadedFiles && uploadedFiles.length > 0) {
-        // provide a non-empty array so validateCombination sees images present
         imagesInput = uploadedFiles.map(f => f.remoteUrl ?? f.previewUrl ?? f.uid);
       } else {
         imagesInput = '';
@@ -177,7 +195,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   }, [combinationSku, combinationImages, combinationPrice, product?.sku, uploadedFiles]);
 
   const openCombinationModal = () => {
-    // initialize attributes with empty values (no defaults)
     const initial: Record<string, string> = {};
     variants.forEach(v => {
       initial[v.name] = '';
@@ -185,22 +202,108 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationAttrs(initial);
     setCombinationStock('');
     setCombinationImages('');
-    setCombinationPrice('');
-    // ensure we are in create mode (no editing SKU) and clear any staged files
+
+    // ─── 2. Precio Heredado ──────────────────────────────────────────────────
+    setCombinationPrice(product?.price && product.price > 0 ? product.price : '');
+    setCombinationSku(product?.sku ? `${product.sku}-` : '');
+
     setEditingSkuId(null);
+    setCombinationErrors({});
     try {
       setFiles([] as UploadFileState[]);
     } catch {
-      // ignore if hook not available
+      // ignore
     }
     setCombinationModalOpen(true);
   };
 
+  // ─── 3. Generación en Matriz (Bulk Generate) ──────────────────────────────
+  const handleBulkGenerate = async () => {
+    if (!productId) return;
+    if (!variants || variants.length === 0) {
+      toast.error('Agregá al menos un grupo de variantes con valores.');
+      return;
+    }
+
+    const variantNames = variants.map(g => g.name);
+    const variantValuesLists = variants.map(g => g.values);
+
+    if (variantValuesLists.some(list => list.length === 0)) {
+      toast.error('Todos los grupos de variantes deben tener al menos un valor cargado.');
+      return;
+    }
+
+    const cartesian = (arrays: string[][]): string[][] => {
+      return arrays.reduce<string[][]>((a, b) =>
+        a.flatMap(d => b.map(e => [...d, e])),
+        [[]]
+      );
+    };
+
+    const allCombos = cartesian(variantValuesLists);
+    const newCombosToCreate: { sku?: string; attributes: Record<string, string>; price?: number; stock?: number }[] = [];
+
+    for (const combo of allCombos) {
+      const attrs: Record<string, string> = {};
+      combo.forEach((val, idx) => {
+        attrs[variantNames[idx]] = val;
+      });
+
+      const exists = skus.some((s) => {
+        const sAttrs = s.attributes || {};
+        const keys1 = Object.keys(attrs);
+        const keys2 = Object.keys(sAttrs);
+        if (keys1.length !== keys2.length) return false;
+        return keys1.every(k => sAttrs[k] === attrs[k]);
+      });
+
+      if (!exists) {
+        const suffix = combo.map(v => v.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()).join('-');
+        const sku = product?.sku ? `${product.sku}-${suffix}` : suffix;
+
+        newCombosToCreate.push({
+          sku,
+          attributes: attrs,
+          price: product?.price && product.price > 0 ? product.price : undefined,
+          stock: 0,
+        });
+      }
+    }
+
+    if (newCombosToCreate.length === 0) {
+      toast.success('Todas las combinaciones posibles ya fueron generadas.');
+      return;
+    }
+
+    setCombosToCreate(newCombosToCreate);
+    setBulkConfirmOpen(true);
+  };
+
+  const executeBulkGenerate = async () => {
+    if (!productId || combosToCreate.length === 0) return;
+    setBulkConfirmOpen(false);
+
+    const loadingToast = toast.loading(`Generando ${combosToCreate.length} combinaciones...`);
+
+    try {
+      for (const combo of combosToCreate) {
+        await createVariantChild(productId, combo);
+      }
+      await loadSkus(productId);
+      toast.success('Combinaciones generadas con éxito', { id: loadingToast });
+    } catch (err) {
+      console.error('Error creando la combinación', err);
+      toast.error('Ocurrió un error al generar las combinaciones', { id: loadingToast });
+    } finally {
+      setCombosToCreate([]);
+    }
+  };
+
   const handleCreateCombination = async () => {
+    if (!productId) return;
     const attrs = { ...combinationAttrs };
     const sku = combinationSku.trim();
     const stock = combinationStock === '' ? undefined : Number(combinationStock);
-    // Prefer newline-separated URLs to avoid splitting valid URLs that contain commas/semicolons in query strings.
     let images = undefined as string[] | undefined;
     const raw = combinationImages.trim();
     if (raw) {
@@ -209,14 +312,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
     const price = combinationPrice === '' ? undefined : Number(combinationPrice);
 
-    // Run validation and prevent submit if errors
     const validation = runCombinationValidation();
     if (validation && (validation.sku || validation.images || validation.price)) {
-      // keep modal open and show errors
       return;
     }
 
-    // Create or update SKU first (so we have an SKU id to upload files into storage if needed)
     let persistedSkuId: string | undefined = undefined;
     if (editingSkuId) {
       await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price });
@@ -228,14 +328,12 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       }
     }
 
-    // If we have a persisted SKU id, upload pending files into SKU storage and collect URLs
     let uploadedRemoteUrls: string[] = [];
     if (persistedSkuId) {
       const results = await uploadAll(persistedSkuId);
       uploadedRemoteUrls = results.filter(r => r.status === 'success' && r.url).map(r => r.url!) as string[];
     }
 
-    // Combine any user-provided URLs with uploaded ones
     if (images && Array.isArray(images)) {
       images = [...uploadedRemoteUrls, ...images];
     } else if (uploadedRemoteUrls.length > 0) {
@@ -244,17 +342,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       images = undefined;
     }
 
-    // If we have a persisted SKU, ensure images are attached via updateVariantChild
     try {
       if (persistedSkuId) {
-        // include attributes to avoid accidental overwrite on backend merge
         await updateVariantChild(productId, persistedSkuId, { images, price, attributes: attrs });
       } else if (!editingSkuId) {
-        // No persisted id returned — fall back to optimistic local entry
         const newItem: CreatedCombination = { sku: sku || undefined, attributes: attrs, stock, images, price };
         setCreatedCombinations(prev => [newItem, ...prev]);
       } else {
-        // Editing existing but no persistedSkuId (shouldn't happen) — still attempt to update
         if (editingSkuId) await updateVariantChild(productId, editingSkuId, { images, price, attributes: attrs });
       }
     } finally {
@@ -263,14 +357,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
-  // Remove optimistic created combinations when the persisted `skus` list contains them
   useEffect(() => {
     if (!skus || skus.length === 0) return;
     setCreatedCombinations(prev => prev.filter(local => {
-      // if local has no sku, keep it
       if (!local.sku) return true;
-      // remove if a persisted sku with same sku string or id exists
-      return !skus.some(s => (local.id && s.id === local.id) || (local.sku && s.sku === local.sku));
+      return !skus.some((s) => (local.id && s.id === local.id) || (local.sku && s.sku === local.sku));
     }));
   }, [skus]);
 
@@ -283,7 +374,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationPrice(typeof sku.price === 'number' ? sku.price : '');
     setCombinationImages(Array.isArray(sku.images) ? sku.images.join('\n') : '');
     setEditingSkuId(id);
-    // Prefill image previews from existing SKU images (remote URLs)
     if (Array.isArray(sku.images) && sku.images.length > 0) {
       const initial: UploadFileState[] = sku.images.map((url) => ({ uid: `remote-${Math.random().toString(36).slice(2, 8)}`, previewUrl: url, remoteUrl: url, status: 'success' } as UploadFileState));
       setFiles(initial);
@@ -306,10 +396,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     <div className={styles.container}>
       {/* ── 1. Opciones del producto ── */}
       <section className={styles.section}>
-
-        {/*{product && (
-          <VariantHeader selectedProduct={product} groupCount={variants.length} />
-        )}*/}
         <div className={styles.sectionHeading}>
           <span className={styles.sectionStep}>1</span>
           <div>
@@ -365,15 +451,31 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           </div>
         </div>
 
-        <div className={styles.combinationsToolbar}>
+        <div className={styles.combinationsToolbar} style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className={styles.addCombinationBtn}
+            onClick={handleBulkGenerate}
+            disabled={!productId || variants.length === 0}
+            style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', boxShadow: 'none' }}
+          >
+            ⚡ Generar matriz de combinaciones
+          </button>
           <button
             type="button"
             onClick={openCombinationModal}
             className={styles.addCombinationBtn}
+            disabled={!productId}
           >
-            + Nueva combinación
+            + Agregar a mano
           </button>
         </div>
+
+        {(!productId) && (
+          <p className={styles.fieldHint} style={{ marginTop: '4px' }}>
+            Guardá el producto primero para poder crear combinaciones.
+          </p>
+        )}
 
         <CombinationsTable
           skus={skus}
@@ -383,7 +485,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         />
       </section>
 
-      {/* ── Modal de combinación (sin cambios) ── */}
+      {/* ── Modal de combinación ── */}
       {combinationModalOpen && (
         <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
           <div className={styles.modal}>
@@ -462,9 +564,24 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 {editingSkuId ? 'Guardar cambios' : 'Crear'}
               </button>
             </div>
+
           </div>
         </div>
       )}
+
+      {/* Modal de Confirmación de Generación Masiva con estilos de UI uniformes */}
+      <ModalConfirm
+        open={bulkConfirmOpen}
+        title="Generar combinaciones"
+        description={`Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0. ¿Continuar?`}
+        confirmText="Aceptar"
+        cancelText="Cancelar"
+        onConfirm={executeBulkGenerate}
+        onCancel={() => {
+          setBulkConfirmOpen(false);
+          setCombosToCreate([]);
+        }}
+      />
     </div>
   );
 }
