@@ -201,7 +201,32 @@ export async function getAllProducts(): Promise<Product[]> {
 export async function getProductById(id: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { id },
-    include: { productCategories: { select: { categoryId: true } } },
+    include: {
+      productCategories: { select: { categoryId: true } },
+      productOptions: {
+        where: { isActive: true },
+        include: {
+          values: true
+        }
+      },
+      productSkus: {
+        where: { isActive: true },
+        include: {
+          skuValues: {
+            include: {
+              optionValue: {
+                include: {
+                  option: true
+                }
+              }
+            }
+          },
+          productSkuImages: {
+            select: { id: true }
+          }
+        }
+      }
+    },
   });
   if (!row) throw createError('Producto no encontrado', 404);
 
@@ -224,7 +249,48 @@ export async function getProductById(id: string): Promise<Product> {
     }
   }
 
-  return toProduct(row);
+  const base = toProduct(row);
+
+  // Mapeamos las opciones activas como variants del producto
+  const variants = (row as any).productOptions?.map((opt: any) => ({
+    id: opt.id,
+    name: opt.name,
+    values: opt.values?.map((val: any) => val.name) ?? [],
+  })) ?? [];
+  (base as any).variants = variants;
+
+  // Mapeamos los SKUs inyectando la propiedad virtual "attributes" calculada
+  if (Array.isArray((row as any).productSkus)) {
+    const skus = (row as any).productSkus.map((s: any) => {
+      const attributes: Record<string, string> = {};
+      if (Array.isArray(s.skuValues)) {
+        s.skuValues.forEach((sv: any) => {
+          const optName = sv.optionValue?.option?.name;
+          const valName = sv.optionValue?.name;
+          if (optName && valName) {
+            attributes[optName] = valName;
+          }
+        });
+      }
+
+      const images = Array.isArray(s.productSkuImages)
+        ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+        : [];
+
+      return {
+        id: s.id,
+        sku: s.sku,
+        attributes,
+        images,
+        stock: s.stock,
+        price: s.price ? Number(s.price) : undefined,
+        isActive: s.isActive,
+      };
+    });
+    (base as any).skus = skus;
+  }
+
+  return base;
 }
 
 export async function createProduct(dto: CreateProductDTO): Promise<Product> {
@@ -267,7 +333,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
         : {}),
     },
   });
-
 
   await updateProductCategories(row.id, normalizedCategoryIds);
   const refreshed = await prisma.product.findUnique({
@@ -487,7 +552,6 @@ type ProductQuery = {
   priceRanges?: string;
 };
 
-
 export async function getPublicProducts(query: ProductQuery) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
@@ -500,18 +564,16 @@ export async function getPublicProducts(query: ProductQuery) {
 
   // 🏷️ TAG dinámico
   if (tag) {
-    // Filtrar IDs primero, luego aplicar al where principal
     const taggedProducts = await prisma.$queryRaw<{ id: string }[]>`
-    SELECT id FROM products
-    WHERE tags::jsonb @> to_jsonb(ARRAY[${tag.toLowerCase()}]::text[])
-  `;
+      SELECT id FROM products
+      WHERE tags::jsonb @> to_jsonb(ARRAY[${tag.toLowerCase()}]::text[])
+    `;
 
     const ids = taggedProducts.map(r => r.id);
     if (ids.length === 0) {
       return { data: [], total: 0, page, limit, totalPages: 0 };
     }
 
-    // Combinar con otros filtros existentes
     where.id = where.id
       ? { in: (where.id as any).in.filter((id: string) => ids.includes(id)) }
       : { in: ids };
@@ -520,10 +582,7 @@ export async function getPublicProducts(query: ProductQuery) {
   // 📦 SLUGS (productos específicos)
   if (slugs) {
     const slugArray = slugs.split(',').map(s => s.trim()).filter(Boolean);
-
-    where.slug = {
-      in: slugArray,
-    };
+    where.slug = { in: slugArray };
   }
 
   // 📂 CATEGORÍA (slug + hijos)
@@ -549,7 +608,7 @@ export async function getPublicProducts(query: ProductQuery) {
     };
   }
 
-  // � RANGOS DE PRECIO
+  // 💸 RANGOS DE PRECIO
   if (query.priceRanges) {
     const ranges = query.priceRanges
       .split(',')
@@ -579,7 +638,7 @@ export async function getPublicProducts(query: ProductQuery) {
     }
   }
 
-  // �🔎 BÚSQUEDA
+  // 🔍 BÚSQUEDA
   if (q) {
     const search = q.toLowerCase();
     where.OR = [
@@ -622,36 +681,72 @@ export async function getPublicProducts(query: ProductQuery) {
 export async function getProductBySlug(slug: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { slug },
-    include: { productCategories: { select: { categoryId: true } }, productSkus: true },
+    include: {
+      productCategories: { select: { categoryId: true } },
+      productOptions: {
+        where: { isActive: true },
+        include: {
+          values: true
+        }
+      },
+      productSkus: {
+        where: { isActive: true },
+        include: {
+          skuValues: {
+            include: {
+              optionValue: {
+                include: {
+                  option: true
+                }
+              }
+            }
+          },
+          productSkuImages: {
+            select: { id: true }
+          }
+        }
+      }
+    },
   });
   if (!row) throw createError('Producto no encontrado', 404);
   const base = toProduct(row);
-  // Attach product SKUs to the returned object for public API consumption
-  // Map prisma productSkus rows to a lightweight shape
+
+  // Mapeamos las opciones activas como variants del producto
+  const variants = (row as any).productOptions?.map((opt: any) => ({
+    id: opt.id,
+    name: opt.name,
+    values: opt.values?.map((val: any) => val.name) ?? [],
+  })) ?? [];
+  (base as any).variants = variants;
+
+  // Mapeamos los SKUs inyectando la propiedad virtual "attributes" calculada
   if (Array.isArray((row as any).productSkus)) {
     const skus = (row as any).productSkus.map((s: any) => {
-      let images: string[] | undefined = undefined;
-      let attrs = s.attributes ?? {};
-      try {
-        if (attrs && typeof attrs === 'object' && Array.isArray(attrs.images)) {
-          images = attrs.images;
-          const { images: _img, ...rest } = attrs;
-          attrs = rest;
-        }
-      } catch {
-        // ignore
+      const attributes: Record<string, string> = {};
+      if (Array.isArray(s.skuValues)) {
+        s.skuValues.forEach((sv: any) => {
+          const optName = sv.optionValue?.option?.name;
+          const valName = sv.optionValue?.name;
+          if (optName && valName) {
+            attributes[optName] = valName;
+          }
+        });
       }
+
+      const images = Array.isArray(s.productSkuImages)
+        ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+        : [];
+
       return {
         id: s.id,
         sku: s.sku,
-        attributes: attrs,
+        attributes,
         images,
         stock: s.stock,
         price: s.price ? Number(s.price) : undefined,
         isActive: s.isActive,
       };
     });
-    // Attach using a non-invasive cast so existing callers don't break
     (base as any).skus = skus;
   }
   return base;
@@ -723,4 +818,3 @@ export async function getProductPriceHistory(productId: string): Promise<Product
     };
   });
 }
-
