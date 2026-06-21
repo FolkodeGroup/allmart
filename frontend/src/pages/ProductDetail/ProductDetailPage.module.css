@@ -558,6 +558,18 @@
   overflow: hidden;
 }
 
+/* Chrome, Safari, Edge, Opera */
+.qtyValue::-webkit-outer-spin-button,
+.qtyValue::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.qtyValue {
+  -moz-appearance: textfield;
+}
+
 .qtyBtn {
   width: 44px;
   height: 44px;
@@ -583,7 +595,8 @@
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   border: none;
-  background: transparent;
+  background: none;
+  color: var(--color-text-primary);
 }
 
 .buttonsRow {
