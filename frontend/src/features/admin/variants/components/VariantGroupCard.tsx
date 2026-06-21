@@ -26,7 +26,9 @@ interface VariantGroupCardProps {
   group: VariantGroup;
   onEditName: (id: string, newName: string) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (group: VariantGroup) => void;
   onEditValue: (groupId: string, oldValue: string, newValue: string) => void;
+  onToggleStatus: (id: string, newStatus: boolean) => void;
   onAddValue: (groupId: string, value: string) => void;
   onRemoveValue: (groupId: string, value: string) => void;
   canEdit: boolean;
@@ -47,6 +49,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   onEditName,
   onDelete,
   onEditValue,
+  onToggleStatus,
   onAddValue,
   onRemoveValue,
   canEdit,
@@ -55,7 +58,8 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
   setNewValue,
   error,
   setIsDirty,
-  onOpenEditModal,
+  onOpenEditModal, // Agregado para resolver error TS2304
+  onDuplicate      // Agregado para resolver error TS2304
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(group.name);
@@ -196,6 +200,17 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
 
           {menuOpen && (
             <div className={styles.actionsDropdown} role="menu">
+              {/* Toggle estado */}
+              <button
+                className={styles.dropdownItem}
+                type="button"
+                role="menuitem"
+                onClick={() => menuAction(() => onToggleStatus(group.id, !group.isActive))}
+              >
+                <span className={group.isActive ? styles.dotActive : styles.dotInactive} />
+                {group.isActive ? 'Desactivar variante' : 'Activar variante'}
+              </button>
+
               {/* Editar avanzado */}
               <button
                 className={styles.dropdownItem}
@@ -203,7 +218,17 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
                 role="menuitem"
                 onClick={() => menuAction(() => onOpenEditModal(group.id))}
               >
-                Editar (avanzado)
+                🛠️ Editar (avanzado)
+              </button>
+
+              {/* Duplicar */}
+              <button
+                className={styles.dropdownItem}
+                type="button"
+                role="menuitem"
+                onClick={() => menuAction(() => onDuplicate(group))}
+              >
+                ⧉ Duplicar grupo
               </button>
 
               {/* Separador antes de eliminar */}
@@ -217,7 +242,7 @@ export const VariantGroupCard: React.FC<VariantGroupCardProps> = ({
                   role="menuitem"
                   onClick={() => menuAction(() => onDelete(group.id))}
                 >
-                  Eliminar grupo
+                  🗑️ Eliminar grupo
                 </button>
               )}
             </div>

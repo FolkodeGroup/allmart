@@ -50,7 +50,6 @@ export interface VariantChild {
   stock?: number;
   images?: string[];
   price?: number;
-  isActive?: boolean;
 }
 
 /** POST /api/admin/products/:productId/variants/children */

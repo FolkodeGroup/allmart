@@ -20,6 +20,7 @@ import {
 } from './components';
 import { VariantsFilters } from './components/VariantFilters';
 import { useUnsavedChanges } from '../../../context/useUnsavedChanges';
+import type { VariantGroup } from '../../../context/AdminVariantsContext';
 
 export function AdminVariants() {
   // Estados para feedback UX
@@ -39,6 +40,7 @@ export function AdminVariants() {
     addVariant,
     updateVariant,
     deleteVariant,
+    toggleVariantStatus,
     addValueToVariant,
     removeValueFromVariant,
   } = useAdminVariants();
@@ -141,6 +143,32 @@ export function AdminVariants() {
     }
   };
 
+  // Nuevas funciones para edición avanzada
+  const handleDuplicateGroup = async (group: VariantGroup) => {
+    if (!selectedProductId) return;
+    const baseName = group.name + ' (Copia)';
+    let name = baseName;
+    let i = 2;
+    while (variants.some((v) => v.name === name)) {
+      name = `${baseName} ${i++}`;
+    }
+    try {
+      await addVariant(selectedProductId, name, group.values);
+      setNotif({ open: true, type: 'success', message: 'Variante duplicada correctamente.' });
+      const userEmail = user ?? 'desconocido';
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'create',
+        entity: 'variant',
+        entityId: '', // Se generará en el backend
+        details: { productId: selectedProductId, name, baseGroupId: group.id },
+      });
+    } catch {
+      setNotif({ open: true, type: 'error', message: 'Error al duplicar variante.' });
+    }
+  };
+
   const handleOpenEditModal = (groupId: string) => {
     const group = variants.find((v) => v.id === groupId);
     if (!group) return;
@@ -211,6 +239,24 @@ export function AdminVariants() {
       setNotif({ open: true, type: 'success', message: 'Valor editado correctamente.' });
     } catch {
       setNotif({ open: true, type: 'error', message: 'Error al editar valor.' });
+    }
+  };
+
+  const handleToggleStatus = async (variantId: string, newStatus: boolean) => {
+    if (!selectedProductId) return;
+    try {
+      await toggleVariantStatus(selectedProductId, variantId, newStatus);
+      const userEmail = user ?? 'desconocido';
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'update',
+        entity: 'variant',
+        entityId: variantId,
+        details: { productId: selectedProductId, isActive: newStatus },
+      });
+    } catch {
+      setNotif({ open: true, type: 'error', message: 'Error al cambiar estado de variante.' });
     }
   };
 
@@ -334,6 +380,7 @@ export function AdminVariants() {
                   onEditName={handleEditGroupName}
                   onDelete={handleDeleteGroup}
                   onEditValue={handleEditValue}
+                  onToggleStatus={handleToggleStatus}
                   onAddValue={handleAddValue}
                   onRemoveValue={handleRemoveValue}
                   canEdit={can('variants.edit')}
@@ -343,7 +390,8 @@ export function AdminVariants() {
                   errors={errors}
                   isPendingNavigation={isDirty}
                   setIsDirty={setIsDirty}
-                  onOpenEditModal={handleOpenEditModal}
+                  onDuplicate={handleDuplicateGroup}    // <-- PROP AGREGADA
+                  onOpenEditModal={handleOpenEditModal}  // <-- PROP AGREGADA
                 />
               )}
               {showWarning && (

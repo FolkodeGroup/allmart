@@ -34,8 +34,6 @@ export function errorHandler(
 export function createError(message: string, statusCode = 500, errors?: string[]): AppError {
   const error: AppError = new Error(message);
   error.statusCode = statusCode;
-  // Legacy code in some controllers expects `error.status`.
-  (error as any).status = statusCode;
   if (errors) error.errors = errors;
   return error;
 }

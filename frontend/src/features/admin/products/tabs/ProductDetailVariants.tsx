@@ -25,6 +25,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     addVariant,
     updateVariant,
     deleteVariant,
+    toggleVariantStatus,
     addValueToVariant,
     removeValueFromVariant,
     createVariantChild,
@@ -38,7 +39,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [combinationIsActive, setCombinationIsActive] = useState(true);
 
   // Modal avanzado
   const [editModal, setEditModal] = useState<{ open: boolean; groupId: string | null }>({ open: false, groupId: null });
@@ -57,6 +57,17 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   }, [productId]);
 
   // Handlers para acciones inline
+  type VariantGroup = { name: string; values: string[] };
+  const handleDuplicate = async (group: VariantGroup) => {
+    const baseName = group.name + ' (Copia)';
+    let name = baseName;
+    let i = 2;
+    while (variants.some((v: VariantGroup) => v.name === name)) {
+      name = `${baseName} ${i++}`;
+    }
+    await addVariant(productId, name, group.values);
+  };
+
   const handleAddGroup = async () => {
     if (!newGroupName.trim()) {
       setErrors(e => ({ ...e, group: 'El nombre es requerido' }));
@@ -80,6 +91,9 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     await deleteVariant(productId, id);
   };
 
+  const handleToggleStatus = async (id: string, newStatus: boolean) => {
+    await toggleVariantStatus(productId, id, newStatus);
+  };
 
   const handleAddValue = async (groupId: string, value: string) => {
     if (!value.trim()) return;
@@ -207,7 +221,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     } catch {
       // ignore
     }
-    setCombinationIsActive(true);
     setCombinationModalOpen(true);
   };
 
@@ -313,10 +326,10 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
     let persistedSkuId: string | undefined = undefined;
     if (editingSkuId) {
-      await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price, isActive: combinationIsActive, });
+      await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price });
       persistedSkuId = editingSkuId;
     } else {
-      const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price, isActive: combinationIsActive, });
+      const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price });
       if (created && typeof created === 'object' && (created as Record<string, unknown>).id) {
         persistedSkuId = String((created as Record<string, unknown>).id);
       }
@@ -374,7 +387,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     } else {
       setFiles([] as UploadFileState[]);
     }
-    setCombinationIsActive(sku.isActive !== false);
     setCombinationModalOpen(true);
   };
 
@@ -407,17 +419,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
-  // Handler para alternar el estado activo de un SKU directamente desde la tabla
-  const handleToggleSkuActive = async (skuId: string, newActive: boolean) => {
-    if (!productId) return;
-    try {
-      await updateVariantChild(productId, skuId, { isActive: newActive });
-      toast.success(newActive ? 'Combinación activada' : 'Combinación desactivada');
-    } catch {
-      toast.error('No se pudo actualizar el estado de la combinación');
-    }
-  };
-
   // Filtrar localmente las SKUs que se eliminaron optimistamente
   const visibleSkus = (skus || []).filter((s) => !deletedSkuIds.has(s.id));
 
@@ -445,7 +446,9 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           groups={variants}
           onEditName={handleEditName}
           onDelete={handleDelete}
+          onDuplicate={handleDuplicate}
           onEditValue={handleEditValue}
+          onToggleStatus={handleToggleStatus}
           onAddValue={handleAddValue}
           onRemoveValue={handleRemoveValue}
           canEdit={true}
@@ -509,7 +512,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           localCombinations={createdCombinations}
           onEdit={handleEditCombination}
           onDelete={handleDeleteCombination}
-          onToggleActive={handleToggleSkuActive}
         />
       </section>
 
@@ -581,17 +583,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 value={combinationStock === '' ? '' : String(combinationStock)}
                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
               />
-            </div>
-            <div className={styles.fieldRow}>
-              <label htmlFor="combination-active" className={styles.checkboxLabel}>
-                <input
-                  id="combination-active"
-                  type="checkbox"
-                  checked={combinationIsActive}
-                  onChange={e => setCombinationIsActive(e.target.checked)}
-                />
-                Combinación activa
-              </label>
             </div>
             <div className={styles.modalActions}>
               <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>

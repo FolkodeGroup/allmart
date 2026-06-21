@@ -594,26 +594,9 @@
   font-family: var(--font-ui);
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
-  color: var(--color-text-primary);
   border: none;
   background: none;
   color: var(--color-text-primary);
-}
-
-.qtyValue:focus {
-  outline: none;
-  border: none;
-}
-
-/* Ocultar flechas de aumentar y disminuir en el input de cantidad de productos */
-.qtyValue::-webkit-outer-spin-button,
-.qtyValue::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.qtyValue {
-  -moz-appearance: textfield;
 }
 
 .buttonsRow {

@@ -10,7 +10,6 @@ interface Sku {
     stock?: number;
     price?: number;
     images?: string[];
-    isActive?: boolean;
 }
 
 interface LocalCombination {
@@ -27,7 +26,6 @@ interface CombinationsTableProps {
     localCombinations: LocalCombination[];
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
-    onToggleActive?: (id: string, isActive: boolean) => void;
 }
 
 // ── Menú de tres puntos para cada fila ──────────────────────────────────────
@@ -137,7 +135,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                         role="menuitem"
                         onClick={() => run(onEdit)}
                     >
-                        Editar
+                        ✏️ Editar
                     </button>
                     <div className={styles.dropdownDivider} />
                     <button
@@ -146,7 +144,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                         role="menuitem"
                         onClick={() => run(onDelete)}
                     >
-                        Eliminar
+                        🗑️ Eliminar
                     </button>
                 </div>,
                 document.body
@@ -161,13 +159,13 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
     localCombinations,
     onEdit,
     onDelete,
-    onToggleActive,
 }) => {
     const isEmpty = skus.length === 0 && localCombinations.length === 0;
 
     if (isEmpty) {
         return (
             <div className={styles.emptyState}>
+                <span className={styles.emptyIcon}>📦</span>
                 <p>Todavía no hay combinaciones.</p>
                 <small>Usá el botón de arriba para agregar la primera.</small>
             </div>
@@ -184,7 +182,6 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                         <th className={styles.thSku}>SKU</th>
                         <th className={styles.thPrice}>Precio</th>
                         <th className={styles.thStock}>Stock</th>
-                        <th className={styles.thActive}>Estado</th>
                         <th className={styles.thActions}></th>
                     </tr>
                 </thead>
@@ -228,16 +225,6 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                 ) : (
                                     <span className={styles.na}>—</span>
                                 )}
-                            </td>
-                            <td className={styles.tdActive}>
-                                <button
-                                    type="button"
-                                    className={s.isActive !== false ? styles.toggleActive : styles.toggleInactive}
-                                    onClick={() => onToggleActive?.(s.id, !(s.isActive !== false))}
-                                    title={s.isActive !== false ? 'Activa — click para desactivar' : 'Inactiva — click para activar'}
-                                >
-                                    {s.isActive !== false ? 'Activo' : 'Inactivo'}
-                                </button>
                             </td>
                             <td className={styles.tdActions}>
                                 <RowMenu onEdit={() => onEdit(s.id)} onDelete={() => onDelete(s.id)} />

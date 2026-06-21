@@ -14,7 +14,7 @@ export interface BannerFilterConfig {
 export type BannerTag = 'oferta' | 'destacado' | 'novedad';
 
 export const BANNER_TAGS: { value: BannerTag; label: string }[] = [
-    { value: 'oferta', label: 'En oferta' },
-    { value: 'destacado', label: 'Destacados' },
-    { value: 'novedad', label: 'Novedades' },
+    { value: 'oferta', label: '🏷️ En oferta' },
+    { value: 'destacado', label: '⭐ Destacados' },
+    { value: 'novedad', label: '🆕 Novedades' },
 ];

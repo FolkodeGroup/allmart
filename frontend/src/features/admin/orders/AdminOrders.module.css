@@ -11,12 +11,6 @@
 }
 
 /* Indicadores visuales para estados problemáticos */
-.orderStatusSelectorContainer {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.5em;
-}
-
 .statusTag {
   display: inline-flex;
   align-items: center;
@@ -52,11 +46,6 @@
 
 .statusTagText {
   vertical-align: middle;
-}
-
-.statusConfirmActions {
-  display: flex;
-  gap: var(--space-3);
 }
 
 /* ── Paginación ── */
@@ -162,7 +151,6 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: var(--space-3);
-  padding-bottom: 30px;
 }
 
 @media (max-width: 1023px) {
@@ -248,7 +236,7 @@
 }
 
 .cardEnviado::before {
-  background: var(--color-primary-light, #10b981);
+  background: var(--color-primary, #10b981);
 }
 
 .cardEntregado::before {
@@ -268,7 +256,7 @@
 }
 
 .numEnviado {
-  color: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
 .numEntregado {
@@ -328,7 +316,7 @@
 }
 
 .searchInput:focus,
-.searchInput:hover {
+.searchInput:hover{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -398,7 +386,7 @@
 }
 
 .filterSelect:focus,
-.filterSelect:hover {
+.filterSelect:hover{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -499,7 +487,7 @@
 }
 
 .dateInput:focus,
-.dateInput:hover {
+.dateInput:hover{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -534,7 +522,7 @@
 }
 
 .totalInput:focus,
-.totalInput:hover {
+.totalInput:hover{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -650,8 +638,8 @@
   padding: 16px 20px;
 }
 
-.tdEmail {
-  color: var(--color-normal-gray);
+.tdEmail{
+  color: var(--color-normal-gray) ;
   font-size: 0.8rem;
 }
 
@@ -857,7 +845,7 @@
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
   border-radius: 999px;
-  padding: 10px;
+  padding: 4px 10px;
   white-space: nowrap;
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
@@ -1602,12 +1590,10 @@
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
   border-radius: 8px;
+  padding: var(--space-2) var(--space-5);
   cursor: pointer;
   transition: background 0.15s;
   flex: 1;
-  min-width: fit-content;
-  width: fit-content;
-  padding: var(--space-2) 0;
 }
 
 .cancelBtn:hover {
@@ -1664,9 +1650,7 @@
   color: var(--color-text-inverse);
   border: none;
   border-radius: 8px;
-  min-width: fit-content;
-  width: fit-content;
-  padding: var(--space-2) 0;
+  padding: var(--space-2) var(--space-5);
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   flex: 1;
@@ -1931,7 +1915,7 @@
   width: 120px;
 }
 
-.customerTd {
+.customerTd{
   font-weight: 600;
   font-size: 16px;
   color: var(--color-text-primary);
@@ -2010,3 +1994,4 @@
     transform: scale(1);
   }
 }
+
