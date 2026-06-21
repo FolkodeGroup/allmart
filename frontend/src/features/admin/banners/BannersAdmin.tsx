@@ -8,7 +8,7 @@ import { useBlocker } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
-import { Trash2, Plus, Edit2, Eye, EyeOff } from 'lucide-react';
+import { Trash2, Edit2, Eye, EyeOff, Plus } from 'lucide-react';
 import { bannersAdminService, type AdminBanner } from './bannersAdminService';
 import { publicBannersService } from '../../../services/publicBannersService';
 import { Button } from '../../../components/ui/Button/Button';
@@ -306,9 +306,9 @@ export function BannersAdmin() {
   }
 
   return (
-    <div className={sectionStyles.container}>
-      <div className={sectionStyles.header}>
-        <div>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerText}>
           <h1 className={sectionStyles.title}>Gestionar Banners</h1>
           <p className={sectionStyles.subtitle}>Crea y organiza los banners de la homepage</p>
         </div>
@@ -431,7 +431,7 @@ export function BannersAdmin() {
                     checked={formData.isPinned}
                     onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
                   />
-                  Fijar al inicio 📌
+                  Fijar al inicio
                 </label>
               </div>
 
@@ -450,9 +450,6 @@ export function BannersAdmin() {
             </div>
 
             <div className={styles.formActions}>
-              <Button type="button" className={styles.btnSecondary} onClick={handleCancelForm}>
-                Cancelar
-              </Button>
               <Button
                 type="submit"
                 className={styles.btnPrimary}
@@ -460,6 +457,9 @@ export function BannersAdmin() {
                 loadingText={editingId ? 'Actualizando...' : 'Creando...'}
               >
                 {editingId ? 'Actualizar' : 'Crear'} Banner
+              </Button>
+              <Button type="button" className={styles.btnSecondary} onClick={handleCancelForm}>
+                Cancelar
               </Button>
             </div>
           </form>

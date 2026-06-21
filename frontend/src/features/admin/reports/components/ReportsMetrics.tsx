@@ -2,21 +2,19 @@ import React from 'react';
 import styles from '../AdminReports.module.css';
 
 export interface MetricCardProps {
-    icon: React.ReactNode;
     label: string;
     value: React.ReactNode;
     highlight?: boolean;
     trend?: number; // Porcentaje de cambio para mostrar tendencia
 }
 
-export const MetricCard: React.FC<MetricCardProps & { colorClass?: string }> = ({ icon, label, value, trend, colorClass }) => (
+export const MetricCard: React.FC<MetricCardProps & { colorClass?: string }> = ({ label, value, trend, colorClass }) => (
     <div className={[
         styles.metricCard,
         colorClass ? styles[colorClass] : '',
     ].filter(Boolean).join(' ')}>
-        <div className={styles.metricIcon}>{icon}</div>
-        <div className={styles.metricValue}>{value}</div>
         <div className={styles.metricLabel}>{label}</div>
+        <div className={styles.metricValue}>{value}</div>
         {trend !== undefined && (
             <div className={styles.metricTrend + ' ' + (trend > 0 ? styles.trendUp : trend < 0 ? styles.trendDown : styles.trendNeutral)}>
                 {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend).toFixed(1)}%

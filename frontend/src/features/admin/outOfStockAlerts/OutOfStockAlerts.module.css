@@ -16,13 +16,13 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 3px solid #d32f2f;
+  border-bottom: 2px solid var(--color-border);
   padding-bottom: 10px;
 }
 
 .header h2 {
   margin: 0;
-  color: #d32f2f;
+  color: var(--color-text-primary);
   font-size: 1.5rem;
 }
 
@@ -45,11 +45,14 @@
 .empty {
   text-align: center;
   padding: 40px;
-  background: #e8f5e9;
+  background: var(--color-bg-tertiary);
   border-radius: 8px;
-  color: #2e7d32;
   font-size: 1rem;
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid var(--color-success);
+}
+
+.empty p {
+  color: var(--color-text-primary);
 }
 
 .alertsList {
@@ -60,9 +63,8 @@
 }
 
 .alertCard {
-  background: #fafafa;
-  border: 2px solid #ffebee;
-  border-left: 5px solid #d32f2f;
+  background: rgba(211, 47, 47, 0.25);
+  border-left: 5px solid var(--color-error-mode);
   border-radius: 8px;
   overflow: hidden;
   transition: box-shadow 0.2s ease;
@@ -74,16 +76,16 @@
 
 .cardHeader {
   padding: 16px;
-  background: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
+  width: 100%;
 }
 
 .cardHeader:hover {
-  background: #f5f5f5;
+  background: rgba(211, 47, 47, 0.175);
 }
 
 .productInfo {
@@ -93,32 +95,38 @@
 .productInfo h3 {
   margin: 0 0 8px 0;
   font-size: 1.1rem;
-  color: #333;
+  color: var(--color-text-primary);
+  text-align: left;
 }
 
 .metadata {
   display: flex;
   gap: 16px;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--color-text-primary);
 }
 
 .sku {
   font-family: monospace;
-  background: #e8eaf6;
-  padding: 2px 6px;
+  background: var(--color-bg-primary);
+  padding: 0.5rem 1rem;
   border-radius: 3px;
 }
 
 .stock {
   font-weight: 600;
-  color: #d32f2f;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
 }
 
 .summary {
   display: flex;
   gap: 24px;
-  padding: 0 16px;
+  background: var(--color-bg-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 5px;
   align-items: center;
 }
 
@@ -130,14 +138,14 @@
 
 .summaryItem .label {
   font-size: 0.75rem;
-  color: #999;
+  color: #666;
   font-weight: 600;
 }
 
 .summaryItem .value {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #d32f2f;
+  color: var(--color-text-primary);
 }
 
 .expandBtn {
@@ -146,34 +154,28 @@
   font-size: 1.2rem;
   cursor: pointer;
   padding: 4px 8px;
-  color: #666;
+  color: var(--color-text-primary);
   transition: color 0.2s ease;
-}
-
-.expandBtn:hover {
-  color: #d32f2f;
 }
 
 .cardContent {
   padding: 16px;
-  background: #fff;
-  border-top: 1px solid #eee;
+  background: var(--color-bg-secondary);
 }
 
 .cardContent h4 {
   margin: 0 0 12px 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 0.95rem;
   text-transform: uppercase;
   font-weight: 600;
 }
 
 .orderRow {
-  background: #fafafa;
+  background: var(--color-bg-primary);
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 12px;
-  border-left: 3px solid #2196f3;
 }
 
 .orderRow:last-child {
@@ -191,29 +193,30 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  border-color: 1px solid var(--color-bg-secondary);
 }
 
 .orderInfo strong {
   font-family: monospace;
-  background: #e3f2fd;
-  padding: 4px 8px;
+  background: rgba(211, 47, 47, 0.25);
+  padding: 0.25rem 0.75rem;
   border-radius: 3px;
   font-size: 0.9rem;
+  color: var(--color-text-primary);
 }
 
 .status {
   display: inline-block;
-  padding: 2px 8px;
-  background: #fff3e0;
-  color: #e65100;
+  padding: 0.25rem 0.75rem;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   border-radius: 3px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .customer {
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 0.95rem;
 }
 
@@ -243,11 +246,11 @@
 }
 
 .orderItems {
-  background: white;
+  background: var(--color-bg-tertiary);
   padding: 8px;
   border-radius: 4px;
   margin-top: 8px;
-  border: 1px solid #eee;
+  border: 1px solid var(--color-border);
 }
 
 .item {
@@ -265,7 +268,7 @@
 
 .itemName {
   flex: 1;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .itemQty {
@@ -322,7 +325,7 @@
   display: block;
   margin: 20px auto;
   padding: 10px 20px;
-  background: #d32f2f;
+  background: var(--color-error-mode);
   color: white;
   border: none;
   border-radius: 4px;

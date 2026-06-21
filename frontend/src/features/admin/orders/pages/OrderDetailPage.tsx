@@ -150,17 +150,14 @@ export default function OrderDetailPage() {
             </h1>
             <div className={styles.headerMeta}>
               <span className={styles.metaItem}>
-                <span className={styles.metaIcon}>📅</span>
                 {formatDateTime(order.createdAt)}
               </span>
               <span className={styles.metaDivider}>•</span>
               <span className={styles.metaItem}>
-                <span className={styles.metaIcon}>💰</span>
                 {formatPrice(order.total)}
               </span>
               <span className={styles.metaDivider}>•</span>
               <span className={styles.metaItem}>
-                <span className={styles.metaIcon}>📦</span>
                 {order.items.length} producto{order.items.length !== 1 ? 's' : ''}
               </span>
             </div>
