@@ -86,7 +86,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   }, [isFavorito, product, syncFavorite]);
 
 
-  const toggleFavorito = (e:React.MouseEvent) => {
+  const toggleFavorito = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
@@ -197,7 +197,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           {isNew && <Badge variant="new">Nuevo</Badge>}
           {typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
             <Badge className={`${styles.badge} ${styles.lowStockBadge}`}>
-              <AlertTriangle size={16} style={{marginRight: 4}} /> Stock bajo
+              <AlertTriangle size={16} style={{ marginRight: 4 }} /> Stock bajo
             </Badge>
           )}
         </div>
@@ -207,7 +207,8 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           type="button"
           onClick={toggleFavorito}
         >
-          <Heart size={18} fill={isFavorito ? 'currentColor' : 'transparent'} aria-hidden="true" />
+          <Heart size={18} stroke="currentColor"
+            strokeWidth={2} className={styles.wishlistBtnIcon} fill={isFavorito ? 'currentColor' : 'transparent'} aria-hidden="true" />
         </button>
       </div>
 
@@ -224,17 +225,17 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           <span>({product.reviewCount})</span>
         </div>
         <div className={styles.priceRow}>
-                {dynamicDiscount ? (
-                  <ProductPrice
-                    price={dynamicDiscount.finalPrice}
-                    size="md"
-                  />
-                ) : (
-                  <ProductPrice
-                    price={product.price}
-                    size="md"
-                  />
-                )}
+          {dynamicDiscount ? (
+            <ProductPrice
+              price={dynamicDiscount.finalPrice}
+              size="md"
+            />
+          ) : (
+            <ProductPrice
+              price={product.price}
+              size="md"
+            />
+          )}
         </div>
       </div>
       <Link
