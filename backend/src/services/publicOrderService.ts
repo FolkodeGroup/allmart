@@ -7,6 +7,7 @@ import { prisma } from '../config/prisma';
 import { CreatePublicOrderDTO } from '../types';
 import { createError } from '../middlewares/errorHandler';
 import { sendOrderConfirmationEmail } from './orderConfirmationEmailService';
+import { stripSuffixId, looksLikeUuid } from '../utils/normalizeId';
 
 export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<string> {
   const { customer, items, total, notes } = data;
@@ -41,39 +42,46 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    // Validar que todos los productos existan antes de crear la orden
-    const validatedItems = [];
+    // Validar que todos los productos/variantes existan antes de crear la orden
+    const validatedItems: Array<any> = [];
     for (const item of items) {
-        // Normalizar y validar productId para evitar llamadas inválidas a Prisma
-        const rawProductId = (item as any).productId;
-        if (rawProductId === undefined || rawProductId === null || rawProductId === '') {
-          throw createError(`Producto con ID ${rawProductId} inválido`, 400);
+      // Normalizar ids que pueden venir con sufijos (p.ej. productId::skuId o productId::original)
+      const rawId = String(item.productId);
+      const stripped = stripSuffixId(rawId);
+
+      // Si parece UUID, intentar buscar primero un SKU (variant) por id
+      if (looksLikeUuid(stripped)) {
+        const sku = await tx.productSku.findUnique({ where: { id: stripped }, select: { id: true, productId: true, stock: true, price: true } as any }) as any;
+        if (sku) {
+          const parent = await tx.product.findUnique({ where: { id: sku.productId }, select: { id: true, name: true, stock: true } });
+          if (!parent) {
+            throw createError(`Producto padre de la variante ${rawId} no encontrado`, 404);
+          }
+          item.unitPrice = item.unitPrice ?? (sku.price ? Number(sku.price) : item.unitPrice);
+          validatedItems.push({ ...item, product: parent, resolvedProductId: parent.id });
+        } else {
+          const product = await tx.product.findUnique({ where: { id: stripped }, select: { id: true, name: true, stock: true } });
+          if (!product) {
+            throw createError(`Producto con ID ${rawId} no encontrado`, 404);
+          }
+          validatedItems.push({ ...item, product, resolvedProductId: product.id });
         }
-
-        let normalizedProductId = typeof rawProductId === 'string' ? rawProductId : String(rawProductId);
-
-        // If frontend appended a suffix like `::original` or `::<skuId>`, keep only the real product id (UUID)
-        if (typeof normalizedProductId === 'string' && normalizedProductId.includes('::')) {
-          normalizedProductId = normalizedProductId.split('::')[0];
+      } else {
+        // No parece UUID: intentar buscar por sku code o por slug
+        const skuByCode = await tx.productSku.findFirst({ where: { sku: stripped }, select: { id: true, productId: true, stock: true, price: true } as any }) as any;
+        if (skuByCode) {
+          const parent = await tx.product.findUnique({ where: { id: skuByCode.productId }, select: { id: true, name: true, stock: true } });
+          if (!parent) throw createError(`Producto padre de la variante ${rawId} no encontrado`, 404);
+          item.unitPrice = item.unitPrice ?? (skuByCode.price ? Number(skuByCode.price) : item.unitPrice);
+          validatedItems.push({ ...item, product: parent, resolvedProductId: parent.id });
+        } else {
+          const productBySlug = await tx.product.findFirst({ where: { slug: stripped }, select: { id: true, name: true, stock: true } });
+          if (!productBySlug) {
+            throw createError(`Producto con identificador ${rawId} no encontrado`, 404);
+          }
+          validatedItems.push({ ...item, product: productBySlug, resolvedProductId: productBySlug.id });
         }
-
-        let product;
-        try {
-          product = await tx.product.findUnique({
-            where: { id: normalizedProductId },
-            select: { id: true, name: true, stock: true },
-          });
-        } catch (err) {
-          // Prisma throws informative errors for invalid args (e.g. wrong type)
-          throw createError(`Error buscando el producto con ID ${normalizedProductId}`, 400);
-        }
-
-        if (!product) {
-          throw createError(`Producto con ID ${normalizedProductId} no encontrado`, 404);
-        }
-
-        // Store normalized productId so downstream writes use the correct UUID
-        validatedItems.push({ ...item, product, productId: normalizedProductId });
+      }
     }
 
     const order = await tx.order.create({
@@ -92,8 +100,9 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     await tx.orderItem.createMany({
       data: validatedItems.map((item) => ({
         orderId: order.id,
-        productId: (item as any).productId,
-        productName: item.productName ?? item.product?.name,
+        // usar el productId resuelto (id del producto padre) para la FK en order_items
+        productId: item.resolvedProductId ?? stripSuffixId(String(item.productId)),
+        productName: item.productName,
         productImage: item.productImage ?? null,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
