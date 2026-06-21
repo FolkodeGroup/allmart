@@ -407,6 +407,17 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
+  // Handler para alternar el estado activo de un SKU directamente desde la tabla
+  const handleToggleSkuActive = async (skuId: string, newActive: boolean) => {
+    if (!productId) return;
+    try {
+      await updateVariantChild(productId, skuId, { isActive: newActive });
+      toast.success(newActive ? 'Combinación activada' : 'Combinación desactivada');
+    } catch {
+      toast.error('No se pudo actualizar el estado de la combinación');
+    }
+  };
+
   // Filtrar localmente las SKUs que se eliminaron optimistamente
   const visibleSkus = (skus || []).filter((s) => !deletedSkuIds.has(s.id));
 
