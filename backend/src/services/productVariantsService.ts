@@ -8,7 +8,6 @@ import { ProductVariant, CreateProductVariantDTO, UpdateProductVariantDTO } from
 import { createError } from '../middlewares/errorHandler';
 import * as productsService from './productsService';
 
-// Mapea la fila relacional de Prisma al DTO plano de variante que el frontend espera
 function toVariant(row: any): ProductVariant {
   return {
     id: row.id,
@@ -22,7 +21,8 @@ function toVariant(row: any): ProductVariant {
 }
 
 export async function getVariantsByProduct(productId: string): Promise<ProductVariant[]> {
-  await productsService.getProductById(productId); // Valida que el producto exista
+  const exists = await productsService.checkProductExists(productId);
+  if (!exists) throw createError('Producto no encontrado', 404);
   
   const rows = await prisma.productOption.findMany({ 
     where: { productId },
@@ -32,7 +32,8 @@ export async function getVariantsByProduct(productId: string): Promise<ProductVa
 }
 
 export async function getVariantById(productId: string, variantId: string): Promise<ProductVariant> {
-  await productsService.getProductById(productId);
+  const exists = await productsService.checkProductExists(productId);
+  if (!exists) throw createError('Producto no encontrado', 404);
   
   const row = await prisma.productOption.findFirst({
     where: { id: variantId, productId },
@@ -46,12 +47,12 @@ export async function createVariant(
   productId: string,
   dto: Omit<CreateProductVariantDTO, 'productId'>
 ): Promise<ProductVariant> {
-  await productsService.getProductById(productId);
+  const exists = await productsService.checkProductExists(productId);
+  if (!exists) throw createError('Producto no encontrado', 404);
   
   const valuesArray = Array.isArray(dto.values) ? dto.values : [];
 
   const row = await prisma.$transaction(async (tx) => {
-    // 1. Crear el grupo de opción (Color, Talle, etc.)
     const option = await tx.productOption.create({
       data: {
         productId,
@@ -60,7 +61,6 @@ export async function createVariant(
       }
     });
 
-    // 2. Crear los valores asociados
     if (valuesArray.length > 0) {
       await tx.productOptionValue.createMany({
         data: valuesArray.map((val: string) => ({
@@ -84,12 +84,17 @@ export async function updateVariant(
   variantId: string,
   dto: UpdateProductVariantDTO
 ): Promise<ProductVariant> {
-  await getVariantById(productId, variantId);
+  const exists = await productsService.checkProductExists(productId);
+  if (!exists) throw createError('Producto no encontrado', 404);
+
+  const optionExists = await prisma.productOption.count({
+    where: { id: variantId, productId }
+  });
+  if (optionExists === 0) throw createError('Variante no encontrada', 404);
   
   const valuesArray = Array.isArray(dto.values) ? dto.values : undefined;
 
   const row = await prisma.$transaction(async (tx) => {
-    // 1. Actualizar el nombre o estado del grupo de opción
     await tx.productOption.update({
       where: { id: variantId },
       data: {
@@ -98,7 +103,6 @@ export async function updateVariant(
       }
     });
 
-    // 2. Si se pasan nuevos valores, reescribir la tabla de valores
     if (valuesArray !== undefined) {
       await tx.productOptionValue.deleteMany({
         where: { optionId: variantId }
@@ -124,6 +128,14 @@ export async function updateVariant(
 }
 
 export async function deleteVariant(productId: string, variantId: string): Promise<void> {
-  await getVariantById(productId, variantId);
-  await prisma.productOption.delete({ where: { id: variantId } });
+  // Optimización: Unica consulta de eliminación atómica
+  const result = await prisma.productOption.deleteMany({
+    where: {
+      id: variantId,
+      productId
+    }
+  });
+  if (result.count === 0) {
+    throw createError('Variante no encontrada', 404);
+  }
 }

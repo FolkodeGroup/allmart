@@ -141,6 +141,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     { sku?: string; attributes: Record<string, string>; price?: number; stock?: number }[]
   >([]);
 
+  // Estados para el Modal de Confirmación de Eliminación Individual Customizado
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [skuToDeleteId, setSkuToDeleteId] = useState<string | null>(null);
+
+  // Estado optimista para eliminación inmediata (0ms percibidos en UI)
+  const [deletedSkuIds, setDeletedSkuIds] = useState<Set<string>>(new Set());
+
   type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
@@ -383,14 +390,37 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationModalOpen(true);
   };
 
-  const handleDeleteCombination = async (id: string) => {
-    if (!window.confirm('¿Eliminar esta combinación?')) return;
+  // ─── 4. Eliminación vinculada a ModalConfirm Custom con Optimistic UI ─────
+  const handleDeleteCombination = (id: string) => {
+    setSkuToDeleteId(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const executeDeleteCombination = async () => {
+    if (!productId || !skuToDeleteId) return;
+    setDeleteConfirmOpen(false);
+    
+    // Optimistic UI Update: Ocultar de inmediato en la tabla
+    setDeletedSkuIds(prev => new Set([...prev, skuToDeleteId]));
+
     try {
-      await deleteVariantChild(productId, id);
+      await deleteVariantChild(productId, skuToDeleteId);
+      toast.success('Combinación eliminada correctamente');
     } catch {
-      // Error handled silently
+      // Revertir estado si falla
+      setDeletedSkuIds(prev => {
+        const next = new Set(prev);
+        next.delete(skuToDeleteId);
+        return next;
+      });
+      toast.error('No se pudo eliminar la combinación');
+    } finally {
+      setSkuToDeleteId(null);
     }
   };
+
+  // Filtrar localmente las SKUs que se eliminaron optimistamente
+  const visibleSkus = (skus || []).filter((s) => !deletedSkuIds.has(s.id));
 
   return (
     <div className={styles.container}>
@@ -478,7 +508,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         )}
 
         <CombinationsTable
-          skus={skus}
+          skus={visibleSkus}
           localCombinations={createdCombinations}
           onEdit={handleEditCombination}
           onDelete={handleDeleteCombination}
@@ -569,7 +599,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         </div>
       )}
 
-      {/* Modal de Confirmación de Generación Masiva con estilos de UI uniformes */}
+      {/* Modal de Confirmación de Generación Masiva */}
       <ModalConfirm
         open={bulkConfirmOpen}
         title="Generar combinaciones"
@@ -580,6 +610,20 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         onCancel={() => {
           setBulkConfirmOpen(false);
           setCombosToCreate([]);
+        }}
+      />
+
+      {/* Modal de Confirmación para Eliminar Combinación Individual */}
+      <ModalConfirm
+        open={deleteConfirmOpen}
+        title="Eliminar combinación"
+        description="¿Estás seguro de que deseas eliminar esta combinación? Esta acción no se puede deshacer."
+        confirmText="Aceptar"
+        cancelText="Cancelar"
+        onConfirm={executeDeleteCombination}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+          setSkuToDeleteId(null);
         }}
       />
     </div>

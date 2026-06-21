@@ -52,11 +52,6 @@
     text-align: center;
 }
 
-.thActions {
-    width: 140px;
-    text-align: right;
-}
-
 /* ── Filas ── */
 .row {
     border-bottom: 1px solid var(--color-border-light);
@@ -98,10 +93,6 @@
 
 .tdStock {
     text-align: center;
-}
-
-.tdActions {
-    text-align: right;
 }
 
 /* ── Thumbnail ── */
@@ -191,7 +182,12 @@
     font-size: var(--text-xs);
 }
 
-/* ── Acciones: menú de tres puntos ── */
+/* ── Acciones: menú de tres puntos ──────────────────────────────────────────
+   El dropdown (.rowDropdown) se renderiza en un portal a document.body con
+   position:fixed (ver CombinationTable.tsx), por lo que su posición se
+   calcula en JS (top/left inline) y NO depende de .tdActions/.rowMenuWrapper
+   como contenedor posicionado. Esto evita que el menú quede atrapado dentro
+   del overflow-x:auto de .tableWrapper y dispare scrollbars al abrirse. ── */
 .thActions {
     width: 48px;
     text-align: center;
@@ -199,12 +195,9 @@
 
 .tdActions {
     text-align: center;
-    /* Necesario para que el dropdown use position: absolute sin afectar el layout */
-    position: relative;
 }
 
 .rowMenuWrapper {
-    position: relative;
     display: inline-flex;
     justify-content: center;
 }
@@ -230,28 +223,25 @@
     color: var(--color-text-primary);
 }
 
+/* Posición (top/left) se setea inline desde JS; acá solo van estilos visuales */
 .rowDropdown {
-    position: absolute;
-    right: 0;
     min-width: 150px;
     background: var(--color-bg-primary);
     border: 1px solid var(--color-border);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    z-index: 200;
+    z-index: 1000;
     padding: var(--space-1);
     animation: dropdownIn 0.14s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Hacia abajo (default) */
 .rowDropdownDown {
-    top: calc(100% + 4px);
     transform-origin: top right;
 }
 
 /* Hacia arriba (cuando no hay espacio debajo) */
 .rowDropdownUp {
-    bottom: calc(100% + 4px);
     transform-origin: bottom right;
 }
 

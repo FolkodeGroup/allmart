@@ -80,6 +80,13 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
     const [combosToCreate, setCombosToCreate] = useState<CreatedCombination[]>([]);
 
+    // Estados para el Modal de Confirmación de Eliminación Individual Customizado
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [skuToDeleteId, setSkuToDeleteId] = useState<string | null>(null);
+
+    // Estado optimista para eliminación inmediata (0ms percibidos en UI)
+    const [deletedSkuIds, setDeletedSkuIds] = useState<Set<string>>(new Set());
+
     useEffect(() => {
         if (!productId) return;
         loadSkus(productId);
@@ -144,7 +151,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationStock('');
         setCombinationImages('');
         
-        // ─── 2. Precio Heredado ──────────────────────────────────────────────────
         setCombinationPrice(form.price > 0 ? form.price : '');
         setCombinationSku(form.sku ? `${form.sku}-` : '');
         setEditingSkuId(null);
@@ -215,7 +221,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             return;
         }
 
-        // En lugar del window.confirm nativo, abrimos el modal de la app
         setCombosToCreate(newCombosToCreate);
         setBulkConfirmOpen(true);
     };
@@ -225,7 +230,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         if (!productId) return;
         setBulkConfirmOpen(false);
 
-        // UI Optimista
         setCreatedCombinations(prev => [...combosToCreate, ...prev]);
 
         for (const combo of combosToCreate) {
@@ -325,10 +329,33 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationModalOpen(true);
     };
 
-    const handleDeleteCombination = async (id: string) => {
+    // ─── 5. Eliminación vinculada a ModalConfirm Custom con Optimistic UI ─────
+    const handleDeleteCombination = (id: string) => {
         if (!productId) return;
-        if (!window.confirm('¿Eliminar esta combinación?')) return;
-        await deleteVariantChild(productId, id);
+        setSkuToDeleteId(id);
+        setDeleteConfirmOpen(true);
+    };
+
+    const executeDeleteCombination = async () => {
+        if (!productId || !skuToDeleteId) return;
+        setDeleteConfirmOpen(false);
+
+        // Optimistic UI Update: Ocultar de inmediato
+        setDeletedSkuIds(prev => new Set([...prev, skuToDeleteId]));
+
+        try {
+            await deleteVariantChild(productId, skuToDeleteId);
+        } catch (err) {
+            console.error('Error al eliminar la combinación:', err);
+            // Revertir estado si falla
+            setDeletedSkuIds(prev => {
+                const next = new Set(prev);
+                next.delete(skuToDeleteId);
+                return next;
+            });
+        } finally {
+            setSkuToDeleteId(null);
+        }
     };
 
     useImperativeHandle(ref, () => ({
@@ -339,6 +366,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             return errs;
         }
     }), [form]);
+
+    // Filtrar localmente las SKUs que se eliminaron optimistamente
+    const visibleSkus = (skus || []).filter((s: Sku) => !deletedSkuIds.has(s.id));
 
     return (
         <fieldset className={styles.fieldset}>
@@ -457,7 +487,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 )}
 
                 <CombinationsTable
-                    skus={skus}
+                    skus={visibleSkus}
                     localCombinations={createdCombinations}
                     onEdit={handleEditCombination}
                     onDelete={handleDeleteCombination}
@@ -511,9 +541,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         </div>
                         {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
                         <div className={styles.fieldRow}>
-                            <label htmlFor="combination-price">Precio</label>
+                            <label htmlFor="combination-sku-price">Precio</label>
                             <input
-                                id="combination-price"
+                                id="combination-sku-price"
                                 type="number"
                                 step="0.01"
                                 value={combinationPrice === '' ? '' : String(combinationPrice)}
@@ -549,7 +579,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 </div>
             )}
 
-            {/* Modal de Confirmación de Generación Masiva con estilos de UI uniformes */}
+            {/* Modal de Confirmación de Generación Masiva */}
             <ModalConfirm
                 open={bulkConfirmOpen}
                 title="Generar combinaciones"
@@ -560,6 +590,20 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 onCancel={() => {
                     setBulkConfirmOpen(false);
                     setCombosToCreate([]);
+                }}
+            />
+
+            {/* Modal de Confirmación para Eliminar Combinación Individual */}
+            <ModalConfirm
+                open={deleteConfirmOpen}
+                title="Eliminar combinación"
+                description="¿Estás seguro de que deseas eliminar esta combinación? Esta acción no se puede deshacer."
+                confirmText="Aceptar"
+                cancelText="Cancelar"
+                onConfirm={executeDeleteCombination}
+                onCancel={() => {
+                    setDeleteConfirmOpen(false);
+                    setSkuToDeleteId(null);
                 }}
             />
         </fieldset>

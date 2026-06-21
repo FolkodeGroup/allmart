@@ -23,7 +23,6 @@ export interface ProductSkuRow {
 function toDto(row: any): ProductSkuRow {
     const attributes: Record<string, string> = {};
     
-    // Mapeamos dinámicamente las relaciones anidadas al formato { Opción: Valor }
     if (Array.isArray(row.skuValues)) {
         row.skuValues.forEach((sv: any) => {
             const optName = sv.optionValue?.option?.name;
@@ -60,7 +59,8 @@ function ensureModelAvailable(): void {
 
 export async function getSkusByProduct(productId: string): Promise<ProductSkuRow[]> {
     ensureModelAvailable();
-    await productsService.getProductById(productId);
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
     
     const rows = await (prisma as any).productSku.findMany({
         where: { productId },
@@ -84,7 +84,8 @@ export async function getSkusByProduct(productId: string): Promise<ProductSkuRow
 
 export async function getSkuById(productId: string, skuId: string): Promise<ProductSkuRow> {
     ensureModelAvailable();
-    await productsService.getProductById(productId);
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
     
     const row = await (prisma as any).productSku.findFirst({
         where: { id: skuId, productId },
@@ -112,15 +113,13 @@ export async function createSku(
     dto: { sku?: string; attributes?: Record<string, string>; stock?: number; price?: number }
 ): Promise<ProductSkuRow> {
     ensureModelAvailable();
-    const product = await productsService.getProductById(productId);
+    
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
 
     const skuCode = dto.sku?.trim() || '';
     if (!skuCode) {
         throw createError('El SKU es obligatorio', 400);
-    }
-
-    if (product.sku && skuCode === product.sku) {
-        throw createError('El SKU de la combinación no puede ser igual al SKU del producto base', 400);
     }
 
     const skuExists = await (prisma as any).productSku.findUnique({
@@ -133,7 +132,6 @@ export async function createSku(
     const attrs = dto.attributes ?? {};
 
     return await prisma.$transaction(async (tx) => {
-        // 1. Crear el SKU base
         const newSku = await (tx as any).productSku.create({
             data: {
                 productId,
@@ -144,7 +142,6 @@ export async function createSku(
             }
         });
 
-        // 2. Resolver las opciones y valores relacionales
         for (const [optionName, valueName] of Object.entries(attrs)) {
             let option = await tx.productOption.findFirst({
                 where: { productId, name: optionName }
@@ -164,7 +161,6 @@ export async function createSku(
                 });
             }
 
-            // 3. Crear el vínculo en la tabla pivote SkuValue
             await tx.productSkuValue.create({
                 data: {
                     skuId: newSku.id,
@@ -201,11 +197,18 @@ export async function updateSku(
     dto: { sku?: string; attributes?: Record<string, string>; stock?: number; price?: number; isActive?: boolean }
 ): Promise<ProductSkuRow> {
     ensureModelAvailable();
-    const existing = await getSkuById(productId, skuId);
+    const exists = await productsService.checkProductExists(productId);
+    if (!exists) throw createError('Producto no encontrado', 404);
 
-    const skuCode = dto.sku?.trim() ?? existing.sku;
+    const skuRow = await (prisma as any).productSku.findFirst({
+        where: { id: skuId, productId },
+        select: { sku: true }
+    });
+    if (!skuRow) throw createError('SKU no encontrado', 404);
 
-    if (dto.sku && dto.sku !== existing.sku) {
+    const skuCode = dto.sku?.trim() ?? skuRow.sku;
+
+    if (dto.sku && dto.sku !== skuRow.sku) {
         const skuExists = await (prisma as any).productSku.findUnique({
             where: { sku: skuCode }
         });
@@ -228,7 +231,6 @@ export async function updateSku(
         });
 
         if (dto.attributes !== undefined) {
-            // Eliminar relaciones pivote anteriores para reescribir
             await tx.productSkuValue.deleteMany({
                 where: { skuId }
             });
@@ -285,6 +287,14 @@ export async function updateSku(
 
 export async function deleteSku(productId: string, skuId: string): Promise<void> {
     ensureModelAvailable();
-    await getSkuById(productId, skuId);
-    await (prisma as any).productSku.delete({ where: { id: skuId } });
+    // Optimización: Unica consulta de eliminación por coincidencia y cascada directa
+    const result = await (prisma as any).productSku.deleteMany({
+        where: {
+            id: skuId,
+            productId
+        }
+    });
+    if (result.count === 0) {
+        throw createError('SKU no encontrado', 404);
+    }
 }
