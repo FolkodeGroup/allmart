@@ -127,6 +127,27 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
               <p className={styles.productSKU}>{product.sku}</p>
             </div>
           </div>
+          {/* actions */}
+          {(canEdit || canDelete) && (
+            <div className={styles.actions}>
+              {canEdit && onEdit && (
+                <button
+                  onClick={() => onEdit(product.id)}
+                  className={styles.btnEdit}
+                >
+                  Editar
+                </button>
+              )}
+              {canDelete && onDelete && (
+                <button
+                  onClick={handleDeleteClick}
+                  className={styles.btnDelete}
+                >
+                  Eliminar
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -149,30 +170,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
       <div className={styles.tabContent}>
         {renderTabContent()}
       </div>
-
-      {/* Footer with actions */}
-      {(canEdit || canDelete) && (
-        <div className={styles.panelFooter}>
-          <div className={styles.actions}>
-            {canEdit && onEdit && (
-              <button
-                onClick={() => onEdit(product.id)}
-                className={styles.btnEdit}
-              >
-                Editar
-              </button>
-            )}
-            {canDelete && onDelete && (
-              <button
-                onClick={handleDeleteClick}
-                className={styles.btnDelete}
-              >
-                Eliminar
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Delete confirmation modal */}
       {showDeleteModal && (
