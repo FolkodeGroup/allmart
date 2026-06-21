@@ -142,6 +142,19 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   }, [product]);
 
+  useEffect(() => {
+    // Solo en modo creación, no al editar una combinación existente
+    if (editingSkuId) return;
+    if (!product?.sku) return;
+
+    const selectedValues = variants
+      .map(v => combinationAttrs[v.name])
+      .filter(Boolean); // ignora los que quedaron en ''
+
+    const suffix = selectedValues.join('-').toUpperCase();
+    setCombinationSku(suffix ? `${product.sku}-${suffix}` : `${product.sku}-`);
+  }, [combinationAttrs, product?.sku, variants, editingSkuId]);
+
   // Validate the current combination inputs and update combinationErrors
   const runCombinationValidation = useCallback(() => {
     // If user provided newline URLs, pass them through. Otherwise, if there are uploaded files (local or remote),
