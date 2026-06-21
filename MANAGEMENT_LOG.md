@@ -2024,3 +2024,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1145: 1129 quitar iconos y subtítulos en la vista de pedidos | 2026-06-21 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1152: Icono de favorito en product cards y número del input de cantidad en detalle no visibles | 2026-06-21 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1148: Error al crear orden desde carrito - Invalid tx.product.findUnique() con id tipo "uuid::original" al enviar combinaciones | 2026-06-21 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1159: Variantes | 2026-06-21 |
