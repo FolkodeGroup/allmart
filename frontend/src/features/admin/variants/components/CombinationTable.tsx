@@ -9,6 +9,7 @@ interface Sku {
     stock?: number;
     price?: number;
     images?: string[];
+    isActive?: boolean;
 }
 
 interface LocalCombination {
@@ -25,6 +26,7 @@ interface CombinationsTableProps {
     localCombinations: LocalCombination[];
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
+    onToggleActive?: (id: string, isActive: boolean) => void;
 }
 
 // ── Menú de tres puntos para cada fila ──────────────────────────────────────
@@ -126,6 +128,7 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
     localCombinations,
     onEdit,
     onDelete,
+    onToggleActive,
 }) => {
     const isEmpty = skus.length === 0 && localCombinations.length === 0;
 
@@ -148,6 +151,7 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                         <th className={styles.thSku}>SKU</th>
                         <th className={styles.thPrice}>Precio</th>
                         <th className={styles.thStock}>Stock</th>
+                        <th className={styles.thActive}>Estado</th>
                         <th className={styles.thActions}></th>
                     </tr>
                 </thead>
@@ -191,6 +195,16 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                 ) : (
                                     <span className={styles.na}>—</span>
                                 )}
+                            </td>
+                            <td className={styles.tdActive}>
+                                <button
+                                    type="button"
+                                    className={s.isActive !== false ? styles.toggleActive : styles.toggleInactive}
+                                    onClick={() => onToggleActive?.(s.id, !(s.isActive !== false))}
+                                    title={s.isActive !== false ? 'Activa — click para desactivar' : 'Inactiva — click para activar'}
+                                >
+                                    {s.isActive !== false ? 'Activo' : 'Inactivo'}
+                                </button>
                             </td>
                             <td className={styles.tdActions}>
                                 <RowMenu onEdit={() => onEdit(s.id)} onDelete={() => onDelete(s.id)} />

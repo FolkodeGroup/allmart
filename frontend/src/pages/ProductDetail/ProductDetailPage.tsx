@@ -15,11 +15,16 @@ import { Badge } from '../../components/ui/Badge/Badge';
 import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import { ProductReviews } from '../../components/ProductReviews/ProductReviews';
-import VariantSelector from '../../components/VariantSelector/VariantSelector';
 
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 import { useFavorites } from '../../components/layout/context/FavoritesContextUtils';
+
+function isSkuActive(sku: { isActive?: boolean; status?: string }): boolean {
+  if (sku.isActive === false) return false;
+  if (sku.status === 'inactive' || sku.status === 'Inactivo') return false;
+  return true;
+}
 
 function renderStars(rating: number): string {
   const full = Math.floor(rating);
@@ -200,18 +205,18 @@ export function ProductDetailPage() {
   const variantMap = useMemo(() => {
     const map: Record<string, Set<string>> = {};
 
-    product?.skus?.forEach(sku => {
-      Object.entries(sku.attributes || {}).forEach(([k, v]) => {
-        const key = k.toLowerCase();
-        const value = String(v).trim();
-        if (!value) return; // ← ignorar valores vacíos
-
-        if (!map[key]) map[key] = new Set();
-        map[key].add(value);
+    product?.skus
+      ?.filter(isSkuActive)  // ← usar el helper
+      .forEach(sku => {
+        Object.entries(sku.attributes || {}).forEach(([k, v]) => {
+          const key = k.toLowerCase();
+          const value = String(v).trim();
+          if (!value) return;
+          if (!map[key]) map[key] = new Set();
+          map[key].add(value);
+        });
       });
-    });
 
-    // Eliminar grupos que quedaron sin valores
     Object.keys(map).forEach(k => {
       if (map[k].size === 0) delete map[k];
     });
@@ -225,14 +230,16 @@ export function ProductDetailPage() {
     return found ? found[1] : undefined;
   }
 
+  // matchingSku — reemplazá el .filter actual
   const matchingSku = useMemo(() => {
     if (!product?.skus) return null;
-
-    return product.skus.find(sku => {
-      return Object.entries(selectedVariants).every(([k, v]) => {
-        return getAttr(sku, k) === v;
-      });
-    }) || null;
+    return product.skus
+      .filter(isSkuActive)  // ← usar el helper
+      .find(sku => {
+        return Object.entries(selectedVariants).every(([k, v]) => {
+          return getAttr(sku, k) === v;
+        });
+      }) ?? null;
   }, [product, selectedVariants]);
 
   useEffect(() => {
@@ -245,14 +252,15 @@ export function ProductDetailPage() {
   }, [matchingSku, selectedVariants]);
 
   function isOptionAvailable(attr: string, value: string) {
-    return product?.skus?.some(sku => {
-      const matchesOther = Object.entries(selectedVariants).every(([k, v]) => {
-        if (k === attr) return true;
-        return getAttr(sku, k) === v;
+    return product?.skus
+      ?.filter(isSkuActive)  // ← usar el helper
+      .some(sku => {
+        const matchesOther = Object.entries(selectedVariants).every(([k, v]) => {
+          if (k === attr) return true;
+          return getAttr(sku, k) === v;
+        });
+        return matchesOther && getAttr(sku, attr) === value;
       });
-
-      return matchesOther && getAttr(sku, attr) === value;
-    });
   }
   function normalizeColor(value: string): string | null {
     // Solo considerar color si parece un valor CSS de color explícito
@@ -521,21 +529,6 @@ export function ProductDetailPage() {
               {dynamicDiscount.minPurchase && (
                 <p>Compra mínima: ${dynamicDiscount.minPurchase.toLocaleString('es-AR')}</p>
               )}
-            </div>
-          )}
-
-
-          {/* Variantes (si existen) */}
-          {variantGroups.length > 0 && (
-            <div className={styles.variantsBlock}>
-              {variantGroups.map(group => (
-                <VariantSelector
-                  key={group.id}
-                  group={group}
-                  selected={selectedVariants[group.id]}
-                  onSelect={(value) => setSelectedVariants(prev => ({ ...prev, [group.id]: value }))}
-                />
-              ))}
             </div>
           )}
 

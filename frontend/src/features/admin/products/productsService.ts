@@ -190,6 +190,7 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
           stock: typeof row.stock === 'number' ? row.stock : Number(row.stock ?? 0),
           price: typeof row.price === 'number' ? row.price : row.price !== undefined ? Number(row.price as unknown) : undefined,
           images: Array.isArray(row.images) ? (row.images as unknown[]).map(i => String(i)).filter(Boolean) : undefined,
+          isActive: row.isActive === true || row.isActive === false ? Boolean(row.isActive) : row.is_active === false ? false : true,
         };
       })
       : undefined,

@@ -55,8 +55,15 @@ interface AdminVariantsContextType {
   /** SKUs/combinations CRUD for a product */
   skus: VariantChild[];
   loadSkus: (productId: string) => Promise<void>;
-  createVariantChild: (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number }) => Promise<unknown>;
-  updateVariantChild: (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number }) => Promise<VariantChild>;
+  createVariantChild: (productId: string, payload: {
+    sku?: string;
+    attributes: Record<string, string>;
+    stock?: number;
+    images?: string[];
+    price?: number;
+    isActive?: boolean;
+  }) => Promise<unknown>;
+  updateVariantChild: (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number; isActive?: boolean; }) => Promise<VariantChild>;
   deleteVariantChild: (productId: string, skuId: string) => Promise<void>;
 }
 
@@ -197,7 +204,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     await updateVariant(productId, variantId, { values: newValues });
   }, [variants, updateVariant]);
 
-  const createVariantChild = useCallback(async (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number }) => {
+  const createVariantChild = useCallback(async (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number; isActive?: boolean; }) => {
     return withLoading(async () => {
       const t = requireToken();
       const created = await variantsService.createVariantChild(t, productId, payload);
@@ -214,7 +221,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     }, 'Entrada de variante creada');
   }, [loadSkus, requireToken, withLoading]);
 
-  const updateVariantChild = useCallback(async (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number }) => {
+  const updateVariantChild = useCallback(async (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number; isActive?: boolean; }) => {
     return withLoading(async () => {
       const t = requireToken();
       const updated = await variantsService.updateVariantChild(

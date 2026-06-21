@@ -35,6 +35,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [newGroupName, setNewGroupName] = useState('');
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [combinationIsActive, setCombinationIsActive] = useState(true);
 
   // Modal avanzado
   const [editModal, setEditModal] = useState<{ open: boolean; groupId: string | null }>({ open: false, groupId: null });
@@ -191,6 +192,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     } catch {
       // ignore if hook not available
     }
+    setCombinationIsActive(true);
     setCombinationModalOpen(true);
   };
 
@@ -217,10 +219,10 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     // Create or update SKU first (so we have an SKU id to upload files into storage if needed)
     let persistedSkuId: string | undefined = undefined;
     if (editingSkuId) {
-      await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price });
+      await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price, isActive: combinationIsActive, });
       persistedSkuId = editingSkuId;
     } else {
-      const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price });
+      const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price, isActive: combinationIsActive, });
       if (created && typeof created === 'object' && (created as Record<string, unknown>).id) {
         persistedSkuId = String((created as Record<string, unknown>).id);
       }
@@ -288,6 +290,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     } else {
       setFiles([] as UploadFileState[]);
     }
+    setCombinationIsActive(sku.isActive !== false);
     setCombinationModalOpen(true);
   };
 
@@ -297,6 +300,14 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       await deleteVariantChild(productId, id);
     } catch {
       // Error handled silently
+    }
+  };
+
+  const handleToggleSkuActive = async (id: string, isActive: boolean) => {
+    try {
+      await updateVariantChild(productId, id, { isActive });
+    } catch {
+      // silencioso — el contexto recarga el estado
     }
   };
 
@@ -376,6 +387,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           localCombinations={createdCombinations}
           onEdit={handleEditCombination}
           onDelete={handleDeleteCombination}
+          onToggleActive={handleToggleSkuActive}
         />
       </section>
 
@@ -447,6 +459,17 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 value={combinationStock === '' ? '' : String(combinationStock)}
                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
               />
+            </div>
+            <div className={styles.fieldRow}>
+              <label htmlFor="combination-active" className={styles.checkboxLabel}>
+                <input
+                  id="combination-active"
+                  type="checkbox"
+                  checked={combinationIsActive}
+                  onChange={e => setCombinationIsActive(e.target.checked)}
+                />
+                Combinación activa
+              </label>
             </div>
             <div className={styles.modalActions}>
               <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
