@@ -217,7 +217,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                   type="button"
                   onClick={() => setConfirmPaid(true)}
                 >
-                  <span className={styles.whatsappIcon}>💬</span>
                   Marcar como abonado
                 </button>
               ) : (
@@ -273,8 +272,8 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         <table className={styles.itemsTable}>
           <thead>
             <tr>
-              <th>Producto</th>
-              <th className={styles.tdCenter}>Cant.</th>
+              <th className={styles.tdLeft}>Producto</th>
+              <th className={styles.tdRight}>Cant.</th>
               <th className={styles.tdRight}>P. unit.</th>
               <th className={styles.tdRight}>Subtotal</th>
             </tr>
@@ -283,7 +282,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             {order.items.map(item => (
               <tr key={item.productId + item.productName}>
                 <td>{item.productName}</td>
-                <td className={styles.tdCenter}>{item.quantity}</td>
+                <td className={styles.tdRight}>{item.quantity}</td>
                 <td className={styles.tdRight}>{formatPrice(item.unitPrice)}</td>
                 <td className={styles.tdRight}>{formatPrice(item.unitPrice * item.quantity)}</td>
               </tr>
@@ -332,7 +331,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                   onClick={() => setConfirmDelete(true)}
                   aria-label="Eliminar pedido"
                 >
-                  🗑️ Eliminar este pedido
+                  Eliminar este pedido
                 </button>
               </Tooltip>
             ) : (
