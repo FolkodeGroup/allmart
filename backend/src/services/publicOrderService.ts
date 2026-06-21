@@ -44,16 +44,36 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     // Validar que todos los productos existan antes de crear la orden
     const validatedItems = [];
     for (const item of items) {
-      const product = await tx.product.findUnique({
-        where: { id: item.productId },
-        select: { id: true, name: true, stock: true },
-      });
+        // Normalizar y validar productId para evitar llamadas inválidas a Prisma
+        const rawProductId = (item as any).productId;
+        if (rawProductId === undefined || rawProductId === null || rawProductId === '') {
+          throw createError(`Producto con ID ${rawProductId} inválido`, 400);
+        }
 
-      if (!product) {
-        throw createError(`Producto con ID ${item.productId} no encontrado`, 404);
-      }
+        let normalizedProductId = typeof rawProductId === 'string' ? rawProductId : String(rawProductId);
 
-      validatedItems.push({ ...item, product });
+        // If frontend appended a suffix like `::original` or `::<skuId>`, keep only the real product id (UUID)
+        if (typeof normalizedProductId === 'string' && normalizedProductId.includes('::')) {
+          normalizedProductId = normalizedProductId.split('::')[0];
+        }
+
+        let product;
+        try {
+          product = await tx.product.findUnique({
+            where: { id: normalizedProductId },
+            select: { id: true, name: true, stock: true },
+          });
+        } catch (err) {
+          // Prisma throws informative errors for invalid args (e.g. wrong type)
+          throw createError(`Error buscando el producto con ID ${normalizedProductId}`, 400);
+        }
+
+        if (!product) {
+          throw createError(`Producto con ID ${normalizedProductId} no encontrado`, 404);
+        }
+
+        // Store normalized productId so downstream writes use the correct UUID
+        validatedItems.push({ ...item, product, productId: normalizedProductId });
     }
 
     const order = await tx.order.create({
@@ -72,8 +92,8 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     await tx.orderItem.createMany({
       data: validatedItems.map((item) => ({
         orderId: order.id,
-        productId: item.productId,
-        productName: item.productName,
+        productId: (item as any).productId,
+        productName: item.productName ?? item.product?.name,
         productImage: item.productImage ?? null,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
