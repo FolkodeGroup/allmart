@@ -245,8 +245,7 @@
   width: 100%;
   background: var(--color-bg-secondary);
   border: 1.5px solid var(--color-border);
-  padding: 10px 12px 10px 36px !important;
-  /* espacio para la lupa */
+  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
   border-radius: 6px;
   color: var(--color-text-primary);
   font-size: 14px;
@@ -254,7 +253,7 @@
 }
 
 .advancedInput:focus,
-.advancedInput:hover {
+.advancedInput:hover{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -267,8 +266,7 @@
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
-  padding: 10px 12px 10px 36px !important;
-  /* espacio para la lupa */
+  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
 }
 
 .advancedLabel {
@@ -295,7 +293,7 @@
 }
 
 .advancedMultiSelect:focus,
-.advancedMultiSelect:hover {
+.advancedMultiSelect:hover{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -1160,7 +1158,6 @@
 }
 
 .trendDown {
-  align-self: flex-end;
   color: #ef4444;
   font-weight: 600;
 }
@@ -1330,7 +1327,7 @@
 }
 
 .dateInput:focus,
-.dateInput:hover {
+.dateInput:hover{
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);

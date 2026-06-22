@@ -65,7 +65,7 @@ export const OutOfStockAlerts: React.FC = () => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2>Productos sin stock con pedidos pendientes</h2>
+          <h2>✅ Productos sin stock con pedidos pendientes</h2>
         </div>
         <div className={styles.empty}>
           <p>¡Excelente! No hay productos sin stock con pedidos pendientes.</p>
@@ -77,7 +77,7 @@ export const OutOfStockAlerts: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Productos sin stock con pedidos pendientes</h2>
+        <h2>🚨 Productos sin stock con pedidos pendientes</h2>
         <div className={styles.badge}>{alertsData.length} producto(s)</div>
       </div>
 
@@ -192,7 +192,7 @@ export const OutOfStockAlerts: React.FC = () => {
       )}
 
       <button className={styles.refreshBtn} onClick={() => loadAlerts(1)} disabled={loading}>
-        {loading ? 'Actualizando...' : 'Actualizar'}
+        {loading ? '🔄 Actualizando...' : '🔄 Actualizar'}
       </button>
     </div>
   );

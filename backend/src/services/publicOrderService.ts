@@ -7,7 +7,6 @@ import { prisma } from '../config/prisma';
 import { CreatePublicOrderDTO } from '../types';
 import { createError } from '../middlewares/errorHandler';
 import { sendOrderConfirmationEmail } from './orderConfirmationEmailService';
-import { stripSuffixId, looksLikeUuid } from '../utils/normalizeId';
 
 export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<string> {
   const { customer, items, total, notes } = data;
@@ -42,46 +41,26 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    // Validar que todos los productos/variantes existan antes de crear la orden
-    const validatedItems: Array<any> = [];
+    // Validar que todos los productos existan antes de crear la orden
+    const validatedItems = [];
     for (const item of items) {
-      // Normalizar ids que pueden venir con sufijos (p.ej. productId::skuId o productId::original)
-      const rawId = String(item.productId);
-      const stripped = stripSuffixId(rawId);
+      // Limpiar el ID compuesto del frontend (extrayendo solo el UUID real del producto)
+      const [realProductId] = item.productId.split('::');
 
-      // Si parece UUID, intentar buscar primero un SKU (variant) por id
-      if (looksLikeUuid(stripped)) {
-        const sku = await tx.productSku.findUnique({ where: { id: stripped }, select: { id: true, productId: true, stock: true, price: true } as any }) as any;
-        if (sku) {
-          const parent = await tx.product.findUnique({ where: { id: sku.productId }, select: { id: true, name: true, stock: true } });
-          if (!parent) {
-            throw createError(`Producto padre de la variante ${rawId} no encontrado`, 404);
-          }
-          item.unitPrice = item.unitPrice ?? (sku.price ? Number(sku.price) : item.unitPrice);
-          validatedItems.push({ ...item, product: parent, resolvedProductId: parent.id });
-        } else {
-          const product = await tx.product.findUnique({ where: { id: stripped }, select: { id: true, name: true, stock: true } });
-          if (!product) {
-            throw createError(`Producto con ID ${rawId} no encontrado`, 404);
-          }
-          validatedItems.push({ ...item, product, resolvedProductId: product.id });
-        }
-      } else {
-        // No parece UUID: intentar buscar por sku code o por slug
-        const skuByCode = await tx.productSku.findFirst({ where: { sku: stripped }, select: { id: true, productId: true, stock: true, price: true } as any }) as any;
-        if (skuByCode) {
-          const parent = await tx.product.findUnique({ where: { id: skuByCode.productId }, select: { id: true, name: true, stock: true } });
-          if (!parent) throw createError(`Producto padre de la variante ${rawId} no encontrado`, 404);
-          item.unitPrice = item.unitPrice ?? (skuByCode.price ? Number(skuByCode.price) : item.unitPrice);
-          validatedItems.push({ ...item, product: parent, resolvedProductId: parent.id });
-        } else {
-          const productBySlug = await tx.product.findFirst({ where: { slug: stripped }, select: { id: true, name: true, stock: true } });
-          if (!productBySlug) {
-            throw createError(`Producto con identificador ${rawId} no encontrado`, 404);
-          }
-          validatedItems.push({ ...item, product: productBySlug, resolvedProductId: productBySlug.id });
-        }
+      const product = await tx.product.findUnique({
+        where: { id: realProductId },
+        select: { id: true, name: true, stock: true },
+      });
+
+      if (!product) {
+        throw createError(`Producto con ID ${realProductId} no encontrado`, 404);
       }
+
+      validatedItems.push({ 
+        ...item, 
+        realProductId, // Guardamos el ID limpio para usarlo en la creación de los orderItems
+        product 
+      });
     }
 
     const order = await tx.order.create({
@@ -100,8 +79,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     await tx.orderItem.createMany({
       data: validatedItems.map((item) => ({
         orderId: order.id,
-        // usar el productId resuelto (id del producto padre) para la FK en order_items
-        productId: item.resolvedProductId ?? stripSuffixId(String(item.productId)),
+        productId: item.realProductId, // Usamos el UUID limpio de la base de datos
         productName: item.productName,
         productImage: item.productImage ?? null,
         quantity: item.quantity,

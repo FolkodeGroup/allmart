@@ -127,7 +127,7 @@ export function AdminReports() {
   // Estado para mostrar/ocultar el contenedor offscreen
   const [showHiddenPdf, setShowHiddenPdf] = useState(false);
   // Estado para cambiar vista de gráfico barchart
-  const [salesViewMode] = useState<'chart' | 'table'>('chart');
+  const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
   useEffect(() => {
     if (!showHiddenPdf) return;
@@ -465,6 +465,9 @@ export function AdminReports() {
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
       {/* Header */}
       <div className={sectionStyles.header}>
+        {/* <h1 className={styles.panelTitle + ' fadeIn'}>
+          <span className={sectionStyles.icon}>📊</span> Reportes y estadísticas
+        </h1> */}
         <p className={sectionStyles.subtitle + ' fadeInFast'}>
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
         </p>
@@ -594,13 +597,22 @@ export function AdminReports() {
           {/* Gráfica de ventas */}
           <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle + ' fadeInFast'}>Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
+              <h2 className={styles.panelTitle + ' fadeInFast'}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
               <span className={styles.panelSubtitle + ' fadeInFast'}>
                 {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
                 {' · '}ingresos de pedidos activos
               </span>
             </div>
+            <div className={styles.viewToggleGroup + ' fadeInFast'}>
+              <span className={styles.viewToggleLabel}>Vista:</span>
 
+              <button
+                className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
+                onClick={() => setSalesViewMode('chart')}
+              >
+                📊 Gráfico
+              </button>
+            </div>
             {salesContent}
           </div>
 
@@ -608,7 +620,7 @@ export function AdminReports() {
           <div className={styles.twoCol + ' fadeIn'}>
             <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>Productos más vendidos</h2>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>🏆 Productos más vendidos</h2>
                 <p className={styles.panelSubtitle + ' fadeInFast'}>Por ingresos generados</p>
               </div>
               <ProductRanking
@@ -620,7 +632,7 @@ export function AdminReports() {
 
             <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>Por estado de pedido</h2>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>📦 Por estado de pedido</h2>
                 <span className={styles.panelSubtitle + ' fadeInFast'}>Todos los pedidos del período</span>
               </div>
               {periodOrders.length === 0 ? (
@@ -639,7 +651,7 @@ export function AdminReports() {
           <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.panelHeaderLeft}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>Últimos pedidos del período</h2>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>📋 Últimos pedidos del período</h2>
                 <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
               </div>
 
@@ -692,41 +704,41 @@ export function AdminReports() {
               <label className={styles.advancedLabel}>
                 <strong>Cliente</strong>
                 <div className={styles.searchWrap}>
-                  <Search size={16} className={styles.searchIcon} />
-                  <input
-                    type="text"
-                    value={ordersTableFilters.clientQuery}
-                    onChange={e => {
-                      e.preventDefault();
-                      setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
-                    }}
-                    placeholder="Nombre o email"
-                    className={styles.advancedInput}
-                    autoComplete="off"
-                    spellCheck="false"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                  />
+                <Search size={16} className={styles.searchIcon} />
+                <input
+                  type="text"
+                  value={ordersTableFilters.clientQuery}
+                  onChange={e => {
+                    e.preventDefault();
+                    setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
+                  }}
+                  placeholder="Nombre o email"
+                  className={styles.advancedInput}
+                  autoComplete="off"
+                  spellCheck="false"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                />
                 </div>
               </label>
               <label className={styles.advancedLabel}>
                 <strong>Producto</strong>
                 <div className={styles.searchWrap}>
-                  <Search size={16} className={styles.searchIcon} />
-                  <input
-                    type="text"
-                    value={ordersTableFilters.productQuery}
-                    onChange={e => {
-                      e.preventDefault();
-                      setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
-                    }}
-                    placeholder="Nombre de producto"
-                    className={styles.advancedInput}
-                    autoComplete="off"
-                    spellCheck="false"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                  />
+                <Search size={16} className={styles.searchIcon} />
+                <input
+                  type="text"
+                  value={ordersTableFilters.productQuery}
+                  onChange={e => {
+                    e.preventDefault();
+                    setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
+                  }}
+                  placeholder="Nombre de producto"
+                  className={styles.advancedInput}
+                  autoComplete="off"
+                  spellCheck="false"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                />
                 </div>
               </label>
               <OrdersFilters
@@ -755,31 +767,29 @@ export function AdminReports() {
                 />
 
                 <div className={styles.paginationWrap}>
-                  {filteredOrdersTable.length > 10 && (
-                    <div className={styles.pageSizeWrap}>
-                      {filteredOrdersTable.length > pageSize && (
-                        <p className={styles.moreHint + ' fadeInFast'}>
-                          Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
-                        </p>
-                      )}
-                      <select
-                        value={pageSize}
-                        onChange={(e) => {
-                          setPageSize(Number(e.target.value));
-                          setPage(1); // resetear página
-                        }}
-                        className={styles.pageSizeSelect}
-                      >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                        <option value={50}>50</option>
-                      </select>
-                    </div>
-                  )}
+                  <div className={styles.pageSizeWrap}>
+                    {filteredOrdersTable.length > pageSize && (
+                      <p className={styles.moreHint + ' fadeInFast'}>
+                        Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
+                      </p>
+                    )}
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setPage(1); // resetear página
+                      }}
+                      className={styles.pageSizeSelect}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
                   <AdminPagination
                     page={page}
-                    totalPages={Math.ceil(filteredOrdersTable.length / pageSize)}
+                    totalPages={Math.ceil(filteredOrdersTable.length / pageSize) || 1}
                     onPageChange={setPage}
                     ariaLabel="Paginación de pedidos del reporte"
                   />

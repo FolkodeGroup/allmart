@@ -101,14 +101,14 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
                         className={`${styles.typeBtn} ${destinationType === 'category' ? styles.typeBtnActive : ''}`}
                         onClick={() => handleDestinationChange('category')}
                     >
-                        Categoría
+                        📂 Categoría
                     </button>
                     <button
                         type="button"
                         className={`${styles.typeBtn} ${destinationType === 'products' ? styles.typeBtnActive : ''}`}
                         onClick={() => handleDestinationChange('products')}
                     >
-                        Productos específicos
+                        📦 Productos específicos
                     </button>
                 </div>
             </div>
