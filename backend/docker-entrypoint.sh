@@ -1,7 +1,7 @@
 #!/bin/sh
 # =============================================================================
 # Allmart Backend — Docker entrypoint
-# Ejecuta las migraciones SQL pendientes y luego arranca el servidor.
+# Ejecuta las migraciones de Prisma y luego arranca el servidor.
 # =============================================================================
 
 set -e
@@ -26,77 +26,12 @@ until node -e "
   sleep 2
 done
 
-echo "[Docker] PostgreSQL disponible. Ejecutando migraciones..."
+echo "[Docker] PostgreSQL disponible. Ejecutando migraciones de Prisma..."
 
-# Ejecutar migraciones SQL pendientes
-node -e "
-  const fs = require('fs');
-  const path = require('path');
-  const { Pool } = require('pg');
+# Ejecutar migraciones nativas de Prisma para entornos de producción
+npx prisma migrate deploy
 
-  const pool = new Pool({
-    host: process.env.DB_HOST || 'db',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-  });
-
-  async function run() {
-    const client = await pool.connect();
-    try {
-      // Asegurar tabla de migraciones
-      await client.query(\`
-        CREATE TABLE IF NOT EXISTS schema_migrations (
-          id SERIAL PRIMARY KEY,
-          filename VARCHAR(255) NOT NULL UNIQUE,
-          applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-      \`);
-
-      // Obtener migraciones ya aplicadas
-      const { rows } = await client.query('SELECT filename FROM schema_migrations ORDER BY id ASC');
-      const applied = new Set(rows.map(r => r.filename));
-
-      // Leer archivos de migración
-      const migrationsDir = path.resolve(__dirname, 'migrations');
-      if (!fs.existsSync(migrationsDir)) {
-        console.log('[Migrate] No se encontró carpeta de migraciones.');
-        return;
-      }
-      const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
-      const pending = files.filter(f => !applied.has(f));
-
-      if (pending.length === 0) {
-        console.log('[Migrate] No hay migraciones pendientes.');
-        return;
-      }
-
-      for (const file of pending) {
-        console.log('  → Aplicando: ' + file);
-        const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
-        await client.query('BEGIN');
-        try {
-          await client.query(sql);
-          await client.query('INSERT INTO schema_migrations (filename) VALUES (\$1)', [file]);
-          await client.query('COMMIT');
-          console.log('  ✅ ' + file);
-        } catch (err) {
-          await client.query('ROLLBACK');
-          throw err;
-        }
-      }
-      console.log('[Migrate] ' + pending.length + ' migración(es) aplicada(s).');
-    } finally {
-      client.release();
-      await pool.end();
-    }
-  }
-
-  run().catch(err => { console.error('[Migrate] Error:', err.message); process.exit(1); });
-"
-
-echo "[Docker] Migraciones completadas."
+echo "[Docker] Migraciones de Prisma completadas."
 
 # ⚠️  COMENTADO: No ejecutar seed automáticamente
 # El seed regeneraba categorías cada vez que se reiniciaba el contenedor
