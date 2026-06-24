@@ -3,7 +3,7 @@
  * CRUD y lógica de negocio para colecciones.
  */
 
-import { Collection, CollectionItem, CollectionDisplayPosition, Prisma } from '@prisma/client';
+import { Collection, CollectionDisplayPosition, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
 import type { AutoSalesParams } from '../jobs/collectionsJob';
@@ -58,6 +58,8 @@ export interface CollectionResponseDTO {
     price: number;
     imageUrl?: string;
     position: number;
+    variants?: any[];
+    skus?: any[];
   }>;
 }
 
@@ -123,14 +125,51 @@ function toCollectionDTO(
     productCount,
     createdAt: collection.createdAt.toISOString(),
     updatedAt: collection.updatedAt.toISOString(),
-    products: products?.map((item) => ({
-      id: item.product.id,
-      name: item.product.name,
-      slug: item.product.slug,
-      price: item.product.price.toNumber(),
-      imageUrl: getFirstImageUrl(item.product.images),
-      position: item.position,
-    })),
+    products: products?.map((item) => {
+      const baseProduct = item.product;
+      const variants = baseProduct.productOptions?.map((opt: any) => ({
+        id: opt.id,
+        name: opt.name,
+        values: opt.values?.map((val: any) => val.name) ?? [],
+      })) ?? [];
+      
+      const skus = Array.isArray(baseProduct.productSkus)
+        ? baseProduct.productSkus.map((s: any) => {
+            const attributes: Record<string, string> = {};
+            if (Array.isArray(s.skuValues)) {
+              for (const sv of s.skuValues) {
+                if (sv.optionValue && sv.optionValue.option) {
+                  attributes[sv.optionValue.option.name] = sv.optionValue.name;
+                }
+              }
+            }
+            const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
+              ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+              : (Array.isArray(baseProduct.images) ? baseProduct.images : []);
+
+            return {
+              id: s.id,
+              sku: s.sku,
+              attributes,
+              images,
+              stock: s.stock,
+              price: s.price ? Number(s.price) : Number(baseProduct.price),
+              isActive: s.isActive,
+            };
+          })
+        : [];
+
+      return {
+        id: baseProduct.id,
+        name: baseProduct.name,
+        slug: baseProduct.slug,
+        price: baseProduct.price.toNumber(),
+        imageUrl: getFirstImageUrl(baseProduct.images),
+        position: item.position,
+        variants,
+        skus,
+      };
+    }),
   };
 }
 
@@ -170,7 +209,29 @@ export async function getAllCollections(
       orderBy: { displayOrder: 'asc' },
       include: {
         collectionItems: {
-          include: { product: true },
+          include: { 
+            product: {
+              include: {
+                productOptions: {
+                  where: { isActive: true },
+                  include: { values: true }
+                },
+                productSkus: {
+                  where: { isActive: true },
+                  include: {
+                    skuValues: {
+                      include: {
+                        optionValue: {
+                          include: { option: true }
+                        }
+                      }
+                    },
+                    productSkuImages: { select: { id: true } }
+                  }
+                }
+              }
+            } 
+          },
           orderBy: { position: 'asc' },
         },
       },
@@ -198,7 +259,29 @@ export async function getCollectionById(id: string): Promise<CollectionResponseD
     where: { id },
     include: {
       collectionItems: {
-        include: { product: true },
+        include: { 
+          product: {
+            include: {
+              productOptions: {
+                where: { isActive: true },
+                include: { values: true }
+              },
+              productSkus: {
+                where: { isActive: true },
+                include: {
+                  skuValues: {
+                    include: {
+                      optionValue: {
+                        include: { option: true }
+                      }
+                    }
+                  },
+                  productSkuImages: { select: { id: true } }
+                }
+              }
+            }
+          } 
+        },
         orderBy: { position: 'asc' },
       },
     },
@@ -223,7 +306,29 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionRespo
     where: { slug },
     include: {
       collectionItems: {
-        include: { product: true },
+        include: { 
+          product: {
+            include: {
+              productOptions: {
+                where: { isActive: true },
+                include: { values: true }
+              },
+              productSkus: {
+                where: { isActive: true },
+                include: {
+                  skuValues: {
+                    include: {
+                      optionValue: {
+                        include: { option: true }
+                      }
+                    }
+                  },
+                  productSkuImages: { select: { id: true } }
+                }
+              }
+            }
+          } 
+        },
         orderBy: { position: 'asc' },
       },
     },
@@ -258,7 +363,29 @@ export async function getCollectionsByDisplayPosition(
     orderBy: { displayOrder: 'asc' },
     include: {
       collectionItems: {
-        include: { product: true },
+        include: { 
+          product: {
+            include: {
+              productOptions: {
+                where: { isActive: true },
+                include: { values: true }
+              },
+              productSkus: {
+                where: { isActive: true },
+                include: {
+                  skuValues: {
+                    include: {
+                      optionValue: {
+                        include: { option: true }
+                      }
+                    }
+                  },
+                  productSkuImages: { select: { id: true } }
+                }
+              }
+            }
+          } 
+        },
         orderBy: { position: 'asc' },
       },
     },
@@ -281,7 +408,29 @@ export async function getAllCollectionsUnpaginated(): Promise<CollectionResponse
     orderBy: { displayOrder: 'asc' },
     include: {
       collectionItems: {
-        include: { product: true },
+        include: { 
+          product: {
+            include: {
+              productOptions: {
+                where: { isActive: true },
+                include: { values: true }
+              },
+              productSkus: {
+                where: { isActive: true },
+                include: {
+                  skuValues: {
+                    include: {
+                      optionValue: {
+                        include: { option: true }
+                      }
+                    }
+                  },
+                  productSkuImages: { select: { id: true } }
+                }
+              }
+            }
+          } 
+        },
         orderBy: { position: 'asc' },
       },
     },

@@ -9,6 +9,7 @@ import { Product, CreateProductDTO, UpdateProductDTO } from '../models/Product';
 import { ProductStatus } from '../types';
 import { createError } from '../middlewares/errorHandler';
 import { getCategoryBySlug } from './categoriesService';
+import { parseSafePrice } from './productSkusService';
 
 // Función auxiliar para el slug
 function generateSlug(name: string): string {
@@ -169,7 +170,6 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
   return where;
 }
 
-// Optimización: Agrupación en una única consulta para la hidratación sin escrituras en disco
 async function hydrateProductImagesFromStorage(rows: Array<{ id: string; images: unknown }>): Promise<void> {
   const rowsToHydrate = rows.filter(row => {
     const arr = Array.isArray(row.images) ? row.images : [];
@@ -199,7 +199,6 @@ async function hydrateProductImagesFromStorage(rows: Array<{ id: string; images:
   }
 }
 
-// Método ultra-rápido para validaciones de existencia sin cargar relaciones pesadas
 export async function checkProductExists(id: string): Promise<boolean> {
   const count = await prisma.product.count({
     where: { id },
@@ -273,18 +272,16 @@ export async function getProductById(id: string): Promise<Product> {
     const skus = (row as any).productSkus.map((s: any) => {
       const attributes: Record<string, string> = {};
       if (Array.isArray(s.skuValues)) {
-        s.skuValues.forEach((sv: any) => {
-          const optName = sv.optionValue?.option?.name;
-          const valName = sv.optionValue?.name;
-          if (optName && valName) {
-            attributes[optName] = valName;
+        for (const sv of s.skuValues) {
+          if (sv.optionValue && sv.optionValue.option) {
+            attributes[sv.optionValue.option.name] = sv.optionValue.name;
           }
-        });
+        }
       }
 
-      const images = Array.isArray(s.productSkuImages)
+      const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
         ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
-        : [];
+        : base.images;
 
       return {
         id: s.id,
@@ -292,7 +289,7 @@ export async function getProductById(id: string): Promise<Product> {
         attributes,
         images,
         stock: s.stock,
-        price: s.price ? Number(s.price) : undefined,
+        price: s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price),
         isActive: s.isActive,
       };
     });
@@ -315,6 +312,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   const primaryCategoryId = dto.categoryId ?? normalizedCategoryIds[0];
 
   const slug = generateSlug(dto.name);
+  const parsedPrice = parseSafePrice(dto.price) ?? 0;
 
   const row = await prisma.product.create({
     data: {
@@ -322,7 +320,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       slug,
       description: dto.description ?? null,
       shortDescription: dto.shortDescription ?? null,
-      price: dto.price,
+      price: parsedPrice,
       images: Array.isArray(dto.images) ? dto.images : [],
       categoryId: primaryCategoryId,
       status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
@@ -355,7 +353,10 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
   const existing = await prisma.product.findUnique({
     where: { id },
-    include: { productCategories: { select: { categoryId: true } } },
+    include: { 
+      productCategories: { select: { categoryId: true } },
+      productSkus: { where: { isActive: true } }
+    },
   });
   if (!existing) throw createError('Producto no encontrado', 404);
 
@@ -386,6 +387,21 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
 
   const primaryCategoryId = (dto.categoryId ?? normalizedCategoryIds[0] ?? existing.categoryId) ?? '';
 
+  // 🛡️ Filtro de seguridad: Evita que el endpoint de actualización general del producto
+  // sobrescriba el precio base del producto con el precio de una variante seleccionada enviado por error.
+  let finalPrice = dto.price !== undefined ? parseSafePrice(dto.price) : undefined;
+  if (finalPrice !== undefined && existing.productSkus.length > 0) {
+    const skuPrices = existing.productSkus
+      .map((s) => s.price ? Number(s.price) : null)
+      .filter((p): p is number => p !== null && p > 0);
+
+    // Si el precio enviado coincide exactamente con el precio de un SKU y es diferente
+    // al precio del producto base preexistente, ignoramos ese valor y mantenemos el precio base original.
+    if (skuPrices.includes(Number(finalPrice)) && Number(finalPrice) !== Number(existing.price)) {
+      finalPrice = Number(existing.price);
+    }
+  }
+
   const row = await prisma.product.update({
     where: { id },
     data: {
@@ -393,7 +409,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       slug,
       description: dto.description !== undefined ? dto.description : existing.description,
       shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : existing.shortDescription,
-      price: dto.price ?? existing.price,
+      price: finalPrice !== undefined ? finalPrice : existing.price,
       images: Array.isArray(dto.images) ? dto.images : (existing.images ?? Prisma.JsonNull),
       categoryId: primaryCategoryId,
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
@@ -656,12 +672,78 @@ export async function getPublicProducts(query: ProductQuery) {
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
-      include: { productCategories: { select: { categoryId: true } } },
+      include: { 
+        productCategories: { select: { categoryId: true } },
+        productOptions: {
+          where: { isActive: true },
+          include: {
+            values: true
+          }
+        },
+        productSkus: {
+          where: { isActive: true },
+          include: {
+            skuValues: {
+              include: {
+                optionValue: {
+                  include: {
+                    option: true
+                  }
+                }
+              }
+            },
+            productSkuImages: {
+              select: { id: true }
+            }
+          }
+        }
+      },
     }),
   ]);
 
+  const mappedProducts = rows.map((row) => {
+    const base = toProduct(row);
+
+    const variants = (row as any).productOptions?.map((opt: any) => ({
+      id: opt.id,
+      name: opt.name,
+      values: opt.values?.map((val: any) => val.name) ?? [],
+    })) ?? [];
+    (base as any).variants = variants;
+
+    if (Array.isArray((row as any).productSkus)) {
+      const skus = (row as any).productSkus.map((s: any) => {
+        const attributes: Record<string, string> = {};
+        if (Array.isArray(s.skuValues)) {
+          for (const sv of s.skuValues) {
+            if (sv.optionValue && sv.optionValue.option) {
+              attributes[sv.optionValue.option.name] = sv.optionValue.name;
+            }
+          }
+        }
+
+        const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
+          ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+          : base.images;
+
+        return {
+          id: s.id,
+          sku: s.sku,
+          attributes,
+          images,
+          stock: s.stock,
+          price: s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price),
+          isActive: s.isActive,
+        };
+      });
+      (base as any).skus = skus;
+    }
+
+    return base;
+  });
+
   return {
-    data: rows.map(toProduct),
+    data: mappedProducts,
     total,
     page,
     limit,
@@ -713,18 +795,16 @@ export async function getProductBySlug(slug: string): Promise<Product> {
     const skus = (row as any).productSkus.map((s: any) => {
       const attributes: Record<string, string> = {};
       if (Array.isArray(s.skuValues)) {
-        s.skuValues.forEach((sv: any) => {
-          const optName = sv.optionValue?.option?.name;
-          const valName = sv.optionValue?.name;
-          if (optName && valName) {
-            attributes[optName] = valName;
+        for (const sv of s.skuValues) {
+          if (sv.optionValue && sv.optionValue.option) {
+            attributes[sv.optionValue.option.name] = sv.optionValue.name;
           }
-        });
+        }
       }
 
-      const images = Array.isArray(s.productSkuImages)
+      const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
         ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
-        : [];
+        : base.images;
 
       return {
         id: s.id,
@@ -732,7 +812,7 @@ export async function getProductBySlug(slug: string): Promise<Product> {
         attributes,
         images,
         stock: s.stock,
-        price: s.price ? Number(s.price) : undefined,
+        price: s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price),
         isActive: s.isActive,
       };
     });
