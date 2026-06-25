@@ -8,15 +8,15 @@ export interface Product {
   shortDescription?: string;
   price: number;
   images: string[];         // Json en DB
-  categoryId: string;       // Propiedad computada (virtual) para compatibilidad
-  categoryIds: string[];    // Array real de categorías (Single Source of Truth)
-  tags: string[];           // Json en DB
+  categoryId: string;       // Propiedad virtual computada
+  categoryIds?: string[];
+  tags: string[];           // Array obtenido dinámicamente de la relación N:M
   rating: number;
   reviewCount: number;
   inStock: boolean;
   stock: number;
   sku?: string;
-  features: string[];       // Json en DB
+  features: string[];       // Array obtenido dinámicamente de la relación 1:N
   isFeatured: boolean;
   primarySupplierId?: string | null;
   status: ProductStatus;
@@ -24,14 +24,11 @@ export interface Product {
   updatedAt: Date;
 }
 
-/** DTO para la creación de productos */
-export type CreateProductDTO = Omit<
-  Product, 
-  'id' | 'createdAt' | 'updatedAt' | 'categoryId' | 'categoryIds'
-> & {
-  categoryIds: string[]; // Requerido en la entrada para asociar categorías
-  categoryId?: string;   // Opcional por compatibilidad heredada
+export type CreateProductDTO = Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'categoryId' | 'categoryIds' | 'tags' | 'features'> & {
+  categoryIds: string[];
+  categoryId?: string;
+  tags?: string[];
+  features?: string[];
 };
 
-/** DTO para la actualización de productos */
 export type UpdateProductDTO = Partial<CreateProductDTO>;

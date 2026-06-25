@@ -1,3 +1,5 @@
+// src/seed_demo.ts
+
 import { prisma } from './config/prisma';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
@@ -155,7 +157,7 @@ const FEATURE_POOLS = {
     'Acero y vidrio de alta calidad',
     'Formato ideal para reuniones y eventos',
     'Apto para uso domestico y profesional',
-    'Terminaciones pulidas y modernas',
+    'Terminaciones pulidas and modernas',
     'Facil lavado despues de cada uso',
     'Aporta estilo al bar de hogar',
   ],
@@ -170,7 +172,7 @@ const FEATURE_POOLS = {
   reposteria: [
     'Superficie antiadherente para mejor desmolde',
     'Medidas practicas para preparaciones caseras',
-    'Ideal para principiantes and avanzados',
+    'Ideal para principiantes y avanzados',
     'Resiste altas temperaturas de horneado',
     'Componentes aptos para contacto alimentario',
     'Limpieza simple luego del uso',
@@ -852,7 +854,7 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
 
     const existingId = existingBySlug?.id || existingBySku?.id;
 
-    // Modificado para no pasar la columna física obsoleta `categoryId` en products
+    // Modificado para no pasar las columnas obsoletas `tags` y `features` en products
     const productRow = existingId
       ? await prisma.product.update({
         where: { id: existingId },
@@ -863,13 +865,11 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
           description: product.description,
           price: product.price,
           images: product.images,
-          tags: product.tags,
           rating: product.rating,
           reviewCount: product.reviewCount,
           inStock: product.inStock,
           stock: product.stock,
           sku: product.sku,
-          features: product.features,
           status: ProductStatus.ACTIVE,
           isFeatured: product.tags.includes('bestseller'),
         },
@@ -882,19 +882,17 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
           description: product.description,
           price: product.price,
           images: product.images,
-          tags: product.tags,
           rating: product.rating,
           reviewCount: product.reviewCount,
           inStock: product.inStock,
           stock: product.stock,
           sku: product.sku,
-          features: product.features,
           status: ProductStatus.ACTIVE,
           isFeatured: product.tags.includes('bestseller'),
         },
       });
 
-    // Guardamos la relación de manera robusta en la tabla intermedia
+    // 1. Guardamos la relación de categoría en la tabla intermedia N:M
     await prisma.productCategory.upsert({
       where: {
         productId_categoryId: {
@@ -908,6 +906,41 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
         categoryId,
       },
     });
+
+    // 2. Sincronizamos las etiquetas normalizadas (ProductTag N:M)
+    const uniqueTags = Array.from(new Set(product.tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
+    await prisma.productTag.deleteMany({
+      where: {
+        productId: productRow.id,
+        tag: { name: { notIn: uniqueTags } }
+      }
+    });
+    for (const tagName of uniqueTags) {
+      const tag = await prisma.tag.upsert({
+        where: { name: tagName },
+        update: {},
+        create: { name: tagName }
+      });
+      await prisma.productTag.upsert({
+        where: {
+          productId_tagId: { productId: productRow.id, tagId: tag.id }
+        },
+        update: {},
+        create: { productId: productRow.id, tagId: tag.id }
+      });
+    }
+
+    // 3. Sincronizamos las características normalizadas (ProductFeature 1:N)
+    await prisma.productFeature.deleteMany({ where: { productId: productRow.id } });
+    if (product.features.length > 0) {
+      await prisma.productFeature.createMany({
+        data: product.features.map((desc, idx) => ({
+          productId: productRow.id,
+          description: desc.trim(),
+          displayOrder: idx
+        }))
+      });
+    }
 
     const images = Array.isArray(productRow.images)
       ? (productRow.images as string[])
@@ -1120,23 +1153,6 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
       });
     }
 
-    // const soldAt = paidAt ?? new Date(baseDate.getTime() + 12 * 60 * 60 * 1000);
-
-    // await prisma.sale.upsert({
-    //   where: { orderId: order.id },
-    //   update: {
-    //     total,
-    //     soldAt,
-    //   },
-    //   create: {
-    //     orderId: order.id,
-    //     total,
-    //     soldAt,
-    //     createdAt: soldAt,
-    //   },
-    // });
-    // salesCount += 1; // Puedes eliminar o comentar el contador también
-
     if (finalStatus === OrderStatus.SHIPPED || finalStatus === OrderStatus.DELIVERED) {
       const destination = destinationData[i % destinationData.length];
       const shippedAt = new Date(baseDate.getTime() + (24 + (i % 6)) * 60 * 60 * 1000);
@@ -1177,7 +1193,7 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
     orderCount += 1;
   }
 
-  console.log(`Pedidos demo: ${orderCount}, ventas/transacciones: ${salesCount}`);
+  console.log(`Pedidos demo: ${orderCount}`);
 
   return { orderCount, salesCount };
 }
@@ -1259,7 +1275,7 @@ async function seedDemo() {
       persistedProducts,
     } = await seedCategoriesAndProducts(generatedProducts);
 
-    const { orderCount, salesCount } = await seedOrdersAndSales(persistedProducts);
+    const { orderCount } = await seedOrdersAndSales(persistedProducts);
     const supplierCount = await seedSuppliers();
     console.log('=============================================');
     console.log('SEED DEMO COMPLETADO');
@@ -1269,7 +1285,6 @@ async function seedDemo() {
     console.log(`Subcategorias: ${subcategoryCount}`);
     console.log(`Productos cargados: ${productCount}`);
     console.log(`Pedidos demo: ${orderCount}`);
-    console.log(`Ventas/transacciones demo: ${salesCount}`);
     console.log(`Proveedores demo: ${supplierCount}`);
     console.log('=============================================');
   } catch (error) {
