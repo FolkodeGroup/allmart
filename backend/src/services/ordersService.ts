@@ -279,16 +279,19 @@ export async function updateOrderStatus(
       }
     });
 
-    // 🔹 Si es entregado, registrar venta
-    if (dto.status === OrderStatus.DELIVERED) {
-      await tx.sale.create({
-        data: {
-          orderId: id,
-          total: order.total,
-          createdAt: new Date()
-        }
-      });
-    }
+   // Modifica la transacción interna para que NO inserte en tx.sale
+// Busca esta condición dentro del método transaction en updateOrderStatus:
+
+    // 🔹 Si es entregado, registrar venta (REMOVER ESTE BLOQUE)
+    // if (dto.status === OrderStatus.DELIVERED) {
+    //   await tx.sale.create({
+    //     data: {
+    //       orderId: id,
+    //       total: order.total,
+    //       createdAt: new Date()
+    //     }
+    //   });
+    // }
 
     // 🔹 Devuelve pedido actualizado con historial completo
     const updatedOrder = await tx.order.findUnique({

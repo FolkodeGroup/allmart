@@ -1120,22 +1120,22 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
       });
     }
 
-    const soldAt = paidAt ?? new Date(baseDate.getTime() + 12 * 60 * 60 * 1000);
+    // const soldAt = paidAt ?? new Date(baseDate.getTime() + 12 * 60 * 60 * 1000);
 
-    await prisma.sale.upsert({
-      where: { orderId: order.id },
-      update: {
-        total,
-        soldAt,
-      },
-      create: {
-        orderId: order.id,
-        total,
-        soldAt,
-        createdAt: soldAt,
-      },
-    });
-    salesCount += 1;
+    // await prisma.sale.upsert({
+    //   where: { orderId: order.id },
+    //   update: {
+    //     total,
+    //     soldAt,
+    //   },
+    //   create: {
+    //     orderId: order.id,
+    //     total,
+    //     soldAt,
+    //     createdAt: soldAt,
+    //   },
+    // });
+    // salesCount += 1; // Puedes eliminar o comentar el contador también
 
     if (finalStatus === OrderStatus.SHIPPED || finalStatus === OrderStatus.DELIVERED) {
       const destination = destinationData[i % destinationData.length];
