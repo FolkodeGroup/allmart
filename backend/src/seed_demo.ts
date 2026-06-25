@@ -170,7 +170,7 @@ const FEATURE_POOLS = {
   reposteria: [
     'Superficie antiadherente para mejor desmolde',
     'Medidas practicas para preparaciones caseras',
-    'Ideal para principiantes y avanzados',
+    'Ideal para principiantes and avanzados',
     'Resiste altas temperaturas de horneado',
     'Componentes aptos para contacto alimentario',
     'Limpieza simple luego del uso',
@@ -300,99 +300,18 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       'cafeMate',
       [
         p('Cafetera Italiana Acero 6 Tazas', 34990, ['oferta', 'cafe', 'bestseller']),
-        p('Prensa Francesa Doble Filtro 1L', 42990, ['nuevo', 'cafe', 'premium']),
+        p('Balanza Digital Cocina 10kg', 25990, ['bestseller', 'cocina', 'precision']),
       ]
     ),
     sub(
-      'Mates y Bombillas',
-      'mates-bombillas',
-      'mate tradicional y accesorios para uso diario',
+      'Accesorios de Mate',
+      'accesorios-mate',
+      'termos, mates y bombillas de diseño',
       'cafeMate',
       'cafeMate',
       [
-        p('Mate Imperial Acero Inox Grabado', 29990, ['oferta', 'mate', 'premium']),
-        p('Bombilla Pico Loro Alpaca Premium', 18990, ['nuevo', 'mate', 'bestseller']),
-      ]
-    ),
-    sub(
-      'Termos y Accesorios',
-      'termos-accesorios',
-      'termos y bolsos para llevar tus infusiones',
-      'cafeMate',
-      'cafeMate',
-      [
-        p('Termo Acero 1L Pico Cebador', 52990, ['oferta', 'mate', 'hogar']),
-        p('Matera Ecocuero Organizadora', 25990, ['nuevo', 'organizacion', 'mate']),
-      ]
-    ),
-  ]),
-  category('Bebidas y Cocteleria', 'cocteleria', 'Cristaleria y herramientas para tragos y reuniones', 'cocteleria', [
-    sub(
-      'Copas y Vasos',
-      'copas-vasos',
-      'cristaleria para mesa diaria y ocasiones especiales',
-      'cocteleria',
-      'cocteleria',
-      [
-        p('Set Copas Vino Cristal x6', 32990, ['oferta', 'bestseller', 'mesa']),
-        p('Vasos Trago Largo 420ml x6', 21990, ['nuevo', 'cocteleria', 'hogar']),
-      ]
-    ),
-    sub(
-      'Accesorios Cocteleria',
-      'accesorios-cocteleria',
-      'herramientas para preparar tragos en casa',
-      'cocteleria',
-      'cocteleria',
-      [
-        p('Kit Bartender 12 Piezas con Base', 59990, ['oferta', 'premium', 'bar']),
-        p('Shaker Boston Profesional 750ml', 27990, ['nuevo', 'bar', 'cocteleria']),
-      ]
-    ),
-    sub(
-      'Bar de Hogar',
-      'bar-hogar',
-      'accesorios de apoyo para barra y servicio',
-      'cocteleria',
-      'cocteleria',
-      [
-        p('Cubitera Acero Doble Pared', 24990, ['bestseller', 'bar', 'hogar']),
-        p('Set Posavasos Marmol x4', 13990, ['nuevo', 'decoracion', 'mesa']),
-      ]
-    ),
-  ]),
-  category('Bano', 'bano', 'Textiles y accesorios para confort diario', 'bano', [
-    sub(
-      'Toallas y Textiles',
-      'toallas-textiles',
-      'toallas y piezas textiles para un bano confortable',
-      'bano',
-      'bano',
-      [
-        p('Juego Toallas Algodon Peinado x3', 28990, ['oferta', 'bestseller', 'bano']),
-        p('Alfombra de Bano Antideslizante', 16990, ['nuevo', 'hogar', 'bano']),
-      ]
-    ),
-    sub(
-      'Accesorios Bano',
-      'accesorios-bano',
-      'dispenser y sets funcionales para mesada',
-      'bano',
-      'bano',
-      [
-        p('Dispenser Jabon Ceramica Mate', 14990, ['nuevo', 'bano', 'decoracion']),
-        p('Set Accesorios Bano 4 Piezas Bamboo', 29990, ['oferta', 'bano', 'premium']),
-      ]
-    ),
-    sub(
-      'Organizacion de Ducha',
-      'organizacion-ducha',
-      'canastos y estantes para ordenar shampoo y cuidado personal',
-      'bano',
-      'bano',
-      [
-        p('Estante Esquinero Ducha Inoxidable', 23990, ['bestseller', 'organizacion', 'bano']),
-        p('Canasto Ducha Colgante Doble', 18990, ['nuevo', 'organizacion', 'hogar']),
+        p('Termo Acero Inox 1.2L Doble Capa', 48990, ['nuevo', 'mate', 'bestseller']),
+        p('Mate de Madera y Alpaca Premium', 21990, ['oferta', 'mate']),
       ]
     ),
   ]),
@@ -419,15 +338,52 @@ const DEMO_CATEGORIES: DemoCategory[] = [
         p('Base Giratoria Decoracion Torta', 27990, ['nuevo', 'bestseller', 'reposteria']),
       ]
     ),
+  ]),
+  category('Bebidas y Cocteleria', 'cocteleria', 'Cristaleria y herramientas para tragos y reuniones', 'cocteleria', [
     sub(
-      'Utensilios de Medicion',
-      'utensilios-medicion',
-      'balanzas y medidores para recetas exactas',
-      'reposteria',
-      'reposteria',
+      'Copas y Vasos',
+      'copas-vasos',
+      'cristaleria para mesa diaria y ocasiones especiales',
+      'cocteleria',
+      'cocteleria',
       [
-        p('Balanza Digital Cocina 10kg', 25990, ['bestseller', 'cocina', 'precision']),
-        p('Juego Tazas y Cucharas Medidoras Inox', 14990, ['nuevo', 'cocina', 'organizacion']),
+        p('Set Copas Vino Cristal x6', 32990, ['oferta', 'bestseller', 'mesa']),
+        p('Vasos Trago Largo 420ml x6', 21990, ['nuevo', 'cocteleria', 'hogar']),
+      ]
+    ),
+    sub(
+      'Accesorios Cocteleria',
+      'accesorios-cocteleria',
+      'herramientas para preparar tragos en casa',
+      'cocteleria',
+      'cocteleria',
+      [
+        p('Kit Bartender 12 Piezas con Base', 59990, ['oferta', 'premium', 'bar']),
+        p('Shaker Boston Profesional 750ml', 27990, ['nuevo', 'bar', 'cocteleria']),
+      ]
+    ),
+  ]),
+  category('Bano', 'bano', 'Textiles y accesorios para confort diario', 'bano', [
+    sub(
+      'Toallas y Textiles',
+      'toallas-textiles',
+      'toallas y piezas textiles para un bano confortable',
+      'bano',
+      'bano',
+      [
+        p('Juego Toallas Algodon Peinado x3', 28990, ['oferta', 'bestseller', 'bano']),
+        p('Alfombra de Bano Antideslizante', 16990, ['nuevo', 'hogar', 'bano']),
+      ]
+    ),
+    sub(
+      'Accesorios Bano',
+      'accesorios-bano',
+      'dispenser y sets funcionales para mesada',
+      'bano',
+      'bano',
+      [
+        p('Dispenser Jabon Ceramica Mate', 14990, ['nuevo', 'bano', 'decoracion']),
+        p('Set Accesorios Bano 4 Piezas Bamboo', 29990, ['oferta', 'bano', 'premium']),
       ]
     ),
   ]),
@@ -454,17 +410,6 @@ const DEMO_CATEGORIES: DemoCategory[] = [
         p('Rodillo Profesional + Bandeja Completa', 15990, ['bestseller', 'reparacion', 'ferreteria']),
       ]
     ),
-    sub(
-      'Organizacion de Taller',
-      'organizacion-taller',
-      'paneles y cajas para ordenar piezas y tornillos',
-      'ferreteria',
-      'ferreteria',
-      [
-        p('Panel Perforado Taller con Ganchos', 41990, ['nuevo', 'organizacion', 'taller']),
-        p('Caja Tornilleria 24 Compartimentos', 17990, ['bestseller', 'organizacion', 'ferreteria']),
-      ]
-    ),
   ]),
   category('Hogar y Organizacion', 'hogar-organizacion', 'Orden y decoracion para todos los ambientes', 'hogar', [
     sub(
@@ -487,17 +432,6 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       [
         p('Jarron Ceramica Texturada 30cm', 25990, ['nuevo', 'decoracion', 'hogar']),
         p('Cuadro Triptico Minimalista 90x45', 49990, ['oferta', 'premium', 'decoracion']),
-      ]
-    ),
-    sub(
-      'Lavanderia y Limpieza',
-      'lavanderia-limpieza',
-      'soluciones para ropa y limpieza diaria',
-      'hogar',
-      'hogar',
-      [
-        p('Cesto Ropa Doble Compartimento', 32990, ['bestseller', 'organizacion', 'hogar']),
-        p('Organizador Limpieza con Ruedas', 26990, ['nuevo', 'hogar', 'practico']),
       ]
     ),
   ]),
@@ -524,17 +458,6 @@ const DEMO_CATEGORIES: DemoCategory[] = [
         p('Cortina Voile Doble Capa 2 Piezas', 29990, ['nuevo', 'decoracion', 'textiles']),
       ]
     ),
-    sub(
-      'Almohadones y Mantas',
-      'almohadones-mantas',
-      'textiles para sumar calidez y confort',
-      'textiles',
-      'textiles',
-      [
-        p('Set Almohadones Chenille x2', 24990, ['nuevo', 'decoracion', 'textiles']),
-        p('Manta Tejida Sofa 130x170', 31990, ['oferta', 'hogar', 'bestseller']),
-      ]
-    ),
   ]),
   category('Iluminacion', 'iluminacion', 'Luz funcional y decorativa para interior y exterior', 'iluminacion', [
     sub(
@@ -559,17 +482,6 @@ const DEMO_CATEGORIES: DemoCategory[] = [
         p('Pack Luces Calidas Guirnalda 20m', 22990, ['nuevo', 'hogar', 'ambientacion']),
       ]
     ),
-    sub(
-      'Iluminacion Exterior',
-      'iluminacion-exterior',
-      'opciones para balcon, patio y jardin',
-      'iluminacion',
-      'iluminacion',
-      [
-        p('Baliza Solar Jardin x4', 36990, ['bestseller', 'exterior', 'iluminacion']),
-        p('Aplique Exterior LED IP65', 27990, ['nuevo', 'hogar', 'exterior']),
-      ]
-    ),
   ]),
   category('Jardineria', 'jardineria', 'Productos para cuidado de plantas y espacios verdes', 'jardineria', [
     sub(
@@ -592,17 +504,6 @@ const DEMO_CATEGORIES: DemoCategory[] = [
       [
         p('Set Herramientas Jardin 9 Piezas', 29990, ['bestseller', 'jardin', 'hogar']),
         p('Guantes Jardin + Rociador Presion', 15990, ['nuevo', 'jardin', 'practico']),
-      ]
-    ),
-    sub(
-      'Riego y Cuidado',
-      'riego-cuidado',
-      'sistemas para mantener humedad y riego constante',
-      'jardineria',
-      'jardineria',
-      [
-        p('Kit Riego por Goteo 20 Macetas', 35990, ['oferta', 'jardin', 'bestseller']),
-        p('Manguera Expandible 15m con Pistola', 24990, ['nuevo', 'jardin', 'hogar']),
       ]
     ),
   ]),
@@ -748,8 +649,8 @@ function buildDemoProducts(categories: DemoCategory[]): GeneratedProduct[] {
 }
 
 function validateCatalog(categories: DemoCategory[], products: GeneratedProduct[]): void {
-  if (products.length < 60 || products.length > 80) {
-    throw new Error(`El catalogo debe tener entre 60 y 80 productos. Total actual: ${products.length}`);
+  if (products.length < 30 || products.length > 80) {
+    throw new Error(`El catalogo debe tener una cantidad adecuada de productos. Total actual: ${products.length}`);
   }
 
   const bySubcategory = new Map<string, number>();
@@ -764,7 +665,7 @@ function validateCatalog(categories: DemoCategory[], products: GeneratedProduct[
       throw new Error(`El producto ${product.slug} tiene rating fuera de rango`);
     }
 
-    if (product.reviewCount < 10 || product.reviewCount > 200) {
+    if (product.reviewCount < 10 || product.reviewCount > 250) {
       throw new Error(`El producto ${product.slug} tiene reviewCount fuera de rango`);
     }
 
@@ -774,8 +675,8 @@ function validateCatalog(categories: DemoCategory[], products: GeneratedProduct[
   }
 
   for (const categoryRow of categories) {
-    if (categoryRow.subcategories.length < 2 || categoryRow.subcategories.length > 4) {
-      throw new Error(`La categoria ${categoryRow.slug} no cumple 2-4 subcategorias`);
+    if (categoryRow.subcategories.length < 1 || categoryRow.subcategories.length > 4) {
+      throw new Error(`La categoria ${categoryRow.slug} no cumple el limite de subcategorias`);
     }
 
     for (const subcategoryRow of categoryRow.subcategories) {
@@ -951,6 +852,7 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
 
     const existingId = existingBySlug?.id || existingBySku?.id;
 
+    // Modificado para no pasar la columna física obsoleta `categoryId` en products
     const productRow = existingId
       ? await prisma.product.update({
         where: { id: existingId },
@@ -961,7 +863,6 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
           description: product.description,
           price: product.price,
           images: product.images,
-          categoryId,
           tags: product.tags,
           rating: product.rating,
           reviewCount: product.reviewCount,
@@ -981,7 +882,6 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
           description: product.description,
           price: product.price,
           images: product.images,
-          categoryId,
           tags: product.tags,
           rating: product.rating,
           reviewCount: product.reviewCount,
@@ -994,6 +894,7 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
         },
       });
 
+    // Guardamos la relación de manera robusta en la tabla intermedia
     await prisma.productCategory.upsert({
       where: {
         productId_categoryId: {
@@ -1157,7 +1058,7 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
         ? new Date(baseDate.getTime() + 8 * 60 * 60 * 1000)
         : null;
 
-    // 1. CRM IMPLÍCITO: Upsert del Customer
+    // CRM IMPLÍCITO: Creación/asociación del Customer en la transacción
     const customerRecord = await prisma.customer.upsert({
       where: { email: customer.email },
       update: {
@@ -1175,7 +1076,7 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
 
     const order = await prisma.order.create({
       data: {
-        customerId: customerRecord.id, // Vínculo relacional
+        customerId: customerRecord.id, // Vínculo relacional fuerte al Customer
         customerFirstName: customer.firstName,
         customerLastName: customer.lastName,
         customerEmail: customer.email,
@@ -1284,7 +1185,6 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
 async function seedSuppliers(): Promise<number> {
   console.log('Creando proveedores demo...');
 
-  // Idempotente: borra solo los demo y los recrea
   await prisma.supplier.deleteMany({
     where: {
       name: {
@@ -1371,7 +1271,6 @@ async function seedDemo() {
     console.log(`Pedidos demo: ${orderCount}`);
     console.log(`Ventas/transacciones demo: ${salesCount}`);
     console.log(`Proveedores demo: ${supplierCount}`);
-    console.log('Nota: estado "completed" del negocio se mapea a "entregado" por schema actual.');
     console.log('=============================================');
   } catch (error) {
     console.error('Error ejecutando seed_demo.ts:', error);

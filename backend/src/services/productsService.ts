@@ -72,8 +72,10 @@ function toProduct(row: any): Product {
     ? row.productCategories.map((rel: { categoryId: string }) => rel.categoryId)
     : Array.isArray(row.categoryIds)
       ? row.categoryIds
-      : undefined;
-  const primaryCategoryId = row.categoryId ?? (categoryIds && categoryIds.length > 0 ? categoryIds[0] : '') ?? '';
+      : [];
+  
+  // Obtenemos el primer ID del array de relaciones de manera segura
+  const primaryCategoryId = categoryIds[0] ?? '';
 
   return {
     id: row.id,
@@ -83,7 +85,7 @@ function toProduct(row: any): Product {
     shortDescription: row.shortDescription ?? undefined,
     price: row.price.toNumber(),
     images: Array.isArray(row.images) ? row.images : [],
-    categoryId: primaryCategoryId,
+    categoryId: primaryCategoryId, // Propiedad virtual para compatibilidad
     categoryIds,
     tags: Array.isArray(row.tags) ? row.tags : [],
     rating: row.rating.toNumber(),
@@ -108,7 +110,6 @@ const adminProductSelect = {
   shortDescription: true,
   price: true,
   images: true,
-  categoryId: true,
   tags: true,
   rating: true,
   reviewCount: true,
@@ -309,7 +310,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   if (skuExists) throw createError('El SKU ya está en uso', 409, ['sku']);
 
   await ensureCategoriesExist(normalizedCategoryIds);
-  const primaryCategoryId = dto.categoryId ?? normalizedCategoryIds[0];
 
   const slug = generateSlug(dto.name);
   const parsedPrice = parseSafePrice(dto.price) ?? 0;
@@ -322,7 +322,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       shortDescription: dto.shortDescription ?? null,
       price: parsedPrice,
       images: Array.isArray(dto.images) ? dto.images : [],
-      categoryId: primaryCategoryId,
       status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
       sku: dto.sku,
       stock: dto.stock ?? 0,
@@ -374,29 +373,23 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
 
   const existingCategoryIds = existing.productCategories.length > 0
     ? existing.productCategories.map((rel) => rel.categoryId)
-    : (existing.categoryId ? [existing.categoryId] : []);
+    : [];
 
   const shouldUpdateCategories = dto.categoryId !== undefined || dto.categoryIds !== undefined;
   const normalizedCategoryIds = shouldUpdateCategories
-    ? normalizeCategoryIds(dto.categoryId ?? existing.categoryId ?? undefined, dto.categoryIds)
+    ? normalizeCategoryIds(dto.categoryId ?? undefined, dto.categoryIds)
     : existingCategoryIds;
 
   if (shouldUpdateCategories) {
     await ensureCategoriesExist(normalizedCategoryIds);
   }
 
-  const primaryCategoryId = (dto.categoryId ?? normalizedCategoryIds[0] ?? existing.categoryId) ?? '';
-
-  // 🛡️ Filtro de seguridad: Evita que el endpoint de actualización general del producto
-  // sobrescriba el precio base del producto con el precio de una variante seleccionada enviado por error.
   let finalPrice = dto.price !== undefined ? parseSafePrice(dto.price) : undefined;
   if (finalPrice !== undefined && existing.productSkus.length > 0) {
     const skuPrices = existing.productSkus
       .map((s) => s.price ? Number(s.price) : null)
       .filter((p): p is number => p !== null && p > 0);
 
-    // Si el precio enviado coincide exactamente con el precio de un SKU y es diferente
-    // al precio del producto base preexistente, ignoramos ese valor y mantenemos el precio base original.
     if (skuPrices.includes(Number(finalPrice)) && Number(finalPrice) !== Number(existing.price)) {
       finalPrice = Number(existing.price);
     }
@@ -411,7 +404,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : existing.shortDescription,
       price: finalPrice !== undefined ? finalPrice : existing.price,
       images: Array.isArray(dto.images) ? dto.images : (existing.images ?? Prisma.JsonNull),
-      categoryId: primaryCategoryId,
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
       sku: dto.sku !== undefined ? dto.sku : existing.sku,
       stock: dto.stock !== undefined ? dto.stock : existing.stock,

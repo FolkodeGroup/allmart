@@ -73,7 +73,6 @@ model Category {
   children          Category[]            @relation("CategoryHierarchy")
   categoryImage     CategoryImageStorage?
   productCategories ProductCategory[]
-  products          Product[]
   promotionRules    PromotionRule[]
 
   @@index([slug], map: "idx_categories_slug")
@@ -89,7 +88,6 @@ model Product {
   shortDescription      String?                @map("short_description")
   price                 Decimal                @db.Decimal(12, 2)
   images                Json                   @default("[]")
-  categoryId            String?                @map("category_id") @db.Uuid
   tags                  Json                   @default("[]")
   rating                Decimal                @default(0) @db.Decimal(3, 2)
   reviewCount           Int                    @default(0) @map("review_count")
@@ -115,12 +113,10 @@ model Product {
   reviews               ProductReview[]
   productSkus           ProductSku[]
   productSuppliers      ProductSupplier[]
-  category              Category?              @relation(fields: [categoryId], references: [id], onUpdate: NoAction, map: "products_category_fk")
   primarySupplier       Supplier?              @relation("ProductPrimarySupplier", fields: [primarySupplierId], references: [id], onUpdate: NoAction, map: "products_primary_supplier_fk")
   promotionRules        PromotionRule[]
   supplierProductPrices SupplierProductPrice[]
 
-  @@index([categoryId], map: "idx_products_category_id")
   @@index([sku], map: "idx_products_sku")
   @@index([slug], map: "idx_products_slug")
   @@index([status], map: "idx_products_status")
