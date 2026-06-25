@@ -7,8 +7,10 @@ import { OrderStatus, PaymentStatus } from '../types';
 
 export interface Order {
   id: string;
+  customerId?: string; // Vínculo fuerte al cliente CRM
   createdAt: Date;
   updatedAt: Date;
+  // Snapshot inmutable
   customer: {
     firstName: string;
     lastName: string;
@@ -44,4 +46,5 @@ export type CreateOrderDTO = {
   total: number;
   notes?: string;
 };
+
 export type UpdateOrderDTO = Partial<Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'customer'>>;

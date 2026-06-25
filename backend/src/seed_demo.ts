@@ -1070,6 +1070,11 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
       customerEmail: { in: demoEmails },
     },
   });
+  await prisma.customer.deleteMany({
+    where: {
+      email: { in: demoEmails }
+    }
+  });
 
   const statuses: OrderStatus[] = [
     OrderStatus.PENDING,
@@ -1152,8 +1157,25 @@ async function seedOrdersAndSales(persistedProducts: PersistedProduct[]): Promis
         ? new Date(baseDate.getTime() + 8 * 60 * 60 * 1000)
         : null;
 
+    // 1. CRM IMPLÍCITO: Upsert del Customer
+    const customerRecord = await prisma.customer.upsert({
+      where: { email: customer.email },
+      update: {
+        totalOrders: { increment: 1 },
+        totalSpent: { increment: total }
+      },
+      create: {
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        totalOrders: 1,
+        totalSpent: total
+      }
+    });
+
     const order = await prisma.order.create({
       data: {
+        customerId: customerRecord.id, // Vínculo relacional
         customerFirstName: customer.firstName,
         customerLastName: customer.lastName,
         customerEmail: customer.email,

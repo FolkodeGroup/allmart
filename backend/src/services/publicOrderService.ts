@@ -1,6 +1,7 @@
 /**
  * services/publicOrderService.ts
  * Lógica para creación pública de pedidos usando Prisma Client con transacciones.
+ * Implementa Guest Checkout con CRM Implícito (Upsert de Customer).
  */
 
 import { prisma } from '../config/prisma';
@@ -17,7 +18,9 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(customer.email)) {
+  const normalizedEmail = customer.email.trim().toLowerCase();
+  
+  if (!emailRegex.test(normalizedEmail)) {
     throw createError('Email inválido', 400);
   }
 
@@ -40,11 +43,12 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     throw createError('Total inválido', 400);
   }
 
+  // Ejecución Atómica (Todo o Nada)
   const result = await prisma.$transaction(async (tx) => {
-    // Validar que todos los productos existan antes de crear la orden
+    
+    // 1. Validar existencia y stock de productos
     const validatedItems = [];
     for (const item of items) {
-      // Limpiar el ID compuesto del frontend (extrayendo solo el UUID real del producto)
       const [realProductId] = item.productId.split('::');
 
       const product = await tx.product.findUnique({
@@ -58,16 +62,41 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
 
       validatedItems.push({ 
         ...item, 
-        realProductId, // Guardamos el ID limpio para usarlo en la creación de los orderItems
+        realProductId,
         product 
       });
     }
 
+    // 2. CRM IMPLÍCITO: Upsert del Customer basado en Email Natural Key
+    const customerRecord = await tx.customer.upsert({
+      where: { email: normalizedEmail },
+      update: {
+        // Actualizamos con los últimos datos proporcionados por el cliente
+        firstName: customer.firstName.trim(),
+        lastName: customer.lastName.trim(),
+        phone: normalizedPhone,
+        // Incrementamos métricas analíticas
+        totalOrders: { increment: 1 },
+        totalSpent: { increment: total }
+      },
+      create: {
+        email: normalizedEmail,
+        firstName: customer.firstName.trim(),
+        lastName: customer.lastName.trim(),
+        phone: normalizedPhone,
+        totalOrders: 1,
+        totalSpent: total
+      }
+    });
+
+    // 3. Crear Orden: Vínculo fuerte (customerId) + Snapshot inmutable de datos
     const order = await tx.order.create({
       data: {
-        customerFirstName: customer.firstName,
-        customerLastName: customer.lastName,
-        customerEmail: customer.email,
+        customerId: customerRecord.id, // Vínculo relacional
+        // Snapshot
+        customerFirstName: customer.firstName.trim(),
+        customerLastName: customer.lastName.trim(),
+        customerEmail: normalizedEmail,
         customerPhone: normalizedPhone,
         total,
         notes: notes ?? null,
@@ -76,10 +105,11 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       },
     });
 
+    // 4. Crear Items de la orden
     await tx.orderItem.createMany({
       data: validatedItems.map((item) => ({
         orderId: order.id,
-        productId: item.realProductId, // Usamos el UUID limpio de la base de datos
+        productId: item.realProductId,
         productName: item.productName,
         productImage: item.productImage ?? null,
         quantity: item.quantity,
@@ -87,6 +117,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       })),
     });
 
+    // 5. Gestión de Stock
     for (const item of validatedItems) {
       const product = item.product;
       const stockBefore = product.stock;
@@ -111,11 +142,12 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       }
     }
 
+    // 6. Historial de estados
     await tx.orderStatusHistory.create({
       data: {
         orderId: order.id,
         status: 'pendiente' as Parameters<typeof tx.orderStatusHistory.create>[0]['data']['status'],
-        note: 'Pedido creado: estado inicial set',
+        note: 'Pedido creado (Guest Checkout)',
       },
     });
 
@@ -125,6 +157,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     };
   });
 
+  // 7. Acciones Asíncronas (Fuera de la transacción de base de datos)
   try {
     await sendOrderConfirmationEmail({
       orderId: result.id,
@@ -132,7 +165,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       customer: {
         firstName: customer.firstName,
         lastName: customer.lastName,
-        email: customer.email,
+        email: normalizedEmail,
         phone: normalizedPhone,
       },
       items: items.map((item) => ({
