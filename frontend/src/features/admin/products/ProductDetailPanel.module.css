@@ -208,7 +208,7 @@
 }
 
 /* ── Footer ── */
-.panelFooter {
+.panelActions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -323,7 +323,7 @@
     font-size: var(--text-xs);
   }
 
-  .panelFooter {
+  .panelActions {
     flex-direction: row;
     gap: var(--space-2);
     padding: var(--space-3);

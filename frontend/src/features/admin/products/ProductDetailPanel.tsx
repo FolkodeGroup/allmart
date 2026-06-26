@@ -127,9 +127,9 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
               <p className={styles.productSKU}>{product.sku}</p>
             </div>
           </div>
-          {/* Footer with actions */}
+          {/* actions */}
           {(canEdit || canDelete) && (
-            <div className={styles.panelFooter}>
+            <div className={styles.panelActions}>
               <div className={styles.actions}>
                 {canEdit && onEdit && (
                   <button
