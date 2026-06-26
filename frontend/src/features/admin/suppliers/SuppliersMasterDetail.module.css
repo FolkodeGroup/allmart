@@ -581,6 +581,10 @@
     width: 100%;
 }
 
+.searchBox svg{
+    color: var(--color-text-primary)
+}
+
 .inlineCheckbox {
     display: inline-flex;
     align-items: center;
@@ -754,18 +758,21 @@
 }
 
 .badgeDanger {
-    background: #fee2e2;
+    background: var(--color-bg-primary);
     color: #dc2626;
+    border: 1px solid var(--color-border);
 }
 
 .badgeWarn {
-    background: #fff7ed;
+    background: var(--color-bg-primary);
     color: #d97706;
+    border: 1px solid var(--color-border);
 }
 
 .badgeOk {
-    background: #f0fdf4;
+    background: var(--color-bg-primary);
     color: #16a34a;
+    border: 1px solid var(--color-border);
 }
 
 /* ── Analysis tab ── */
@@ -916,7 +923,7 @@
     padding: 8px 16px;
     border: none;
     border-radius: 8px;
-    background: #ef4444;
+    background: var(--color-error-mode);
     color: #fff;
     font-size: 0.85rem;
     font-weight: 600;
@@ -927,7 +934,7 @@
     padding: 8px 16px;
     border: none;
     border-radius: 8px;
-    background: #10b981;
+    background: var(--color-error-mode);
     color: #fff;
     font-size: 0.85rem;
     font-weight: 600;
