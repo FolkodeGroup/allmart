@@ -95,12 +95,13 @@
 }
 
 .filterTab:hover {
-    color: var(--color-text-primary);
+    background: var(--color-bg-primary)
 }
 
 .filterTabActive {
-    color: var(--color-dif-mode, #6366f1);
-    border-bottom-color: var(--color-dif-mode, #6366f1);
+    color: var(--color-dif-mode);
+    border-bottom-color: var(--color-dif-mode);
+    background: var(--color-bg-tertiary)
 }
 
 .newBtn {
@@ -243,8 +244,7 @@
 }
 
 .iconBtn:hover {
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
 }
 
 .cardMeta {
@@ -374,13 +374,14 @@
 }
 
 .tab:hover {
-    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
 }
 
 .tabActive {
     color: var(--color-dif-mode);
     border-bottom-color: var(--color-dif-mode);
     font-weight: 600;
+    background: var(--color-bg-tertiary);
 }
 
 /* Loading */
