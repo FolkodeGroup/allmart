@@ -234,32 +234,26 @@ function AdminOrders() {
         ) : (
           <>
             <div className={`${styles.summaryCard} ${styles.cardTotal}`}>
-              <span className={styles.summaryIcon}>🛒</span>
               <span className={styles.summaryNum}>{orders.length}</span>
               <span className={styles.summaryLabel}>Total pedidos</span>
             </div>
             <div className={`${styles.summaryCard} ${styles.cardPendiente}`}>
-              <span className={styles.summaryIcon}>⏳</span>
               <span className={`${styles.summaryNum} ${styles.numPendiente}`}>{summary.pendiente}</span>
               <span className={styles.summaryLabel}>Pendientes</span>
             </div>
             <div className={`${styles.summaryCard} ${styles.cardPreparacion}`}>
-              <span className={styles.summaryIcon}>🔧</span>
               <span className={`${styles.summaryNum} ${styles.numPreparacion}`}>{summary['en-preparacion']}</span>
               <span className={styles.summaryLabel}>En preparación</span>
             </div>
             <div className={`${styles.summaryCard} ${styles.cardEnviado}`}>
-              <span className={styles.summaryIcon}>🚚</span>
               <span className={`${styles.summaryNum} ${styles.numEnviado}`}>{summary.enviado}</span>
               <span className={styles.summaryLabel}>Enviados</span>
             </div>
             <div className={`${styles.summaryCard} ${styles.cardEntregado}`}>
-              <span className={styles.summaryIcon}>✅</span>
               <span className={`${styles.summaryNum} ${styles.numEntregado}`}>{summary.entregado}</span>
               <span className={styles.summaryLabel}>Entregados</span>
             </div>
             <div className={`${styles.summaryCard} ${styles.cardAbonado}`}>
-              <span className={styles.summaryIcon}>💬</span>
               <span className={`${styles.summaryNum} ${styles.numAbonado}`}>{totalAbonados}</span>
               <span className={styles.summaryLabel}>Abonados</span>
             </div>
