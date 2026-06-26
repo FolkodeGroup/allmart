@@ -18,7 +18,7 @@ import styles from '../AdminOrders.module.css';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import type { Order } from '../../../../context/AdminOrdersContext';
 import { Button } from '../../../../components/ui/Button/Button';
-import { formatOrderCode, formatOrderLabel } from '../../../../utils/orders';
+import { formatOrderCode } from '../../../../utils/orders';
 
 /**
  * Props de OrderItem.
@@ -54,7 +54,6 @@ export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersT
       <table className={styles.table} style={{ minWidth: 900 }}>
         <thead>
           <tr>
-            <th style={{ width: 48 }}></th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>N° Pedido</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Fecha</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Cliente</th>
@@ -101,7 +100,7 @@ interface OrderItemProps {
  * excepto en la celda del estado donde el click se propaga de forma controlada.
  */
 
-export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderItemProps) {
+export function OrderItem({ order, onDetail, index }: OrderItemProps) {
   const totalQty = order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0); // Cantidad total de ítems sumando todas las líneas del pedido
 
   const { updateOrderStatus } = useAdminOrders();
@@ -163,17 +162,6 @@ export function OrderItem({ order, selected, onSelect, onDetail, index }: OrderI
       tabIndex={0}
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
     >
-      {/* Checkbox de selección: stopPropagation evita abrir el modal al hacer clic */}
-      <td style={{ padding: '16px 12px' }}>
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={e => { e.stopPropagation(); onSelect(order.id); }}
-          aria-label={`Seleccionar ${formatOrderLabel(order.id)}`}
-          onClick={e => e.stopPropagation()}
-        />
-      </td>
-
       {/* ID truncado a 8 caracteres para legibilidad */}
       <td className={styles.tdOrder} >
         #{formatOrderCode(order.id)}
