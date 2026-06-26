@@ -208,13 +208,12 @@
 }
 
 /* ── Footer ── */
-.panelFooter {
+.panelActions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
   flex-shrink: 0;
 }
@@ -324,7 +323,7 @@
     font-size: var(--text-xs);
   }
 
-  .panelFooter {
+  .panelActions {
     flex-direction: row;
     gap: var(--space-2);
     padding: var(--space-3);
