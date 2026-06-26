@@ -325,10 +325,10 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                     </div>
                                     <div className={styles.cardActions}>
                                         <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); onEdit(s.id); }} title="Editar">
-                                            <Edit2 size={13} />
+                                            <i className="bi bi-pencil-fill" />
                                         </button>
                                         <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); setDeleteId(s.id); }} title="Desactivar proveedor">
-                                            <PowerOff size={13} />
+                                            <i className="bi bi-lightbulb" />
                                         </button>
                                     </div>
                                 </div>
