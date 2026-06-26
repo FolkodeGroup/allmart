@@ -43,9 +43,8 @@ interface OrderStatusSelectorProps {
  * de persistir el cambio recae en el padre (OrderItem, OrderDetailModal).
  */
 
-export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value, onChange, disabled, className }) => {
+export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value, onChange, disabled }) => {
   // Estado local para el valor "en vuelo" antes de confirmar
-  const [showConfirm, setShowConfirm] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus>(value);
 
   /**
@@ -57,29 +56,13 @@ export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value,
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value as OrderStatus;
     setPendingStatus(newStatus);
-    setShowConfirm(true);
 
     // Notificación optimista: el padre puede marcar isDirty sin esperar confirmación
     if (newStatus !== value) onChange(newStatus);
   };
 
-  /** El usuario confirmó el cambio: solo cerramos el cuadro. El padre ya tiene el valor. */
-  const handleConfirm = () => {
-    setShowConfirm(false);
-  };
-
-  /**
-  * El usuario canceló: revertimos el estado local Y notificamos al padre
-  * para que también revierta (ej: limpiar isDirty si no hay otros cambios).
-  */
-  const handleCancel = () => {
-    setPendingStatus(value);
-    setShowConfirm(false);
-    onChange(value); // revierte en el padre
-  };
-
   return (
-    <div className={className} style={{ display: 'inline-block', position: 'relative' }}>
+    <div className={styles.orderStatusSelectorContainer}>
       <select
         className={styles.statusSelect}
         value={pendingStatus}
@@ -91,23 +74,6 @@ export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value,
           <option key={s} value={s}>{STATUS_LABELS[s]}</option>
         ))}
       </select>
-
-      {/* Cuadro de confirmación inline: aparece debajo del select tras un cambio */}
-      {showConfirm && (
-        <div className={styles.statusConfirmBox}>
-          <span className={styles.statusConfirmText}>
-            ¿Confirmar cambio de estado a "{STATUS_LABELS[pendingStatus as keyof typeof STATUS_LABELS]}"?
-          </span>
-          <div className={styles.statusConfirmActions}>
-            <button className={styles.applyStatusBtn} type="button" onClick={handleConfirm}>
-              Confirmar
-            </button>
-            <button className={styles.cancelBtn} type="button" onClick={handleCancel}>
-              Cancelar
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

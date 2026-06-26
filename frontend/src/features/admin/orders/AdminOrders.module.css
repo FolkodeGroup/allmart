@@ -316,7 +316,7 @@
 }
 
 .searchInput:focus,
-.searchInput:hover{
+.searchInput:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -386,7 +386,7 @@
 }
 
 .filterSelect:focus,
-.filterSelect:hover{
+.filterSelect:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -487,7 +487,7 @@
 }
 
 .dateInput:focus,
-.dateInput:hover{
+.dateInput:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -522,7 +522,7 @@
 }
 
 .totalInput:focus,
-.totalInput:hover{
+.totalInput:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -638,8 +638,8 @@
   padding: 16px 20px;
 }
 
-.tdEmail{
-  color: var(--color-normal-gray) ;
+.tdEmail {
+  color: var(--color-normal-gray);
   font-size: 0.8rem;
 }
 
@@ -1915,7 +1915,7 @@
   width: 120px;
 }
 
-.customerTd{
+.customerTd {
   font-weight: 600;
   font-size: 16px;
   color: var(--color-text-primary);
@@ -1995,3 +1995,13 @@
   }
 }
 
+.orderStatusSelectorContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5em;
+}
+
+.statusConfirmActions {
+  display: flex;
+  gap: var(--space-3);
+}

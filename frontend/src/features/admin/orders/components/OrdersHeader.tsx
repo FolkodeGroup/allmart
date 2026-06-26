@@ -25,7 +25,7 @@ export function OrdersHeader() {
       {/* Etiqueta de sección (breadcrumb visual) */}
       <span className={sectionStyles.label}>Administración</span>
       <h1 className={sectionStyles.title}>
-        <span className={sectionStyles.icon}>🛒</span> Pedidos
+        Pedidos
         {/*
           Botón de ayuda: abre un Tooltip con descripción de la sección.
           El botón está vacío visualmente; el contenido lo provee el Tooltip.
