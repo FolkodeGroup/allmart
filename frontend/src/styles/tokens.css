@@ -10,6 +10,7 @@
   --color-accent: #DDB08C;
   --color-accent-light: #e8c5a8;
   --color-accent-dark: #c89a70;
+  --color-accent-bg: #fff5eb;
   --color-neutral-dark: #000000;
   --color-neutral-light: #FFFFFF;
   --color-soft-gray: #A9A9A9;
@@ -192,6 +193,7 @@ body[data-admin-theme='dark'] {
   --color-accent:              #ddb08c;
   --color-accent-light:        #e8c5a8;
   --color-accent-dark:         #c89a70;
+  --color-accent-bg:           rgba(221, 176, 140, 0.16);
   --color-neutral-dark:        #181c1f;
   --color-neutral-light:       #f3f3f3;
   --color-warm-gray:           #b6a68a;

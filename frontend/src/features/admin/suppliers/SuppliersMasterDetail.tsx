@@ -43,6 +43,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     const [history, setHistory] = useState<PriceHistoryEntry[]>([]);
     const [rightLoading, setRightLoading] = useState(false);
     const [rangedays, setRangeDays] = useState<RangeId>(30);
+    const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
 
     // Modals
     const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -89,6 +90,18 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         }).finally(() => setRightLoading(false));
     }, [selectedId, rangedays]);
 
+    useEffect(() => {
+        if (!selectedId) {
+            setSelectedProductId(null);
+        }
+    }, [selectedId]);
+
+    useEffect(() => {
+        if (!selectedProductId && products.length === 1) {
+            setSelectedProductId(products[0].productId);
+        }
+    }, [products, selectedProductId]);
+
     // ── Filtered supplier list ──────────────────────────────────────────────
     const filteredSuppliers = useMemo(() => {
         let list = suppliers;
@@ -108,26 +121,33 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     const selectedSupplier = useMemo(() => suppliers.find(s => s.id === selectedId) ?? null, [suppliers, selectedId]);
 
     // ── Chart data: pivot history into { date, [productName]: price } ──────
+    const selectedProduct = useMemo(
+        () => products.find(p => p.productId === selectedProductId) ?? null,
+        [products, selectedProductId]
+    );
+
+    const selectedHistory = useMemo(() => {
+        if (!selectedProductId) return [];
+        return history.filter(h => h.productId === selectedProductId);
+    }, [history, selectedProductId]);
+
     const chartData = useMemo(() => {
-        if (history.length === 0) return [];
+        if (selectedHistory.length === 0) return [];
         const byDate: Record<string, Record<string, number>> = {};
-        const productNames = new Set<string>();
-        history.forEach(h => {
+        selectedHistory.forEach(h => {
             const day = h.createdAt.slice(0, 10);
             if (!byDate[day]) byDate[day] = {};
-            // Graficar costo cuando está disponible, sino precio
             byDate[day][h.productName] = h.cost !== null ? h.cost : h.price;
-            productNames.add(h.productName);
         });
         const sorted = Object.keys(byDate).sort();
         return sorted.map(day => ({ date: day, ...byDate[day] }));
-    }, [history]);
+    }, [selectedHistory]);
 
     const chartProducts = useMemo(() => {
         const names = new Set<string>();
-        history.forEach(h => names.add(h.productName));
-        return Array.from(names).slice(0, 8); // max 8 lines
-    }, [history]);
+        selectedHistory.forEach(h => names.add(h.productName));
+        return Array.from(names).slice(0, 8);
+    }, [selectedHistory]);
 
     const LINE_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#0ea5e9', '#14b8a6'];
 
@@ -358,13 +378,29 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                 </button>
                                             ))}
                                         </div>
-                                        {chartData.length === 0 ? (
+                                        {!selectedProductId ? (
+                                            <div className={styles.emptyChart}>
+                                                <Package size={36} />
+                                                <p>Seleccioná un producto en la pestaña Productos para ver su fluctuación.</p>
+                                            </div>
+                                        ) : chartData.length === 0 ? (
                                             <div className={styles.emptyChart}>
                                                 <TrendingUp size={36} />
-                                                <p>Sin historial de precios para el período seleccionado</p>
+                                                <p>Sin historial de precios para el producto seleccionado en el período elegido.</p>
                                             </div>
                                         ) : (
-                                            <ResponsiveContainer width="100%" height={320}>
+                                            <>
+                                                <div className={styles.selectedProductBanner}>
+                                                    <span>Producto: <strong>{selectedProduct?.productName ?? 'Seleccionado'}</strong></span>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.clearSelectionBtn}
+                                                        onClick={() => setSelectedProductId(null)}
+                                                    >
+                                                        Cambiar producto
+                                                    </button>
+                                                </div>
+                                                <ResponsiveContainer width="100%" height={320}>
                                                 <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
                                                     <defs>
                                                         {chartProducts.map((name, i) => (
@@ -375,27 +411,27 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                         ))}
                                                     </defs>
                                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e0e0e0)" />
-                                                    <XAxis 
-                                                        dataKey="date" 
+                                                    <XAxis
+                                                        dataKey="date"
                                                         tick={{ fontSize: 12, fontWeight: 500 }}
                                                         stroke="var(--color-text-tertiary, #6b7280)"
                                                     />
-                                                    <YAxis 
+                                                    <YAxis
                                                         tick={{ fontSize: 12 }}
                                                         tickFormatter={(v: number) => fmt.format(v)}
                                                         stroke="var(--color-text-tertiary, #6b7280)"
                                                         width={90}
                                                         label={{ value: 'Costo', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: 'var(--color-text-tertiary, #6b7280)' }}
                                                     />
-                                                    <Tooltip 
+                                                    <Tooltip
                                                         formatter={(v: number) => fmt.format(v)}
                                                         cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
                                                     />
                                                     <Legend wrapperStyle={{ fontSize: 12, paddingTop: '16px' }} />
                                                     {chartProducts.map((name, i) => (
-                                                        <Area 
-                                                            key={name} 
-                                                            type="monotone" 
+                                                        <Area
+                                                            key={name}
+                                                            type="monotone"
                                                             dataKey={name}
                                                             stroke={LINE_COLORS[i % LINE_COLORS.length]}
                                                             strokeWidth={2}
@@ -405,6 +441,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                     ))}
                                                 </AreaChart>
                                             </ResponsiveContainer>
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -438,14 +475,22 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                     {label} {sortKey === key ? (sortDir === 'asc' ? '↑' : '↓') : ''}
                                                                 </th>
                                                             ))}
+                                                            <th className={styles.thAction}>Acciones</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {sortedProducts.map(p => (
                                                             <tr
                                                                 key={p.productId}
-                                                                className={styles.tableRow}
-                                                                onClick={() => setHistoryProduct({ productId: p.productId, productName: p.productName })}
+                                                                className={`${styles.tableRow} ${selectedProductId === p.productId ? styles.tableRowSelected : ''}`}
+                                                                tabIndex={0}
+                                                                onClick={() => setSelectedProductId(p.productId)}
+                                                                onKeyDown={e => {
+                                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                                        e.preventDefault();
+                                                                        setSelectedProductId(p.productId);
+                                                                    }
+                                                                }}
                                                             >
                                                                 <td className={styles.tdSku}>{p.sku ?? '—'}</td>
                                                                 <td>{p.productName}</td>
@@ -457,6 +502,18 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                 </td>
                                                                 <td className={styles.tdDate}>
                                                                     {p.lastPriceChange ? new Date(p.lastPriceChange).toLocaleDateString('es-AR') : '—'}
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className={styles.historyBtn}
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setHistoryProduct({ productId: p.productId, productName: p.productName });
+                                                                        }}
+                                                                    >
+                                                                        Ver historial
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                         ))}
