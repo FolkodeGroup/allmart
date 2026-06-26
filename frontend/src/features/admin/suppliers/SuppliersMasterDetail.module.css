@@ -419,13 +419,19 @@
 .chartTab {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .chartControls {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, rgba(255, 140, 66, 0.12), rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
 }
 
 .controlLabel {
@@ -454,10 +460,64 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 200px;
+    min-height: 220px;
     gap: 10px;
     color: var(--color-text-tertiary);
     font-size: 0.85rem;
+    border: 1px dashed var(--color-border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.chartSummary {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.chartSummaryTitle {
+    margin: 0 0 4px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.chartSummaryHint {
+    margin: 0;
+    font-size: 0.77rem;
+    color: var(--color-text-tertiary);
+}
+
+.priorityPills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.priorityPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 140, 66, 0.25);
+    background: rgba(255, 140, 66, 0.12);
+    color: var(--color-text-primary);
+    font-size: 0.74rem;
+    cursor: pointer;
+}
+
+.chartPanel {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.92), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255, 140, 66, 0.22);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16);
 }
 
 /* ── Table tab ── */
@@ -471,11 +531,49 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tableToolbarLeft,
+.tableToolbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .tableCount {
     font-size: 0.82rem;
     color: var(--color-text-secondary);
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    min-width: 220px;
+}
+
+.searchBox input {
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    outline: none;
+    width: 100%;
+}
+
+.inlineCheckbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
 }
 
 .exportBtn {
@@ -503,7 +601,8 @@
 .tableWrapper {
     overflow-x: auto;
     border: 1px solid var(--color-border);
-    border-radius: 8px;
+    border-radius: 12px;
+    background: var(--color-bg-secondary);
 }
 
 .table {
@@ -515,6 +614,12 @@
 .table thead tr {
     background: var(--color-bg-secondary);
     border-bottom: 1px solid var(--color-border);
+}
+
+.thCheckbox,
+.tdCheckbox {
+    width: 44px;
+    text-align: center;
 }
 
 .thSortable {
@@ -547,7 +652,7 @@
 }
 
 .tableRowSelected {
-    background: var(--color-accent-bg, #f0f1fe);
+    background: rgba(255, 140, 66, 0.1);
 }
 
 .historyBtn {
