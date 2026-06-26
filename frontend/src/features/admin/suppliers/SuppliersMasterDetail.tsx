@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, Edit2, PowerOff, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
 import { readSelectedProductIds, toggleSelectedProductId, writeSelectedProductIds } from './prioritySelection';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -233,11 +233,20 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         URL.revokeObjectURL(url);
     }
 
-    // ── Delete ──────────────────────────────────────────────────────────────
+    // ── Toggle Active/Inactive ─────────────────────────────────────────────
     async function confirmDelete() {
         if (!deleteId) return;
         try {
-            await suppliersAdminService.deleteSupplierV2(deleteId);
+            const supplier = suppliers.find(s => s.id === deleteId);
+            if (!supplier) return;
+
+            if (supplier.isActive) {
+                // Desactivar
+                await suppliersAdminService.deleteSupplierV2(deleteId);
+            } else {
+                // Reactivar
+                await suppliersAdminService.updateSupplierV2(deleteId, { name: supplier.name, isActive: true });
+            }
             if (selectedId === deleteId) setSelectedId(null);
             await loadSuppliers();
         } finally {
@@ -327,8 +336,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                         <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); onEdit(s.id); }} title="Editar">
                                             <i className="bi bi-pencil-fill" />
                                         </button>
-                                        <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); setDeleteId(s.id); }} title="Desactivar proveedor">
-                                            <i className="bi bi-lightbulb" />
+                                        <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); setDeleteId(s.id); }} title={s.isActive ? 'Desactivar proveedor' : 'Reactivar proveedor'}>
+                                            <i className={s.isActive ? 'bi bi-lightbulb-off' : 'bi bi-lightbulb'} />
                                         </button>
                                     </div>
                                 </div>
@@ -680,19 +689,23 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             </section>
 
             {/* ── MODALS ── */}
-            {deleteId && (
-                <div className={styles.overlay} onClick={() => setDeleteId(null)} role="presentation" onKeyDown={(e) => e.key === 'Escape' && setDeleteId(null)}>
-                    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-                    <div className={styles.confirmModal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="delete-confirmation-title">
-                        <h4 id="delete-confirmation-title">¿Desactivar proveedor?</h4>
-                        <p>Esta acción desactivará el proveedor. Podrás reactivarlo después si es necesario.</p>
-                        <div className={styles.confirmActions}>
-                            <button type="button" className={styles.btnSecondary} onClick={() => setDeleteId(null)}>Cancelar</button>
-                            <button type="button" className={styles.btnDanger} onClick={confirmDelete}>Desactivar</button>
+            {deleteId && (() => {
+                const supplier = suppliers.find(s => s.id === deleteId);
+                const isActive = supplier?.isActive ?? false;
+                return (
+                    <div className={styles.overlay} onClick={() => setDeleteId(null)} role="presentation" onKeyDown={(e) => e.key === 'Escape' && setDeleteId(null)}>
+                        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+                        <div className={styles.confirmModal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="delete-confirmation-title">
+                            <h4 id="delete-confirmation-title">{isActive ? '¿Desactivar proveedor?' : '¿Reactivar proveedor?'}</h4>
+                            <p>{isActive ? 'Esta acción desactivará el proveedor. Podrás reactivarlo después si es necesario.' : 'Esta acción reactivará el proveedor y volverá a estar disponible.'}</p>
+                            <div className={styles.confirmActions}>
+                                <button type="button" className={styles.btnSecondary} onClick={() => setDeleteId(null)}>Cancelar</button>
+                                <button type="button" className={isActive ? styles.btnDanger : styles.btnSuccess} onClick={confirmDelete}>{isActive ? 'Desactivar' : 'Reactivar'}</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {historyProduct && (
                 <PriceHistoryModal
