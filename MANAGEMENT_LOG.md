@@ -1958,3 +1958,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1134: 1110 agregar botón agregar combinación dentro del formulario de ediciónalta de producto | 2026-06-20 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1162: Unificación de Directorios de Migraciones | 2026-06-24 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1167: Eliminación de iconos y algunos ajustes de centrado en headers de la tabla de pedidos en ver | 2026-06-26 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1165: 1119 quitar iconos y acciones innecesarias en la vista de producto del admin | 2026-06-26 |
