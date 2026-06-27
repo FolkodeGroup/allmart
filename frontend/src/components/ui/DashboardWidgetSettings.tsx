@@ -15,6 +15,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import type { WidgetId } from '../../context/DashboardLayoutContext';
 import styles from './DashboardWidgetSettings.module.css';
+import { ConfirmModal } from './ConfirmModal';
 
 interface WidgetInfo {
     id: WidgetId;
@@ -51,23 +52,29 @@ export const DashboardWidgetSettings = React.forwardRef<
         const [dragOverId, setDragOverId] = useState<WidgetId | null>(null);
         const [localOrder, setLocalOrder] = useState<WidgetInfo[]>(widgets);
         const [showPreview, setShowPreview] = useState(true);
+        const [showResetConfirm, setShowResetConfirm] = useState(false);
 
         // Update local order when widgets change
         React.useEffect(() => {
             setLocalOrder(widgets);
         }, [widgets]);
 
-        const handleResetClick = async () => {
-            if (!window.confirm('¿Restaurar el diseño predeterminado del panel?')) {
-                return;
-            }
+        const handleResetClick = () => {
+            setShowResetConfirm(true);
+        };
 
+        const handleConfirmReset = async () => {
             setIsResetting(true);
             try {
                 await onResetLayout();
+                setShowResetConfirm(false);
             } finally {
                 setIsResetting(false);
             }
+        };
+
+        const handleCancelReset = () => {
+            setShowResetConfirm(false);
         };
 
         const handleDragStart = useCallback((e: React.DragEvent, id: WidgetId) => {
@@ -308,6 +315,18 @@ export const DashboardWidgetSettings = React.forwardRef<
                         </div>
                     </div>
                 </div>
+
+                {/* Reset Confirmation Modal */}
+                <ConfirmModal
+                    open={showResetConfirm}
+                    title="Restaurar diseño"
+                    message="¿Restaurar el diseño predeterminado del panel? Esto volverá todos los widgets a su estado inicial."
+                    confirmLabel="Restaurar"
+                    cancelLabel="Cancelar"
+                    onConfirm={handleConfirmReset}
+                    onCancel={handleCancelReset}
+                    loading={isResetting}
+                />
             </>
         );
     },
