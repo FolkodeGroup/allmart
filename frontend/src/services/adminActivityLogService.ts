@@ -11,12 +11,19 @@ export type AdminActivityLog = {
 };
 
 const STORAGE_KEY = 'admin_activity_logs';
+const ADMIN_USER_KEY = 'allmart_admin_user';
 
 function getLogs(): AdminActivityLog[] {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw);
+    const parsed: AdminActivityLog[] = JSON.parse(raw);
+    const storedUser = localStorage.getItem(ADMIN_USER_KEY) || null;
+    // Normalize entries: if user is missing or placeholder, fill from stored user when available
+    return parsed.map((l) => ({
+      ...l,
+      user: (!l.user || l.user === 'desconocido') ? (storedUser ?? l.user ?? 'Usuario desconocido') : l.user,
+    }));
   } catch {
     return [];
   }
@@ -27,13 +34,26 @@ function saveLogs(logs: AdminActivityLog[]) {
 }
 
 export function logAdminActivity(log: AdminActivityLog) {
+  const storedUser = localStorage.getItem(ADMIN_USER_KEY) || null;
+  const normalizedLog: AdminActivityLog = {
+    ...log,
+    user: (!log.user || log.user === 'desconocido') ? (storedUser ?? log.user ?? 'Usuario desconocido') : log.user,
+  };
   const logs = getLogs();
-  logs.push(log);
+  logs.push(normalizedLog);
   saveLogs(logs);
 }
 
 export function getAdminActivityLogs(): AdminActivityLog[] {
-  return getLogs();
+  try {
+    return getLogs().slice().sort((a, b) => {
+      const ta = new Date(a.timestamp).getTime() || 0;
+      const tb = new Date(b.timestamp).getTime() || 0;
+      return tb - ta; // más reciente primero
+    });
+  } catch {
+    return getLogs();
+  }
 }
 
 export function clearAdminActivityLogs() {
