@@ -1,5 +1,6 @@
-import React, { useState, Suspense, useCallback } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
+import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import styles from './ProductDetailPanel.module.css';
 
@@ -44,9 +45,38 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   canEdit = true,
   canDelete = true,
 }: ProductDetailPanelProps) {
+  const { updateProduct } = useAdminProducts();
   const [activeTab, setActiveTab] = useState<TabName>('basic');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [statusFlags, setStatusFlags] = useState({
+    inStock: product.inStock,
+    isFeatured: product.isFeatured ?? false,
+  });
+  const [isSavingStatus, setIsSavingStatus] = useState(false);
+
+  useEffect(() => {
+    setStatusFlags({
+      inStock: product.inStock,
+      isFeatured: product.isFeatured ?? false,
+    });
+  }, [product.inStock, product.isFeatured]);
+
+  const handleToggleStatus = useCallback(async (field: 'inStock' | 'isFeatured') => {
+    if (!canEdit) return;
+
+    const nextValue = !statusFlags[field];
+    setStatusFlags((prev) => ({ ...prev, [field]: nextValue }));
+    setIsSavingStatus(true);
+
+    try {
+      await updateProduct(product.id, { [field]: nextValue });
+    } catch {
+      setStatusFlags((prev) => ({ ...prev, [field]: !nextValue }));
+    } finally {
+      setIsSavingStatus(false);
+    }
+  }, [canEdit, product.id, statusFlags, updateProduct]);
 
   // Solicitar confirmación de eliminación
   const handleDeleteClick = useCallback(() => {
@@ -125,6 +155,26 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             <div className={styles.titleSection}>
               <h2 className={styles.panelTitle}>{product.name}</h2>
               <p className={styles.productSKU}>{product.sku}</p>
+              <div className={styles.headerStatus}>
+                <button
+                  type="button"
+                  className={`${styles.statusToggle} ${statusFlags.inStock ? styles.statusToggleActive : styles.statusToggleInactive}`}
+                  onClick={() => handleToggleStatus('inStock')}
+                  disabled={!canEdit || isSavingStatus}
+                  aria-pressed={statusFlags.inStock}
+                >
+                  {statusFlags.inStock ? 'Con Stock' : 'Sin stock'}
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.statusToggle} ${statusFlags.isFeatured ? styles.statusToggleActive : styles.statusToggleInactive}`}
+                  onClick={() => handleToggleStatus('isFeatured')}
+                  disabled={!canEdit || isSavingStatus}
+                  aria-pressed={statusFlags.isFeatured}
+                >
+                  {statusFlags.isFeatured ? 'Destacado' : 'No destacado'}
+                </button>
+              </div>
             </div>
           </div>
           {/* actions */}
