@@ -1961,3 +1961,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1165: 1119 quitar iconos y acciones innecesarias en la vista de producto del admin | 2026-06-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1194: Automatizar valor `0` al seleccionar descuento BOGO en vista de Promociones | 2026-06-27 |
