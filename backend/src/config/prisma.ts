@@ -14,9 +14,9 @@ const connectionString = `postgresql://${env.DB_USER}:${env.DB_PASSWORD}@${env.D
 // Crear un pool de conexiones optimizado para limitar recursos en la VPS
 const pool = new Pool({
   connectionString,
-  max: 20,                       // Máximo de conexiones simultáneas en el pool
-  idleTimeoutMillis: 15000,      // Cierra conexiones inactivas tras 15 segundos
-  connectionTimeoutMillis: 2000, // Timeout para obtener conexión del pool (2s)
+  max: 10,                       // Máximo de conexiones simultáneas en el pool
+  idleTimeoutMillis: 30000,      // Cierra conexiones inactivas tras 15 segundos
+  connectionTimeoutMillis: 15000, // Timeout para obtener conexión del pool (2s)
 });
 
 const adapter = new PrismaPg(pool);
