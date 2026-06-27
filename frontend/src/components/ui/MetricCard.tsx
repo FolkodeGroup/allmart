@@ -4,26 +4,29 @@ import styles from './MetricCard.module.css';
 interface MetricCardProps {
   title: string;
   value: string | number;
-  variation: number; // porcentaje
+  variation?: number; // porcentaje
 }
 
 export function MetricCard({ title, value, variation }: MetricCardProps) {
-  const isPositive = variation >= 0;
+  const hasVariation = variation !== undefined;
+  const isPositive = !hasVariation || variation >= 0;
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <span className={styles.title}>{title}</span>
       </div>
       <div className={styles.value}>{value}</div>
-      <div className={styles.variation}>
-        <span className={isPositive ? styles.arrowUp : styles.arrowDown}>
-          {isPositive ? '▲' : '▼'}
-        </span>
-        <span className={isPositive ? styles.positive : styles.negative}>
-          {Math.abs(variation).toFixed(1)}%
-        </span>
-        <span className={styles.label}>vs mes anterior</span>
-      </div>
+      {hasVariation && (
+        <div className={styles.variation}>
+          <span className={isPositive ? styles.arrowUp : styles.arrowDown}>
+            {isPositive ? '▲' : '▼'}
+          </span>
+          <span className={isPositive ? styles.positive : styles.negative}>
+            {Math.abs(variation!).toFixed(1)}%
+          </span>
+          <span className={styles.label}>vs mes anterior</span>
+        </div>
+      )}
     </div>
   );
 }
