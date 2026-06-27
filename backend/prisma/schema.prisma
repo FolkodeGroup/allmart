@@ -12,45 +12,33 @@ datasource db {
 // ============================================================================
 
 model User {
-  id           String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  firstName    String                 @map("first_name") @db.VarChar(100)
-  lastName     String                 @map("last_name") @db.VarChar(100)
-  email        String                 @unique(map: "users_email_unique") @db.VarChar(255)
-  passwordHash String                 @map("password_hash")
-  role         UserRole               @default(customer)
-  isActive     Boolean                @default(true) @map("is_active")
-  createdAt    DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  firstName    String    @map("first_name") @db.VarChar(100)
+  lastName     String    @map("last_name") @db.VarChar(100)
+  phone        String?   @db.VarChar(30) // <-- Asegúrate que tenga el ?
+  passwordHash String?   @map("password_hash") // <-- Asegúrate que tenga el ?
+  role         UserRole  @default(customer)
+  isActive     Boolean   @default(true) @map("is_active")
+  totalOrders  Int       @default(0) @map("total_orders") // <-- Asegúrate que esté
+  totalSpent   Decimal   @default(0) @db.Decimal(12, 2) @map("total_spent") // <-- Asegúrate que esté
+  
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   
   cart         Cart?
   favorites    Favorite[]
   reviews      ProductReview[]
   staffNotes   StaffNote[]
   priceChanges SupplierProductPrice[] @relation("SupplierProductPriceChangedBy")
+  orders       Order[]
 
   @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
   @@map("users")
 }
 
-model Customer {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email       String   @unique @db.VarChar(255)
-  firstName   String   @map("first_name") @db.VarChar(100)
-  lastName    String   @map("last_name") @db.VarChar(100)
-  phone       String?  @db.VarChar(30)
-  
-  totalOrders Int      @default(0) @map("total_orders")
-  totalSpent  Decimal  @default(0) @db.Decimal(12, 2) @map("total_spent")
-  
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  orders      Order[]
-
-  @@index([email], map: "idx_customers_email")
-  @@map("customers")
-}
 
 // ============================================================================
 // 2. CATÁLOGO DE PRODUCTOS, SKUS, ETIQUETAS Y CARACTERÍSTICAS
@@ -313,9 +301,12 @@ model CategoryImageStorage {
 
 model Order {
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  customerId         String?              @map("customer_id") @db.Uuid
-  customer           Customer?            @relation(fields: [customerId], references: [id], onUpdate: NoAction, map: "orders_customer_fk")
+  
+  // Vínculo al nuevo modelo User (CRM)
+  userId             String?              @map("user_id") @db.Uuid
+  user               User?                @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "orders_user_fk")
 
+  // Snapshot de datos del cliente al momento de la compra (inmutable)
   customerFirstName  String               @map("customer_first_name") @db.VarChar(100)
   customerLastName   String               @map("customer_last_name") @db.VarChar(100)
   customerEmail      String               @map("customer_email") @db.VarChar(255)
@@ -335,10 +326,9 @@ model Order {
   reviews            ProductReview[]
   shipment           Shipment?
 
-  @@index([customerId], map: "idx_orders_customer_id")
+  @@index([userId], map: "idx_orders_user_id")
   @@index([createdAt], map: "idx_orders_created_at")
   @@index([customerEmail], map: "idx_orders_customer_email")
-  @@index([customerPhone], map: "idx_orders_customer_phone")
   @@index([status], map: "idx_orders_status")
   @@map("orders")
 }

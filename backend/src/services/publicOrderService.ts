@@ -1,7 +1,6 @@
 /**
  * services/publicOrderService.ts
- * Lógica para creación pública de pedidos usando Prisma Client con transacciones.
- * Implementa Guest Checkout con CRM Implícito (Upsert de Customer).
+ * Lógica para creación pública de pedidos con CRM Unificado y Stock Atómico.
  */
 
 import { prisma } from '../config/prisma';
@@ -33,49 +32,16 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     throw createError('El pedido debe tener al menos un item', 400);
   }
 
-  for (const item of items) {
-    if (!item.productId || item.quantity <= 0 || item.unitPrice <= 0) {
-      throw createError('Item inválido en el pedido', 400);
-    }
-  }
-
-  if (!total || total <= 0) {
-    throw createError('Total inválido', 400);
-  }
-
-  // Ejecución Atómica (Todo o Nada)
+  // 1. Ejecución de la transacción de Base de Datos
   const result = await prisma.$transaction(async (tx) => {
     
-    // 1. Validar existencia y stock de productos
-    const validatedItems = [];
-    for (const item of items) {
-      const [realProductId] = item.productId.split('::');
-
-      const product = await tx.product.findUnique({
-        where: { id: realProductId },
-        select: { id: true, name: true, stock: true },
-      });
-
-      if (!product) {
-        throw createError(`Producto con ID ${realProductId} no encontrado`, 404);
-      }
-
-      validatedItems.push({ 
-        ...item, 
-        realProductId,
-        product 
-      });
-    }
-
-    // 2. CRM IMPLÍCITO: Upsert del Customer basado en Email Natural Key
-    const customerRecord = await tx.customer.upsert({
+    // CRM UNIFICADO: Upsert del Usuario basado en Email (Invitado sin password)
+    const userRecord = await tx.user.upsert({
       where: { email: normalizedEmail },
       update: {
-        // Actualizamos con los últimos datos proporcionados por el cliente
         firstName: customer.firstName.trim(),
         lastName: customer.lastName.trim(),
         phone: normalizedPhone,
-        // Incrementamos métricas analíticas
         totalOrders: { increment: 1 },
         totalSpent: { increment: total }
       },
@@ -84,71 +50,68 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
         firstName: customer.firstName.trim(),
         lastName: customer.lastName.trim(),
         phone: normalizedPhone,
+        role: 'customer',
+        passwordHash: null, 
         totalOrders: 1,
         totalSpent: total
       }
     });
 
-    // 3. Crear Orden: Vínculo fuerte (customerId) + Snapshot inmutable de datos
+    // Crear la Orden vinculada al nuevo userId único
     const order = await tx.order.create({
       data: {
-        customerId: customerRecord.id, // Vínculo relacional
-        // Snapshot
+        userId: userRecord.id,
         customerFirstName: customer.firstName.trim(),
         customerLastName: customer.lastName.trim(),
         customerEmail: normalizedEmail,
         customerPhone: normalizedPhone,
         total,
         notes: notes ?? null,
-        status: 'pendiente' as Parameters<typeof tx.order.create>[0]['data']['status'],
-        paymentStatus: 'no_abonado' as Parameters<typeof tx.order.create>[0]['data']['paymentStatus'],
+        status: 'pendiente',
+        paymentStatus: 'no_abonado',
       },
     });
 
-    // 4. Crear Items de la orden
-    await tx.orderItem.createMany({
-      data: validatedItems.map((item) => ({
-        orderId: order.id,
-        productId: item.realProductId,
-        productName: item.productName,
-        productImage: item.productImage ?? null,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-      })),
-    });
+    // Gestión de Stock Atómico y creación de items
+    for (const item of items) {
+      const [realProductId] = item.productId.split('::');
 
-    // 5. Gestión de Stock
-    for (const item of validatedItems) {
-      const product = item.product;
-      const stockBefore = product.stock;
-      const stockAfter = stockBefore - item.quantity;
-
-      await tx.product.update({
-        where: { id: product.id },
-        data: { stock: stockAfter },
+      const updatedProduct = await tx.product.update({
+        where: { id: realProductId },
+        data: { stock: { decrement: item.quantity } }
       });
 
-      if (stockAfter <= 0) {
+      if (updatedProduct.stock < 0) {
+        throw createError(`Stock insuficiente para ${item.productName}`, 409);
+      }
+
+      await tx.orderItem.create({
+        data: {
+          orderId: order.id,
+          productId: realProductId,
+          productName: item.productName,
+          productImage: item.productImage ?? null,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        }
+      });
+
+      if (updatedProduct.stock <= 5) {
         await tx.lowStockAlert.create({
           data: {
             orderId: order.id,
-            productId: product.id,
-            productName: product.name,
+            productId: realProductId,
+            productName: item.productName,
             quantitySold: item.quantity,
-            stockBefore,
-            stockAfter,
+            stockBefore: updatedProduct.stock + item.quantity,
+            stockAfter: updatedProduct.stock,
           },
         });
       }
     }
 
-    // 6. Historial de estados
     await tx.orderStatusHistory.create({
-      data: {
-        orderId: order.id,
-        status: 'pendiente' as Parameters<typeof tx.orderStatusHistory.create>[0]['data']['status'],
-        note: 'Pedido creado (Guest Checkout)',
-      },
+      data: { orderId: order.id, status: 'pendiente', note: 'Pedido recibido vía Web' },
     });
 
     return {
@@ -157,7 +120,8 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     };
   });
 
-  // 7. Acciones Asíncronas (Fuera de la transacción de base de datos)
+  // 2. Acciones fuera de la transacción (Envío de Email)
+  // Aquí usamos 'sendOrderConfirmationEmail' resolviendo el aviso de ESLint
   try {
     await sendOrderConfirmationEmail({
       orderId: result.id,
@@ -177,7 +141,8 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       notes,
     });
   } catch (error) {
-    console.error('[Orders] No se pudo enviar el email de confirmación:', error);
+    // Logueamos pero no fallamos la petición porque el pedido ya se guardó en BD
+    console.error('[Orders] Error al enviar email de confirmación:', error);
   }
 
   return result.id;
