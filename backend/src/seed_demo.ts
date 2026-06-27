@@ -842,55 +842,38 @@ async function seedCategoriesAndProducts(products: GeneratedProduct[]): Promise<
       throw new Error(`No se encontro categoryId para slug ${product.categorySlug}`);
     }
 
-    const existingBySlug = await prisma.product.findUnique({
-      where: { slug: product.slug },
-      select: { id: true },
-    });
-
-    const existingBySku = await prisma.product.findUnique({
+    const productRow = await prisma.product.upsert({
       where: { sku: product.sku },
-      select: { id: true },
+      update: {
+        name: product.name,
+        slug: product.slug,
+        shortDescription: product.shortDescription,
+        description: product.description,
+        price: product.price,
+        images: product.images,
+        rating: product.rating,
+        reviewCount: product.reviewCount,
+        inStock: product.inStock,
+        stock: product.stock,
+        status: ProductStatus.ACTIVE,
+        isFeatured: product.tags.includes('bestseller'),
+      },
+      create: {
+        name: product.name,
+        slug: product.slug,
+        shortDescription: product.shortDescription,
+        description: product.description,
+        price: product.price,
+        images: product.images,
+        rating: product.rating,
+        reviewCount: product.reviewCount,
+        inStock: product.inStock,
+        stock: product.stock,
+        sku: product.sku,
+        status: ProductStatus.ACTIVE,
+        isFeatured: product.tags.includes('bestseller'),
+      },
     });
-
-    const existingId = existingBySlug?.id || existingBySku?.id;
-
-    // Modificado para no pasar las columnas obsoletas `tags` y `features` en products
-    const productRow = existingId
-      ? await prisma.product.update({
-        where: { id: existingId },
-        data: {
-          name: product.name,
-          slug: product.slug,
-          shortDescription: product.shortDescription,
-          description: product.description,
-          price: product.price,
-          images: product.images,
-          rating: product.rating,
-          reviewCount: product.reviewCount,
-          inStock: product.inStock,
-          stock: product.stock,
-          sku: product.sku,
-          status: ProductStatus.ACTIVE,
-          isFeatured: product.tags.includes('bestseller'),
-        },
-      })
-      : await prisma.product.create({
-        data: {
-          name: product.name,
-          slug: product.slug,
-          shortDescription: product.shortDescription,
-          description: product.description,
-          price: product.price,
-          images: product.images,
-          rating: product.rating,
-          reviewCount: product.reviewCount,
-          inStock: product.inStock,
-          stock: product.stock,
-          sku: product.sku,
-          status: ProductStatus.ACTIVE,
-          isFeatured: product.tags.includes('bestseller'),
-        },
-      });
 
     // 1. Guardamos la relación de categoría en la tabla intermedia N:M
     await prisma.productCategory.upsert({

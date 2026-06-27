@@ -7,6 +7,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as imgStorage from '../../services/imageStorageService';
 import * as bannersCtrl from '../../controllers/public/bannersController';
+import * as skuPublic from '../../controllers/public/skuImagePublicController';
 import { prisma } from '../../config/prisma';
 import { env } from '../../config/env';
 
@@ -14,79 +15,57 @@ const router = Router();
 
 const CACHE = 'public, max-age=86400, stale-while-revalidate=3600';
 
-// ─── Productos ─────────────────────────────────────────────────────────────────
+// ─── PRODUCTOS ─────────────────────────────────────────────────────────────────
 
 router.get('/products/:id/thumb', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { data, mimeType, redirectUrl } = await imgStorage.serveProductImageThumb(req.params.id);
     
-    if (redirectUrl) {
-      return res.redirect(302, redirectUrl);
-    }
+    if (redirectUrl) return res.redirect(302, redirectUrl);
 
-    res.set('Content-Type', mimeType);
-    res.set('Cache-Control', CACHE);
-    res.set('Content-Length', String(data.length));
-    res.send(data);
-  } catch (err) {
-    next(err);
-  }
+    if (data && data.length > 0) {
+      res.set('Content-Type', mimeType).set('Cache-Control', CACHE).set('Content-Length', String(data.length)).send(data);
+    } else {
+      res.status(404).json({ message: "Imagen no encontrada" });
+    }
+  } catch (err) { next(err); }
 });
 
 router.get('/products/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { data, mimeType, redirectUrl } = await imgStorage.serveProductImage(req.params.id);
     
-    if (redirectUrl) {
-      return res.redirect(302, redirectUrl);
-    }
+    if (redirectUrl) return res.redirect(302, redirectUrl);
 
-    res.set('Content-Type', mimeType);
-    res.set('Cache-Control', CACHE);
-    res.set('Content-Length', String(data.length));
-    res.send(data);
-  } catch (err) {
-    next(err);
-  }
+    if (data && data.length > 0) {
+      res.set('Content-Type', mimeType).set('Cache-Control', CACHE).set('Content-Length', String(data.length)).send(data);
+    } else {
+      res.status(404).json({ message: "Imagen no encontrada" });
+    }
+  } catch (err) { next(err); }
 });
 
-// ─── Categorías ────────────────────────────────────────────────────────────────
+// ─── CATEGORÍAS ────────────────────────────────────────────────────────────────
 
 router.get('/categories/:id/thumb', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { data, mimeType, redirectUrl } = await imgStorage.serveCategoryImageThumb(req.params.id);
-    
-    if (redirectUrl) {
-      return res.redirect(302, redirectUrl);
-    }
+    if (redirectUrl) return res.redirect(302, redirectUrl);
 
-    res.set('Content-Type', mimeType);
-    res.set('Cache-Control', CACHE);
-    res.set('Content-Length', String(data.length));
-    res.send(data);
-  } catch (err) {
-    next(err);
-  }
+    res.set('Content-Type', mimeType).set('Cache-Control', CACHE).send(data);
+  } catch (err) { next(err); }
 });
 
 router.get('/categories/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { data, mimeType, redirectUrl } = await imgStorage.serveCategoryImage(req.params.id);
-    
-    if (redirectUrl) {
-      return res.redirect(302, redirectUrl);
-    }
+    if (redirectUrl) return res.redirect(302, redirectUrl);
 
-    res.set('Content-Type', mimeType);
-    res.set('Cache-Control', CACHE);
-    res.set('Content-Length', String(data.length));
-    res.send(data);
-  } catch (err) {
-    next(err);
-  }
+    res.set('Content-Type', mimeType).set('Cache-Control', CACHE).send(data);
+  } catch (err) { next(err); }
 });
 
-// ─── Banners ───────────────────────────────────────────────────────────────────
+// ─── BANNERS ───────────────────────────────────────────────────────────────────
 
 router.get('/banners/:id/thumb', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -101,9 +80,7 @@ router.get('/banners/:id/thumb', async (req: Request, res: Response, next: NextF
     }
 
     return bannersCtrl.getBannerThumbnail(req, res, next);
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 });
 
 router.get('/banners/:id', async (req: Request, res: Response, next: NextFunction) => {
@@ -119,14 +96,10 @@ router.get('/banners/:id', async (req: Request, res: Response, next: NextFunctio
     }
 
     return bannersCtrl.getBannerImage(req, res, next);
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 });
 
-// ─── SKU images ────────────────────────────────────────────────────────────────
-
-import * as skuPublic from '../../controllers/public/skuImagePublicController';
+// ─── SKUS (VARIANTES) ──────────────────────────────────────────────────────────
 
 router.get('/sku/:id/thumb', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -141,9 +114,7 @@ router.get('/sku/:id/thumb', async (req: Request, res: Response, next: NextFunct
     }
 
     return skuPublic.serveSkuImageThumb(req, res, next);
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 });
 
 router.get('/sku/:id', async (req: Request, res: Response, next: NextFunction) => {
@@ -159,9 +130,7 @@ router.get('/sku/:id', async (req: Request, res: Response, next: NextFunction) =
     }
 
     return skuPublic.serveSkuImage(req, res, next);
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 });
 
 export default router;

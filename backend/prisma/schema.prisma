@@ -237,15 +237,10 @@ model ProductSkuValue {
 model ProductImageStorage {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   productId        String   @map("product_id") @db.Uuid
-  
+
   // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?  @map("storage_key") @db.VarChar(500)
-  storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
-  
-  // --- BINARIOS OPCIONALES ---
-  data             Bytes?
-  thumbnail        Bytes?
-  
+  storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)  
   width            Int
   height           Int
   thumbWidth       Int?     @map("thumb_width")
@@ -271,11 +266,6 @@ model ProductSkuImageStorage {
   // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?    @map("storage_key") @db.VarChar(500)
   storageThumbKey  String?    @map("storage_thumb_key") @db.VarChar(500)
-
-  // --- BINARIOS OPCIONALES ---
-  data             Bytes?
-  thumbnail        Bytes?
-
   width            Int
   height           Int
   thumbWidth       Int?       @map("thumb_width")
@@ -302,11 +292,6 @@ model CategoryImageStorage {
   // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?  @map("storage_key") @db.VarChar(500)
   storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
-
-  // --- BINARIOS OPCIONALES ---
-  data             Bytes?
-  thumbnail        Bytes?
-
   width            Int
   height           Int
   thumbWidth       Int?     @map("thumb_width")
@@ -575,11 +560,6 @@ model Banner {
   // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?  @map("storage_key") @db.VarChar(500)
   storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
-
-  // --- BINARIOS OPCIONALES ---
-  data             Bytes?
-  thumbnail        Bytes?
-
   width            Int
   height           Int
   thumbWidth       Int?     @map("thumb_width")
