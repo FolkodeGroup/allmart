@@ -120,7 +120,7 @@ const NoteCard = memo(({
 
     return (
         <button
-            className={`${styles['sticky-note']} ${isExpanded ? styles['expanded'] : ''}`}
+            className={`${styles['sticky-note']} ${isExpanded ? styles['expanded'] : ''} ${isActionsHidden ? styles['hide-actions'] : ''}`}
             type="button"
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
@@ -316,13 +316,14 @@ export default function StaffNotes() {
                     isConfirmingDelete={isConfirmingDelete}
                     isActionsHidden={isActionsHidden}
                     editContent={uiState.editContent}
-                    onMouseEnter={() => updateUiState({ hoveredId: note.id })}
-                    onMouseLeave={() =>
-                        updateUiState(prev => ({
-                            ...prev,
-                            hoveredId: prev.hoveredId === note.id ? null : prev.hoveredId,
-                        }))
-                    }
+                            onMouseEnter={() => updateUiState(prev => ({ ...prev, hoveredId: note.id, actionsHiddenFor: null }))}
+                            onMouseLeave={() =>
+                                updateUiState(prev => ({
+                                    ...prev,
+                                    hoveredId: prev.hoveredId === note.id ? null : prev.hoveredId,
+                                    actionsHiddenFor: prev.pinnedExpandedId === note.id ? prev.pinnedExpandedId : prev.actionsHiddenFor,
+                                }))
+                            }
                     onToggleExpanded={() => toggleExpanded(note.id)}
                     onToggleActionsVisibility={() => toggleActionsVisibility(note.id)}
                     onStartEdit={() => handleStartEdit(note.id, note.content)}

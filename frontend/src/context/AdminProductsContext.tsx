@@ -57,7 +57,7 @@ function apiToAdminProduct(api: ApiProduct, categories: Category[]): AdminProduc
 
 // ─── Tipos del contexto ───────────────────────────────────────────────────────
 
-interface AdminProductsContextType {
+export interface AdminProductsContextType {
   products: AdminProduct[];
   categories: Category[];
   loading: boolean;
