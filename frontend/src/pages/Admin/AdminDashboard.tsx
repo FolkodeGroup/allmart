@@ -57,7 +57,7 @@ export function AdminDashboard() {
   const {
     ingresos, totalPedidos, clientesUnicos, tasaConversion, ticketPromedio,
     pendientes, lowStock, categoryData, topProducts, topClients,
-    currentMonthRevenue, weeklySalesData, weeklyTotalSales,
+    currentMonthRevenue, weeklySalesData, weeklyTotalSales, variaciones,
   } = useDashboardMetrics(orders, products);
 
   // Estado del sistema (latencia / online)
@@ -86,11 +86,11 @@ export function AdminDashboard() {
       case 'metrics':
         return (
           <div className={styles.metricsGrid}>
-            <MetricCard title="Ingresos" value={fmtCurrency(ingresos)} variation={0} />
-            <MetricCard title="Pedidos" value={totalPedidos} variation={0} />
-            <MetricCard title="Clientes" value={clientesUnicos} variation={0} />
-            <MetricCard title="Ticket Promedio" value={fmtCurrency(ticketPromedio)} variation={0} />
-            <MetricCard title="Conversión" value={tasaConversion.toFixed(1) + '%'} variation={0} />
+            <MetricCard title="Ingresos" value={fmtCurrency(ingresos)} variation={variaciones.ingresos} />
+            <MetricCard title="Pedidos" value={totalPedidos} variation={variaciones.pedidos} />
+            <MetricCard title="Clientes" value={clientesUnicos} variation={variaciones.clientes} />
+            <MetricCard title="Ticket Promedio" value={fmtCurrency(ticketPromedio)} variation={variaciones.ticketPromedio} />
+            <MetricCard title="Conversión" value={tasaConversion.toFixed(1) + '%'} variation={variaciones.conversion} />
             <MetricCard title="Productos" value={totalProducts || products.length} variation={0} />
           </div>
         );

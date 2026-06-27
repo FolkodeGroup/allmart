@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, Edit2, PowerOff, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
+import { readSelectedProductIds, toggleSelectedProductId, writeSelectedProductIds } from './prioritySelection';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     BarChart, Bar,
@@ -36,6 +37,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     const [search, setSearch] = useState('');
     const [filterTab, setFilterTab] = useState<'active' | 'inactive'>('active');
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+    const [productSearch, setProductSearch] = useState('');
 
     // Right panel state
     const [activeTab, setActiveTab] = useState<TabId>('chart');
@@ -43,6 +46,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     const [history, setHistory] = useState<PriceHistoryEntry[]>([]);
     const [rightLoading, setRightLoading] = useState(false);
     const [rangedays, setRangeDays] = useState<RangeId>(30);
+    const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
 
     // Modals
     const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -89,6 +93,18 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         }).finally(() => setRightLoading(false));
     }, [selectedId, rangedays]);
 
+    useEffect(() => {
+        if (!selectedId) {
+            setSelectedProductId(null);
+        }
+    }, [selectedId]);
+
+    useEffect(() => {
+        if (!selectedProductId && products.length === 1) {
+            setSelectedProductId(products[0].productId);
+        }
+    }, [products, selectedProductId]);
+
     // ── Filtered supplier list ──────────────────────────────────────────────
     const filteredSuppliers = useMemo(() => {
         let list = suppliers;
@@ -107,43 +123,79 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
     const selectedSupplier = useMemo(() => suppliers.find(s => s.id === selectedId) ?? null, [suppliers, selectedId]);
 
+    useEffect(() => {
+        if (selectedSupplier?.id) {
+            setSelectedProductIds(readSelectedProductIds(selectedSupplier.id));
+        } else {
+            setSelectedProductIds([]);
+        }
+    }, [selectedSupplier?.id]);
+
     // ── Chart data: pivot history into { date, [productName]: price } ──────
+    const selectedHistory = useMemo(() => {
+        if (selectedProductIds.length === 0) return [];
+        return history.filter(h => selectedProductIds.includes(h.productId));
+    }, [history, selectedProductIds]);
+
     const chartData = useMemo(() => {
-        if (history.length === 0) return [];
+        if (selectedHistory.length === 0) return [];
         const byDate: Record<string, Record<string, number>> = {};
-        const productNames = new Set<string>();
-        history.forEach(h => {
+        selectedHistory.forEach(h => {
             const day = h.createdAt.slice(0, 10);
             if (!byDate[day]) byDate[day] = {};
-            // Graficar costo cuando está disponible, sino precio
             byDate[day][h.productName] = h.cost !== null ? h.cost : h.price;
-            productNames.add(h.productName);
         });
         const sorted = Object.keys(byDate).sort();
         return sorted.map(day => ({ date: day, ...byDate[day] }));
-    }, [history]);
+    }, [selectedHistory]);
 
     const chartProducts = useMemo(() => {
         const names = new Set<string>();
-        history.forEach(h => names.add(h.productName));
-        return Array.from(names).slice(0, 8); // max 8 lines
-    }, [history]);
+        selectedHistory.forEach(h => names.add(h.productName));
+        return Array.from(names).slice(0, 8);
+    }, [selectedHistory]);
 
     const LINE_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#0ea5e9', '#14b8a6'];
 
     // ── Sort products table ─────────────────────────────────────────────────
+    const filteredProducts = useMemo(() => {
+        const q = productSearch.trim().toLowerCase();
+        if (!q) return products;
+        return products.filter(p => {
+            const haystack = `${p.productName} ${p.sku ?? ''}`.toLowerCase();
+            return haystack.includes(q);
+        });
+    }, [products, productSearch]);
+
     const sortedProducts = useMemo(() => {
-        return [...products].sort((a, b) => {
+        return [...filteredProducts].sort((a, b) => {
             const va = a[sortKey] ?? 0;
             const vb = b[sortKey] ?? 0;
             if (typeof va === 'string') return sortDir === 'asc' ? va.localeCompare(String(vb)) : String(vb).localeCompare(va);
             return sortDir === 'asc' ? Number(va) - Number(vb) : Number(vb) - Number(va);
         });
-    }, [products, sortKey, sortDir]);
+    }, [filteredProducts, sortKey, sortDir]);
 
     function toggleSort(key: keyof SupplierProductEntry) {
         if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
         else { setSortKey(key); setSortDir('asc'); }
+    }
+
+    function togglePriority(productId: string) {
+        const next = toggleSelectedProductId(selectedProductIds, productId);
+        setSelectedProductIds(next);
+        if (selectedSupplier?.id) writeSelectedProductIds(selectedSupplier.id, next);
+    }
+
+    function toggleAllVisiblePriorities() {
+        const visibleIds = filteredProducts.map(p => p.productId);
+        if (visibleIds.length === 0) return;
+        const allVisibleSelected = visibleIds.every(id => selectedProductIds.includes(id));
+        const next = allVisibleSelected
+            ? selectedProductIds.filter(id => !visibleIds.includes(id))
+            : Array.from(new Set([...selectedProductIds, ...visibleIds]));
+        setSelectedProductIds(next);
+        if (selectedSupplier?.id) writeSelectedProductIds(selectedSupplier.id, next);
     }
 
     // ── Analysis metrics ────────────────────────────────────────────────────
@@ -163,7 +215,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             .sort((a, b) => (b.margin ?? 0) - (a.margin ?? 0))
             .slice(0, 3);
         const lowMarginAlerts = products.filter(p => p.margin !== null && (p.margin as number) < 15);
-        return { avgMargin, volatility, recentChanges, topByMargin, lowMarginAlerts };
+        const inventoryHealth = products.length ? Math.max(92, 100 - Math.min(20, lowMarginAlerts.length * 3)) : 100;
+        return { avgMargin, volatility, recentChanges, topByMargin, lowMarginAlerts, inventoryHealth };
     }, [products, history]);
 
     // ── CSV Export ──────────────────────────────────────────────────────────
@@ -180,11 +233,20 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         URL.revokeObjectURL(url);
     }
 
-    // ── Delete ──────────────────────────────────────────────────────────────
+    // ── Toggle Active/Inactive ─────────────────────────────────────────────
     async function confirmDelete() {
         if (!deleteId) return;
         try {
-            await suppliersAdminService.deleteSupplierV2(deleteId);
+            const supplier = suppliers.find(s => s.id === deleteId);
+            if (!supplier) return;
+
+            if (supplier.isActive) {
+                // Desactivar
+                await suppliersAdminService.deleteSupplierV2(deleteId);
+            } else {
+                // Reactivar
+                await suppliersAdminService.updateSupplierV2(deleteId, { name: supplier.name, isActive: true });
+            }
             if (selectedId === deleteId) setSelectedId(null);
             await loadSuppliers();
         } finally {
@@ -272,10 +334,10 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                     </div>
                                     <div className={styles.cardActions}>
                                         <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); onEdit(s.id); }} title="Editar">
-                                            <Edit2 size={13} />
+                                            <i className="bi bi-pencil-fill" />
                                         </button>
-                                        <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); setDeleteId(s.id); }} title="Desactivar proveedor">
-                                            <PowerOff size={13} />
+                                        <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); setDeleteId(s.id); }} title={s.isActive ? 'Desactivar proveedor' : 'Reactivar proveedor'}>
+                                            <i className={s.isActive ? 'bi bi-lightbulb-off' : 'bi bi-lightbulb'} />
                                         </button>
                                     </div>
                                 </div>
@@ -358,53 +420,80 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                 </button>
                                             ))}
                                         </div>
-                                        {chartData.length === 0 ? (
+                                        {selectedProductIds.length === 0 ? (
+                                            <div className={styles.emptyChart}>
+                                                <Package size={36} />
+                                                <p>Marcá productos como prioridad para compararlos en el gráfico.</p>
+                                            </div>
+                                        ) : chartData.length === 0 ? (
                                             <div className={styles.emptyChart}>
                                                 <TrendingUp size={36} />
-                                                <p>Sin historial de precios para el período seleccionado</p>
+                                                <p>Sin historial de precios para los productos priorizados en el período elegido.</p>
                                             </div>
                                         ) : (
-                                            <ResponsiveContainer width="100%" height={320}>
-                                                <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-                                                    <defs>
-                                                        {chartProducts.map((name, i) => (
-                                                            <linearGradient key={name} id={`color${name.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                                                                <stop offset="5%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.8}/>
-                                                                <stop offset="95%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.05}/>
-                                                            </linearGradient>
-                                                        ))}
-                                                    </defs>
-                                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e0e0e0)" />
-                                                    <XAxis 
-                                                        dataKey="date" 
-                                                        tick={{ fontSize: 12, fontWeight: 500 }}
-                                                        stroke="var(--color-text-tertiary, #6b7280)"
-                                                    />
-                                                    <YAxis 
-                                                        tick={{ fontSize: 12 }}
-                                                        tickFormatter={(v: number) => fmt.format(v)}
-                                                        stroke="var(--color-text-tertiary, #6b7280)"
-                                                        width={90}
-                                                        label={{ value: 'Costo', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: 'var(--color-text-tertiary, #6b7280)' }}
-                                                    />
-                                                    <Tooltip 
-                                                        formatter={(v: number) => fmt.format(v)}
-                                                        cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
-                                                    />
-                                                    <Legend wrapperStyle={{ fontSize: 12, paddingTop: '16px' }} />
-                                                    {chartProducts.map((name, i) => (
-                                                        <Area 
-                                                            key={name} 
-                                                            type="monotone" 
-                                                            dataKey={name}
-                                                            stroke={LINE_COLORS[i % LINE_COLORS.length]}
-                                                            strokeWidth={2}
-                                                            fill={`url(#color${name.replace(/\s+/g, '')})`}
-                                                            isAnimationActive={true}
-                                                        />
-                                                    ))}
-                                                </AreaChart>
-                                            </ResponsiveContainer>
+                                            <>
+                                                <div className={styles.chartSummary}>
+                                                    <div>
+                                                        <p className={styles.chartSummaryTitle}>Comparando {selectedProductIds.length} producto{selectedProductIds.length === 1 ? '' : 's'}</p>
+                                                        <p className={styles.chartSummaryHint}>Los productos marcados con checkbox aparecen aquí en tiempo real.</p>
+                                                    </div>
+                                                    <div className={styles.priorityPills}>
+                                                        {selectedProductIds.map((productId) => {
+                                                            const product = products.find(p => p.productId === productId);
+                                                            if (!product) return null;
+                                                            return (
+                                                                <button key={productId} type="button" className={styles.priorityPill} onClick={() => togglePriority(productId)}>
+                                                                    {product.productName}
+                                                                    <XCircle size={12} />
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                                <div className={styles.chartPanel}>
+                                                    <ResponsiveContainer width="100%" height={320}>
+                                                        <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+                                                            <defs>
+                                                                {chartProducts.map((name, i) => (
+                                                                    <linearGradient key={name} id={`color${name.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+                                                                        <stop offset="5%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.8}/>
+                                                                        <stop offset="95%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.05}/>
+                                                                    </linearGradient>
+                                                                ))}
+                                                            </defs>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e0e0e0)" />
+                                                            <XAxis
+                                                                dataKey="date"
+                                                                tick={{ fontSize: 12, fontWeight: 500 }}
+                                                                stroke="var(--color-text-tertiary, #6b7280)"
+                                                            />
+                                                            <YAxis
+                                                                tick={{ fontSize: 12 }}
+                                                                tickFormatter={(v: number) => fmt.format(v)}
+                                                                stroke="var(--color-text-tertiary, #6b7280)"
+                                                                width={90}
+                                                                label={{ value: 'Costo', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: 'var(--color-text-tertiary, #6b7280)' }}
+                                                            />
+                                                            <Tooltip
+                                                                formatter={(v: number) => fmt.format(v)}
+                                                                cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
+                                                            />
+                                                            <Legend wrapperStyle={{ fontSize: 12, paddingTop: '16px' }} />
+                                                            {chartProducts.map((name, i) => (
+                                                                <Area
+                                                                    key={name}
+                                                                    type="monotone"
+                                                                    dataKey={name}
+                                                                    stroke={LINE_COLORS[i % LINE_COLORS.length]}
+                                                                    strokeWidth={2}
+                                                                    fill={`url(#color${name.replace(/\s+/g, '')})`}
+                                                                    isAnimationActive={true}
+                                                                />
+                                                            ))}
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -413,10 +502,31 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                 {activeTab === 'table' && (
                                     <div className={styles.tableTab}>
                                         <div className={styles.tableActions}>
-                                            <span className={styles.tableCount}>{products.length} producto{products.length !== 1 ? 's' : ''}</span>
-                                            <button type="button" className={styles.exportBtn} onClick={exportCsv}>
-                                                Exportar CSV
-                                            </button>
+                                            <div className={styles.tableToolbarLeft}>
+                                                <span className={styles.tableCount}>{filteredProducts.length} de {products.length} producto{products.length !== 1 ? 's' : ''}</span>
+                                                <label className={styles.searchBox}>
+                                                    <Search size={14} />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Buscar producto..."
+                                                        value={productSearch}
+                                                        onChange={e => setProductSearch(e.target.value)}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.tableToolbarRight}>
+                                                <label className={styles.inlineCheckbox}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={filteredProducts.length > 0 && filteredProducts.every(p => selectedProductIds.includes(p.productId))}
+                                                        onChange={toggleAllVisiblePriorities}
+                                                    />
+                                                    Priorizar visibles
+                                                </label>
+                                                <button type="button" className={styles.exportBtn} onClick={exportCsv}>
+                                                    Exportar CSV
+                                                </button>
+                                            </div>
                                         </div>
                                         {products.length === 0 ? (
                                             <div className={styles.emptyTable}>Sin productos asignados a este proveedor</div>
@@ -425,6 +535,14 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                 <table className={styles.table}>
                                                     <thead>
                                                         <tr>
+                                                            <th className={styles.thCheckbox}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={filteredProducts.length > 0 && filteredProducts.every(p => selectedProductIds.includes(p.productId))}
+                                                                    onChange={toggleAllVisiblePriorities}
+                                                                    aria-label="Priorizar todos los productos visibles"
+                                                                />
+                                                            </th>
                                                             {([
                                                                 ['sku', 'SKU'],
                                                                 ['productName', 'Nombre'],
@@ -438,15 +556,31 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                     {label} {sortKey === key ? (sortDir === 'asc' ? '↑' : '↓') : ''}
                                                                 </th>
                                                             ))}
+                                                            <th className={styles.thAction}>Acciones</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {sortedProducts.map(p => (
                                                             <tr
                                                                 key={p.productId}
-                                                                className={styles.tableRow}
-                                                                onClick={() => setHistoryProduct({ productId: p.productId, productName: p.productName })}
+                                                                className={`${styles.tableRow} ${selectedProductId === p.productId ? styles.tableRowSelected : ''}`}
+                                                                tabIndex={0}
+                                                                onClick={() => setSelectedProductId(p.productId)}
+                                                                onKeyDown={e => {
+                                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                                        e.preventDefault();
+                                                                        setSelectedProductId(p.productId);
+                                                                    }
+                                                                }}
                                                             >
+                                                                <td className={styles.tdCheckbox} onClick={e => e.stopPropagation()}>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={selectedProductIds.includes(p.productId)}
+                                                                        onChange={() => togglePriority(p.productId)}
+                                                                        aria-label={`Priorizar ${p.productName}`}
+                                                                    />
+                                                                </td>
                                                                 <td className={styles.tdSku}>{p.sku ?? '—'}</td>
                                                                 <td>{p.productName}</td>
                                                                 <td>{fmtN(p.currentPrice)}</td>
@@ -457,6 +591,18 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                 </td>
                                                                 <td className={styles.tdDate}>
                                                                     {p.lastPriceChange ? new Date(p.lastPriceChange).toLocaleDateString('es-AR') : '—'}
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className={styles.historyBtn}
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setHistoryProduct({ productId: p.productId, productName: p.productName });
+                                                                        }}
+                                                                    >
+                                                                        Ver historial
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                         ))}
@@ -543,19 +689,23 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             </section>
 
             {/* ── MODALS ── */}
-            {deleteId && (
-                <div className={styles.overlay} onClick={() => setDeleteId(null)} role="presentation" onKeyDown={(e) => e.key === 'Escape' && setDeleteId(null)}>
-                    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-                    <div className={styles.confirmModal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="delete-confirmation-title">
-                        <h4 id="delete-confirmation-title">¿Desactivar proveedor?</h4>
-                        <p>Esta acción desactivará el proveedor. Podrás reactivarlo después si es necesario.</p>
-                        <div className={styles.confirmActions}>
-                            <button type="button" className={styles.btnSecondary} onClick={() => setDeleteId(null)}>Cancelar</button>
-                            <button type="button" className={styles.btnDanger} onClick={confirmDelete}>Desactivar</button>
+            {deleteId && (() => {
+                const supplier = suppliers.find(s => s.id === deleteId);
+                const isActive = supplier?.isActive ?? false;
+                return (
+                    <div className={styles.overlay} onClick={() => setDeleteId(null)} role="presentation" onKeyDown={(e) => e.key === 'Escape' && setDeleteId(null)}>
+                        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+                        <div className={styles.confirmModal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="delete-confirmation-title">
+                            <h4 id="delete-confirmation-title">{isActive ? '¿Desactivar proveedor?' : '¿Reactivar proveedor?'}</h4>
+                            <p>{isActive ? 'Esta acción desactivará el proveedor. Podrás reactivarlo después si es necesario.' : 'Esta acción reactivará el proveedor y volverá a estar disponible.'}</p>
+                            <div className={styles.confirmActions}>
+                                <button type="button" className={styles.btnSecondary} onClick={() => setDeleteId(null)}>Cancelar</button>
+                                <button type="button" className={isActive ? styles.btnDanger : styles.btnSuccess} onClick={confirmDelete}>{isActive ? 'Desactivar' : 'Reactivar'}</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {historyProduct && (
                 <PriceHistoryModal

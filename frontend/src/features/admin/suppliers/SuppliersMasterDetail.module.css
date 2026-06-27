@@ -88,19 +88,20 @@
     border-bottom: 2px solid transparent;
     font-size: 0.8rem;
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
 }
 
 .filterTab:hover {
-    color: var(--color-text-primary);
+    background: var(--color-bg-primary)
 }
 
 .filterTabActive {
-    color: var(--color-accent, #6366f1);
-    border-bottom-color: var(--color-accent, #6366f1);
+    color: var(--color-dif-mode);
+    border-bottom-color: var(--color-dif-mode);
+    background: var(--color-bg-tertiary)
 }
 
 .newBtn {
@@ -109,7 +110,7 @@
     justify-content: center;
     gap: 6px;
     padding: 7px 12px;
-    background: var(--color-accent, #6366f1);
+    background: var(--color-dif-mode, #6366f1);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -156,21 +157,26 @@
 }
 
 .supplierCard:hover {
-    border-color: var(--color-accent, #6366f1);
+    border-color: var(--color-dif-mode);
 }
 
 .supplierCardActive {
-    border-color: var(--color-accent, #6366f1);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
-    background: var(--color-accent-bg, #f0f1fe);
+    border-color: var(--color-dif-mode);
+    background: var(--color-dif-mode-light);
+    box-shadow: inset 4px 0 0 0 var(--color-dif-mode);
+}
+
+.supplierCard:focus-visible {
+    outline: 2px solid var(--color-dif-mode);
+    outline-offset: 2px;
 }
 
 .supplierCardActive .cardName {
-    color: var(--color-accent, #6366f1);
+    color: var(--color-text-primary);
 }
 
 .supplierCardActive .cardStatus {
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
 }
 
 .cardTop {
@@ -183,7 +189,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--color-accent, #6366f1);
+    background: var(--color-dif-mode);
     color: #fff;
     display: flex;
     align-items: center;
@@ -213,7 +219,7 @@
     align-items: center;
     gap: 3px;
     font-size: 0.72rem;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-primary);
     margin-top: 1px;
 }
 
@@ -229,17 +235,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
+    background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: 6px;
     cursor: pointer;
-    color: var(--color-text-tertiary);
+    color: var(--color-dif-mode);
     transition: background 0.12s, color 0.12s;
 }
 
 .iconBtn:hover {
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
 }
 
 .cardMeta {
@@ -294,7 +299,7 @@
     width: 42px;
     height: 42px;
     border-radius: 10px;
-    background: var(--color-accent, #6366f1);
+    background: var(--color-dif-mode, #6366f1);
     color: #fff;
     display: flex;
     align-items: center;
@@ -316,7 +321,7 @@
     flex-wrap: wrap;
     gap: 10px;
     font-size: 0.8rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
 }
 
 .headerMeta span {
@@ -329,7 +334,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    color: var(--color-accent, #6366f1);
+    color: var(--color-dif-mode, #6366f1);
     text-decoration: none;
     font-size: 0.8rem;
 }
@@ -361,7 +366,7 @@
     background: transparent;
     font-size: 0.82rem;
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     cursor: pointer;
     border-bottom: 2px solid transparent;
     transition: color 0.15s, border-color 0.15s;
@@ -369,13 +374,14 @@
 }
 
 .tab:hover {
-    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
 }
 
 .tabActive {
-    color: var(--color-accent, #6366f1);
-    border-bottom-color: var(--color-accent, #6366f1);
+    color: var(--color-dif-mode);
+    border-bottom-color: var(--color-dif-mode);
     font-weight: 600;
+    background: var(--color-bg-tertiary);
 }
 
 /* Loading */
@@ -414,34 +420,49 @@
 .chartTab {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .chartControls {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
 }
 
 .controlLabel {
     font-size: 0.8rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
 }
 
 .rangeBtn {
     padding: 4px 10px;
     border: 1px solid var(--color-border);
     border-radius: 6px;
-    background: var(--color-bg-secondary);
+    background: var(--color-bg-tertiary);
     font-size: 0.78rem;
     cursor: pointer;
     transition: all 0.12s;
+    color: var(--color-text-primary)
+}
+
+.rangeBtn:hover {
+    background: var(--color-bg-primary);
 }
 
 .rangeBtnActive {
-    background: var(--color-accent, #6366f1);
+    background: var(--color-dif-mode);
     color: #fff;
-    border-color: var(--color-accent, #6366f1);
+    border-color: var(--color-dif-mode);
+}
+
+.rangeBtnActive:hover {
+    background: var(--color-dif-mode);
 }
 
 .emptyChart {
@@ -449,10 +470,68 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 200px;
+    min-height: 220px;
     gap: 10px;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-primary);
     font-size: 0.85rem;
+    border: 1px dashed var(--color-border);
+    border-radius: 14px;
+    background: var(--color-bg-secondary);
+}
+
+.emptyChart p {
+    color: var(--color-text-primary)
+}
+
+.chartSummary {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.chartSummaryTitle {
+    margin: 0 0 4px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.chartSummaryHint {
+    margin: 0;
+    font-size: 0.77rem;
+    color: var(--color-text-tertiary);
+}
+
+.priorityPills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.priorityPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--color-dif-mode-dark);
+    background: var(--color-dif-mode-light);
+    color: var(--color-text-primary);
+    font-size: 0.74rem;
+    cursor: pointer;
+}
+
+.chartPanel {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-dif-mode);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16);
 }
 
 /* ── Table tab ── */
@@ -466,11 +545,53 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tableToolbarLeft,
+.tableToolbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .tableCount {
     font-size: 0.82rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    min-width: 220px;
+}
+
+.searchBox input {
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    outline: none;
+    width: 100%;
+}
+
+.searchBox svg{
+    color: var(--color-text-primary)
+}
+
+.inlineCheckbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
 }
 
 .exportBtn {
@@ -482,6 +603,7 @@
     font-weight: 500;
     cursor: pointer;
     transition: background 0.12s;
+    color: var(--color-text-primary)
 }
 
 .exportBtn:hover {
@@ -498,7 +620,8 @@
 .tableWrapper {
     overflow-x: auto;
     border: 1px solid var(--color-border);
-    border-radius: 8px;
+    border-radius: 12px;
+    background: var(--color-bg-secondary);
 }
 
 .table {
@@ -512,19 +635,26 @@
     border-bottom: 1px solid var(--color-border);
 }
 
+.thCheckbox,
+.tdCheckbox {
+    width: 44px;
+    text-align: center;
+}
+
 .thSortable {
     padding: 9px 12px;
     text-align: left;
     font-weight: 600;
     font-size: 0.78rem;
-    color: var(--color-text-secondary);
+    color: var(--color-dif-mode-dark);
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
 }
 
 .thSortable:hover {
-    color: var(--color-text-primary);
+    color: var(--color-dif-mode);
+    background: var(--color-bg-tertiary)
 }
 
 .tableRow {
@@ -539,6 +669,63 @@
 
 .tableRow:hover {
     background: var(--color-bg-secondary);
+}
+
+.tableRowSelected {
+    background: rgba(255, 140, 66, 0.1);
+}
+
+.historyBtn {
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.historyBtn:hover,
+.historyBtn:focus-visible {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-accent);
+}
+
+.thAction {
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: var(--color-dif-mode-dark);
+}
+
+.selectedProductBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+}
+
+.clearSelectionBtn {
+    padding: 6px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.clearSelectionBtn:hover,
+.clearSelectionBtn:focus-visible {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-accent);
 }
 
 .table td {
@@ -572,18 +759,21 @@
 }
 
 .badgeDanger {
-    background: #fee2e2;
+    background: var(--color-bg-primary);
     color: #dc2626;
+    border: 1px solid var(--color-border);
 }
 
 .badgeWarn {
-    background: #fff7ed;
+    background: var(--color-bg-primary);
     color: #d97706;
+    border: 1px solid var(--color-border);
 }
 
 .badgeOk {
-    background: #f0fdf4;
+    background: var(--color-bg-primary);
     color: #16a34a;
+    border: 1px solid var(--color-border);
 }
 
 /* ── Analysis tab ── */
@@ -624,7 +814,7 @@
 .sectionTitle {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--color-text-secondary);
+    color: var(--color-dif-mode-dark);
     margin: 0 0 8px;
     display: flex;
     align-items: center;
@@ -655,7 +845,7 @@
 
 .top3Rank {
     font-weight: 700;
-    color: var(--color-accent, #6366f1);
+    color: var(--color-dif-mode-dark);
     width: 24px;
 }
 
@@ -710,7 +900,7 @@
 
 .confirmModal p {
     font-size: 0.85rem;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     margin: 0 0 18px;
 }
 
@@ -727,13 +917,25 @@
     background: var(--color-bg-secondary);
     font-size: 0.85rem;
     cursor: pointer;
+    color: var(--color-text-primary)
 }
 
 .btnDanger {
     padding: 8px 16px;
     border: none;
     border-radius: 8px;
-    background: #ef4444;
+    background: var(--color-error-mode);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btnSuccess {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-error-mode);
     color: #fff;
     font-size: 0.85rem;
     font-weight: 600;

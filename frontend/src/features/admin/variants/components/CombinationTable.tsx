@@ -135,7 +135,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                         role="menuitem"
                         onClick={() => run(onEdit)}
                     >
-                        ✏️ Editar
+                        Editar
                     </button>
                     <div className={styles.dropdownDivider} />
                     <button
@@ -144,7 +144,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                         role="menuitem"
                         onClick={() => run(onDelete)}
                     >
-                        🗑️ Eliminar
+                        Eliminar
                     </button>
                 </div>,
                 document.body
