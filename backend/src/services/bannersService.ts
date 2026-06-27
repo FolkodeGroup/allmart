@@ -1,6 +1,6 @@
 /**
  * services/bannersService.ts
- * Lógica de negocio para el dominio de banners usando Prisma Client.
+ * Lógica de negocio para el dominio de banners usando Prisma Client y Cloudflare R2.
  */
 
 import { prisma } from '../config/prisma';
@@ -11,11 +11,12 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2Client } from '../config/r2';
 import { env } from '../config/env';
 
-function toBuffer(bytes: Uint8Array | Buffer): Buffer {
+function toBuffer(bytes: Uint8Array | Buffer | null): Buffer {
+  if (!bytes) return Buffer.alloc(0);
   return Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
 }
 
-// Mapea el resultado de Prisma al tipo BannerWithImageMeta
+/** Mapea el resultado de Prisma al tipo BannerWithImageMeta */
 function toBannerWithMeta(row: any): BannerWithImageMeta {
   return {
     id: row.id,
@@ -36,7 +37,7 @@ function toBannerWithMeta(row: any): BannerWithImageMeta {
   };
 }
 
-// Para respuestas públicas sin datos binarios
+/** Para respuestas públicas sin datos binarios */
 function toBannerPublic(row: any): any {
   return {
     id: row.id,
@@ -50,6 +51,7 @@ function toBannerPublic(row: any): any {
     filterConfig: row.filterConfig ?? {},
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    cdnUrl: row.storageKey ? `${env.R2_PUBLIC_URL}/${row.storageKey}` : null
   };
 }
 
@@ -111,23 +113,15 @@ export async function createBanner(
   altText: string | undefined,
   isPinned: boolean,
   isActive: boolean,
-  imageData: {
-    data: Buffer;
-    width: number;
-    height: number;
-    thumbnail?: Buffer;
-    thumbWidth?: number;
-    thumbHeight?: number;
-    sizeBytes: number;
-    originalFilename?: string;
-  },
+  imageData: any,
   filterConfig: Record<string, unknown>,
 ): Promise<BannerWithImageMeta> {
   if (!title.trim()) {
     throw createError('El título es requerido', 400);
   }
 
-  const row = await prisma.banner.create({
+  // Creamos el registro inicial para obtener el ID real
+  const tempRow = await prisma.banner.create({
     data: {
       title,
       description: description ?? null,
@@ -147,13 +141,11 @@ export async function createBanner(
     },
   });
 
-  // =========================================================================
-  // 🚀 FASE 1: DOBLE ESCRITURA BANNERS EN CLOUDFLARE R2
-  // =========================================================================
-  try {
-    const s3KeyFull = `banners/${row.id}/full.webp`;
-    const s3KeyThumb = `banners/${row.id}/thumb.webp`;
+  const s3KeyFull = `banners/${tempRow.id}/full.webp`;
+  const s3KeyThumb = `banners/${tempRow.id}/thumb.webp`;
 
+  // Doble escritura a R2
+  try {
     const uploads = [
       r2Client.send(new PutObjectCommand({
         Bucket: env.R2_BUCKET_NAME,
@@ -176,12 +168,21 @@ export async function createBanner(
 
     await Promise.all(uploads);
     console.log(`[R2] Banner backup guardado en R2: ${s3KeyFull}`);
-  } catch (error) {
-    console.error('[R2] Error en doble escritura de Banner a Cloudflare R2:', error);
-  }
-  // =========================================================================
 
-  return toBannerWithMeta(row);
+    // Actualizamos con las storageKeys
+    const finalRow = await prisma.banner.update({
+      where: { id: tempRow.id },
+      data: {
+        storageKey: s3KeyFull,
+        storageThumbKey: s3KeyThumb
+      }
+    });
+
+    return toBannerWithMeta(finalRow);
+  } catch (error) {
+    console.error('[R2] Error en doble escritura de Banner:', error);
+    return toBannerWithMeta(tempRow);
+  }
 }
 
 export async function updateBanner(
@@ -219,25 +220,41 @@ export async function updateBanner(
 
 export async function updateBannerImage(
   id: string,
-  imageData: {
-    data: Buffer;
-    width: number;
-    height: number;
-    thumbnail?: Buffer;
-    thumbWidth?: number;
-    thumbHeight?: number;
-    sizeBytes: number;
-    originalFilename?: string;
-  },
+  imageData: any,
 ): Promise<BannerWithImageMeta> {
   const existing = await prisma.banner.findUnique({
     where: { id },
   });
   if (!existing) throw createError('Banner no encontrado', 404);
 
+  const s3KeyFull = `banners/${id}/full.webp`;
+  const s3KeyThumb = `banners/${id}/thumb.webp`;
+
+  // Actualización en R2
+  try {
+    await Promise.all([
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyFull,
+        Body: imageData.data,
+        ContentType: 'image/webp',
+      })),
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyThumb,
+        Body: imageData.thumbnail,
+        ContentType: 'image/webp',
+      }))
+    ]);
+  } catch (error) {
+    console.error('[R2] Error actualizando imagen de Banner en R2:', error);
+  }
+
   const row = await prisma.banner.update({
     where: { id },
     data: {
+      storageKey: s3KeyFull,
+      storageThumbKey: s3KeyThumb,
       data: new Uint8Array(imageData.data),
       width: imageData.width,
       height: imageData.height,
@@ -249,40 +266,6 @@ export async function updateBannerImage(
       mimeType: 'image/webp',
     },
   });
-
-  // =========================================================================
-  // 🚀 FASE 1: ACTUALIZACIÓN DE IMAGEN EN CLOUDFLARE R2
-  // =========================================================================
-  try {
-    const s3KeyFull = `banners/${id}/full.webp`;
-    const s3KeyThumb = `banners/${id}/thumb.webp`;
-
-    const uploads = [
-      r2Client.send(new PutObjectCommand({
-        Bucket: env.R2_BUCKET_NAME,
-        Key: s3KeyFull,
-        Body: imageData.data,
-        ContentType: 'image/webp',
-      }))
-    ];
-
-    if (imageData.thumbnail) {
-      uploads.push(
-        r2Client.send(new PutObjectCommand({
-          Bucket: env.R2_BUCKET_NAME,
-          Key: s3KeyThumb,
-          Body: imageData.thumbnail,
-          ContentType: 'image/webp',
-        }))
-      );
-    }
-
-    await Promise.all(uploads);
-    console.log(`[R2] Banner image actualizada en R2: ${s3KeyFull}`);
-  } catch (error) {
-    console.error('[R2] Error actualizando imagen de Banner en R2:', error);
-  }
-  // =========================================================================
 
   return toBannerWithMeta(row);
 }

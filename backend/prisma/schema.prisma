@@ -237,10 +237,17 @@ model ProductSkuValue {
 model ProductImageStorage {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   productId        String   @map("product_id") @db.Uuid
-  data             Bytes
+  
+  // --- CAMPOS NUEVOS FASE 2 ---
+  storageKey       String?  @map("storage_key") @db.VarChar(500)
+  storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
+  
+  // --- BINARIOS OPCIONALES ---
+  data             Bytes?
+  thumbnail        Bytes?
+  
   width            Int
   height           Int
-  thumbnail        Bytes?
   thumbWidth       Int?     @map("thumb_width")
   thumbHeight      Int?     @map("thumb_height")
   mimeType         String   @default("image/webp") @map("mime_type") @db.VarChar(50)
@@ -260,10 +267,17 @@ model ProductImageStorage {
 model ProductSkuImageStorage {
   id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   skuId            String     @map("sku_id") @db.Uuid
-  data             Bytes
+
+  // --- CAMPOS NUEVOS FASE 2 ---
+  storageKey       String?    @map("storage_key") @db.VarChar(500)
+  storageThumbKey  String?    @map("storage_thumb_key") @db.VarChar(500)
+
+  // --- BINARIOS OPCIONALES ---
+  data             Bytes?
+  thumbnail        Bytes?
+
   width            Int
   height           Int
-  thumbnail        Bytes?
   thumbWidth       Int?       @map("thumb_width")
   thumbHeight      Int?       @map("thumb_height")
   mimeType         String     @default("image/webp") @map("mime_type") @db.VarChar(50)
@@ -284,10 +298,17 @@ model ProductSkuImageStorage {
 model CategoryImageStorage {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   categoryId       String   @unique @map("category_id") @db.Uuid
-  data             Bytes
+
+  // --- CAMPOS NUEVOS FASE 2 ---
+  storageKey       String?  @map("storage_key") @db.VarChar(500)
+  storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
+
+  // --- BINARIOS OPCIONALES ---
+  data             Bytes?
+  thumbnail        Bytes?
+
   width            Int
   height           Int
-  thumbnail        Bytes?
   thumbWidth       Int?     @map("thumb_width")
   thumbHeight      Int?     @map("thumb_height")
   mimeType         String   @default("image/webp") @map("mime_type") @db.VarChar(50)
@@ -550,10 +571,17 @@ model Banner {
   title            String   @db.VarChar(255)
   description      String?
   filterConfig     Json     @default("{}") @map("filter_config")
-  data             Bytes
+
+  // --- CAMPOS NUEVOS FASE 2 ---
+  storageKey       String?  @map("storage_key") @db.VarChar(500)
+  storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
+
+  // --- BINARIOS OPCIONALES ---
+  data             Bytes?
+  thumbnail        Bytes?
+
   width            Int
   height           Int
-  thumbnail        Bytes?
   thumbWidth       Int?     @map("thumb_width")
   thumbHeight      Int?     @map("thumb_height")
   mimeType         String   @default("image/webp") @map("mime_type") @db.VarChar(50)

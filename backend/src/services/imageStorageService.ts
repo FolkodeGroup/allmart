@@ -1,15 +1,13 @@
 /**
  * services/imageStorageService.ts
  * ──────────────────────────────────────────────────────────────────────────────
- * Gestión completa de imágenes binarias en la base de datos.
+ * Gestión completa de imágenes binarias en la base de datos y Cloudflare R2.
  *
  * Funciones:
  *   - Recibe un buffer de cualquier formato (JPEG, PNG, WebP, GIF…)
  *   - Convierte a WebP con compresión configurable
- *   - Genera una miniatura WebP (~200 px de ancho) para previews
- *   - Valida tipo MIME y tamaño máximo antes de procesar
- *   - Persiste en tablas product_images_storage / category_images_storage
- *   - Devuelve metadatos para construir las URLs de servicio
+ *   - Genera una miniatura WebP (~240 px de ancho) para previews
+ *   - Persiste en R2 (Storage Key) y en la base de datos (BYTEA opcional)
  */
 
 import sharp from 'sharp';
@@ -54,24 +52,23 @@ export interface UploadedImageFile {
 }
 
 export interface ProcessedImage {
-  /** WebP completo (puede estar redimensionado a MAX_WIDTH) */
   data: Buffer;
   width: number;
   height: number;
-  /** WebP miniatura */
   thumbnail: Buffer;
   thumbWidth: number;
   thumbHeight: number;
-  /** Tamaño en bytes del WebP resultante */
   sizeBytes: number;
   originalFilename: string;
 }
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
+/** Helper para validar UUID */
+const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
 /**
  * Sincroniza el campo `images` del producto con las imágenes almacenadas en productImageStorage.
- * Esto asegura que las imágenes aparezcan en las tarjetas del catálogo.
  */
 async function syncProductImages(productId: string): Promise<void> {
   const allStorageImages = await prisma.productImageStorage.findMany({
@@ -79,10 +76,6 @@ async function syncProductImages(productId: string): Promise<void> {
     orderBy: { position: 'asc' },
     select: {
       id: true,
-      altText: true,
-      position: true,
-      createdAt: true,
-      updatedAt: true,
     },
   });
 
@@ -110,31 +103,24 @@ function validateFile(file: UploadedImageFile): void {
 }
 
 /**
- * Procesa un buffer de imagen:
- *  1. Convierte a WebP con calidad configurable
- *  2. Reduce dimensiones si supera MAX_WIDTH (manteniendo proporción)
- *  3. Genera una miniatura a THUMBNAIL_WIDTH
+ * Procesa un buffer de imagen a WebP y genera miniatura.
  */
 async function processImage(buffer: Buffer, originalname: string): Promise<ProcessedImage> {
-  // Instancia base (strip metadata EXIF para privacidad)
-  const base = sharp(buffer).rotate(); // .rotate() aplica rotación EXIF automáticamente
+  const base = sharp(buffer).rotate();
 
-  // ── Imagen completa ──────────────────────────────────────────────────────────
   const fullBufferRaw = await base
     .clone()
     .resize({ width: MAX_WIDTH, withoutEnlargement: true })
     .webp({ quality: WEBP_QUALITY })
-    .toBuffer({ resolveWithObject: false });
+    .toBuffer();
 
-  // Obtener metadatos de la versión final
   const fullMeta = await sharp(fullBufferRaw).metadata();
 
-  // ── Miniatura ────────────────────────────────────────────────────────────────
   const thumbBufferRaw = await base
     .clone()
     .resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true })
     .webp({ quality: 75 })
-    .toBuffer({ resolveWithObject: false });
+    .toBuffer();
 
   const thumbMeta = await sharp(thumbBufferRaw).metadata();
 
@@ -153,9 +139,7 @@ async function processImage(buffer: Buffer, originalname: string): Promise<Proce
 // ─── API de producto ───────────────────────────────────────────────────────────
 
 /**
- * Sube y persiste una imagen de producto.
- * Convierte a WebP automáticamente y genera miniatura.
- * También sincroniza el campo `images` del producto para que aparezca en las tarjetas.
+ * Sube y persiste una imagen de producto (R2 + DB).
  */
 export async function uploadProductImage(
   productId: string,
@@ -174,16 +158,12 @@ export async function uploadProductImage(
   }
 
   const processed = await processImage(file.buffer, file.originalname);
+  const timestamp = Date.now();
+  const s3KeyFull = `products/${productId}/${timestamp}-${position}.webp`;
+  const s3KeyThumb = `products/${productId}/thumbs/${timestamp}-${position}.webp`;
 
-  // =========================================================================
-  // FASE 1: DOBLE ESCRITURA EN CLOUDFLARE R2
-  // =========================================================================
+  // Doble escritura a Cloudflare R2
   try {
-    const timestamp = Date.now();
-    const s3KeyFull = `products/${productId}/${timestamp}-${position}.webp`;
-    const s3KeyThumb = `products/${productId}/thumbs/${timestamp}-${position}.webp`;
-
-    // Subimos ambas imágenes en paralelo
     await Promise.all([
       r2Client.send(new PutObjectCommand({
         Bucket: env.R2_BUCKET_NAME,
@@ -198,15 +178,16 @@ export async function uploadProductImage(
         ContentType: 'image/webp',
       }))
     ]);
-    console.log(`[R2] Copia de seguridad guardada en R2: ${s3KeyFull}`);
+    console.log(`[R2] Imagen de producto guardada con éxito: ${s3KeyFull}`);
   } catch (error) {
-    // Solo logueamos el error, NO lanzamos throw para no romper el flujo de Postgres
     console.error('[R2] Error en doble escritura a Cloudflare R2:', error);
   }
 
   const created = await prisma.productImageStorage.create({
     data: {
       productId,
+      storageKey: s3KeyFull,
+      storageThumbKey: s3KeyThumb,
       data: toBytes(processed.data),
       width: processed.width,
       height: processed.height,
@@ -221,7 +202,6 @@ export async function uploadProductImage(
     },
   });
 
-  // Sincronizar el campo `images` del producto para que aparezca en las tarjetas
   await syncProductImages(productId);
 
   return toImageMeta(created);
@@ -239,16 +219,25 @@ export async function getProductImages(productId: string) {
       thumbWidth: true, thumbHeight: true, mimeType: true,
       originalFilename: true, sizeBytes: true, altText: true,
       position: true, createdAt: true, updatedAt: true,
-      // NO seleccionamos data ni thumbnail para no cargar binarios en listas
+      storageKey: true, storageThumbKey: true
     },
   });
-  return rows.map(r => ({ ...r, url: `/api/images/products/${r.id}`, thumbUrl: `/api/images/products/${r.id}/thumb` }));
+  return rows.map(r => ({ 
+    ...r, 
+    url: `/api/images/products/${r.id}`, 
+    thumbUrl: `/api/images/products/${r.id}/thumb`,
+    cdnUrl: r.storageKey ? `${env.R2_PUBLIC_URL}/${r.storageKey}` : null
+  }));
 }
 
 /**
  * Obtiene los metadatos de una imagen de producto por ID.
  */
 export async function getProductImageMeta(id: string) {
+  if (!isUUID(id)) {
+    throw createError('Imagen no encontrada (Legacy ID)', 404);
+  }
+
   const row = await prisma.productImageStorage.findUnique({
     where: { id },
     select: {
@@ -256,20 +245,29 @@ export async function getProductImageMeta(id: string) {
       thumbWidth: true, thumbHeight: true, mimeType: true,
       originalFilename: true, sizeBytes: true, altText: true,
       position: true, createdAt: true, updatedAt: true,
+      storageKey: true, storageThumbKey: true
     },
   });
   if (!row) throw createError('Imagen no encontrada', 404);
-  return { ...row, url: `/api/images/products/${row.id}`, thumbUrl: `/api/images/products/${row.id}/thumb` };
+  return { 
+    ...row, 
+    url: `/api/images/products/${row.id}`, 
+    thumbUrl: `/api/images/products/${row.id}/thumb`,
+    cdnUrl: row.storageKey ? `${env.R2_PUBLIC_URL}/${row.storageKey}` : null
+  };
 }
 
 /**
  * Actualiza los metadatos de una imagen de producto (altText, position).
- * Para reemplazar los binarios se debe eliminar y volver a subir.
  */
 export async function updateProductImageMeta(
   id: string,
   data: { altText?: string; position?: number },
 ) {
+  if (!isUUID(id)) {
+    throw createError('Imagen no encontrada (Legacy ID)', 404);
+  }
+
   const existing = await prisma.productImageStorage.findUnique({ where: { id } });
   if (!existing) throw createError('Imagen no encontrada', 404);
 
@@ -287,7 +285,6 @@ export async function updateProductImageMeta(
     },
   });
 
-  // Sincronizar el campo `images` del producto
   await syncProductImages(existing.productId);
 
   return { ...updated, url: `/api/images/products/${updated.id}`, thumbUrl: `/api/images/products/${updated.id}/thumb` };
@@ -297,46 +294,55 @@ export async function updateProductImageMeta(
  * Elimina una imagen de producto.
  */
 export async function deleteProductImage(id: string): Promise<void> {
+  if (!isUUID(id)) {
+    throw createError('Imagen no encontrada (Legacy ID)', 404);
+  }
+
   const existing = await prisma.productImageStorage.findUnique({ where: { id } });
   if (!existing) throw createError('Imagen no encontrada', 404);
   
   await prisma.productImageStorage.delete({ where: { id } });
   
-  // Sincronizar el campo `images` del producto después de eliminar
   await syncProductImages(existing.productId);
 }
 
 /**
  * Sirve el binario WebP completo de una imagen de producto.
- * Retorna el Buffer y el mime type para enviarlo como respuesta HTTP.
  */
 export async function serveProductImage(id: string): Promise<{ data: Buffer; mimeType: string }> {
+  if (!isUUID(id)) {
+    throw createError('Imagen no encontrada (Legacy ID)', 404);
+  }
+
   const row = await prisma.productImageStorage.findUnique({
     where: { id },
     select: { data: true, mimeType: true },
   });
   if (!row) throw createError('Imagen no encontrada', 404);
-  return { data: Buffer.from(row.data), mimeType: row.mimeType };
+  return { data: row.data ? Buffer.from(row.data) : Buffer.alloc(0), mimeType: row.mimeType };
 }
 
 /**
  * Sirve el binario WebP miniatura de una imagen de producto.
  */
 export async function serveProductImageThumb(id: string): Promise<{ data: Buffer; mimeType: string }> {
+  if (!isUUID(id)) {
+    throw createError('Imagen no encontrada (Legacy ID)', 404);
+  }
+
   const row = await prisma.productImageStorage.findUnique({
     where: { id },
     select: { thumbnail: true, data: true, mimeType: true },
   });
   if (!row) throw createError('Imagen no encontrada', 404);
-  // Si no tiene thumbnail (imágenes antiguas), devuelve el completo
-  const buffer = row.thumbnail ? Buffer.from(row.thumbnail) : Buffer.from(row.data);
+  const buffer = row.thumbnail ? Buffer.from(row.thumbnail) : (row.data ? Buffer.from(row.data) : Buffer.alloc(0));
   return { data: buffer, mimeType: row.mimeType };
 }
 
 // ─── API de categoría ──────────────────────────────────────────────────────────
 
 /**
- * Sube y persiste (upsert) la imagen de una categoría.
+ * Sube y persiste (upsert) la imagen de una categoría (R2 + DB).
  */
 export async function uploadCategoryImage(
   categoryId: string,
@@ -349,15 +355,11 @@ export async function uploadCategoryImage(
   if (!category) throw createError('Categoría no encontrada', 404);
 
   const processed = await processImage(file.buffer, file.originalname);
+  const timestamp = Date.now();
+  const s3KeyFull = `categories/${categoryId}/${timestamp}-full.webp`;
+  const s3KeyThumb = `categories/${categoryId}/thumbs/${timestamp}-thumb.webp`;
 
-  // =========================================================================
-  // FASE 1: DOBLE ESCRITURA EN CLOUDFLARE R2
-  // =========================================================================
   try {
-    const timestamp = Date.now();
-    const s3KeyFull = `categories/${categoryId}/${timestamp}-full.webp`;
-    const s3KeyThumb = `categories/${categoryId}/thumbs/${timestamp}-thumb.webp`;
-
     await Promise.all([
       r2Client.send(new PutObjectCommand({
         Bucket: env.R2_BUCKET_NAME,
@@ -372,16 +374,17 @@ export async function uploadCategoryImage(
         ContentType: 'image/webp',
       }))
     ]);
-    console.log(`[R2] Copia de seguridad guardada en R2: ${s3KeyFull}`);
+    console.log(`[R2] Imagen de categoría guardada con éxito: ${s3KeyFull}`);
   } catch (error) {
     console.error('[R2] Error en doble escritura a Cloudflare R2:', error);
   }
 
-  // upsert: si ya existe imagen para la categoría, la reemplaza
   const row = await prisma.categoryImageStorage.upsert({
     where: { categoryId },
     create: {
       categoryId,
+      storageKey: s3KeyFull,
+      storageThumbKey: s3KeyThumb,
       data: toBytes(processed.data),
       width: processed.width,
       height: processed.height,
@@ -394,6 +397,8 @@ export async function uploadCategoryImage(
       altText: altText ?? null,
     },
     update: {
+      storageKey: s3KeyFull,
+      storageThumbKey: s3KeyThumb,
       data: toBytes(processed.data),
       width: processed.width,
       height: processed.height,
@@ -414,8 +419,6 @@ export async function uploadCategoryImage(
   });
 
   const imageUrl = `/api/images/categories/${row.id}`;
-
-  // Actualizar la tabla Category con la URL de la imagen (legacy compat)
   await prisma.category.update({
     where: { id: categoryId },
     data: { imageUrl },
@@ -435,10 +438,16 @@ export async function getCategoryImageMeta(categoryId: string) {
       thumbWidth: true, thumbHeight: true, mimeType: true,
       originalFilename: true, sizeBytes: true, altText: true,
       createdAt: true, updatedAt: true,
+      storageKey: true
     },
   });
   if (!row) throw createError('La categoría no tiene imagen subida', 404);
-  return { ...row, url: `/api/images/categories/${row.id}`, thumbUrl: `/api/images/categories/${row.id}/thumb` };
+  return { 
+    ...row, 
+    url: `/api/images/categories/${row.id}`, 
+    thumbUrl: `/api/images/categories/${row.id}/thumb`,
+    cdnUrl: row.storageKey ? `${env.R2_PUBLIC_URL}/${row.storageKey}` : null
+  };
 }
 
 /**
@@ -450,7 +459,7 @@ export async function serveCategoryImage(id: string): Promise<{ data: Buffer; mi
     select: { data: true, mimeType: true },
   });
   if (!row) throw createError('Imagen no encontrada', 404);
-  return { data: Buffer.from(row.data), mimeType: row.mimeType };
+  return { data: row.data ? Buffer.from(row.data) : Buffer.alloc(0), mimeType: row.mimeType };
 }
 
 /**
@@ -462,7 +471,7 @@ export async function serveCategoryImageThumb(id: string): Promise<{ data: Buffe
     select: { thumbnail: true, data: true, mimeType: true },
   });
   if (!row) throw createError('Imagen no encontrada', 404);
-  const buffer = row.thumbnail ? Buffer.from(row.thumbnail) : Buffer.from(row.data);
+  const buffer = row.thumbnail ? Buffer.from(row.thumbnail) : (row.data ? Buffer.from(row.data) : Buffer.alloc(0));
   return { data: buffer, mimeType: row.mimeType };
 }
 
@@ -474,7 +483,6 @@ export async function deleteCategoryImage(categoryId: string): Promise<void> {
   if (!existing) throw createError('La categoría no tiene imagen', 404);
   await prisma.categoryImageStorage.delete({ where: { categoryId } });
 
-  // Limpiar el campo imageUrl en Category (legacy compat)
   await prisma.category.update({
     where: { id: categoryId },
     data: { imageUrl: null },
@@ -483,21 +491,11 @@ export async function deleteCategoryImage(categoryId: string): Promise<void> {
 
 // ─── Helper interno ────────────────────────────────────────────────────────────
 
-/**
- * Convierte un Buffer de Node.js a Uint8Array<ArrayBuffer> que es lo que Prisma
- * espera para campos Bytes (BYTEA en PostgreSQL).
- * A nivel de runtime es la misma memoria; solo resuelve la discrepancia de tipos.
- */
 function toBytes(buf: Buffer): Uint8Array<ArrayBuffer> {
   return new Uint8Array(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)) as Uint8Array<ArrayBuffer>;
 }
 
-function toImageMeta(row: {
-  id: string; productId: string; width: number; height: number;
-  thumbWidth: number | null; thumbHeight: number | null; mimeType: string;
-  originalFilename: string | null; sizeBytes: number; altText: string | null;
-  position: number; createdAt: Date; updatedAt: Date;
-}) {
+function toImageMeta(row: any) {
   return {
     ...row,
     url: `/api/images/products/${row.id}`,
