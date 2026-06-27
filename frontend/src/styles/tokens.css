@@ -55,6 +55,7 @@
   --color-accent-light-inverse: #A9A9A9;
   --color-accent-dark-inverse: #AEA491;
 
+  --color-dif-mode-light: #ebffef;
   --color-dif-mode: #769282;
   --color-dif-mode-dark: #5d7568;
 
@@ -230,6 +231,7 @@ body[data-admin-theme='dark'] {
   --color-accent-light-inverse: #e8c5a8;
   --color-accent-dark-inverse: #c89a70;
 
+  --color-dif-mode-light: rgba(221, 176, 140, 0.16);
   --color-dif-mode: #c89a70;
   --color-dif-mode-dark: #c89a70d9;
 
