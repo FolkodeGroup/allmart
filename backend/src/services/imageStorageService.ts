@@ -15,6 +15,9 @@
 import sharp from 'sharp';
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { r2Client } from '../config/r2';
+import { env } from '../config/env';
 
 // ─── Constantes de configuración ──────────────────────────────────────────────
 
@@ -162,17 +165,44 @@ export async function uploadProductImage(
 ) {
   validateFile(file);
 
-  // Verificar que el producto existe
   const product = await prisma.product.findUnique({ where: { id: productId } });
   if (!product) throw createError('Producto no encontrado', 404);
 
-  // Calcular posición automática si no se especifica
   if (position === undefined) {
     const count = await prisma.productImageStorage.count({ where: { productId } });
     position = count;
   }
 
   const processed = await processImage(file.buffer, file.originalname);
+
+  // =========================================================================
+  // FASE 1: DOBLE ESCRITURA EN CLOUDFLARE R2
+  // =========================================================================
+  try {
+    const timestamp = Date.now();
+    const s3KeyFull = `products/${productId}/${timestamp}-${position}.webp`;
+    const s3KeyThumb = `products/${productId}/thumbs/${timestamp}-${position}.webp`;
+
+    // Subimos ambas imágenes en paralelo
+    await Promise.all([
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyFull,
+        Body: processed.data,
+        ContentType: 'image/webp',
+      })),
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyThumb,
+        Body: processed.thumbnail,
+        ContentType: 'image/webp',
+      }))
+    ]);
+    console.log(`[R2] Copia de seguridad guardada en R2: ${s3KeyFull}`);
+  } catch (error) {
+    // Solo logueamos el error, NO lanzamos throw para no romper el flujo de Postgres
+    console.error('[R2] Error en doble escritura a Cloudflare R2:', error);
+  }
 
   const created = await prisma.productImageStorage.create({
     data: {
@@ -319,6 +349,33 @@ export async function uploadCategoryImage(
   if (!category) throw createError('Categoría no encontrada', 404);
 
   const processed = await processImage(file.buffer, file.originalname);
+
+  // =========================================================================
+  // FASE 1: DOBLE ESCRITURA EN CLOUDFLARE R2
+  // =========================================================================
+  try {
+    const timestamp = Date.now();
+    const s3KeyFull = `categories/${categoryId}/${timestamp}-full.webp`;
+    const s3KeyThumb = `categories/${categoryId}/thumbs/${timestamp}-thumb.webp`;
+
+    await Promise.all([
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyFull,
+        Body: processed.data,
+        ContentType: 'image/webp',
+      })),
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyThumb,
+        Body: processed.thumbnail,
+        ContentType: 'image/webp',
+      }))
+    ]);
+    console.log(`[R2] Copia de seguridad guardada en R2: ${s3KeyFull}`);
+  } catch (error) {
+    console.error('[R2] Error en doble escritura a Cloudflare R2:', error);
+  }
 
   // upsert: si ya existe imagen para la categoría, la reemplaza
   const row = await prisma.categoryImageStorage.upsert({

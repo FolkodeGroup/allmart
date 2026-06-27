@@ -7,6 +7,9 @@ import { prisma } from '../config/prisma';
 import { Prisma } from '@prisma/client';
 import { BannerWithImageMeta } from '../models/Banner';
 import { createError } from '../middlewares/errorHandler';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { r2Client } from '../config/r2';
+import { env } from '../config/env';
 
 function toBuffer(bytes: Uint8Array | Buffer): Buffer {
   return Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
@@ -144,6 +147,40 @@ export async function createBanner(
     },
   });
 
+  // =========================================================================
+  // 🚀 FASE 1: DOBLE ESCRITURA BANNERS EN CLOUDFLARE R2
+  // =========================================================================
+  try {
+    const s3KeyFull = `banners/${row.id}/full.webp`;
+    const s3KeyThumb = `banners/${row.id}/thumb.webp`;
+
+    const uploads = [
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyFull,
+        Body: imageData.data,
+        ContentType: 'image/webp',
+      }))
+    ];
+
+    if (imageData.thumbnail) {
+      uploads.push(
+        r2Client.send(new PutObjectCommand({
+          Bucket: env.R2_BUCKET_NAME,
+          Key: s3KeyThumb,
+          Body: imageData.thumbnail,
+          ContentType: 'image/webp',
+        }))
+      );
+    }
+
+    await Promise.all(uploads);
+    console.log(`[R2] Banner backup guardado en R2: ${s3KeyFull}`);
+  } catch (error) {
+    console.error('[R2] Error en doble escritura de Banner a Cloudflare R2:', error);
+  }
+  // =========================================================================
+
   return toBannerWithMeta(row);
 }
 
@@ -212,6 +249,40 @@ export async function updateBannerImage(
       mimeType: 'image/webp',
     },
   });
+
+  // =========================================================================
+  // 🚀 FASE 1: ACTUALIZACIÓN DE IMAGEN EN CLOUDFLARE R2
+  // =========================================================================
+  try {
+    const s3KeyFull = `banners/${id}/full.webp`;
+    const s3KeyThumb = `banners/${id}/thumb.webp`;
+
+    const uploads = [
+      r2Client.send(new PutObjectCommand({
+        Bucket: env.R2_BUCKET_NAME,
+        Key: s3KeyFull,
+        Body: imageData.data,
+        ContentType: 'image/webp',
+      }))
+    ];
+
+    if (imageData.thumbnail) {
+      uploads.push(
+        r2Client.send(new PutObjectCommand({
+          Bucket: env.R2_BUCKET_NAME,
+          Key: s3KeyThumb,
+          Body: imageData.thumbnail,
+          ContentType: 'image/webp',
+        }))
+      );
+    }
+
+    await Promise.all(uploads);
+    console.log(`[R2] Banner image actualizada en R2: ${s3KeyFull}`);
+  } catch (error) {
+    console.error('[R2] Error actualizando imagen de Banner en R2:', error);
+  }
+  // =========================================================================
 
   return toBannerWithMeta(row);
 }

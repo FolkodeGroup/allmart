@@ -1,8 +1,8 @@
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
-
-// Reuse processImage and helpers from imageStorageService by importing directly
-// Note: imageStorageService exports helpers via functions but not processImage; we'll call its public API where possible.
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { r2Client } from '../config/r2';
+import { env } from '../config/env';
 
 export interface UploadedImageFile {
     buffer: Buffer;
@@ -23,8 +23,7 @@ export async function uploadSkuImage(
     position?: number,
     isPrimary?: boolean,
 ) {
-    // Validate file using same rules as imageStorageService
-    // imageStorageService.validateFile is not exported; perform a lightweight validation here
+    // Validate file
     const allowed = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
     if (!allowed.has(file.mimetype)) throw createError(`Tipo de archivo no permitido: ${file.mimetype}`, 400);
     if (file.size > 8 * 1024 * 1024) throw createError('El archivo supera el tamaño máximo permitido de 8 MB', 400);
@@ -38,8 +37,28 @@ export async function uploadSkuImage(
         position = count;
     }
 
-    // Reuse image processing from imageStorageService by calling processImage via importing; but it's not exported -> use a simple conversion: store original buffer as-is and mark mimeType
-    // To avoid duplicating heavy logic, call imageStorageService.uploadProductImage? Not applicable. For now, store as-is without WebP conversion (safe fallback).
+    // =========================================================================
+    // 🚀 FASE 1: DOBLE ESCRITURA PARA VARIANTES (SKU) EN CLOUDFLARE R2
+    // =========================================================================
+    try {
+        const timestamp = Date.now();
+        const extension = file.mimetype.split('/')[1] || 'webp';
+        const s3Key = `skus/${skuId}/${timestamp}-${position}.${extension}`;
+
+        await r2Client.send(new PutObjectCommand({
+            Bucket: env.R2_BUCKET_NAME,
+            Key: s3Key,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        }));
+        console.log(`[R2] Copia de Variant Image guardada en R2: ${s3Key}`);
+    } catch (error) {
+        // Logueamos pero no bloqueamos la subida a Postgres en Fase 1
+        console.error('[R2] Error en doble escritura de SKU a Cloudflare R2:', error);
+    }
+    // =========================================================================
+
+    // Guardado original en Postgres (BYTEA)
     const created = await prisma.productSkuImageStorage.create({
         data: {
             skuId,
@@ -60,7 +79,10 @@ export async function uploadSkuImage(
 
     if (created.isPrimary) {
         // ensure only one primary per sku
-        await prisma.productSkuImageStorage.updateMany({ where: { skuId, id: { not: created.id } }, data: { isPrimary: false } });
+        await prisma.productSkuImageStorage.updateMany({ 
+            where: { skuId, id: { not: created.id } }, 
+            data: { isPrimary: false } 
+        });
     }
 
     await syncSkuImages(skuId, sku.productId);
@@ -79,7 +101,11 @@ export async function uploadSkuImage(
 }
 
 export async function getSkuImages(skuId: string) {
-    const rows = await prisma.productSkuImageStorage.findMany({ where: { skuId }, orderBy: { position: 'asc' }, select: { id: true, skuId: true, altText: true, position: true, mimeType: true, originalFilename: true, sizeBytes: true, isPrimary: true, createdAt: true, updatedAt: true, thumbWidth: true, thumbHeight: true } });
+    const rows = await prisma.productSkuImageStorage.findMany({ 
+        where: { skuId }, 
+        orderBy: { position: 'asc' }, 
+        select: { id: true, skuId: true, altText: true, position: true, mimeType: true, originalFilename: true, sizeBytes: true, isPrimary: true, createdAt: true, updatedAt: true, thumbWidth: true, thumbHeight: true } 
+    });
     return rows.map(r => ({ ...r, url: `/api/images/sku/${r.id}`, thumbUrl: r.thumbWidth ? `/api/images/sku/${r.id}/thumb` : undefined }));
 }
 
@@ -92,9 +118,20 @@ export async function getSkuImageMeta(id: string) {
 export async function updateSkuImageMeta(id: string, data: { altText?: string | null; position?: number; isPrimary?: boolean }) {
     const existing = await prisma.productSkuImageStorage.findUnique({ where: { id } });
     if (!existing) throw createError('Imagen no encontrada', 404);
-    const updated = await prisma.productSkuImageStorage.update({ where: { id }, data: { altText: data.altText !== undefined ? data.altText : existing.altText, position: data.position !== undefined ? data.position : existing.position, isPrimary: data.isPrimary !== undefined ? data.isPrimary : existing.isPrimary }, select: { id: true, skuId: true, altText: true, position: true, isPrimary: true, createdAt: true, updatedAt: true, thumbWidth: true } });
+    const updated = await prisma.productSkuImageStorage.update({ 
+        where: { id }, 
+        data: { 
+            altText: data.altText !== undefined ? data.altText : existing.altText, 
+            position: data.position !== undefined ? data.position : existing.position, 
+            isPrimary: data.isPrimary !== undefined ? data.isPrimary : existing.isPrimary 
+        }, 
+        select: { id: true, skuId: true, altText: true, position: true, isPrimary: true, createdAt: true, updatedAt: true, thumbWidth: true } 
+    });
     if (updated.isPrimary) {
-        await prisma.productSkuImageStorage.updateMany({ where: { skuId: updated.skuId, id: { not: updated.id } }, data: { isPrimary: false } });
+        await prisma.productSkuImageStorage.updateMany({ 
+            where: { skuId: updated.skuId, id: { not: updated.id } }, 
+            data: { isPrimary: false } 
+        });
     }
     return { ...updated, url: `/api/images/sku/${updated.id}`, thumbUrl: updated.thumbWidth ? `/api/images/sku/${updated.id}/thumb` : undefined };
 }
@@ -105,7 +142,10 @@ export async function deleteSkuImage(id: string) {
     await prisma.productSkuImageStorage.delete({ where: { id } });
     // If deleted image was primary, assign another as primary if exists
     if (existing.isPrimary) {
-        const next = await prisma.productSkuImageStorage.findFirst({ where: { skuId: existing.skuId }, orderBy: { position: 'asc' } });
+        const next = await prisma.productSkuImageStorage.findFirst({ 
+            where: { skuId: existing.skuId }, 
+            orderBy: { position: 'asc' } 
+        });
         if (next) await prisma.productSkuImageStorage.update({ where: { id: next.id }, data: { isPrimary: true } });
     }
 }
