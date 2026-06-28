@@ -67,18 +67,15 @@ export async function getAdminCategories(query: {
 
   // Usar include: { _count: { select: { products: true } } } para contar productos
   // Filtrar por cantidad de productos después de obtener los resultados
-  const [total, rows] = await Promise.all([
-    prisma.category.count({ where }),
-    prisma.category.findMany({
-      where,
-      orderBy: { name: 'asc' },
-      skip: (page - 1) * limit,
-      take: limit,
-      include: {
-        _count: { select: { productCategories: true } },
-      },
-    }),
-  ]);
+  const rows = await prisma.category.findMany({
+    where,
+    orderBy: { name: 'asc' },
+    skip: (page - 1) * limit,
+    take: limit,
+    include: {
+      _count: { select: { productCategories: true } },
+    },
+  });
 
   // Filtrar por minProducts y maxProducts en memoria (paginación ya aplicada)
   let filteredRows = rows;
@@ -102,10 +99,10 @@ export async function getAdminCategories(query: {
 
   return {
     data,
-    total,
+    total: filteredTotal,
     page,
     limit,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(filteredTotal / limit),
   };
 }
 
