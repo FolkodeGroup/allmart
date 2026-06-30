@@ -47,20 +47,6 @@ export interface ProcessedImage {
 
 const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
 
-async function syncProductImages(productId: string): Promise<void> {
-  const allStorageImages = await prisma.productImageStorage.findMany({
-    where: { productId },
-    orderBy: { position: 'asc' },
-    select: { id: true },
-  });
-
-  const syncedImages = allStorageImages.map((img) => `/api/images/products/${img.id}`);
-
-  await prisma.product.update({
-    where: { id: productId },
-    data: { images: syncedImages as any },
-  });
-}
 
 function validateFile(file: UploadedImageFile): void {
   if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
@@ -138,7 +124,6 @@ export async function uploadProductImage(productId: string, file: UploadedImageF
     },
   });
 
-  await syncProductImages(productId);
   return toImageMeta(created);
 }
 
@@ -167,7 +152,6 @@ export async function deleteProductImage(id: string): Promise<void> {
   const existing = await prisma.productImageStorage.findUnique({ where: { id } });
   if (!existing) throw createError('Imagen no encontrada', 404);
   await prisma.productImageStorage.delete({ where: { id } });
-  await syncProductImages(existing.productId);
 }
 
 export async function serveProductImage(id: string): Promise<{ data: Buffer; mimeType: string; redirectUrl?: string }> {

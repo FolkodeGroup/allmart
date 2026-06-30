@@ -131,6 +131,11 @@ function toProduct(row: any): Product {
     ? row.productFeatures.map((pf: any) => pf.description)
     : [];
 
+  // Extraemos las imágenes desde la relación directa en BD
+  const images = Array.isArray(row.productImages)
+    ? row.productImages.map((img: any) => `/api/images/products/${img.id}`)
+    : [];
+
   return {
     id: row.id,
     name: row.name,
@@ -138,7 +143,7 @@ function toProduct(row: any): Product {
     description: row.description ?? undefined,
     shortDescription: row.shortDescription ?? undefined,
     price: row.price.toNumber(),
-    images: Array.isArray(row.images) ? row.images : [],
+    images,
     categoryId: primaryCategoryId,
     categoryIds,
     tags,
@@ -163,7 +168,7 @@ const adminProductSelect = {
   description: true,
   shortDescription: true,
   price: true,
-  images: true,
+  productImages: { select: { id: true }, orderBy: { position: 'asc' } },
   rating: true,
   reviewCount: true,
   inStock: true,
@@ -225,35 +230,6 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
   return where;
 }
 
-async function hydrateProductImagesFromStorage(rows: Array<{ id: string; images: unknown }>): Promise<void> {
-  const rowsToHydrate = rows.filter(row => {
-    const arr = Array.isArray(row.images) ? row.images : [];
-    return arr.length === 0;
-  });
-
-  if (rowsToHydrate.length === 0) return;
-
-  const productIds = rowsToHydrate.map(r => r.id);
-
-  const storageImages = await prisma.productImageStorage.findMany({
-    where: { productId: { in: productIds } },
-    select: { id: true, productId: true },
-    orderBy: { position: 'asc' },
-  });
-
-  const imagesByProduct = new Map<string, string[]>();
-  for (const img of storageImages) {
-    const list = imagesByProduct.get(img.productId) || [];
-    list.push(`/api/images/products/${img.id}`);
-    imagesByProduct.set(img.productId, list);
-  }
-
-  for (const row of rowsToHydrate) {
-    const syncedImages = imagesByProduct.get(row.id) || [];
-    (row as any).images = syncedImages;
-  }
-}
-
 export async function checkProductExists(id: string): Promise<boolean> {
   const count = await prisma.product.count({
     where: { id },
@@ -265,6 +241,7 @@ export async function getAllProducts(): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
       productTags: { include: { tag: true } },
       productFeatures: { orderBy: { displayOrder: 'asc' } },
@@ -277,6 +254,7 @@ export async function getProductById(id: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { id },
     include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
       productTags: { include: { tag: true } },
       productFeatures: { orderBy: { displayOrder: 'asc' } },
@@ -305,20 +283,8 @@ export async function getProductById(id: string): Promise<Product> {
       }
     },
   });
+  
   if (!row) throw createError('Producto no encontrado', 404);
-
-  // Sincronizar únicamente en memoria si el array está vacío
-  const imagesArray = Array.isArray(row.images) ? row.images : [];
-  if (imagesArray.length === 0) {
-    const storageImages = await prisma.productImageStorage.findMany({
-      where: { productId: id },
-      select: { id: true },
-      orderBy: { position: 'asc' },
-    });
-    if (storageImages.length > 0) {
-      (row as any).images = storageImages.map(img => `/api/images/products/${img.id}`);
-    }
-  }
 
   const base = toProduct(row);
 
@@ -381,7 +347,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       description: dto.description ?? null,
       shortDescription: dto.shortDescription ?? null,
       price: parsedPrice,
-      images: Array.isArray(dto.images) ? dto.images : [],
       status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
       sku: dto.sku,
       stock: dto.stock ?? 0,
@@ -402,6 +367,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   const refreshed = await prisma.product.findUnique({
     where: { id: row.id },
     include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
       productTags: { include: { tag: true } },
       productFeatures: { orderBy: { displayOrder: 'asc' } },
@@ -416,7 +382,8 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     where: { id },
     include: { 
       productCategories: { select: { categoryId: true } },
-      productSkus: { where: { isActive: true } }
+      productSkus: { where: { isActive: true } },
+      productTags: { include: { tag: true } }
     },
   });
   if (!existing) throw createError('Producto no encontrado', 404);
@@ -465,7 +432,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       description: dto.description !== undefined ? dto.description : existing.description,
       shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : existing.shortDescription,
       price: finalPrice !== undefined ? finalPrice : existing.price,
-      images: Array.isArray(dto.images) ? dto.images : (existing.images ?? Prisma.JsonNull),
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
       sku: dto.sku !== undefined ? dto.sku : existing.sku,
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
@@ -480,9 +446,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
         const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
         if (incomingTags === null) return undefined;
 
-        const teniaNovedad = Array.isArray((existing as any).tags)
-          ? ((existing as any).tags as string[]).includes('novedad')
-          : false;
+        const teniaNovedad = existing.productTags.some(pt => pt.tag.name === 'novedad');
         const tieneNovedad = incomingTags.includes('novedad');
 
         if (tieneNovedad && !teniaNovedad) {
@@ -513,6 +477,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   const refreshed = await prisma.product.findUnique({
     where: { id },
     include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
       productTags: { include: { tag: true } },
       productFeatures: { orderBy: { displayOrder: 'asc' } },
@@ -554,8 +519,6 @@ export async function getAdminProducts(query: {
     }),
   ]);
 
-  await hydrateProductImagesFromStorage(rows);
-
   return {
     data: rows.map(toProduct),
     total,
@@ -563,30 +526,6 @@ export async function getAdminProducts(query: {
     limit,
     totalPages: Math.ceil(total / limit),
   };
-}
-
-async function preferStorageImagesForExport(rows: Array<{ id: string; images: unknown }>): Promise<void> {
-  if (rows.length === 0) return;
-  const productIds = rows.map((r) => r.id);
-  const storageRecords = await prisma.productImageStorage.findMany({
-    where: { productId: { in: productIds } },
-    select: { id: true, productId: true },
-    orderBy: { position: 'asc' },
-  });
-
-  const byProduct = new Map<string, string[]>();
-  for (const rec of storageRecords) {
-    const urls = byProduct.get(rec.productId) ?? [];
-    urls.push(`/api/images/products/${rec.id}`);
-    byProduct.set(rec.productId, urls);
-  }
-
-  for (const row of rows) {
-    const storageUrls = byProduct.get(row.id);
-    if (storageUrls && storageUrls.length > 0) {
-      (row as any).images = storageUrls;
-    }
-  }
 }
 
 export async function getProductsForCatalogExport(query: {
@@ -605,9 +544,6 @@ export async function getProductsForCatalogExport(query: {
     take: limit,
     select: adminProductSelect,
   });
-
-  await hydrateProductImagesFromStorage(rows);
-  await preferStorageImagesForExport(rows);
 
   return rows.map(toProduct);
 }
@@ -741,6 +677,7 @@ export async function getPublicProducts(query: ProductQuery) {
       skip: (page - 1) * limit,
       take: limit,
       include: { 
+        productImages: { select: { id: true }, orderBy: { position: 'asc' } },
         productCategories: { select: { categoryId: true } },
         productTags: { include: { tag: true } },
         productFeatures: { orderBy: { displayOrder: 'asc' } },
@@ -825,6 +762,7 @@ export async function getProductBySlug(slug: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { slug },
     include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
       productTags: { include: { tag: true } },
       productFeatures: { orderBy: { displayOrder: 'asc' } },
@@ -853,6 +791,7 @@ export async function getProductBySlug(slug: string): Promise<Product> {
       }
     },
   });
+  
   if (!row) throw createError('Producto no encontrado', 404);
   const base = toProduct(row);
 
