@@ -206,6 +206,9 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
 
   if (status && status !== 'all') {
     where.status = status;
+  } else {
+    // Si no se filtra por un estado en particular, excluimos los archivados
+    where.status = { not: 'archived' }; 
   }
 
   if (stockLevel && stockLevel !== 'all') {
@@ -490,7 +493,16 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
 export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
-  await prisma.product.delete({ where: { id } });
+  
+  // 👇 REEMPLAZAR DELETE POR UPDATE (SOFT DELETE) 👇
+  await prisma.product.update({
+    where: { id },
+    data: {
+      status: 'archived', // Marcado como archivado para conservar historial en ventas
+      inStock: false,     // Aseguramos que salga del inventario activo
+      stock: 0,
+    },
+  });
 }
 
 export async function getLowStockCount(): Promise<number> {
@@ -565,7 +577,9 @@ type ProductQuery = {
 export async function getPublicProducts(query: ProductQuery) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
-  const where: Record<string, any> = {};
+  const where: Record<string, any> = {
+    status: 'active', // 🔒 SEGURIDAD: Solo productos activos son visibles al público
+  };
 
   if (Array.isArray(slugs) && slugs.length > 0) {
     where.slug = { in: slugs };
