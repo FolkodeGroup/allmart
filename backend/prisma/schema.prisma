@@ -18,27 +18,36 @@ model User {
   lastName     String    @map("last_name") @db.VarChar(100)
   phone        String?   @db.VarChar(30) // <-- Asegúrate que tenga el ?
   passwordHash String?   @map("password_hash") // <-- Asegúrate que tenga el ?
-  role         UserRole  @default(customer)
-  isActive     Boolean   @default(true) @map("is_active")
-  totalOrders  Int       @default(0) @map("total_orders") // <-- Asegúrate que esté
-  totalSpent   Decimal   @default(0) @db.Decimal(12, 2) @map("total_spent") // <-- Asegúrate que esté
-  
+  role         UserRole  @default(editor)
+  isActive     Boolean   @default(true) @map("is_active")  
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  
   cart         Cart?
   favorites    Favorite[]
   reviews      ProductReview[]
   staffNotes   StaffNote[]
   priceChanges SupplierProductPrice[] @relation("SupplierProductPriceChangedBy")
-  orders       Order[]
-
   @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
   @@map("users")
 }
 
+model Customer {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  firstName    String    @map("first_name") @db.VarChar(100)
+  lastName     String    @map("last_name") @db.VarChar(100)
+  phone        String?   @db.VarChar(30)
+  totalOrders  Int       @default(0) @map("total_orders")
+  totalSpent   Decimal   @default(0) @db.Decimal(12, 2) @map("total_spent")
+  
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  orders       Order[]
 
+  @@map("customers")
+}
 
 // ============================================================================
 // 2. CATÁLOGO DE PRODUCTOS, SKUS, ETIQUETAS Y CARACTERÍSTICAS
@@ -304,8 +313,8 @@ model Order {
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   
   // Vínculo al nuevo modelo User (CRM)
-  userId             String?              @map("user_id") @db.Uuid
-  user               User?                @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "orders_user_fk")
+  customerId         String?              @map("customer_id") @db.Uuid
+  customerRel        Customer?            @relation(fields: [customerId], references: [id], onUpdate: NoAction, map: "orders_customer_fk")
 
   // Snapshot de datos del cliente al momento de la compra (inmutable)
   customerFirstName  String               @map("customer_first_name") @db.VarChar(100)
@@ -327,7 +336,7 @@ model Order {
   reviews            ProductReview[]
   shipment           Shipment?
 
-  @@index([userId], map: "idx_orders_user_id")
+  @@index([customerId], map: "idx_orders_customer_id") // Antes decía [userId]
   @@index([createdAt], map: "idx_orders_created_at")
   @@index([customerEmail], map: "idx_orders_customer_email")
   @@index([status], map: "idx_orders_status")
@@ -700,8 +709,6 @@ model Contact {
 enum UserRole {
   admin
   editor
-  customer
-
   @@map("user_role")
 }
 

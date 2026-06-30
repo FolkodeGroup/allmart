@@ -1,6 +1,6 @@
 /**
  * services/publicOrderService.ts
- * Lógica para creación pública de pedidos con CRM Unificado y Stock Atómico.
+ * Lógica para creación pública de pedidos con CRM de Customers y Stock Atómico.
  */
 
 import { prisma } from '../config/prisma';
@@ -35,8 +35,8 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
   // 1. Ejecución de la transacción de Base de Datos
   const result = await prisma.$transaction(async (tx) => {
     
-    // CRM UNIFICADO: Upsert del Usuario basado en Email (Invitado sin password)
-    const userRecord = await tx.user.upsert({
+    // CRM: Upsert del Customer basado en Email
+    const customerRecord = await tx.customer.upsert({
       where: { email: normalizedEmail },
       update: {
         firstName: customer.firstName.trim(),
@@ -50,17 +50,15 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
         firstName: customer.firstName.trim(),
         lastName: customer.lastName.trim(),
         phone: normalizedPhone,
-        role: 'customer',
-        passwordHash: null, 
         totalOrders: 1,
         totalSpent: total
       }
     });
 
-    // Crear la Orden vinculada al nuevo userId único
+    // Crear la Orden vinculada al Customer
     const order = await tx.order.create({
       data: {
-        userId: userRecord.id,
+        customerId: customerRecord.id, // ← AHORA ES customerId
         customerFirstName: customer.firstName.trim(),
         customerLastName: customer.lastName.trim(),
         customerEmail: normalizedEmail,
@@ -74,14 +72,29 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
 
     // Gestión de Stock Atómico y creación de items
     for (const item of items) {
-      const [realProductId] = item.productId.split('::');
+      const [realProductId, skuId] = item.productId.split('::');
 
-      const updatedProduct = await tx.product.update({
-        where: { id: realProductId },
-        data: { stock: { decrement: item.quantity } }
-      });
+      // 👇 CORRECCIÓN ESLINT: Declarar sin inicializar 👇
+      let updatedStock: number;
+      let realSkuId: string | null;
 
-      if (updatedProduct.stock < 0) {
+      if (skuId) {
+        const updatedSku = await tx.productSku.update({
+          where: { id: skuId },
+          data: { stock: { decrement: item.quantity } }
+        });
+        updatedStock = updatedSku.stock;
+        realSkuId = skuId;
+      } else {
+        const updatedProduct = await tx.product.update({
+          where: { id: realProductId },
+          data: { stock: { decrement: item.quantity } }
+        });
+        updatedStock = updatedProduct.stock;
+        realSkuId = null; // Asignación explícita
+      }
+
+      if (updatedStock < 0) {
         throw createError(`Stock insuficiente para ${item.productName}`, 409);
       }
 
@@ -89,6 +102,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
         data: {
           orderId: order.id,
           productId: realProductId,
+          productSkuId: realSkuId,
           productName: item.productName,
           productImage: item.productImage ?? null,
           quantity: item.quantity,
@@ -96,15 +110,15 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
         }
       });
 
-      if (updatedProduct.stock <= 5) {
+      if (updatedStock <= 5) {
         await tx.lowStockAlert.create({
           data: {
             orderId: order.id,
             productId: realProductId,
             productName: item.productName,
             quantitySold: item.quantity,
-            stockBefore: updatedProduct.stock + item.quantity,
-            stockAfter: updatedProduct.stock,
+            stockBefore: updatedStock + item.quantity,
+            stockAfter: updatedStock,
           },
         });
       }
@@ -121,7 +135,6 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
   });
 
   // 2. Acciones fuera de la transacción (Envío de Email)
-  // Aquí usamos 'sendOrderConfirmationEmail' resolviendo el aviso de ESLint
   try {
     await sendOrderConfirmationEmail({
       orderId: result.id,
@@ -141,7 +154,6 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       notes,
     });
   } catch (error) {
-    // Logueamos pero no fallamos la petición porque el pedido ya se guardó en BD
     console.error('[Orders] Error al enviar email de confirmación:', error);
   }
 
