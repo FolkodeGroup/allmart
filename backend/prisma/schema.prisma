@@ -760,3 +760,21 @@ enum CollectionType {
 
   @@map("collection_type")
 }
+
+// ============================================================================
+// 7. AUDITORÍA (LOGS)
+// ============================================================================
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userEmail  String   @map("user_email") @db.VarChar(255)
+  action     String   @db.VarChar(50)
+  entity     String   @db.VarChar(50)
+  entityId   String?  @map("entity_id") @db.VarChar(100)
+  details    Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([entity, entityId], map: "idx_audit_logs_entity")
+  @@index([createdAt], map: "idx_audit_logs_created_at")
+  @@map("audit_logs")
+}
