@@ -32,6 +32,12 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     throw createError('El pedido debe tener al menos un item', 400);
   }
 
+  // 🟢 PREVENCIÓN DE DEADLOCKS: Ordenamiento determinista de recursos
+  // Ordenamos los productos por su ID de manera ascendente antes de entrar a la transacción.
+  // Esto garantiza que múltiples compras simultáneas que compartan productos bloqueen las filas
+  // exactamente en el mismo orden físico, eliminando el riesgo de bloqueos mutuos (Deadlocks - Error 40P01).
+  const sortedItems = [...items].sort((a, b) => a.productId.localeCompare(b.productId));
+
   // 1. Ejecución de la transacción de Base de Datos
   const result = await prisma.$transaction(async (tx) => {
     
@@ -70,8 +76,8 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       },
     });
 
-    // Gestión de Stock Atómico y creación de items
-    for (const item of items) {
+    // Gestión de Stock Atómico y creación de items (recorremos sortedItems)
+    for (const item of sortedItems) {
       const [realProductId, skuId] = item.productId.split('::');
 
       // 👇 CORRECCIÓN ESLINT: Declarar sin inicializar 👇
