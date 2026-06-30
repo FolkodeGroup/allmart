@@ -11,6 +11,8 @@ import { createError } from '../middlewares/errorHandler';
 import { getCategoryBySlug } from './categoriesService';
 import { parseSafePrice } from './productSkusService';
 
+import { applyDiscountsToProducts } from './discountService';
+
 // Función auxiliar para el slug
 function generateSlug(name: string): string {
   return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
@@ -691,7 +693,6 @@ export async function getPublicProducts(query: ProductQuery) {
       skip: (page - 1) * limit,
       take: limit,
       include: { 
-        productImages: { select: { id: true }, orderBy: { position: 'asc' } },
         productCategories: { select: { categoryId: true } },
         productTags: { include: { tag: true } },
         productFeatures: { orderBy: { displayOrder: 'asc' } },
@@ -763,8 +764,10 @@ export async function getPublicProducts(query: ProductQuery) {
     return base;
   });
 
+  const productsWithDiscounts = await applyDiscountsToProducts(mappedProducts);
+
   return {
-    data: mappedProducts,
+    data: productsWithDiscounts, // Retorna los productos ya pre-calculados con su descuento
     total,
     page,
     limit,
