@@ -80,7 +80,7 @@ function bulkActionToTargetStatus(action: AdminBulkOrderAction): OrderStatus {
 function toOrder(row: any): Order {
   return {
     id: row.id,
-    customerId: row.userId, // Referencia al ID único del CRM (User)
+    customerId: row.customerId, // Referencia al ID único del CRM (User)
     customer: {
       firstName: row.customerFirstName,
       lastName: row.customerLastName,

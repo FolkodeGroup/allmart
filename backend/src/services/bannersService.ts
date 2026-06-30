@@ -73,6 +73,25 @@ export async function createBanner(title: string, description: string | undefine
   }
 }
 
+// 🟢 FUNCIÓN AÑADIDA PARA FIX DE COMPILACIÓN
+export async function updateBanner(id: string, data: any) {
+  const existing = await prisma.banner.findUnique({ where: { id } });
+  if (!existing) throw createError('Banner no encontrado', 404);
+
+  const row = await prisma.banner.update({
+    where: { id },
+    data: {
+      title: data.title !== undefined ? data.title : existing.title,
+      description: data.description !== undefined ? data.description : existing.description,
+      isPinned: data.isPinned !== undefined ? data.isPinned : existing.isPinned,
+      isActive: data.isActive !== undefined ? data.isActive : existing.isActive,
+      altText: data.altText !== undefined ? data.altText : existing.altText,
+      filterConfig: data.filterConfig !== undefined ? data.filterConfig : (existing.filterConfig ?? {}),
+    },
+  });
+  return toBannerWithMeta(row);
+}
+
 export async function updateBannerImage(id: string, imageData: any) {
   const s3KeyFull = `banners/${id}/full.webp`;
   const s3KeyThumb = `banners/${id}/thumb.webp`;

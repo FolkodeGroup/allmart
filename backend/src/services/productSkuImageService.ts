@@ -11,10 +11,6 @@ export interface UploadedImageFile {
     size: number;
 }
 
-/* async function syncSkuImages(_skuId: string, _productId?: string) {
-    return;
-} */
-
 export async function uploadSkuImage(skuId: string, file: UploadedImageFile, altText?: string, position?: number, isPrimary?: boolean) {
     const allowed = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
     if (!allowed.has(file.mimetype)) throw createError(`Tipo de archivo no permitido: ${file.mimetype}`, 400);
@@ -82,6 +78,22 @@ export async function getSkuImages(skuId: string) {
     }));
 }
 
+// 🟢 FUNCIÓN INTERNA AÑADIDA PARA FIX DE COMPILACIÓN
+export async function getSkuImageMeta(id: string) {
+    const row = await prisma.productSkuImageStorage.findUnique({ where: { id } });
+    if (!row) throw createError('Imagen de SKU no encontrada', 404);
+    return {
+        id: row.id,
+        skuId: row.skuId,
+        url: `/api/images/sku/${row.id}`,
+        altText: row.altText,
+        position: row.position,
+        isPrimary: row.isPrimary,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+    };
+}
+
 export async function serveSkuImage(id: string) {
     const row = await prisma.productSkuImageStorage.findUnique({ where: { id }, select: { storageKey: true, mimeType: true } });
     if (row?.storageKey && env.R2_PUBLIC_URL) {
@@ -102,8 +114,8 @@ export async function serveSkuImageThumb(id: string) {
 export async function updateSkuImageMeta(id: string, data: { altText?: string | null; position?: number; isPrimary?: boolean }) {
     const existing = await prisma.productSkuImageStorage.findUnique({ where: { id } });
     if (!existing) throw createError('Imagen no encontrada', 404);
-    const updated = await prisma.productSkuImageStorage.update({ 
-        where: { id }, 
+    const updated = await prisma.productSkuImageStorage.update({
+        where: { id },
         data: { 
             altText: data.altText !== undefined ? data.altText : existing.altText, 
             position: data.position !== undefined ? data.position : existing.position, 

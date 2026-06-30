@@ -79,14 +79,10 @@ function toPromotionDTO(promotion: any): PromotionResponseDTO {
   };
 }
 
-/**
- * Valida el valor de una promoción basado en su tipo
- */
 function validatePromotionValue(type: string, value: number): void {
   if (typeof value !== 'number' || isNaN(value)) {
     throw createError('El valor debe ser un número válido', 400);
   }
-
   if (type === 'percentage') {
     if (value < 0 || value > 100) {
       throw createError('El porcentaje debe estar entre 0 y 100', 400);
@@ -98,9 +94,6 @@ function validatePromotionValue(type: string, value: number): void {
   }
 }
 
-/**
- * Obtiene todas las promociones con paginación
- */
 export async function getAllPromotions(
   skip = 0,
   take = 10,
@@ -110,11 +103,9 @@ export async function getAllPromotions(
   total: number;
 }> {
   const where: Record<string, any> = {};
-
   if (filters?.isActive !== undefined) {
     where.isActive = filters.isActive;
   }
-
   if (filters?.search) {
     where.OR = [
       { name: { contains: filters.search, mode: 'insensitive' } },
@@ -138,9 +129,6 @@ export async function getAllPromotions(
   };
 }
 
-/**
- * Obtiene una promoción por ID con sus reglas
- */
 export async function getPromotionById(id: string): Promise<any> {
   const promotion = await prisma.promotion.findUnique({
     where: { id },
@@ -162,9 +150,6 @@ export async function getPromotionById(id: string): Promise<any> {
   return { ...dto, rules: { productIds, categoryIds } };
 }
 
-/**
- * Obtiene promociones activas
- */
 export async function getActivePromotions(): Promise<PromotionResponseDTO[]> {
   const now = new Date();
   const promotions = await prisma.promotion.findMany({
@@ -179,26 +164,15 @@ export async function getActivePromotions(): Promise<PromotionResponseDTO[]> {
   return promotions.map(toPromotionDTO);
 }
 
-/**
- * Crea una nueva promoción con sus reglas
- */
 export async function createPromotion(dto: CreatePromotionDTO): Promise<any> {
-  // Validaciones
   if (!dto.name || !dto.type || dto.value === undefined) {
-    throw createError(
-      'Campos requeridos: name, type, value, startDate, endDate',
-      400
-    );
+    throw createError('Campos requeridos: name, type, value, startDate, endDate', 400);
   }
-
-  // Validar el valor basado en el tipo
   validatePromotionValue(dto.type, dto.value);
-
   if (new Date(dto.endDate) <= new Date(dto.startDate)) {
     throw createError('La fecha de fin debe ser posterior a la fecha de inicio', 400);
   }
 
-  // Crear la promoción
   const promotion = await prisma.promotion.create({
     data: {
       name: dto.name,
@@ -207,59 +181,32 @@ export async function createPromotion(dto: CreatePromotionDTO): Promise<any> {
       value: new Decimal(dto.value),
       startDate: new Date(dto.startDate),
       endDate: new Date(dto.endDate),
-      minPurchaseAmount: dto.minPurchaseAmount
-        ? new Decimal(dto.minPurchaseAmount)
-        : null,
+      minPurchaseAmount: dto.minPurchaseAmount ? new Decimal(dto.minPurchaseAmount) : null,
       maxDiscount: dto.maxDiscount ? new Decimal(dto.maxDiscount) : null,
       isActive: dto.isActive ?? true,
       priority: dto.priority ?? 0,
     },
   });
 
-  // Agregar reglas si existen
   if (dto.rules) {
     const { productIds = [], categoryIds = [] } = dto.rules;
-
-    // Crear reglas para productos
     for (const productId of productIds) {
-      await prisma.promotionRule.create({
-        data: {
-          promotionId: promotion.id,
-          productId,
-        },
-      });
+      await prisma.promotionRule.create({ data: { promotionId: promotion.id, productId } });
     }
-
-    // Crear reglas para categorías
     for (const categoryId of categoryIds) {
-      await prisma.promotionRule.create({
-        data: {
-          promotionId: promotion.id,
-          categoryId,
-        },
-      });
+      await prisma.promotionRule.create({ data: { promotionId: promotion.id, categoryId } });
     }
   }
 
   const result = toPromotionDTO(promotion);
-  return {
-    ...result,
-    rules: dto.rules || { productIds: [], categoryIds: [] },
-  };
+  return { ...result, rules: dto.rules || { productIds: [], categoryIds: [] } };
 }
 
-/**
- * Actualiza una promoción y sus reglas
- */
-export async function updatePromotion(
-  id: string,
-  dto: UpdatePromotionDTO
-): Promise<any> {
+export async function updatePromotion(id: string, dto: UpdatePromotionDTO): Promise<any> {
   const existing = await prisma.promotion.findUnique({ where: { id } });
   if (!existing) {
     throw createError('Promoción no encontrada', 404);
   }
-
   const startDate = dto.startDate || existing.startDate;
   const endDate = dto.endDate || existing.endDate;
 
@@ -267,14 +214,12 @@ export async function updatePromotion(
     throw createError('La fecha de fin debe ser posterior a la fecha de inicio', 400);
   }
 
-  // Validar el valor si se proporciona
   if (dto.value !== undefined) {
     const type = dto.type || existing.type;
     validatePromotionValue(type, dto.value);
   }
 
-  // Actualizar promoción
-  const promotion = await prisma.promotion.update({
+  await prisma.promotion.update({
     where: { id },
     data: {
       name: dto.name,
@@ -283,44 +228,24 @@ export async function updatePromotion(
       value: dto.value !== undefined ? new Decimal(dto.value) : undefined,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-      minPurchaseAmount: dto.minPurchaseAmount
-        ? new Decimal(dto.minPurchaseAmount)
-        : undefined,
+      minPurchaseAmount: dto.minPurchaseAmount ? new Decimal(dto.minPurchaseAmount) : undefined,
       maxDiscount: dto.maxDiscount ? new Decimal(dto.maxDiscount) : undefined,
       isActive: dto.isActive,
       priority: dto.priority,
     },
   });
 
-  // Actualizar reglas si se proporcionan
   if (dto.rules) {
-    // Eliminar reglas existentes
     await prisma.promotionRule.deleteMany({ where: { promotionId: id } });
-
     const { productIds = [], categoryIds = [] } = dto.rules;
-
-    // Crear nuevas reglas para productos
     for (const productId of productIds) {
-      await prisma.promotionRule.create({
-        data: {
-          promotionId: id,
-          productId,
-        },
-      });
+      await prisma.promotionRule.create({ data: { promotionId: id, productId } });
     }
-
-    // Crear nuevas reglas para categorías
     for (const categoryId of categoryIds) {
-      await prisma.promotionRule.create({
-        data: {
-          promotionId: id,
-          categoryId,
-        },
-      });
+      await prisma.promotionRule.create({ data: { promotionId: id, categoryId } });
     }
   }
 
-  // Obtener con reglas actualizadas
   const updated = await prisma.promotion.findUnique({
     where: { id },
     include: { promotionRules: true },
@@ -331,46 +256,26 @@ export async function updatePromotion(
   }
 
   const result = toPromotionDTO(updated);
-  const productIds = updated.promotionRules
-    .filter((r: any) => r.productId)
-    .map((r: any) => r.productId!) as string[];
-  const categoryIds = updated.promotionRules
-    .filter((r: any) => r.categoryId)
-    .map((r: any) => r.categoryId!) as string[];
+  const productIds = updated.promotionRules.filter((r: any) => r.productId).map((r: any) => r.productId!) as string[];
+  const categoryIds = updated.promotionRules.filter((r: any) => r.categoryId).map((r: any) => r.categoryId!) as string[];
 
   return { ...result, rules: { productIds, categoryIds } };
 }
 
-/**
- * Elimina una promoción y sus reglas
- */
 export async function deletePromotion(id: string): Promise<void> {
   const existing = await prisma.promotion.findUnique({ where: { id } });
-  if (!existing) {
-    throw createError('Promoción no encontrada', 404);
-  }
-
-  // Eliminar reglas primero (CASCADE debería manejar esto, pero ser explícito es más seguro)
+  if (!existing) throw createError('Promoción no encontrada', 404);
   await prisma.promotionRule.deleteMany({ where: { promotionId: id } });
-
-  // Eliminar promoción
   await prisma.promotion.delete({ where: { id } });
 }
 
-/**
- * Duplica una promoción existente
- */
 export async function duplicatePromotion(id: string): Promise<any> {
   const existing = await prisma.promotion.findUnique({
     where: { id },
     include: { promotionRules: true },
   });
+  if (!existing) throw createError('Promoción no encontrada', 404);
 
-  if (!existing) {
-    throw createError('Promoción no encontrada', 404);
-  }
-
-  // Crear copia con nombre modificado
   const newPromotion = await prisma.promotion.create({
     data: {
       name: `${existing.name} (Copia)`,
@@ -381,12 +286,11 @@ export async function duplicatePromotion(id: string): Promise<any> {
       endDate: existing.endDate,
       minPurchaseAmount: existing.minPurchaseAmount,
       maxDiscount: existing.maxDiscount,
-      isActive: false, // Desactivado por defecto
+      isActive: false,
       priority: existing.priority,
     },
   });
 
-  // Copiar reglas
   for (const rule of existing.promotionRules) {
     await prisma.promotionRule.create({
       data: {
@@ -402,25 +306,15 @@ export async function duplicatePromotion(id: string): Promise<any> {
     include: { promotionRules: true },
   });
 
-  if (!result) {
-    throw createError('Error al crear la copia de la promoción', 500);
-  }
+  if (!result) throw createError('Error al crear la copia de la promoción', 500);
 
   const dto = toPromotionDTO(result);
-  const productIds = result.promotionRules
-    .filter((r: any) => r.productId)
-    .map((r: any) => r.productId!) as string[];
-  const categoryIds = result.promotionRules
-    .filter((r: any) => r.categoryId)
-    .map((r: any) => r.categoryId!) as string[];
+  const productIds = result.promotionRules.filter((r: any) => r.productId).map((r: any) => r.productId!) as string[];
+  const categoryIds = result.promotionRules.filter((r: any) => r.categoryId).map((r: any) => r.categoryId!) as string[];
 
   return { ...dto, rules: { productIds, categoryIds } };
 }
 
-/**
- * Obtiene todos los productos asignados a una promoción específica,
- * incluyendo los asignados a través de sus categorías.
- */
 export async function getProductsByPromotion(promotionId: string): Promise<{
   directProducts: Array<{ id: string; name: string; slug: string; price: number; status: string; categoryId: string | null }>;
   categoryProducts: Array<{ id: string; name: string; slug: string; price: number; status: string; categoryId: string | null; assignedViaCategory: string }>;
@@ -443,13 +337,29 @@ export async function getProductsByPromotion(promotionId: string): Promise<{
     .filter((r: any) => r.categoryId)
     .map((r: any) => r.categoryId!) as string[];
 
-  const directProducts = directProductIds.length > 0
+  const directProductsRaw = directProductIds.length > 0
     ? await prisma.product.findMany({
         where: { id: { in: directProductIds } },
-        select: { id: true, name: true, slug: true, price: true, status: true, categoryId: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          price: true,
+          status: true,
+          productCategories: { select: { categoryId: true } },
+        },
         orderBy: { name: 'asc' },
       })
     : [];
+
+  const directProducts = directProductsRaw.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    price: p.price.toNumber(),
+    status: p.status,
+    categoryId: p.productCategories?.[0]?.categoryId ?? null,
+  }));
 
   const categories = categoryIds.length > 0
     ? await prisma.category.findMany({
@@ -459,30 +369,44 @@ export async function getProductsByPromotion(promotionId: string): Promise<{
       })
     : [];
 
-  const categoryProducts = categoryIds.length > 0
-    ? (await prisma.product.findMany({
-        where: { categoryId: { in: categoryIds }, id: { notIn: directProductIds } },
-        select: { id: true, name: true, slug: true, price: true, status: true, categoryId: true },
+  const categoryProductsRaw = categoryIds.length > 0
+    ? await prisma.product.findMany({
+        where: {
+          productCategories: { some: { categoryId: { in: categoryIds } } },
+          id: { notIn: directProductIds },
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          price: true,
+          status: true,
+          productCategories: { select: { categoryId: true } },
+        },
         orderBy: { name: 'asc' },
-      })).map((p: any) => ({
-        ...p,
-        assignedViaCategory: categories.find((c: any) => c.id === p.categoryId)?.name ?? '',
-      }))
+      })
     : [];
 
+  const categoryProducts = categoryProductsRaw.map((p) => {
+    const catId = p.productCategories?.[0]?.categoryId ?? null;
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.price.toNumber(),
+      status: p.status,
+      categoryId: catId,
+      assignedViaCategory: categories.find((c) => c.id === catId)?.name ?? '',
+    };
+  });
+
   return {
-    directProducts: directProducts.map((p: any) => ({ ...p, price: p.price.toNumber() })),
-    categoryProducts: categoryProducts.map((p: any) => ({ ...p, price: p.price.toNumber() })),
+    directProducts,
+    categoryProducts,
     categories,
   };
 }
 
-/**
- * Asigna o desasigna productos/categorías a una promoción en bloque.
- * Modo 'add': agrega sin tocar existentes.
- * Modo 'remove': elimina solo esos IDs.
- * Modo 'replace': reemplaza completamente.
- */
 export async function bulkAssignToPromotion(
   promotionId: string,
   payload: { mode: 'add' | 'remove' | 'replace'; productIds?: string[]; categoryIds?: string[] }
@@ -520,9 +444,6 @@ export async function bulkAssignToPromotion(
   }
 }
 
-/**
- * Resumen de todas las promociones con conteos para la vista de matriz.
- */
 export async function getPromotionsMatrix(): Promise<Array<{
   id: string; name: string; type: string; value: number;
   startDate: string; endDate: string; isActive: boolean; priority: number;
@@ -533,7 +454,7 @@ export async function getPromotionsMatrix(): Promise<Array<{
       promotionRules: {
         include: {
           product: { select: { id: true } },
-          category: { select: { id: true, _count: { select: { products: true } } } },
+          category: { select: { id: true, _count: { select: { productCategories: true } } } },
         },
       },
     },
@@ -544,7 +465,7 @@ export async function getPromotionsMatrix(): Promise<Array<{
     const directRules = p.promotionRules.filter((r: any) => r.productId);
     const categoryRules = p.promotionRules.filter((r: any) => r.categoryId);
     const productsViaCategories = categoryRules.reduce(
-      (sum: number, r: any) => sum + (r.category?._count?.products ?? 0), 0
+      (sum: number, r: any) => sum + (r.category?._count?.productCategories ?? 0), 0
     );
     return {
       id: p.id, name: p.name, type: p.type, value: p.value.toNumber(),

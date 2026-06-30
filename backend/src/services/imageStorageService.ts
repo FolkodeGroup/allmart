@@ -47,7 +47,6 @@ export interface ProcessedImage {
 
 const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
 
-
 function validateFile(file: UploadedImageFile): void {
   if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
     throw createError(`Tipo de archivo no permitido: ${file.mimetype}`, 400);
@@ -145,6 +144,22 @@ export async function getProductImageMeta(id: string) {
   const row = await prisma.productImageStorage.findUnique({ where: { id } });
   if (!row) throw createError('Imagen no encontrada', 404);
   return { ...row, url: `/api/images/products/${row.id}`, thumbUrl: `/api/images/products/${row.id}/thumb` };
+}
+
+// 🟢 FUNCIÓN AÑADIDA PARA FIX DE COMPILACIÓN
+export async function updateProductImageMeta(id: string, data: { altText?: string | null; position?: number }) {
+  const existing = await prisma.productImageStorage.findUnique({ where: { id } });
+  if (!existing) throw createError('Imagen no encontrada', 404);
+
+  const updated = await prisma.productImageStorage.update({
+    where: { id },
+    data: {
+      altText: data.altText !== undefined ? data.altText : existing.altText,
+      position: data.position !== undefined ? data.position : existing.position,
+    },
+  });
+
+  return toImageMeta(updated);
 }
 
 export async function deleteProductImage(id: string): Promise<void> {

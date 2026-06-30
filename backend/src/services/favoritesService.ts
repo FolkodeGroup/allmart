@@ -15,27 +15,39 @@ export async function getUserFavorites(userId: string) {
     orderBy: { createdAt: 'desc' },
     include: {
       product: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          price: true,
-          images: true,
-          rating: true,
-          reviewCount: true,
-          inStock: true,
-          status: true,
+        include: {
+          productImages: {
+            select: { id: true },
+            orderBy: { position: 'asc' },
+          },
         },
       },
     },
   });
 
-  return favorites.map((f) => ({
-    id: f.id,
-    productId: f.productId,
-    createdAt: f.createdAt,
-    product: f.product,
-  }));
+  return favorites.map((f) => {
+    // 🟢 Mapeamos las imágenes relacionales al array de strings esperado por el frontend
+    const images = Array.isArray(f.product.productImages)
+      ? f.product.productImages.map((img: any) => `/api/images/products/${img.id}`)
+      : [];
+
+    return {
+      id: f.id,
+      productId: f.productId,
+      createdAt: f.createdAt,
+      product: {
+        id: f.product.id,
+        name: f.product.name,
+        slug: f.product.slug,
+        price: Number(f.product.price),
+        images,
+        rating: Number(f.product.rating),
+        reviewCount: f.product.reviewCount,
+        inStock: f.product.inStock,
+        status: f.product.status,
+      },
+    };
+  });
 }
 
 /**
@@ -85,16 +97,8 @@ export async function checkFavorite(userId: string, productId: string) {
  * Elimina un favorito específico.
  */
 export async function removeFavorite(userId: string, productId: string) {
-  const existing = await prisma.favorite.findUnique({
-    where: {
-      userId_productId: {
-        userId,
-        productId,
-      },
-    },
-  });
-
-  if (!existing) throw createError('Favorito no encontrado', 404);
-
-  await prisma.favorite.delete({ where: { id: existing.id } });
+  const userId_productId = { userId, productId };
+  const existing = await prisma.favorite.findUnique({ where: { userId_productId } });
+  if (!existing) throw createError('Imagen no encontrada', 404);
+  await prisma.favorite.delete({ where: { userId_productId } });
 }
