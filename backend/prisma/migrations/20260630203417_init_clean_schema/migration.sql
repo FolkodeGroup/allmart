@@ -74,7 +74,6 @@ CREATE TABLE "products" (
     "description" TEXT,
     "short_description" TEXT,
     "price" DECIMAL(12,2) NOT NULL,
-    "images" JSONB NOT NULL DEFAULT '[]',
     "rating" DECIMAL(3,2) NOT NULL DEFAULT 0,
     "review_count" INTEGER NOT NULL DEFAULT 0,
     "in_stock" BOOLEAN NOT NULL DEFAULT true,
