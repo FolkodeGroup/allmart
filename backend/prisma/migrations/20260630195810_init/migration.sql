@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "user_role" AS ENUM ('admin', 'editor', 'customer');
+CREATE TYPE "user_role" AS ENUM ('admin', 'editor');
 
 -- CreateEnum
 CREATE TYPE "order_status" AS ENUM ('pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado');
@@ -22,16 +22,32 @@ CREATE TYPE "collection_type" AS ENUM ('manual', 'auto_sales');
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "email" VARCHAR(255) NOT NULL,
     "first_name" VARCHAR(100) NOT NULL,
     "last_name" VARCHAR(100) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
-    "password_hash" TEXT NOT NULL,
-    "role" "user_role" NOT NULL DEFAULT 'customer',
+    "phone" VARCHAR(30),
+    "password_hash" TEXT,
+    "role" "user_role" NOT NULL DEFAULT 'editor',
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "customers" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "email" VARCHAR(255) NOT NULL,
+    "first_name" VARCHAR(100) NOT NULL,
+    "last_name" VARCHAR(100) NOT NULL,
+    "phone" VARCHAR(30),
+    "total_orders" INTEGER NOT NULL DEFAULT 0,
+    "total_spent" DECIMAL(12,2) NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "customers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -59,14 +75,11 @@ CREATE TABLE "products" (
     "short_description" TEXT,
     "price" DECIMAL(12,2) NOT NULL,
     "images" JSONB NOT NULL DEFAULT '[]',
-    "category_id" UUID,
-    "tags" JSONB NOT NULL DEFAULT '[]',
     "rating" DECIMAL(3,2) NOT NULL DEFAULT 0,
     "review_count" INTEGER NOT NULL DEFAULT 0,
     "in_stock" BOOLEAN NOT NULL DEFAULT true,
     "stock" INTEGER NOT NULL DEFAULT 0,
     "sku" VARCHAR(100),
-    "features" JSONB NOT NULL DEFAULT '[]',
     "is_featured" BOOLEAN NOT NULL DEFAULT false,
     "status" "product_status" NOT NULL DEFAULT 'active',
     "primary_supplier_id" UUID,
@@ -87,13 +100,87 @@ CREATE TABLE "product_categories" (
 );
 
 -- CreateTable
+CREATE TABLE "tags" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "name" VARCHAR(100) NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "tags_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "product_tags" (
+    "product_id" UUID NOT NULL,
+    "tag_id" UUID NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "product_tags_pkey" PRIMARY KEY ("product_id","tag_id")
+);
+
+-- CreateTable
+CREATE TABLE "product_features" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "product_id" UUID NOT NULL,
+    "description" VARCHAR(500) NOT NULL,
+    "display_order" INTEGER NOT NULL DEFAULT 0,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "product_features_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "product_options" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "product_id" UUID NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "product_options_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "product_option_values" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "option_id" UUID NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "product_option_values_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "product_skus" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "product_id" UUID NOT NULL,
+    "sku" VARCHAR(100) NOT NULL,
+    "stock" INTEGER NOT NULL DEFAULT 0,
+    "price" DECIMAL(12,2),
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "product_skus_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "product_sku_values" (
+    "sku_id" UUID NOT NULL,
+    "option_value_id" UUID NOT NULL,
+
+    CONSTRAINT "product_sku_values_pkey" PRIMARY KEY ("sku_id","option_value_id")
+);
+
+-- CreateTable
 CREATE TABLE "product_images_storage" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "product_id" UUID NOT NULL,
-    "data" BYTEA NOT NULL,
+    "storage_key" VARCHAR(500),
+    "storage_thumb_key" VARCHAR(500),
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,
-    "thumbnail" BYTEA,
     "thumb_width" INTEGER,
     "thumb_height" INTEGER,
     "mime_type" VARCHAR(50) NOT NULL DEFAULT 'image/webp',
@@ -108,13 +195,35 @@ CREATE TABLE "product_images_storage" (
 );
 
 -- CreateTable
+CREATE TABLE "product_sku_images_storage" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "sku_id" UUID NOT NULL,
+    "storage_key" VARCHAR(500),
+    "storage_thumb_key" VARCHAR(500),
+    "width" INTEGER NOT NULL,
+    "height" INTEGER NOT NULL,
+    "thumb_width" INTEGER,
+    "thumb_height" INTEGER,
+    "mime_type" VARCHAR(50) NOT NULL DEFAULT 'image/webp',
+    "original_filename" VARCHAR(255),
+    "size_bytes" INTEGER NOT NULL,
+    "alt_text" VARCHAR(500),
+    "position" INTEGER NOT NULL DEFAULT 0,
+    "is_primary" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "product_sku_images_storage_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "category_images_storage" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "category_id" UUID NOT NULL,
-    "data" BYTEA NOT NULL,
+    "storage_key" VARCHAR(500),
+    "storage_thumb_key" VARCHAR(500),
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,
-    "thumbnail" BYTEA,
     "thumb_width" INTEGER,
     "thumb_height" INTEGER,
     "mime_type" VARCHAR(50) NOT NULL DEFAULT 'image/webp',
@@ -128,21 +237,9 @@ CREATE TABLE "category_images_storage" (
 );
 
 -- CreateTable
-CREATE TABLE "product_variants" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "product_id" UUID NOT NULL,
-    "name" VARCHAR(100) NOT NULL,
-    "values" JSONB NOT NULL DEFAULT '[]',
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "product_variants_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "orders" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "customer_id" UUID,
     "customer_first_name" VARCHAR(100) NOT NULL,
     "customer_last_name" VARCHAR(100) NOT NULL,
     "customer_email" VARCHAR(255) NOT NULL,
@@ -163,6 +260,7 @@ CREATE TABLE "order_items" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "order_id" UUID NOT NULL,
     "product_id" UUID,
+    "product_sku_id" UUID,
     "product_name" VARCHAR(255) NOT NULL,
     "product_image" TEXT,
     "quantity" INTEGER NOT NULL,
@@ -202,17 +300,6 @@ CREATE TABLE "cart_items" (
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "cart_items_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "sales" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "order_id" UUID NOT NULL,
-    "total" DECIMAL(12,2) NOT NULL,
-    "sold_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "sales_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -335,10 +422,10 @@ CREATE TABLE "banners" (
     "title" VARCHAR(255) NOT NULL,
     "description" TEXT,
     "filter_config" JSONB NOT NULL DEFAULT '{}',
-    "data" BYTEA NOT NULL,
+    "storage_key" VARCHAR(500),
+    "storage_thumb_key" VARCHAR(500),
     "width" INTEGER NOT NULL,
     "height" INTEGER NOT NULL,
-    "thumbnail" BYTEA,
     "thumb_width" INTEGER,
     "thumb_height" INTEGER,
     "mime_type" VARCHAR(50) NOT NULL DEFAULT 'image/webp',
@@ -349,6 +436,7 @@ CREATE TABLE "banners" (
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_pinned" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "banners_pkey" PRIMARY KEY ("id")
 );
@@ -441,14 +529,30 @@ CREATE TABLE "contacts" (
     CONSTRAINT "contacts_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "audit_logs" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "user_email" VARCHAR(255) NOT NULL,
+    "action" VARCHAR(50) NOT NULL,
+    "entity" VARCHAR(50) NOT NULL,
+    "entity_id" VARCHAR(100),
+    "details" JSONB,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "audit_logs_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
-CREATE UNIQUE INDEX "users_email_unique" ON "users"("email");
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE INDEX "idx_users_email" ON "users"("email");
 
 -- CreateIndex
 CREATE INDEX "idx_users_role" ON "users"("role");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "customers_email_key" ON "customers"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "categories_slug_unique" ON "categories"("slug");
@@ -464,9 +568,6 @@ CREATE UNIQUE INDEX "products_slug_unique" ON "products"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "products_sku_unique" ON "products"("sku");
-
--- CreateIndex
-CREATE INDEX "idx_products_category_id" ON "products"("category_id");
 
 -- CreateIndex
 CREATE INDEX "idx_products_sku" ON "products"("sku");
@@ -487,22 +588,46 @@ CREATE INDEX "idx_product_categories_category_id" ON "product_categories"("categ
 CREATE INDEX "idx_product_categories_product_id" ON "product_categories"("product_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "tags_name_key" ON "tags"("name");
+
+-- CreateIndex
+CREATE INDEX "product_features_product_id_idx" ON "product_features"("product_id");
+
+-- CreateIndex
+CREATE INDEX "idx_product_options_product_id" ON "product_options"("product_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "product_options_product_id_name_key" ON "product_options"("product_id", "name");
+
+-- CreateIndex
+CREATE INDEX "idx_product_option_values_option_id" ON "product_option_values"("option_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "product_option_values_option_id_name_key" ON "product_option_values"("option_id", "name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "product_skus_sku_unique" ON "product_skus"("sku");
+
+-- CreateIndex
+CREATE INDEX "idx_product_skus_product_id" ON "product_skus"("product_id");
+
+-- CreateIndex
 CREATE INDEX "idx_product_images_product_id" ON "product_images_storage"("product_id");
 
 -- CreateIndex
 CREATE INDEX "idx_product_images_position" ON "product_images_storage"("product_id", "position");
 
 -- CreateIndex
+CREATE INDEX "idx_product_sku_images_sku_id" ON "product_sku_images_storage"("sku_id");
+
+-- CreateIndex
+CREATE INDEX "idx_product_sku_images_position" ON "product_sku_images_storage"("sku_id", "position");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "category_images_storage_category_id_key" ON "category_images_storage"("category_id");
 
 -- CreateIndex
-CREATE INDEX "idx_product_variants_is_active" ON "product_variants"("is_active");
-
--- CreateIndex
-CREATE INDEX "idx_product_variants_name" ON "product_variants"("name");
-
--- CreateIndex
-CREATE INDEX "idx_product_variants_product_id" ON "product_variants"("product_id");
+CREATE INDEX "idx_orders_customer_id" ON "orders"("customer_id");
 
 -- CreateIndex
 CREATE INDEX "idx_orders_created_at" ON "orders"("created_at");
@@ -511,13 +636,13 @@ CREATE INDEX "idx_orders_created_at" ON "orders"("created_at");
 CREATE INDEX "idx_orders_customer_email" ON "orders"("customer_email");
 
 -- CreateIndex
-CREATE INDEX "idx_orders_customer_phone" ON "orders"("customer_phone");
-
--- CreateIndex
 CREATE INDEX "idx_orders_status" ON "orders"("status");
 
 -- CreateIndex
 CREATE INDEX "idx_order_items_order_id" ON "order_items"("order_id");
+
+-- CreateIndex
+CREATE INDEX "idx_order_items_sku_id" ON "order_items"("product_sku_id");
 
 -- CreateIndex
 CREATE INDEX "idx_order_status_history_order_id" ON "order_status_history"("order_id");
@@ -536,12 +661,6 @@ CREATE INDEX "idx_cart_items_cart_id" ON "cart_items"("cart_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "cart_items_unique_product" ON "cart_items"("cart_id", "product_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "sales_order_unique" ON "sales"("order_id");
-
--- CreateIndex
-CREATE INDEX "idx_sales_sold_at" ON "sales"("sold_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "shipments_order_unique" ON "shipments"("order_id");
@@ -595,6 +714,9 @@ CREATE INDEX "idx_collections_display_position" ON "collections"("display_positi
 CREATE INDEX "idx_collections_type" ON "collections"("type");
 
 -- CreateIndex
+CREATE INDEX "idx_collections_active_home" ON "collections"("display_position", "display_order") WHERE (is_active = true);
+
+-- CreateIndex
 CREATE INDEX "idx_collection_items_collection_id" ON "collection_items"("collection_id");
 
 -- CreateIndex
@@ -614,6 +736,9 @@ CREATE INDEX "idx_low_stock_alerts_created_at" ON "low_stock_alerts"("created_at
 
 -- CreateIndex
 CREATE INDEX "idx_banners_is_active" ON "banners"("is_active");
+
+-- CreateIndex
+CREATE INDEX "idx_banners_is_pinned" ON "banners"("is_pinned");
 
 -- CreateIndex
 CREATE INDEX "idx_banners_display_order" ON "banners"("display_order");
@@ -675,35 +800,68 @@ CREATE INDEX "idx_contacts_is_flagged" ON "contacts"("is_flagged");
 -- CreateIndex
 CREATE INDEX "idx_contacts_created_at" ON "contacts"("created_at");
 
--- AddForeignKey
-ALTER TABLE "categories" ADD CONSTRAINT "categories_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+-- CreateIndex
+CREATE INDEX "idx_audit_logs_entity" ON "audit_logs"("entity", "entity_id");
+
+-- CreateIndex
+CREATE INDEX "idx_audit_logs_created_at" ON "audit_logs"("created_at");
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_category_fk" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE "categories" ADD CONSTRAINT "categories_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "products" ADD CONSTRAINT "products_primary_supplier_fk" FOREIGN KEY ("primary_supplier_id") REFERENCES "suppliers"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE "product_categories" ADD CONSTRAINT "product_categories_category_fk" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE "product_categories" ADD CONSTRAINT "product_categories_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "product_categories" ADD CONSTRAINT "product_categories_category_fk" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE "product_tags" ADD CONSTRAINT "product_tags_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_tags" ADD CONSTRAINT "product_tags_tag_fk" FOREIGN KEY ("tag_id") REFERENCES "tags"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_features" ADD CONSTRAINT "product_features_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_options" ADD CONSTRAINT "product_options_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_option_values" ADD CONSTRAINT "product_option_values_option_id_fkey" FOREIGN KEY ("option_id") REFERENCES "product_options"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_skus" ADD CONSTRAINT "product_skus_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_sku_values" ADD CONSTRAINT "product_sku_values_option_value_id_fkey" FOREIGN KEY ("option_value_id") REFERENCES "product_option_values"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "product_sku_values" ADD CONSTRAINT "product_sku_values_sku_id_fkey" FOREIGN KEY ("sku_id") REFERENCES "product_skus"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "product_images_storage" ADD CONSTRAINT "product_images_storage_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE "product_sku_images_storage" ADD CONSTRAINT "product_sku_images_sku_fk" FOREIGN KEY ("sku_id") REFERENCES "product_skus"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE "category_images_storage" ADD CONSTRAINT "category_images_storage_category_fk" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "product_variants" ADD CONSTRAINT "product_variants_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE "orders" ADD CONSTRAINT "orders_customer_fk" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "order_items" ADD CONSTRAINT "order_items_sku_fk" FOREIGN KEY ("product_sku_id") REFERENCES "product_skus"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -718,22 +876,19 @@ ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_cart_fk" FOREIGN KEY ("cart_
 ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "sales" ADD CONSTRAINT "sales_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE "shipments" ADD CONSTRAINT "shipments_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "staff_notes" ADD CONSTRAINT "staff_notes_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "promotion_rules" ADD CONSTRAINT "promotion_rules_promotion_fk" FOREIGN KEY ("promotion_id") REFERENCES "promotions"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE "promotion_rules" ADD CONSTRAINT "promotion_rules_category_fk" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "promotion_rules" ADD CONSTRAINT "promotion_rules_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "promotion_rules" ADD CONSTRAINT "promotion_rules_category_fk" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE "promotion_rules" ADD CONSTRAINT "promotion_rules_promotion_fk" FOREIGN KEY ("promotion_id") REFERENCES "promotions"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "collection_items" ADD CONSTRAINT "collection_items_collection_fk" FOREIGN KEY ("collection_id") REFERENCES "collections"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -748,19 +903,19 @@ ALTER TABLE "low_stock_alerts" ADD CONSTRAINT "low_stock_alerts_order_fk" FOREIG
 ALTER TABLE "low_stock_alerts" ADD CONSTRAINT "low_stock_alerts_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE "favorites" ADD CONSTRAINT "favorites_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "favorites" ADD CONSTRAINT "favorites_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "favorites" ADD CONSTRAINT "favorites_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "product_suppliers" ADD CONSTRAINT "product_suppliers_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
