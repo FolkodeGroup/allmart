@@ -80,7 +80,7 @@ function bulkActionToTargetStatus(action: AdminBulkOrderAction): OrderStatus {
 function toOrder(row: any): Order {
   return {
     id: row.id,
-    customerId: row.customerId, // Referencia al ID único del CRM (User)
+    customerId: row.customerId,
     customer: {
       firstName: row.customerFirstName,
       lastName: row.customerLastName,
@@ -104,6 +104,43 @@ function toOrder(row: any): Order {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
+}
+
+/**
+ * Ajusta métricas agregadas del CRM del cliente al cambiar el estado del pedido,
+ * mitigando de raíz la deriva de datos (Data Drift) al cancelar u omitir transacciones.
+ */
+async function handleCustomerMetricsOnStatusChange(
+  tx: any, 
+  customerId: string | null, 
+  oldStatus: string, 
+  newStatus: string, 
+  total: number
+) {
+  if (!customerId) return;
+
+  const wasActive = oldStatus !== 'cancelado';
+  const isActive = newStatus !== 'cancelado';
+
+  if (wasActive && !isActive) {
+    // Se canceló un pedido activo: restamos de los acumulados
+    await tx.customer.update({
+      where: { id: customerId },
+      data: {
+        totalOrders: { decrement: 1 },
+        totalSpent: { decrement: total }
+      }
+    });
+  } else if (!wasActive && isActive) {
+    // Se reactivó un pedido cancelado: incrementamos
+    await tx.customer.update({
+      where: { id: customerId },
+      data: {
+        totalOrders: { increment: 1 },
+        totalSpent: { increment: total }
+      }
+    });
+  }
 }
 
 // ─── Servicios ─────────────────────────────────────────────────────────────
@@ -191,6 +228,9 @@ export async function updateOrderStatus(id: string, dto: { status: OrderStatus; 
       }
     });
 
+    // Ajustar métricas del cliente dentro del contexto transaccional
+    await handleCustomerMetricsOnStatusChange(tx, order.customerId, order.status, newStatus, Number(order.total));
+
     return getOrderById(id);
   });
 }
@@ -209,24 +249,31 @@ export async function updateOrderPaymentStatus(id: string, dto: { paymentStatus:
   return toOrder(updated);
 }
 
+/**
+ * Eliminación lógica (Soft Delete) del pedido para no perder trazabilidad contable
+ * ni distorsionar los balances financieros históricos.
+ */
 export async function deleteOrder(id: string): Promise<void> {
   const order = await prisma.order.findUnique({ where: { id } });
   if (!order) throw createError('Pedido no encontrado', 404);
-  
-  // SOFT DELETE: Protegemos la integridad contable
-  await prisma.$transaction([
-    prisma.order.update({
+
+  await prisma.$transaction(async (tx) => {
+    await tx.order.update({
       where: { id },
       data: { status: 'cancelado' }
-    }),
-    prisma.orderStatusHistory.create({
-      data: { 
-        orderId: id, 
-        status: 'cancelado', 
-        note: 'Pedido anulado/eliminado (Soft Delete)' 
+    });
+
+    await tx.orderStatusHistory.create({
+      data: {
+        orderId: id,
+        status: 'cancelado',
+        note: 'Pedido anulado/eliminado (Soft Delete)'
       }
-    })
-  ]);
+    });
+
+    // Ajustar métricas de CRM del cliente restando el pedido cancelado
+    await handleCustomerMetricsOnStatusChange(tx, order.customerId, order.status, 'cancelado', Number(order.total));
+  });
 }
 
 export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO): Promise<AdminBulkUpdateOrderStatusResultDTO> {
@@ -237,7 +284,7 @@ export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO):
   const results = await prisma.$transaction(async (tx) => {
     const rows = await tx.order.findMany({
       where: { id: { in: orderIds } },
-      select: { id: true, status: true },
+      select: { id: true, status: true, customerId: true, total: true },
     });
 
     const itemResults: AdminBulkUpdateOrderStatusItemResultDTO[] = [];
@@ -249,13 +296,18 @@ export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO):
         continue;
       }
 
-      if (!canApplyBulkAction(action, prismaStatusToOrderStatus(row.status))) {
+      const currentStatus = prismaStatusToOrderStatus(row.status);
+      if (!canApplyBulkAction(action, currentStatus)) {
         itemResults.push({ id: orderId, success: false, reason: 'Transición no permitida' });
         continue;
       }
 
       await tx.order.update({ where: { id: orderId }, data: { status: targetPrismaStatus } });
       await tx.orderStatusHistory.create({ data: { orderId, status: targetPrismaStatus, note: note ?? null } });
+      
+      // Ajustar métricas del cliente para cada pedido modificado en bloque
+      await handleCustomerMetricsOnStatusChange(tx, row.customerId, row.status, targetPrismaStatus, Number(row.total));
+
       itemResults.push({ id: orderId, success: true });
     }
 
