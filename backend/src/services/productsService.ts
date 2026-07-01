@@ -10,7 +10,6 @@ import { ProductStatus } from '../types';
 import { createError } from '../middlewares/errorHandler';
 import { getCategoryBySlug } from './categoriesService';
 import { parseSafePrice } from './productSkusService';
-
 import { applyDiscountsToProducts } from './discountService';
 
 // Función auxiliar para el slug
@@ -209,7 +208,7 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
   if (status && status !== 'all') {
     where.status = status;
   } else {
-    // Si no se filtra por un estado en particular, excluimos los archivados
+    // Si no se filtra por un estado en particular, excluimos los archivados (Soft Delete)
     where.status = { not: 'archived' }; 
   }
 
@@ -290,7 +289,6 @@ export async function getProductById(id: string): Promise<Product> {
   });
   
   if (!row) throw createError('Producto no encontrado', 404);
-
   const base = toProduct(row);
 
   const variants = (row as any).productOptions?.map((opt: any) => ({
@@ -345,24 +343,44 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   const slug = generateSlug(dto.name);
   const parsedPrice = parseSafePrice(dto.price) ?? 0;
 
-  const row = await prisma.product.create({
-    data: {
-      name: dto.name,
-      slug,
-      description: dto.description ?? null,
-      shortDescription: dto.shortDescription ?? null,
-      price: parsedPrice,
-      status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
-      sku: dto.sku,
-      stock: dto.stock ?? 0,
-      rating: dto.rating ?? 0,
-      reviewCount: dto.reviewCount ?? 0,
-      inStock: dto.inStock ?? true,
-      isFeatured: dto.isFeatured ?? false,
-      ...(dto.primarySupplierId !== undefined
-        ? { primarySupplierId: dto.primarySupplierId ?? null }
-        : {}),
-    },
+  // Ejecución atómica para garantizar que las imágenes se inserten de forma consistente
+  const row = await prisma.$transaction(async (tx) => {
+    const newProduct = await tx.product.create({
+      data: {
+        name: dto.name,
+        slug,
+        description: dto.description ?? null,
+        shortDescription: dto.shortDescription ?? null,
+        price: parsedPrice,
+        status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
+        sku: dto.sku,
+        stock: dto.stock ?? 0,
+        rating: dto.rating ?? 0,
+        reviewCount: dto.reviewCount ?? 0,
+        inStock: dto.inStock ?? true,
+        isFeatured: dto.isFeatured ?? false,
+        ...(dto.primarySupplierId !== undefined
+          ? { primarySupplierId: dto.primarySupplierId ?? null }
+          : {}),
+      },
+    });
+
+    if (Array.isArray(dto.images) && dto.images.length > 0) {
+      await tx.productImageStorage.createMany({
+        data: dto.images.map((url, index) => ({
+          productId: newProduct.id,
+          storageKey: url.startsWith('/api/images') ? null : url,
+          width: 0,
+          height: 0,
+          mimeType: 'image/webp',
+          originalFilename: 'imported_creation',
+          sizeBytes: 0,
+          position: index,
+        }))
+      });
+    }
+
+    return newProduct;
   });
 
   await updateProductCategories(row.id, normalizedCategoryIds);
@@ -469,6 +487,24 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     },
   });
 
+  if (dto.images !== undefined) {
+    await prisma.productImageStorage.deleteMany({ where: { productId: id } });
+    if (Array.isArray(dto.images) && dto.images.length > 0) {
+      await prisma.productImageStorage.createMany({
+        data: dto.images.map((url, index) => ({
+          productId: id,
+          storageKey: url.startsWith('/api/images') ? null : url,
+          width: 0,
+          height: 0,
+          mimeType: 'image/webp',
+          originalFilename: 'imported_update',
+          sizeBytes: 0,
+          position: index,
+        }))
+      });
+    }
+  }
+
   if (shouldUpdateCategories) {
     await updateProductCategories(id, normalizedCategoryIds);
   }
@@ -496,12 +532,11 @@ export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
   
-  // 👇 REEMPLAZAR DELETE POR UPDATE (SOFT DELETE) 👇
   await prisma.product.update({
     where: { id },
     data: {
-      status: 'archived', // Marcado como archivado para conservar historial en ventas
-      inStock: false,     // Aseguramos que salga del inventario activo
+      status: 'archived', 
+      inStock: false,     
       stock: 0,
     },
   });
@@ -511,6 +546,10 @@ export async function getLowStockCount(): Promise<number> {
   return prisma.product.count({ where: { stock: { lt: 5 } } });
 }
 
+/**
+ * Obtiene productos para administración con paginación optimizada mediante "Paginación Diferida".
+ * Evita la penalización de escanear filas anchas (con relaciones) al paginar offsets grandes.
+ */
 export async function getAdminProducts(query: {
   q?: string;
   categoryId?: string;
@@ -522,16 +561,27 @@ export async function getAdminProducts(query: {
   const { q, categoryId, status, stockLevel, page = 1, limit = 10 } = query;
   const where = buildAdminProductsWhere({ q, categoryId, status, stockLevel });
 
-  const [total, rows] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-      select: adminProductSelect,
-    }),
-  ]);
+  const total = await prisma.product.count({ where });
+
+  // 1. Petición ligera: Obtenemos únicamente los IDs aplicando el OFFSET (Rápido vía B-Tree Index)
+  const idsRow = await prisma.product.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    skip: (page - 1) * limit,
+    take: limit,
+    select: { id: true },
+  });
+
+  const ids = idsRow.map(r => r.id);
+
+  // 2. Hidratación: Consultamos los registros completos solo para los IDs de la página actual
+  const rows = ids.length > 0
+    ? await prisma.product.findMany({
+        where: { id: { in: ids } },
+        orderBy: { createdAt: 'desc' },
+        select: adminProductSelect,
+      })
+    : [];
 
   return {
     data: rows.map(toProduct),
@@ -576,11 +626,15 @@ type ProductQuery = {
   priceRanges?: string;
 };
 
+/**
+ * Obtiene productos públicos con filtros y paginación optimizada mediante "Paginación Diferida".
+ * Resuelve la penalización del OFFSET masivo sin requerir modificaciones en la API ni el frontend.
+ */
 export async function getPublicProducts(query: ProductQuery) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
   const where: Record<string, any> = {
-    status: 'active', // 🔒 SEGURIDAD: Solo productos activos son visibles al público
+    status: 'active', 
   };
 
   if (Array.isArray(slugs) && slugs.length > 0) {
@@ -591,7 +645,6 @@ export async function getPublicProducts(query: ProductQuery) {
     where.isFeatured = isFeatured;
   }
 
-  // Modificado de consulta JSONB cruda a query relacional eficiente con índice indexado
   if (tag) {
     const taggedProducts = await prisma.productTag.findMany({
       where: {
@@ -676,6 +729,8 @@ export async function getPublicProducts(query: ProductQuery) {
     ];
   }
 
+  const total = await prisma.product.count({ where });
+
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   switch (sort) {
     case 'price_asc': orderBy.price = 'asc'; break;
@@ -685,43 +740,52 @@ export async function getPublicProducts(query: ProductQuery) {
     default: orderBy.createdAt = 'desc';
   }
 
-  const [total, rows] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
-      include: { 
-        productCategories: { select: { categoryId: true } },
-        productTags: { include: { tag: true } },
-        productFeatures: { orderBy: { displayOrder: 'asc' } },
-        productOptions: {
-          where: { isActive: true },
-          include: {
-            values: true
-          }
-        },
-        productSkus: {
-          where: { isActive: true },
-          include: {
-            skuValues: {
-              include: {
-                optionValue: {
-                  include: {
-                    option: true
+  // 1. OBTENCIÓN DE IDs EN LOTE: Evitamos resolver relaciones pesadas de la base de datos para registros a descartar
+  const idsRow = await prisma.product.findMany({
+    where,
+    orderBy,
+    skip: (page - 1) * limit,
+    take: limit,
+    select: { id: true },
+  });
+
+  const ids = idsRow.map(r => r.id);
+
+  // 2. HIDRATACIÓN: Solicitamos únicamente los 12 productos requeridos para el catálogo público actual
+  const rows = ids.length > 0
+    ? await prisma.product.findMany({
+        where: { id: { in: ids } },
+        orderBy,
+        include: { 
+          productCategories: { select: { categoryId: true } },
+          productTags: { include: { tag: true } },
+          productFeatures: { orderBy: { displayOrder: 'asc' } },
+          productOptions: {
+            where: { isActive: true },
+            include: {
+              values: true
+            }
+          },
+          productSkus: {
+            where: { isActive: true },
+            include: {
+              skuValues: {
+                include: {
+                  optionValue: {
+                    include: {
+                      option: true
+                    }
                   }
                 }
+              },
+              productSkuImages: {
+                select: { id: true }
               }
-            },
-            productSkuImages: {
-              select: { id: true }
             }
           }
-        }
-      },
-    }),
-  ]);
+        },
+      })
+    : [];
 
   const mappedProducts = rows.map((row) => {
     const base = toProduct(row);
@@ -767,7 +831,7 @@ export async function getPublicProducts(query: ProductQuery) {
   const productsWithDiscounts = await applyDiscountsToProducts(mappedProducts);
 
   return {
-    data: productsWithDiscounts, // Retorna los productos ya pre-calculados con su descuento
+    data: productsWithDiscounts, 
     total,
     page,
     limit,
