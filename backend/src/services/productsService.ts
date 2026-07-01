@@ -679,8 +679,16 @@ export async function deleteProduct(id: string): Promise<void> {
   });
 }
 
+/**
+ * Obtiene la cantidad total de productos con stock < 5 excluyendo los productos archivados (Soft Deleted).
+ */
 export async function getLowStockCount(): Promise<number> {
-  return prisma.product.count({ where: { stock: { lt: 5 } } });
+  return prisma.product.count({ 
+    where: { 
+      stock: { lt: 5 },
+      status: { not: 'archived' } // 🔒 CORRECCIÓN: Excluir productos eliminados
+    } 
+  });
 }
 
 /**

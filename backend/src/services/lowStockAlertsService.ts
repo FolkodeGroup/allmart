@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '../config/prisma';
+import { Prisma, ProductStatus } from '@prisma/client';
 
 export interface LowStockAlertWithOrder {
   id: string;
@@ -86,7 +87,12 @@ export async function getCurrentLowStockProducts(
     : DEFAULT_STOCK_THRESHOLD;
 
   const skip = (safePage - 1) * safeLimit;
-  const where = { stock: { lte: safeThreshold } };
+  
+  // 🔒 CORRECCIÓN DE TIPO: Usar el enum ProductStatus de Prisma de forma estricta
+  const where: Prisma.ProductWhereInput = { 
+    stock: { lte: safeThreshold },
+    status: { not: ProductStatus.archived }
+  };
 
   const [products, total, noStock] = await Promise.all([
     prisma.product.findMany({
@@ -105,7 +111,6 @@ export async function getCurrentLowStockProducts(
         inStock: true,
         status: true,
         updatedAt: true,
-        // 🟢 CORRECCIÓN: Resolvemos a través de la relación N:M productCategories
         productCategories: {
           select: {
             category: {
@@ -123,12 +128,13 @@ export async function getCurrentLowStockProducts(
     prisma.product.count({
       where: {
         stock: { lte: 0 },
+        status: { not: ProductStatus.archived } // 🔒 CORRECCIÓN DE TIPO: Usar el enum ProductStatus de Prisma
       },
     }),
   ]);
 
-  const data: CurrentLowStockProduct[] = products.map((product) => {
-    // Tomamos la primera relación de categoría como la principal
+  // 🔒 CORRECCIÓN DE INFERENCIA: Casteamos a any[] para evitar errores de propiedades anidadas en el map
+  const data: CurrentLowStockProduct[] = (products as any[]).map((product) => {
     const firstCategoryRel = product.productCategories?.[0]?.category;
     return {
       id: product.id,

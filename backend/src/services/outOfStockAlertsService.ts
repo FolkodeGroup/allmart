@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '../config/prisma';
+import { ProductStatus } from '@prisma/client';
 
 export interface OutOfStockOrderItem {
   id: string;
@@ -44,7 +45,8 @@ export interface OutOfStockAlertsResponse {
 }
 
 /**
- * Obtiene productos sin stock que tienen pedidos pendientes o confirmados
+ * Obtiene productos sin stock que tienen pedidos pendientes o confirmados,
+ * excluyendo productos archivados (Soft Deleted).
  */
 export async function getOutOfStockAlerts(
   page = 1,
@@ -56,7 +58,10 @@ export async function getOutOfStockAlerts(
 
   // Obtener productos sin stock
   const productsWithoutStock = await prisma.product.findMany({
-    where: { stock: { lte: 0 } },
+    where: { 
+      stock: { lte: 0 },
+      status: { not: ProductStatus.archived } // 🔒 CORRECCIÓN: Uso de enum de Prisma
+    },
     select: { id: true, name: true, sku: true, stock: true },
   });
 
@@ -178,11 +183,14 @@ export async function getOutOfStockAlerts(
 }
 
 /**
- * Obtiene el conteo total de alertas sin stock
+ * Obtiene el conteo total de alertas sin stock, excluyendo productos archivados.
  */
 export async function getOutOfStockAlertCount(): Promise<number> {
   const productsWithoutStock = await prisma.product.findMany({
-    where: { stock: { lte: 0 } },
+    where: { 
+      stock: { lte: 0 },
+      status: { not: ProductStatus.archived } // 🔒 CORRECCIÓN: Uso de enum de Prisma
+    },
     select: { id: true },
   });
 
