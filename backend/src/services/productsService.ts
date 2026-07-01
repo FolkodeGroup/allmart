@@ -665,14 +665,25 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   return toProduct(refreshed ?? row);
 }
 
+/**
+ * Eliminación lógica (Soft Delete): Actualiza el estado del producto a archivado
+ * y renombra de manera segura el slug y el SKU para que queden liberados
+ * de forma inmediata en la base de datos para futuras creaciones.
+ */
 export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
   
+  const timestamp = Date.now();
+  const archivedSlug = `${existing.slug}-archived-${timestamp}`;
+  const archivedSku = existing.sku ? `${existing.sku}-archived-${timestamp}` : null;
+
   await prisma.product.update({
     where: { id },
     data: {
       status: 'archived', 
+      slug: archivedSlug,  // 🟢 CORRECCIÓN: Libera el slug original inmediatamente
+      sku: archivedSku,    // 🟢 CORRECCIÓN: Libera el SKU original inmediatamente
       inStock: false,     
       stock: 0,
     },
