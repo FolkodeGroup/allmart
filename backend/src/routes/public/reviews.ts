@@ -1,24 +1,12 @@
-/**
- * routes/public/reviews.ts
- * Rutas de reviews de productos.
- */
-
 import { Router } from 'express';
 import * as ctrl from '../../controllers/public/reviewsController';
-import { authMiddleware } from '../../middlewares/auth';
+import { adminMiddleware } from '../../middlewares/auth';
 
 const router = Router();
 
-// GET  /api/products/:productId/reviews  (público)
 router.get('/products/:productId/reviews', ctrl.index);
-
-// POST /api/products/:productId/reviews/guest  (público, verificado por pedido)
 router.post('/products/:productId/reviews/guest', ctrl.createGuest);
-
-// POST /api/products/:productId/reviews  (requiere auth)
-router.post('/products/:productId/reviews', authMiddleware, ctrl.create);
-
-// DELETE /api/reviews/:reviewId           (requiere auth)
-router.delete('/reviews/:reviewId', authMiddleware, ctrl.destroy);
+// Requiere admin para eliminar
+router.delete('/reviews/:reviewId', adminMiddleware, ctrl.destroy);
 
 export default router;

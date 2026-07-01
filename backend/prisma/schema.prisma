@@ -16,17 +16,16 @@ model User {
   email        String    @unique @db.VarChar(255)
   firstName    String    @map("first_name") @db.VarChar(100)
   lastName     String    @map("last_name") @db.VarChar(100)
-  phone        String?   @db.VarChar(30) // <-- Asegúrate que tenga el ?
-  passwordHash String?   @map("password_hash") // <-- Asegúrate que tenga el ?
+  phone        String?   @db.VarChar(30)
+  passwordHash String    @map("password_hash") // CORRECCIÓN: YA NO ES OPCIONAL
   role         UserRole  @default(editor)
   isActive     Boolean   @default(true) @map("is_active")  
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  cart         Cart?
-  favorites    Favorite[]
-  reviews      ProductReview[]
+  
   staffNotes   StaffNote[]
   priceChanges SupplierProductPrice[] @relation("SupplierProductPriceChangedBy")
+  
   @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
   @@map("users")
@@ -212,7 +211,7 @@ model ProductSku {
   product          Product                  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_skus_product_fk")
   productSkuImages ProductSkuImageStorage[]
   skuValues        ProductSkuValue[]
-  orderItems       OrderItem[]              // Relación inversa para trazabilidad transaccional
+  orderItems       OrderItem[]              
 
   @@index([productId], map: "idx_product_skus_product_id")
   @@map("product_skus")
@@ -236,7 +235,6 @@ model ProductImageStorage {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   productId        String   @map("product_id") @db.Uuid
 
-  // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?  @map("storage_key") @db.VarChar(500)
   storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)  
   width            Int
@@ -261,7 +259,6 @@ model ProductSkuImageStorage {
   id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   skuId            String     @map("sku_id") @db.Uuid
 
-  // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?    @map("storage_key") @db.VarChar(500)
   storageThumbKey  String?    @map("storage_thumb_key") @db.VarChar(500)
   width            Int
@@ -287,7 +284,6 @@ model CategoryImageStorage {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   categoryId       String   @unique @map("category_id") @db.Uuid
 
-  // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?  @map("storage_key") @db.VarChar(500)
   storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
   width            Int
@@ -311,12 +307,9 @@ model CategoryImageStorage {
 
 model Order {
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  
-  // Vínculo al nuevo modelo User (CRM)
   customerId         String?              @map("customer_id") @db.Uuid
   customerRel        Customer?            @relation(fields: [customerId], references: [id], onUpdate: NoAction, map: "orders_customer_fk")
 
-  // Snapshot de datos del cliente al momento de la compra (inmutable)
   customerFirstName  String               @map("customer_first_name") @db.VarChar(100)
   customerLastName   String               @map("customer_last_name") @db.VarChar(100)
   customerEmail      String               @map("customer_email") @db.VarChar(255)
@@ -336,7 +329,7 @@ model Order {
   reviews            ProductReview[]
   shipment           Shipment?
 
-  @@index([customerId], map: "idx_orders_customer_id") // Antes decía [userId]
+  @@index([customerId], map: "idx_orders_customer_id")
   @@index([createdAt], map: "idx_orders_created_at")
   @@index([customerEmail], map: "idx_orders_customer_email")
   @@index([status], map: "idx_orders_status")
@@ -347,7 +340,7 @@ model OrderItem {
   id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   orderId      String      @map("order_id") @db.Uuid
   productId    String?     @map("product_id") @db.Uuid
-  productSkuId String?     @map("product_sku_id") @db.Uuid // Campo opcional y mapeado como UUID
+  productSkuId String?     @map("product_sku_id") @db.Uuid
   productName  String      @map("product_name") @db.VarChar(255)
   productImage String?     @map("product_image")
   quantity     Int
@@ -355,10 +348,10 @@ model OrderItem {
 
   order        Order       @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "order_items_order_fk")
   product      Product?    @relation(fields: [productId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "order_items_product_fk")
-  productSku   ProductSku? @relation(fields: [productSkuId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "order_items_sku_fk") // Relación de auditoría segura
+  productSku   ProductSku? @relation(fields: [productSkuId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "order_items_sku_fk") 
 
   @@index([orderId], map: "idx_order_items_order_id")
-  @@index([productSkuId], map: "idx_order_items_sku_id") // Índice para optimizar consultas de variantes
+  @@index([productSkuId], map: "idx_order_items_sku_id")
   @@map("order_items")
 }
 
@@ -377,16 +370,13 @@ model OrderStatusHistory {
 
 model Cart {
   id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String?    @unique(map: "carts_user_unique") @map("user_id") @db.Uuid
-  sessionId String?    @map("session_id") @db.VarChar(255)
+  sessionId String     @unique(map: "carts_session_unique") @map("session_id") @db.VarChar(255)
   createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   
   cartItems CartItem[]
-  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "carts_user_fk")
 
   @@index([sessionId], map: "idx_carts_session_id")
-  @@index([userId], map: "idx_carts_user_id")
   @@map("carts")
 }
 
@@ -560,7 +550,6 @@ model Banner {
   description      String?
   filterConfig     Json     @default("{}") @map("filter_config")
 
-  // --- CAMPOS NUEVOS FASE 2 ---
   storageKey       String?  @map("storage_key") @db.VarChar(500)
   storageThumbKey  String?  @map("storage_thumb_key") @db.VarChar(500)
   width            Int
@@ -586,9 +575,8 @@ model Banner {
 model ProductReview {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   productId    String   @map("product_id") @db.Uuid
-  userId       String?  @map("user_id") @db.Uuid
   orderId      String?  @map("order_id") @db.Uuid
-  reviewerName String?  @map("reviewer_name") @db.VarChar(100)
+  reviewerName String   @map("reviewer_name") @db.VarChar(100) 
   rating       Int
   title        String?  @db.VarChar(255)
   text         String?
@@ -598,27 +586,23 @@ model ProductReview {
   
   order        Order?   @relation(fields: [orderId], references: [id], onUpdate: NoAction, map: "product_reviews_order_fk")
   product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_reviews_product_fk")
-  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_reviews_user_fk")
 
-  @@unique([productId, userId], map: "product_reviews_unique")
   @@unique([productId, orderId], map: "product_reviews_order_unique")
   @@index([productId], map: "idx_product_reviews_product_id")
-  @@index([userId], map: "idx_product_reviews_user_id")
   @@index([orderId], map: "idx_product_reviews_order_id")
   @@map("product_reviews")
 }
 
 model Favorite {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
+  sessionId String   @map("session_id") @db.VarChar(255) // CORRECCIÓN: Depende de Sesión
   productId String   @map("product_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "favorites_product_fk")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "favorites_user_fk")
 
-  @@unique([userId, productId], map: "favorites_unique")
-  @@index([userId], map: "idx_favorites_user_id")
+  @@unique([sessionId, productId], map: "favorites_unique")
+  @@index([sessionId], map: "idx_favorites_session_id")
   @@index([productId], map: "idx_favorites_product_id")
   @@map("favorites")
 }
@@ -632,7 +616,6 @@ model Supplier {
   email            String?                @db.VarChar(255)
   description      String?
   isActive         Boolean                @default(true) @map("is_active")
-  products         String                 @default("")
   createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   

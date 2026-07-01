@@ -212,7 +212,21 @@ export async function updateOrderPaymentStatus(id: string, dto: { paymentStatus:
 export async function deleteOrder(id: string): Promise<void> {
   const order = await prisma.order.findUnique({ where: { id } });
   if (!order) throw createError('Pedido no encontrado', 404);
-  await prisma.order.delete({ where: { id } });
+  
+  // SOFT DELETE: Protegemos la integridad contable
+  await prisma.$transaction([
+    prisma.order.update({
+      where: { id },
+      data: { status: 'cancelado' }
+    }),
+    prisma.orderStatusHistory.create({
+      data: { 
+        orderId: id, 
+        status: 'cancelado', 
+        note: 'Pedido anulado/eliminado (Soft Delete)' 
+      }
+    })
+  ]);
 }
 
 export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO): Promise<AdminBulkUpdateOrderStatusResultDTO> {

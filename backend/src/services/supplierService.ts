@@ -91,32 +91,24 @@ export const supplierService = {
 
   // ── Create ───────────────────────────────────────────────────────────────────
   async create(data: SupplierCreateInput) {
-    if (!data.name?.trim()) throw createError('El nombre del proveedor es obligatorio', 400);
-    if (!data.email?.trim()) throw createError('El email del proveedor es obligatorio', 400);
-    if (!data.phone?.trim()) throw createError('El teléfono del proveedor es obligatorio', 400);
+    if (!data.name?.trim()) throw createError('El nombre es obligatorio', 400);
 
     return prisma.supplier.create({
       data: {
         name: data.name.trim(),
-        phone: data.phone.trim(),
+        phone: data.phone?.trim() ?? '',
         address: data.address?.trim() ?? '',
-        email: data.email.trim(),
+        email: data.email?.trim() ?? null,
         url: data.url?.trim() || null,
         description: data.description?.trim() || null,
         isActive: data.isActive ?? true,
-        products: '',
       },
     });
   },
 
   // ── Update ───────────────────────────────────────────────────────────────────
   async update(id: string, data: SupplierUpdateInput) {
-    await supplierService.getById(id); // throws 404 if not found
-
-    // Validate required fields when provided
-    if (data.name !== undefined && !data.name?.trim()) throw createError('El nombre del proveedor es obligatorio', 400);
-    if (data.email !== undefined && !data.email?.trim()) throw createError('El email del proveedor es obligatorio', 400);
-    if (data.phone !== undefined && !data.phone?.trim()) throw createError('El teléfono del proveedor es obligatorio', 400);
+    await supplierService.getById(id);
 
     return prisma.supplier.update({
       where: { id },
@@ -124,7 +116,7 @@ export const supplierService = {
         ...(data.name !== undefined ? { name: data.name.trim() } : {}),
         ...(data.phone !== undefined ? { phone: data.phone.trim() } : {}),
         ...(data.address !== undefined ? { address: data.address?.trim() ?? '' } : {}),
-        ...(data.email !== undefined ? { email: data.email.trim() } : {}),
+        ...(data.email !== undefined ? { email: data.email?.trim() ?? null } : {}),
         ...(data.url !== undefined ? { url: data.url?.trim() || null } : {}),
         ...(data.description !== undefined ? { description: data.description?.trim() || null } : {}),
         ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),

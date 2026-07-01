@@ -52,7 +52,6 @@ export interface AdminSupplierV2 {
     email: string | null;
     description: string | null;
     isActive: boolean;
-    products: string;
     productCount: number;
     createdAt: string;
     updatedAt: string;
@@ -253,7 +252,7 @@ export const suppliersAdminService = {
         const result = await suppliersAdminService.listSuppliers({ limit: 200 });
         return (result?.data ?? []).map(s => ({
             id: s.id, name: s.name, url: s.url, phone: s.phone,
-            address: s.address, products: s.products,
+            address: s.address, products: '', // Se hardcodea vacío ya que V2 no posee 'products'
             createdAt: s.createdAt, updatedAt: s.updatedAt,
         }));
     },
@@ -261,19 +260,19 @@ export const suppliersAdminService = {
     async getSupplier(id: string): Promise<AdminSupplier | undefined> {
         try {
             const s = await suppliersAdminService.getSupplierV2(id);
-            return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: s.products, createdAt: s.createdAt, updatedAt: s.updatedAt };
+            return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: '', createdAt: s.createdAt, updatedAt: s.updatedAt };
         } catch { return undefined; }
     },
 
     async createSupplier(data: SupplierInput): Promise<AdminSupplier> {
         const s = await suppliersAdminService.createSupplierV2({ ...data, url: data.url ?? undefined });
-        return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: s.products, createdAt: s.createdAt, updatedAt: s.updatedAt };
+        return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: '', createdAt: s.createdAt, updatedAt: s.updatedAt };
     },
 
     async updateSupplier(id: string, data: SupplierInput): Promise<AdminSupplier | undefined> {
         try {
             const s = await suppliersAdminService.updateSupplierV2(id, { ...data, url: data.url ?? undefined });
-            return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: s.products, createdAt: s.createdAt, updatedAt: s.updatedAt };
+            return { id: s.id, name: s.name, url: s.url, phone: s.phone, address: s.address, products: '', createdAt: s.createdAt, updatedAt: s.updatedAt };
         } catch { return undefined; }
     },
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { FileText, Phone, ArrowLeft, AlertCircle, Building2, Globe } from 'lucide-react';
+import { Phone, ArrowLeft, AlertCircle, Building2, Globe } from 'lucide-react';
 import { useBlocker } from 'react-router-dom';
 import { useSupplierForm } from '../../../hooks/useSuppliersForm';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -15,7 +15,6 @@ interface Props {
 const SECTIONS = [
     { id: 'identificacion', label: 'Identificación', Icon: Building2 },
     { id: 'contacto', label: 'Contacto', Icon: Phone },
-    { id: 'comercial', label: 'Comercial', Icon: FileText },
 ] as const;
 
 type SectionId = typeof SECTIONS[number]['id'];
@@ -33,7 +32,6 @@ export function SuppliersAdminForm({ supplierId, onBack, onSuccess }: Props) {
     const sectionRefs = useRef<Record<SectionId, HTMLElement | null>>({
         identificacion: null,
         contacto: null,
-        comercial: null,
     });
     const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -89,7 +87,6 @@ export function SuppliersAdminForm({ supplierId, onBack, onSuccess }: Props) {
     const sectionHasError = (id: SectionId): boolean => {
         if (id === 'identificacion') return !!(fieldErrors.name);
         if (id === 'contacto') return !!(fieldErrors.phone || fieldErrors.address);
-        if (id === 'comercial') return !!(fieldErrors.products);
         return false;
     };
 
@@ -313,41 +310,6 @@ export function SuppliersAdminForm({ supplierId, onBack, onSuccess }: Props) {
                                         </span>
                                     )}
                                 </div>
-                            </div>
-                        </fieldset>
-                    </section>
-
-                    {/* ── Comercial ──────────────────────────────────────────────── */}
-                    <section
-                        id="comercial"
-                        ref={setSectionRef('comercial')}
-                        className={styles.section}
-                    >
-                        <h2 className={styles.sectionTitle}>
-                            <FileText size={17} strokeWidth={1.8} />
-                            Comercial
-                        </h2>
-                        <fieldset className={styles.fieldset}>
-                            <legend className={styles.legend}>Relación comercial</legend>
-                            <div className={styles.field}>
-                                <label className={styles.label} htmlFor="supplier-products">
-                                    Productos que se le compran *
-                                </label>
-                                <input
-                                    id="supplier-products"
-                                    type="text"
-                                    className={`${styles.input} ${fieldErrors.products ? styles.inputError : ''}`}
-                                    value={formData.products}
-                                    onChange={handleField('products')}
-                                    placeholder="Ej: Papel, Cartón, Bolsas"
-                                    aria-invalid={!!fieldErrors.products}
-                                    aria-describedby={fieldErrors.products ? 'err-products' : undefined}
-                                />
-                                {fieldErrors.products && (
-                                    <span id="err-products" className={styles.errorText}>
-                                        {fieldErrors.products}
-                                    </span>
-                                )}
                             </div>
                         </fieldset>
                     </section>
