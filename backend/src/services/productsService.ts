@@ -11,6 +11,15 @@ import { createError } from '../middlewares/errorHandler';
 import { getCategoryBySlug } from './categoriesService';
 import { parseSafePrice } from './productSkusService';
 import { applyDiscountsToProducts } from './discountService';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { r2Client } from '../config/r2';
+import { env } from '../config/env';
+import sharp from 'sharp';
+
+// Constantes de optimización de imágenes (idénticas a las de imageStorageService)
+const MAX_WIDTH = 1200;
+const THUMBNAIL_WIDTH = 240;
+const WEBP_QUALITY = 82;
 
 // Función auxiliar para el slug
 function generateSlug(name: string): string {
@@ -110,6 +119,48 @@ async function updateProductFeatures(productId: string, features: string[]): Pro
       }))
     });
   }
+}
+
+/**
+ * Decodifica, procesa y sube una imagen en Base64 a Cloudflare R2 de forma optimizada.
+ */
+async function uploadBase64ToR2(productId: string, base64Str: string, position: number) {
+  const matches = base64Str.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
+  if (!matches) {
+    throw createError('Formato de imagen Base64 inválido', 400);
+  }
+  
+  const buffer = Buffer.from(matches[2], 'base64');
+  const base = sharp(buffer).rotate();
+  
+  const fullBuffer = await base.clone().resize({ width: MAX_WIDTH, withoutEnlargement: true }).webp({ quality: WEBP_QUALITY }).toBuffer();
+  const fullMeta = await sharp(fullBuffer).metadata();
+  const thumbBuffer = await base.clone().resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true }).webp({ quality: 75 }).toBuffer();
+  const thumbMeta = await sharp(thumbBuffer).metadata();
+
+  const timestamp = Date.now();
+  const s3KeyFull = `products/${productId}/${timestamp}-${position}.webp`;
+  const s3KeyThumb = `products/${productId}/thumbs/${timestamp}-${position}.webp`;
+
+  // Subida concurrente a R2 para optimizar velocidad
+  await Promise.all([
+    r2Client.send(new PutObjectCommand({
+      Bucket: env.R2_BUCKET_NAME, Key: s3KeyFull, Body: fullBuffer, ContentType: 'image/webp'
+    })),
+    r2Client.send(new PutObjectCommand({
+      Bucket: env.R2_BUCKET_NAME, Key: s3KeyThumb, Body: thumbBuffer, ContentType: 'image/webp'
+    }))
+  ]);
+
+  return {
+    storageKey: s3KeyFull,
+    storageThumbKey: s3KeyThumb,
+    width: fullMeta.width ?? 0,
+    height: fullMeta.height ?? 0,
+    thumbWidth: thumbMeta.width ?? THUMBNAIL_WIDTH,
+    thumbHeight: thumbMeta.height ?? 0,
+    sizeBytes: fullBuffer.length,
+  };
 }
 
 // Mapea el resultado de Prisma al tipo Product del proyecto
@@ -343,52 +394,95 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   const slug = generateSlug(dto.name);
   const parsedPrice = parseSafePrice(dto.price) ?? 0;
 
-  // Ejecución atómica para garantizar que las imágenes se inserten de forma consistente
-  const row = await prisma.$transaction(async (tx) => {
-    const newProduct = await tx.product.create({
-      data: {
-        name: dto.name,
-        slug,
-        description: dto.description ?? null,
-        shortDescription: dto.shortDescription ?? null,
-        price: parsedPrice,
-        status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
-        sku: dto.sku,
-        stock: dto.stock ?? 0,
-        rating: dto.rating ?? 0,
-        reviewCount: dto.reviewCount ?? 0,
-        inStock: dto.inStock ?? true,
-        isFeatured: dto.isFeatured ?? false,
-        ...(dto.primarySupplierId !== undefined
-          ? { primarySupplierId: dto.primarySupplierId ?? null }
-          : {}),
-      },
-    });
-
-    if (Array.isArray(dto.images) && dto.images.length > 0) {
-      await tx.productImageStorage.createMany({
-        data: dto.images.map((url, index) => ({
-          productId: newProduct.id,
-          storageKey: url.startsWith('/api/images') ? null : url,
-          width: 0,
-          height: 0,
-          mimeType: 'image/webp',
-          originalFilename: 'imported_creation',
-          sizeBytes: 0,
-          position: index,
-        }))
-      });
-    }
-
-    return newProduct;
+  // 1. Crear la cabecera del producto primero
+  const product = await prisma.product.create({
+    data: {
+      name: dto.name,
+      slug,
+      description: dto.description ?? null,
+      shortDescription: dto.shortDescription ?? null,
+      price: parsedPrice,
+      status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
+      sku: dto.sku,
+      stock: dto.stock ?? 0,
+      rating: dto.rating ?? 0,
+      reviewCount: dto.reviewCount ?? 0,
+      inStock: dto.inStock ?? true,
+      isFeatured: dto.isFeatured ?? false,
+      ...(dto.primarySupplierId !== undefined
+        ? { primarySupplierId: dto.primarySupplierId ?? null }
+        : {}),
+    },
   });
 
-  await updateProductCategories(row.id, normalizedCategoryIds);
-  await updateProductTags(row.id, Array.isArray(dto.tags) ? dto.tags : []);
-  await updateProductFeatures(row.id, Array.isArray(dto.features) ? dto.features : []);
+  // 2. Procesar imágenes en paralelo de forma asíncrona y veloz fuera del bloqueo de la base de datos
+  if (Array.isArray(dto.images) && dto.images.length > 0) {
+    const imageRecords = await Promise.all(
+      dto.images.map(async (url, index) => {
+        // Caso A: Imagen cruda en Base64 desde el Wizard
+        if (url.startsWith('data:image/')) {
+          const uploaded = await uploadBase64ToR2(product.id, url, index);
+          return {
+            productId: product.id,
+            ...uploaded,
+            mimeType: 'image/webp',
+            originalFilename: 'wizard_upload',
+            position: index,
+          };
+        }
+
+        // Caso B: Imagen local duplicada (Clonamos metadatos de R2 para no duplicar storage físico)
+        const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
+        if (isLocalImageMatch) {
+          const existingImageId = isLocalImageMatch[1];
+          const existingImg = await prisma.productImageStorage.findUnique({
+            where: { id: existingImageId },
+          });
+          if (existingImg) {
+            return {
+              productId: product.id,
+              storageKey: existingImg.storageKey,
+              storageThumbKey: existingImg.storageThumbKey,
+              width: existingImg.width,
+              height: existingImg.height,
+              thumbWidth: existingImg.thumbWidth,
+              thumbHeight: existingImg.thumbHeight,
+              mimeType: existingImg.mimeType,
+              originalFilename: existingImg.originalFilename,
+              sizeBytes: existingImg.sizeBytes,
+              position: index,
+            };
+          }
+        }
+
+        // Caso C: Enlace externo común
+        return {
+          productId: product.id,
+          storageKey: url,
+          storageThumbKey: null,
+          width: 0,
+          height: 0,
+          thumbWidth: null,
+          thumbHeight: null,
+          mimeType: 'image/jpeg',
+          originalFilename: 'external',
+          sizeBytes: 0,
+          position: index,
+        };
+      })
+    );
+
+    await prisma.productImageStorage.createMany({
+      data: imageRecords,
+    });
+  }
+
+  await updateProductCategories(product.id, normalizedCategoryIds);
+  await updateProductTags(product.id, Array.isArray(dto.tags) ? dto.tags : []);
+  await updateProductFeatures(product.id, Array.isArray(dto.features) ? dto.features : []);
 
   const refreshed = await prisma.product.findUnique({
-    where: { id: row.id },
+    where: { id: product.id },
     include: {
       productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
@@ -397,7 +491,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     },
   });
 
-  return toProduct(refreshed ?? row);
+  return toProduct(refreshed ?? product);
 }
 
 export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
@@ -490,17 +584,60 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   if (dto.images !== undefined) {
     await prisma.productImageStorage.deleteMany({ where: { productId: id } });
     if (Array.isArray(dto.images) && dto.images.length > 0) {
+      const imageRecords = await Promise.all(
+        dto.images.map(async (url, index) => {
+          if (url.startsWith('data:image/')) {
+            const uploaded = await uploadBase64ToR2(id, url, index);
+            return {
+              productId: id,
+              ...uploaded,
+              mimeType: 'image/webp',
+              originalFilename: 'wizard_upload',
+              position: index,
+            };
+          }
+
+          const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
+          if (isLocalImageMatch) {
+            const existingImageId = isLocalImageMatch[1];
+            const existingImg = await prisma.productImageStorage.findUnique({
+              where: { id: existingImageId },
+            });
+            if (existingImg) {
+              return {
+                productId: id,
+                storageKey: existingImg.storageKey,
+                storageThumbKey: existingImg.storageThumbKey,
+                width: existingImg.width,
+                height: existingImg.height,
+                thumbWidth: existingImg.thumbWidth,
+                thumbHeight: existingImg.thumbHeight,
+                mimeType: existingImg.mimeType,
+                originalFilename: existingImg.originalFilename,
+                sizeBytes: existingImg.sizeBytes,
+                position: index,
+              };
+            }
+          }
+
+          return {
+            productId: id,
+            storageKey: url,
+            storageThumbKey: null,
+            width: 0,
+            height: 0,
+            thumbWidth: null,
+            thumbHeight: null,
+            mimeType: 'image/jpeg',
+            originalFilename: 'external',
+            sizeBytes: 0,
+            position: index,
+          };
+        })
+      );
+
       await prisma.productImageStorage.createMany({
-        data: dto.images.map((url, index) => ({
-          productId: id,
-          storageKey: url.startsWith('/api/images') ? null : url,
-          width: 0,
-          height: 0,
-          mimeType: 'image/webp',
-          originalFilename: 'imported_update',
-          sizeBytes: 0,
-          position: index,
-        }))
+        data: imageRecords,
       });
     }
   }
