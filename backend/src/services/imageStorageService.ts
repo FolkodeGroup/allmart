@@ -58,19 +58,28 @@ function validateFile(file: UploadedImageFile): void {
 
 async function processImage(buffer: Buffer, originalname: string): Promise<ProcessedImage> {
   const base = sharp(buffer).rotate();
-  const fullBufferRaw = await base.clone().resize({ width: MAX_WIDTH, withoutEnlargement: true }).webp({ quality: WEBP_QUALITY }).toBuffer();
-  const fullMeta = await sharp(fullBufferRaw).metadata();
-  const thumbBufferRaw = await base.clone().resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true }).webp({ quality: 75 }).toBuffer();
-  const thumbMeta = await sharp(thumbBufferRaw).metadata();
+  
+  // 🟢 OPTIMIZACIÓN: Se usa resolveWithObject para evitar re-parsear el buffer de imagen y mejorar el rendimiento
+  const { data: fullData, info: fullInfo } = await base
+    .clone()
+    .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+    .webp({ quality: WEBP_QUALITY })
+    .toBuffer({ resolveWithObject: true });
+
+  const { data: thumbData, info: thumbInfo } = await base
+    .clone()
+    .resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true })
+    .webp({ quality: 75 })
+    .toBuffer({ resolveWithObject: true });
 
   return {
-    data: fullBufferRaw,
-    width: fullMeta.width ?? 0,
-    height: fullMeta.height ?? 0,
-    thumbnail: thumbBufferRaw,
-    thumbWidth: thumbMeta.width ?? 0,
-    thumbHeight: thumbMeta.height ?? 0,
-    sizeBytes: fullBufferRaw.length,
+    data: fullData,
+    width: fullInfo.width ?? 0,
+    height: fullInfo.height ?? 0,
+    thumbnail: thumbData,
+    thumbWidth: thumbInfo.width ?? 0,
+    thumbHeight: thumbInfo.height ?? 0,
+    sizeBytes: fullData.length,
     originalFilename: originalname,
   };
 }
@@ -135,7 +144,7 @@ export async function getProductImages(productId: string) {
     ...r, 
     url: `/api/images/products/${r.id}`, 
     thumbUrl: `/api/images/products/${r.id}/thumb`,
-    cdnUrl: r.storageKey ? `${env.R2_PUBLIC_URL}/${r.storageKey}` : null
+    cdnUrl: r.storageKey ? (r.storageKey.startsWith('http') ? r.storageKey : `${env.R2_PUBLIC_URL}/${r.storageKey}`) : null
   }));
 }
 
@@ -176,8 +185,15 @@ export async function serveProductImage(id: string): Promise<{ data: Buffer; mim
     select: { mimeType: true, storageKey: true }
   });
   if (!row) throw createError('Imagen no encontrada', 404);
-  if (row.storageKey && env.R2_PUBLIC_URL) {
-    return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
+  
+  if (row.storageKey) {
+    // 🟢 CORRECCIÓN: Si el enlace guardado ya es externo, redirigimos directamente sin prefijar el CDN de R2
+    if (row.storageKey.startsWith('http://') || row.storageKey.startsWith('https://')) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: row.storageKey };
+    }
+    if (env.R2_PUBLIC_URL) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
+    }
   }
   throw createError('Imagen no disponible', 404);
 }
@@ -186,11 +202,18 @@ export async function serveProductImageThumb(id: string): Promise<{ data: Buffer
   if (!isUUID(id)) throw createError('Imagen no encontrada (Legacy ID)', 404);
   const row = await prisma.productImageStorage.findUnique({
     where: { id },
-    select: { mimeType: true, storageThumbKey: true }
+    select: { mimeType: true, storageThumbKey: true, storageKey: true }
   });
   if (!row) throw createError('Imagen no encontrada', 404);
-  if (row.storageThumbKey && env.R2_PUBLIC_URL) {
-    return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageThumbKey}` };
+  
+  const key = row.storageThumbKey || row.storageKey;
+  if (key) {
+    if (key.startsWith('http://') || key.startsWith('https://')) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: key };
+    }
+    if (env.R2_PUBLIC_URL) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${key}` };
+    }
   }
   throw createError('Miniatura no disponible', 404);
 }
@@ -239,16 +262,27 @@ export async function uploadCategoryImage(categoryId: string, file: UploadedImag
 
 export async function serveCategoryImage(id: string): Promise<{ data: Buffer; mimeType: string; redirectUrl?: string }> {
   const row = await prisma.categoryImageStorage.findUnique({ where: { id }, select: { mimeType: true, storageKey: true } });
-  if (row?.storageKey && env.R2_PUBLIC_URL) {
-    return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
+  if (row?.storageKey) {
+    if (row.storageKey.startsWith('http://') || row.storageKey.startsWith('https://')) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: row.storageKey };
+    }
+    if (env.R2_PUBLIC_URL) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
+    }
   }
   throw createError('Imagen no encontrada', 404);
 }
 
 export async function serveCategoryImageThumb(id: string): Promise<{ data: Buffer; mimeType: string; redirectUrl?: string }> {
-  const row = await prisma.categoryImageStorage.findUnique({ where: { id }, select: { mimeType: true, storageThumbKey: true } });
-  if (row?.storageThumbKey && env.R2_PUBLIC_URL) {
-    return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageThumbKey}` };
+  const row = await prisma.categoryImageStorage.findUnique({ where: { id }, select: { mimeType: true, storageThumbKey: true, storageKey: true } });
+  const key = row?.storageThumbKey || row?.storageKey;
+  if (key) {
+    if (key.startsWith('http://') || key.startsWith('https://')) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: key };
+    }
+    if (env.R2_PUBLIC_URL) {
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${key}` };
+    }
   }
   throw createError('Miniatura no encontrada', 404);
 }

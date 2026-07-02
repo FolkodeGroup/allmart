@@ -16,12 +16,12 @@ import { r2Client } from '../config/r2';
 import { env } from '../config/env';
 import sharp from 'sharp';
 
-// Constantes de optimización de imágenes (idénticas a las de imageStorageService)
+// Constantes de optimización de imágenes
 const MAX_WIDTH = 1200;
 const THUMBNAIL_WIDTH = 240;
 const WEBP_QUALITY = 82;
 
-// Función auxiliar para el slug
+// Función auxiliar para el slug base
 function generateSlug(name: string): string {
   return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 }
@@ -133,16 +133,22 @@ async function uploadBase64ToR2(productId: string, base64Str: string, position: 
   const buffer = Buffer.from(matches[2], 'base64');
   const base = sharp(buffer).rotate();
   
-  const fullBuffer = await base.clone().resize({ width: MAX_WIDTH, withoutEnlargement: true }).webp({ quality: WEBP_QUALITY }).toBuffer();
-  const fullMeta = await sharp(fullBuffer).metadata();
-  const thumbBuffer = await base.clone().resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true }).webp({ quality: 75 }).toBuffer();
-  const thumbMeta = await sharp(thumbBuffer).metadata();
+  const { data: fullBuffer, info: fullInfo } = await base
+    .clone()
+    .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+    .webp({ quality: WEBP_QUALITY })
+    .toBuffer({ resolveWithObject: true });
+
+  const { data: thumbBuffer, info: thumbInfo } = await base
+    .clone()
+    .resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true })
+    .webp({ quality: 75 })
+    .toBuffer({ resolveWithObject: true });
 
   const timestamp = Date.now();
   const s3KeyFull = `products/${productId}/${timestamp}-${position}.webp`;
   const s3KeyThumb = `products/${productId}/thumbs/${timestamp}-${position}.webp`;
 
-  // Subida concurrente a R2 para optimizar velocidad
   await Promise.all([
     r2Client.send(new PutObjectCommand({
       Bucket: env.R2_BUCKET_NAME, Key: s3KeyFull, Body: fullBuffer, ContentType: 'image/webp'
@@ -155,10 +161,10 @@ async function uploadBase64ToR2(productId: string, base64Str: string, position: 
   return {
     storageKey: s3KeyFull,
     storageThumbKey: s3KeyThumb,
-    width: fullMeta.width ?? 0,
-    height: fullMeta.height ?? 0,
-    thumbWidth: thumbMeta.width ?? THUMBNAIL_WIDTH,
-    thumbHeight: thumbMeta.height ?? 0,
+    width: fullInfo.width ?? 0,
+    height: fullInfo.height ?? 0,
+    thumbWidth: thumbInfo.width ?? THUMBNAIL_WIDTH,
+    thumbHeight: thumbInfo.height ?? 0,
     sizeBytes: fullBuffer.length,
   };
 }
@@ -173,17 +179,14 @@ function toProduct(row: any): Product {
   
   const primaryCategoryId = categoryIds[0] ?? '';
 
-  // Reconstruimos tags desde la relación N:M
   const tags = Array.isArray(row.productTags)
     ? row.productTags.map((pt: any) => pt.tag.name)
     : [];
 
-  // Reconstruimos features desde la relación 1:N
   const features = Array.isArray(row.productFeatures)
     ? row.productFeatures.map((pf: any) => pf.description)
     : [];
 
-  // Extraemos las imágenes desde la relación directa en BD
   const images = Array.isArray(row.productImages)
     ? row.productImages.map((img: any) => `/api/images/products/${img.id}`)
     : [];
@@ -236,15 +239,7 @@ const adminProductSelect = {
   productFeatures: { select: { description: true, displayOrder: true }, orderBy: { displayOrder: 'asc' } },
 } satisfies Prisma.ProductSelect;
 
-type AdminProductsFilterQuery = {
-  q?: string;
-  categoryId?: string;
-  status?: string;
-  stockLevel?: string;
-  productIds?: string[];
-};
-
-function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string, any> {
+function buildAdminProductsWhere(query: Record<string, any>): Record<string, any> {
   const { q, categoryId, status, stockLevel, productIds } = query;
   const where: Record<string, any> = {};
 
@@ -259,7 +254,6 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
   if (status && status !== 'all') {
     where.status = status;
   } else {
-    // Si no se filtra por un estado en particular, excluimos los archivados (Soft Delete)
     where.status = { not: 'archived' }; 
   }
 
@@ -391,10 +385,18 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 
   await ensureCategoriesExist(normalizedCategoryIds);
 
-  const slug = generateSlug(dto.name);
+  // 🟢 CORRECCIÓN: Autogeneración inteligente del Slug para evitar colisiones Unique Constraint (Error 500)
+  let slug = generateSlug(dto.name);
+  let slugExists = await prisma.product.findUnique({ where: { slug } });
+  let counter = 1;
+  while (slugExists) {
+    slug = `${generateSlug(dto.name)}-${counter}`;
+    slugExists = await prisma.product.findUnique({ where: { slug } });
+    counter++;
+  }
+
   const parsedPrice = parseSafePrice(dto.price) ?? 0;
 
-  // 1. Crear la cabecera del producto primero
   const product = await prisma.product.create({
     data: {
       name: dto.name,
@@ -415,11 +417,9 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     },
   });
 
-  // 2. Procesar imágenes en paralelo de forma asíncrona y veloz fuera del bloqueo de la base de datos
   if (Array.isArray(dto.images) && dto.images.length > 0) {
-    const imageRecords = await Promise.all(
+    const imageRecordsRaw = await Promise.all(
       dto.images.map(async (url, index) => {
-        // Caso A: Imagen cruda en Base64 desde el Wizard
         if (url.startsWith('data:image/')) {
           const uploaded = await uploadBase64ToR2(product.id, url, index);
           return {
@@ -431,7 +431,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
           };
         }
 
-        // Caso B: Imagen local duplicada (Clonamos metadatos de R2 para no duplicar storage físico)
         const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
         if (isLocalImageMatch) {
           const existingImageId = isLocalImageMatch[1];
@@ -455,7 +454,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
           }
         }
 
-        // Caso C: Enlace externo común
         return {
           productId: product.id,
           storageKey: url,
@@ -471,6 +469,8 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
         };
       })
     );
+
+    const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
 
     await prisma.productImageStorage.createMany({
       data: imageRecords,
@@ -512,9 +512,17 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     if (skuExists) throw createError(`El SKU "${dto.sku}" ya está en uso por otro producto`, 409);
   }
 
+  // 🟢 CORRECCIÓN: Autogeneración inteligente del Slug para actualizaciones
   let slug = existing.slug;
-  if (dto.name) {
+  if (dto.name && dto.name !== existing.name) {
     slug = generateSlug(dto.name);
+    let slugExists = await prisma.product.findUnique({ where: { slug } });
+    let counter = 1;
+    while (slugExists && slugExists.id !== id) {
+      slug = `${generateSlug(dto.name)}-${counter}`;
+      slugExists = await prisma.product.findUnique({ where: { slug } });
+      counter++;
+    }
   }
 
   const existingCategoryIds = existing.productCategories.length > 0
@@ -540,6 +548,10 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       finalPrice = Number(existing.price);
     }
   }
+
+  const existingImages = await prisma.productImageStorage.findMany({
+    where: { productId: id },
+  });
 
   const row = await prisma.product.update({
     where: { id },
@@ -584,7 +596,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   if (dto.images !== undefined) {
     await prisma.productImageStorage.deleteMany({ where: { productId: id } });
     if (Array.isArray(dto.images) && dto.images.length > 0) {
-      const imageRecords = await Promise.all(
+      const imageRecordsRaw = await Promise.all(
         dto.images.map(async (url, index) => {
           if (url.startsWith('data:image/')) {
             const uploaded = await uploadBase64ToR2(id, url, index);
@@ -600,9 +612,14 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
           const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
           if (isLocalImageMatch) {
             const existingImageId = isLocalImageMatch[1];
-            const existingImg = await prisma.productImageStorage.findUnique({
-              where: { id: existingImageId },
-            });
+            let existingImg: any = existingImages.find(img => img.id === existingImageId);
+            
+            if (!existingImg) {
+              existingImg = await prisma.productImageStorage.findUnique({
+                where: { id: existingImageId },
+              });
+            }
+
             if (existingImg) {
               return {
                 productId: id,
@@ -636,6 +653,8 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
         })
       );
 
+      const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
+
       await prisma.productImageStorage.createMany({
         data: imageRecords,
       });
@@ -665,11 +684,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   return toProduct(refreshed ?? row);
 }
 
-/**
- * Eliminación lógica (Soft Delete): Actualiza el estado del producto a archivado
- * y renombra de manera segura el slug y el SKU para que queden liberados
- * de forma inmediata en la base de datos para futuras creaciones.
- */
 export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
@@ -682,44 +696,29 @@ export async function deleteProduct(id: string): Promise<void> {
     where: { id },
     data: {
       status: 'archived', 
-      slug: archivedSlug,  // 🟢 CORRECCIÓN: Libera el slug original inmediatamente
-      sku: archivedSku,    // 🟢 CORRECCIÓN: Libera el SKU original inmediatamente
+      slug: archivedSlug,
+      sku: archivedSku,
       inStock: false,     
       stock: 0,
     },
   });
 }
 
-/**
- * Obtiene la cantidad total de productos con stock < 5 excluyendo los productos archivados (Soft Deleted).
- */
 export async function getLowStockCount(): Promise<number> {
   return prisma.product.count({ 
     where: { 
       stock: { lt: 5 },
-      status: { not: 'archived' } // 🔒 CORRECCIÓN: Excluir productos eliminados
+      status: { not: 'archived' }
     } 
   });
 }
 
-/**
- * Obtiene productos para administración con paginación optimizada mediante "Paginación Diferida".
- * Evita la penalización de escanear filas anchas (con relaciones) al paginar offsets grandes.
- */
-export async function getAdminProducts(query: {
-  q?: string;
-  categoryId?: string;
-  status?: string;
-  stockLevel?: string;
-  page?: number;
-  limit?: number;
-}) {
+export async function getAdminProducts(query: Record<string, any>) {
   const { q, categoryId, status, stockLevel, page = 1, limit = 10 } = query;
   const where = buildAdminProductsWhere({ q, categoryId, status, stockLevel });
 
   const total = await prisma.product.count({ where });
 
-  // 1. Petición ligera: Obtenemos únicamente los IDs aplicando el OFFSET (Rápido vía B-Tree Index)
   const idsRow = await prisma.product.findMany({
     where,
     orderBy: { createdAt: 'desc' },
@@ -730,7 +729,6 @@ export async function getAdminProducts(query: {
 
   const ids = idsRow.map(r => r.id);
 
-  // 2. Hidratación: Consultamos los registros completos solo para los IDs de la página actual
   const rows = ids.length > 0
     ? await prisma.product.findMany({
         where: { id: { in: ids } },
@@ -748,14 +746,7 @@ export async function getAdminProducts(query: {
   };
 }
 
-export async function getProductsForCatalogExport(query: {
-  q?: string;
-  categoryId?: string;
-  status?: string;
-  stockLevel?: string;
-  productIds?: string[];
-  limit?: number;
-}): Promise<Product[]> {
+export async function getProductsForCatalogExport(query: Record<string, any>): Promise<Product[]> {
   const { q, categoryId, status, stockLevel, productIds, limit } = query;
   const where = buildAdminProductsWhere({ q, categoryId, status, stockLevel, productIds });
   const rows = await prisma.product.findMany({
@@ -768,25 +759,7 @@ export async function getProductsForCatalogExport(query: {
   return rows.map(toProduct);
 }
 
-type ProductQuery = {
-  category?: string;
-  q?: string;
-  sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
-  page?: number;
-  limit?: number;
-  isFeatured?: boolean;
-  tag?: string;
-  isOnSale?: boolean;
-  isNovedad?: boolean;
-  slugs?: string;
-  priceRanges?: string;
-};
-
-/**
- * Obtiene productos públicos con filtros y paginación optimizada mediante "Paginación Diferida".
- * Resuelve la penalización del OFFSET masivo sin requerir modificaciones en la API ni el frontend.
- */
-export async function getPublicProducts(query: ProductQuery) {
+export async function getPublicProducts(query: Record<string, any>) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
   const where: Record<string, any> = {
@@ -822,7 +795,7 @@ export async function getPublicProducts(query: ProductQuery) {
   }
 
   if (slugs) {
-    const slugArray = slugs.split(',').map(s => s.trim()).filter(Boolean);
+    const slugArray = slugs.split(',').map((s: string) => s.trim()).filter(Boolean);
     where.slug = { in: slugArray };
   }
 
@@ -851,9 +824,9 @@ export async function getPublicProducts(query: ProductQuery) {
   if (query.priceRanges) {
     const ranges = query.priceRanges
       .split(',')
-      .map((value) => value.trim())
+      .map((value: string) => value.trim())
       .filter(Boolean)
-      .map((range) => {
+      .map((range: string) => {
         const [minStr, maxStr] = range.split('-');
         const min = minStr !== '' ? Number(minStr) : undefined;
         const max = maxStr !== '' ? Number(maxStr) : undefined;
@@ -867,7 +840,7 @@ export async function getPublicProducts(query: ProductQuery) {
         }
         return { price: filter };
       })
-      .filter((item) => Object.keys(item.price as Record<string, unknown>).length > 0);
+      .filter((item: any) => Object.keys(item.price as Record<string, unknown>).length > 0);
 
     if (ranges.length > 0) {
       where.AND = [
@@ -896,7 +869,6 @@ export async function getPublicProducts(query: ProductQuery) {
     default: orderBy.createdAt = 'desc';
   }
 
-  // 1. OBTENCIÓN DE IDs EN LOTE: Evitamos resolver relaciones pesadas de la base de datos para registros a descartar
   const idsRow = await prisma.product.findMany({
     where,
     orderBy,
@@ -907,7 +879,6 @@ export async function getPublicProducts(query: ProductQuery) {
 
   const ids = idsRow.map(r => r.id);
 
-  // 2. HIDRATACIÓN: Solicitamos únicamente los 12 productos requeridos para el catálogo público actual
   const rows = ids.length > 0
     ? await prisma.product.findMany({
         where: { id: { in: ids } },
