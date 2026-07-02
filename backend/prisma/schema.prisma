@@ -17,7 +17,7 @@ model User {
   firstName    String    @map("first_name") @db.VarChar(100)
   lastName     String    @map("last_name") @db.VarChar(100)
   phone        String?   @db.VarChar(30)
-  passwordHash String    @map("password_hash") // CORRECCIÓN: YA NO ES OPCIONAL
+  passwordHash String    @map("password_hash")
   role         UserRole  @default(editor)
   isActive     Boolean   @default(true) @map("is_active")  
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -85,7 +85,7 @@ model Product {
   
   rating                Decimal                @default(0) @db.Decimal(3, 2)
   reviewCount           Int                    @default(0) @map("review_count")
-  inStock               Boolean                @default(true) @map("in_stock")
+  inStock               Boolean                @default(true) @map("is_visible")
   stock                 Int                    @default(0)
   sku                   String?                @unique(map: "products_sku_unique") @db.VarChar(100)
   isFeatured            Boolean                @default(false) @map("is_featured")
@@ -212,6 +212,7 @@ model ProductSku {
   productSkuImages ProductSkuImageStorage[]
   skuValues        ProductSkuValue[]
   orderItems       OrderItem[]              
+  cartItems        CartItem[]              
 
   @@index([productId], map: "idx_product_skus_product_id")
   @@map("product_skus")
@@ -381,16 +382,17 @@ model Cart {
 }
 
 model CartItem {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cartId    String   @map("cart_id") @db.Uuid
-  productId String   @map("product_id") @db.Uuid
-  quantity  Int
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cartId       String      @map("cart_id") @db.Uuid
+  productId    String      @map("product_id") @db.Uuid
+  productSkuId String?     @map("product_sku_id") @db.Uuid
+  quantity     Int
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cart_items_cart_fk")
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cart_items_product_fk")
+  cart         Cart        @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cart_items_cart_fk")
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cart_items_product_fk")
+  productSku   ProductSku? @relation(fields: [productSkuId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cart_items_sku_fk")
 
-  @@unique([cartId, productId], map: "cart_items_unique_product")
   @@index([cartId], map: "idx_cart_items_cart_id")
   @@map("cart_items")
 }

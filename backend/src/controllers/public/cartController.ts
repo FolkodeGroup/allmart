@@ -25,8 +25,8 @@ export async function getCart(req: Request, res: Response, next: NextFunction) {
 export async function addItem(req: Request, res: Response, next: NextFunction) {
   try {
     const sessionId = getSessionId(req, res);
-    const { productId, quantity } = req.body;
-    const cart = await cartService.addItem(sessionId, productId, quantity ?? 1);
+    const { productId, productSkuId, quantity } = req.body;
+    const cart = await cartService.addItem(sessionId, productId, productSkuId ?? null, quantity ?? 1);
     res.json(cart);
   } catch (err) {
     next(err);
@@ -37,8 +37,8 @@ export async function updateItem(req: Request, res: Response, next: NextFunction
   try {
     const sessionId = getSessionId(req, res);
     const { productId } = req.params;
-    const { quantity } = req.body;
-    const cart = await cartService.updateItem(sessionId, productId, quantity);
+    const { quantity, productSkuId } = req.body;
+    const cart = await cartService.updateItem(sessionId, productId, productSkuId ?? null, quantity);
     res.json(cart);
   } catch (err) {
     next(err);
@@ -49,7 +49,9 @@ export async function removeItem(req: Request, res: Response, next: NextFunction
   try {
     const sessionId = getSessionId(req, res);
     const { productId } = req.params;
-    const cart = await cartService.removeItem(sessionId, productId);
+    const { productSkuId } = req.body;
+    const skuId = productSkuId || req.query.productSkuId;
+    const cart = await cartService.removeItem(sessionId, productId, (skuId as string) ?? null);
     res.json(cart);
   } catch (err) {
     next(err);
