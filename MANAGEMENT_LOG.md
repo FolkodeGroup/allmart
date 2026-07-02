@@ -1961,3 +1961,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1165: 1119 quitar iconos y acciones innecesarias en la vista de producto del admin | 2026-06-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1222: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-02 |
