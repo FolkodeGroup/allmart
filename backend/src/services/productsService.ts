@@ -21,7 +21,7 @@ const MAX_WIDTH = 1200;
 const THUMBNAIL_WIDTH = 240;
 const WEBP_QUALITY = 82;
 
-// Función auxiliar para el slug base
+// Función auxiliar para el slug
 function generateSlug(name: string): string {
   return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 }
@@ -79,7 +79,6 @@ async function updateProductCategories(productId: string, categoryIds: string[])
 async function updateProductTags(productId: string, tags: string[]): Promise<void> {
   const uniqueTags = Array.from(new Set(tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
 
-  // 1. Desvincular tags que no correspondan
   await prisma.productTag.deleteMany({
     where: {
       productId,
@@ -87,7 +86,6 @@ async function updateProductTags(productId: string, tags: string[]): Promise<voi
     }
   });
 
-  // 2. Insertar/Vincular los nuevos
   for (const tagName of uniqueTags) {
     const tag = await prisma.tag.upsert({
       where: { name: tagName },
@@ -106,10 +104,8 @@ async function updateProductTags(productId: string, tags: string[]): Promise<voi
 }
 
 async function updateProductFeatures(productId: string, features: string[]): Promise<void> {
-  // Limpiar features existentes para este producto
   await prisma.productFeature.deleteMany({ where: { productId } });
 
-  // Insertar nuevas features respetando el orden
   if (features.length > 0) {
     await prisma.productFeature.createMany({
       data: features.map((desc, idx) => ({
@@ -121,9 +117,6 @@ async function updateProductFeatures(productId: string, features: string[]): Pro
   }
 }
 
-/**
- * Decodifica, procesa y sube una imagen en Base64 a Cloudflare R2 de forma optimizada.
- */
 async function uploadBase64ToR2(productId: string, base64Str: string, position: number) {
   const matches = base64Str.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
   if (!matches) {
@@ -385,7 +378,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 
   await ensureCategoriesExist(normalizedCategoryIds);
 
-  // 🟢 CORRECCIÓN: Autogeneración inteligente del Slug para evitar colisiones Unique Constraint (Error 500)
   let slug = generateSlug(dto.name);
   let slugExists = await prisma.product.findUnique({ where: { slug } });
   let counter = 1;
@@ -417,20 +409,22 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     },
   });
 
+  // 🟢 OPTIMIZACIÓN Y FIX DE PG-POOL: Convertimos el Promise.all() que colapsaba la CPU y la Base de Datos 
+  // en un bucle secuencial eficiente for...of
   if (Array.isArray(dto.images) && dto.images.length > 0) {
-    const imageRecordsRaw = await Promise.all(
-      dto.images.map(async (url, index) => {
-        if (url.startsWith('data:image/')) {
-          const uploaded = await uploadBase64ToR2(product.id, url, index);
-          return {
-            productId: product.id,
-            ...uploaded,
-            mimeType: 'image/webp',
-            originalFilename: 'wizard_upload',
-            position: index,
-          };
-        }
-
+    const imageRecordsRaw = [];
+    let index = 0;
+    for (const url of dto.images) {
+      if (url.startsWith('data:image/')) {
+        const uploaded = await uploadBase64ToR2(product.id, url, index);
+        imageRecordsRaw.push({
+          productId: product.id,
+          ...uploaded,
+          mimeType: 'image/webp',
+          originalFilename: 'wizard_upload',
+          position: index,
+        });
+      } else {
         const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
         if (isLocalImageMatch) {
           const existingImageId = isLocalImageMatch[1];
@@ -438,7 +432,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
             where: { id: existingImageId },
           });
           if (existingImg) {
-            return {
+            imageRecordsRaw.push({
               productId: product.id,
               storageKey: existingImg.storageKey,
               storageThumbKey: existingImg.storageThumbKey,
@@ -450,25 +444,26 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
               originalFilename: existingImg.originalFilename,
               sizeBytes: existingImg.sizeBytes,
               position: index,
-            };
+            });
           }
+        } else {
+          imageRecordsRaw.push({
+            productId: product.id,
+            storageKey: url,
+            storageThumbKey: null,
+            width: 0,
+            height: 0,
+            thumbWidth: null,
+            thumbHeight: null,
+            mimeType: 'image/jpeg',
+            originalFilename: 'external',
+            sizeBytes: 0,
+            position: index,
+          });
         }
-
-        return {
-          productId: product.id,
-          storageKey: url,
-          storageThumbKey: null,
-          width: 0,
-          height: 0,
-          thumbWidth: null,
-          thumbHeight: null,
-          mimeType: 'image/jpeg',
-          originalFilename: 'external',
-          sizeBytes: 0,
-          position: index,
-        };
-      })
-    );
+      }
+      index++;
+    }
 
     const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
 
@@ -512,7 +507,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     if (skuExists) throw createError(`El SKU "${dto.sku}" ya está en uso por otro producto`, 409);
   }
 
-  // 🟢 CORRECCIÓN: Autogeneración inteligente del Slug para actualizaciones
   let slug = existing.slug;
   if (dto.name && dto.name !== existing.name) {
     slug = generateSlug(dto.name);
@@ -593,22 +587,25 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     },
   });
 
+  // 🟢 OPTIMIZACIÓN Y FIX DE PG-POOL PARA EL UPDATE
   if (dto.images !== undefined) {
     await prisma.productImageStorage.deleteMany({ where: { productId: id } });
+    
     if (Array.isArray(dto.images) && dto.images.length > 0) {
-      const imageRecordsRaw = await Promise.all(
-        dto.images.map(async (url, index) => {
-          if (url.startsWith('data:image/')) {
-            const uploaded = await uploadBase64ToR2(id, url, index);
-            return {
-              productId: id,
-              ...uploaded,
-              mimeType: 'image/webp',
-              originalFilename: 'wizard_upload',
-              position: index,
-            };
-          }
-
+      const imageRecordsRaw = [];
+      let index = 0;
+      
+      for (const url of dto.images) {
+        if (url.startsWith('data:image/')) {
+          const uploaded = await uploadBase64ToR2(id, url, index);
+          imageRecordsRaw.push({
+            productId: id,
+            ...uploaded,
+            mimeType: 'image/webp',
+            originalFilename: 'wizard_upload',
+            position: index,
+          });
+        } else {
           const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
           if (isLocalImageMatch) {
             const existingImageId = isLocalImageMatch[1];
@@ -621,7 +618,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
             }
 
             if (existingImg) {
-              return {
+              imageRecordsRaw.push({
                 productId: id,
                 storageKey: existingImg.storageKey,
                 storageThumbKey: existingImg.storageThumbKey,
@@ -633,25 +630,26 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
                 originalFilename: existingImg.originalFilename,
                 sizeBytes: existingImg.sizeBytes,
                 position: index,
-              };
+              });
             }
+          } else {
+            imageRecordsRaw.push({
+              productId: id,
+              storageKey: url,
+              storageThumbKey: null,
+              width: 0,
+              height: 0,
+              thumbWidth: null,
+              thumbHeight: null,
+              mimeType: 'image/jpeg',
+              originalFilename: 'external',
+              sizeBytes: 0,
+              position: index,
+            });
           }
-
-          return {
-            productId: id,
-            storageKey: url,
-            storageThumbKey: null,
-            width: 0,
-            height: 0,
-            thumbWidth: null,
-            thumbHeight: null,
-            mimeType: 'image/jpeg',
-            originalFilename: 'external',
-            sizeBytes: 0,
-            position: index,
-          };
-        })
-      );
+        }
+        index++;
+      }
 
       const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
 
@@ -759,7 +757,21 @@ export async function getProductsForCatalogExport(query: Record<string, any>): P
   return rows.map(toProduct);
 }
 
-export async function getPublicProducts(query: Record<string, any>) {
+type ProductQuery = {
+  category?: string;
+  q?: string;
+  sort?: 'price_asc' | 'price_desc' | 'rating' | 'newest';
+  page?: number;
+  limit?: number;
+  isFeatured?: boolean;
+  tag?: string;
+  isOnSale?: boolean;
+  isNovedad?: boolean;
+  slugs?: string;
+  priceRanges?: string;
+};
+
+export async function getPublicProducts(query: ProductQuery) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
   const where: Record<string, any> = {
@@ -824,9 +836,9 @@ export async function getPublicProducts(query: Record<string, any>) {
   if (query.priceRanges) {
     const ranges = query.priceRanges
       .split(',')
-      .map((value: string) => value.trim())
+      .map((value) => value.trim())
       .filter(Boolean)
-      .map((range: string) => {
+      .map((range) => {
         const [minStr, maxStr] = range.split('-');
         const min = minStr !== '' ? Number(minStr) : undefined;
         const max = maxStr !== '' ? Number(maxStr) : undefined;

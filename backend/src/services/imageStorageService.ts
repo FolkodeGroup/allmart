@@ -8,7 +8,7 @@
 import sharp from 'sharp';
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { r2Client } from '../config/r2';
 import { env } from '../config/env';
 
@@ -59,7 +59,6 @@ function validateFile(file: UploadedImageFile): void {
 async function processImage(buffer: Buffer, originalname: string): Promise<ProcessedImage> {
   const base = sharp(buffer).rotate();
   
-  // 🟢 OPTIMIZACIÓN: Se usa resolveWithObject para evitar re-parsear el buffer de imagen y mejorar el rendimiento
   const { data: fullData, info: fullInfo } = await base
     .clone()
     .resize({ width: MAX_WIDTH, withoutEnlargement: true })
@@ -155,7 +154,6 @@ export async function getProductImageMeta(id: string) {
   return { ...row, url: `/api/images/products/${row.id}`, thumbUrl: `/api/images/products/${row.id}/thumb` };
 }
 
-// 🟢 FUNCIÓN AÑADIDA PARA FIX DE COMPILACIÓN
 export async function updateProductImageMeta(id: string, data: { altText?: string | null; position?: number }) {
   const existing = await prisma.productImageStorage.findUnique({ where: { id } });
   if (!existing) throw createError('Imagen no encontrada', 404);
@@ -187,12 +185,25 @@ export async function serveProductImage(id: string): Promise<{ data: Buffer; mim
   if (!row) throw createError('Imagen no encontrada', 404);
   
   if (row.storageKey) {
-    // 🟢 CORRECCIÓN: Si el enlace guardado ya es externo, redirigimos directamente sin prefijar el CDN de R2
     if (row.storageKey.startsWith('http://') || row.storageKey.startsWith('https://')) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: row.storageKey };
     }
     if (env.R2_PUBLIC_URL) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
+    } else {
+      // 🟢 CORRECCIÓN: Si no hay CDN público, descargamos usando el SDK de AWS R2 y servimos el Buffer directamente
+      try {
+        const response = await r2Client.send(new GetObjectCommand({
+          Bucket: env.R2_BUCKET_NAME,
+          Key: row.storageKey
+        }));
+        const byteArray = await response.Body?.transformToByteArray();
+        if (byteArray) {
+          return { data: Buffer.from(byteArray), mimeType: row.mimeType };
+        }
+      } catch (err) {
+        console.error('[R2 Proxy] Error fetching full image from R2:', err);
+      }
     }
   }
   throw createError('Imagen no disponible', 404);
@@ -213,6 +224,20 @@ export async function serveProductImageThumb(id: string): Promise<{ data: Buffer
     }
     if (env.R2_PUBLIC_URL) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${key}` };
+    } else {
+      // 🟢 CORRECCIÓN: Fallback Proxy R2 para las miniaturas del buscador
+      try {
+        const response = await r2Client.send(new GetObjectCommand({
+          Bucket: env.R2_BUCKET_NAME,
+          Key: key
+        }));
+        const byteArray = await response.Body?.transformToByteArray();
+        if (byteArray) {
+          return { data: Buffer.from(byteArray), mimeType: row.mimeType };
+        }
+      } catch (err) {
+        console.error('[R2 Proxy] Error fetching thumbnail from R2:', err);
+      }
     }
   }
   throw createError('Miniatura no disponible', 404);
@@ -268,6 +293,16 @@ export async function serveCategoryImage(id: string): Promise<{ data: Buffer; mi
     }
     if (env.R2_PUBLIC_URL) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
+    } else {
+      try {
+        const response = await r2Client.send(new GetObjectCommand({
+          Bucket: env.R2_BUCKET_NAME, Key: row.storageKey
+        }));
+        const byteArray = await response.Body?.transformToByteArray();
+        if (byteArray) return { data: Buffer.from(byteArray), mimeType: row.mimeType };
+      } catch (err) {
+        console.error('[R2 Proxy] Error fetching category image:', err);
+      }
     }
   }
   throw createError('Imagen no encontrada', 404);
@@ -282,6 +317,16 @@ export async function serveCategoryImageThumb(id: string): Promise<{ data: Buffe
     }
     if (env.R2_PUBLIC_URL) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${key}` };
+    } else {
+      try {
+        const response = await r2Client.send(new GetObjectCommand({
+          Bucket: env.R2_BUCKET_NAME, Key: key
+        }));
+        const byteArray = await response.Body?.transformToByteArray();
+        if (byteArray) return { data: Buffer.from(byteArray), mimeType: row.mimeType };
+      } catch (err) {
+        console.error('[R2 Proxy] Error fetching category thumb:', err);
+      }
     }
   }
   throw createError('Miniatura no encontrada', 404);
