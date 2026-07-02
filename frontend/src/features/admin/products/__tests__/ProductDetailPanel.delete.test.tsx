@@ -9,17 +9,40 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { ProductDetailPanel } from '../ProductDetailPanel';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
+import AdminProductsContext, { type AdminProductsContextType } from '../../../../context/AdminProductsContext';
 import { AdminVariantsProvider } from '../../../../context';
 import { AdminAuthProvider } from '../../../../context/AdminAuthContext';
 import { NotificationProvider } from '../../../../context/NotificationContext';
 
-function TestWrapper({ children }: { children: ReactNode }) {
+const defaultAdminProductsContext: AdminProductsContextType = {
+  products: [],
+  categories: [],
+  loading: false,
+  total: 0,
+  page: 1,
+  totalPages: 1,
+  error: null,
+  refreshProducts: vi.fn(),
+  refreshCurrentPage: vi.fn(),
+  addProduct: vi.fn() as any,
+  updateProduct: vi.fn() as any,
+  deleteProduct: vi.fn() as any,
+  getProduct: vi.fn() as any,
+  loadProductVariants: vi.fn() as any,
+  getLowStockCount: vi.fn(),
+  lowStockTotal: 0,
+};
+
+function TestWrapper({ children, contextValue }: { children: ReactNode; contextValue?: Partial<AdminProductsContextType> }) {
+  const value = { ...defaultAdminProductsContext, ...contextValue } as AdminProductsContextType;
   return (
     <AdminAuthProvider>
       <NotificationProvider>
-        <AdminVariantsProvider>
-          {children}
-        </AdminVariantsProvider>
+        <AdminProductsContext.Provider value={value}>
+          <AdminVariantsProvider>
+            {children}
+          </AdminVariantsProvider>
+        </AdminProductsContext.Provider>
       </NotificationProvider>
     </AdminAuthProvider>
   );
@@ -163,5 +186,39 @@ describe('ProductDetailPanel - Delete Confirmation Modal', () => {
       btn.textContent?.trim() === 'Eliminar'
     );
     expect(deleteButtons.length).toBeGreaterThan(0);
+  });
+
+  it('should toggle inStock status when status button is clicked', async () => {
+    const updateProduct = vi.fn().mockResolvedValue(undefined);
+    render(
+      <TestWrapper contextValue={{ updateProduct }}>
+        <ProductDetailPanel product={mockProduct} canEdit={true} />
+      </TestWrapper>
+    );
+
+    const inStockButton = screen.getByRole('button', { name: /Con Stock/i });
+    fireEvent.click(inStockButton);
+
+    await waitFor(() => {
+      expect(updateProduct).toHaveBeenCalledWith('prod-1', { inStock: false });
+      expect(inStockButton).toHaveTextContent('Sin stock');
+    });
+  });
+
+  it('should toggle isFeatured status when featured button is clicked', async () => {
+    const updateProduct = vi.fn().mockResolvedValue(undefined);
+    render(
+      <TestWrapper contextValue={{ updateProduct }}>
+        <ProductDetailPanel product={mockProduct} canEdit={true} />
+      </TestWrapper>
+    );
+
+    const featuredButton = screen.getByRole('button', { name: /No destacado/i });
+    fireEvent.click(featuredButton);
+
+    await waitFor(() => {
+      expect(updateProduct).toHaveBeenCalledWith('prod-1', { isFeatured: true });
+      expect(featuredButton).toHaveTextContent('Destacado');
+    });
   });
 });
