@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Modal } from '../../../components/ui/Modal';
-import { useNotification } from '../../../context/NotificationContext';
+import { useNotification } from '../../../context';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useCategorySelection } from './hooks/useCategorySelection';

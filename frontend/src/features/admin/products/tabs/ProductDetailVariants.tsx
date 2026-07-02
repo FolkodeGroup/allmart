@@ -3,16 +3,18 @@ import toast from 'react-hot-toast';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import styles from './ProductDetailVariants.module.css';
+import commonStyles from '../AdminProductFormPage.module.css'; // Usamos estilos comunes para los inputs
 import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
 import type { UploadFileState } from '../../images';
 import { getStoredToken } from '../../../../utils/apiClient';
-import { useAdminVariants } from '../../../../context/AdminVariantsContext';
+import { useAdminVariants } from '../../../../hooks/useAdminVariants';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
 import { VariantForm } from '../../variants/components/VariantForm';
 import { VariantEditModal } from '../../variants/components/VariantEditModal';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
+import { Modal } from '../../../../components/ui/Modal'; // 🟢 FIX: Modal oficial
 
 interface ProductDetailVariantsProps {
   productId: string;
@@ -341,7 +343,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     try {
       let persistedSkuId: string | undefined = undefined;
       
-      // 1. Crear entrada primero para obtener un ID donde anclar las imágenes
       if (editingSkuId) {
         persistedSkuId = editingSkuId;
       } else {
@@ -351,7 +352,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         }
       }
 
-      // 2. Subir imágenes si existen locales
       let uploadedRemoteUrls: string[] = [];
       if (persistedSkuId && uploadedFiles.length > 0) {
         const results = await uploadAll(persistedSkuId);
@@ -366,7 +366,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         images = undefined;
       }
 
-      // 3. Actualizar registro final
       if (persistedSkuId) {
         await updateVariantChild(productId, persistedSkuId, { images, price, stock, sku: sku || undefined, attributes: attrs });
       }
@@ -374,7 +373,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       setFiles([]);
       toast.success(editingSkuId ? 'Combinación actualizada' : 'Combinación creada con éxito');
       
-      // 4. Recargar vista desde BD (borra la tabla optimista auto)
       await loadSkus(productId);
       
     } catch(err) {
@@ -412,7 +410,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationModalOpen(true);
   };
 
-  // ─── 4. Eliminación vinculada a ModalConfirm Custom con Optimistic UI ─────
   const handleDeleteCombination = (id: string) => {
     setSkuToDeleteId(id);
     setDeleteConfirmOpen(true);
@@ -422,14 +419,12 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     if (!productId || !skuToDeleteId) return;
     setDeleteConfirmOpen(false);
 
-    // Optimistic UI Update: Ocultar de inmediato en la tabla
     setDeletedSkuIds(prev => new Set([...prev, skuToDeleteId]));
 
     try {
       await deleteVariantChild(productId, skuToDeleteId);
       toast.success('Combinación eliminada correctamente');
     } catch {
-      // Revertir estado si falla
       setDeletedSkuIds(prev => {
         const next = new Set(prev);
         next.delete(skuToDeleteId);
@@ -441,7 +436,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
-  // Filtrar localmente las SKUs que se eliminaron optimistamente
   const visibleSkus = (skus || []).filter((s) => !deletedSkuIds.has(s.id));
 
   return (
@@ -522,7 +516,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         </div>
 
         {(!productId) && (
-          <p className={styles.fieldHint} style={{ marginTop: '4px' }}>
+          <p className={commonStyles.fieldHint} style={{ marginTop: '4px' }}>
             Guardá el producto primero para poder crear combinaciones.
           </p>
         )}
@@ -535,89 +529,114 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         />
       </section>
 
-      {/* ── Modal de combinación ── */}
-      {combinationModalOpen && (
-        <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
-          <div className={styles.modal}>
-            <h3>{editingSkuId ? 'Editar combinación' : 'Añadir combinación'}</h3>
-            {variants.length === 0 && (
-              <p className={styles.help}>No hay grupos de variantes para seleccionar.</p>
-            )}
-            {variants.map((g) => (
-              <div key={g.id} className={styles.fieldRow}>
-                <label>{g.name}</label>
-                <select
-                  value={combinationAttrs[g.name] ?? ''}
-                  onChange={e => setCombinationAttrs(a => ({ ...a, [g.name]: e.target.value }))}
-                >
-                  <option value="">--</option>
-                  {g.values.map(v => <option key={v} value={v}>{v}</option>)}
-                </select>
-              </div>
-            ))}
-            <div className={styles.fieldRow}>
-              <label htmlFor="combination-sku">SKU</label>
-              <input
-                id="combination-sku"
-                value={combinationSku}
-                onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
-                onBlur={() => runCombinationValidation()}
-                className={combinationErrors.sku ? styles.inputError : ''}
+      {/* 🟢 FIX: Modal Oficial del Design System */}
+      <Modal
+        open={combinationModalOpen}
+        onClose={() => setCombinationModalOpen(false)}
+        title={editingSkuId ? 'Editar combinación' : 'Añadir combinación'}
+        disableClose={isSubmittingCombo}
+        size="md"
+        actions={
+          <>
+            <button 
+              type="button" 
+              className={commonStyles.cancelBtn} 
+              disabled={isSubmittingCombo} 
+              onClick={() => setCombinationModalOpen(false)}
+              style={{ minWidth: 100 }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={commonStyles.submitBtn}
+              onClick={handleCreateCombination}
+              disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
+              style={{ minWidth: 120 }}
+            >
+              {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
+            </button>
+          </>
+        }
+      >
+        <div style={{ display: 'grid', gap: '16px', padding: '8px 0' }}>
+          {(!variants || variants.length === 0) && (
+            <p className={commonStyles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
+          )}
+
+          {variants.map((group) => (
+            <div key={group.id} className={commonStyles.field}>
+              <label className={commonStyles.label}>{group.name}</label>
+              <select
+                className={commonStyles.input}
+                value={combinationAttrs[group.name] ?? ''}
+                onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
+              >
+                <option value="">-- Seleccionar --</option>
+                {group.values.map(value => (
+                  <option key={value} value={value}>{value}</option>
+                ))}
+              </select>
+            </div>
+          ))}
+
+          <div className={commonStyles.field}>
+            <label htmlFor="combination-sku" className={commonStyles.label}>SKU *</label>
+            <input
+              id="combination-sku"
+              className={`${commonStyles.input} ${combinationErrors.sku ? commonStyles.inputError : ''}`}
+              value={combinationSku}
+              onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
+              onBlur={() => runCombinationValidation()}
+            />
+            {combinationErrors.sku && <div className={commonStyles.errorText}>{combinationErrors.sku}</div>}
+          </div>
+
+          <div className={commonStyles.field}>
+            <label htmlFor="combination-images" className={commonStyles.label}>Imágenes</label>
+            <div style={{ marginTop: '8px' }}>
+              <ImageUploader onAddFiles={addFiles} />
+              <ImagePreviewList
+                items={uploadedFiles}
+                onRemove={removeFile}
+                onRetry={retry}
+                onSetPrimary={setPrimary}
               />
             </div>
-            {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
-            <div className={styles.fieldRow}>
-              <label htmlFor="combination-images">Imágenes</label>
-              <div className={styles.imageUploaderContainer}>
-                <ImageUploader onAddFiles={(f: File[]) => addFiles(f)} />
-                <ImagePreviewList
-                  items={uploadedFiles}
-                  onRemove={(id: string) => removeFile(id)}
-                  onRetry={(id: string) => retry(id)}
-                  onSetPrimary={(id: string) => setPrimary(id)}
-                />
-              </div>
-            </div>
-            {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
-            <div className={styles.fieldRow}>
-              <label htmlFor="combination-price">Precio</label>
+            {combinationErrors.images && <div className={commonStyles.errorText}>{combinationErrors.images}</div>}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className={commonStyles.field}>
+              <label htmlFor="combination-price" className={commonStyles.label}>Precio</label>
               <input
                 id="combination-price"
                 type="number"
                 step="0.01"
+                className={`${commonStyles.input} ${combinationErrors.price ? commonStyles.inputError : ''}`}
                 value={combinationPrice === '' ? '' : String(combinationPrice)}
                 onChange={e => {
                   setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
                   runCombinationValidation();
                 }}
                 onBlur={() => runCombinationValidation()}
-                className={combinationErrors.price ? styles.inputError : ''}
               />
+              {combinationErrors.price && <div className={commonStyles.errorText}>{combinationErrors.price}</div>}
             </div>
-            {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
-            <div className={styles.fieldRow}>
-              <label htmlFor="combination-stock">Stock</label>
+
+            <div className={commonStyles.field}>
+              <label htmlFor="combination-stock" className={commonStyles.label}>Stock</label>
               <input
                 id="combination-stock"
                 type="number"
+                className={commonStyles.input}
                 value={combinationStock === '' ? '' : String(combinationStock)}
                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
               />
             </div>
-            <div className={styles.modalActions}>
-              {/* 🟢 SE DESHABILITAN LOS BOTONES MIENTRAS CARGA */}
-              <button type="button" disabled={isSubmittingCombo} onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
-              <button
-                type="button"
-                onClick={handleCreateCombination}
-                disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
-              >
-                {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
-              </button>
-            </div>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* Modal de Confirmación de Generación Masiva */}
       <ModalConfirm

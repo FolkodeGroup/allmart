@@ -7,7 +7,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
-import { useNotification } from './NotificationContext';
+import { useNotification } from './index';
 import * as imagesService from '../features/admin/images/productImagesService';
 import type { ApiProductImage, CreateImagePayload, UpdateImagePayload, UpdateImageMetaPayload } from '../features/admin/images/productImagesService';
 
