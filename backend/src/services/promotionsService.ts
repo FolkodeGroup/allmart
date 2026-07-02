@@ -173,6 +173,14 @@ export async function createPromotion(dto: CreatePromotionDTO): Promise<any> {
     throw createError('La fecha de fin debe ser posterior a la fecha de inicio', 400);
   }
 
+  // Interceptación de valores negativos antes de la base de datos
+  if (dto.minPurchaseAmount !== undefined && dto.minPurchaseAmount !== null && dto.minPurchaseAmount < 0) {
+    throw createError('El monto de compra mínima no puede ser negativo', 400);
+  }
+  if (dto.maxDiscount !== undefined && dto.maxDiscount !== null && dto.maxDiscount < 0) {
+    throw createError('El descuento máximo permitido no puede ser negativo', 400);
+  }
+
   const promotion = await prisma.promotion.create({
     data: {
       name: dto.name,
@@ -217,6 +225,14 @@ export async function updatePromotion(id: string, dto: UpdatePromotionDTO): Prom
   if (dto.value !== undefined) {
     const type = dto.type || existing.type;
     validatePromotionValue(type, dto.value);
+  }
+
+  // Interceptación de valores negativos antes de la base de datos
+  if (dto.minPurchaseAmount !== undefined && dto.minPurchaseAmount !== null && dto.minPurchaseAmount < 0) {
+    throw createError('El monto de compra mínima no puede ser negativo', 400);
+  }
+  if (dto.maxDiscount !== undefined && dto.maxDiscount !== null && dto.maxDiscount < 0) {
+    throw createError('El descuento máximo permitido no puede ser negativo', 400);
   }
 
   await prisma.promotion.update({

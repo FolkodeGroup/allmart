@@ -401,6 +401,14 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 
   const parsedPrice = parseSafePrice(dto.price) ?? 0;
 
+  // Interceptación preventiva de valores negativos
+  if (parsedPrice < 0) {
+    throw createError('El precio de venta no puede ser negativo', 400);
+  }
+  if (dto.stock !== undefined && dto.stock !== null && dto.stock < 0) {
+    throw createError('El stock físico no puede ser negativo', 400);
+  }
+
   // 1. Crear la cabecera del producto primero
   const product = await prisma.product.create({
     data: {
@@ -547,6 +555,15 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   }
 
   let finalPrice = dto.price !== undefined ? parseSafePrice(dto.price) : undefined;
+
+  // Interceptación preventiva de valores negativos
+  if (finalPrice !== undefined && finalPrice !== null && finalPrice < 0) {
+    throw createError('El precio de venta no puede ser negativo', 400);
+  }
+  if (dto.stock !== undefined && dto.stock !== null && dto.stock < 0) {
+    throw createError('El stock físico no puede ser negativo', 400);
+  }
+
   if (finalPrice !== undefined && existing.productSkus.length > 0) {
     const skuPrices = existing.productSkus
       .map((s) => s.price ? Number(s.price) : null)
