@@ -79,6 +79,7 @@ async function updateProductCategories(productId: string, categoryIds: string[])
 async function updateProductTags(productId: string, tags: string[]): Promise<void> {
   const uniqueTags = Array.from(new Set(tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
 
+  // 1. Desvincular tags que no correspondan
   await prisma.productTag.deleteMany({
     where: {
       productId,
@@ -86,6 +87,7 @@ async function updateProductTags(productId: string, tags: string[]): Promise<voi
     }
   });
 
+  // 2. Insertar/Vincular los nuevos
   for (const tagName of uniqueTags) {
     const tag = await prisma.tag.upsert({
       where: { name: tagName },
@@ -104,8 +106,10 @@ async function updateProductTags(productId: string, tags: string[]): Promise<voi
 }
 
 async function updateProductFeatures(productId: string, features: string[]): Promise<void> {
+  // Limpiar features existentes para este producto
   await prisma.productFeature.deleteMany({ where: { productId } });
 
+  // Insertar nuevas features respetando el orden
   if (features.length > 0) {
     await prisma.productFeature.createMany({
       data: features.map((desc, idx) => ({
@@ -117,6 +121,9 @@ async function updateProductFeatures(productId: string, features: string[]): Pro
   }
 }
 
+/**
+ * Decodifica, procesa y sube una imagen en Base64 a Cloudflare R2 de forma optimizada.
+ */
 async function uploadBase64ToR2(productId: string, base64Str: string, position: number) {
   const matches = base64Str.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
   if (!matches) {
@@ -142,6 +149,7 @@ async function uploadBase64ToR2(productId: string, base64Str: string, position: 
   const s3KeyFull = `products/${productId}/${timestamp}-${position}.webp`;
   const s3KeyThumb = `products/${productId}/thumbs/${timestamp}-${position}.webp`;
 
+  // Subida concurrente a R2 para optimizar velocidad
   await Promise.all([
     r2Client.send(new PutObjectCommand({
       Bucket: env.R2_BUCKET_NAME, Key: s3KeyFull, Body: fullBuffer, ContentType: 'image/webp'
@@ -172,14 +180,17 @@ function toProduct(row: any): Product {
   
   const primaryCategoryId = categoryIds[0] ?? '';
 
+  // Reconstruimos tags desde la relación N:M
   const tags = Array.isArray(row.productTags)
     ? row.productTags.map((pt: any) => pt.tag.name)
     : [];
 
+  // Reconstruimos features desde la relación 1:N
   const features = Array.isArray(row.productFeatures)
     ? row.productFeatures.map((pf: any) => pf.description)
     : [];
 
+  // Extraemos las imágenes desde la relación directa en BD
   const images = Array.isArray(row.productImages)
     ? row.productImages.map((img: any) => `/api/images/products/${img.id}`)
     : [];
@@ -247,6 +258,7 @@ function buildAdminProductsWhere(query: Record<string, any>): Record<string, any
   if (status && status !== 'all') {
     where.status = status;
   } else {
+    // Si no se filtra por un estado en particular, excluimos los archivados (Soft Delete)
     where.status = { not: 'archived' }; 
   }
 
@@ -389,6 +401,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 
   const parsedPrice = parseSafePrice(dto.price) ?? 0;
 
+  // 1. Crear la cabecera del producto primero
   const product = await prisma.product.create({
     data: {
       name: dto.name,
@@ -409,22 +422,23 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     },
   });
 
-  // 🟢 OPTIMIZACIÓN Y FIX DE PG-POOL: Convertimos el Promise.all() que colapsaba la CPU y la Base de Datos 
-  // en un bucle secuencial eficiente for...of
+  // 2. Procesar imágenes en paralelo de forma asíncrona y veloz fuera del bloqueo de la base de datos
   if (Array.isArray(dto.images) && dto.images.length > 0) {
-    const imageRecordsRaw = [];
-    let index = 0;
-    for (const url of dto.images) {
-      if (url.startsWith('data:image/')) {
-        const uploaded = await uploadBase64ToR2(product.id, url, index);
-        imageRecordsRaw.push({
-          productId: product.id,
-          ...uploaded,
-          mimeType: 'image/webp',
-          originalFilename: 'wizard_upload',
-          position: index,
-        });
-      } else {
+    const imageRecordsRaw = await Promise.all(
+      dto.images.map(async (url, index) => {
+        // Caso A: Imagen cruda en Base64 desde el Wizard
+        if (url.startsWith('data:image/')) {
+          const uploaded = await uploadBase64ToR2(product.id, url, index);
+          return {
+            productId: product.id,
+            ...uploaded,
+            mimeType: 'image/webp',
+            originalFilename: 'wizard_upload',
+            position: index,
+          };
+        }
+
+        // Caso B: Imagen local duplicada (Clonamos metadatos de R2 para no duplicar storage físico)
         const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
         if (isLocalImageMatch) {
           const existingImageId = isLocalImageMatch[1];
@@ -432,7 +446,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
             where: { id: existingImageId },
           });
           if (existingImg) {
-            imageRecordsRaw.push({
+            return {
               productId: product.id,
               storageKey: existingImg.storageKey,
               storageThumbKey: existingImg.storageThumbKey,
@@ -444,26 +458,26 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
               originalFilename: existingImg.originalFilename,
               sizeBytes: existingImg.sizeBytes,
               position: index,
-            });
+            };
           }
-        } else {
-          imageRecordsRaw.push({
-            productId: product.id,
-            storageKey: url,
-            storageThumbKey: null,
-            width: 0,
-            height: 0,
-            thumbWidth: null,
-            thumbHeight: null,
-            mimeType: 'image/jpeg',
-            originalFilename: 'external',
-            sizeBytes: 0,
-            position: index,
-          });
         }
-      }
-      index++;
-    }
+
+        // Caso C: Enlace externo común
+        return {
+          productId: product.id,
+          storageKey: url,
+          storageThumbKey: null,
+          width: 0,
+          height: 0,
+          thumbWidth: null,
+          thumbHeight: null,
+          mimeType: 'image/jpeg',
+          originalFilename: 'external',
+          sizeBytes: 0,
+          position: index,
+        };
+      })
+    );
 
     const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
 
@@ -587,25 +601,22 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     },
   });
 
-  // 🟢 OPTIMIZACIÓN Y FIX DE PG-POOL PARA EL UPDATE
   if (dto.images !== undefined) {
     await prisma.productImageStorage.deleteMany({ where: { productId: id } });
-    
     if (Array.isArray(dto.images) && dto.images.length > 0) {
-      const imageRecordsRaw = [];
-      let index = 0;
-      
-      for (const url of dto.images) {
-        if (url.startsWith('data:image/')) {
-          const uploaded = await uploadBase64ToR2(id, url, index);
-          imageRecordsRaw.push({
-            productId: id,
-            ...uploaded,
-            mimeType: 'image/webp',
-            originalFilename: 'wizard_upload',
-            position: index,
-          });
-        } else {
+      const imageRecordsRaw = await Promise.all(
+        dto.images.map(async (url, index) => {
+          if (url.startsWith('data:image/')) {
+            const uploaded = await uploadBase64ToR2(id, url, index);
+            return {
+              productId: id,
+              ...uploaded,
+              mimeType: 'image/webp',
+              originalFilename: 'wizard_upload',
+              position: index,
+            };
+          }
+
           const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
           if (isLocalImageMatch) {
             const existingImageId = isLocalImageMatch[1];
@@ -618,7 +629,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
             }
 
             if (existingImg) {
-              imageRecordsRaw.push({
+              return {
                 productId: id,
                 storageKey: existingImg.storageKey,
                 storageThumbKey: existingImg.storageThumbKey,
@@ -630,26 +641,25 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
                 originalFilename: existingImg.originalFilename,
                 sizeBytes: existingImg.sizeBytes,
                 position: index,
-              });
+              };
             }
-          } else {
-            imageRecordsRaw.push({
-              productId: id,
-              storageKey: url,
-              storageThumbKey: null,
-              width: 0,
-              height: 0,
-              thumbWidth: null,
-              thumbHeight: null,
-              mimeType: 'image/jpeg',
-              originalFilename: 'external',
-              sizeBytes: 0,
-              position: index,
-            });
           }
-        }
-        index++;
-      }
+
+          return {
+            productId: id,
+            storageKey: url,
+            storageThumbKey: null,
+            width: 0,
+            height: 0,
+            thumbWidth: null,
+            thumbHeight: null,
+            mimeType: 'image/jpeg',
+            originalFilename: 'external',
+            sizeBytes: 0,
+            position: index,
+          };
+        })
+      );
 
       const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
 
@@ -895,7 +905,9 @@ export async function getPublicProducts(query: ProductQuery) {
     ? await prisma.product.findMany({
         where: { id: { in: ids } },
         orderBy,
+        // 🟢 FIX 1: Agregar el include faltante (productImages) para catálogos públicos
         include: { 
+          productImages: { select: { id: true }, orderBy: { position: 'asc' } },
           productCategories: { select: { categoryId: true } },
           productTags: { include: { tag: true } },
           productFeatures: { orderBy: { displayOrder: 'asc' } },
