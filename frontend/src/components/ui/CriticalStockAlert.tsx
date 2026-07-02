@@ -17,16 +17,7 @@ export default function CriticalStockAlert({ products }: Props) {
   const criticalProducts = products.filter(p => p.stock >= 0 && p.stock <= LOW_STOCK_THRESHOLD);
   const sorted = [...criticalProducts].sort((a, b) => a.stock - b.stock).slice(0, 3);
 
-  // Debug: mostrar en consola qué está siendo filtrado
-  if (import.meta.env.MODE === 'development') {
-    console.log('[CriticalStockAlert DEBUG]', {
-      totalProducts: products.length,
-      criticalCount: criticalProducts.length,
-      criticalProducts: criticalProducts.map(p => ({ name: p.name, stock: p.stock })),
-      displaying: sorted.length,
-      displayedProducts: sorted.map(p => ({ name: p.name, stock: p.stock })),
-    });
-  }
+  
 
   if (sorted.length === 0) {
     return (

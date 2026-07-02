@@ -9,6 +9,7 @@ import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 import type { UploadFileState } from '../../images';
 import styles from '../AdminProductFormPage.module.css';
+import toast from 'react-hot-toast';
 
 export type TabVariantesRef = {
     validate: () => Record<string, string>;
@@ -38,6 +39,10 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     errors = {},
 }, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
+
+    // 🟢 ESTADO DE CARGA PARA UX DEL MODAL
+    const [isSubmittingCombo, setIsSubmittingCombo] = useState(false);
+
     interface Sku {
         id: string;
         sku?: string;
@@ -73,6 +78,8 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     const [combinationPrice, setCombinationPrice] = useState<number | ''>('');
     const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
     const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
+    
+    // 🟢 ESTADO OPTIMISTA: Lista local para mostrar al instante en la UI antes que termine el fetch
     const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
     const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
 
@@ -92,6 +99,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         loadSkus(productId);
     }, [productId, loadSkus]);
 
+    // Limpieza de estados locales si la API ya trajo el dato final
     useEffect(() => {
         if (!skus || skus.length === 0) return;
         setCreatedCombinations(prev => prev.filter(local => {
@@ -100,7 +108,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }));
     }, [skus]);
 
-    // ─── 1. SKU Automático Reactivo ─────────────────────────────────────────────
     useEffect(() => {
         if (combinationModalOpen && !editingSkuId && form.sku) {
             const attrValues = Object.values(combinationAttrs).filter(Boolean);
@@ -163,11 +170,10 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationModalOpen(true);
     };
 
-    // ─── 3. Preparar la Generación en Matriz (Abre el Modal) ─────────────────
     const handleBulkGenerate = () => {
         if (!productId) return;
         if (!form.variants || form.variants.length === 0) {
-            alert('Agregá al menos un grupo de variantes con valores.');
+            toast.error('Agregá al menos un grupo de variantes con valores.');
             return;
         }
 
@@ -175,7 +181,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         const variantValuesLists = form.variants.map(g => g.values);
 
         if (variantValuesLists.some(list => list.length === 0)) {
-            alert('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
+            toast.error('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
             return;
         }
 
@@ -217,7 +223,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }
 
         if (newCombosToCreate.length === 0) {
-            alert('Todas las combinaciones posibles ya fueron generadas.');
+            toast.success('Todas las combinaciones posibles ya fueron generadas.');
             return;
         }
 
@@ -225,84 +231,118 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setBulkConfirmOpen(true);
     };
 
-    // ─── 4. Ejecutar la Generación en Matriz (Desde el Modal) ────────────────
     const executeBulkGenerate = async () => {
         if (!productId) return;
         setBulkConfirmOpen(false);
 
+        // 🟢 CERRAR MODAL INMEDIATAMENTE E INYECTAR OPTIMISTIC UI
         setCreatedCombinations(prev => [...combosToCreate, ...prev]);
+        const loadingToast = toast.loading(`Generando ${combosToCreate.length} combinaciones...`);
 
-        for (const combo of combosToCreate) {
-            try {
+        try {
+            for (const combo of combosToCreate) {
                 await createVariantChild(productId, {
                     sku: combo.sku,
                     attributes: combo.attributes,
                     price: combo.price,
                     stock: combo.stock
                 });
-            } catch (err) {
-                console.error('Error creando la combinación', combo, err);
             }
+            await loadSkus(productId);
+            toast.success('Generación exitosa', { id: loadingToast });
+        } catch (err) {
+            console.error('Error creando la combinación', err);
+            toast.error('Ocurrió un error al generar combinaciones', { id: loadingToast });
+        } finally {
+            setCombosToCreate([]);
         }
-        await loadSkus(productId);
-        setCombosToCreate([]);
     };
 
     const handleCreateCombination = async () => {
         if (!productId) return;
+        
+        setIsSubmittingCombo(true); // Bloqueamos UI
+
         const attrs = { ...combinationAttrs };
         const sku = combinationSku.trim();
         const stock = combinationStock === '' ? undefined : Number(combinationStock);
         let images: string[] | undefined;
+        
         const raw = combinationImages.trim();
         if (raw) {
             if (raw.includes('\n')) images = raw.split('\n').map(s => s.trim()).filter(Boolean);
             else images = [raw];
         }
+        
         const price = combinationPrice === '' ? undefined : Number(combinationPrice);
 
         const validation = runCombinationValidation();
         if (validation && (validation.sku || validation.images || validation.price)) {
+            setIsSubmittingCombo(false);
             return;
         }
 
-        let persistedSkuId: string | undefined;
-        if (editingSkuId) {
-            await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price });
-            persistedSkuId = editingSkuId;
-        } else {
-            const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price });
-            if (created && typeof created === 'object' && (created as Record<string, unknown>).id) {
-                persistedSkuId = String((created as Record<string, unknown>).id);
-            }
-        }
+        // 🟢 CERRAR MODAL INMEDIATAMENTE
+        setCombinationModalOpen(false);
+        setEditingSkuId(null);
+        setCombinationAttrs({});
+        setCombinationSku('');
+        setCombinationPrice('');
+        setCombinationStock('');
+        setCombinationImages('');
 
-        let uploadedRemoteUrls: string[] = [];
-        if (persistedSkuId) {
-            const results = await uploadAll(persistedSkuId);
-            uploadedRemoteUrls = results.filter(r => r.status === 'success' && r.url).map(r => r.url!) as string[];
-        }
+        // 🟢 INYECTAR EN TABLA OPTIMISTA PARA FEEDBACK VISUAL 0ms
+        const optimisticCombo: CreatedCombination = { 
+            sku: sku || undefined, 
+            attributes: attrs, 
+            stock, 
+            images: uploadedFiles.map(f => f.remoteUrl || f.previewUrl).filter(Boolean) as string[], 
+            price 
+        };
+        setCreatedCombinations(prev => [optimisticCombo, ...prev]);
 
-        if (images && Array.isArray(images)) {
-            images = [...uploadedRemoteUrls, ...images];
-        } else if (uploadedRemoteUrls.length > 0) {
-            images = uploadedRemoteUrls;
-        } else {
-            images = undefined;
-        }
-
+        // 🔥 PROCEDER CON LA RED DE FONDO
         try {
-            if (persistedSkuId) {
-                await updateVariantChild(productId, persistedSkuId, { images, price, attributes: attrs });
-            } else if (!editingSkuId) {
-                const newItem: CreatedCombination = { sku: sku || undefined, attributes: attrs, stock, images, price };
-                setCreatedCombinations(prev => [newItem, ...prev]);
-            } else {
-                if (editingSkuId) await updateVariantChild(productId, editingSkuId, { images, price, attributes: attrs });
+            let persistedSkuId = editingSkuId;
+            
+            if (!persistedSkuId) {
+                const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price });
+                if (created && typeof created === 'object' && (created as Record<string, unknown>).id) {
+                    persistedSkuId = String((created as Record<string, unknown>).id);
+                }
             }
+
+            let uploadedRemoteUrls: string[] = [];
+            if (persistedSkuId && uploadedFiles.length > 0) {
+                const results = await uploadAll(persistedSkuId);
+                uploadedRemoteUrls = results.filter(r => r.status === 'success' && r.url).map(r => r.url!) as string[];
+            }
+
+            if (images && Array.isArray(images)) {
+                images = [...uploadedRemoteUrls, ...images];
+            } else if (uploadedRemoteUrls.length > 0) {
+                images = uploadedRemoteUrls;
+            } else {
+                images = undefined;
+            }
+
+            if (persistedSkuId) {
+                await updateVariantChild(productId, persistedSkuId, { images, price, stock, sku: sku || undefined, attributes: attrs });
+            }
+
+            setFiles([]);
+            toast.success(editingSkuId ? 'Combinación actualizada' : 'Combinación creada con éxito');
+            
+            // Recargamos listado real y el useEffect borrará la entry optimista
+            await loadSkus(productId);
+            
+        } catch(err) {
+            console.error('Error al guardar variante:', err);
+            toast.error('Ocurrió un error al guardar la combinación');
+            // Revertir optimistic UI si falla
+            setCreatedCombinations(prev => prev.filter(c => c.sku !== sku));
         } finally {
-            setCombinationModalOpen(false);
-            setEditingSkuId(null);
+            setIsSubmittingCombo(false); // Liberamos UI
         }
     };
 
@@ -329,7 +369,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationModalOpen(true);
     };
 
-    // ─── 5. Eliminación vinculada a ModalConfirm Custom con Optimistic UI ─────
     const handleDeleteCombination = (id: string) => {
         if (!productId) return;
         setSkuToDeleteId(id);
@@ -345,14 +384,15 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
 
         try {
             await deleteVariantChild(productId, skuToDeleteId);
-        } catch (err) {
-            console.error('Error al eliminar la combinación:', err);
+            toast.success('Combinación eliminada');
+        } catch {
             // Revertir estado si falla
             setDeletedSkuIds(prev => {
                 const next = new Set(prev);
                 next.delete(skuToDeleteId);
                 return next;
             });
+            toast.error('Error al eliminar combinación');
         } finally {
             setSkuToDeleteId(null);
         }
@@ -367,7 +407,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }
     }), [form]);
 
-    // Filtrar localmente las SKUs que se eliminaron optimistamente
     const visibleSkus = (skus || []).filter((s: Sku) => !deletedSkuIds.has(s.id));
 
     return (
@@ -498,7 +537,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             {combinationModalOpen && (
                 <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
                     <div className={styles.modal}>
-                        <h3>{editingSkuId ? 'Editar combinación' : 'Agregar combinación'}</h3>
+                        <h3>{editingSkuId ? 'Editar combinación' : 'Añadir combinación'}</h3>
                         {(!form.variants || form.variants.length === 0) && (
                             <p className={styles.help}>No hay grupos de variantes para seleccionar.</p>
                         )}
@@ -566,13 +605,14 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             />
                         </div>
                         <div className={styles.modalActions}>
-                            <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
+                            {/* 🟢 SE DESHABILITAN LOS BOTONES MIENTRAS CARGA */}
+                            <button type="button" disabled={isSubmittingCombo} onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
                             <button
                                 type="button"
                                 onClick={handleCreateCombination}
-                                disabled={!!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
+                                disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
                             >
-                                {editingSkuId ? 'Guardar cambios' : 'Crear'}
+                                {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
                             </button>
                         </div>
                     </div>

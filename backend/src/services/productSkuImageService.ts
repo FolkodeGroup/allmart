@@ -27,14 +27,9 @@ const MAX_WIDTH = 1200;
 const THUMBNAIL_WIDTH = 240;
 const WEBP_QUALITY = 82;
 
-/**
- * Procesa la imagen de variante: corrige orientación, comprime a WebP
- * y genera una miniatura liviana para optimizar ancho de banda.
- */
 async function processSkuImage(buffer: Buffer, originalname: string): Promise<ProcessedSkuImage> {
     const base = sharp(buffer).rotate();
     
-    // Procesar imagen principal optimizada
     const fullBufferRaw = await base
         .clone()
         .resize({ width: MAX_WIDTH, withoutEnlargement: true })
@@ -43,7 +38,6 @@ async function processSkuImage(buffer: Buffer, originalname: string): Promise<Pr
     
     const fullMeta = await sharp(fullBufferRaw).metadata();
     
-    // Generar miniatura optimizada
     const thumbBufferRaw = await base
         .clone()
         .resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true })
@@ -72,12 +66,8 @@ export async function uploadSkuImage(
     isPrimary?: boolean
 ) {
     const allowed = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff']);
-    if (!allowed.has(file.mimetype)) {
-        throw createError(`Tipo de archivo no permitido: ${file.mimetype}`, 400);
-    }
-    if (file.size > 8 * 1024 * 1024) {
-        throw createError('El archivo supera el tamaño máximo de 8 MB', 400);
-    }
+    if (!allowed.has(file.mimetype)) throw createError(`Tipo de archivo no permitido: ${file.mimetype}`, 400);
+    if (file.size > 8 * 1024 * 1024) throw createError('El archivo supera el tamaño máximo de 8 MB', 400);
 
     const sku = await prisma.productSku.findUnique({ where: { id: skuId } });
     if (!sku) throw createError('SKU no encontrado', 404);
@@ -86,7 +76,6 @@ export async function uploadSkuImage(
         position = await prisma.productSkuImageStorage.count({ where: { skuId } });
     }
 
-    // Procesar y optimizar la imagen con Sharp antes de la transferencia a R2
     const processed = await processSkuImage(file.buffer, file.originalname);
     const timestamp = Date.now();
     const s3KeyFull = `skus/${skuId}/${timestamp}-${position}.webp`;
@@ -94,18 +83,8 @@ export async function uploadSkuImage(
 
     try {
         await Promise.all([
-            r2Client.send(new PutObjectCommand({
-                Bucket: env.R2_BUCKET_NAME, 
-                Key: s3KeyFull, 
-                Body: processed.data, 
-                ContentType: 'image/webp'
-            })),
-            r2Client.send(new PutObjectCommand({
-                Bucket: env.R2_BUCKET_NAME, 
-                Key: s3KeyThumb, 
-                Body: processed.thumbnail, 
-                ContentType: 'image/webp'
-            }))
+            r2Client.send(new PutObjectCommand({ Bucket: env.R2_BUCKET_NAME, Key: s3KeyFull, Body: processed.data, ContentType: 'image/webp' })),
+            r2Client.send(new PutObjectCommand({ Bucket: env.R2_BUCKET_NAME, Key: s3KeyThumb, Body: processed.thumbnail, ContentType: 'image/webp' }))
         ]);
     } catch (error) {
         console.error('[R2] Error en la transferencia de imagen de SKU a R2:', error);

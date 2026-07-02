@@ -15,8 +15,6 @@ export async function removeExpiredNovedadTags(): Promise<void> {
 
     if (products.length === 0) return;
 
-    console.log(`[removeNovedadTag] Procesando ${products.length} productos...`);
-
     for (const product of products) {
         await prisma.$transaction(async (tx) => {
             // 1. Buscamos el tag "novedad"
@@ -41,6 +39,4 @@ export async function removeExpiredNovedadTags(): Promise<void> {
             });
         });
     }
-
-    console.log(`[removeNovedadTag] ${products.length} productos actualizados`);
 }

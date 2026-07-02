@@ -20,10 +20,6 @@ export interface ProductSkuRow {
     updatedAt: Date;
 }
 
-/**
- * Parsea y limpia de forma segura precios en formato string que puedan contener
- * separadores de miles con puntos o comas decimales (común en formatos latinoamericanos).
- */
 export function parseSafePrice(price: any): number | undefined {
   if (price === undefined || price === null || price === '') {
     return undefined;
@@ -34,7 +30,6 @@ export function parseSafePrice(price: any): number | undefined {
   if (typeof price === 'string') {
     let clean = price.trim().replace(/[^0-9.,-]/g, '');
     
-    // Formato es-AR (puntos para miles, coma para decimales)
     if (clean.includes('.') && clean.includes(',')) {
       clean = clean.replace(/\./g, '').replace(/,/g, '.');
     } else if (clean.includes('.')) {
@@ -102,21 +97,9 @@ export async function getSkusByProduct(productId: string): Promise<ProductSkuRow
     const rows = await (prisma as any).productSku.findMany({
         where: { productId },
         include: {
-            product: {
-                select: { price: true }
-            },
-            skuValues: {
-                include: {
-                    optionValue: {
-                        include: {
-                            option: true
-                        }
-                    }
-                }
-            },
-            productSkuImages: {
-                select: { id: true }
-            }
+            product: { select: { price: true } },
+            skuValues: { include: { optionValue: { include: { option: true } } } },
+            productSkuImages: { select: { id: true } }
         }
     });
     return rows.map(toDto);
@@ -130,21 +113,9 @@ export async function getSkuById(productId: string, skuId: string): Promise<Prod
     const row = await (prisma as any).productSku.findFirst({
         where: { id: skuId, productId },
         include: {
-            product: {
-                select: { price: true }
-            },
-            skuValues: {
-                include: {
-                    optionValue: {
-                        include: {
-                            option: true
-                        }
-                    }
-                }
-            },
-            productSkuImages: {
-                select: { id: true }
-            }
+            product: { select: { price: true } },
+            skuValues: { include: { optionValue: { include: { option: true } } } },
+            productSkuImages: { select: { id: true } }
         }
     });
     if (!row) throw createError('SKU no encontrado', 404);
@@ -174,6 +145,7 @@ export async function createSku(
 
     const attrs = dto.attributes ?? {};
 
+    // 🟢 OPTIMIZACIÓN: Transacción atómica estricta sin arrays mutables en memoria
     return await prisma.$transaction(async (tx) => {
         const product = await tx.product.findUnique({
             where: { id: productId },
@@ -194,56 +166,37 @@ export async function createSku(
             }
         });
 
-        // Optimización: Carga inicial de todas las opciones para realizar validación en memoria y evitar ráfagas de consultas a la BD
-        const existingOptions = await tx.productOption.findMany({
-            where: { productId },
-            include: { values: true }
-        });
-
+        // Resolvemos opciones una a una con await estricto para evitar locks de pool
         for (const [optionName, valueName] of Object.entries(attrs)) {
-            let option = existingOptions.find(o => o.name === optionName);
+            let option = await tx.productOption.findUnique({
+                where: { productId_name: { productId, name: optionName } }
+            });
             if (!option) {
                 option = await tx.productOption.create({
-                    data: { productId, name: optionName, isActive: true },
-                    include: { values: true }
+                    data: { productId, name: optionName, isActive: true }
                 });
-                existingOptions.push(option);
             }
 
-            let optionValue = option.values.find(v => v.name === valueName);
+            let optionValue = await tx.productOptionValue.findUnique({
+                where: { optionId_name: { optionId: option.id, name: valueName } }
+            });
             if (!optionValue) {
                 optionValue = await tx.productOptionValue.create({
                     data: { optionId: option.id, name: valueName }
                 });
-                option.values.push(optionValue);
             }
 
             await tx.productSkuValue.create({
-                data: {
-                    skuId: newSku.id,
-                    optionValueId: optionValue.id
-                }
+                data: { skuId: newSku.id, optionValueId: optionValue.id }
             });
         }
 
         const populated = await (tx as any).productSku.findUnique({
             where: { id: newSku.id },
             include: {
-                product: {
-                    select: { price: true }
-                },
-                skuValues: {
-                    include: {
-                        optionValue: {
-                            include: {
-                                option: true
-                              }
-                        }
-                    }
-                },
-                productSkuImages: {
-                    select: { id: true }
-                }
+                product: { select: { price: true } },
+                skuValues: { include: { optionValue: { include: { option: true } } } },
+                productSkuImages: { select: { id: true } }
             }
         });
 
@@ -277,6 +230,7 @@ export async function updateSku(
         }
     }
 
+    // 🟢 OPTIMIZACIÓN: Transacción atómica estricta
     return await prisma.$transaction(async (tx) => {
         const product = await tx.product.findUnique({
             where: { id: productId },
@@ -306,35 +260,27 @@ export async function updateSku(
                 where: { skuId }
             });
 
-            // Optimización: Reducción drástica del número de consultas en memoria
-            const existingOptions = await tx.productOption.findMany({
-                where: { productId },
-                include: { values: true }
-            });
-
             for (const [optionName, valueName] of Object.entries(dto.attributes)) {
-                let option = existingOptions.find(o => o.name === optionName);
+                let option = await tx.productOption.findUnique({
+                    where: { productId_name: { productId, name: optionName } }
+                });
                 if (!option) {
                     option = await tx.productOption.create({
-                        data: { productId, name: optionName, isActive: true },
-                        include: { values: true }
+                        data: { productId, name: optionName, isActive: true }
                     });
-                    existingOptions.push(option);
                 }
 
-                let optionValue = option.values.find(v => v.name === valueName);
+                let optionValue = await tx.productOptionValue.findUnique({
+                    where: { optionId_name: { optionId: option.id, name: valueName } }
+                });
                 if (!optionValue) {
                     optionValue = await tx.productOptionValue.create({
                         data: { optionId: option.id, name: valueName }
                     });
-                    option.values.push(optionValue);
                 }
 
                 await tx.productSkuValue.create({
-                    data: {
-                        skuId,
-                        optionValueId: optionValue.id
-                    }
+                    data: { skuId, optionValueId: optionValue.id }
                 });
             }
         }
@@ -342,21 +288,9 @@ export async function updateSku(
         const populated = await (tx as any).productSku.findUnique({
             where: { id: skuId },
             include: {
-                product: {
-                    select: { price: true }
-                },
-                skuValues: {
-                    include: {
-                        optionValue: {
-                            include: {
-                                option: true
-                            }
-                        }
-                    }
-                },
-                productSkuImages: {
-                    select: { id: true }
-                }
+                product: { select: { price: true } },
+                skuValues: { include: { optionValue: { include: { option: true } } } },
+                productSkuImages: { select: { id: true } }
             }
         });
 
@@ -367,10 +301,7 @@ export async function updateSku(
 export async function deleteSku(productId: string, skuId: string): Promise<void> {
     ensureModelAvailable();
     const result = await (prisma as any).productSku.deleteMany({
-        where: {
-            id: skuId,
-            productId
-        }
+        where: { id: skuId, productId }
     });
     if (result.count === 0) {
         throw createError('SKU no encontrado', 404);
