@@ -1960,5 +1960,52 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1167: Eliminación de iconos y algunos ajustes de centrado en headers de la tabla de pedidos en ver | 2026-06-26 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1165: 1119 quitar iconos y acciones innecesarias en la vista de producto del admin | 2026-06-26 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1222: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1186: ajuste de valores en las métricas claves en la vista del dashboard admin | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1174: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1172: 1115 mejorar fluctuación por producto y modo clarooscuro del proveedor activo vista proveedores | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1171: Se implementa mejoras al soporte del modo claro/oscuro en la vista "A… | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1194: Automatizar valor `0` al seleccionar descuento BOGO en vista de Promociones | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1193: Aplicar tema oscuro al modal de confirmación de Ocultar/Eliminar | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1191: Ajustar ancho de columnas en vista de Categorías para coincidir con Productos | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1185: Ajustar estilos del modal de editar variantes para consistencia | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1184: Crear variantes de producto durante la creación (alta) de un nuevo producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1183: Mejorar inputs de "Precio" y "Stock" con comportamiento intuitivo | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1182: Limpiar sección "SEO / Publicación" en formulario de producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1181: Optimizar layout de card "sin resultados" en búsqueda de productos | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1180: Agregar input de "Stock Crítico" para alertas por producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1179: Agregar botones de "Con Stock" y "Destacado" en el detalle del producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1178: Ocultar botones de acciones al hover en la card de nota para ver el mensaje completo | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1177: Mostrar usuario que realiza acciones en la tabla de Actividad Reciente | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1176: Modal de confirmación de restaurar diseño predeterminado debe usar estilo de modales de la app | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1175: Datos de Métricas Clave no reflejan correctamente los mocks/carga de la página | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1173: Que no se rompan los textos dentro de las cards de Métricas Clave en Dashboard Admin | 2026-06-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-06-28 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1220: Unificar estilos de estados de Pedidos entre Dashboard y vista de Pedidos | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1219: Renderizado en vivo de filtros (actualizar mientras se escribe) | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1218: Resultados duplicados en la tabla de pedidos al aplicar filtros (excepto búsqueda) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1217: Alinear estilos de los modales de `Ver` y `Eliminar` en Consultas con el modo claro/oscuro global | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1216: Evitar pérdida de contenido al descargar PDFs (confirmación del navegador o flujo incorrecto) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1215: Corregir cálculo de ventas totales para rangos personalizados (error de +-1 día) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1214: Mejorar estilos y legibilidad de PDFs exportados desde Reportes | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1213: Evitar descargas duplicadas del PDF (una sola descarga por acción) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1212: Renderizar los gráficos como tablas legibles en el PDF de Reportes | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1211: Corregir textos y duplicado de título en la edición de categorías | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1210: Quitar las celdas "Estados / Cliente / Producto" del PDF detallado de Reportes | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1209: Permitir volver a “Sin tope” el descuento máximo al editar una promoción | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1208: Alinear texto y reactivar acciones en la card de Notas del Dashboard | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1207: Eliminar modal de confirmación de salida en formulario de Categorías y corregir botón Guardar | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1206: No renderizar productos de categorías hijas ocultas en la Home | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1205: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-01 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1222: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1221: 1193 aplicar tema oscuro al modal de confirmación de ocultareliminar | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1204: ajuste de columnas en la vista de categorias | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1203: ajustar-estilos-del-modal-de-editar-variantes-para-consistencia | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1202: Mejorar inputs de "Precio" y "Stock" con comportamiento intuitivo | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1201: Limpiar sección "SEO / Publicación" en formulario de producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1200: Columnas ajustadas para que ocupe todo el ancho si no se encontraron productos | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1198: 1179 agregar botones de con stock y destacado en el detalle del producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1197: 1178 ocultar botones de acciones al hover en la card de nota para ver el mensaje completo | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1196: 1177 mostrar usuario que realiza acciones en la tabla de actividad reciente | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1195: Resultados: | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1192: 🔄 Registrar puntaje de gestión | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-07-02 |
