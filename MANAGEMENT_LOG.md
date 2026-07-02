@@ -1932,9 +1932,14 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1089: Mejorar UI de variantes de producto en el Home usando variantes creadas y referencia de Mercado Libre | 2026-06-10 |
 | FedericoPaal | 3 | Creación de issue | Issue #1087: Mantener visible el apartado de “Productos en Stock Crítico” en el Dashboard aunque no haya items con bajo stock | 2026-06-10 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1092: 🔄 Actualización automática de puntajes semanal | 2026-06-14 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1103: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1101: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1100: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1099: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1098: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1103: 🔄 Registrar puntaje de gestión | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1102: 1096 subida de imágenes desde escritorio y gestión avanzada de imágenes en creaciónedición de combinaciones | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1101: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1100: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1099: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1098: 🔄 Registrar puntaje de gestión | 2026-06-17 |
@@ -1942,23 +1947,158 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1094: 1089 mejorar UI de variantes de producto en el home usando variantes creadas y referencia de mercado libre | 2026-06-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1093: 1087 mantener visible el apartado de productos en stock crítico en el dashboard aunque no haya items con bajo stock | 2026-06-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1093: 1087 mantener visible el apartado de productos en stock crítico en el dashboard aunque no haya items con bajo stock | 2026-06-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1092: 🔄 Actualización automática de puntajes semanal | 2026-06-17 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1088: 🔄 Registrar puntaje de gestión | 2026-06-17 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1096: Subida de imágenes desde escritorio y gestión avanzada de imágenes en creación/edición de combinaciones | 2026-06-17 |
 | Mau-bar-iva | 3 | Creación de issue | Issue #1095: Validar formulario de creación/edición de combinaciones (SKU, imagen, precio) | 2026-06-17 |
-| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1092: 🔄 Actualización automática de puntajes semanal | 2026-06-17 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1102: 1096 subida de imágenes desde escritorio y gestión avanzada de imágenes en creaciónedición de combinaciones | 2026-06-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1107: 🔄 Registrar puntaje de gestión | 2026-06-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1112: Quitar selección masiva de checkboxes en la vista de Colecciones | 2026-06-19 |
+| FedericoPaal | 3 | Creación de issue | Issue #1111: SKU de primera combinación debe heredarse del SKU de producto en el formulario de Alta/Edición | 2026-06-19 |
+| FedericoPaal | 3 | Creación de issue | Issue #1110: Agregar botón "Agregar combinación" dentro del formulario de edición/alta de producto | 2026-06-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1109: Eliminar-iconos-en-Promociones-revisar-paginación-y-mejorar-botones-"Seleccionar/Deseleccionar"-en-formulario-de-Promociones | 2026-06-19 |
+| FedericoPaal | 3 | Creación de issue | Issue #1108: Ajustar búsqueda de productos por nombre/SKU y mejorar contraste de cards de detalles en vista de Producto | 2026-06-19 |
+| FedericoPaal | 3 | Creación de issue | Issue #1106: Mejorar iconografía y espaciado en Dashboard y Sidebar | 2026-06-19 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1144: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1142: El problema ocurre porque la aplicación carga en el contexto global (… | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1141: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1139: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1138: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1137: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1136: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1128: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1127: 1106 mejorar iconografía y espaciado en dashboard y sidebar | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1126: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1125: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1124: 988 eliminar campo n de orden en banners y renderizar por fecha de creación lifo | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1123: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1122: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1144: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1143: iconos eliminados y paginación ajustada en la vista de reportes | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1143: iconos eliminados y paginación ajustada en la vista de reportes | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1143: iconos eliminados y paginación ajustada en la vista de reportes | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1142: El problema ocurre porque la aplicación carga en el contexto global (… | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1140: Estilos modo claro/oscuro ajustados | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1139: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1138: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1137: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1136: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1135: Vista de colecciones, botón de selección masiva en el encabezado de la tabla eliminado | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1134: 1110 agregar botón agregar combinación dentro del formulario de ediciónalta de producto | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1133: iconos eliminados estilos ajustados y paginación en matriz de productos agregada | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1132: 1108 ajustar búsqueda de productos por nombresku y mejorar contraste de cards de detalles en vista de producto | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1128: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1127: 1106 mejorar iconografía y espaciado en dashboard y sidebar | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1126: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1125: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1124: 988 eliminar campo n de orden en banners y renderizar por fecha de creación lifo | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1123: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1122: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1107: 🔄 Registrar puntaje de gestión | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1105: Subtitulo del producto al añadirse al carrito muestra las variantes y valores seleccionadas como mercado libre | 2026-06-20 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1104: 1090 optimizar UI de variantes en admin para ocupar menos espacio y ser más entendible | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1131: Mejorar soporte modo claro/oscuro en la vista "Alertas sin stock" | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1130: Eliminar acción masiva de checkboxes y modal en vista de Pedidos | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1129: Quitar iconos y subtítulos en la vista de Pedidos | 2026-06-20 |
 | FedericoPaal | 3 | Creación de issue | Issue #1121: Reubicar botones de Editar y Eliminar al nivel del título del producto en la vista de detalle | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1104: 1090 optimizar UI de variantes en admin para ocupar menos espacio y ser más entendible | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1105: Subtitulo del producto al añadirse al carrito muestra las variantes y valores seleccionadas como mercado libre | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1124: 988 eliminar campo n de orden en banners y renderizar por fecha de creación lifo | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1120: Agregar estado Activar/Desactivar en Combinaciones de Producto | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1119: Quitar iconos y acciones innecesarias en la vista de Producto del admin | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1118: Mostrar advertencia al usuario si intenta crear una combinación sin completar todos los campos del formulario | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1117: Validar mínimo un valor de variante en Producto para generar la combinación base | 2026-06-20 |
+| FedericoPaal | 3 | Creación de issue | Issue #1116: Generar SKU dinámico en modal "Añadir combinación" según valores de variantes | 2026-06-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1115: Mejorar Fluctuación por producto y modo claro/oscuro del proveedor activo — Vista Proveedores | 2026-06-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1114: REPORTES-Quitar-iconos-de-cards-remover-tab-Gráfico-y-ajustar-paginación-en-Últimos pedidos del período | 2026-06-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1113: Tamaño de botones y mejora de modo claro/oscuro en el formulario de Banners | 2026-06-20 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1106: Mejorar iconografía y espaciado en Dashboard y Sidebar | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1127: 1106 mejorar iconografía y espaciado en dashboard y sidebar | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1132: 1108 ajustar búsqueda de productos por nombresku y mejorar contraste de cards de detalles en vista de producto | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1133: iconos eliminados estilos ajustados y paginación en matriz de productos agregada | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1134: 1110 agregar botón agregar combinación dentro del formulario de ediciónalta de producto | 2026-06-20 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1162: Unificación de Directorios de Migraciones | 2026-06-24 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1167: Eliminación de iconos y algunos ajustes de centrado en headers de la tabla de pedidos en ver | 2026-06-26 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1165: 1119 quitar iconos y acciones innecesarias en la vista de producto del admin | 2026-06-26 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #988: Eliminar campo "N° de Orden" en banners y renderizar por fecha de creación (LIFO) | 2026-06-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1159: Variantes | 2026-06-21 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1158: 🔄 Registrar puntaje de gestión | 2026-06-21 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1150: 🔄 Actualización automática de puntajes semanal | 2026-06-21 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1149: 🔄 Registrar puntaje de gestión | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1159: Variantes | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1158: 🔄 Registrar puntaje de gestión | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1157: Agregar estado Activar/Desactivar en Combinaciones de Producto | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1156: Al crearse nueva combinación cuando seleccionas valores de variantes se van agregando al sku automaticamente | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1155: Quitar iconos y acciones innecesarias en la vista de Producto del admin | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1154: Botones de acciones editar y eliminar en la vista de Admin Productos en la parte del detalle ajustados | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1153: 1152 icono de favorito en product cards y número del input de cantidad en detalle no visibles | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1151: Error al crear orden desde carrito - Invalid tx.product.findUnique() con id tipo "uuid::original" al enviar combinaciones | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1150: 🔄 Actualización automática de puntajes semanal | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1149: 🔄 Registrar puntaje de gestión | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1147: Se mejora soporte del modo claro/oscuro en la vista "Alertas sin stock" | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1146: Eliminación de checkboxes de selección masiva en pedidos y codigo relacionado | 2026-06-21 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1145: 1129 quitar iconos y subtítulos en la vista de pedidos | 2026-06-21 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1152: Icono de favorito en product cards y número del input de cantidad en detalle no visibles | 2026-06-21 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1148: Error al crear orden desde carrito - Invalid tx.product.findUnique() con id tipo "uuid::original" al enviar combinaciones | 2026-06-21 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1161: 🔄 Registrar puntaje de gestión | 2026-06-22 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1160: Feat: Regresar proyecto a versión estable efcd2f3 de Rama Variantes | 2026-06-22 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1160: Feat: Regresar proyecto a versión estable efcd2f3 de Rama Variantes | 2026-06-22 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1162: Unificación de Directorios de Migraciones | 2026-06-24 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1162: Unificación de Directorios de Migraciones | 2026-06-24 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1161: 🔄 Registrar puntaje de gestión | 2026-06-24 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1170: 🔄 Registrar puntaje de gestión | 2026-06-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1168: 🔄 Registrar puntaje de gestión | 2026-06-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1170: 🔄 Registrar puntaje de gestión | 2026-06-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1168: 🔄 Registrar puntaje de gestión | 2026-06-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1167: Eliminación de iconos y algunos ajustes de centrado en headers de la tabla de pedidos en ver | 2026-06-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1166: btns de acciones del panel de detalle en el admin productos reubicados | 2026-06-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1165: 1119 quitar iconos y acciones innecesarias en la vista de producto del admin | 2026-06-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1164: eliminación de acciones masivas en la tabla de pedidos OrdersTable.tsx | 2026-06-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1163: estilos para el icono de favorito en las ProductCard | 2026-06-26 |
+| FedericoPaal | 3 | Creación de issue | Issue #1169: Mejorar soporte modo claro/oscuro en la vista "Alertas sin stock" | 2026-06-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1192: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1190: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1189: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1188: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1174: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1190: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1189: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1188: 🔄 Registrar puntaje de gestión | 2026-06-27 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1187: Ajjuste de datos en métricas claves en el dashboard de la vista Admin  | 2026-06-27 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1222: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1186: ajuste de valores en las métricas claves en la vista del dashboard admin | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1174: 🔄 Registrar puntaje de gestión | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1172: 1115 mejorar fluctuación por producto y modo clarooscuro del proveedor activo vista proveedores | 2026-06-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1171: Se implementa mejoras al soporte del modo claro/oscuro en la vista "A… | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1194: Automatizar valor `0` al seleccionar descuento BOGO en vista de Promociones | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1193: Aplicar tema oscuro al modal de confirmación de Ocultar/Eliminar | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1191: Ajustar ancho de columnas en vista de Categorías para coincidir con Productos | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1185: Ajustar estilos del modal de editar variantes para consistencia | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1184: Crear variantes de producto durante la creación (alta) de un nuevo producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1183: Mejorar inputs de "Precio" y "Stock" con comportamiento intuitivo | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1182: Limpiar sección "SEO / Publicación" en formulario de producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1181: Optimizar layout de card "sin resultados" en búsqueda de productos | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1180: Agregar input de "Stock Crítico" para alertas por producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1179: Agregar botones de "Con Stock" y "Destacado" en el detalle del producto | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1178: Ocultar botones de acciones al hover en la card de nota para ver el mensaje completo | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1177: Mostrar usuario que realiza acciones en la tabla de Actividad Reciente | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1176: Modal de confirmación de restaurar diseño predeterminado debe usar estilo de modales de la app | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1175: Datos de Métricas Clave no reflejan correctamente los mocks/carga de la página | 2026-06-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1173: Que no se rompan los textos dentro de las cards de Métricas Clave en Dashboard Admin | 2026-06-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-06-28 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1220: Unificar estilos de estados de Pedidos entre Dashboard y vista de Pedidos | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1219: Renderizado en vivo de filtros (actualizar mientras se escribe) | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1218: Resultados duplicados en la tabla de pedidos al aplicar filtros (excepto búsqueda) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1217: Alinear estilos de los modales de `Ver` y `Eliminar` en Consultas con el modo claro/oscuro global | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1216: Evitar pérdida de contenido al descargar PDFs (confirmación del navegador o flujo incorrecto) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1215: Corregir cálculo de ventas totales para rangos personalizados (error de +-1 día) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1214: Mejorar estilos y legibilidad de PDFs exportados desde Reportes | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1213: Evitar descargas duplicadas del PDF (una sola descarga por acción) | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1212: Renderizar los gráficos como tablas legibles en el PDF de Reportes | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1211: Corregir textos y duplicado de título en la edición de categorías | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1210: Quitar las celdas "Estados / Cliente / Producto" del PDF detallado de Reportes | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1209: Permitir volver a “Sin tope” el descuento máximo al editar una promoción | 2026-07-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1208: Alinear texto y reactivar acciones en la card de Notas del Dashboard | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1207: Eliminar modal de confirmación de salida en formulario de Categorías y corregir botón Guardar | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1206: No renderizar productos de categorías hijas ocultas en la Home | 2026-07-01 |
+| FedericoPaal | 3 | Creación de issue | Issue #1205: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-01 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1222: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1221: 1193 aplicar tema oscuro al modal de confirmación de ocultareliminar | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1204: ajuste de columnas en la vista de categorias | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1203: ajustar-estilos-del-modal-de-editar-variantes-para-consistencia | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1202: Mejorar inputs de "Precio" y "Stock" con comportamiento intuitivo | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1201: Limpiar sección "SEO / Publicación" en formulario de producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1200: Columnas ajustadas para que ocupe todo el ancho si no se encontraron productos | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1198: 1179 agregar botones de con stock y destacado en el detalle del producto | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1197: 1178 ocultar botones de acciones al hover en la card de nota para ver el mensaje completo | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1196: 1177 mostrar usuario que realiza acciones en la tabla de actividad reciente | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1195: Resultados: | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1192: 🔄 Registrar puntaje de gestión | 2026-07-02 |
