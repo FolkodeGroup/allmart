@@ -33,6 +33,7 @@ function MasterDetailLayoutInner({
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(
     defaultSelectedProductId
   );
+  const isEmpty = !loading && !error && products.length === 0;
 
   // Auto-select product: prefer defaultSelectedProductId if provided and valid,
   // otherwise select the first product if none is selected
@@ -75,7 +76,7 @@ function MasterDetailLayoutInner({
   }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete]);
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''}`}>
       {/* List Panel (Left) */}
       <ProductListPanel
         products={products}

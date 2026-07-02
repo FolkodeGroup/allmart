@@ -15,6 +15,11 @@
   animation: fadeIn 0.3s ease-out;
 }
 
+.containerEmpty {
+  grid-template-columns: 1fr;
+}
+
+
 @keyframes fadeIn {
   from {
     opacity: 0;
