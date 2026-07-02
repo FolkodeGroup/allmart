@@ -48,7 +48,7 @@ export function AdminCategories() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [sortField, setSortField] = useState<CategorySortField>('name');
   const [sortDirection, setSortDirection] = useState<CategorySortDirection>('asc');
-  const [deleting, setDeleting] = useState(false);
+  const [_deleting, setDeleting] = useState(false); //deleting ocultado porque no tiene un uso todavia
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -64,7 +64,7 @@ export function AdminCategories() {
 
   // Estado para cambio de visibilidad
   const [toggleConfirm, setToggleConfirm] = useState<{ id: string; newVisible: boolean } | null>(null);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [_togglingId, setTogglingId] = useState<string | null>(null); //togglingId ocultado porque no tiene un uso todavia
   const [optimisticVis, setOptimisticVis] = useState<Record<string, boolean>>({});
   const { showNotification } = useNotification();
 
