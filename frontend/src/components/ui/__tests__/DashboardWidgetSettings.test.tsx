@@ -166,7 +166,6 @@ describe('DashboardWidgetSettings', () => {
 
   it('should handle reset layout with confirmation', async () => {
     mockOnResetLayout.mockResolvedValue(undefined);
-    window.confirm = vi.fn(() => true);
 
     render(
       <DashboardWidgetSettings
@@ -180,6 +179,13 @@ describe('DashboardWidgetSettings', () => {
 
     const resetButton = screen.getByText(/Restaurar diseño predeterminado/);
     fireEvent.click(resetButton);
+
+    // Find and click the confirm button in the modal
+    // We need to find the specific button that says "Restaurar" without "diseño"
+    const confirmButtons = screen.getAllByRole('button', { name: /Restaurar/i });
+    // The confirm button is the last one (the first one is the reset button in the panel)
+    const confirmButton = confirmButtons[confirmButtons.length - 1];
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(mockOnResetLayout).toHaveBeenCalled();
@@ -187,8 +193,6 @@ describe('DashboardWidgetSettings', () => {
   });
 
   it('should not call reset layout if user cancels confirmation', async () => {
-    window.confirm = vi.fn(() => false);
-
     render(
       <DashboardWidgetSettings
         widgets={mockWidgets}
@@ -201,6 +205,10 @@ describe('DashboardWidgetSettings', () => {
 
     const resetButton = screen.getByText(/Restaurar diseño predeterminado/);
     fireEvent.click(resetButton);
+
+    // Find and click the cancel button in the modal
+    const cancelButton = screen.getByRole('button', { name: /Cancelar/i });
+    fireEvent.click(cancelButton);
 
     await waitFor(() => {
       expect(mockOnResetLayout).not.toHaveBeenCalled();
