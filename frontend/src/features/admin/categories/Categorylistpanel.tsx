@@ -167,9 +167,9 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                                 <>
                                                     <span className={styles.separator}>·</span>
                                                     <span
-                                                        className={`${styles.productCount} ${productCount === 0 ? styles.emptyCount : ''}`}
+                                                        className={`${styles.productCount} }`}
                                                     >
-                                                        {productCount === 0 ? 'Sin productos' : `${productCount} prod.`}
+                                                        Stock: {productCount ?? 0}
                                                     </span>
                                                 </>
                                             )}
