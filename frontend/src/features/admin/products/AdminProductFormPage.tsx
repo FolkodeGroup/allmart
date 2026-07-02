@@ -23,12 +23,12 @@ interface Props {
 
 // ── Section definitions with Bootstrap Icons ────────────────────────────────
 const SECTIONS = [
-    { id: 'basico',     label: 'Básico',           icon: 'bi bi-file-earmark-text' },
-    { id: 'precios',    label: 'Precios',           icon: 'bi bi-currency-dollar'   },
-    { id: 'categorias', label: 'Categorías',        icon: 'bi bi-tags'              },
-    { id: 'imagenes',   label: 'Imágenes',          icon: 'bi bi-image'             },
-    { id: 'variantes',  label: 'Variantes',         icon: 'bi bi-layers'            },
-    { id: 'seo',        label: 'SEO / Publicación', icon: 'bi bi-globe'             },
+    { id: 'basico', label: 'Básico', icon: 'bi bi-file-earmark-text' },
+    { id: 'precios', label: 'Precios', icon: 'bi bi-currency-dollar' },
+    { id: 'categorias', label: 'Categorías', icon: 'bi bi-tags' },
+    { id: 'imagenes', label: 'Imágenes', icon: 'bi bi-image' },
+    { id: 'variantes', label: 'Variantes', icon: 'bi bi-layers' },
+    { id: 'seo', label: 'SEO / Publicación', icon: 'bi bi-globe' },
 ] as const;
 
 type SectionId = typeof SECTIONS[number]['id'];
