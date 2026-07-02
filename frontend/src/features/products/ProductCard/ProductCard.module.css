@@ -29,12 +29,23 @@
 }
 
 .imageWrapper {
-  position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1; /* 🟢 FIX: Fuerza un contenedor cuadrado perfecto */
+  background-color: #f9f9f9; /* Fondo gris claro suave para rellenar los espacios en blanco si el producto es muy flaco */
+  border-radius: 8px 8px 0 0;
   overflow: hidden;
-  background: var(--color-bg-secondary);
-  flex-grow: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Evitamos que la imagen rompa los bordes redondeados */
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Garantiza que encaje */
+  mix-blend-mode: multiply; /* Opcional: Ayuda a que productos con fondo blanco se fusionen con el fondo gris de la tarjeta */
 }
 
 .imageWrapper a {

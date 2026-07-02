@@ -191,16 +191,21 @@
 .mainImageWrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1; /* 🟢 FIX: Opcional, pero asegura que el diseño no salte. También puedes usar max-height: 500px */
   border-radius: var(--radius-xl);
   overflow: hidden;
   background: var(--color-bg-secondary);
+  max-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mainImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* 🟢 FIX: Asegura que la imagen se ajuste sin recortarse */
+  object-position: center; 
   transition: transform var(--transition-slow);
 }
 
@@ -211,6 +216,12 @@
 .thumbnails {
   display: flex;
   gap: var(--space-3);
+  aspect-ratio: 1 / 1; /* 🟢 Miniaturas también cuadradas */
+  width: 80px;
+  height: 80px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .thumbnail {
@@ -233,7 +244,7 @@
 .thumbnailImg {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* 🟢 Asegura que la miniatura se ajuste sin recortarse */
 }
 
 /* ── Product Info ── */
