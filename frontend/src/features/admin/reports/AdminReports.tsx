@@ -532,7 +532,6 @@ export function AdminReports() {
               statusSlices={statusSlices}
               periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
               ordersTableProps={{ orders: filteredOrdersTable }}
-              ordersTableFilters={ordersTableFilters}
             />
           </div>
         )}
@@ -704,41 +703,41 @@ export function AdminReports() {
               <label className={styles.advancedLabel}>
                 <strong>Cliente</strong>
                 <div className={styles.searchWrap}>
-                <Search size={16} className={styles.searchIcon} />
-                <input
-                  type="text"
-                  value={ordersTableFilters.clientQuery}
-                  onChange={e => {
-                    e.preventDefault();
-                    setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
-                  }}
-                  placeholder="Nombre o email"
-                  className={styles.advancedInput}
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                />
+                  <Search size={16} className={styles.searchIcon} />
+                  <input
+                    type="text"
+                    value={ordersTableFilters.clientQuery}
+                    onChange={e => {
+                      e.preventDefault();
+                      setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
+                    }}
+                    placeholder="Nombre o email"
+                    className={styles.advancedInput}
+                    autoComplete="off"
+                    spellCheck="false"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                  />
                 </div>
               </label>
               <label className={styles.advancedLabel}>
                 <strong>Producto</strong>
                 <div className={styles.searchWrap}>
-                <Search size={16} className={styles.searchIcon} />
-                <input
-                  type="text"
-                  value={ordersTableFilters.productQuery}
-                  onChange={e => {
-                    e.preventDefault();
-                    setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
-                  }}
-                  placeholder="Nombre de producto"
-                  className={styles.advancedInput}
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                />
+                  <Search size={16} className={styles.searchIcon} />
+                  <input
+                    type="text"
+                    value={ordersTableFilters.productQuery}
+                    onChange={e => {
+                      e.preventDefault();
+                      setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
+                    }}
+                    placeholder="Nombre de producto"
+                    className={styles.advancedInput}
+                    autoComplete="off"
+                    spellCheck="false"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                  />
                 </div>
               </label>
               <OrdersFilters

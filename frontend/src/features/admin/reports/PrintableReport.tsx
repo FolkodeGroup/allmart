@@ -19,10 +19,10 @@ export interface PrintableReportProps {
     statusSlices: Array<{ key: string; count: number }>;
     periodLabel: string;
     ordersTableProps: OrdersTableProps;
-    ordersTableFilters: {
-        status: string[];
-        clientQuery: string;
-        productQuery: string;
+    ordersTableFilters?: {
+        status?: string[];
+        clientQuery?: string;
+        productQuery?: string;
     };
 }
 
@@ -97,24 +97,30 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                     <section style={{ marginBottom: 24 }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <tbody>
-                                <tr>
-                                    <td style={cellLabel}>Estados</td>
-                                    <td style={cellValue}>
-                                        {ordersTableFilters.status.join(', ') || 'Todos'}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style={cellLabel}>Cliente</td>
-                                    <td style={cellValue}>
-                                        {ordersTableFilters.clientQuery || 'Todos'}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style={cellLabel}>Producto</td>
-                                    <td style={cellValue}>
-                                        {ordersTableFilters.productQuery || 'Todos'}
-                                    </td>
-                                </tr>
+                                {ordersTableFilters?.status && (
+                                    <tr>
+                                        <td style={cellLabel}>Estados</td>
+                                        <td style={cellValue}>
+                                            {ordersTableFilters.status.join(', ') || 'Todos'}
+                                        </td>
+                                    </tr>
+                                )}
+                                {ordersTableFilters?.clientQuery && (
+                                    <tr>
+                                        <td style={cellLabel}>Cliente</td>
+                                        <td style={cellValue}>
+                                            {ordersTableFilters.clientQuery || 'Todos'}
+                                        </td>
+                                    </tr>
+                                )}
+                                {ordersTableFilters?.productQuery && (
+                                    <tr>
+                                        <td style={cellLabel}>Producto</td>
+                                        <td style={cellValue}>
+                                            {ordersTableFilters.productQuery || 'Todos'}
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </section>
