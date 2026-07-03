@@ -137,6 +137,7 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
                     fontSize={9}
                     fill="#1976d2"
                     fontWeight="bold"
+
                 >
                     {label}
                 </text>
