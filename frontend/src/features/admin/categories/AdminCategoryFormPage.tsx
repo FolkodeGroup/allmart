@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { FileText, Image, ArrowLeft, AlertCircle, Upload, X } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Upload, X } from 'lucide-react';
 import { useBlocker } from 'react-router-dom';
 import { useCategoryForm } from '../../../hooks/useCategoryFormPage';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -17,8 +17,8 @@ interface Props {
 
 // ── Section definitions ────────────────────────────────────────────────────
 const SECTIONS = [
-    { id: 'basico', label: 'Básico', Icon: FileText },
-    { id: 'imagenes', label: 'Imágenes', Icon: Image },
+    { id: 'basico', label: 'Básico', Icon: 'bi bi-file-earmark-text' },
+    { id: 'imagenes', label: 'Imágenes', Icon: 'bi bi-image' },
 ] as const;
 
 type SectionId = typeof SECTIONS[number]['id'];
@@ -54,6 +54,8 @@ export function AdminCategoryFormPage({
         () => categories.filter(c => c.id !== categoryId),
         [categories, categoryId]
     );
+
+    const isActive = (sectionId: SectionId) => activeSection === sectionId;
 
     // Optimized isDirty comparison
     const shallowCompareRelevantFields = React.useCallback(
@@ -195,11 +197,11 @@ export function AdminCategoryFormPage({
                                             }`}
                                         onClick={() => scrollToSection(section.id)}
                                     >
-                                        <section.Icon
-                                            size={15}
-                                            className={styles.sidebarIcon}
-                                            strokeWidth={activeSection === section.id ? 2.5 : 1.8}
-                                        />
+                                        <i className={section.Icon}
+                                            style={{
+                                                color: isActive(section.id) ? 'white' : 'var(--color-primary)',
+                                                fontSize: '1.1rem'
+                                            }} />
                                         <span className={styles.sidebarLabel}>{section.label}</span>
                                         {hasError && (
                                             <AlertCircle
@@ -220,7 +222,7 @@ export function AdminCategoryFormPage({
                             className={styles.sidebarProgressBar}
                             style={{
                                 height: `${((SECTIONS.findIndex(s => s.id === activeSection) + 1) /
-                                        SECTIONS.length) *
+                                    SECTIONS.length) *
                                     100
                                     }%`,
                             }}
@@ -238,7 +240,7 @@ export function AdminCategoryFormPage({
                     {/* ── Básico ─────────────────────────────────────────────── */}
                     <section id="basico" ref={setSectionRef('basico')} className={styles.section}>
                         <h2 className={styles.sectionTitle}>
-                            <FileText size={17} strokeWidth={1.8} /> Información básica
+                            Información Básica
                         </h2>
                         <CategoryTabBasico
                             form={formProps.form}
@@ -255,11 +257,12 @@ export function AdminCategoryFormPage({
                         className={styles.section}
                     >
                         <h2 className={styles.sectionTitle}>
-                            <Image size={17} strokeWidth={1.8} /> Imagen
+                            Imagen
                         </h2>
                         <fieldset className={styles.fieldset}>
-                            <legend className={styles.legend}>Imagen de la categoría *</legend>
-
+                            <p className={styles.fieldHint}>
+                                Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
+                            </p>
                             {(formProps.fieldErrors.image || formProps.imgError) && (
                                 <div className={styles.imgError}>
                                     {formProps.fieldErrors.image || formProps.imgError}
