@@ -34,7 +34,7 @@
 .pageTitle {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--color-text, #1e293b);
+    color: var(--color-text-primary, #1e293b);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -127,7 +127,8 @@
 /* ── Sticky sidebar ──────────────────────────────────────────────────────── */
 .sidebar {
     position: sticky;
-    top: 135px; /* Ajusta este valor según el alto real del navbar/header */
+    top: 135px;
+    /* Ajusta este valor según el alto real del navbar/header */
     align-self: flex-start;
     width: 188px;
     flex-shrink: 0;

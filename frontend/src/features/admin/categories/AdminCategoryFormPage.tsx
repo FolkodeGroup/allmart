@@ -191,9 +191,8 @@ export function AdminCategoryFormPage({
                                 <li key={section.id}>
                                     <button
                                         type="button"
-                                        className={`${styles.sidebarItem} ${
-                                            activeSection === section.id ? styles.sidebarItemActive : ''
-                                        }`}
+                                        className={`${styles.sidebarItem} ${activeSection === section.id ? styles.sidebarItemActive : ''
+                                            }`}
                                         onClick={() => scrollToSection(section.id)}
                                     >
                                         <section.Icon
@@ -220,11 +219,10 @@ export function AdminCategoryFormPage({
                         <div
                             className={styles.sidebarProgressBar}
                             style={{
-                                height: `${
-                                    ((SECTIONS.findIndex(s => s.id === activeSection) + 1) /
+                                height: `${((SECTIONS.findIndex(s => s.id === activeSection) + 1) /
                                         SECTIONS.length) *
                                     100
-                                }%`,
+                                    }%`,
                             }}
                         />
                     </div>

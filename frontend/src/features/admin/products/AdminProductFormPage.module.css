@@ -1105,7 +1105,7 @@
 .pageTitle {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--color-text, #1e293b);
+    color: var(--color-text-primary, #1e293b);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1326,7 +1326,7 @@
     gap: 8px;
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--color-text, #ffffff);
+    color: var(--color-text-primary, #ffffff);
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--color-border, #e2e8f0);
