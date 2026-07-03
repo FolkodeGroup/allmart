@@ -76,7 +76,7 @@ const PERIOD_LABELS: Record<Period, string> = {
 
 // Lazy loading de gráficos optimizado (cada chunk por separado, no se recrea en cada render)
 // const BarChart = React.lazy(() => import('./components/BarChart'));
-const DonutChart = React.lazy(() => import('./components/DonutChart'));
+import DonutChart from './components/DonutChart';
 
 
 export interface OrdersTableProps {
@@ -129,13 +129,54 @@ export function AdminReports() {
   // Estado para cambiar vista de gráfico barchart
   const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
+  const isGeneratingRef = useRef(false);
+
   useEffect(() => {
     if (!showHiddenPdf || pdfLoading) return;
-    generatePdf({ rootRef: hiddenPdfRef, fileName: 'reporte-resumen.pdf' })
-      .then(() => setNotif({ open: true, type: 'success', message: 'PDF generado.' }))
-      .catch(() => setNotif({ open: true, type: 'error', message: 'Error generando PDF.' }))
-      .finally(() => setShowHiddenPdf(false));
-  }, [showHiddenPdf, generatePdf, pdfLoading]);
+    if (isGeneratingRef.current) return;
+
+    isGeneratingRef.current = true;
+
+    const run = async () => {
+      try {
+        // 🧠 1. esperar a que React pinte el DOM
+        await new Promise(requestAnimationFrame);
+
+        // 🧠 2. asegurar que el ref existe
+        if (!hiddenPdfRef.current) {
+          await new Promise(res => setTimeout(res, 100));
+        }
+
+        // 🧠 3. esperar gráficos + lazy + layout
+        await new Promise(res => setTimeout(res, 1000));
+
+        // 🧠 4. generar PDF
+        await generatePdf({
+          rootRef: hiddenPdfRef,
+          fileName: 'reporte-resumen.pdf'
+        });
+
+        setNotif({
+          open: true,
+          type: 'success',
+          message: 'PDF generado.'
+        });
+
+      } catch {
+        setNotif({
+          open: true,
+          type: 'error',
+          message: 'Error generando PDF.'
+        });
+
+      } finally {
+        isGeneratingRef.current = false;
+        setShowHiddenPdf(false);
+      }
+    };
+
+    run();
+  }, [showHiddenPdf, pdfLoading, generatePdf]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
