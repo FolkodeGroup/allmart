@@ -130,12 +130,12 @@ export function AdminReports() {
   const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
   useEffect(() => {
-    if (!showHiddenPdf) return;
+    if (!showHiddenPdf || pdfLoading) return;
     generatePdf({ rootRef: hiddenPdfRef, fileName: 'reporte-resumen.pdf' })
       .then(() => setNotif({ open: true, type: 'success', message: 'PDF generado.' }))
       .catch(() => setNotif({ open: true, type: 'error', message: 'Error generando PDF.' }))
       .finally(() => setShowHiddenPdf(false));
-  }, [showHiddenPdf, generatePdf]);
+  }, [showHiddenPdf, generatePdf, pdfLoading]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
@@ -499,23 +499,11 @@ export function AdminReports() {
             type="button"
             className={styles.exportResumeBtn}
             style={{ marginLeft: 8 }}
-            onClick={async () => {
-              setShowHiddenPdf(true);
-              // Esperar a que el PrintableReport se monte
-              setTimeout(async () => {
-                try {
-                  await generatePdf({
-                    rootRef: hiddenPdfRef,
-                    fileName: 'reporte-resumen.pdf',
-                  });
-                  setNotif({ open: true, type: 'success', message: 'PDF generado y descargado correctamente.' });
-                } catch {
-                  setNotif({ open: true, type: 'error', message: 'Ocurrió un error al generar el PDF.' });
-                } finally {
-                  setShowHiddenPdf(false);
-                }
-              }, 300); // da tiempo a renderizar offscreen
-            }}
+            onClick={() => {
+              if (!pdfLoading) {
+                setShowHiddenPdf(true);
+              }
+            }} // da tiempo a renderizar offscreen
             disabled={pdfLoading}
           >
             {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
@@ -540,266 +528,270 @@ export function AdminReports() {
       </div>
 
       {/* KPI Cards */}
-      {isLoading ? (
-        <>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <KPISkeleton key={i} />
-          ))}
-        </>
-      ) : (
-        <div className={styles.fadeIn}>
-          <ReportsMetrics metrics={metrics} />
-        </div>
-      )}
-
-      {isLoading ? (
-        <>
-          <div className={styles.panel + ' fadeIn'}>
-            <div className={styles.panelHeader}>
-              <div className={styles.skeletonPanelTitle}></div>
-              <div className={styles.skeletonPanelSubtitle}></div>
-            </div>
-            <BarChartSkeleton />
+      {
+        isLoading ? (
+          <>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <KPISkeleton key={i} />
+            ))}
+          </>
+        ) : (
+          <div className={styles.fadeIn}>
+            <ReportsMetrics metrics={metrics} />
           </div>
+        )
+      }
 
-          <div className={styles.twoCol + ' fadeIn'}>
-            <div className={styles.panel + ' fadeInFast'}>
+      {
+        isLoading ? (
+          <>
+            <div className={styles.panel + ' fadeIn'}>
               <div className={styles.panelHeader}>
                 <div className={styles.skeletonPanelTitle}></div>
                 <div className={styles.skeletonPanelSubtitle}></div>
               </div>
-              <ProductRankingSkeleton />
+              <BarChartSkeleton />
             </div>
 
-            <div className={styles.panel + ' fadeInFast'}>
+            <div className={styles.twoCol + ' fadeIn'}>
+              <div className={styles.panel + ' fadeInFast'}>
+                <div className={styles.panelHeader}>
+                  <div className={styles.skeletonPanelTitle}></div>
+                  <div className={styles.skeletonPanelSubtitle}></div>
+                </div>
+                <ProductRankingSkeleton />
+              </div>
+
+              <div className={styles.panel + ' fadeInFast'}>
+                <div className={styles.panelHeader}>
+                  <div className={styles.skeletonPanelTitle}></div>
+                  <div className={styles.skeletonPanelSubtitle}></div>
+                </div>
+                <DonutChartSkeleton />
+              </div>
+            </div>
+
+            <div className={styles.panel + ' fadeIn'}>
               <div className={styles.panelHeader}>
                 <div className={styles.skeletonPanelTitle}></div>
                 <div className={styles.skeletonPanelSubtitle}></div>
               </div>
-              <DonutChartSkeleton />
+              <div className={styles.skeletonTableSkeleton}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className={styles.skeletonTableRow}></div>
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div className={styles.panel + ' fadeIn'}>
-            <div className={styles.panelHeader}>
-              <div className={styles.skeletonPanelTitle}></div>
-              <div className={styles.skeletonPanelSubtitle}></div>
-            </div>
-            <div className={styles.skeletonTableSkeleton}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className={styles.skeletonTableRow}></div>
-              ))}
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Gráfica de ventas */}
-          <div className={styles.panel + ' fadeIn'}>
-            <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle + ' fadeInFast'}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
-              <span className={styles.panelSubtitle + ' fadeInFast'}>
-                {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
-                {' · '}ingresos de pedidos activos
-              </span>
-            </div>
-            <div className={styles.viewToggleGroup + ' fadeInFast'}>
-              <span className={styles.viewToggleLabel}>Vista:</span>
-
-              <button
-                className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
-                onClick={() => setSalesViewMode('chart')}
-              >
-                📊 Gráfico
-              </button>
-            </div>
-            {salesContent}
-          </div>
-
-          {/* Top productos + Distribución de estados */}
-          <div className={styles.twoCol + ' fadeIn'}>
-            <div className={styles.panel + ' fadeInFast'}>
+          </>
+        ) : (
+          <>
+            {/* Gráfica de ventas */}
+            <div className={styles.panel + ' fadeIn'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>🏆 Productos más vendidos</h2>
-                <p className={styles.panelSubtitle + ' fadeInFast'}>Por ingresos generados</p>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
+                <span className={styles.panelSubtitle + ' fadeInFast'}>
+                  {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
+                  {' · '}ingresos de pedidos activos
+                </span>
               </div>
-              <ProductRanking
-                products={topProducts}
-                maxRevenue={maxProductRevenue}
-                formatPrice={formatPrice}
-              />
-            </div>
+              <div className={styles.viewToggleGroup + ' fadeInFast'}>
+                <span className={styles.viewToggleLabel}>Vista:</span>
 
-            <div className={styles.panel + ' fadeInFast'}>
-              <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>📦 Por estado de pedido</h2>
-                <span className={styles.panelSubtitle + ' fadeInFast'}>Todos los pedidos del período</span>
-              </div>
-              {periodOrders.length === 0 ? (
-                <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
-              ) : (
-                <Suspense fallback={<DonutChartSkeleton aria-busy="true" />}>
-                  <div className={styles.fadeIn}>
-                    <DonutChart slices={statusSlices} />
-                  </div>
-                </Suspense>
-              )}
-            </div>
-          </div>
-
-          {/* Tabla resumen */}
-          <div className={styles.panel + ' fadeIn'}>
-            <div className={styles.panelHeader}>
-              <div className={styles.panelHeaderLeft}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>📋 Últimos pedidos del período</h2>
-                <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
-              </div>
-
-              <div className={styles.exportWrap + ' fadeInFast'}>
-                <ExportButtons
-                  onExportCSV={async () => {
-                    if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
-                    setExportLoading('csv');
-                    try {
-                      const lbl = filters.type === 'predefined' ? filters.period : 'custom';
-                      exportOrdersCSV(periodOrders, getExportFileName('pedidos', lbl, 'csv'));
-                      setNotif({ open: true, type: 'success', message: 'CSV descargado.' });
-                    } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar CSV.' }); }
-                    finally { setExportLoading(null); }
-                  }}
-                  onExportExcel={async () => {
-                    if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
-                    setExportLoading('xlsx');
-                    try {
-                      const lbl = filters.type === 'predefined' ? filters.period : 'custom';
-                      exportOrdersXLSX(periodOrders, getExportFileName('pedidos', lbl, 'xlsx'));
-                      setNotif({ open: true, type: 'success', message: 'Excel descargado.' });
-                    } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar Excel.' }); }
-                    finally { setExportLoading(null); }
-                  }}
-                  onExportPDF={async () => {
-                    if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
-                    setExportLoading('pdf');
-                    try {
-                      const lbl = filters.type === 'predefined' ? filters.period : 'custom';
-                      await exportOrdersPDF(periodOrders, getExportFileName('pedidos', lbl, 'pdf'));
-                      setNotif({ open: true, type: 'success', message: 'PDF descargado.' });
-                    } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar PDF.' }); }
-                    finally { setExportLoading(null); }
-                  }}
-                  loading={exportLoading}
-                />
-                <Notification
-                  open={notif.open}
-                  type={notif.type}
-                  message={notif.message}
-                  onClose={() => setNotif(n => ({ ...n, open: false }))}
-                />
-              </div>
-            </div>
-
-            {/* Filtros rápidos para la tabla de pedidos */}
-            <div className={styles.advancedFiltersWrap + ' fadeInFast'}>
-
-              <label className={styles.advancedLabel}>
-                <strong>Cliente</strong>
-                <div className={styles.searchWrap}>
-                <Search size={16} className={styles.searchIcon} />
-                <input
-                  type="text"
-                  value={ordersTableFilters.clientQuery}
-                  onChange={e => {
-                    e.preventDefault();
-                    setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
-                  }}
-                  placeholder="Nombre o email"
-                  className={styles.advancedInput}
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                />
-                </div>
-              </label>
-              <label className={styles.advancedLabel}>
-                <strong>Producto</strong>
-                <div className={styles.searchWrap}>
-                <Search size={16} className={styles.searchIcon} />
-                <input
-                  type="text"
-                  value={ordersTableFilters.productQuery}
-                  onChange={e => {
-                    e.preventDefault();
-                    setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
-                  }}
-                  placeholder="Nombre de producto"
-                  className={styles.advancedInput}
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                />
-                </div>
-              </label>
-              <OrdersFilters
-                ordersTableFilters={ordersTableFilters}
-                setOrdersTableFilters={setOrdersTableFilters} />
-              <div className={styles.advancedActions}>
                 <button
-                  type="button"
-                  className={styles.clearBtn}
-                  onClick={() => setOrdersTableFilters({ status: [], clientQuery: '', productQuery: '' })}
-                  disabled={
-                    !(ordersTableFilters.status.length || ordersTableFilters.clientQuery || ordersTableFilters.productQuery)
-                  }
-                  title="Limpiar filtros avanzados"
+                  className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
+                  onClick={() => setSalesViewMode('chart')}
                 >
-                  Limpiar filtros
+                  📊 Gráfico
                 </button>
               </div>
+              {salesContent}
             </div>
-            {periodOrders.length === 0 ? (
-              <p className={styles.noData + ' fadeCross'}>Sin pedidos en este período.</p>
-            ) : (
-              <>
-                <OrdersTable
-                  orders={paginatedOrders}
-                />
 
-                <div className={styles.paginationWrap}>
-                  <div className={styles.pageSizeWrap}>
-                    {filteredOrdersTable.length > pageSize && (
-                      <p className={styles.moreHint + ' fadeInFast'}>
-                        Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
-                      </p>
-                    )}
-                    <select
-                      value={pageSize}
-                      onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                        setPage(1); // resetear página
-                      }}
-                      className={styles.pageSizeSelect}
-                    >
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
-                  </div>
-                  <AdminPagination
-                    page={page}
-                    totalPages={Math.ceil(filteredOrdersTable.length / pageSize) || 1}
-                    onPageChange={setPage}
-                    ariaLabel="Paginación de pedidos del reporte"
+            {/* Top productos + Distribución de estados */}
+            <div className={styles.twoCol + ' fadeIn'}>
+              <div className={styles.panel + ' fadeInFast'}>
+                <div className={styles.panelHeader}>
+                  <h2 className={styles.panelTitle + ' fadeInFast'}>🏆 Productos más vendidos</h2>
+                  <p className={styles.panelSubtitle + ' fadeInFast'}>Por ingresos generados</p>
+                </div>
+                <ProductRanking
+                  products={topProducts}
+                  maxRevenue={maxProductRevenue}
+                  formatPrice={formatPrice}
+                />
+              </div>
+
+              <div className={styles.panel + ' fadeInFast'}>
+                <div className={styles.panelHeader}>
+                  <h2 className={styles.panelTitle + ' fadeInFast'}>📦 Por estado de pedido</h2>
+                  <span className={styles.panelSubtitle + ' fadeInFast'}>Todos los pedidos del período</span>
+                </div>
+                {periodOrders.length === 0 ? (
+                  <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
+                ) : (
+                  <Suspense fallback={<DonutChartSkeleton aria-busy="true" />}>
+                    <div className={styles.fadeIn}>
+                      <DonutChart slices={statusSlices} />
+                    </div>
+                  </Suspense>
+                )}
+              </div>
+            </div>
+
+            {/* Tabla resumen */}
+            <div className={styles.panel + ' fadeIn'}>
+              <div className={styles.panelHeader}>
+                <div className={styles.panelHeaderLeft}>
+                  <h2 className={styles.panelTitle + ' fadeInFast'}>📋 Últimos pedidos del período</h2>
+                  <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
+                </div>
+
+                <div className={styles.exportWrap + ' fadeInFast'}>
+                  <ExportButtons
+                    onExportCSV={async () => {
+                      if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      setExportLoading('csv');
+                      try {
+                        const lbl = filters.type === 'predefined' ? filters.period : 'custom';
+                        exportOrdersCSV(periodOrders, getExportFileName('pedidos', lbl, 'csv'));
+                        setNotif({ open: true, type: 'success', message: 'CSV descargado.' });
+                      } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar CSV.' }); }
+                      finally { setExportLoading(null); }
+                    }}
+                    onExportExcel={async () => {
+                      if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      setExportLoading('xlsx');
+                      try {
+                        const lbl = filters.type === 'predefined' ? filters.period : 'custom';
+                        exportOrdersXLSX(periodOrders, getExportFileName('pedidos', lbl, 'xlsx'));
+                        setNotif({ open: true, type: 'success', message: 'Excel descargado.' });
+                      } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar Excel.' }); }
+                      finally { setExportLoading(null); }
+                    }}
+                    onExportPDF={async () => {
+                      if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      setExportLoading('pdf');
+                      try {
+                        const lbl = filters.type === 'predefined' ? filters.period : 'custom';
+                        await exportOrdersPDF(periodOrders, getExportFileName('pedidos', lbl, 'pdf'));
+                        setNotif({ open: true, type: 'success', message: 'PDF descargado.' });
+                      } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar PDF.' }); }
+                      finally { setExportLoading(null); }
+                    }}
+                    loading={exportLoading}
+                  />
+                  <Notification
+                    open={notif.open}
+                    type={notif.type}
+                    message={notif.message}
+                    onClose={() => setNotif(n => ({ ...n, open: false }))}
                   />
                 </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+              </div>
+
+              {/* Filtros rápidos para la tabla de pedidos */}
+              <div className={styles.advancedFiltersWrap + ' fadeInFast'}>
+
+                <label className={styles.advancedLabel}>
+                  <strong>Cliente</strong>
+                  <div className={styles.searchWrap}>
+                    <Search size={16} className={styles.searchIcon} />
+                    <input
+                      type="text"
+                      value={ordersTableFilters.clientQuery}
+                      onChange={e => {
+                        e.preventDefault();
+                        setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
+                      }}
+                      placeholder="Nombre o email"
+                      className={styles.advancedInput}
+                      autoComplete="off"
+                      spellCheck="false"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                    />
+                  </div>
+                </label>
+                <label className={styles.advancedLabel}>
+                  <strong>Producto</strong>
+                  <div className={styles.searchWrap}>
+                    <Search size={16} className={styles.searchIcon} />
+                    <input
+                      type="text"
+                      value={ordersTableFilters.productQuery}
+                      onChange={e => {
+                        e.preventDefault();
+                        setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
+                      }}
+                      placeholder="Nombre de producto"
+                      className={styles.advancedInput}
+                      autoComplete="off"
+                      spellCheck="false"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                    />
+                  </div>
+                </label>
+                <OrdersFilters
+                  ordersTableFilters={ordersTableFilters}
+                  setOrdersTableFilters={setOrdersTableFilters} />
+                <div className={styles.advancedActions}>
+                  <button
+                    type="button"
+                    className={styles.clearBtn}
+                    onClick={() => setOrdersTableFilters({ status: [], clientQuery: '', productQuery: '' })}
+                    disabled={
+                      !(ordersTableFilters.status.length || ordersTableFilters.clientQuery || ordersTableFilters.productQuery)
+                    }
+                    title="Limpiar filtros avanzados"
+                  >
+                    Limpiar filtros
+                  </button>
+                </div>
+              </div>
+              {periodOrders.length === 0 ? (
+                <p className={styles.noData + ' fadeCross'}>Sin pedidos en este período.</p>
+              ) : (
+                <>
+                  <OrdersTable
+                    orders={paginatedOrders}
+                  />
+
+                  <div className={styles.paginationWrap}>
+                    <div className={styles.pageSizeWrap}>
+                      {filteredOrdersTable.length > pageSize && (
+                        <p className={styles.moreHint + ' fadeInFast'}>
+                          Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
+                        </p>
+                      )}
+                      <select
+                        value={pageSize}
+                        onChange={(e) => {
+                          setPageSize(Number(e.target.value));
+                          setPage(1); // resetear página
+                        }}
+                        className={styles.pageSizeSelect}
+                      >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                      </select>
+                    </div>
+                    <AdminPagination
+                      page={page}
+                      totalPages={Math.ceil(filteredOrdersTable.length / pageSize) || 1}
+                      onPageChange={setPage}
+                      ariaLabel="Paginación de pedidos del reporte"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        )
+      }
+    </div >
   );
 }
 
