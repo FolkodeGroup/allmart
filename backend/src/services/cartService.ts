@@ -114,6 +114,11 @@ export async function addItem(
 ): Promise<CartDTO> {
   const cart = await findOrCreateCart(sessionId);
 
+  // Validación de seguridad para prevenir cantidades nulas o negativas
+  if (quantity <= 0) {
+    throw createError('La cantidad a agregar debe ser mayor a cero', 400);
+  }
+
   const existingItem = await prisma.cartItem.findFirst({
     where: { 
       cartId: cart.id, 

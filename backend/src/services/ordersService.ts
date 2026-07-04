@@ -325,6 +325,9 @@ export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO):
 }
 
 export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
+    if (dto.total < 0) {
+      throw createError('El total del pedido no puede ser negativo', 400);
+    }
     const row = await prisma.order.create({
       data: {
         customerFirstName: dto.customer.firstName,
@@ -341,11 +344,15 @@ export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
 }
 
 export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Order> {
+    if (dto.total !== undefined && dto.total < 0) {
+      throw createError('El total del pedido no puede ser negativo', 400);
+    }
     const data: any = {};
     if (dto.status) data.status = orderStatusToPrismaStatus(dto.status);
     if (dto.paymentStatus) data.paymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
     if (dto.paidAt) data.paidAt = dto.paidAt;
     if (dto.notes) data.notes = dto.notes;
+    if (dto.total !== undefined) data.total = dto.total;
   
     const row = await prisma.order.update({
       where: { id },

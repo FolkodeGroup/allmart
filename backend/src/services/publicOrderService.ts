@@ -32,6 +32,20 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     throw createError('El pedido debe tener al menos un item', 400);
   }
 
+  // Interceptación de seguridad: Validar montos y cantidades no negativas antes de procesar
+  if (total < 0) {
+    throw createError('El total del pedido no puede ser negativo', 400);
+  }
+
+  for (const item of items) {
+    if (item.quantity <= 0) {
+      throw createError(`La cantidad para el producto "${item.productName}" debe ser mayor a cero`, 400);
+    }
+    if (item.unitPrice < 0) {
+      throw createError(`El precio unitario para el producto "${item.productName}" no puede ser negativo`, 400);
+    }
+  }
+
   // 🟢 PREVENCIÓN DE DEADLOCKS: Ordenamiento determinista de recursos
   // Ordenamos los productos por su ID de manera ascendente antes de entrar a la transacción.
   // Esto garantiza que múltiples compras simultáneas que compartan productos bloqueen las filas
