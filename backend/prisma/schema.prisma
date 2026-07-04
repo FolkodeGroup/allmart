@@ -83,7 +83,8 @@ model Product {
   shortDescription      String?                @map("short_description")
   price                 Decimal                @db.Decimal(12, 2)
   
-  rating                Decimal                @default(0) @db.Decimal(3, 2)
+  // MOD-1 Solucionado: Mapeo nativo a Float (double precision) para optimizar cálculos
+  rating                Float                  @default(0) @map("rating")
   reviewCount           Int                    @default(0) @map("review_count")
   inStock               Boolean                @default(true) @map("in_stock")
   stock                 Int                    @default(0)
@@ -116,6 +117,11 @@ model Product {
   @@index([slug], map: "idx_products_slug")
   @@index([status], map: "idx_products_status")
   @@index([isFeatured], map: "idx_products_is_featured")
+  
+  // CRIT-1 Solucionado: Índices GIN trigram declarados nativamente para evitar que Prisma los elimine
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_products_name_trgm")
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_products_description_trgm")
+  
   @@map("products")
 }
 
@@ -353,6 +359,9 @@ model OrderItem {
 
   @@index([orderId], map: "idx_order_items_order_id")
   @@index([productSkuId], map: "idx_order_items_sku_id")
+  
+  // MOD-2: Indexación de FKs inversas para optimizar Joins y análisis
+  @@index([productId], map: "idx_order_items_product_id")
   @@map("order_items")
 }
 
@@ -394,6 +403,15 @@ model CartItem {
   productSku   ProductSku? @relation(fields: [productSkuId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "cart_items_sku_fk")
 
   @@index([cartId], map: "idx_cart_items_cart_id")
+  
+  // MOD-2: Indexación de claves foráneas no únicas de forma explícita
+  @@index([productId], map: "idx_cart_items_product_id")
+  @@index([productSkuId], map: "idx_cart_items_sku_id")
+  
+  // CRIT-2 Solucionado: Uso correcto de raw() para índices de unicidad parciales nativos en PostgreSQL
+  @@unique([cartId, productId, productSkuId], map: "cart_items_unique_product_sku", where: raw("product_sku_id IS NOT NULL"))
+  @@unique([cartId, productId], map: "cart_items_unique_product_base", where: raw("product_sku_id IS NULL"))
+
   @@map("cart_items")
 }
 
@@ -512,7 +530,7 @@ model Collection {
 }
 
 model CollectionItem {
- id           String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
+  id           String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   collectionId String     @map("collection_id") @db.Uuid
   productId    String     @map("product_id") @db.Uuid
   position     Int        @default(0)
@@ -665,6 +683,9 @@ model SupplierProductPrice {
 
   @@index([productId, supplierId, createdAt(sort: Desc)], map: "idx_supplier_product_prices_main")
   @@index([supplierId, createdAt(sort: Desc)], map: "idx_supplier_product_prices_supplier")
+  
+  // MOD-2: Indexación de FKs inversas de forma explícita
+  @@index([changedBy], map: "idx_supplier_prices_changed_by")
   @@map("supplier_product_prices")
 }
 

@@ -206,7 +206,8 @@ function toProduct(row: any): Product {
     categoryId: primaryCategoryId,
     categoryIds,
     tags,
-    rating: row.rating.toNumber(),
+    // MOD-1 Solucionado: row.rating es un Float nativo ahora (no requiere .toNumber())
+    rating: row.rating,
     reviewCount: row.reviewCount,
     inStock: row.inStock,
     stock: row.stock,
