@@ -4,7 +4,7 @@
  * Consume la API REST del backend — sin mocks ni localStorage.
  */
 
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
 import type { ApiVariant, VariantChild } from '../features/admin/variants/variantsService';
 
 export interface VariantGroup {
@@ -54,6 +54,14 @@ function apiToVariantGroup(api: ApiVariant): VariantGroup {
     isActive: api.isActive,
   };
 }
+
+export const useAdminVariants = () => {
+  const context = useContext(AdminVariantsContext);
+  if (!context) {
+    throw new Error('useAdminVariants debe usarse dentro de un AdminVariantsProvider');
+  }
+  return context;
+};
 
 // Re-export the helper function for use in the provider
 export { apiToVariantGroup };
