@@ -86,6 +86,21 @@
     z-index: 5;
 }
 
+/* Hide action buttons while hovering the card on desktop to avoid
+   overlapping the note text and improve readability. Mobile keeps
+   the actions visible (handled in the mobile media query). */
+/* When a note is explicitly set to hide actions (e.g. after click expansion),
+   apply this class to the note to hide the actions. Hover will not affect
+   actions visibility via CSS; visibility is controlled from JS so hover
+   can temporarily reveal actions. */
+.hide-actions .note-actions {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+}
+
 /* Skeleton Loading */
 .sticky-note.skeleton {
     background: rgba(247, 224, 126, 0.2);
@@ -111,6 +126,7 @@
     font-size: 14px;
     line-height: 1.4;
     color: var(--color-text-primary, #333);
+    text-align: left;
 }
 
 .sticky-note:hover .note-content,
@@ -130,6 +146,13 @@
 
 .note-metadata span {
     display: block;
+    text-align: left;
+}
+
+/* Keyboard focus ring for the note cards */
+.sticky-note:focus-visible {
+    outline: 2px solid var(--color-dif-mode, #b0895b);
+    outline-offset: 2px;
 }
 
 /* Note Actions */
@@ -364,6 +387,13 @@
         position: static;
         margin-top: 8px;
         gap: 6px;
+    }
+    /* Mobile: ensure actions remain visible and usable */
+    .note-actions {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: none;
     }
 
     .edit-btn,

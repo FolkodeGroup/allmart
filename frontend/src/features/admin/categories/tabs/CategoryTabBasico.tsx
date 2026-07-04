@@ -39,7 +39,6 @@ export function CategoryTabBasico({
         <>
             {/* ── Información básica ── */}
             <fieldset className={styles.fieldset}>
-                <legend className={styles.legend}>Información básica</legend>
 
                 <div className={styles.row}>
                     <div className={styles.field}>
@@ -47,9 +46,8 @@ export function CategoryTabBasico({
                             Nombre *
                         </label>
                         <input
-                            className={`${styles.input} ${
-                                touched.name && errors.name ? styles.inputError : ''
-                            }`}
+                            className={`${styles.input} ${touched.name && errors.name ? styles.inputError : ''
+                                }`}
                             id="category-name"
                             value={form.name}
                             onChange={e => handleNameChange(e.target.value)}
@@ -67,9 +65,8 @@ export function CategoryTabBasico({
                             Slug (URL amigable)
                         </label>
                         <input
-                            className={`${styles.input} ${
-                                touched.slug && errors.slug ? styles.inputError : ''
-                            }`}
+                            className={`${styles.input} ${touched.slug && errors.slug ? styles.inputError : ''
+                                }`}
                             id="category-slug"
                             value={form.slug}
                             onChange={e => {

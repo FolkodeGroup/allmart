@@ -24,6 +24,7 @@ import { useCategoryBulkActions } from './hooks/useCategoryBulkActions';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
 import { CategoriesMasterDetailLayout } from './CategoriesMasterDetailLayout';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 
 type CategorySortField = 'name' | 'slug' | 'itemCount' | 'isVisible';
 type CategorySortDirection = 'asc' | 'desc';
@@ -32,14 +33,14 @@ export function AdminCategories() {
   const navigate = useNavigate();
   const location = useLocation();
   const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory, uploadCategoryImage } = useAdminCategories();
-  
+
   // Estado local para paginación
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  
+
   const { can, user } = useAdminAuth();
   const [search, setSearch] = useState('');
-  
+
   // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -47,23 +48,23 @@ export function AdminCategories() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [sortField, setSortField] = useState<CategorySortField>('name');
   const [sortDirection, setSortDirection] = useState<CategorySortDirection>('asc');
-  const [deleting, setDeleting] = useState(false);
+  const [_deleting, setDeleting] = useState(false); //deleting ocultado porque no tiene un uso todavia
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     parentId: '',
     isVisible: true,
   });
-  
+
   const [formImageFile, setFormImageFile] = useState<File | null>(null);
   const [formImagePreview, setFormImagePreview] = useState<string>('');
-  
+
   // Estado para cambio de visibilidad
   const [toggleConfirm, setToggleConfirm] = useState<{ id: string; newVisible: boolean } | null>(null);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [_togglingId, setTogglingId] = useState<string | null>(null); //togglingId ocultado porque no tiene un uso todavia
   const [optimisticVis, setOptimisticVis] = useState<Record<string, boolean>>({});
   const { showNotification } = useNotification();
 
@@ -524,68 +525,28 @@ export function AdminCategories() {
       </AnimatePresence>
 
       {/* Modal de confirmación de visibilidad */}
-      <Modal
+      <ModalConfirm
         open={!!toggleConfirm}
-        onClose={() => (togglingId ? undefined : setToggleConfirm(null))}
         title={toggleConfirm?.newVisible ? 'Mostrar categoría' : 'Ocultar categoría'}
-        actions={
-          <>
-            <button
-              className={styles.deleteBtn}
-              onClick={confirmToggleVisibility}
-              disabled={!!togglingId}
-              style={{ minWidth: 100 }}
-              type="button"
-            >
-              {togglingId ? 'Guardando...' : 'Confirmar'}
-            </button>
-            <button
-              className={styles.cancelBtn}
-              onClick={() => setToggleConfirm(null)}
-              disabled={!!togglingId}
-              style={{ minWidth: 100 }}
-              type="button"
-            >Cancelar</button>
-          </>
-        }
-        disableClose={!!togglingId}
-      >
-        <p>
-          {toggleConfirm?.newVisible
-            ? '¿Mostrar esta categoría? Será visible para los usuarios.'
-            : '¿Ocultar esta categoría? No será visible para los usuarios.'}
-        </p>
-      </Modal>
+        description={toggleConfirm?.newVisible
+          ? '¿Mostrar esta categoría? Será visible para los usuarios.'
+          : '¿Ocultar esta categoría? No será visible para los usuarios.'}
+        confirmText={toggleConfirm?.newVisible ? 'Mostrar' : 'Ocultar'}
+        cancelText="Cancelar"
+        onConfirm={confirmToggleVisibility}
+        onCancel={() => setToggleConfirm(null)}
+      />
 
       {/* Modal de confirmación de eliminación */}
-      <Modal
+      <ModalConfirm
         open={!!deleteConfirm}
-        onClose={() => (deleting ? undefined : setDeleteConfirm(null))}
         title="Eliminar categoría"
-        actions={
-          <>
-            <button
-              className={styles.deleteBtn}
-              onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
-              disabled={deleting}
-              style={{ minWidth: 100 }}
-              type="button"
-            >
-              {deleting ? 'Eliminando...' : 'Confirmar'}
-            </button>
-            <button
-              className={styles.cancelBtn}
-              onClick={() => setDeleteConfirm(null)}
-              disabled={deleting}
-              style={{ minWidth: 100 }}
-              type="button"
-            >Cancelar</button>
-          </>
-        }
-        disableClose={deleting}
-      >
-        <p>¿Estás seguro de que querés eliminar esta categoría?</p>
-      </Modal>
+        description="¿Seguro que querés eliminar esta categoría?"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+        onCancel={() => setDeleteConfirm(null)}
+      />
 
       {/* Formulario en modal para creación rápida */}
       <Modal

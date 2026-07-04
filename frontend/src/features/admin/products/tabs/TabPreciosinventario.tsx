@@ -72,12 +72,14 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             type="number"
                             min={0}
                             step={0.01}
-                            value={form.price}
+                            value={form.price === 0 ? '' : form.price}
                             onChange={e => {
-                                const val = Number(e.target.value);
+                                const raw = e.target.value;
+                                const val = raw === '' ? 0 : Number(raw);
                                 setField('price', val);
                                 validateField('price', val);
                             }}
+                            placeholder="0"
                             onBlur={() => handleBlur('price')}
                             required
                         />
@@ -86,7 +88,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                         <ValidationHelper
                             error={localErrors.price}
                             success={!!(form.price > 0 && !localErrors.price)}
-                            
+
                         />
                     )}
                 </div>
@@ -102,12 +104,14 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             id="product-stock"
                             type="number"
                             min={0}
-                            value={form.stock}
+                            value={form.stock === 0 ? '' : form.stock}
                             onChange={e => {
-                                const val = Number(e.target.value);
+                                const raw = e.target.value;
+                                const val = raw === '' ? 0 : Number(raw);
                                 setField('stock', val);
                                 validateField('stock', val);
                             }}
+                            placeholder="0"
                             onBlur={() => handleBlur('stock')}
                         />
                     </div>
@@ -115,7 +119,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                         <ValidationHelper
                             error={localErrors.stock}
                             success={!!(form.stock >= 0 && !localErrors.stock)}
-                            
+
                         />
                     )}
                 </div>

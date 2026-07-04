@@ -184,10 +184,15 @@ export function useCategoryForm({ categoryId, onSuccess, onUnsavedChanges }: Use
                     return;
                 }
             }
-            
+
             // Actualizar initialForm para que la comparación de isDirty sea correcta después de guardar
-            setInitialForm(form);
-            onSuccess();
+            // Usamos el objeto sanitizado y navegamos en el siguiente tick para asegurarnos
+            // de que los estados se actualicen antes de realizar la navegación (evita
+            // que el bloqueador detecte cambios y muestre el modal al guardar).
+            setInitialForm(sanitizedForm as Omit<Category, 'id'>);
+            // Ejecutar onSuccess en el siguiente ciclo del event loop para dar tiempo
+            // a React a propagar el nuevo initialForm y evitar bloqueos indeseados.
+            setTimeout(() => onSuccess(), 0);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al guardar la categoría');
         } finally {

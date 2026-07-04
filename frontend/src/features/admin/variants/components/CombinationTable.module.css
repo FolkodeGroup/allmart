@@ -81,10 +81,6 @@
     width: 64px;
 }
 
-.tdVariant {}
-
-.tdSku {}
-
 .tdPrice {
     text-align: right;
     font-weight: var(--font-semibold);

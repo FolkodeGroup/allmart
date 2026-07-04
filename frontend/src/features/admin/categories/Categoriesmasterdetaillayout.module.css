@@ -2,7 +2,8 @@
    Mirrors MasterDetailLayout.module.css — same two-column structure. */
 
 .container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 40% 60%;
     width: 100%;
     min-height: 500px;
     border: 1px solid var(--color-border, #e5e2dd);
@@ -65,4 +66,3 @@
         height: 300px;
     }
 }
-

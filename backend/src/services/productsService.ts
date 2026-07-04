@@ -515,7 +515,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
   const existing = await prisma.product.findUnique({
     where: { id },
-    include: { 
+    include: {
       productCategories: { select: { categoryId: true } },
       productSkus: { where: { isActive: true } },
       productTags: { include: { tag: true } }
@@ -839,11 +839,21 @@ export async function getPublicProducts(query: ProductQuery) {
     where.slug = { in: slugArray };
   }
 
+  const visibleCategoryFilter = {
+    OR: [
+      { category: { isVisible: true } },
+      { productCategories: { some: { category: { isVisible: true } } } },
+    ],
+  };
+
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
+    if (!foundCategory.isVisible) {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
 
     const children = await prisma.category.findMany({
-      where: { parentId: foundCategory.id },
+      where: { parentId: foundCategory.id, isVisible: true },
       select: { id: true },
     });
 
@@ -852,13 +862,17 @@ export async function getPublicProducts(query: ProductQuery) {
       ...children.map(c => c.id),
     ];
 
-    where.productCategories = {
-      some: {
-        categoryId: {
-          in: categoryIds,
-        },
+    where.AND = [
+      {
+        OR: [
+          { categoryId: { in: categoryIds } },
+          { productCategories: { some: { categoryId: { in: categoryIds } } } },
+        ],
       },
-    };
+      visibleCategoryFilter,
+    ];
+  } else {
+    where.AND = [visibleCategoryFilter];
   }
 
   if (query.priceRanges) {
