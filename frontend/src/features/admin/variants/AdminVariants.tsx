@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState} from 'react';
 import { Palette, AlertCircle } from 'lucide-react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
-import { useAdminVariants } from '../../../context/AdminVariantsContext';
+import { useAdminVariants } from '../../../hooks/useAdminVariants';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { logAdminActivity } from '../../../services/adminActivityLogService';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
@@ -34,7 +34,6 @@ export function AdminVariants() {
     variants,
     selectedProductId,
     isLoading,
-    error: apiError,
     loadVariants,
     addVariant,
     updateVariant,
@@ -88,7 +87,7 @@ export function AdminVariants() {
     setErrors(prev => ({ ...prev, group: '' }));
     if (!selectedProductId) return;
     if (!name) return setErrors(prev => ({ ...prev, group: 'El nombre del grupo es obligatorio' }));
-    const exists = variants.some(g => g.name.toLowerCase() === name.toLowerCase());
+    const exists = variants.some((g) => g.name.toLowerCase() === name.toLowerCase());
     if (exists) return setErrors(prev => ({ ...prev, group: 'Ya existe un grupo con ese nombre' }));
     try {
       await addVariant(selectedProductId, name);
@@ -177,8 +176,8 @@ export function AdminVariants() {
     if (!selectedProductId) return;
     if (!val) return setErrors(prev => ({ ...prev, [`value-${variantId}`]: 'El valor es obligatorio' }));
 
-    const group = variants.find(v => v.id === variantId);
-    if (group?.values.some(v => v.toLowerCase() === val.toLowerCase())) {
+    const group = variants.find((v) => v.id === variantId);
+    if (group?.values.some((v) => v.toLowerCase() === val.toLowerCase())) {
       return setErrors(prev => ({ ...prev, [`value-${variantId}`]: 'Este valor ya existe en el grupo' }));
     }
 
@@ -199,16 +198,16 @@ export function AdminVariants() {
       return;
     }
 
-    const group = variants.find(v => v.id === variantId);
+    const group = variants.find((v) => v.id === variantId);
     if (!group) return;
 
-    if (group.values.some(v => v.toLowerCase() === newVal.toLowerCase() && v !== oldValue)) {
+    if (group.values.some((v) => v.toLowerCase() === newVal.toLowerCase() && v !== oldValue)) {
       setNotif({ open: true, type: 'error', message: 'Este valor ya existe en el grupo' });
       return;
     }
 
     try {
-      const updatedVals = group.values.map(v => v === oldValue ? newVal : v);
+      const updatedVals = group.values.map((v) => v === oldValue ? newVal : v);
       await updateVariant(selectedProductId, variantId, { values: updatedVals });
       setNotif({ open: true, type: 'success', message: 'Valor editado correctamente.' });
     } catch {
@@ -230,8 +229,8 @@ export function AdminVariants() {
       return;
     }
     const headers = ['Grupo', 'Valores'];
-    const rows = variants.map(variant => [variant.name, variant.values.join('; ')]);
-    const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
+    const rows = variants.map((variant) => [variant.name, variant.values.join('; ')]);
+    const csvContent = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.setAttribute('href', URL.createObjectURL(blob));
@@ -245,7 +244,7 @@ export function AdminVariants() {
     const matchesStatus = filters.status === "all" ? true : filters.status === "active" ? variant.isActive : !variant.isActive;
     const matchesDynamic = Object.entries(filters.dynamic).every(([vName, vVal]) => {
       if (!vVal) return true;
-      return variants.find(v => v.name === vName)?.values.includes(vVal);
+      return variants.find((v) => v.name === vName)?.values.includes(vVal);
     });
     return matchesSearch && matchesStatus && matchesDynamic;
   });
@@ -294,13 +293,6 @@ export function AdminVariants() {
             />
           ) : (
             <>
-              {apiError && (
-                <div className={sectionStyles.errorState}>
-                  <AlertCircle size={20} />
-                  <p>Error: {apiError}</p>
-                </div>
-              )}
-
               <VariantHeader
                 selectedProduct={selectedProduct}
                 groupCount={filteredVariants.length}
@@ -345,8 +337,14 @@ export function AdminVariants() {
                   errors={errors}
                   isPendingNavigation={isDirty}
                   setIsDirty={setIsDirty}
-                  onOpenEditModal={handleOpenEditModal}  // <-- PROP AGREGADA
+                  onOpenEditModal={handleOpenEditModal}
                 />
+              )}
+              {apiError && (
+                <div className={sectionStyles.errorState} style={{ marginTop: '1rem' }}>
+                  <AlertCircle size={20} />
+                  <p>Error: {apiError}</p>
+                </div>
               )}
               {showWarning && (
                 <ModalConfirm
