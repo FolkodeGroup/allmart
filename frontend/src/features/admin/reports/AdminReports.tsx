@@ -15,8 +15,7 @@ import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPag
 import { Suspense } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
-import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName } from '../../../utils/exportHelpers';
-//import { generateMockOrders } from './components/DatosMockeados';
+import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName, exportReportsSummaryXLSX } from '../../../utils/exportHelpers';//import { generateMockOrders } from './components/DatosMockeados';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
 import { SalesTableView } from './components/SalesTableView';
@@ -130,6 +129,10 @@ export function AdminReports() {
   const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
   const isGeneratingRef = useRef(false);
+
+  const barChartCaptureRef = useRef<HTMLDivElement>(null);
+  const donutChartCaptureRef = useRef<HTMLDivElement>(null);
+  const [exportingExcel, setExportingExcel] = useState(false);
 
   useEffect(() => {
     if (!showHiddenPdf || pdfLoading) return;
@@ -540,14 +543,37 @@ export function AdminReports() {
             type="button"
             className={styles.exportResumeBtn}
             style={{ marginLeft: 8 }}
-            onClick={() => {
-              if (!pdfLoading) {
-                setShowHiddenPdf(true);
+            disabled={exportingExcel}
+            onClick={async () => {
+              setExportingExcel(true);
+              try {
+                if (salesViewMode !== 'chart') {
+                  setSalesViewMode('chart');
+                  await new Promise(res => setTimeout(res, 300));
+                }
+                const periodLabel = filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado';
+                const lbl = filters.type === 'predefined' ? filters.period : 'custom';
+                await exportReportsSummaryXLSX({
+                  metrics,
+                  barData,
+                  statusSlices,
+                  topProducts,
+                  orders: filteredOrdersTable,
+                  periodLabel,
+                  fileName: getExportFileName('resumen-reportes', lbl, 'xlsx'),
+                  barChartEl: barChartCaptureRef.current,
+                  donutChartEl: donutChartCaptureRef.current,
+                });
+                setNotif({ open: true, type: 'success', message: 'Excel descargado.' });
+              } catch (err) {
+                console.error(err);
+                setNotif({ open: true, type: 'error', message: 'Error al generar el Excel.' });
+              } finally {
+                setExportingExcel(false);
               }
-            }} // da tiempo a renderizar offscreen
-            disabled={pdfLoading}
+            }}
           >
-            {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
+            {exportingExcel ? 'Generando Excel…' : 'Descargar Excel'}
           </button>
         </div>
         {/* Contenedor invisible para exportación PDF fiel */}
@@ -645,7 +671,9 @@ export function AdminReports() {
                   📊 Gráfico
                 </button>
               </div>
-              {salesContent}
+              <div ref={barChartCaptureRef}>
+                {salesContent}
+              </div>
             </div>
 
             {/* Top productos + Distribución de estados */}
@@ -671,7 +699,7 @@ export function AdminReports() {
                   <p className={styles.noData + ' fadeCross'}>Sin datos en este período.</p>
                 ) : (
                   <Suspense fallback={<DonutChartSkeleton aria-busy="true" />}>
-                    <div className={styles.fadeIn}>
+                    <div className={styles.fadeIn} ref={donutChartCaptureRef}>
                       <DonutChart slices={statusSlices} />
                     </div>
                   </Suspense>
