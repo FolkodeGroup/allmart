@@ -206,7 +206,6 @@ function toProduct(row: any): Product {
     categoryId: primaryCategoryId,
     categoryIds,
     tags,
-    // MOD-1 Solucionado: row.rating es un Float nativo ahora (no requiere .toNumber())
     rating: row.rating,
     reviewCount: row.reviewCount,
     inStock: row.inStock,
@@ -515,7 +514,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
   const existing = await prisma.product.findUnique({
     where: { id },
-    include: {
+    include: { 
       productCategories: { select: { categoryId: true } },
       productSkus: { where: { isActive: true } },
       productTags: { include: { tag: true } }
@@ -839,21 +838,11 @@ export async function getPublicProducts(query: ProductQuery) {
     where.slug = { in: slugArray };
   }
 
-  const visibleCategoryFilter = {
-    OR: [
-      { category: { isVisible: true } },
-      { productCategories: { some: { category: { isVisible: true } } } },
-    ],
-  };
-
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
-    if (!foundCategory.isVisible) {
-      return { data: [], total: 0, page, limit, totalPages: 0 };
-    }
 
     const children = await prisma.category.findMany({
-      where: { parentId: foundCategory.id, isVisible: true },
+      where: { parentId: foundCategory.id },
       select: { id: true },
     });
 
@@ -862,17 +851,29 @@ export async function getPublicProducts(query: ProductQuery) {
       ...children.map(c => c.id),
     ];
 
-    where.AND = [
-      {
-        OR: [
-          { categoryId: { in: categoryIds } },
-          { productCategories: { some: { categoryId: { in: categoryIds } } } },
-        ],
+    where.productCategories = {
+      some: {
+        categoryId: {
+          in: categoryIds,
+        },
       },
-      visibleCategoryFilter,
+    };
+  }
+
+  // SANEADO: Filtro de visibilidad de categorías sin usar el campo inexistente "category"
+  if (!category) {
+    where.AND = [
+      ...(where.AND || []),
+      {
+        productCategories: {
+          some: {
+            category: {
+              isVisible: true
+            }
+          }
+        }
+      }
     ];
-  } else {
-    where.AND = [visibleCategoryFilter];
   }
 
   if (query.priceRanges) {
@@ -937,7 +938,6 @@ export async function getPublicProducts(query: ProductQuery) {
     ? await prisma.product.findMany({
         where: { id: { in: ids } },
         orderBy,
-        // 🟢 FIX 1: Agregar el include faltante (productImages) para catálogos públicos
         include: { 
           productImages: { select: { id: true }, orderBy: { position: 'asc' } },
           productCategories: { select: { categoryId: true } },
