@@ -34,6 +34,7 @@ export function AdminVariants() {
     variants,
     selectedProductId,
     isLoading,
+    error: apiError,
     loadVariants,
     addVariant,
     updateVariant,
