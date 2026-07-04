@@ -841,40 +841,65 @@ export async function getPublicProducts(query: ProductQuery) {
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
 
+    if (!foundCategory.isVisible) {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
+
     const children = await prisma.category.findMany({
-      where: { parentId: foundCategory.id },
+      where: { parentId: foundCategory.id, isVisible: true },
       select: { id: true },
-    });
+    }) || [];
 
     const categoryIds = [
       foundCategory.id,
       ...children.map(c => c.id),
     ];
 
-    where.productCategories = {
-      some: {
-        categoryId: {
-          in: categoryIds,
-        },
-      },
-    };
-  }
-
-  // SANEADO: Filtro de visibilidad de categorías sin usar el campo inexistente "category"
-  if (!category) {
     where.AND = [
       ...(where.AND || []),
       {
-        productCategories: {
-          some: {
-            category: {
-              isVisible: true
-            }
-          }
-        }
-      }
+        OR: [
+          {
+            categoryId: {
+              in: categoryIds,
+            },
+          },
+          {
+            productCategories: {
+              some: {
+                categoryId: {
+                  in: categoryIds,
+                },
+              },
+            },
+          },
+        ],
+      },
     ];
   }
+
+  // SANEADO: Filtro de visibilidad de categorías siempre activo para el catálogo público
+  where.AND = [
+    ...(where.AND || []),
+    {
+      OR: [
+        {
+          category: {
+            isVisible: true,
+          },
+        },
+        {
+          productCategories: {
+            some: {
+              category: {
+                isVisible: true,
+              },
+            },
+          },
+        },
+      ],
+    },
+  ];
 
   if (query.priceRanges) {
     const ranges = query.priceRanges
