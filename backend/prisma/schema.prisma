@@ -12,7 +12,7 @@ datasource db {
 // ============================================================================
 
 model User {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   email        String    @unique @db.VarChar(255)
   firstName    String    @map("first_name") @db.VarChar(100)
   lastName     String    @map("last_name") @db.VarChar(100)
@@ -32,7 +32,7 @@ model User {
 }
 
 model Customer {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   email        String    @unique @db.VarChar(255)
   firstName    String    @map("first_name") @db.VarChar(100)
   lastName     String    @map("last_name") @db.VarChar(100)
@@ -53,7 +53,7 @@ model Customer {
 // ============================================================================
 
 model Category {
-  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                String                @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   name              String                @db.VarChar(150)
   slug              String                @unique(map: "categories_slug_unique") @db.VarChar(150)
   description       String?
@@ -76,7 +76,7 @@ model Category {
 }
 
 model Product {
-  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                    String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   name                  String                 @db.VarChar(255)
   slug                  String                 @unique(map: "products_slug_unique") @db.VarChar(255)
   description           String?
@@ -133,7 +133,7 @@ model ProductCategory {
 }
 
 model Tag {
-  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String       @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   name      String       @unique @db.VarChar(100)
   createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   
@@ -155,7 +155,7 @@ model ProductTag {
 }
 
 model ProductFeature {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   productId    String   @map("product_id") @db.Uuid
   description  String   @db.VarChar(500)
   displayOrder Int      @default(0) @map("display_order")
@@ -168,7 +168,7 @@ model ProductFeature {
 }
 
 model ProductOption {
-  id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String               @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   productId String               @map("product_id") @db.Uuid
   name      String               @db.VarChar(100)
   isActive  Boolean              @default(true) @map("is_active")
@@ -184,7 +184,7 @@ model ProductOption {
 }
 
 model ProductOptionValue {
-  id        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String            @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   optionId  String            @map("option_id") @db.Uuid
   name      String            @db.VarChar(100)
   createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -199,7 +199,7 @@ model ProductOptionValue {
 }
 
 model ProductSku {
-  id               String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String                   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   productId        String                   @map("product_id") @db.Uuid
   sku              String                   @unique(map: "product_skus_sku_unique") @db.VarChar(100)
   stock            Int                      @default(0)
@@ -233,7 +233,7 @@ model ProductSkuValue {
 // ============================================================================
 
 model ProductImageStorage {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   productId        String   @map("product_id") @db.Uuid
 
   storageKey       String?  @map("storage_key") @db.VarChar(500)
@@ -257,7 +257,7 @@ model ProductImageStorage {
 }
 
 model ProductSkuImageStorage {
-  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   skuId            String     @map("sku_id") @db.Uuid
 
   storageKey       String?    @map("storage_key") @db.VarChar(500)
@@ -282,7 +282,7 @@ model ProductSkuImageStorage {
 }
 
 model CategoryImageStorage {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   categoryId       String   @unique @map("category_id") @db.Uuid
 
   storageKey       String?  @map("storage_key") @db.VarChar(500)
@@ -307,7 +307,7 @@ model CategoryImageStorage {
 // ============================================================================
 
 model Order {
-  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                 String               @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   customerId         String?              @map("customer_id") @db.Uuid
   customerRel        Customer?            @relation(fields: [customerId], references: [id], onUpdate: NoAction, map: "orders_customer_fk")
 
@@ -338,7 +338,7 @@ model Order {
 }
 
 model OrderItem {
-  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String      @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   orderId      String      @map("order_id") @db.Uuid
   productId    String?     @map("product_id") @db.Uuid
   productSkuId String?     @map("product_sku_id") @db.Uuid
@@ -357,7 +357,7 @@ model OrderItem {
 }
 
 model OrderStatusHistory {
-  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String      @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   orderId   String      @map("order_id") @db.Uuid
   status    OrderStatus
   changedAt DateTime    @default(now()) @map("changed_at") @db.Timestamptz(6)
@@ -370,7 +370,7 @@ model OrderStatusHistory {
 }
 
 model Cart {
-  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   sessionId String     @unique(map: "carts_session_unique") @map("session_id") @db.VarChar(255)
   createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -382,7 +382,7 @@ model Cart {
 }
 
 model CartItem {
-  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String      @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   cartId       String      @map("cart_id") @db.Uuid
   productId    String      @map("product_id") @db.Uuid
   productSkuId String?     @map("product_sku_id") @db.Uuid
@@ -398,7 +398,7 @@ model CartItem {
 }
 
 model Shipment {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id              String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   orderId         String    @unique(map: "shipments_order_unique") @map("order_id") @db.Uuid
   addressStreet   String    @map("address_street") @db.VarChar(255)
   addressCity     String    @map("address_city") @db.VarChar(150)
@@ -432,7 +432,7 @@ model SchemaMigration {
 }
 
 model StaffNote {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   content   String
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -445,7 +445,7 @@ model StaffNote {
 }
 
 model Promotion {
-  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                String          @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   name              String          @db.VarChar(255)
   description       String?
   type              PromotionType
@@ -468,7 +468,7 @@ model Promotion {
 }
 
 model PromotionRule {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id          String    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   promotionId String    @map("promotion_id") @db.Uuid
   productId   String?   @map("product_id") @db.Uuid
   categoryId  String?   @map("category_id") @db.Uuid
@@ -487,7 +487,7 @@ model PromotionRule {
 }
 
 model Collection {
-  id              String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id              String                    @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   name            String                    @db.VarChar(255)
   slug            String                    @unique(map: "collections_slug_unique") @db.VarChar(255)
   description     String?
@@ -512,7 +512,7 @@ model Collection {
 }
 
 model CollectionItem {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+ id           String     @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   collectionId String     @map("collection_id") @db.Uuid
   productId    String     @map("product_id") @db.Uuid
   position     Int        @default(0)
@@ -528,7 +528,7 @@ model CollectionItem {
 }
 
 model LowStockAlert {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   orderId      String   @map("order_id") @db.Uuid
   productId    String   @map("product_id") @db.Uuid
   productName  String   @map("product_name") @db.VarChar(255)
@@ -547,7 +547,7 @@ model LowStockAlert {
 }
 
 model Banner {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   title            String   @db.VarChar(255)
   description      String?
   filterConfig     Json     @default("{}") @map("filter_config")
@@ -575,7 +575,7 @@ model Banner {
 }
 
 model ProductReview {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   productId    String   @map("product_id") @db.Uuid
   orderId      String?  @map("order_id") @db.Uuid
   reviewerName String   @map("reviewer_name") @db.VarChar(100) 
@@ -596,7 +596,7 @@ model ProductReview {
 }
 
 model Favorite {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   sessionId String   @map("session_id") @db.VarChar(255) // CORRECCIÓN: Depende de Sesión
   productId String   @map("product_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -610,7 +610,7 @@ model Favorite {
 }
 
 model Supplier {
-  id               String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String                 @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   name             String                 @db.VarChar(255)
   url              String?                @db.VarChar(500)
   phone            String                 @db.VarChar(50)
@@ -631,7 +631,7 @@ model Supplier {
 }
 
 model ProductSupplier {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   productId    String   @map("product_id") @db.Uuid
   supplierId   String   @map("supplier_id") @db.Uuid
   currentPrice Decimal  @map("current_price") @db.Decimal(12, 2)
@@ -650,7 +650,7 @@ model ProductSupplier {
 }
 
 model SupplierProductPrice {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   productId     String   @map("product_id") @db.Uuid
   supplierId    String   @map("supplier_id") @db.Uuid
   price         Decimal  @db.Decimal(12, 2)
@@ -669,7 +669,7 @@ model SupplierProductPrice {
 }
 
 model Contact {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id         String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   name       String   @db.VarChar(150)
   email      String   @db.VarChar(255)
   phone      String?  @db.VarChar(30)
@@ -751,7 +751,7 @@ enum CollectionType {
 // ============================================================================
 
 model AuditLog {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id         String   @id @default(dbgenerated("uuid_generate_v7()")) @db.Uuid
   userEmail  String   @map("user_email") @db.VarChar(255)
   action     String   @db.VarChar(50)
   entity     String   @db.VarChar(50)
