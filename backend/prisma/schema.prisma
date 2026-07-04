@@ -156,7 +156,6 @@ model ProductTag {
 
   @@id([productId, tagId])
   
-  // MOD-3 Solucionado: Indexación de la clave foránea inversa para optimizar búsquedas por etiqueta
   @@index([tagId], map: "idx_product_tags_tag_id")
   @@map("product_tags")
 }
@@ -233,7 +232,6 @@ model ProductSkuValue {
 
   @@id([skuId, optionValueId])
   
-  // MOD-3 Solucionado: Indexación de la clave foránea inversa para agilizar búsquedas de variantes por atributo
   @@index([optionValueId], map: "idx_product_sku_values_option_value_id")
   @@map("product_sku_values")
 }
@@ -345,7 +343,6 @@ model Order {
   @@index([customerEmail], map: "idx_orders_customer_email")
   @@index([status], map: "idx_orders_status")
   
-  // Optimización de Reportes: Índice compuesto B-Tree para consultas y visualización administrativa
   @@index([status, createdAt(sort: Desc)], map: "idx_orders_status_created_at")
   @@map("orders")
 }
