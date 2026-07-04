@@ -156,20 +156,80 @@
 }
 
 body[data-admin-theme='dark'] {
-   --admin-confirm-modal-bg: #353132;
-   --admin-confirm-modal-border: #4c4341;
-   --admin-confirm-modal-text: #f5f1ea;
-   --admin-confirm-modal-text-muted: #d8cec2;
-   --admin-confirm-modal-overlay: rgba(8, 10, 12, 0.72);
-   --admin-confirm-modal-shadow: 0 26px 64px rgba(0, 0, 0, 0.46);
-   --admin-confirm-cancel-bg: #262c2f;
-   --admin-confirm-cancel-border: #769282;
-   --admin-confirm-cancel-text: #f5f1ea;
-   --admin-confirm-cancel-hover-bg: #2f3639;
-   --admin-confirm-danger-bg: #6d494e;
-   --admin-confirm-danger-border: #6d494e;
-   --admin-confirm-danger-text: #ff8b90;
-   --admin-confirm-danger-hover-bg: #7b5459;
+  color-scheme: dark;
+
+  /* ── Paleta de Colores de Modo Oscuro para Portales y Body ── */
+  --color-primary:             #5d7568;
+  --color-primary-light:       #cbe7c9;
+  --color-primary-dark:        #7ba882;
+  --color-accent:              #ddb08c;
+  --color-accent-light:        #e8c5a8;
+  --color-accent-dark:         #c89a70;
+  --color-neutral-dark:        #181c1f;
+  --color-neutral-light:       #f3f3f3;
+  --color-warm-gray:           #b6a68a;
+
+  /* ── Fondos Semánticos ── */
+  --color-bg-primary:          #232a2f;
+  --color-bg-secondary:        #181c1f;
+  --color-bg-tertiary:         #1e2529;
+  --color-bg-card:             #232a2f;
+
+  /* ── Alias de Superficie ── */
+  --color-surface:             #232a2f;
+  --color-surface-subtle:      #1d2328;
+
+  /* ── Tipografía y Textos ── */
+  --color-text-primary:        #f3f3f3;
+  --color-text-secondary:      #cbe7c9;
+  --color-text-tertiary:       #AEA491;
+  --color-text-inverse:        #181c1f;
+
+  /* ── Bordes ── */
+  --color-border:              #2d3a3f;
+  --color-border-light:        #263038;
+
+  /* ── Estados Semánticos ── */
+  --color-success:             #a3c9a8;
+  --color-error:               #e07070;
+  --color-overlay:             rgba(0, 0, 0, 0.6);
+
+  --color-normal-gray:         #888888;
+  --color-primary-light-inverse: #8fa99a;
+  --color-primary-dark-inverse: #5d7568;
+  --color-accent-light-inverse: #e8c5a8;
+  --color-accent-dark-inverse: #c89a70;
+  --color-dif-mode-light:      rgba(221, 176, 140, 0.16);
+  --color-dif-mode:            #c89a70;
+  --color-dif-mode-dark:       #c89a70d9;
+  --color-active-mode:         rgba(209, 107, 23, 0.12);
+  --color-error-mode:          #c91414dc;
+  --color-error-mode-hover:    #c91c1c;
+  --color-text-instock:        #fff;
+  --color-text-outofstock:     #fff;
+
+  /* ── Sombras para fondos oscuros ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.4);
+
+  /* ── Variables de modales de confirmación (ModalConfirm) ── */
+  --admin-confirm-modal-bg: #353132;
+  --admin-confirm-modal-border: #4c4341;
+  --admin-confirm-modal-text: #f5f1ea;
+  --admin-confirm-modal-text-muted: #d8cec2;
+  --admin-confirm-modal-overlay: rgba(8, 10, 12, 0.72);
+  --admin-confirm-modal-shadow: 0 26px 64px rgba(0, 0, 0, 0.46);
+  --admin-confirm-cancel-bg: #262c2f;
+  --admin-confirm-cancel-border: #769282;
+  --admin-confirm-cancel-text: #f5f1ea;
+  --admin-confirm-cancel-hover-bg: #2f3639;
+  --admin-confirm-danger-bg: #6d494e;
+  --admin-confirm-danger-border: #6d494e;
+  --admin-confirm-danger-text: #ff8b90;
+  --admin-confirm-danger-hover-bg: #7b5459;
 }
 
 /* ── Breakpoints (reference, used in media queries) ──

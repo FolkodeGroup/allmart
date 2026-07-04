@@ -16,13 +16,14 @@ export function useActivityFeed({
     const [pending, setPending] = useState<AdminActivityLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const loadLogs = useCallback(() => {
+    const loadLogs = useCallback(async () => {
+        setIsLoading(true);
         try {
-            const fresh = getAdminActivityLogs();
+            const fresh = await getAdminActivityLogs();
             setLogs(fresh.slice(0, maxEvents));
-            setIsLoading(false);
         } catch (error) {
             console.error('Error loading activity logs:', error);
+        } finally {
             setIsLoading(false);
         }
     }, [maxEvents]);
@@ -34,26 +35,30 @@ export function useActivityFeed({
         }
     }, [autoFetch, loadLogs]);
 
-    // Polling para detectar nuevos eventos
+    // Polling para detectar nuevos eventos con llamadas asíncronas
     useEffect(() => {
         if (!autoFetch) return;
 
-        const interval = setInterval(() => {
-            const fresh = getAdminActivityLogs();
-            const latestKnown = logs[0]?.timestamp;
+        const interval = setInterval(async () => {
+            try {
+                const fresh = await getAdminActivityLogs();
+                const latestKnown = logs[0]?.timestamp;
 
-            if (latestKnown) {
-                const newItems = fresh.filter(
-                    (l) => new Date(l.timestamp) > new Date(latestKnown)
-                );
-                if (newItems.length > 0) {
-                    setPending((prev) => [...newItems, ...prev]);
+                if (latestKnown) {
+                    const newItems = fresh.filter(
+                        (l: AdminActivityLog) => new Date(l.timestamp) > new Date(latestKnown)
+                    );
+                    if (newItems.length > 0) {
+                        setPending((prev) => [...newItems, ...prev]);
+                    }
                 }
+            } catch (error) {
+                console.error('Error in activity feed polling:', error);
             }
         }, pollInterval);
 
         return () => clearInterval(interval);
-    }, [logs, pollInterval, autoFetch]);
+    }, [logs, pollInterval, autoFetch, loadLogs]);
 
     const loadPending = useCallback(() => {
         setLogs((prev) => [...pending, ...prev].slice(0, maxEvents));

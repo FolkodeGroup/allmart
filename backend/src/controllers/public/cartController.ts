@@ -1,66 +1,67 @@
-// controllers/public/cartController.ts
-import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '../../types';
+import { Request, Response, NextFunction } from 'express';
 import * as cartService from '../../services/cartService';
+import { v4 as uuidv4 } from 'uuid';
 
-// Devuelve el carrito actual
-export async function getCart(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+function getSessionId(req: Request, res: Response): string {
+  let sessionId = req.cookies.session_id;
+  if (!sessionId) {
+    sessionId = uuidv4();
+    // Cookie dura 1 año
+    res.cookie('session_id', sessionId, { maxAge: 31536000000, httpOnly: true, sameSite: 'lax' });
+  }
+  return sessionId;
+}
+
+export async function getCart(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.userId;
-    const sessionId = req.cookies.session_id;
-    const cart = await cartService.getCart(userId, sessionId);
+    const sessionId = getSessionId(req, res);
+    const cart = await cartService.getCart(sessionId);
     res.json(cart);
   } catch (err) {
     next(err);
   }
 }
 
-// Agrega un producto al carrito
-export async function addItem(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function addItem(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.userId;
-    const sessionId = req.cookies.session_id;
-    const { productId, quantity } = req.body;
-    const cart = await cartService.addItem(userId, sessionId, productId, quantity ?? 1);
+    const sessionId = getSessionId(req, res);
+    const { productId, productSkuId, quantity } = req.body;
+    const cart = await cartService.addItem(sessionId, productId, productSkuId ?? null, quantity ?? 1);
     res.json(cart);
   } catch (err) {
     next(err);
   }
 }
 
-// Actualiza la cantidad de un producto
-export async function updateItem(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function updateItem(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.userId;
-    const sessionId = req.cookies.session_id;
+    const sessionId = getSessionId(req, res);
     const { productId } = req.params;
-    const { quantity } = req.body;
-    const cart = await cartService.updateItem(userId, sessionId, productId, quantity);
+    const { quantity, productSkuId } = req.body;
+    const cart = await cartService.updateItem(sessionId, productId, productSkuId ?? null, quantity);
     res.json(cart);
   } catch (err) {
     next(err);
   }
 }
 
-// Elimina un producto del carrito
-export async function removeItem(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function removeItem(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.userId;
-    const sessionId = req.cookies.session_id;
+    const sessionId = getSessionId(req, res);
     const { productId } = req.params;
-    const cart = await cartService.removeItem(userId, sessionId, productId);
+    const { productSkuId } = req.body;
+    const skuId = productSkuId || req.query.productSkuId;
+    const cart = await cartService.removeItem(sessionId, productId, (skuId as string) ?? null);
     res.json(cart);
   } catch (err) {
     next(err);
   }
 }
 
-// Vacía todo el carrito
-export async function clearCart(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function clearCart(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user?.userId;
-    const sessionId = req.cookies.session_id;
-    const cart = await cartService.clearCart(userId, sessionId);
+    const sessionId = getSessionId(req, res);
+    const cart = await cartService.clearCart(sessionId);
     res.json(cart);
   } catch (err) {
     next(err);

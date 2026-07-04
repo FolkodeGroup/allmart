@@ -98,7 +98,6 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
 
     // Sincroniza el flag global cada vez que isDirty cambia localmente
     useEffect(() => {
-        console.log('[OrderDetailModal] isDirty local:', isDirty, '→ llamando setGlobalDirty');
         setGlobalDirty(isDirty);
     }, [isDirty, setGlobalDirty]);
 

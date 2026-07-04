@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '../config/prisma';
+import { Prisma, ProductStatus } from '@prisma/client';
 
 export interface LowStockAlertWithOrder {
   id: string;
@@ -15,9 +16,9 @@ export interface LowStockAlertWithOrder {
   stockAfter: number;
   createdAt: Date;
   order: {
-    customerFirstName: string;
-    customerLastName: string;
-    customerEmail: string;
+    customerFirstName: true;
+    customerLastName: true;
+    customerEmail: true;
   };
 }
 
@@ -54,40 +55,24 @@ export interface CurrentLowStockProductsResponse {
 
 const DEFAULT_STOCK_THRESHOLD = 5;
 
-export async function getLowStockAlerts(page = 1, limit = 20): Promise<{
-  data: LowStockAlertWithOrder[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-}> {
-  const skip = (page - 1) * limit;
+export async function getLowStockAlerts(
+  page = 1,
+  limit = 20
+): Promise<any> {
+  const response = await prisma.lowStockAlert.findMany({
+    orderBy: { createdAt: 'desc' },
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+  return response;
+}
 
-  const [alerts, total] = await Promise.all([
-    prisma.lowStockAlert.findMany({
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        order: {
-          select: {
-            customerFirstName: true,
-            customerLastName: true,
-            customerEmail: true,
-          },
-        },
-      },
-    }),
-    prisma.lowStockAlert.count(),
-  ]);
+export async function getLowStockAlertCount(): Promise<number> {
+  return prisma.lowStockAlert.count();
+}
 
-  return {
-    data: alerts as LowStockAlertWithOrder[],
-    total,
-    page,
-    limit,
-    pages: Math.ceil(total / limit),
-  };
+export async function getLowStockAlertsByProductId(productId: string): Promise<any[]> {
+  return prisma.lowStockAlert.findMany({ where: { productId } });
 }
 
 export async function getCurrentLowStockProducts(
@@ -102,7 +87,12 @@ export async function getCurrentLowStockProducts(
     : DEFAULT_STOCK_THRESHOLD;
 
   const skip = (safePage - 1) * safeLimit;
-  const where = { stock: { lte: safeThreshold } };
+  
+  // 🔒 CORRECCIÓN DE TIPO: Usar el enum ProductStatus de Prisma de forma estricta
+  const where: Prisma.ProductWhereInput = { 
+    stock: { lte: safeThreshold },
+    status: { not: ProductStatus.archived }
+  };
 
   const [products, total, noStock] = await Promise.all([
     prisma.product.findMany({
@@ -121,11 +111,15 @@ export async function getCurrentLowStockProducts(
         inStock: true,
         status: true,
         updatedAt: true,
-        category: {
+        productCategories: {
           select: {
-            id: true,
-            name: true,
-            slug: true,
+            category: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
           },
         },
       },
@@ -134,21 +128,30 @@ export async function getCurrentLowStockProducts(
     prisma.product.count({
       where: {
         stock: { lte: 0 },
+        status: { not: ProductStatus.archived } // 🔒 CORRECCIÓN DE TIPO: Usar el enum ProductStatus de Prisma
       },
     }),
   ]);
 
-  const data: CurrentLowStockProduct[] = products.map((product) => ({
-    id: product.id,
-    name: product.name,
-    sku: product.sku,
-    stock: product.stock,
-    inStock: product.inStock,
-    status: product.status,
-    updatedAt: product.updatedAt,
-    category: product.category,
-    alertLevel: product.stock <= 0 ? 'no_stock' : 'low_stock',
-  }));
+  // 🔒 CORRECCIÓN DE INFERENCIA: Casteamos a any[] para evitar errores de propiedades anidadas en el map
+  const data: CurrentLowStockProduct[] = (products as any[]).map((product) => {
+    const firstCategoryRel = product.productCategories?.[0]?.category;
+    return {
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      stock: product.stock,
+      inStock: product.inStock,
+      status: product.status,
+      updatedAt: product.updatedAt,
+      category: firstCategoryRel ? {
+        id: firstCategoryRel.id,
+        name: firstCategoryRel.name,
+        slug: firstCategoryRel.slug,
+      } : null,
+      alertLevel: product.stock <= 0 ? 'no_stock' : 'low_stock',
+    };
+  });
 
   return {
     data,
@@ -162,30 +165,4 @@ export async function getCurrentLowStockProducts(
       threshold: safeThreshold,
     },
   };
-}
-
-export async function getLowStockAlertsByProductId(productId: string): Promise<LowStockAlertWithOrder[]> {
-  return prisma.lowStockAlert.findMany({
-    where: { productId },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      order: {
-        select: {
-          customerFirstName: true,
-          customerLastName: true,
-          customerEmail: true,
-        },
-      },
-    },
-  }) as Promise<LowStockAlertWithOrder[]>;
-}
-
-export async function getLowStockAlertCount(): Promise<number> {
-  return prisma.lowStockAlert.count({
-    where: {
-      createdAt: {
-        gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Últimas 24 horas
-      },
-    },
-  });
 }

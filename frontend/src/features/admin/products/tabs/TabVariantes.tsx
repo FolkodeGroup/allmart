@@ -1,14 +1,16 @@
 import { forwardRef, useImperativeHandle, useState, useEffect, useCallback } from 'react';
 import type { TabVariantesProps } from '../components/types';
-import { useAdminVariants } from '../../../../context/AdminVariantsContext';
+import { useAdminVariants } from '../../../../hooks/useAdminVariants';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import { getStoredToken } from '../../../../utils/apiClient';
 import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
+import { Modal } from '../../../../components/ui/Modal'; // 🟢 FIX: Usamos el Modal del Design System
 import type { UploadFileState } from '../../images';
 import styles from '../AdminProductFormPage.module.css';
+import toast from 'react-hot-toast';
 
 export type TabVariantesRef = {
     validate: () => Record<string, string>;
@@ -38,6 +40,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     errors = {},
 }, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
+
+    const [isSubmittingCombo, setIsSubmittingCombo] = useState(false);
+
     interface Sku {
         id: string;
         sku?: string;
@@ -73,18 +78,15 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     const [combinationPrice, setCombinationPrice] = useState<number | ''>('');
     const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
     const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
+    
     const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
     const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
 
-    // Estados para el Modal de Confirmación de Generación Masiva
     const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
     const [combosToCreate, setCombosToCreate] = useState<CreatedCombination[]>([]);
 
-    // Estados para el Modal de Confirmación de Eliminación Individual Customizado
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [skuToDeleteId, setSkuToDeleteId] = useState<string | null>(null);
-
-    // Estado optimista para eliminación inmediata (0ms percibidos en UI)
     const [deletedSkuIds, setDeletedSkuIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
@@ -100,7 +102,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }));
     }, [skus]);
 
-    // ─── 1. SKU Automático Reactivo ─────────────────────────────────────────────
     useEffect(() => {
         if (combinationModalOpen && !editingSkuId && form.sku) {
             const attrValues = Object.values(combinationAttrs).filter(Boolean);
@@ -158,16 +159,15 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         try {
             setFiles([] as UploadFileState[]);
         } catch {
-            // ignore if hook is unavailable
+            // ignore
         }
         setCombinationModalOpen(true);
     };
 
-    // ─── 3. Preparar la Generación en Matriz (Abre el Modal) ─────────────────
     const handleBulkGenerate = () => {
         if (!productId) return;
         if (!form.variants || form.variants.length === 0) {
-            alert('Agregá al menos un grupo de variantes con valores.');
+            toast.error('Agregá al menos un grupo de variantes con valores.');
             return;
         }
 
@@ -175,7 +175,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         const variantValuesLists = form.variants.map(g => g.values);
 
         if (variantValuesLists.some(list => list.length === 0)) {
-            alert('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
+            toast.error('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
             return;
         }
 
@@ -217,7 +217,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }
 
         if (newCombosToCreate.length === 0) {
-            alert('Todas las combinaciones posibles ya fueron generadas.');
+            toast.success('Todas las combinaciones posibles ya fueron generadas.');
             return;
         }
 
@@ -225,84 +225,112 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setBulkConfirmOpen(true);
     };
 
-    // ─── 4. Ejecutar la Generación en Matriz (Desde el Modal) ────────────────
     const executeBulkGenerate = async () => {
         if (!productId) return;
         setBulkConfirmOpen(false);
 
         setCreatedCombinations(prev => [...combosToCreate, ...prev]);
+        const loadingToast = toast.loading(`Generando ${combosToCreate.length} combinaciones...`);
 
-        for (const combo of combosToCreate) {
-            try {
+        try {
+            for (const combo of combosToCreate) {
                 await createVariantChild(productId, {
                     sku: combo.sku,
                     attributes: combo.attributes,
                     price: combo.price,
                     stock: combo.stock
                 });
-            } catch (err) {
-                console.error('Error creando la combinación', combo, err);
             }
+            await loadSkus(productId);
+            toast.success('Generación exitosa', { id: loadingToast });
+        } catch (err) {
+            console.error('Error creando la combinación', err);
+            toast.error('Ocurrió un error al generar combinaciones', { id: loadingToast });
+        } finally {
+            setCombosToCreate([]);
         }
-        await loadSkus(productId);
-        setCombosToCreate([]);
     };
 
     const handleCreateCombination = async () => {
         if (!productId) return;
+        
+        setIsSubmittingCombo(true); 
+
         const attrs = { ...combinationAttrs };
         const sku = combinationSku.trim();
         const stock = combinationStock === '' ? undefined : Number(combinationStock);
         let images: string[] | undefined;
+        
         const raw = combinationImages.trim();
         if (raw) {
             if (raw.includes('\n')) images = raw.split('\n').map(s => s.trim()).filter(Boolean);
             else images = [raw];
         }
+        
         const price = combinationPrice === '' ? undefined : Number(combinationPrice);
 
         const validation = runCombinationValidation();
         if (validation && (validation.sku || validation.images || validation.price)) {
+            setIsSubmittingCombo(false);
             return;
         }
 
-        let persistedSkuId: string | undefined;
-        if (editingSkuId) {
-            await updateVariantChild(productId, editingSkuId, { sku: sku || undefined, attributes: attrs, stock, price });
-            persistedSkuId = editingSkuId;
-        } else {
-            const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price });
-            if (created && typeof created === 'object' && (created as Record<string, unknown>).id) {
-                persistedSkuId = String((created as Record<string, unknown>).id);
-            }
-        }
+        setCombinationModalOpen(false);
+        setEditingSkuId(null);
+        setCombinationAttrs({});
+        setCombinationSku('');
+        setCombinationPrice('');
+        setCombinationStock('');
+        setCombinationImages('');
 
-        let uploadedRemoteUrls: string[] = [];
-        if (persistedSkuId) {
-            const results = await uploadAll(persistedSkuId);
-            uploadedRemoteUrls = results.filter(r => r.status === 'success' && r.url).map(r => r.url!) as string[];
-        }
-
-        if (images && Array.isArray(images)) {
-            images = [...uploadedRemoteUrls, ...images];
-        } else if (uploadedRemoteUrls.length > 0) {
-            images = uploadedRemoteUrls;
-        } else {
-            images = undefined;
-        }
+        const optimisticCombo: CreatedCombination = { 
+            sku: sku || undefined, 
+            attributes: attrs, 
+            stock, 
+            images: uploadedFiles.map(f => f.remoteUrl || f.previewUrl).filter(Boolean) as string[], 
+            price 
+        };
+        setCreatedCombinations(prev => [optimisticCombo, ...prev]);
 
         try {
-            if (persistedSkuId) {
-                await updateVariantChild(productId, persistedSkuId, { images, price, attributes: attrs });
-            } else if (!editingSkuId) {
-                const newItem: CreatedCombination = { sku: sku || undefined, attributes: attrs, stock, images, price };
-                setCreatedCombinations(prev => [newItem, ...prev]);
-            } else {
-                if (editingSkuId) await updateVariantChild(productId, editingSkuId, { images, price, attributes: attrs });
+            let persistedSkuId = editingSkuId;
+            
+            if (!persistedSkuId) {
+                const created = await createVariantChild(productId, { sku: sku || undefined, attributes: attrs, stock, price });
+                if (created && typeof created === 'object' && (created as Record<string, unknown>).id) {
+                    persistedSkuId = String((created as Record<string, unknown>).id);
+                }
             }
+
+            let uploadedRemoteUrls: string[] = [];
+            if (persistedSkuId && uploadedFiles.length > 0) {
+                const results = await uploadAll(persistedSkuId);
+                uploadedRemoteUrls = results.filter(r => r.status === 'success' && r.url).map(r => r.url!) as string[];
+            }
+
+            if (images && Array.isArray(images)) {
+                images = [...uploadedRemoteUrls, ...images];
+            } else if (uploadedRemoteUrls.length > 0) {
+                images = uploadedRemoteUrls;
+            } else {
+                images = undefined;
+            }
+
+            if (persistedSkuId) {
+                await updateVariantChild(productId, persistedSkuId, { images, price, stock, sku: sku || undefined, attributes: attrs });
+            }
+
+            setFiles([]);
+            toast.success(editingSkuId ? 'Combinación actualizada' : 'Combinación creada con éxito');
+            
+            await loadSkus(productId);
+            
+        } catch(err) {
+            console.error('Error al guardar variante:', err);
+            toast.error('Ocurrió un error al guardar la combinación');
+            setCreatedCombinations(prev => prev.filter(c => c.sku !== sku));
         } finally {
-            setCombinationModalOpen(false);
-            setEditingSkuId(null);
+            setIsSubmittingCombo(false); 
         }
     };
 
@@ -329,7 +357,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationModalOpen(true);
     };
 
-    // ─── 5. Eliminación vinculada a ModalConfirm Custom con Optimistic UI ─────
     const handleDeleteCombination = (id: string) => {
         if (!productId) return;
         setSkuToDeleteId(id);
@@ -340,19 +367,18 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         if (!productId || !skuToDeleteId) return;
         setDeleteConfirmOpen(false);
 
-        // Optimistic UI Update: Ocultar de inmediato
         setDeletedSkuIds(prev => new Set([...prev, skuToDeleteId]));
 
         try {
             await deleteVariantChild(productId, skuToDeleteId);
-        } catch (err) {
-            console.error('Error al eliminar la combinación:', err);
-            // Revertir estado si falla
+            toast.success('Combinación eliminada');
+        } catch {
             setDeletedSkuIds(prev => {
                 const next = new Set(prev);
                 next.delete(skuToDeleteId);
                 return next;
             });
+            toast.error('Error al eliminar combinación');
         } finally {
             setSkuToDeleteId(null);
         }
@@ -367,7 +393,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }
     }), [form]);
 
-    // Filtrar localmente las SKUs que se eliminaron optimistamente
     const visibleSkus = (skus || []).filter((s: Sku) => !deletedSkuIds.has(s.id));
 
     return (
@@ -494,90 +519,118 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 />
             </div>
 
-            {/* Modal Manual de Agregar/Editar Combinación */}
-            {combinationModalOpen && (
-                <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
-                    <div className={styles.modal}>
-                        <h3>{editingSkuId ? 'Editar combinación' : 'Agregar combinación'}</h3>
-                        {(!form.variants || form.variants.length === 0) && (
-                            <p className={styles.help}>No hay grupos de variantes para seleccionar.</p>
-                        )}
-                        {(form.variants ?? []).map((group) => (
-                            <div key={group.id} className={styles.fieldRow}>
-                                <label>{group.name}</label>
-                                <select
-                                    value={combinationAttrs[group.name] ?? ''}
-                                    onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
-                                >
-                                    <option value="">--</option>
-                                    {group.values.map(value => (
-                                        <option key={value} value={value}>{value}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        ))}
-                        <div className={styles.fieldRow}>
-                            <label htmlFor="combination-sku">SKU</label>
-                            <input
-                                id="combination-sku"
-                                value={combinationSku}
-                                onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
-                                onBlur={() => runCombinationValidation()}
-                                className={combinationErrors.sku ? styles.inputError : ''}
+            {/* 🟢 FIX: Modal Oficial del Design System para Agregar/Editar Combinación */}
+            <Modal
+                open={combinationModalOpen}
+                onClose={() => setCombinationModalOpen(false)}
+                title={editingSkuId ? 'Editar combinación' : 'Añadir combinación'}
+                disableClose={isSubmittingCombo}
+                size="md"
+                actions={
+                    <>
+                        <button 
+                            type="button" 
+                            className={styles.cancelBtn} 
+                            disabled={isSubmittingCombo} 
+                            onClick={() => setCombinationModalOpen(false)}
+                            style={{ minWidth: 100 }}
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.submitBtn}
+                            onClick={handleCreateCombination}
+                            disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
+                            style={{ minWidth: 120 }}
+                        >
+                            {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
+                        </button>
+                    </>
+                }
+            >
+                <div style={{ display: 'grid', gap: '16px', padding: '8px 0' }}>
+                    {(!form.variants || form.variants.length === 0) && (
+                        <p className={styles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
+                    )}
+
+                    {/* Selectores de Variantes */}
+                    {(form.variants ?? []).map((group) => (
+                        <div key={group.id} className={styles.field}>
+                            <label className={styles.label}>{group.name}</label>
+                            <select
+                                className={styles.input}
+                                value={combinationAttrs[group.name] ?? ''}
+                                onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
+                            >
+                                <option value="">-- Seleccionar --</option>
+                                {group.values.map(value => (
+                                    <option key={value} value={value}>{value}</option>
+                                ))}
+                            </select>
+                        </div>
+                    ))}
+
+                    {/* SKU */}
+                    <div className={styles.field}>
+                        <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
+                        <input
+                            id="combination-sku"
+                            className={`${styles.input} ${combinationErrors.sku ? styles.inputError : ''}`}
+                            value={combinationSku}
+                            onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
+                            onBlur={() => runCombinationValidation()}
+                        />
+                        {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
+                    </div>
+
+                    {/* Imágenes */}
+                    <div className={styles.field}>
+                        <label htmlFor="combination-images" className={styles.label}>Imágenes</label>
+                        <div style={{ marginTop: '8px' }}>
+                            <ImageUploader onAddFiles={addFiles} />
+                            <ImagePreviewList
+                                items={uploadedFiles}
+                                onRemove={removeFile}
+                                onRetry={retry}
+                                onSetPrimary={setPrimary}
                             />
                         </div>
-                        {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
-                        <div className={styles.fieldRow}>
-                            <label htmlFor="combination-images">Imágenes</label>
-                            <div className={styles.imageUploaderContainer}>
-                                <ImageUploader onAddFiles={addFiles} />
-                                <ImagePreviewList
-                                    items={uploadedFiles}
-                                    onRemove={removeFile}
-                                    onRetry={retry}
-                                    onSetPrimary={setPrimary}
-                                />
-                            </div>
-                        </div>
                         {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
-                        <div className={styles.fieldRow}>
-                            <label htmlFor="combination-sku-price">Precio</label>
+                    </div>
+
+                    {/* Precio & Stock */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div className={styles.field}>
+                            <label htmlFor="combination-price" className={styles.label}>Precio</label>
                             <input
-                                id="combination-sku-price"
+                                id="combination-price"
                                 type="number"
                                 step="0.01"
+                                className={`${styles.input} ${combinationErrors.price ? styles.inputError : ''}`}
                                 value={combinationPrice === '' ? '' : String(combinationPrice)}
                                 onChange={e => {
                                     setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
                                     runCombinationValidation();
                                 }}
                                 onBlur={() => runCombinationValidation()}
-                                className={combinationErrors.price ? styles.inputError : ''}
                             />
+                            {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
                         </div>
-                        {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
-                        <div className={styles.fieldRow}>
-                            <label htmlFor="combination-stock">Stock</label>
+
+                        <div className={styles.field}>
+                            <label htmlFor="combination-stock" className={styles.label}>Stock</label>
                             <input
                                 id="combination-stock"
                                 type="number"
+                                className={styles.input}
                                 value={combinationStock === '' ? '' : String(combinationStock)}
                                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
                             />
                         </div>
-                        <div className={styles.modalActions}>
-                            <button type="button" onClick={() => setCombinationModalOpen(false)}>Cancelar</button>
-                            <button
-                                type="button"
-                                onClick={handleCreateCombination}
-                                disabled={!!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
-                            >
-                                {editingSkuId ? 'Guardar cambios' : 'Crear'}
-                            </button>
-                        </div>
                     </div>
                 </div>
-            )}
+            </Modal>
 
             {/* Modal de Confirmación de Generación Masiva */}
             <ModalConfirm

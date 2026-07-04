@@ -1,10 +1,3 @@
-/**
- * models/Product.ts
- * Modelo de datos del producto base.
- * Las variantes (talle, color, etc.) se gestionan en ProductVariant.
- * Las imágenes en ProductImage.
- */
-
 import { ProductStatus } from '../types';
 
 export interface Product {
@@ -15,21 +8,27 @@ export interface Product {
   shortDescription?: string;
   price: number;
   images: string[];         // Json en DB
-  categoryId: string;
+  categoryId: string;       // Propiedad virtual computada
   categoryIds?: string[];
-  tags: string[];           // Json en DB
+  tags: string[];           // Array obtenido dinámicamente de la relación N:M
   rating: number;
   reviewCount: number;
   inStock: boolean;
   stock: number;
   sku?: string;
-  features: string[];       // Json en DB
-  isFeatured: boolean;      // Nuevo campo
+  features: string[];       // Array obtenido dinámicamente de la relación 1:N
+  isFeatured: boolean;
   primarySupplierId?: string | null;
   status: ProductStatus;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type CreateProductDTO = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateProductDTO = Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'categoryId' | 'categoryIds' | 'tags' | 'features'> & {
+  categoryIds: string[];
+  categoryId?: string;
+  tags?: string[];
+  features?: string[];
+};
+
 export type UpdateProductDTO = Partial<CreateProductDTO>;

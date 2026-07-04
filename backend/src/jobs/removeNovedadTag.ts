@@ -5,27 +5,38 @@ export async function removeExpiredNovedadTags(): Promise<void> {
     const TWO_WEEKS_AGO = new Date();
     TWO_WEEKS_AGO.setDate(TWO_WEEKS_AGO.getDate() - 14);
 
+    // Seleccionamos solo el ID, ya no existe "tags" directo en el producto
     const products = await prisma.product.findMany({
         where: {
             novedadSince: { lte: TWO_WEEKS_AGO, not: null },
         },
-        select: { id: true, tags: true },
+        select: { id: true },
     });
 
     if (products.length === 0) return;
 
-    console.log(`[removeNovedadTag] Procesando ${products.length} productos...`);
-
     for (const product of products) {
-        const currentTags = Array.isArray(product.tags) ? product.tags as string[] : [];
-        await prisma.product.update({
-            where: { id: product.id },
-            data: {
-                tags: currentTags.filter(t => t !== 'novedad'),
-                novedadSince: null,
-            },
+        await prisma.$transaction(async (tx) => {
+            // 1. Buscamos el tag "novedad"
+            const tag = await tx.tag.findUnique({ where: { name: 'novedad' } });
+            
+            // 2. Si existe, eliminamos la relación con este producto
+            if (tag) {
+                await tx.productTag.deleteMany({
+                    where: {
+                        productId: product.id,
+                        tagId: tag.id,
+                    },
+                });
+            }
+
+            // 3. Limpiamos la fecha de novedad
+            await tx.product.update({
+                where: { id: product.id },
+                data: {
+                    novedadSince: null,
+                },
+            });
         });
     }
-
-    console.log(`[removeNovedadTag] ${products.length} productos actualizados`);
 }

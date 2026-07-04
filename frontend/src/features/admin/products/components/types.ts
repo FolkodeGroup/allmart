@@ -61,9 +61,10 @@ export interface TabImagenesProps {
     errors?: Record<string, string>;
     isEdit: boolean;
     productId?: string | null;
-    // Estado para modo creación (URLs)
+    // Estado para modo creación (URLs / Base64)
     images: string[];
     fieldErrors: Record<string, string>;
+    setField: SetField; // 🟢 PROPIEDAD AÑADIDA
     onSetImage: (index: number, value: string) => void;
     onAddImageSlot: () => void;
     onRemoveImageSlot: (index: number) => void;
@@ -84,7 +85,6 @@ export interface TabImagenesProps {
     setEditingImgAlt: (v: string) => void;
     savingImgId: string | null;
     deletingImgId: string | null;
-    // FIX: RefObject<HTMLInputElement> sin `| null` — coincide con useRef<HTMLInputElement>(null)
     fileInputRef: React.RefObject<HTMLInputElement | null>;
     onApiUploadImage: () => Promise<void>;
     onApiStartEdit: (img: ProductImageItem) => void;

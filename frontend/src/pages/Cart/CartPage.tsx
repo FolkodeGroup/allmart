@@ -43,7 +43,6 @@ export function CartPage() {
 
   const shippingThreshold = 50000;
   const freeShipping = totalPrice >= shippingThreshold;
-  console.log(items);
   return (
     <main className={styles.page}>
       <h1 className={styles.heading}>

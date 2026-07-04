@@ -59,29 +59,33 @@ export default defineConfig({
     // Enable code splitting for better caching and lazy loading
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor chunks
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['@mui/material', '@emotion/react', '@emotion/styled', 'framer-motion'],
-          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'vendor-charts': ['recharts'],
+        // División dinámica de chunks para evitar dependencias circulares
+        manualChunks(id) {
+          // 1. Dependencias externas (node_modules)
+          if (id.includes('node_modules')) {
+            // 🟢 SOLUCIÓN CIRCULAR: Combinamos react, mui, emotion, framer-motion, recharts y d3 en 'vendor-base'
+            // Esto elimina la referencia circular entre el módulo de gráficos y las librerías de UI base.
+            if (
+              id.includes('react/') || id.includes('react-dom/') || id.includes('react-router-dom/') ||
+              id.includes('@mui/') || id.includes('@emotion/') || id.includes('framer-motion/') ||
+              id.includes('recharts/') || id.includes('d3-')
+            ) {
+              return 'vendor-base';
+            }
+            if (id.includes('react-hook-form/') || id.includes('@hookform/resolvers/') || id.includes('zod/')) {
+              return 'vendor-forms';
+            }
+          }
 
-          // Admin feature chunks for better lazy loading
-          'admin-products': [
-            './src/features/admin/products/AdminProducts',
-            './src/features/admin/products/AdminProductCard',
-            './src/features/admin/products/AdminProductFormPage',
-          ],
-          'admin-categories': ['./src/features/admin/categories/AdminCategories'],
-          'admin-orders': ['./src/features/admin/orders/AdminOrders'],
-          'admin-images': ['./src/features/admin/images/AdminImages'],
-          'admin-variants': ['./src/features/admin/variants/AdminVariants'],
-          'admin-reports': ['./src/features/admin/reports/AdminReports'],
-        },
+          // 2. Agrupar todas las características de administración en un solo bloque 'admin-core'.
+          if (id.includes('src/features/admin/')) {
+            return 'admin-core';
+          }
+        }
       },
     },
-    // Optimize chunk sizes
-    chunkSizeWarningLimit: 600,
+    // 🟢 OPTIMIZACIÓN: Aumentamos el límite de advertencia para acomodar el bloque base consolidado y el admin core
+    chunkSizeWarningLimit: 1600,
     minify: 'esbuild',
   },
   // Optimization for development

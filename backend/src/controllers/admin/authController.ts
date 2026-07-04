@@ -1,10 +1,11 @@
 /**
  * controllers/admin/authController.ts
- * Controlador de autenticación del panel de administración.
+ * Controlador de autenticación del panel de administración con auditoría.
  */
 
 import { Request, Response, NextFunction } from 'express';
 import * as authService from '../../services/authService';
+import * as auditService from '../../services/auditService';
 import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
 
@@ -30,12 +31,23 @@ export async function changePasswordController(
     }
 
     const userId = req.user?.userId;
+    const userEmail = req.user?.user || 'desconocido';
+
     if (!userId) {
       res.status(401).json({ success: false, message: 'No autenticado' });
       return;
     }
 
     await authService.changePassword(userId, currentPassword, newPassword);
+
+    await auditService.recordAction({
+      userEmail,
+      action: 'editar',
+      entity: 'users',
+      entityId: userId,
+      details: { action: 'change_password' }
+    });
+
     sendSuccess(res, null, 200, 'Contraseña actualizada correctamente');
   } catch (err) {
     next(err);

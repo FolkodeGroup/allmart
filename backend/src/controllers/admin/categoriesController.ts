@@ -1,10 +1,11 @@
 /**
  * controllers/admin/categoriesController.ts
- * Controlador CRUD para el dominio de categorías.
+ * Controlador CRUD para el dominio de categorías con Auditoría integrada.
  */
 
 import { Response, NextFunction } from 'express';
 import * as categoriesService from '../../services/categoriesService';
+import * as auditService from '../../services/auditService';
 import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
 import { CreateCategoryDTO, UpdateCategoryDTO } from '../../models/Category';
@@ -48,6 +49,15 @@ export async function show(req: AuthenticatedRequest, res: Response, next: NextF
 export async function create(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const category = await categoriesService.createCategory(req.body as CreateCategoryDTO);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'crear',
+      entity: 'categories',
+      entityId: category.id,
+      details: { name: category.name }
+    });
+
     sendSuccess(res, category, 201, 'Categoría creada');
   } catch (err) { next(err); }
 }
@@ -55,13 +65,32 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
 export async function update(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const category = await categoriesService.updateCategory(req.params.id, req.body as UpdateCategoryDTO);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'editar',
+      entity: 'categories',
+      entityId: category.id,
+      details: { name: category.name }
+    });
+
     sendSuccess(res, category, 200, 'Categoría actualizada');
   } catch (err) { next(err); }
 }
 
 export async function remove(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
+    const category = await categoriesService.getCategoryById(req.params.id);
     await categoriesService.deleteCategory(req.params.id);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'eliminar',
+      entity: 'categories',
+      entityId: req.params.id,
+      details: { name: category.name }
+    });
+
     sendSuccess(res, null, 200, 'Categoría eliminada');
   } catch (err) { next(err); }
 }

@@ -302,7 +302,7 @@ export function AdminReports() {
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([k, v]) => ({
           dateKey: k,
-          label: new Date(k + '-01').toLocaleDateString('es-AR', { month: 'short', year: '2-digit' }),
+          label: new Date(k + '-01T12:00:00').toLocaleDateString('es-AR', { month: 'short', year: '2-digit' }),
           value: v,
         }));
     }
@@ -520,7 +520,6 @@ export function AdminReports() {
               statusSlices={statusSlices}
               periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
               ordersTableProps={{ orders: filteredOrdersTable }}
-              ordersTableFilters={ordersTableFilters}
             />
           </div>
         )}

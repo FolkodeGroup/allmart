@@ -10,6 +10,7 @@ import { env } from './config/env';
 import { connectDB } from './config/database';
 import { removeExpiredNovedadTags } from './jobs/removeNovedadTag';
 import { syncAllAutoCollections } from './jobs/collectionsJob';
+import { cleanAbandonedCarts } from './jobs/cleanAbandonedCarts';
 
 async function bootstrap(): Promise<void> {
   await connectDB();
@@ -33,6 +34,14 @@ async function bootstrap(): Promise<void> {
         console.error('[Server] Error al sincronizar colecciones automáticas (inicio):', err);
       });
 
+    cleanAbandonedCarts(14)
+      .then((count) => {
+        console.log(`[Server] Limpieza inicial de carritos completada: ${count} eliminados.`);
+      })
+      .catch((err) => {
+        console.error('[Server] Error al limpiar carritos abandonados (inicio):', err);
+      });
+
     // ─── Programación de tareas recurrentes cada 24 horas ─────────────────────
     setInterval(() => {
       console.log('[Server] Ejecutando tareas programadas diarias...');
@@ -49,6 +58,14 @@ async function bootstrap(): Promise<void> {
         })
         .catch((err) => {
           console.error('[Server] Error al sincronizar colecciones automáticas (intervalo):', err);
+        });
+
+      cleanAbandonedCarts(14)
+        .then((count) => {
+          console.log(`[Server] Limpieza periódica de carritos completada: ${count} eliminados.`);
+        })
+        .catch((err) => {
+          console.error('[Server] Error al limpiar carritos abandonados (intervalo):', err);
         });
     }, 24 * 60 * 60 * 1000);
   });

@@ -59,28 +59,44 @@ export function ActivityFeed({
   pollInterval = 10000,
   maxEvents = 50,
 }: ActivityFeedProps) {
-  const [logs, setLogs] = useState<AdminActivityLog[]>(() =>
-    getAdminActivityLogs().slice(0, maxEvents),
-  );
+  const [logs, setLogs] = useState<AdminActivityLog[]>([]);
   const [filter, setFilter] = useState<string>("all");
 
-  // Auto-reload: merge new logs automatically
+  // Fetch asíncrono para carga inicial y polling
   useEffect(() => {
-    const interval = setInterval(() => {
-      const fresh = getAdminActivityLogs().slice(0, maxEvents);
-      setLogs(fresh);
-    }, pollInterval);
+    const fetchLogs = async () => {
+      try {
+        const fresh = await getAdminActivityLogs();
+        setLogs(fresh.slice(0, maxEvents));
+      } catch (error) {
+        console.error("Error al obtener los logs de actividad:", error);
+      }
+    };
+
+    fetchLogs(); // Carga inicial
+
+    const interval = setInterval(fetchLogs, pollInterval);
     return () => clearInterval(interval);
   }, [pollInterval, maxEvents]);
 
-  const handleClear = useCallback(() => {
-    clearAdminActivityLogs();
-    setLogs([]);
+  const handleClear = useCallback(async () => {
+    try {
+      await clearAdminActivityLogs();
+      setLogs([]);
+    } catch (error) {
+      console.error("Error al limpiar los logs:", error);
+    }
   }, []);
 
-  const handleDelete = useCallback((log: AdminActivityLog, idx: number) => {
-    deleteAdminActivityLog(log.timestamp, idx);
-    setLogs(getAdminActivityLogs().slice(0, maxEvents));
+  const handleDelete = useCallback(async (log: AdminActivityLog) => {
+    if (!log.id) return;
+    try {
+      await deleteAdminActivityLog(log.id);
+      const fresh = await getAdminActivityLogs();
+      setLogs(fresh.slice(0, maxEvents));
+    } catch (error) {
+      console.error("Error al eliminar el log:", error);
+    }
   }, [maxEvents]);
 
   const filtered = logs.filter((l) => {
@@ -152,7 +168,7 @@ export function ActivityFeed({
               {filtered.map((log, i) => {
                 const cfg = getConfig(log.action);
                 return (
-                  <tr key={`${log.timestamp}-${i}`} className="af-row">
+                  <tr key={log.id || `${log.timestamp}-${i}`} className="af-row">
                     <td>
                       <span
                         className="af-tag"
@@ -167,7 +183,7 @@ export function ActivityFeed({
                     <td>
                       <button
                         className="af-delete-btn"
-                        onClick={() => handleDelete(log, i)}
+                        onClick={() => handleDelete(log)}
                         aria-label="Eliminar este evento"
                         title="Eliminar"
                       >
