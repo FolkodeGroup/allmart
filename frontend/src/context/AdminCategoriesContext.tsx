@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { Category } from '../types';
 import * as categoriesService from '../features/admin/categories/categoriesService';
 import { useAdminAuth } from './AdminAuthContext';
-import { useNotification } from './NotificationContext';
+import { useNotification } from './index';
 
 interface AdminCategoriesContextType {
   categories: Category[];

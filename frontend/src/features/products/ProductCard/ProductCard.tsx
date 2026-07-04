@@ -39,6 +39,12 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
 
   // Cargar descuento dinámico desde API
   useEffect(() => {
+    // 🟢 OPTIMIZACIÓN: Si el backend ya calculó el descuento, evitamos la llamada de red
+    if (product.appliedDiscount) {
+      setDynamicDiscount(product.appliedDiscount);
+      return;
+    }
+
     const loadDiscount = async () => {
       try {
         const categoryIds = Array.isArray(product.categoryIds)
@@ -53,13 +59,12 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         );
         setDynamicDiscount(discount);
       } catch (error) {
-        // Silent error - fallback a descuento estático
         console.error('Error loading discount:', error);
       }
     };
 
     loadDiscount();
-  }, [product.id, product.price, product.category?.id, product.categoryIds]);
+  }, [product.id, product.price, product.category?.id, product.categoryIds, product.appliedDiscount]);
 
   const isNew = product.tags.includes("nuevo");
   const isFeatured = variant === 'featured';

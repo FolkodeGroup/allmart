@@ -1,11 +1,12 @@
 /**
  * controllers/admin/productsController.ts
- * Controlador CRUD para el dominio de productos.
+ * Controlador CRUD para el dominio de productos con Auditoría integrada.
  */
 
 import { isAbsolute, resolve } from 'node:path';
 import { Response, NextFunction } from 'express';
 import * as productsService from '../../services/productsService';
+import * as auditService from '../../services/auditService';
 import {
   CatalogPdfProductInput,
   generateCatalogPdf,
@@ -106,6 +107,15 @@ export async function show(req: AuthenticatedRequest, res: Response, next: NextF
 export async function create(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const product = await productsService.createProduct(req.body as CreateProductDTO);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'crear',
+      entity: 'products',
+      entityId: product.id,
+      details: { name: product.name }
+    });
+
     sendSuccess(res, product, 201, 'Producto creado');
   } catch (err) { next(err); }
 }
@@ -113,13 +123,32 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
 export async function update(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const product = await productsService.updateProduct(req.params.id, req.body as UpdateProductDTO);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'editar',
+      entity: 'products',
+      entityId: product.id,
+      details: { name: product.name }
+    });
+
     sendSuccess(res, product, 200, 'Producto actualizado');
   } catch (err) { next(err); }
 }
 
 export async function remove(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
+    const product = await productsService.getProductById(req.params.id);
     await productsService.deleteProduct(req.params.id);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'eliminar',
+      entity: 'products',
+      entityId: req.params.id,
+      details: { name: product.name }
+    });
+
     sendSuccess(res, null, 200, 'Producto eliminado');
   } catch (err) { next(err); }
 }

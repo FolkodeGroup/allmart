@@ -90,34 +90,32 @@ export async function apiFetch<T>(
     const timeoutId = window.setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 
     try {
-  const headers = {
-    ...getAuthHeaders(token),
-    ...(options.headers || {}),
-  };
+      const headers = {
+        ...getAuthHeaders(token),
+        ...(options.headers || {}),
+      };
 
-  // Si enviamos FormData, eliminamos el Content-Type para que el navegador lo gestione
-  if (options.body instanceof FormData) {
-    delete (headers as Record<string, string>)['Content-Type'];
-  }
+      if (options.body instanceof FormData) {
+        delete (headers as Record<string, string>)['Content-Type'];
+      }
 
+      // 🟢 CORRECCIÓN: Agregar credentials para que el session_id cookie viaje siempre
       const res = await fetch(url, {
         ...options,
         headers,
+        credentials: options.credentials || 'include',
         signal: controller.signal,
       });
 
       window.clearTimeout(timeoutId);
-
       return handleResponse<T>(res);
     } catch (error) {
       window.clearTimeout(timeoutId);
-
       if (shouldRetry(method, error, attempt, maxRetries)) {
         attempt += 1;
         await delay(RETRY_DELAY_MS * attempt);
         continue;
       }
-
       throw error;
     }
   }

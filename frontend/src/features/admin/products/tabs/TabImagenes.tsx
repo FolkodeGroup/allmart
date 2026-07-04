@@ -1,5 +1,6 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { RefObject } from 'react';
+import type { SetField } from '../components/types';
 import styles from '../AdminProductFormPage.module.css';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 
@@ -24,6 +25,7 @@ interface TabImagenesProps {
     productId?: string | null;
     images: string[];
     fieldErrors: Record<string, string>;
+    setField: SetField;
     onSetImage: (i: number, val: string) => void;
     onAddImageSlot: () => void;
     onRemoveImageSlot: (i: number) => void;
@@ -47,8 +49,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
     isEdit,
     images,
     fieldErrors,
-    onSetImage,
-    onAddImageSlot,
+    setField,
     onRemoveImageSlot,
     apiImages,
     imagesLoading,
@@ -72,15 +73,35 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
         }
     }), [images, isEdit]);
 
-    const handleFileClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setUploadProgress(0);
-            const previews = Array.from(e.target.files).map((file) => URL.createObjectURL(file));
-            onAddImageSlot();
-            previews.forEach((preview, i) => {
-                onSetImage(images.length + i, preview);
-            });
-            setUploadProgress(100);
+    // 🟢 CORRECCIÓN: Leemos las imágenes como Base64 para que el backend pueda subirlas a R2 correctamente.
+    const handleFileClick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setUploadProgress(10);
+            const files = Array.from(e.target.files);
+            
+            try {
+                const base64Strings = await Promise.all(files.map(file => {
+                    return new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            if (event.target?.result) resolve(event.target.result as string);
+                            else reject(new Error("Error leyendo el archivo"));
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                }));
+
+                // Limpiamos los strings vacíos que puedan haber quedado por inicialización
+                const cleanImages = images.filter(img => img.trim() !== '');
+                setField('images', [...cleanImages, ...base64Strings]);
+                
+                setUploadProgress(100);
+                setTimeout(() => setUploadProgress(0), 1500);
+            } catch (error) {
+                console.error("Error procesando imágenes a Base64:", error);
+                setUploadProgress(0);
+            }
         }
     };
 
@@ -201,7 +222,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                     <div className={styles.imagesGrid}>
                         {images.map((url: string, index: number) =>
                             url.trim() ? (
-                                <div key={`${url}-${index}`} className={styles.imageCard}>
+                                <div key={`${url.substring(0,20)}-${index}`} className={styles.imageCard}>
                                     <div className={styles.imagePreview}>
                                         <img src={url} alt={`Imagen ${index + 1}`} />
                                     </div>

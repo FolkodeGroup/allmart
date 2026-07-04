@@ -44,16 +44,21 @@ export function useImageUpload({ token, productId, skuId, maxSizeBytes = 5 * 102
     }, []);
 
     type UploadResult = { uid: string; url?: string; id?: string; status: UploadStatus; errorMessage?: string | null };
+    
+    // Upload de manera estrictamente secuencial
     const uploadAll = useCallback(async (overrideSkuId?: string): Promise<UploadResult[]> => {
         const results: UploadResult[] = [];
         const targetSku = overrideSkuId ?? skuId;
+        
         for (const f of files) {
             if (f.status !== 'pending' || !f.file) continue;
             try {
                 setFiles(s => s.map(x => x.uid === f.uid ? { ...x, status: 'uploading', progress: 10 } : x));
+                
                 const res = targetSku
-                    ? await uploadSkuImage(token ?? '', productId, targetSku, f.file!)
-                    : await uploadProductImage(token ?? '', productId, f.file!);
+                    ? await uploadSkuImage(token ?? '', productId, targetSku, f.file)
+                    : await uploadProductImage(token ?? '', productId, f.file);
+                
                 setFiles(s => s.map(x => x.uid === f.uid ? { ...x, status: 'success', progress: 100, remoteUrl: res.url, id: res.id } : x));
                 results.push({ uid: f.uid, url: res.url, id: res.id, status: 'success' });
             } catch (err: unknown) {

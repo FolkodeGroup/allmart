@@ -4,13 +4,15 @@ interface ProductImageProps {
   src?: string | null;
   alt: string;
   className?: string;
-  width?: number;
-  height?: number;
-  placeholder?: string; // URL de imagen liviana o color
+  width?: number | string;
+  height?: number | string;
+  placeholder?: string;
   style?: React.CSSProperties;
   loading?: 'lazy' | 'eager';
   fetchPriority?: 'high' | 'low' | 'auto';
   sizes?: string;
+  /** 🟢 FIX: Agregamos objectFit param, por defecto 'contain' en ecommerce */
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
 }
 
 /**
@@ -27,12 +29,12 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   loading = 'lazy',
   fetchPriority = 'auto',
   sizes,
+  objectFit = 'contain', // 🟢 Por defecto 'contain' para que no se recorten los productos
 }) => {
   const [loaded, setLoaded] = useState(false);
   const safeSrc = typeof src === 'string' ? src : '';
 
   if (!safeSrc) {
-    // Si no hay imagen, mostrar placeholder
     return (
       <img
         src={placeholder}
@@ -40,20 +42,25 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         className={className}
         width={width}
         height={height}
-        style={{ width: width ? width : '100%', height: height ? height : '100%', objectFit: 'cover', ...style }}
+        style={{ 
+          width: width ? width : '100%', 
+          height: height ? height : '100%', 
+          objectFit: objectFit, // 🟢 Aplicamos el objectFit
+          ...style 
+        }}
         aria-label={alt}
       />
     );
   }
-  // Derivar WebP si es posible
+  
   const webpSrc = safeSrc.endsWith('.jpg') || safeSrc.endsWith('.jpeg')
     ? safeSrc.replace(/\.(jpg|jpeg)$/i, '.webp')
     : safeSrc.endsWith('.png')
       ? safeSrc.replace(/\.png$/i, '.webp')
       : undefined;
+
   return (
     <div style={{ position: 'relative', width: width || '100%', height: height || '100%', ...style }} className={className}>
-      {/* Placeholder blur/liviano */}
       <img
         src={placeholder}
         alt=""
@@ -65,14 +72,13 @@ export const ProductImage: React.FC<ProductImageProps> = ({
           inset: 0,
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
+          objectFit: objectFit, // 🟢
           filter: loaded ? 'none' : 'blur(8px)',
           opacity: loaded ? 0 : 1,
           transition: 'opacity 0.4s',
           zIndex: 1,
         }}
       />
-      {/* Imagen final optimizada */}
       <picture>
         {webpSrc && (
           <source srcSet={webpSrc} type="image/webp" />
@@ -90,7 +96,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
             display: 'block',
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: objectFit, // 🟢 Fix fundamental
             opacity: loaded ? 1 : 0,
             transition: 'opacity 0.4s',
             zIndex: 1,

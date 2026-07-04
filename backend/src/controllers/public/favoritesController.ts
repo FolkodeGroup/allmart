@@ -1,53 +1,53 @@
-/**
- * controllers/public/favoritesController.ts
- * Controlador para favoritos de usuario.
- */
-
-import { Response } from 'express';
-import { AuthenticatedRequest } from '../../types';
+import { Request, Response } from 'express';
 import * as favoritesService from '../../services/favoritesService';
+import { v4 as uuidv4 } from 'uuid';
 
-/** GET /api/favorites (mis favoritos) */
-export const index = async (req: AuthenticatedRequest, res: Response) => {
+function getSessionId(req: Request, res: Response): string {
+  let sessionId = req.cookies.session_id;
+  if (!sessionId) {
+    sessionId = uuidv4();
+    res.cookie('session_id', sessionId, { maxAge: 31536000000, httpOnly: true, sameSite: 'lax' });
+  }
+  return sessionId;
+}
+
+export const index = async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.userId;
-    const favorites = await favoritesService.getUserFavorites(userId);
+    const sessionId = getSessionId(req, res);
+    const favorites = await favoritesService.getUserFavorites(sessionId);
     res.json({ data: favorites });
   } catch (error: any) {
     res.status(error.status || 500).json({ message: error.message || 'Error interno' });
   }
 };
 
-/** POST /api/favorites/:productId (toggle) */
-export const toggle = async (req: AuthenticatedRequest, res: Response) => {
+export const toggle = async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const sessionId = getSessionId(req, res);
     const { productId } = req.params;
-    const result = await favoritesService.toggleFavorite(userId, productId);
+    const result = await favoritesService.toggleFavorite(sessionId, productId);
     res.json(result);
   } catch (error: any) {
     res.status(error.status || 500).json({ message: error.message || 'Error interno' });
   }
 };
 
-/** GET /api/favorites/:productId/check */
-export const check = async (req: AuthenticatedRequest, res: Response) => {
+export const check = async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const sessionId = getSessionId(req, res);
     const { productId } = req.params;
-    const result = await favoritesService.checkFavorite(userId, productId);
+    const result = await favoritesService.checkFavorite(sessionId, productId);
     res.json(result);
   } catch (error: any) {
     res.status(error.status || 500).json({ message: error.message || 'Error interno' });
   }
 };
 
-/** DELETE /api/favorites/:productId */
-export const destroy = async (req: AuthenticatedRequest, res: Response) => {
+export const destroy = async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const sessionId = getSessionId(req, res);
     const { productId } = req.params;
-    await favoritesService.removeFavorite(userId, productId);
+    await favoritesService.removeFavorite(sessionId, productId);
     res.status(204).send();
   } catch (error: any) {
     res.status(error.status || 500).json({ message: error.message || 'Error interno' });

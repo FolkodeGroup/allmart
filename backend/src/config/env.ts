@@ -32,4 +32,10 @@ export const env = {
   MAIL_FROM_EMAIL: process.env.MAIL_FROM_EMAIL || process.env.SMTP_USER || '',
   FRONTEND_URL: process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173',
   ALLMART_WHATSAPP_PHONE: process.env.ALLMART_WHATSAPP_PHONE || '5491165891091',
+  // ─── Cloudflare R2 ────────────────────────────────────────────────────────
+  R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID || '',
+  R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || '',
+  R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY || '',
+  R2_BUCKET_NAME: process.env.R2_BUCKET_NAME || 'allmart-images',
+  R2_PUBLIC_URL: process.env.R2_PUBLIC_URL || '',
 } as const;

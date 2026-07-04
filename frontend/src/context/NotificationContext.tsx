@@ -1,13 +1,6 @@
-import React, { createContext, useContext, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-
-export type NotificationType = 'info' | 'success' | 'warning' | 'error';
-
-interface NotificationContextType {
-  showNotification: (type: NotificationType, message: string) => void;
-}
-
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+import { NotificationContext, type NotificationType } from './NotificationContextValue';
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const showNotification = useCallback((type: NotificationType, message: string) => {
@@ -34,25 +27,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     <NotificationContext.Provider value={value}>
       {children}
       <Toaster
-        position="bottom-right"
+        position="top-right" /* 🟢 FIX: Arriba a la derecha para no obstruir interacciones */
         toastOptions={{
           duration: 4000,
           style: {
             background: '#333',
             color: '#fff',
             borderRadius: '10px',
+            fontSize: '14px',
+            fontWeight: 500,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           },
         }}
       />
     </NotificationContext.Provider>
   );
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useNotification = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotification debe usarse dentro de un NotificationProvider');
-  }
-  return context;
 };

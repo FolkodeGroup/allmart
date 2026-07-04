@@ -8,7 +8,7 @@
 import React from 'react';
 import { AdminCategoriesProvider } from '../context/AdminCategoriesContext';
 import { AdminProductsProvider } from '../context/AdminProductsContext';
-import { AdminVariantsProvider } from '../context/AdminVariantsContext';
+import { AdminVariantsProvider } from '../context/AdminVariantsProvider';
 import { AdminImagesProvider } from '../context/AdminImagesContext';
 import { AdminOrdersProvider } from '../context/AdminOrdersContext';
 import { DashboardLayoutProvider } from '../context/DashboardLayoutContext';

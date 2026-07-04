@@ -1,12 +1,5 @@
-/**
- * services/discountService.ts
- * Lógica de cálculo de descuentos basado en promociones activas.
- */
-
-import { Decimal } from '@prisma/client/runtime/client';
-import { Promotion, PromotionRule, PromotionType } from '@prisma/client';
+import { Promotion, PromotionRule } from '@prisma/client';
 import { prisma } from '../config/prisma';
-import { createError } from '../middlewares/errorHandler';
 
 export interface DiscountResult {
   promotionId: string;
@@ -66,8 +59,6 @@ export function calculateDiscount(
   } else if (promotion.type === 'fixed') {
     discountAmount = value;
   } else if (promotion.type === 'bogo') {
-    // BOGO: Buy One Get One. El descuento es el 100% del producto más barato
-    // En este contexto, lo tratamos como un descuento del producto completo
     discountAmount = originalPrice;
   }
 
@@ -153,31 +144,104 @@ export async function getBestDiscount(
 }
 
 /**
- * Aplica descuentos a un array de productos
+ * Aplica descuentos a un array de productos resolviendo eficientemente las N+1 queries.
  */
 export async function applyDiscountsToProducts(
   products: any[]
 ): Promise<any[]> {
-  return Promise.all(
-    products.map(async (product) => {
-      const categoryIds = Array.isArray(product.categoryIds)
-        ? product.categoryIds
-        : product.categoryId
-          ? [product.categoryId]
-          : [];
+  if (products.length === 0) return [];
 
-      const discount = await getBestDiscount(
-        product.id,
-        product.price.toNumber ? product.price.toNumber() : product.price,
-        categoryIds
+  // 1. Obtener todas las promociones activas una sola vez
+  const activePromotions = await getActivePromotions();
+  if (activePromotions.length === 0) {
+    return products.map(p => ({ ...p, appliedDiscount: null }));
+  }
+
+  // 2. Extraer todos los IDs de productos y categorías involucradas para consulta en lotes
+  const productIds = products.map(p => p.id as string);
+  const allCategoryIds = new Set<string>();
+  products.forEach(p => {
+    const catIds: string[] = Array.isArray(p.categoryIds)
+      ? (p.categoryIds as string[])
+      : p.categoryId ? [p.categoryId as string] : [];
+    catIds.forEach((id: string) => allCategoryIds.add(id));
+  });
+
+  // 3. Consultar todas las reglas aplicables en una sola llamada
+  const rules = await prisma.promotionRule.findMany({
+    where: {
+      OR: [
+        { productId: { in: productIds } },
+        { categoryId: { in: Array.from(allCategoryIds) } }
+      ]
+    }
+  });
+
+  // Mapear reglas en memoria para acceso inmediato de O(1)
+  const rulesByProduct = new Map<string, typeof rules>();
+  const rulesByCategory = new Map<string, typeof rules>();
+
+  rules.forEach(rule => {
+    if (rule.productId) {
+      const list = rulesByProduct.get(rule.productId) || [];
+      list.push(rule);
+      rulesByProduct.set(rule.productId, list);
+    }
+    if (rule.categoryId) {
+      const list = rulesByCategory.get(rule.categoryId) || [];
+      list.push(rule);
+      rulesByCategory.set(rule.categoryId, list);
+    }
+  });
+
+  // 4. Calcular el mejor descuento en memoria sin sobrecargar la base de datos
+  return products.map(product => {
+    const price = product.price.toNumber ? product.price.toNumber() : Number(product.price);
+    const catIds: string[] = Array.isArray(product.categoryIds)
+      ? (product.categoryIds as string[])
+      : product.categoryId ? [product.categoryId as string] : [];
+
+    const prodRules = rulesByProduct.get(product.id) || [];
+    const catRules = catIds.flatMap((catId: string) => rulesByCategory.get(catId) || []);
+    const applicableRules = [...prodRules, ...catRules];
+
+    let bestDiscount: any = null;
+
+    for (const rule of applicableRules) {
+      const promotion = activePromotions.find(p => p.id === rule.promotionId);
+      if (!promotion) continue;
+
+      if (promotion.minPurchaseAmount) {
+        const minAmount = promotion.minPurchaseAmount.toNumber();
+        if (price < minAmount) continue;
+      }
+
+      const { discountAmount, finalPrice, discountPercentage } = calculateDiscount(
+        promotion,
+        price
       );
 
-      return {
-        ...product,
-        appliedDiscount: discount,
+      const result = {
+        promotionId: promotion.id,
+        promotionName: promotion.name,
+        originalPrice: price,
+        discountAmount: Math.round(discountAmount * 100) / 100,
+        finalPrice: Math.round(finalPrice * 100) / 100,
+        discountPercentage: Math.round(discountPercentage * 100) / 100,
+        promotionType: promotion.type,
+        priority: promotion.priority,
       };
-    })
-  );
+
+      if (!bestDiscount || result.discountAmount > bestDiscount.discountAmount) {
+        bestDiscount = result;
+      }
+    }
+
+    return {
+      ...product,
+      appliedDiscount: bestDiscount,
+    };
+  });
 }
 
 /**

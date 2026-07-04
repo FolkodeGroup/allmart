@@ -1,6 +1,6 @@
 /**
  * services/ordersService.ts
- * Lógica de negocio para el dominio de pedidos usando Prisma Client.
+ * Lógica de negocio para el dominio de pedidos usando el esquema CRM unificado.
  */
 import { prisma } from '../config/prisma';
 import { Order, CreateOrderDTO, UpdateOrderDTO } from '../models/Order';
@@ -16,10 +16,7 @@ import {
   AdminBulkUpdateOrderStatusItemResultDTO,
 } from '../types/admin/order';
 
-// ─── Conversiones de enums Prisma ↔ aplicación ────────────────────────────────
-// Prisma genera enum keys con underscore (en_preparacion, no_abonado)
-// para cumplir con las restricciones de identificadores TypeScript.
-// En la BD y en la API se usa la versión con guión (en-preparacion, no-abonado).
+// ─── Helpers de Conversión ──────────────────────────────────────────────────
 
 function prismaStatusToOrderStatus(s: string): OrderStatus {
   const map: Record<string, OrderStatus> = {
@@ -41,8 +38,7 @@ function prismaPaymentToPaymentStatus(s: string): PaymentStatus {
   return map[s] ?? (s as PaymentStatus);
 }
 
-// Convierte OrderStatus de la app al enum Prisma (para escritura)
-function orderStatusToPrismaStatus(s: OrderStatus): string {
+function orderStatusToPrismaStatus(s: OrderStatus): any {
   const map: Record<OrderStatus, string> = {
     [OrderStatus.PENDING]:    'pendiente',
     [OrderStatus.CONFIRMED]:  'confirmado',
@@ -54,7 +50,7 @@ function orderStatusToPrismaStatus(s: OrderStatus): string {
   return map[s] ?? s;
 }
 
-function paymentStatusToPrismaStatus(s: PaymentStatus): string {
+function paymentStatusToPrismaStatus(s: PaymentStatus): any {
   const map: Record<PaymentStatus, string> = {
     [PaymentStatus.UNPAID]: 'no_abonado',
     [PaymentStatus.PAID]:   'abonado',
@@ -81,20 +77,20 @@ function bulkActionToTargetStatus(action: AdminBulkOrderAction): OrderStatus {
   return OrderStatus.CANCELLED;
 }
 
-// Mapea Prisma Order al tipo Order de la app
 function toOrder(row: any): Order {
   return {
     id: row.id,
+    customerId: row.customerId,
     customer: {
-      firstName: row.customerFirstName || row.customer_first_name,
-      lastName: row.customerLastName || row.customer_last_name,
-      email: row.customerEmail || row.customer_email,
-      phone: row.customerPhone || row.customer_phone || undefined,
+      firstName: row.customerFirstName,
+      lastName: row.customerLastName,
+      email: row.customerEmail,
+      phone: row.customerPhone || undefined,
     },
     total: typeof row.total === 'object' && row.total.toNumber ? row.total.toNumber() : Number(row.total),
     status: prismaStatusToOrderStatus(row.status),
-    paymentStatus: prismaPaymentToPaymentStatus(row.paymentStatus || row.payment_status),
-    paidAt: row.paidAt || row.paid_at || undefined,
+    paymentStatus: prismaPaymentToPaymentStatus(row.paymentStatus),
+    paidAt: row.paidAt || undefined,
     notes: row.notes ?? undefined,
     items: Array.isArray(row.orderItems)
       ? row.orderItems.map((item: any) => ({
@@ -105,57 +101,71 @@ function toOrder(row: any): Order {
         quantity: item.quantity,
       }))
       : [],
-    createdAt: row.createdAt || row.created_at,
-    updatedAt: row.updatedAt || row.updated_at,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
+/**
+ * Ajusta métricas agregadas del CRM del cliente al cambiar el estado del pedido,
+ * mitigando de raíz la deriva de datos (Data Drift) al cancelar u omitir transacciones.
+ */
+async function handleCustomerMetricsOnStatusChange(
+  tx: any, 
+  customerId: string | null, 
+  oldStatus: string, 
+  newStatus: string, 
+  total: number
+) {
+  if (!customerId) return;
 
-export async function getAllOrders(
-  query: AdminOrdersQueryDTO
-): Promise<PaginatedResponseDTO<Order>> {
+  const wasActive = oldStatus !== 'cancelado';
+  const isActive = newStatus !== 'cancelado';
 
-  const {
-    status,
-    paymentStatus,
-    q,
-    page = 1,
-    limit = 10
-  } = query;
+  if (wasActive && !isActive) {
+    // Se canceló un pedido activo: restamos de los acumulados
+    await tx.customer.update({
+      where: { id: customerId },
+      data: {
+        totalOrders: { decrement: 1 },
+        totalSpent: { decrement: total }
+      }
+    });
+  } else if (!wasActive && isActive) {
+    // Se reactivó un pedido cancelado: incrementamos
+    await tx.customer.update({
+      where: { id: customerId },
+      data: {
+        totalOrders: { increment: 1 },
+        totalSpent: { increment: total }
+      }
+    });
+  }
+}
 
-  const pageNumber = Number(page);
-  const limitNumber = Number(limit);
-  const skip = (pageNumber - 1) * limitNumber;
+// ─── Servicios ─────────────────────────────────────────────────────────────
+
+export async function getAllOrders(query: AdminOrdersQueryDTO): Promise<PaginatedResponseDTO<Order>> {
+  const { status, paymentStatus, q, page = 1, limit = 10 } = query;
+  const skip = (Number(page) - 1) * Number(limit);
 
   const where: any = {};
-
-  if (status) {
-    where.status = orderStatusToPrismaStatus(status);
-  }
-
-  if (paymentStatus) {
-    where.paymentStatus = paymentStatusToPrismaStatus(paymentStatus);
-  }
-
+  if (status) where.status = orderStatusToPrismaStatus(status);
+  if (paymentStatus) where.paymentStatus = paymentStatusToPrismaStatus(paymentStatus);
   if (q) {
     where.OR = [
       { customerFirstName: { contains: q, mode: 'insensitive' } },
       { customerLastName:  { contains: q, mode: 'insensitive' } },
       { customerEmail:     { contains: q, mode: 'insensitive' } },
-      { customerPhone:     { contains: q, mode: 'insensitive' } },
     ];
   }
 
-  // Evita timeout por adquisición de conexión transaccional en listados de lectura.
-  // Aquí no se requiere atomicidad estricta entre findMany/count.
   const [rows, total] = await Promise.all([
     prisma.order.findMany({
       where,
       skip,
-      take: limitNumber,
-      include: {
-        orderItems: true,
-      },
+      take: Number(limit),
+      include: { orderItems: true },
       orderBy: { createdAt: 'desc' }
     }),
     prisma.order.count({ where })
@@ -164,28 +174,21 @@ export async function getAllOrders(
   return {
     data: rows.map(toOrder),
     total,
-    page: pageNumber,
-    totalPages: Math.ceil(total / limitNumber)
+    page: Number(page),
+    totalPages: Math.ceil(total / Number(limit))
   };
 }
 
-export async function getOrderById(
-  id: string
-): Promise<AdminOrderDTO> {
-
+export async function getOrderById(id: string): Promise<AdminOrderDTO> {
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
       orderItems: true,
-      orderStatusHistory: {
-        orderBy: { changedAt: 'asc' }
-      }
+      orderStatusHistory: { orderBy: { changedAt: 'asc' } }
     }
   });
 
-  if (!order) {
-    throw createError('Pedido no encontrado', 404);
-  }
+  if (!order) throw createError('Pedido no encontrado', 404);
 
   return {
     ...toOrder(order),
@@ -203,74 +206,20 @@ export async function getOrderById(
   };
 }
 
-export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
-  const row = await prisma.order.create({
-    data: {
-      customerFirstName: dto.customer.firstName,
-      customerLastName:  dto.customer.lastName,
-      customerEmail:     dto.customer.email,
-      customerPhone:     dto.customer.phone ?? null,
-      total:             dto.total,
-      notes:             dto.notes ?? null,
-      status:            orderStatusToPrismaStatus(OrderStatus.PENDING) as Parameters<typeof prisma.order.create>[0]['data']['status'],
-      paymentStatus:     paymentStatusToPrismaStatus(PaymentStatus.UNPAID) as Parameters<typeof prisma.order.create>[0]['data']['paymentStatus'],
-    },
-  });
-  return toOrder(row);
-}
-
-export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Order> {
-  await getOrderById(id); // valida existencia
-
-  const data: Record<string, unknown> = {};
-  if (dto.status !== undefined)        data.status        = orderStatusToPrismaStatus(dto.status);
-  if (dto.paymentStatus !== undefined) data.paymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
-  if (dto.paidAt !== undefined)        data.paidAt        = dto.paidAt;
-  if (dto.notes !== undefined)         data.notes         = dto.notes;
-
-  const row = await prisma.order.update({
-    where: { id },
-    data: data as Parameters<typeof prisma.order.update>[0]['data'],
-  });
-  return toOrder(row);
-}
-
-export async function updateOrderStatus(
-  id: string,
-  dto: { status: OrderStatus; note?: string }
-): Promise<AdminOrderDTO> {
-
-  if (!dto.status) {
-    throw createError('Status es requerido', 400);
-  }
-
-  if (!Object.values(OrderStatus).includes(dto.status)) {
-    throw createError('Estado inválido', 400);
-  }
+export async function updateOrderStatus(id: string, dto: { status: OrderStatus; note?: string }): Promise<AdminOrderDTO> {
+  if (!Object.values(OrderStatus).includes(dto.status)) throw createError('Estado inválido', 400);
 
   return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({ where: { id } });
+    if (!order) throw createError('Pedido no encontrado', 404);
 
-    const order = await tx.order.findUnique({
-      where: { id },
-      include: {
-        orderItems: true,
-        orderStatusHistory: true
-      }
-    });
+    const newStatus = orderStatusToPrismaStatus(dto.status);
 
-    if (!order) {
-      throw createError('Pedido no encontrado', 404);
-    }
-
-    const newStatus = orderStatusToPrismaStatus(dto.status) as any;
-
-    // 🔹 Actualiza estado
     await tx.order.update({
       where: { id },
       data: { status: newStatus }
     });
 
-    // 🔹 Registra historial
     await tx.orderStatusHistory.create({
       data: {
         orderId: id,
@@ -279,153 +228,85 @@ export async function updateOrderStatus(
       }
     });
 
-    // 🔹 Si es entregado, registrar venta
-    if (dto.status === OrderStatus.DELIVERED) {
-      await tx.sale.create({
-        data: {
-          orderId: id,
-          total: order.total,
-          createdAt: new Date()
-        }
-      });
-    }
+    // Ajustar métricas del cliente dentro del contexto transaccional
+    await handleCustomerMetricsOnStatusChange(tx, order.customerId, order.status, newStatus, Number(order.total));
 
-    // 🔹 Devuelve pedido actualizado con historial completo
-    const updatedOrder = await tx.order.findUnique({
-      where: { id },
-      include: {
-        orderItems: true,
-        orderStatusHistory: {
-          orderBy: { changedAt: 'asc' }
-        }
-      }
-    });
-
-    if (!updatedOrder) {
-      throw createError('Error recuperando pedido actualizado', 500);
-    }
-
-    return {
-      ...toOrder(updatedOrder),
-      items: updatedOrder.orderItems.map(item => ({
-        productId: item.productId || '',
-        productName: item.productName,
-        productImage: item.productImage || undefined,
-        unitPrice: Number(item.unitPrice),
-        quantity: item.quantity
-      })),
-      statusHistory: updatedOrder.orderStatusHistory.map(h => ({
-        status: prismaStatusToOrderStatus(h.status),
-        changedAt: h.changedAt
-      }))
-    };
+    return getOrderById(id);
   });
 }
 
-export async function updateOrderPaymentStatus(
-  id: string,
-  dto: { paymentStatus: PaymentStatus }
-): Promise<Order> {
+export async function updateOrderPaymentStatus(id: string, dto: { paymentStatus: PaymentStatus }): Promise<Order> {
+  const newPaymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
 
-  if (!dto.paymentStatus) {
-    throw createError('paymentStatus es requerido', 400);
-  }
-
-  if (!Object.values(PaymentStatus).includes(dto.paymentStatus)) {
-    throw createError('Estado de pago inválido', 400);
-  }
-
-  return prisma.$transaction(async (tx) => {
-
-    const order = await tx.order.findUnique({
-      where: { id }
-    });
-
-    if (!order) {
-      throw createError('Pedido no encontrado', 404);
+  const updated = await prisma.order.update({
+    where: { id },
+    data: {
+      paymentStatus: newPaymentStatus,
+      paidAt: dto.paymentStatus === PaymentStatus.PAID ? new Date() : null
     }
-
-    const newPaymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus) as any;
-
-    const updated = await tx.order.update({
-      where: { id },
-      data: {
-        paymentStatus: newPaymentStatus,
-        paidAt:
-          dto.paymentStatus === PaymentStatus.PAID
-            ? new Date()
-            : null
-      }
-    });
-
-    return toOrder(updated);
   });
+
+  return toOrder(updated);
 }
 
+/**
+ * Eliminación lógica (Soft Delete) del pedido para no perder trazabilidad contable
+ * ni distorsionar los balances financieros históricos.
+ */
 export async function deleteOrder(id: string): Promise<void> {
-  const existing = await prisma.order.findUnique({ where: { id } });
-  if (!existing) throw createError('Pedido no encontrado', 404);
-  await prisma.order.delete({ where: { id } });
+  const order = await prisma.order.findUnique({ where: { id } });
+  if (!order) throw createError('Pedido no encontrado', 404);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.order.update({
+      where: { id },
+      data: { status: 'cancelado' }
+    });
+
+    await tx.orderStatusHistory.create({
+      data: {
+        orderId: id,
+        status: 'cancelado',
+        note: 'Pedido anulado/eliminado (Soft Delete)'
+      }
+    });
+
+    // Ajustar métricas de CRM del cliente restando el pedido cancelado
+    await handleCustomerMetricsOnStatusChange(tx, order.customerId, order.status, 'cancelado', Number(order.total));
+  });
 }
 
-export async function bulkUpdateOrderStatus(
-  dto: AdminBulkUpdateOrderStatusDTO
-): Promise<AdminBulkUpdateOrderStatusResultDTO> {
-  if (!dto || !Array.isArray(dto.orderIds) || dto.orderIds.length === 0) {
-    throw createError('orderIds es requerido y debe contener al menos un pedido', 400);
-  }
-
-  if (!dto.action || !['confirm', 'ship', 'cancel'].includes(dto.action)) {
-    throw createError('Accion masiva invalida', 400);
-  }
-
-  const uniqueOrderIds = Array.from(new Set(dto.orderIds.filter(Boolean)));
-  if (uniqueOrderIds.length === 0) {
-    throw createError('No hay IDs validos para procesar', 400);
-  }
-
-  const action = dto.action as AdminBulkOrderAction;
+export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO): Promise<AdminBulkUpdateOrderStatusResultDTO> {
+  const { orderIds, action, note } = dto;
   const targetStatus = bulkActionToTargetStatus(action);
-  const targetPrismaStatus = orderStatusToPrismaStatus(targetStatus) as any;
+  const targetPrismaStatus = orderStatusToPrismaStatus(targetStatus);
 
   const results = await prisma.$transaction(async (tx) => {
     const rows = await tx.order.findMany({
-      where: { id: { in: uniqueOrderIds } },
-      select: { id: true, status: true },
+      where: { id: { in: orderIds } },
+      select: { id: true, status: true, customerId: true, total: true },
     });
 
-    const byId = new Map(rows.map((row) => [row.id, row]));
     const itemResults: AdminBulkUpdateOrderStatusItemResultDTO[] = [];
 
-    for (const orderId of uniqueOrderIds) {
-      const row = byId.get(orderId);
+    for (const orderId of orderIds) {
+      const row = rows.find(r => r.id === orderId);
       if (!row) {
-        itemResults.push({ id: orderId, success: false, reason: 'Pedido no encontrado' });
+        itemResults.push({ id: orderId, success: false, reason: 'No encontrado' });
         continue;
       }
 
       const currentStatus = prismaStatusToOrderStatus(row.status);
       if (!canApplyBulkAction(action, currentStatus)) {
-        itemResults.push({
-          id: orderId,
-          success: false,
-          reason: `Transicion no permitida desde ${currentStatus}`,
-        });
+        itemResults.push({ id: orderId, success: false, reason: 'Transición no permitida' });
         continue;
       }
 
-      await tx.order.update({
-        where: { id: orderId },
-        data: { status: targetPrismaStatus },
-      });
-
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId,
-          status: targetPrismaStatus,
-          note: dto.note ?? null,
-        },
-      });
+      await tx.order.update({ where: { id: orderId }, data: { status: targetPrismaStatus } });
+      await tx.orderStatusHistory.create({ data: { orderId, status: targetPrismaStatus, note: note ?? null } });
+      
+      // Ajustar métricas del cliente para cada pedido modificado en bloque
+      await handleCustomerMetricsOnStatusChange(tx, row.customerId, row.status, targetPrismaStatus, Number(row.total));
 
       itemResults.push({ id: orderId, success: true });
     }
@@ -433,15 +314,49 @@ export async function bulkUpdateOrderStatus(
     return itemResults;
   });
 
-  const success = results.filter((r) => r.success).length;
-  const failed = results.length - success;
-
   return {
     action,
     targetStatus,
     total: results.length,
-    success,
-    failed,
+    success: results.filter(r => r.success).length,
+    failed: results.filter(r => !r.success).length,
     results,
   };
+}
+
+export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
+    if (dto.total < 0) {
+      throw createError('El total del pedido no puede ser negativo', 400);
+    }
+    const row = await prisma.order.create({
+      data: {
+        customerFirstName: dto.customer.firstName,
+        customerLastName:  dto.customer.lastName,
+        customerEmail:     dto.customer.email,
+        customerPhone:     dto.customer.phone ?? null,
+        total:             dto.total,
+        notes:             dto.notes ?? null,
+        status:            'pendiente',
+        paymentStatus:     'no_abonado',
+      },
+    });
+    return toOrder(row);
+}
+
+export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Order> {
+    if (dto.total !== undefined && dto.total < 0) {
+      throw createError('El total del pedido no puede ser negativo', 400);
+    }
+    const data: any = {};
+    if (dto.status) data.status = orderStatusToPrismaStatus(dto.status);
+    if (dto.paymentStatus) data.paymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
+    if (dto.paidAt) data.paidAt = dto.paidAt;
+    if (dto.notes) data.notes = dto.notes;
+    if (dto.total !== undefined) data.total = dto.total;
+  
+    const row = await prisma.order.update({
+      where: { id },
+      data,
+    });
+    return toOrder(row);
 }

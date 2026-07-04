@@ -1,6 +1,6 @@
 /**
  * services/publicOrderService.ts
- * Lógica para creación pública de pedidos usando Prisma Client con transacciones.
+ * Lógica para creación pública de pedidos con CRM de Customers y Stock Atómico.
  */
 
 import { prisma } from '../config/prisma';
@@ -17,7 +17,9 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(customer.email)) {
+  const normalizedEmail = customer.email.trim().toLowerCase();
+  
+  if (!emailRegex.test(normalizedEmail)) {
     throw createError('Email inválido', 400);
   }
 
@@ -30,93 +32,120 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     throw createError('El pedido debe tener al menos un item', 400);
   }
 
+  // Interceptación de seguridad: Validar montos y cantidades no negativas antes de procesar
+  if (total < 0) {
+    throw createError('El total del pedido no puede ser negativo', 400);
+  }
+
   for (const item of items) {
-    if (!item.productId || item.quantity <= 0 || item.unitPrice <= 0) {
-      throw createError('Item inválido en el pedido', 400);
+    if (item.quantity <= 0) {
+      throw createError(`La cantidad para el producto "${item.productName}" debe ser mayor a cero`, 400);
+    }
+    if (item.unitPrice < 0) {
+      throw createError(`El precio unitario para el producto "${item.productName}" no puede ser negativo`, 400);
     }
   }
 
-  if (!total || total <= 0) {
-    throw createError('Total inválido', 400);
-  }
+  // 🟢 PREVENCIÓN DE DEADLOCKS: Ordenamiento determinista de recursos
+  // Ordenamos los productos por su ID de manera ascendente antes de entrar a la transacción.
+  // Esto garantiza que múltiples compras simultáneas que compartan productos bloqueen las filas
+  // exactamente en el mismo orden físico, eliminando el riesgo de bloqueos mutuos (Deadlocks - Error 40P01).
+  const sortedItems = [...items].sort((a, b) => a.productId.localeCompare(b.productId));
 
+  // 1. Ejecución de la transacción de Base de Datos
   const result = await prisma.$transaction(async (tx) => {
-    // Validar que todos los productos existan antes de crear la orden
-    const validatedItems = [];
-    for (const item of items) {
-      // Limpiar el ID compuesto del frontend (extrayendo solo el UUID real del producto)
-      const [realProductId] = item.productId.split('::');
-
-      const product = await tx.product.findUnique({
-        where: { id: realProductId },
-        select: { id: true, name: true, stock: true },
-      });
-
-      if (!product) {
-        throw createError(`Producto con ID ${realProductId} no encontrado`, 404);
+    
+    // CRM: Upsert del Customer basado en Email
+    const customerRecord = await tx.customer.upsert({
+      where: { email: normalizedEmail },
+      update: {
+        firstName: customer.firstName.trim(),
+        lastName: customer.lastName.trim(),
+        phone: normalizedPhone,
+        totalOrders: { increment: 1 },
+        totalSpent: { increment: total }
+      },
+      create: {
+        email: normalizedEmail,
+        firstName: customer.firstName.trim(),
+        lastName: customer.lastName.trim(),
+        phone: normalizedPhone,
+        totalOrders: 1,
+        totalSpent: total
       }
+    });
 
-      validatedItems.push({ 
-        ...item, 
-        realProductId, // Guardamos el ID limpio para usarlo en la creación de los orderItems
-        product 
-      });
-    }
-
+    // Crear la Orden vinculada al Customer
     const order = await tx.order.create({
       data: {
-        customerFirstName: customer.firstName,
-        customerLastName: customer.lastName,
-        customerEmail: customer.email,
+        customerId: customerRecord.id, // ← AHORA ES customerId
+        customerFirstName: customer.firstName.trim(),
+        customerLastName: customer.lastName.trim(),
+        customerEmail: normalizedEmail,
         customerPhone: normalizedPhone,
         total,
         notes: notes ?? null,
-        status: 'pendiente' as Parameters<typeof tx.order.create>[0]['data']['status'],
-        paymentStatus: 'no_abonado' as Parameters<typeof tx.order.create>[0]['data']['paymentStatus'],
+        status: 'pendiente',
+        paymentStatus: 'no_abonado',
       },
     });
 
-    await tx.orderItem.createMany({
-      data: validatedItems.map((item) => ({
-        orderId: order.id,
-        productId: item.realProductId, // Usamos el UUID limpio de la base de datos
-        productName: item.productName,
-        productImage: item.productImage ?? null,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-      })),
-    });
+    // Gestión de Stock Atómico y creación de items (recorremos sortedItems)
+    for (const item of sortedItems) {
+      const [realProductId, skuId] = item.productId.split('::');
 
-    for (const item of validatedItems) {
-      const product = item.product;
-      const stockBefore = product.stock;
-      const stockAfter = stockBefore - item.quantity;
+      // 👇 CORRECCIÓN ESLINT: Declarar sin inicializar 👇
+      let updatedStock: number;
+      let realSkuId: string | null;
 
-      await tx.product.update({
-        where: { id: product.id },
-        data: { stock: stockAfter },
+      if (skuId) {
+        const updatedSku = await tx.productSku.update({
+          where: { id: skuId },
+          data: { stock: { decrement: item.quantity } }
+        });
+        updatedStock = updatedSku.stock;
+        realSkuId = skuId;
+      } else {
+        const updatedProduct = await tx.product.update({
+          where: { id: realProductId },
+          data: { stock: { decrement: item.quantity } }
+        });
+        updatedStock = updatedProduct.stock;
+        realSkuId = null; // Asignación explícita
+      }
+
+      if (updatedStock < 0) {
+        throw createError(`Stock insuficiente para ${item.productName}`, 409);
+      }
+
+      await tx.orderItem.create({
+        data: {
+          orderId: order.id,
+          productId: realProductId,
+          productSkuId: realSkuId,
+          productName: item.productName,
+          productImage: item.productImage ?? null,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        }
       });
 
-      if (stockAfter <= 0) {
+      if (updatedStock <= 5) {
         await tx.lowStockAlert.create({
           data: {
             orderId: order.id,
-            productId: product.id,
-            productName: product.name,
+            productId: realProductId,
+            productName: item.productName,
             quantitySold: item.quantity,
-            stockBefore,
-            stockAfter,
+            stockBefore: updatedStock + item.quantity,
+            stockAfter: updatedStock,
           },
         });
       }
     }
 
     await tx.orderStatusHistory.create({
-      data: {
-        orderId: order.id,
-        status: 'pendiente' as Parameters<typeof tx.orderStatusHistory.create>[0]['data']['status'],
-        note: 'Pedido creado: estado inicial set',
-      },
+      data: { orderId: order.id, status: 'pendiente', note: 'Pedido recibido vía Web' },
     });
 
     return {
@@ -125,6 +154,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
     };
   });
 
+  // 2. Acciones fuera de la transacción (Envío de Email)
   try {
     await sendOrderConfirmationEmail({
       orderId: result.id,
@@ -132,7 +162,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       customer: {
         firstName: customer.firstName,
         lastName: customer.lastName,
-        email: customer.email,
+        email: normalizedEmail,
         phone: normalizedPhone,
       },
       items: items.map((item) => ({
@@ -144,7 +174,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       notes,
     });
   } catch (error) {
-    console.error('[Orders] No se pudo enviar el email de confirmación:', error);
+    console.error('[Orders] Error al enviar email de confirmación:', error);
   }
 
   return result.id;
