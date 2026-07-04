@@ -3,13 +3,24 @@ import { Prisma } from '@prisma/client';
 
 vi.mock('../../config/prisma', () => ({
   prisma: {
-    $queryRaw: vi.fn(),
     product: {
-      count: vi.fn(),
       findMany: vi.fn(),
+      findUnique: vi.fn(),
+      count: vi.fn(),
     },
     category: {
+      findUnique: vi.fn(),
       findMany: vi.fn(),
+    },
+    productTag: {
+      findMany: vi.fn(),
+    },
+    // Agregar estos dos mocks para evitar excepciones al consultar descuentos en los tests
+    promotion: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    promotionRule: {
+      findMany: vi.fn().mockResolvedValue([]),
     },
   },
 }));
@@ -84,7 +95,7 @@ describe('productsService.getPublicProducts', () => {
     const result = await getPublicProducts({});
 
     expect(prisma.product.count).toHaveBeenCalledTimes(1);
-    expect(prisma.product.findMany).toHaveBeenCalledTimes(1);
+    expect(prisma.product.findMany).toHaveBeenCalledTimes(2);
 
     const callWhere = (prisma.product.count as any).mock.calls[0][0].where;
     expect(callWhere).toEqual(expect.objectContaining({
