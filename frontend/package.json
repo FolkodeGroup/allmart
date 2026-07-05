@@ -23,7 +23,6 @@
     "bootstrap-icons": "^1.13.1",
     "dompurify": "^3.3.3",
     "dotenv": "^17.3.1",
-    "exceljs": "^4.4.0",
     "framer-motion": "^12.36.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
