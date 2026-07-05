@@ -90,7 +90,7 @@ yarn.lock
 
 # Gatsby files
 .cache/
-public/
+/public/
 !frontend/public/favicon.ico
 !frontend/public/favicon-16x16.png
 !frontend/public/favicon-32x32.png
