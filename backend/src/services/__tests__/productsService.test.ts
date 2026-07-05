@@ -101,10 +101,7 @@ describe('productsService.getPublicProducts', () => {
     expect(callWhere).toEqual(expect.objectContaining({
       AND: [
         expect.objectContaining({
-          OR: [
-            { category: { isVisible: true } },
-            { productCategories: { some: { category: { isVisible: true } } } },
-          ],
+          productCategories: { some: { category: { isVisible: true } } },
         }),
       ],
     }));
@@ -151,10 +148,7 @@ describe('productsService.getPublicProducts', () => {
           ],
         }),
         expect.objectContaining({
-          OR: [
-            { category: { isVisible: true } },
-            { productCategories: { some: { category: { isVisible: true } } } },
-          ],
+          productCategories: { some: { category: { isVisible: true } } },
         }),
       ],
     }));
