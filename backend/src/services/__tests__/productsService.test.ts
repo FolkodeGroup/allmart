@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Prisma } from '@prisma/client';
 
 vi.mock('../../config/prisma', () => ({
   prisma: {
