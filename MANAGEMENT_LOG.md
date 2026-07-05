@@ -2105,3 +2105,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-07-02 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1231: 1215 corregir cálculo de ventas totales para rangos personalizados error de  1 día | 2026-07-04 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1233: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1244: git add backend/Dockerfile prisma.config.ts docker-entrypoint.sh pris… | 2026-07-05 |
