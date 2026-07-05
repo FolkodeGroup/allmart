@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { suppliersAdminService } from '../features/admin/suppliers/suppliersAdminService';
-import type { SupplierFormData } from './useSuppliers';
+
+export interface SupplierFormData {
+    name: string;
+    url: string;
+    phone: string;
+    address: string;
+    products: string;
+}
 
 const EMPTY_FORM: SupplierFormData = {
     name: '',
@@ -60,7 +67,7 @@ export function useSupplierForm({ id, onSuccess }: UseSupplierFormOptions) {
 
     function handleField<K extends keyof SupplierFormData>(key: K) {
         return (e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData((prev) => ({ ...prev, [key]: e.target.value }));
+            setFormData((prev: SupplierFormData) => ({ ...prev, [key]: e.target.value }));
     }
 
     async function handleSubmit(e: React.FormEvent) {
