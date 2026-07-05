@@ -4,5 +4,3 @@ export { suppliersAdminService } from './suppliersAdminService';
 export type { AdminSupplier, SupplierProductItem, ProductPriceHistoryEntry } from './suppliersAdminService';
 export { SuppliersAdminFormWrapper } from './SuppliersAdminFormWrapper';
 export { SuppliersMasterDetail } from './SuppliersMasterDetail';
-export { SupplierProductListPanel } from './SupplierProductListPanel';
-export { SupplierPricePanel } from './SupplierPricePanel';

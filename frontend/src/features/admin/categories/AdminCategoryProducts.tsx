@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, PackageSearch, AlertCircle } from 'lucide-react';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
-import { useNotification } from '../../../context/NotificationContext';
+import { useNotification } from '../../../context';
 import { ProductCardsGrid } from '../../../components/ui/ProductCardsGrid';
 import { ProductPagination } from '../../../components/ui/ProductPagination';
 import { EmptyState } from '../../../components/ui/EmptyState';

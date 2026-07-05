@@ -119,9 +119,10 @@ const NoteCard = memo(({
     }, [onCancelDelete]);
 
     return (
-        <button
+        <div
             className={`${styles['sticky-note']} ${isExpanded ? styles['expanded'] : ''} ${isActionsHidden ? styles['hide-actions'] : ''}`}
-            type="button"
+            role="button"
+            tabIndex={0}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             onClick={handleCardClick}
@@ -212,7 +213,7 @@ const NoteCard = memo(({
                     ) : null}
                 </>
             )}
-        </button>
+        </div>
     );
 });
 
@@ -300,11 +301,12 @@ export default function StaffNotes() {
     // notesList must be declared before any early returns (Rules of Hooks)
     const notesList = useMemo(() => {
         return notes.map((note) => {
-            const isExpanded = uiState.hoveredId === note.id || uiState.pinnedExpandedId === note.id;
+                const isExpanded = uiState.hoveredId === note.id || uiState.pinnedExpandedId === note.id;
             const isEditing = uiState.editingId === note.id;
             const isDeleting = uiState.deletingId === note.id;
             const isConfirmingDelete = uiState.deletingConfirm === note.id;
-            const isActionsHidden = uiState.actionsHiddenFor === note.id;
+                // Show actions when hovered or when the note is pinned/expanded.
+                const isActionsHidden = !(uiState.hoveredId === note.id || uiState.pinnedExpandedId === note.id);
 
             return (
                 <NoteCard

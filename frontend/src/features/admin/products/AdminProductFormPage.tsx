@@ -55,7 +55,6 @@ export function AdminProductFormPage({
         onUnsavedChanges,
     });
 
-    // ── Cálculo de isDirty (Corregido para evitar errores de ESLint) ────────
     const isDirty = useMemo(() => {
         const a = formProps.form;
         const b = formProps.initialForm;
@@ -302,6 +301,7 @@ export function AdminProductFormPage({
                             productId={productId}
                             images={formProps.form.images}
                             fieldErrors={formProps.fieldErrors}
+                            setField={formProps.setField} // 🟢 PASAMOS LA FUNCIÓN
                             onSetImage={formProps.setImage}
                             onAddImageSlot={formProps.addImageSlot}
                             onRemoveImageSlot={formProps.removeImageSlot}

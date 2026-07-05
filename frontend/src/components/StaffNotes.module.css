@@ -126,6 +126,7 @@
     font-size: 14px;
     line-height: 1.4;
     color: var(--color-text-primary, #333);
+    text-align: left;
 }
 
 .sticky-note:hover .note-content,
@@ -145,6 +146,13 @@
 
 .note-metadata span {
     display: block;
+    text-align: left;
+}
+
+/* Keyboard focus ring for the note cards */
+.sticky-note:focus-visible {
+    outline: 2px solid var(--color-dif-mode, #b0895b);
+    outline-offset: 2px;
 }
 
 /* Note Actions */

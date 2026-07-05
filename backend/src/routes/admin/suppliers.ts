@@ -31,11 +31,11 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST /api/admin/suppliers
 router.post('/', async (req: Request, res: Response) => {
     try {
-        const { name, url, phone, address, products } = req.body;
-        if (!name?.trim() || !phone?.trim() || !address?.trim() || !products?.trim()) {
+        const { name, url, phone, address } = req.body;
+        if (!name?.trim() || !phone?.trim() || !address?.trim()) {
             return res.status(400).json({ success: false, error: 'Faltan campos obligatorios' });
         }
-        const supplier = await suppliersService.create({ name, url, phone, address, products });
+        const supplier = await suppliersService.create({ name, url, phone, address });
         res.status(201).json({ success: true, data: supplier });
     } catch (err) {
         console.error('[suppliers] create error:', err);
@@ -46,11 +46,11 @@ router.post('/', async (req: Request, res: Response) => {
 // PUT /api/admin/suppliers/:id
 router.put('/:id', async (req: Request, res: Response) => {
     try {
-        const { name, url, phone, address, products } = req.body;
-        if (!name?.trim() || !phone?.trim() || !address?.trim() || !products?.trim()) {
+        const { name, url, phone, address } = req.body;
+        if (!name?.trim() || !phone?.trim() || !address?.trim()) {
             return res.status(400).json({ success: false, error: 'Faltan campos obligatorios' });
         }
-        const supplier = await suppliersService.update(req.params.id, { name, url, phone, address, products });
+        const supplier = await suppliersService.update(req.params.id, { name, url, phone, address });
         if (!supplier) {
             return res.status(404).json({ success: false, error: 'Proveedor no encontrado' });
         }

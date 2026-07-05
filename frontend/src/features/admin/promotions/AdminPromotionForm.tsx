@@ -197,6 +197,20 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     setValueError(error);
   }, [value, type, validateValue]);
 
+  // ─── Force BOGO value ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (type === 'bogo' && value !== '0') {
+      setValue('0');
+    }
+  }, [type, value]);
+
+  const handleTypeChange = useCallback((newType: Promotion['type']) => {
+    setType(newType);
+    if (newType === 'bogo') {
+      setValue('0');
+    }
+  }, []);
+
   // ─── Handlers ────────────────────────────────────────────────────────────
   function toggleProduct(id: string) {
     setSelectedProductIds((prev) =>
@@ -304,7 +318,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label htmlFor="promo-type">Tipo de Descuento *</label>
-                <select id="promo-type" value={type} onChange={(e) => setType(e.target.value as Promotion['type'])}>
+                <select id="promo-type" value={type} onChange={(e) => handleTypeChange(e.target.value as Promotion['type'])}>
                   {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>

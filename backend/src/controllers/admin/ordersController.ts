@@ -1,10 +1,11 @@
 /**
  * controllers/admin/ordersController.ts
- * Controlador CRUD para el dominio de pedidos.
+ * Controlador CRUD para el dominio de pedidos con Auditoría integrada.
  */
 
 import { Response, NextFunction } from 'express';
 import * as ordersService from '../../services/ordersService';
+import * as auditService from '../../services/auditService';
 import { generateOrdersPdf, OrderPdfInput } from '../../services/ordersPdfService';
 import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
@@ -42,6 +43,15 @@ export async function update(req: AuthenticatedRequest, res: Response, next: Nex
 export async function remove(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     await ordersService.deleteOrder(req.params.id);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'eliminar',
+      entity: 'orders',
+      entityId: req.params.id,
+      details: { softDelete: true }
+    });
+
     res.status(204).send();
   } catch (err) { next(err); }
 }
@@ -53,6 +63,14 @@ export async function updateStatus(req: AuthenticatedRequest, res: Response, nex
       req.body
     );
 
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'editar',
+      entity: 'orders',
+      entityId: order.id,
+      details: { status: req.body.status }
+    });
+
     sendSuccess(res, order);
   } catch (error) {
     next(error);
@@ -62,7 +80,15 @@ export async function updateStatus(req: AuthenticatedRequest, res: Response, nex
 export async function bulkUpdateStatus(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const result = await ordersService.bulkUpdateOrderStatus(req.body);
-    sendSuccess(res, result, 200, 'Actualizacion masiva completada');
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'editar',
+      entity: 'orders',
+      details: { action: req.body.action, totalAffected: result.success }
+    });
+
+    sendSuccess(res, result, 200, 'Actualización masiva completada');
   } catch (error) {
     next(error);
   }
@@ -74,6 +100,14 @@ export async function updatePayment(req: AuthenticatedRequest, res: Response, ne
       req.params.id,
       req.body
     );
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'editar',
+      entity: 'orders',
+      entityId: order.id,
+      details: { paymentStatus: req.body.paymentStatus }
+    });
 
     sendSuccess(res, order, 200, 'Estado de pago actualizado');
   } catch (error) {

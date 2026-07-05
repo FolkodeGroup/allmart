@@ -117,8 +117,9 @@ async function main() {
       suppliers.push(existing);
       console.log(`  ↩  Found existing: ${def.name}`);
     } else {
+      // 🔒 CORRECCIÓN: Se remueve products de la creación
       const s = await prisma.supplier.create({
-        data: { ...def, products: '', isActive: true },
+        data: { ...def, isActive: true }, 
       });
       suppliers.push(s);
       console.log(`  ✅  Created: ${def.name}`);

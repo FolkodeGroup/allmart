@@ -2102,3 +2102,6 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1196: 1177 mostrar usuario que realiza acciones en la tabla de actividad reciente | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1195: Resultados: | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1192: 🔄 Registrar puntaje de gestión | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-07-02 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1231: 1215 corregir cálculo de ventas totales para rangos personalizados error de  1 día | 2026-07-04 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1233: Refactor prisma 250626 | 2026-07-04 |

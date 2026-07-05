@@ -137,6 +137,7 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
                     fontSize={9}
                     fill="#1976d2"
                     fontWeight="bold"
+
                 >
                     {label}
                 </text>
@@ -194,15 +195,6 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
 
                     const isHovered = hoveredIdx === i;
 
-                    const formatShortDate = (dateKey: string) => {
-                        const date = new Date(dateKey);
-
-                        return date.toLocaleDateString('es-AR', {
-                            day: '2-digit',
-                            month: 'short'
-                        });
-                    };
-
                     return (
                         <g
                             key={d.dateKey}
@@ -236,7 +228,7 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
                                     fontWeight="500"
                                     transform={`rotate(-40, ${x + barW / 2}, ${padTop + chartH + 28})`}
                                 >
-                                    {formatShortDate(d.dateKey)}
+                                    {d.label}
                                 </text>
                             )
                             }

@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
 import { useAdminCategories } from './AdminCategoriesContext';
-import { useNotification } from './NotificationContext';
+import { useNotification } from './index';
 import {
   fetchAdminProducts,
   fetchAdminLowStockCount,

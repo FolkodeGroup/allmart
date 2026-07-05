@@ -21,7 +21,6 @@ import bannersRouter from './admin/banners';
 import reportsRouter from './admin/reports';
 import publicCategoriesRouter from './public/categories';
 import publicProductsRouter from './public/products';
-import publicAuthRouter from './public/auth';
 import publicOrdersRouter from './public/orders';
 import publicCartRouter from './public/cart';
 import publicImagesRouter from './public/images';
@@ -32,10 +31,10 @@ import publicReviewsRouter from './public/reviews';
 import publicFavoritesRouter from './public/favorites';
 import publicConfigRouter from './public/config';
 import publicContactsRouter from './public/contacts';
-import suppliersRouter from './admin/suppliers';
 import suppliersV2Router from './admin/suppliersV2';
 import contactsRouter from './admin/contacts';
 import { adminMiddleware } from '../middlewares/auth';
+import auditLogsRouter from './admin/auditLogs';
 
 const adminRouter = Router();
 
@@ -58,10 +57,11 @@ adminRouter.use('/banners', bannersRouter);
 adminRouter.use('/reports', reportsRouter);
 adminRouter.use('/suppliers', suppliersV2Router);
 adminRouter.use('/contacts', contactsRouter);
+adminRouter.use('/audit-logs', auditLogsRouter);
+
 
 // ─── Rutas públicas (sin autenticación) ───────────────────────────────────────
 const publicRouter = Router();
-publicRouter.use('/auth', publicAuthRouter);
 publicRouter.use('/categories', publicCategoriesRouter);
 publicRouter.use('/products', publicProductsRouter);
 publicRouter.use('/orders', publicOrdersRouter);

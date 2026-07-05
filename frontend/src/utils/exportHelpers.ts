@@ -1,18 +1,5 @@
-// Helper puro para transformar pedidos a filas exportables
-export function mapOrdersToRows(orders: Order[]): (string | number)[][] {
-    return orders.map(o => [
-        o.id.slice(0, 8).toUpperCase(),                         // ← solo primeros 8 chars
-        new Date(o.createdAt).toLocaleDateString('es-AR'),
-        `${o.customer.firstName} ${o.customer.lastName}`,
-        o.customer.email,
-        o.items.map(i => `${i.productName} x${i.quantity}`).join('\n'), // ← salto de línea en vez de |
-        `$${Number(o.total).toLocaleString('es-AR')}`,
-        o.status,
-        o.paymentStatus ?? 'no-abonado',
-    ]);
-}
+// frontend/src/utils/exportHelpers.ts
 import type { Order } from '../context/AdminOrdersContext';
-import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
@@ -27,17 +14,33 @@ export function getExportFileName(base: string, periodLabel: string, ext: string
     return `${base}-${periodLabel}-${y}-${m}-${d}.${ext}`;
 }
 
+// Helper puro para transformar pedidos a filas exportables
+export function mapOrdersToRows(orders: Order[]): (string | number)[][] {
+    return orders.map(o => [
+        o.id.slice(0, 8).toUpperCase(),
+        new Date(o.createdAt).toLocaleDateString('es-AR'),
+        `${o.customer.firstName} ${o.customer.lastName}`,
+        o.customer.email,
+        o.items.map(i => `${i.productName} x${i.quantity}`).join('\n'),
+        `$${Number(o.total).toLocaleString('es-AR')}`,
+        o.status,
+        o.paymentStatus ?? 'no-abonado',
+    ]);
+}
+
 export function exportOrdersCSV(orders: Order[], fileName: string): void {
     const headers = ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'];
     const rows = mapOrdersToRows(orders);
     const csv = [headers, ...rows]
-        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}`).join(','))
+        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
         .join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     triggerDownload(blob, fileName);
 }
 
-export function exportOrdersXLSX(orders: Order[], fileName: string) {
+// 🟢 MODIFICADO: Importación dinámica de XLSX para excluirlo del bundle inicial
+export async function exportOrdersXLSX(orders: Order[], fileName: string) {
+    const XLSX = await import('xlsx');
     const wsData = [
         ['ID', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago'],
         ...mapOrdersToRows(orders)
@@ -51,9 +54,8 @@ export function exportOrdersXLSX(orders: Order[], fileName: string) {
 }
 
 export async function exportOrdersPDF(orders: Order[], fileName: string) {
-    const doc = new jsPDF({ orientation: 'landscape' }); // ← landscape para más ancho
+    const doc = new jsPDF({ orientation: 'landscape' });
 
-    // Título
     doc.setFontSize(14);
     doc.setTextColor(38, 166, 154);
     doc.text('Reporte de Pedidos', 14, 12);
@@ -68,7 +70,7 @@ export async function exportOrdersPDF(orders: Order[], fileName: string) {
         styles: {
             fontSize: 7,
             cellPadding: 3,
-            overflow: 'linebreak', // ← wrappea el texto en vez de desbordarlo
+            overflow: 'linebreak',
             valign: 'top',
         },
         headStyles: {
@@ -78,14 +80,14 @@ export async function exportOrdersPDF(orders: Order[], fileName: string) {
             fontSize: 8,
         },
         columnStyles: {
-            0: { cellWidth: 22 },  // N° Pedido
-            1: { cellWidth: 20 },  // Fecha
-            2: { cellWidth: 30 },  // Cliente
-            3: { cellWidth: 45 },  // Email
-            4: { cellWidth: 70 },  // Productos ← más ancho
-            5: { cellWidth: 22 }, // Total
-            6: { cellWidth: 24 },  // Estado
-            7: { cellWidth: 20 },  // Pago
+            0: { cellWidth: 22 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: 30 },
+            3: { cellWidth: 45 },
+            4: { cellWidth: 70 },
+            5: { cellWidth: 22 },
+            6: { cellWidth: 24 },
+            7: { cellWidth: 20 },
         },
         alternateRowStyles: {
             fillColor: [245, 250, 249],

@@ -1,98 +1,56 @@
-// src/features/admin/products/components/tabs/types.ts
+import type React from 'react';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
-import type { ProductImageItem } from '../../../../context/AdminImagesContext';
+import type { Category } from '../../../../types';
 
-/**
- * Estado compartido del formulario pasado a todos los tabs.
- * El estado vive en AdminProductForm; los tabs son componentes puros de presentación.
- */
 export interface TabFormState {
-    form: Omit<AdminProduct, 'id'>;
-    fieldErrors: Record<string, string>;
-    isEdit: boolean;
+  form: Omit<AdminProduct, 'id'>;
+  fieldErrors: Record<string, string>;
+  isEdit: boolean;
 }
 
-/**
- * Setter tipado para el campo del formulario.
- */
-export type SetField = <K extends keyof Omit<AdminProduct, 'id'>>(
-    key: K,
-    value: Omit<AdminProduct, 'id'>[K]
-) => void;
+export type SetField = <K extends keyof Omit<AdminProduct, 'id'>>(key: K, value: Omit<AdminProduct, 'id'>[K]) => void;
 
-// ── Tab Básico ───────────────────────────────────────────────────────────────
 export interface TabBasicoProps extends TabFormState {
-    errors?: Record<string, string>;
-    setField: SetField;
-    tagInput: string;
-    setTagInput: (v: string) => void;
-    featureInput: string;
-    setFeatureInput: (v: string) => void;
-    onAddTag: () => void;
-    onRemoveTag: (tag: string) => void;
-    onAddFeature: () => void;
-    onRemoveFeature: (index: number) => void;
+  setField: SetField;
+  tagInput: string;
+  setTagInput: (val: string) => void;
+  featureInput: string;
+  setFeatureInput: (val: string) => void;
+  onAddTag: () => void;
+  onRemoveTag: (tag: string) => void;
+  onAddFeature: () => void;
+  onRemoveFeature: (idx: number) => void;
+  errors?: Record<string, string>;
 }
 
-// ── Tab Precios e Inventario ─────────────────────────────────────────────────
 export interface TabPreciosInventarioProps extends TabFormState {
-    errors?: Record<string, string>;
-    setField: SetField;
+  setField: SetField;
+  errors?: Record<string, string>;
 }
 
-// ── Tab Variantes ────────────────────────────────────────────────────────────
-export interface TabVariantesProps extends TabFormState {
-    errors?: Record<string, string>;
-    setField: SetField;
-    productId: string | null;
-    isEdit: boolean;
-    newGroupName: string;
-    setNewGroupName: (v: string) => void;
-    newGroupValues: Record<string, string>;
-    setNewGroupValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-    onAddVariantGroup: () => void;
-    onRemoveVariantGroup: (groupId: string) => void;
-    onAddVariantValue: (groupId: string) => void;
-    onRemoveVariantValue: (groupId: string, value: string) => void;
-}
-
-// ── Tab Imágenes ─────────────────────────────────────────────────────────────
-export interface TabImagenesProps {
-    errors?: Record<string, string>;
-    isEdit: boolean;
-    productId?: string | null;
-    // Estado para modo creación (URLs)
-    images: string[];
-    fieldErrors: Record<string, string>;
-    onSetImage: (index: number, value: string) => void;
-    onAddImageSlot: () => void;
-    onRemoveImageSlot: (index: number) => void;
-    // Estado para modo edición (API)
-    apiImages: ProductImageItem[];
-    imagesLoading: boolean;
-    imagesError: string | null;
-    imgFile: File | null;
-    setImgFile: (f: File | null) => void;
-    imgNewAlt: string;
-    setImgNewAlt: (v: string) => void;
-    imgError: string;
-    showAddImgForm: boolean;
-    setShowAddImgForm: (v: boolean) => void;
-    editingImgId: string | null;
-    setEditingImgId: (id: string | null) => void;
-    editingImgAlt: string;
-    setEditingImgAlt: (v: string) => void;
-    savingImgId: string | null;
-    deletingImgId: string | null;
-    // FIX: RefObject<HTMLInputElement> sin `| null` — coincide con useRef<HTMLInputElement>(null)
-    fileInputRef: React.RefObject<HTMLInputElement | null>;
-    onApiUploadImage: () => Promise<void>;
-    onApiStartEdit: (img: ProductImageItem) => void;
-    onApiCommitEdit: (imageId: string) => Promise<void>;
-    onApiDeleteImage: (imageId: string) => Promise<void>;
-}
-
-// ── Tab SEO / Publicación ────────────────────────────────────────────────────
 export interface TabSEOPublicacionProps extends TabFormState {
-    setField: SetField;
+  setField: SetField;
+}
+
+export interface TabVariantesProps extends TabFormState {
+  productId: string | null;
+  setField: SetField;
+  newGroupName: string;
+  setNewGroupName: (val: string) => void;
+  newGroupValues: Record<string, string>;
+  setNewGroupValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  onAddVariantGroup: () => void;
+  onRemoveVariantGroup: (groupId: string) => void;
+  onAddVariantValue: (groupId: string) => void;
+  onRemoveVariantValue: (groupId: string, value: string) => void;
+  errors?: Record<string, string>;
+}
+
+export interface TabCategoriasProps extends TabFormState {
+  setField: SetField;
+  categories: Category[];
+  additionalCategoryIds: string[];
+  onPrimaryCategoryChange: (value: string) => void;
+  onAdditionalCategoriesChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  getCategoryLabel: (category: { id: string; name: string; parentId?: string | null }) => string;
 }

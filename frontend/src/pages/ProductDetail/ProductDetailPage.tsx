@@ -44,27 +44,22 @@ export function ProductDetailPage() {
   const [addedFeedback, setAddedFeedback] = useState(false);
   const [dynamicDiscount, setDynamicDiscount] = useState<ProductDiscount | null>(null);
 
-  // Compute selected SKU and image set once to avoid repeated .find calls
   const selectedSku = useMemo(() => product?.skus?.find(s => s.id === selectedSkuId) ?? null, [product?.skus, selectedSkuId]);
 
   const skuImages = useMemo(() => {
-    // Si no hay variantes seleccionadas → siempre imágenes del producto base
     if (Object.keys(selectedVariants).length === 0) return (product?.images ?? []).filter(Boolean);
-    // Si hay SKU seleccionado con imágenes propias → usarlas
     const source = (selectedSku?.images && selectedSku.images.length > 0) ? selectedSku.images : (product?.images ?? []);
-    // Normalize and deduplicate URLs to avoid duplicates showing in the gallery
     const normalized = Array.isArray(source) ? source.map(String).filter(Boolean) : [];
     const unique = Array.from(new Set(normalized));
     return unique;
   }, [selectedSku, selectedVariants, product?.images]);
 
-  // Ensure selectedImage index stays in bounds when skuImages changes
   useEffect(() => {
     if (selectedImage >= (skuImages?.length ?? 0)) {
       setSelectedImage(0);
     }
   }, [skuImages, selectedImage]);
-  /* Cargar producto por slug */
+
   useEffect(() => {
     if (!slug) return;
 
@@ -87,11 +82,9 @@ export function ProductDetailPage() {
 
         const mappedProduct = mapApiProductToProduct(apiProduct, categories);
         setProduct(mappedProduct);
-        // Ensure default selection is the original product combination
         setSelectedSkuId(null);
         setLoading(false);
 
-        // Cargar productos relacionados de la misma categoría
         const primaryCategoryId = apiProduct.categoryId || apiProduct.categoryIds?.[0];
         const category = categories.find((c) => c.id === primaryCategoryId);
 
@@ -101,15 +94,13 @@ export function ProductDetailPage() {
         }
 
         try {
-          // Cargar más productos para filtrar mejor
           const { data } = await fetchPublicProducts({
             category: category.slug,
-            limit: 8 // Cargar más para tener mejor selección
+            limit: 8 
           });
 
           if (cancelled) return;
 
-          // Filtrar: excluir el producto actual y tomar los primeros 4
           const related = data
             .filter((p) => p.id !== apiProduct.id)
             .slice(0, 4)
@@ -130,43 +121,16 @@ export function ProductDetailPage() {
 
     loadProduct();
 
-
     return () => {
       cancelled = true;
     };
   }, [slug]);
 
-  // When selected SKU changes, reset selected image to 0
+  // Cuando se cambia de SKU, volvemos a la primera imagen de la galería
   useEffect(() => {
     setSelectedImage(0);
   }, [selectedSkuId]);
 
-  // Pre-seleccionar el primer SKU activo como combinación default
-  /*useEffect(() => {
-    if (!product?.skus?.length) return;
-    // Si ya hay variantes seleccionadas (ej: navegación de vuelta), no pisar
-    if (Object.keys(selectedVariants).length > 0) return;
-
-    const firstActiveSku = product.skus[0] ?? null;
-    if (!firstActiveSku?.attributes) return;
-
-    const defaultSelection: Record<string, string> = {};
-    Object.entries(firstActiveSku.attributes).forEach(([k, v]) => {
-      // Normalizar la key a lowercase para que coincida con variantMap
-      defaultSelection[k.toLowerCase()] = String(v);
-    });
-
-  setSelectedVariants(defaultSelection);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [product]);*/
-
-  // debug: log selected SKU and images to help diagnose missing main image issue
-  useEffect(() => {
-
-    console.debug('selectedSkuId ->', selectedSkuId, 'selectedSku ->', selectedSku, 'skuImages ->', skuImages);
-  }, [selectedSkuId, selectedSku, skuImages]);
-
-  /* Cargar descuento dinámico desde API */
   useEffect(() => {
     if (!product) return;
 
@@ -184,8 +148,7 @@ export function ProductDetailPage() {
         );
         setDynamicDiscount(discount);
       } catch (error) {
-        console.error('Error loading discount:', error);
-        setDynamicDiscount(null);
+        console.error('Error cargando descuento:', error);
       }
     };
 
@@ -204,14 +167,13 @@ export function ProductDetailPage() {
       Object.entries(sku.attributes || {}).forEach(([k, v]) => {
         const key = k.toLowerCase();
         const value = String(v).trim();
-        if (!value) return; // ← ignorar valores vacíos
+        if (!value) return; 
 
         if (!map[key]) map[key] = new Set();
         map[key].add(value);
       });
     });
 
-    // Eliminar grupos que quedaron sin valores
     Object.keys(map).forEach(k => {
       if (map[k].size === 0) delete map[k];
     });
@@ -227,6 +189,9 @@ export function ProductDetailPage() {
 
   const matchingSku = useMemo(() => {
     if (!product?.skus) return null;
+    
+    // 🟢 CORRECCIÓN: Si no hay selección, obligamos a que no haga match con el primer SKU para no robar el precio base
+    if (Object.keys(selectedVariants).length === 0) return null;
 
     return product.skus.find(sku => {
       return Object.entries(selectedVariants).every(([k, v]) => {
@@ -239,7 +204,6 @@ export function ProductDetailPage() {
     if (matchingSku) {
       setSelectedSkuId(matchingSku.id);
     } else if (Object.keys(selectedVariants).length === 0) {
-      // Sin selección → volver al producto original
       setSelectedSkuId(null);
     }
   }, [matchingSku, selectedVariants]);
@@ -254,9 +218,8 @@ export function ProductDetailPage() {
       return matchesOther && getAttr(sku, attr) === value;
     });
   }
+
   function normalizeColor(value: string): string | null {
-    // Solo considerar color si parece un valor CSS de color explícito
-    // (hex, rgb/rgba, hsl, o nombre con más de 3 chars que no sea texto genérico)
     const trimmed = value.trim();
     const looksLikeColorSyntax =
       /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(trimmed) ||
@@ -276,7 +239,8 @@ export function ProductDetailPage() {
     }
 
     syncFavorite(product);
-  }, [isProductFavorite, product, syncFavorite]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isProductFavorite, syncFavorite]); // 🟢 CORRECCIÓN: Se agrega syncFavorite y se silencia la dependencia de 'product' para evitar bucle de re-renderizado
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -284,7 +248,6 @@ export function ProductDetailPage() {
     const isOriginal = Object.keys(selectedVariants).length === 0;
 
     if (isOriginal) {
-      // Producto base sin combinación seleccionada
       addToCart({
         product: {
           ...product,
@@ -354,7 +317,6 @@ export function ProductDetailPage() {
 
   return (
     <main className={styles.page}>
-      {/* Breadcrumb */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
@@ -367,9 +329,7 @@ export function ProductDetailPage() {
         <span className={styles.breadcrumbCurrent}>{product.name}</span>
       </nav>
 
-      {/* Product */}
       <div className={styles.productLayout}>
-        {/* Gallery */}
         <div className={styles.gallery}>
           <div className={styles.mainImageWrapper}>
             <img
@@ -384,8 +344,7 @@ export function ProductDetailPage() {
               {(skuImages || []).map((img, idx) => (
                 <button
                   key={idx}
-                  className={`${styles.thumbnail} ${idx === selectedImage ? styles.active : ''
-                    }`}
+                  className={`${styles.thumbnail} ${idx === selectedImage ? styles.active : ''}`}
                   onClick={() => setSelectedImage(idx)}
                   tabIndex={0}
                   onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setSelectedImage(idx)}
@@ -405,7 +364,6 @@ export function ProductDetailPage() {
           )}
         </div>
 
-        {/* Info */}
         <div className={styles.info}>
           <div className={styles.badges}>
             {isNew && <Badge variant="new">Nuevo</Badge>}
@@ -425,10 +383,8 @@ export function ProductDetailPage() {
             SKU: {Object.keys(selectedVariants).length === 0 ? product.sku : (selectedSku?.sku ?? product.sku)}
           </span>
 
-          {/* Product combinations / SKUs */}
           {Object.keys(variantMap).length > 0 && (
             <div className={styles.variantsBlock}>
-              {/* Fila "Original" — siempre visible, representa el producto base */}
               <div className={styles.variantGroup}>
                 <span className={styles.variantLabel}>Original</span>
                 <div className={styles.variantOptions}>
@@ -446,7 +402,6 @@ export function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Grupos de variantes normales */}
               {Object.entries(variantMap).map(([attr, values]) => (
                 <div key={attr} className={styles.variantGroup}>
                   <span className={styles.variantLabel}>{attr}</span>
@@ -494,16 +449,12 @@ export function ProductDetailPage() {
             </div>
           )}
 
-          {/* Price */}
           <div className={styles.priceBlock}>
             {(() => {
-              // If a SKU is selected and it has a price, prefer it
               const basePrice = selectedSku?.price ?? product.price;
               if (dynamicDiscount) {
-                // If there is a dynamic discount, compute final price based on the selected base price
                 const final = dynamicDiscount.finalPrice && dynamicDiscount.originalPrice === product.price
-                  ? // scale discount proportionally if base price differs from product.price
-                  Math.max(0, Math.round((basePrice / product.price) * dynamicDiscount.finalPrice))
+                  ? Math.max(0, Math.round((basePrice / product.price) * dynamicDiscount.finalPrice))
                   : dynamicDiscount.finalPrice;
                 return <ProductPrice price={final} size="lg" />;
               }
@@ -511,7 +462,6 @@ export function ProductDetailPage() {
             })()}
           </div>
 
-          {/* Promotion Information */}
           {dynamicDiscount && dynamicDiscount.promotionName && (
             <div className={styles.promotionInfo}>
               <strong>Promoción: {dynamicDiscount.promotionName}</strong>
@@ -524,8 +474,6 @@ export function ProductDetailPage() {
             </div>
           )}
 
-
-          {/* Variantes (si existen) */}
           {variantGroups.length > 0 && (
             <div className={styles.variantsBlock}>
               {variantGroups.map(group => (
@@ -539,10 +487,8 @@ export function ProductDetailPage() {
             </div>
           )}
 
-          {/* Description */}
           <p className={styles.description}>{product.description}</p>
 
-          {/* Features */}
           {product.features && product.features.length > 0 && (
             <div className={styles.features}>
               <h3 className={styles.featuresTitle}>Características</h3>
@@ -555,7 +501,6 @@ export function ProductDetailPage() {
             </div>
           )}
 
-          {/* Actions */}
           <div className={styles.actions}>
             <div className={styles.quantityRow}>
               <div className={styles.quantityControl}>
@@ -619,24 +564,20 @@ export function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Related Products */}
-      {
-        relatedProducts.length > 0 && (
-          <section className={styles.relatedSection} aria-label="Productos relacionados">
-            <h2 className={styles.relatedTitle}>También te puede interesar</h2>
-            <div className={styles.relatedGrid}>
-              {relatedProducts.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </section>
-        )
-      }
+      {relatedProducts.length > 0 && (
+        <section className={styles.relatedSection} aria-label="Productos relacionados">
+          <h2 className={styles.relatedTitle}>También te puede interesar</h2>
+          <div className={styles.relatedGrid}>
+            {relatedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* Reviews section */}
       <div className={styles.reviewsSection}>
         <ProductReviews productId={product.id} />
       </div>
-    </main >
+    </main>
   );
 }

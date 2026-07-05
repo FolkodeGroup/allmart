@@ -3,7 +3,7 @@ import { contactsService } from '../../../services/contactsService';
 import { Modal } from '../../../components/ui/Modal';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
-import { useNotification } from '../../../context/NotificationContext';
+import { useNotification } from '../../../context';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useAdminContact } from '../../../context/AdminContactContext';
 import { MessageSquare } from 'lucide-react';

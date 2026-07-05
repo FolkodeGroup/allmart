@@ -10,6 +10,16 @@ import { ProductStatus } from '../types';
 import { createError } from '../middlewares/errorHandler';
 import { getCategoryBySlug } from './categoriesService';
 import { parseSafePrice } from './productSkusService';
+import { applyDiscountsToProducts } from './discountService';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { r2Client } from '../config/r2';
+import { env } from '../config/env';
+import sharp from 'sharp';
+
+// Constantes de optimización de imágenes
+const MAX_WIDTH = 1200;
+const THUMBNAIL_WIDTH = 240;
+const WEBP_QUALITY = 82;
 
 // Función auxiliar para el slug
 function generateSlug(name: string): string {
@@ -66,14 +76,124 @@ async function updateProductCategories(productId: string, categoryIds: string[])
   }
 }
 
+async function updateProductTags(productId: string, tags: string[]): Promise<void> {
+  const uniqueTags = Array.from(new Set(tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
+
+  // 1. Desvincular tags que no correspondan
+  await prisma.productTag.deleteMany({
+    where: {
+      productId,
+      tag: { name: { notIn: uniqueTags } }
+    }
+  });
+
+  // 2. Insertar/Vincular los nuevos
+  for (const tagName of uniqueTags) {
+    const tag = await prisma.tag.upsert({
+      where: { name: tagName },
+      update: {},
+      create: { name: tagName }
+    });
+
+    await prisma.productTag.upsert({
+      where: {
+        productId_tagId: { productId, tagId: tag.id }
+      },
+      update: {},
+      create: { productId, tagId: tag.id }
+    });
+  }
+}
+
+async function updateProductFeatures(productId: string, features: string[]): Promise<void> {
+  // Limpiar features existentes para este producto
+  await prisma.productFeature.deleteMany({ where: { productId } });
+
+  // Insertar nuevas features respetando el orden
+  if (features.length > 0) {
+    await prisma.productFeature.createMany({
+      data: features.map((desc, idx) => ({
+        productId,
+        description: desc.trim(),
+        displayOrder: idx
+      }))
+    });
+  }
+}
+
+/**
+ * Decodifica, procesa y sube una imagen en Base64 a Cloudflare R2 de forma optimizada.
+ */
+async function uploadBase64ToR2(productId: string, base64Str: string, position: number) {
+  const matches = base64Str.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
+  if (!matches) {
+    throw createError('Formato de imagen Base64 inválido', 400);
+  }
+  
+  const buffer = Buffer.from(matches[2], 'base64');
+  const base = sharp(buffer).rotate();
+  
+  const { data: fullBuffer, info: fullInfo } = await base
+    .clone()
+    .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+    .webp({ quality: WEBP_QUALITY })
+    .toBuffer({ resolveWithObject: true });
+
+  const { data: thumbBuffer, info: thumbInfo } = await base
+    .clone()
+    .resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true })
+    .webp({ quality: 75 })
+    .toBuffer({ resolveWithObject: true });
+
+  const timestamp = Date.now();
+  const s3KeyFull = `products/${productId}/${timestamp}-${position}.webp`;
+  const s3KeyThumb = `products/${productId}/thumbs/${timestamp}-${position}.webp`;
+
+  // Subida concurrente a R2 para optimizar velocidad
+  await Promise.all([
+    r2Client.send(new PutObjectCommand({
+      Bucket: env.R2_BUCKET_NAME, Key: s3KeyFull, Body: fullBuffer, ContentType: 'image/webp'
+    })),
+    r2Client.send(new PutObjectCommand({
+      Bucket: env.R2_BUCKET_NAME, Key: s3KeyThumb, Body: thumbBuffer, ContentType: 'image/webp'
+    }))
+  ]);
+
+  return {
+    storageKey: s3KeyFull,
+    storageThumbKey: s3KeyThumb,
+    width: fullInfo.width ?? 0,
+    height: fullInfo.height ?? 0,
+    thumbWidth: thumbInfo.width ?? THUMBNAIL_WIDTH,
+    thumbHeight: thumbInfo.height ?? 0,
+    sizeBytes: fullBuffer.length,
+  };
+}
+
 // Mapea el resultado de Prisma al tipo Product del proyecto
 function toProduct(row: any): Product {
   const categoryIds = Array.isArray(row.productCategories)
     ? row.productCategories.map((rel: { categoryId: string }) => rel.categoryId)
     : Array.isArray(row.categoryIds)
       ? row.categoryIds
-      : undefined;
-  const primaryCategoryId = row.categoryId ?? (categoryIds && categoryIds.length > 0 ? categoryIds[0] : '') ?? '';
+      : [];
+  
+  const primaryCategoryId = categoryIds[0] ?? '';
+
+  // Reconstruimos tags desde la relación N:M
+  const tags = Array.isArray(row.productTags)
+    ? row.productTags.map((pt: any) => pt.tag.name)
+    : [];
+
+  // Reconstruimos features desde la relación 1:N
+  const features = Array.isArray(row.productFeatures)
+    ? row.productFeatures.map((pf: any) => pf.description)
+    : [];
+
+  // Extraemos las imágenes desde la relación directa en BD
+  const images = Array.isArray(row.productImages)
+    ? row.productImages.map((img: any) => `/api/images/products/${img.id}`)
+    : [];
 
   return {
     id: row.id,
@@ -82,16 +202,16 @@ function toProduct(row: any): Product {
     description: row.description ?? undefined,
     shortDescription: row.shortDescription ?? undefined,
     price: row.price.toNumber(),
-    images: Array.isArray(row.images) ? row.images : [],
+    images,
     categoryId: primaryCategoryId,
     categoryIds,
-    tags: Array.isArray(row.tags) ? row.tags : [],
-    rating: row.rating.toNumber(),
+    tags,
+    rating: row.rating,
     reviewCount: row.reviewCount,
     inStock: row.inStock,
     stock: row.stock,
     sku: row.sku ?? undefined,
-    features: Array.isArray(row.features) ? row.features : [],
+    features,
     isFeatured: row.isFeatured ?? false,
     primarySupplierId: row.primarySupplierId ?? null,
     status: row.status as ProductStatus,
@@ -107,32 +227,23 @@ const adminProductSelect = {
   description: true,
   shortDescription: true,
   price: true,
-  images: true,
-  categoryId: true,
-  tags: true,
+  productImages: { select: { id: true }, orderBy: { position: 'asc' } },
   rating: true,
   reviewCount: true,
   inStock: true,
   stock: true,
   sku: true,
-  features: true,
   isFeatured: true,
   primarySupplierId: true,
   status: true,
   createdAt: true,
   updatedAt: true,
   productCategories: { select: { categoryId: true } },
+  productTags: { select: { tag: { select: { name: true } } } },
+  productFeatures: { select: { description: true, displayOrder: true }, orderBy: { displayOrder: 'asc' } },
 } satisfies Prisma.ProductSelect;
 
-type AdminProductsFilterQuery = {
-  q?: string;
-  categoryId?: string;
-  status?: string;
-  stockLevel?: string;
-  productIds?: string[];
-};
-
-function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string, any> {
+function buildAdminProductsWhere(query: Record<string, any>): Record<string, any> {
   const { q, categoryId, status, stockLevel, productIds } = query;
   const where: Record<string, any> = {};
 
@@ -146,6 +257,9 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
 
   if (status && status !== 'all') {
     where.status = status;
+  } else {
+    // Si no se filtra por un estado en particular, excluimos los archivados (Soft Delete)
+    where.status = { not: 'archived' }; 
   }
 
   if (stockLevel && stockLevel !== 'all') {
@@ -170,35 +284,6 @@ function buildAdminProductsWhere(query: AdminProductsFilterQuery): Record<string
   return where;
 }
 
-async function hydrateProductImagesFromStorage(rows: Array<{ id: string; images: unknown }>): Promise<void> {
-  const rowsToHydrate = rows.filter(row => {
-    const arr = Array.isArray(row.images) ? row.images : [];
-    return arr.length === 0;
-  });
-
-  if (rowsToHydrate.length === 0) return;
-
-  const productIds = rowsToHydrate.map(r => r.id);
-
-  const storageImages = await prisma.productImageStorage.findMany({
-    where: { productId: { in: productIds } },
-    select: { id: true, productId: true },
-    orderBy: { position: 'asc' },
-  });
-
-  const imagesByProduct = new Map<string, string[]>();
-  for (const img of storageImages) {
-    const list = imagesByProduct.get(img.productId) || [];
-    list.push(`/api/images/products/${img.id}`);
-    imagesByProduct.set(img.productId, list);
-  }
-
-  for (const row of rowsToHydrate) {
-    const syncedImages = imagesByProduct.get(row.id) || [];
-    (row as any).images = syncedImages;
-  }
-}
-
 export async function checkProductExists(id: string): Promise<boolean> {
   const count = await prisma.product.count({
     where: { id },
@@ -209,7 +294,12 @@ export async function checkProductExists(id: string): Promise<boolean> {
 export async function getAllProducts(): Promise<Product[]> {
   const rows = await prisma.product.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { productCategories: { select: { categoryId: true } } },
+    include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+      productCategories: { select: { categoryId: true } },
+      productTags: { include: { tag: true } },
+      productFeatures: { orderBy: { displayOrder: 'asc' } },
+    },
   });
   return rows.map(toProduct);
 }
@@ -218,7 +308,10 @@ export async function getProductById(id: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { id },
     include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
+      productTags: { include: { tag: true } },
+      productFeatures: { orderBy: { displayOrder: 'asc' } },
       productOptions: {
         where: { isActive: true },
         include: {
@@ -244,21 +337,8 @@ export async function getProductById(id: string): Promise<Product> {
       }
     },
   });
+  
   if (!row) throw createError('Producto no encontrado', 404);
-
-  // Sincronizar únicamente en memoria si el array está vacío
-  const imagesArray = Array.isArray(row.images) ? row.images : [];
-  if (imagesArray.length === 0) {
-    const storageImages = await prisma.productImageStorage.findMany({
-      where: { productId: id },
-      select: { id: true },
-      orderBy: { position: 'asc' },
-    });
-    if (storageImages.length > 0) {
-      (row as any).images = storageImages.map(img => `/api/images/products/${img.id}`);
-    }
-  }
-
   const base = toProduct(row);
 
   const variants = (row as any).productOptions?.map((opt: any) => ({
@@ -309,31 +389,40 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   if (skuExists) throw createError('El SKU ya está en uso', 409, ['sku']);
 
   await ensureCategoriesExist(normalizedCategoryIds);
-  const primaryCategoryId = dto.categoryId ?? normalizedCategoryIds[0];
 
-  const slug = generateSlug(dto.name);
+  let slug = generateSlug(dto.name);
+  let slugExists = await prisma.product.findUnique({ where: { slug } });
+  let counter = 1;
+  while (slugExists) {
+    slug = `${generateSlug(dto.name)}-${counter}`;
+    slugExists = await prisma.product.findUnique({ where: { slug } });
+    counter++;
+  }
+
   const parsedPrice = parseSafePrice(dto.price) ?? 0;
 
-  const row = await prisma.product.create({
+  // Interceptación preventiva de valores negativos
+  if (parsedPrice < 0) {
+    throw createError('El precio de venta no puede ser negativo', 400);
+  }
+  if (dto.stock !== undefined && dto.stock !== null && dto.stock < 0) {
+    throw createError('El stock físico no puede ser negativo', 400);
+  }
+
+  // 1. Crear la cabecera del producto primero
+  const product = await prisma.product.create({
     data: {
       name: dto.name,
       slug,
       description: dto.description ?? null,
       shortDescription: dto.shortDescription ?? null,
       price: parsedPrice,
-      images: Array.isArray(dto.images) ? dto.images : [],
-      categoryId: primaryCategoryId,
       status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
       sku: dto.sku,
       stock: dto.stock ?? 0,
       rating: dto.rating ?? 0,
       reviewCount: dto.reviewCount ?? 0,
       inStock: dto.inStock ?? true,
-      tags: Array.isArray(dto.tags) ? dto.tags : [],
-      novedadSince: Array.isArray(dto.tags) && dto.tags.includes('novedad')
-        ? new Date()
-        : null,
-      features: Array.isArray(dto.features) ? dto.features : [],
       isFeatured: dto.isFeatured ?? false,
       ...(dto.primarySupplierId !== undefined
         ? { primarySupplierId: dto.primarySupplierId ?? null }
@@ -341,13 +430,85 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     },
   });
 
-  await updateProductCategories(row.id, normalizedCategoryIds);
+  // 2. Procesar imágenes en paralelo de forma asíncrona y veloz fuera del bloqueo de la base de datos
+  if (Array.isArray(dto.images) && dto.images.length > 0) {
+    const imageRecordsRaw = await Promise.all(
+      dto.images.map(async (url, index) => {
+        // Caso A: Imagen cruda en Base64 desde el Wizard
+        if (url.startsWith('data:image/')) {
+          const uploaded = await uploadBase64ToR2(product.id, url, index);
+          return {
+            productId: product.id,
+            ...uploaded,
+            mimeType: 'image/webp',
+            originalFilename: 'wizard_upload',
+            position: index,
+          };
+        }
+
+        // Caso B: Imagen local duplicada (Clonamos metadatos de R2 para no duplicar storage físico)
+        const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
+        if (isLocalImageMatch) {
+          const existingImageId = isLocalImageMatch[1];
+          const existingImg = await prisma.productImageStorage.findUnique({
+            where: { id: existingImageId },
+          });
+          if (existingImg) {
+            return {
+              productId: product.id,
+              storageKey: existingImg.storageKey,
+              storageThumbKey: existingImg.storageThumbKey,
+              width: existingImg.width,
+              height: existingImg.height,
+              thumbWidth: existingImg.thumbWidth,
+              thumbHeight: existingImg.thumbHeight,
+              mimeType: existingImg.mimeType,
+              originalFilename: existingImg.originalFilename,
+              sizeBytes: existingImg.sizeBytes,
+              position: index,
+            };
+          }
+        }
+
+        // Caso C: Enlace externo común
+        return {
+          productId: product.id,
+          storageKey: url,
+          storageThumbKey: null,
+          width: 0,
+          height: 0,
+          thumbWidth: null,
+          thumbHeight: null,
+          mimeType: 'image/jpeg',
+          originalFilename: 'external',
+          sizeBytes: 0,
+          position: index,
+        };
+      })
+    );
+
+    const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
+
+    await prisma.productImageStorage.createMany({
+      data: imageRecords,
+    });
+  }
+
+  await updateProductCategories(product.id, normalizedCategoryIds);
+  await updateProductTags(product.id, Array.isArray(dto.tags) ? dto.tags : []);
+  await updateProductFeatures(product.id, Array.isArray(dto.features) ? dto.features : []);
+
   const refreshed = await prisma.product.findUnique({
-    where: { id: row.id },
-    include: { productCategories: { select: { categoryId: true } } },
+    where: { id: product.id },
+    include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+      productCategories: { select: { categoryId: true } },
+      productTags: { include: { tag: true } },
+      productFeatures: { orderBy: { displayOrder: 'asc' } },
+    },
   });
 
-  return toProduct(refreshed ?? row);
+  return toProduct(refreshed ?? product);
 }
 
 export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
@@ -355,7 +516,8 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     where: { id },
     include: { 
       productCategories: { select: { categoryId: true } },
-      productSkus: { where: { isActive: true } }
+      productSkus: { where: { isActive: true } },
+      productTags: { include: { tag: true } }
     },
   });
   if (!existing) throw createError('Producto no encontrado', 404);
@@ -368,39 +530,53 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   }
 
   let slug = existing.slug;
-  if (dto.name) {
+  if (dto.name && dto.name !== existing.name) {
     slug = generateSlug(dto.name);
+    let slugExists = await prisma.product.findUnique({ where: { slug } });
+    let counter = 1;
+    while (slugExists && slugExists.id !== id) {
+      slug = `${generateSlug(dto.name)}-${counter}`;
+      slugExists = await prisma.product.findUnique({ where: { slug } });
+      counter++;
+    }
   }
 
   const existingCategoryIds = existing.productCategories.length > 0
     ? existing.productCategories.map((rel) => rel.categoryId)
-    : (existing.categoryId ? [existing.categoryId] : []);
+    : [];
 
   const shouldUpdateCategories = dto.categoryId !== undefined || dto.categoryIds !== undefined;
   const normalizedCategoryIds = shouldUpdateCategories
-    ? normalizeCategoryIds(dto.categoryId ?? existing.categoryId ?? undefined, dto.categoryIds)
+    ? normalizeCategoryIds(dto.categoryId ?? undefined, dto.categoryIds)
     : existingCategoryIds;
 
   if (shouldUpdateCategories) {
     await ensureCategoriesExist(normalizedCategoryIds);
   }
 
-  const primaryCategoryId = (dto.categoryId ?? normalizedCategoryIds[0] ?? existing.categoryId) ?? '';
-
-  // 🛡️ Filtro de seguridad: Evita que el endpoint de actualización general del producto
-  // sobrescriba el precio base del producto con el precio de una variante seleccionada enviado por error.
   let finalPrice = dto.price !== undefined ? parseSafePrice(dto.price) : undefined;
+
+  // Interceptación preventiva de valores negativos
+  if (finalPrice !== undefined && finalPrice !== null && finalPrice < 0) {
+    throw createError('El precio de venta no puede ser negativo', 400);
+  }
+  if (dto.stock !== undefined && dto.stock !== null && dto.stock < 0) {
+    throw createError('El stock físico no puede ser negativo', 400);
+  }
+
   if (finalPrice !== undefined && existing.productSkus.length > 0) {
     const skuPrices = existing.productSkus
       .map((s) => s.price ? Number(s.price) : null)
       .filter((p): p is number => p !== null && p > 0);
 
-    // Si el precio enviado coincide exactamente con el precio de un SKU y es diferente
-    // al precio del producto base preexistente, ignoramos ese valor y mantenemos el precio base original.
     if (skuPrices.includes(Number(finalPrice)) && Number(finalPrice) !== Number(existing.price)) {
       finalPrice = Number(existing.price);
     }
   }
+
+  const existingImages = await prisma.productImageStorage.findMany({
+    where: { productId: id },
+  });
 
   const row = await prisma.product.update({
     where: { id },
@@ -410,8 +586,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       description: dto.description !== undefined ? dto.description : existing.description,
       shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : existing.shortDescription,
       price: finalPrice !== undefined ? finalPrice : existing.price,
-      images: Array.isArray(dto.images) ? dto.images : (existing.images ?? Prisma.JsonNull),
-      categoryId: primaryCategoryId,
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
       sku: dto.sku !== undefined ? dto.sku : existing.sku,
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
@@ -422,14 +596,11 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
         : dto.stock !== undefined
           ? dto.stock > 0
           : existing.inStock,
-      tags: Array.isArray(dto.tags) ? dto.tags : (existing.tags ?? Prisma.JsonNull),
       novedadSince: (() => {
         const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
         if (incomingTags === null) return undefined;
 
-        const teniaNovedad = Array.isArray(existing.tags)
-          ? (existing.tags as string[]).includes('novedad')
-          : false;
+        const teniaNovedad = existing.productTags.some(pt => pt.tag.name === 'novedad');
         const tieneNovedad = incomingTags.includes('novedad');
 
         if (tieneNovedad && !teniaNovedad) {
@@ -440,7 +611,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
         }
         return undefined;
       })(),
-      features: Array.isArray(dto.features) ? dto.features : (existing.features ?? Prisma.JsonNull),
       isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : existing.isFeatured,
       ...(dto.primarySupplierId !== undefined
         ? { primarySupplierId: dto.primarySupplierId ?? null }
@@ -448,12 +618,92 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     },
   });
 
+  if (dto.images !== undefined) {
+    await prisma.productImageStorage.deleteMany({ where: { productId: id } });
+    if (Array.isArray(dto.images) && dto.images.length > 0) {
+      const imageRecordsRaw = await Promise.all(
+        dto.images.map(async (url, index) => {
+          if (url.startsWith('data:image/')) {
+            const uploaded = await uploadBase64ToR2(id, url, index);
+            return {
+              productId: id,
+              ...uploaded,
+              mimeType: 'image/webp',
+              originalFilename: 'wizard_upload',
+              position: index,
+            };
+          }
+
+          const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
+          if (isLocalImageMatch) {
+            const existingImageId = isLocalImageMatch[1];
+            let existingImg: any = existingImages.find(img => img.id === existingImageId);
+            
+            if (!existingImg) {
+              existingImg = await prisma.productImageStorage.findUnique({
+                where: { id: existingImageId },
+              });
+            }
+
+            if (existingImg) {
+              return {
+                productId: id,
+                storageKey: existingImg.storageKey,
+                storageThumbKey: existingImg.storageThumbKey,
+                width: existingImg.width,
+                height: existingImg.height,
+                thumbWidth: existingImg.thumbWidth,
+                thumbHeight: existingImg.thumbHeight,
+                mimeType: existingImg.mimeType,
+                originalFilename: existingImg.originalFilename,
+                sizeBytes: existingImg.sizeBytes,
+                position: index,
+              };
+            }
+          }
+
+          return {
+            productId: id,
+            storageKey: url,
+            storageThumbKey: null,
+            width: 0,
+            height: 0,
+            thumbWidth: null,
+            thumbHeight: null,
+            mimeType: 'image/jpeg',
+            originalFilename: 'external',
+            sizeBytes: 0,
+            position: index,
+          };
+        })
+      );
+
+      const imageRecords = imageRecordsRaw.filter(Boolean) as any[];
+
+      await prisma.productImageStorage.createMany({
+        data: imageRecords,
+      });
+    }
+  }
+
   if (shouldUpdateCategories) {
     await updateProductCategories(id, normalizedCategoryIds);
   }
+  if (dto.tags !== undefined) {
+    await updateProductTags(id, Array.isArray(dto.tags) ? dto.tags : []);
+  }
+  if (dto.features !== undefined) {
+    await updateProductFeatures(id, Array.isArray(dto.features) ? dto.features : []);
+  }
+
   const refreshed = await prisma.product.findUnique({
     where: { id },
-    include: { productCategories: { select: { categoryId: true } } },
+    include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+      productCategories: { select: { categoryId: true } },
+      productTags: { include: { tag: true } },
+      productFeatures: { orderBy: { displayOrder: 'asc' } },
+    },
   });
 
   return toProduct(refreshed ?? row);
@@ -462,36 +712,55 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
 export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
-  await prisma.product.delete({ where: { id } });
+  
+  const timestamp = Date.now();
+  const archivedSlug = `${existing.slug}-archived-${timestamp}`;
+  const archivedSku = existing.sku ? `${existing.sku}-archived-${timestamp}` : null;
+
+  await prisma.product.update({
+    where: { id },
+    data: {
+      status: 'archived', 
+      slug: archivedSlug,
+      sku: archivedSku,
+      inStock: false,     
+      stock: 0,
+    },
+  });
 }
 
 export async function getLowStockCount(): Promise<number> {
-  return prisma.product.count({ where: { stock: { lt: 5 } } });
+  return prisma.product.count({ 
+    where: { 
+      stock: { lt: 5 },
+      status: { not: 'archived' }
+    } 
+  });
 }
 
-export async function getAdminProducts(query: {
-  q?: string;
-  categoryId?: string;
-  status?: string;
-  stockLevel?: string;
-  page?: number;
-  limit?: number;
-}) {
+export async function getAdminProducts(query: Record<string, any>) {
   const { q, categoryId, status, stockLevel, page = 1, limit = 10 } = query;
   const where = buildAdminProductsWhere({ q, categoryId, status, stockLevel });
 
-  const [total, rows] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-      select: adminProductSelect,
-    }),
-  ]);
+  const total = await prisma.product.count({ where });
 
-  await hydrateProductImagesFromStorage(rows);
+  const idsRow = await prisma.product.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    skip: (page - 1) * limit,
+    take: limit,
+    select: { id: true },
+  });
+
+  const ids = idsRow.map(r => r.id);
+
+  const rows = ids.length > 0
+    ? await prisma.product.findMany({
+        where: { id: { in: ids } },
+        orderBy: { createdAt: 'desc' },
+        select: adminProductSelect,
+      })
+    : [];
 
   return {
     data: rows.map(toProduct),
@@ -502,38 +771,7 @@ export async function getAdminProducts(query: {
   };
 }
 
-async function preferStorageImagesForExport(rows: Array<{ id: string; images: unknown }>): Promise<void> {
-  if (rows.length === 0) return;
-  const productIds = rows.map((r) => r.id);
-  const storageRecords = await prisma.productImageStorage.findMany({
-    where: { productId: { in: productIds } },
-    select: { id: true, productId: true },
-    orderBy: { position: 'asc' },
-  });
-
-  const byProduct = new Map<string, string[]>();
-  for (const rec of storageRecords) {
-    const urls = byProduct.get(rec.productId) ?? [];
-    urls.push(`/api/images/products/${rec.id}`);
-    byProduct.set(rec.productId, urls);
-  }
-
-  for (const row of rows) {
-    const storageUrls = byProduct.get(row.id);
-    if (storageUrls && storageUrls.length > 0) {
-      (row as any).images = storageUrls;
-    }
-  }
-}
-
-export async function getProductsForCatalogExport(query: {
-  q?: string;
-  categoryId?: string;
-  status?: string;
-  stockLevel?: string;
-  productIds?: string[];
-  limit?: number;
-}): Promise<Product[]> {
+export async function getProductsForCatalogExport(query: Record<string, any>): Promise<Product[]> {
   const { q, categoryId, status, stockLevel, productIds, limit } = query;
   const where = buildAdminProductsWhere({ q, categoryId, status, stockLevel, productIds });
   const rows = await prisma.product.findMany({
@@ -542,9 +780,6 @@ export async function getProductsForCatalogExport(query: {
     take: limit,
     select: adminProductSelect,
   });
-
-  await hydrateProductImagesFromStorage(rows);
-  await preferStorageImagesForExport(rows);
 
   return rows.map(toProduct);
 }
@@ -566,7 +801,9 @@ type ProductQuery = {
 export async function getPublicProducts(query: ProductQuery) {
   const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
 
-  const where: Record<string, any> = {};
+  const where: Record<string, any> = {
+    status: 'active', 
+  };
 
   if (Array.isArray(slugs) && slugs.length > 0) {
     where.slug = { in: slugs };
@@ -577,12 +814,16 @@ export async function getPublicProducts(query: ProductQuery) {
   }
 
   if (tag) {
-    const taggedProducts = await prisma.$queryRaw<{ id: string }[]>`
-      SELECT id FROM products
-      WHERE tags::jsonb @> to_jsonb(ARRAY[${tag.toLowerCase()}]::text[])
-    `;
+    const taggedProducts = await prisma.productTag.findMany({
+      where: {
+        tag: {
+          name: tag.toLowerCase()
+        }
+      },
+      select: { productId: true }
+    });
 
-    const ids = taggedProducts.map(r => r.id);
+    const ids = taggedProducts.map(r => r.productId);
     if (ids.length === 0) {
       return { data: [], total: 0, page, limit, totalPages: 0 };
     }
@@ -593,31 +834,63 @@ export async function getPublicProducts(query: ProductQuery) {
   }
 
   if (slugs) {
-    const slugArray = slugs.split(',').map(s => s.trim()).filter(Boolean);
+    const slugArray = slugs.split(',').map((s: string) => s.trim()).filter(Boolean);
     where.slug = { in: slugArray };
   }
 
   if (category) {
     const foundCategory = await getCategoryBySlug(category);
 
+    if (!foundCategory.isVisible) {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
+
     const children = await prisma.category.findMany({
-      where: { parentId: foundCategory.id },
+      where: { parentId: foundCategory.id, isVisible: true },
       select: { id: true },
-    });
+    }) || [];
 
     const categoryIds = [
       foundCategory.id,
       ...children.map(c => c.id),
     ];
 
-    where.productCategories = {
-      some: {
-        categoryId: {
-          in: categoryIds,
+    where.AND = [
+      ...(where.AND || []),
+      {
+        OR: [
+          {
+            categoryId: {
+              in: categoryIds,
+            },
+          },
+          {
+            productCategories: {
+              some: {
+                categoryId: {
+                  in: categoryIds,
+                },
+              },
+            },
+          },
+        ],
+      },
+    ];
+  }
+
+  // SANEADO: Filtro de visibilidad de categorías siempre activo para el catálogo público
+  where.AND = [
+    ...(where.AND || []),
+    {
+      productCategories: {
+        some: {
+          category: {
+            isVisible: true,
+          },
         },
       },
-    };
-  }
+    },
+  ];
 
   if (query.priceRanges) {
     const ranges = query.priceRanges
@@ -638,7 +911,7 @@ export async function getPublicProducts(query: ProductQuery) {
         }
         return { price: filter };
       })
-      .filter((item) => Object.keys(item.price as Record<string, unknown>).length > 0);
+      .filter((item: any) => Object.keys(item.price as Record<string, unknown>).length > 0);
 
     if (ranges.length > 0) {
       where.AND = [
@@ -656,6 +929,8 @@ export async function getPublicProducts(query: ProductQuery) {
     ];
   }
 
+  const total = await prisma.product.count({ where });
+
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   switch (sort) {
     case 'price_asc': orderBy.price = 'asc'; break;
@@ -665,41 +940,51 @@ export async function getPublicProducts(query: ProductQuery) {
     default: orderBy.createdAt = 'desc';
   }
 
-  const [total, rows] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
-      include: { 
-        productCategories: { select: { categoryId: true } },
-        productOptions: {
-          where: { isActive: true },
-          include: {
-            values: true
-          }
-        },
-        productSkus: {
-          where: { isActive: true },
-          include: {
-            skuValues: {
-              include: {
-                optionValue: {
-                  include: {
-                    option: true
+  const idsRow = await prisma.product.findMany({
+    where,
+    orderBy,
+    skip: (page - 1) * limit,
+    take: limit,
+    select: { id: true },
+  });
+
+  const ids = idsRow.map(r => r.id);
+
+  const rows = ids.length > 0
+    ? await prisma.product.findMany({
+        where: { id: { in: ids } },
+        orderBy,
+        include: { 
+          productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+          productCategories: { select: { categoryId: true } },
+          productTags: { include: { tag: true } },
+          productFeatures: { orderBy: { displayOrder: 'asc' } },
+          productOptions: {
+            where: { isActive: true },
+            include: {
+              values: true
+            }
+          },
+          productSkus: {
+            where: { isActive: true },
+            include: {
+              skuValues: {
+                include: {
+                  optionValue: {
+                    include: {
+                      option: true
+                    }
                   }
                 }
+              },
+              productSkuImages: {
+                select: { id: true }
               }
-            },
-            productSkuImages: {
-              select: { id: true }
             }
           }
-        }
-      },
-    }),
-  ]);
+        },
+      })
+    : [];
 
   const mappedProducts = rows.map((row) => {
     const base = toProduct(row);
@@ -742,8 +1027,10 @@ export async function getPublicProducts(query: ProductQuery) {
     return base;
   });
 
+  const productsWithDiscounts = await applyDiscountsToProducts(mappedProducts);
+
   return {
-    data: mappedProducts,
+    data: productsWithDiscounts, 
     total,
     page,
     limit,
@@ -755,7 +1042,10 @@ export async function getProductBySlug(slug: string): Promise<Product> {
   const row = await prisma.product.findUnique({
     where: { slug },
     include: {
+      productImages: { select: { id: true }, orderBy: { position: 'asc' } },
       productCategories: { select: { categoryId: true } },
+      productTags: { include: { tag: true } },
+      productFeatures: { orderBy: { displayOrder: 'asc' } },
       productOptions: {
         where: { isActive: true },
         include: {
@@ -781,6 +1071,7 @@ export async function getProductBySlug(slug: string): Promise<Product> {
       }
     },
   });
+  
   if (!row) throw createError('Producto no encontrado', 404);
   const base = toProduct(row);
 

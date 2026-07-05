@@ -12,7 +12,7 @@ export interface User {
   firstName:    string;
   lastName:     string;
   email:        string;
-  passwordHash: string;
+  passwordHash: string; // CORRECCIÓN: Ya no es opcional
   role:         UserRole;
   isActive:     boolean;
   createdAt:    Date;

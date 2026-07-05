@@ -1,4 +1,4 @@
-import { utils, writeFile } from 'xlsx';
+// frontend/src/utils/exportProducts.ts
 
 export interface ExportableProduct {
   id: string;
@@ -34,7 +34,7 @@ export function exportProductsToCSV(products: ExportableProduct[]) {
     p.inStock ? 'Activo' : 'Inactivo',
     formatDate(p.createdAt)
   ]);
-  const csvContent = [headers, ...rows].map(row => row.map(field => `"${String(field).replace(/"/g, '""')}` ).join(',')).join('\r\n');
+  const csvContent = [headers, ...rows].map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"` ).join(',')).join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -47,11 +47,13 @@ export function exportProductsToCSV(products: ExportableProduct[]) {
   URL.revokeObjectURL(url);
 }
 
-export function exportProductsToExcel(products: ExportableProduct[]) {
+// 🟢 MODIFICADO: Importación dinámica de XLSX para excluirlo del bundle inicial
+export async function exportProductsToExcel(products: ExportableProduct[]) {
   if (!products || products.length === 0) {
     alert('No hay productos para exportar.');
     return;
   }
+  const XLSX = await import('xlsx');
   const data = products.map(p => ({
     ID: p.id,
     Nombre: p.name,
@@ -62,9 +64,9 @@ export function exportProductsToExcel(products: ExportableProduct[]) {
     Estado: p.inStock ? 'Activo' : 'Inactivo',
     'Fecha de creación': formatDate(p.createdAt)
   }));
-  const ws = utils.json_to_sheet(data);
-  const wb = utils.book_new();
-  utils.book_append_sheet(wb, ws, 'Productos');
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Productos');
   const date = formatDate(new Date());
-  writeFile(wb, `products-${date}.xlsx`);
+  XLSX.writeFile(wb, `products-${date}.xlsx`);
 }
