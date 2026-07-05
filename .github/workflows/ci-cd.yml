@@ -18,6 +18,11 @@
 #   - VPS_SEED_ADMIN_PASSWORD Contraseña inicial para el usuario admin@admin.com
 #   - VPS_SEED_EDITOR_PASSWORD Contraseña inicial para el usuario editor@admin.com
 #   - GITGUARDIAN_API_KEY     API key de GitGuardian para escaneo de secretos
+#   - R2_ACCOUNT_ID           ID de cuenta de Cloudflare (R2)
+#   - R2_ACCESS_KEY_ID        Access Key ID de Cloudflare R2
+#   - R2_SECRET_ACCESS_KEY    Secret Access Key de Cloudflare R2
+#   - R2_BUCKET_NAME          Nombre del Bucket de Cloudflare R2 (ej: allmart-images)
+#   - R2_PUBLIC_URL           URL pública del Bucket de R2 (ej: https://pub-...r2.dev)
 # =============================================================================
 
 name: CI/CD Pipeline
@@ -212,6 +217,13 @@ jobs:
             update_env "FRONTEND_PORT" "8082"
             update_env "JWT_SECRET" "${{ secrets.VPS_JWT_SECRET }}"
             update_env "CORS_ORIGIN" "${{ secrets.VPS_CORS_ORIGIN }}"
+            
+            # Sincronizar variables de Cloudflare R2
+            update_env "R2_ACCOUNT_ID" "${{ secrets.R2_ACCOUNT_ID }}"
+            update_env "R2_ACCESS_KEY_ID" "${{ secrets.R2_ACCESS_KEY_ID }}"
+            update_env "R2_SECRET_ACCESS_KEY" "${{ secrets.R2_SECRET_ACCESS_KEY }}"
+            update_env "R2_BUCKET_NAME" "${{ secrets.R2_BUCKET_NAME }}"
+            update_env "R2_PUBLIC_URL" "${{ secrets.R2_PUBLIC_URL }}"
             
             # Solo actualizar seed passwords si el secret NO está vacío en GitHub
             SEED_ADMIN="${{ secrets.VPS_SEED_ADMIN_PASSWORD }}"
