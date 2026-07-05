@@ -84,8 +84,9 @@ RUN npm ci --prefer-offline --no-audit --omit=dev && \
     npm cache clean --force && \
     rm -rf /home/node/.npm
 
-# Copiar Prisma schema (necesario para el client en runtime)
+# Copiar Prisma schema y archivo de configuración (Requerido para Prisma 7)
 COPY prisma ./prisma
+COPY prisma.config.ts ./
 
 # Regenerar Prisma Client en la imagen de producción
 RUN npx prisma generate && \
