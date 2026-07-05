@@ -145,7 +145,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
 
     const openCombinationModal = () => {
         const initial: Record<string, string> = {};
-        (form.variants ?? []).forEach(v => {
+        (form.variants ?? []).forEach((v: { name: string }) => {
             initial[v.name] = '';
         });
         setCombinationAttrs(initial);
@@ -171,10 +171,10 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             return;
         }
 
-        const variantNames = form.variants.map(g => g.name);
-        const variantValuesLists = form.variants.map(g => g.values);
+        const variantNames = form.variants.map((g: { name: string }) => g.name);
+        const variantValuesLists = form.variants.map((g: { values: string[] }) => g.values);
 
-        if (variantValuesLists.some(list => list.length === 0)) {
+        if (variantValuesLists.some((list: string[]) => list.length === 0)) {
             toast.error('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
             return;
         }
@@ -421,7 +421,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             </div>
             {localErrors.variants && <span className={styles.errorText}>{localErrors.variants}</span>}
 
-            {(form.variants ?? []).map(group => (
+            {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
                 <div key={group.id} className={styles.variantGroup}>
                     <div className={styles.variantGroupHeader}>
                         <span className={styles.variantGroupName}>
@@ -439,7 +439,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     </div>
 
                     <div className={styles.tags}>
-                        {group.values.map(val => (
+                        {group.values.map((val: string) => (
                             <span key={val} className={styles.tag}>
                                 {val}
                                 <button
@@ -555,16 +555,16 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     )}
 
                     {/* Selectores de Variantes */}
-                    {(form.variants ?? []).map((group) => (
+                    {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
                         <div key={group.id} className={styles.field}>
                             <label className={styles.label}>{group.name}</label>
                             <select
                                 className={styles.input}
                                 value={combinationAttrs[group.name] ?? ''}
-                                onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
+                                onChange={e => setCombinationAttrs((prev: Record<string, string>) => ({ ...prev, [group.name]: e.target.value }))}
                             >
                                 <option value="">-- Seleccionar --</option>
-                                {group.values.map(value => (
+                                {group.values.map((value: string) => (
                                     <option key={value} value={value}>{value}</option>
                                 ))}
                             </select>

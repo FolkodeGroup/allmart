@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Prisma } from '@prisma/client';
 
 vi.mock('../../config/prisma', () => ({
   prisma: {
@@ -101,10 +100,7 @@ describe('productsService.getPublicProducts', () => {
     expect(callWhere).toEqual(expect.objectContaining({
       AND: [
         expect.objectContaining({
-          OR: [
-            { category: { isVisible: true } },
-            { productCategories: { some: { category: { isVisible: true } } } },
-          ],
+          productCategories: { some: { category: { isVisible: true } } },
         }),
       ],
     }));
@@ -151,10 +147,7 @@ describe('productsService.getPublicProducts', () => {
           ],
         }),
         expect.objectContaining({
-          OR: [
-            { category: { isVisible: true } },
-            { productCategories: { some: { category: { isVisible: true } } } },
-          ],
+          productCategories: { some: { category: { isVisible: true } } },
         }),
       ],
     }));
