@@ -94,9 +94,6 @@ RUN npx prisma generate && \
 # Copiar el código compilado desde el builder
 COPY --from=builder /app/dist ./dist
 
-# Copiar migraciones SQL (para ejecutar desde Docker)
-COPY migrations ./migrations
-
 # Copiar scripts de base de datos
 COPY scripts ./scripts
 
