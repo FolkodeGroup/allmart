@@ -2090,6 +2090,7 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1207: Eliminar modal de confirmación de salida en formulario de Categorías y corregir botón Guardar | 2026-07-01 |
 | FedericoPaal | 3 | Creación de issue | Issue #1206: No renderizar productos de categorías hijas ocultas en la Home | 2026-07-01 |
 | FedericoPaal | 3 | Creación de issue | Issue #1205: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-01 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1223: 🔄 Registrar puntaje de gestión | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1222: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1221: 1193 aplicar tema oscuro al modal de confirmación de ocultareliminar | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1204: ajuste de columnas en la vista de categorias | 2026-07-02 |
@@ -2097,11 +2098,36 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1202: Mejorar inputs de "Precio" y "Stock" con comportamiento intuitivo | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1201: Limpiar sección "SEO / Publicación" en formulario de producto | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1200: Columnas ajustadas para que ocupe todo el ancho si no se encontraron productos | 2026-07-02 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1198: 1179 agregar botones de con stock y destacado en el detalle del producto | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1197: 1178 ocultar botones de acciones al hover en la card de nota para ver el mensaje completo | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1196: 1177 mostrar usuario que realiza acciones en la tabla de actividad reciente | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1195: Resultados: | 2026-07-02 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1192: 🔄 Registrar puntaje de gestión | 2026-07-02 |
-| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-07-02 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1231: 1215 corregir cálculo de ventas totales para rangos personalizados error de  1 día | 2026-07-04 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1233: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1236: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1235: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1234: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1233: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1232: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1235: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1234: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1233: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1232: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1231: 1215 corregir cálculo de ventas totales para rangos personalizados error de  1 día | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1230: Evitar descargas duplicadas del PDF (una sola descarga por acción | 2026-07-04 |
+| dgimenezdeveloper | 10 | Revisión de PR — Solicitud de cambios | PR #1230: Evitar descargas duplicadas del PDF (una sola descarga por acción | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1229: 1211 corregir textos y duplicado de título en la edición de categorías | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1228: Quitar las celdas "Estados / Cliente / Producto" del PDF detallado de Reportes | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1227: 1208 alinear texto y reactivar acciones en la card de notas del dashboard | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1226: 1207 eliminar modal de confirmación de salida en formulario de categorías y corregir botón guardar | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1225: 1206 no renderizar productos de categorías hijas ocultas en la home | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1224: Cambio implementado y verificado. | 2026-07-04 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1223: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1240: fix prisma config | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1239: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1238: Fix(Dockerfile) | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1237: Delete archivos huerfanos frontend | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1240: fix prisma config | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1239: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1238: Fix(Dockerfile) | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1237: Delete archivos huerfanos frontend | 2026-07-05 |
