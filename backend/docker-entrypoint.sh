@@ -36,18 +36,6 @@ npx prisma migrate deploy
 
 echo "[Docker] Migraciones de Prisma completadas."
 
-# ⚠️  COMENTADO: No ejecutar seed automáticamente
-# El seed regeneraba categorías cada vez que se reiniciaba el contenedor
-# Las categorías deben crearse y mantenerse manualmente en el admin panel
-# Si necesitas datos de demostración completos, ejecuta manualmente:
-#   docker exec allmart-backend npm run seed:demo
-
-# if [ -n "$SEED_ADMIN_PASSWORD" ] && [ -n "$SEED_EDITOR_PASSWORD" ]; then
-#   npm run seed:prod
-# else
-#   echo "[Docker] No se detectaron contraseñas de SEED. Saltando paso."
-# fi
-
 echo "[Docker] Arrancando servidor..."
 
 # Arrancar el servidor
