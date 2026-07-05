@@ -838,45 +838,36 @@ export async function getPublicProducts(query: ProductQuery) {
     where.slug = { in: slugArray };
   }
 
-  if (category) {
-    const foundCategory = await getCategoryBySlug(category);
+    if (category) {
+      const foundCategory = await getCategoryBySlug(category);
 
-    if (!foundCategory.isVisible) {
-      return { data: [], total: 0, page, limit, totalPages: 0 };
-    }
+      if (!foundCategory.isVisible) {
+        return { data: [], total: 0, page, limit, totalPages: 0 };
+      }
 
-    const children = await prisma.category.findMany({
-      where: { parentId: foundCategory.id, isVisible: true },
-      select: { id: true },
-    }) || [];
+      const children = await prisma.category.findMany({
+        where: { parentId: foundCategory.id, isVisible: true },
+        select: { id: true },
+      }) || [];
 
-    const categoryIds = [
-      foundCategory.id,
-      ...children.map(c => c.id),
-    ];
+      const categoryIds = [
+        foundCategory.id,
+        ...children.map(c => c.id),
+      ];
 
-    where.AND = [
-      ...(where.AND || []),
-      {
-        OR: [
-          {
-            categoryId: {
-              in: categoryIds,
-            },
-          },
-          {
-            productCategories: {
-              some: {
-                categoryId: {
-                  in: categoryIds,
-                },
+      where.AND = [
+        ...(where.AND || []),
+        {
+          productCategories: {
+            some: {
+              categoryId: {
+                in: categoryIds,
               },
             },
           },
-        ],
-      },
-    ];
-  }
+        },
+      ];
+    }
 
   // SANEADO: Filtro de visibilidad de categorías siempre activo para el catálogo público
   where.AND = [
