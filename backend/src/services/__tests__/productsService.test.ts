@@ -138,18 +138,28 @@ describe('productsService.getPublicProducts', () => {
     });
 
     const callWhere = (prisma.product.count as any).mock.calls[0][0].where;
-    expect(callWhere).toEqual(expect.objectContaining({
+    expect(callWhere).toEqual({
+      status: 'active',
       AND: [
-        expect.objectContaining({
-          OR: [
-            { categoryId: { in: ['parent-cat', 'child-visible'] } },
-            { productCategories: { some: { categoryId: { in: ['parent-cat', 'child-visible'] } } } },
-          ],
-        }),
-        expect.objectContaining({
-          productCategories: { some: { category: { isVisible: true } } },
-        }),
+        {
+          productCategories: {
+            some: {
+              categoryId: {
+                in: ['parent-cat', 'child-visible'],
+              },
+            },
+          },
+        },
+        {
+          productCategories: {
+            some: {
+              category: {
+                isVisible: true,
+              },
+            },
+          },
+        },
       ],
-    }));
+    });
   });
 });
