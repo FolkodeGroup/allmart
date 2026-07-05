@@ -1,8 +1,8 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 23375 |
-| FedericoPaal | 7578 |
-| Mau-bar-iva | 4548 |
+| dgimenezdeveloper | 23705 |
+| FedericoPaal | 7823 |
+| Mau-bar-iva | 4833 |
 | Nahuel-Dalesio | 1630 |
 | agustin-ovejero | 1472 |
 | CelinaJP | 1378 |
@@ -11,6 +11,41 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1240: fix prisma config | 2026-07-05 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1239: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1238: Fix(Dockerfile) | 2026-07-05 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1237: Delete archivos huerfanos frontend | 2026-07-05 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1240: fix prisma config | 2026-07-05 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1239: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1238: Fix(Dockerfile) | 2026-07-05 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1237: Delete archivos huerfanos frontend | 2026-07-05 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1236: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1235: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1234: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1233: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1232: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1235: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1234: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1233: Refactor prisma 250626 | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1232: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1231: 1215 corregir cálculo de ventas totales para rangos personalizados error de  1 día | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1230: Evitar descargas duplicadas del PDF (una sola descarga por acción | 2026-07-04 |
+| dgimenezdeveloper | 10 | Gestión | Revisión de PR — Solicitud de cambios — PR #1230: Evitar descargas duplicadas del PDF (una sola descarga por acción | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1229: 1211 corregir textos y duplicado de título en la edición de categorías | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1228: Quitar las celdas "Estados / Cliente / Producto" del PDF detallado de Reportes | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1227: 1208 alinear texto y reactivar acciones en la card de notas del dashboard | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1226: 1207 eliminar modal de confirmación de salida en formulario de categorías y corregir botón guardar | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1225: 1206 no renderizar productos de categorías hijas ocultas en la home | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1224: Cambio implementado y verificado. | 2026-07-04 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1223: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| FedericoPaal | 30 | Issue | Alinear texto y reactivar acciones en la card de Notas del Dashboard | 2026-07-04 |
+| FedericoPaal | 30 | Issue | Eliminar modal de confirmación de salida en formulario de Categorías y corregir botón Guardar | 2026-07-04 |
+| FedericoPaal | 35 | Issue | No renderizar productos de categorías hijas ocultas en la Home | 2026-07-04 |
+| FedericoPaal | 50 | Issue | Automatizar valor `0` al seleccionar descuento BOGO en vista de Promociones | 2026-07-04 |
+| Mau-bar-iva | 20 | Issue | Corregir cálculo de ventas totales para rangos personalizados (error de +-1 día) | 2026-07-04 |
+| Mau-bar-iva | 50 | Issue | Corregir textos y duplicado de título en la edición de categorías | 2026-07-04 |
+| Mau-bar-iva | 15 | Issue | Quitar las celdas "Estados / Cliente / Producto" del PDF detallado de Reportes | 2026-07-04 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1223: 🔄 Registrar puntaje de gestión | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1222: Alinear el estilo de los badges de estado en la vista de Categorías con los de Producto | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1221: 1193 aplicar tema oscuro al modal de confirmación de ocultareliminar | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1204: ajuste de columnas en la vista de categorias | 2026-07-02 |
@@ -18,6 +53,7 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1202: Mejorar inputs de "Precio" y "Stock" con comportamiento intuitivo | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1201: Limpiar sección "SEO / Publicación" en formulario de producto | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1200: Columnas ajustadas para que ocupe todo el ancho si no se encontraron productos | 2026-07-02 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1198: 1179 agregar botones de con stock y destacado en el detalle del producto | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1197: 1178 ocultar botones de acciones al hover en la card de nota para ver el mensaje completo | 2026-07-02 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1196: 1177 mostrar usuario que realiza acciones en la tabla de actividad reciente | 2026-07-02 |
@@ -276,6 +312,9 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1057: 1044 renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-30 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1056: 1045 badge de notificación en consultas del sidebar | 2026-05-30 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1055: estilo ajustado | 2026-05-30 |
+| FedericoPaal | 50 | Issue | Renderizar productos sin stock en home y adevertencia de pedidos | 2026-05-30 |
+| Mau-bar-iva | 50 | Issue | Adaptar productos más vendidos a modo claro y oscuro | 2026-05-30 |
+| Mau-bar-iva | 50 | Issue | Badge de notificación en consultas del sidebar | 2026-05-30 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1054: 🔄 Registrar puntaje de gestión | 2026-05-28 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1053: 🔄 Registrar puntaje de gestión | 2026-05-28 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1052: 🔄 Registrar puntaje de gestión | 2026-05-28 |
@@ -289,6 +328,10 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1048: fix render de badge | 2026-05-28 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1047: fix url de etiqueta link en CartPage.tsx | 2026-05-28 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1039: 🔄 Registrar puntaje de gestión | 2026-05-28 |
+| FedericoPaal | 50 | Issue | Campos obligatorios en proveedores | 2026-05-28 |
+| Mau-bar-iva | 50 | Issue | ALERTA DE STOCK CRÍTICO: FILTRAR SOLO PRODUCTOS CON STOCK BAJO | 2026-05-28 |
+| Mau-bar-iva | 20 | Issue | Ocultar badge de notificación en el Carrito de Compras cuando no hay productos | 2026-05-28 |
+| Mau-bar-iva | 30 | Issue | Redirección a la información del producto desde el Carrito de Compras | 2026-05-28 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1039: 🔄 Registrar puntaje de gestión | 2026-05-27 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1035: 🔄 Registrar puntaje de gestión | 2026-05-27 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1038: implementación de modal de confirmación para el cierre de sesión | 2026-05-27 |
