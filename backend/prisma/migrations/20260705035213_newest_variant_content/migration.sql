@@ -21,12 +21,12 @@ CREATE TYPE "collection_type" AS ENUM ('manual', 'auto_sales');
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "email" VARCHAR(255) NOT NULL,
     "first_name" VARCHAR(100) NOT NULL,
     "last_name" VARCHAR(100) NOT NULL,
     "phone" VARCHAR(30),
-    "password_hash" TEXT,
+    "password_hash" TEXT NOT NULL,
     "role" "user_role" NOT NULL DEFAULT 'editor',
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -37,7 +37,7 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "customers" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "email" VARCHAR(255) NOT NULL,
     "first_name" VARCHAR(100) NOT NULL,
     "last_name" VARCHAR(100) NOT NULL,
@@ -52,13 +52,12 @@ CREATE TABLE "customers" (
 
 -- CreateTable
 CREATE TABLE "categories" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "name" VARCHAR(150) NOT NULL,
     "slug" VARCHAR(150) NOT NULL,
     "description" TEXT,
     "image_url" TEXT,
     "parent_id" UUID,
-    "item_count" INTEGER NOT NULL DEFAULT 0,
     "is_visible" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -68,13 +67,13 @@ CREATE TABLE "categories" (
 
 -- CreateTable
 CREATE TABLE "products" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "name" VARCHAR(255) NOT NULL,
     "slug" VARCHAR(255) NOT NULL,
     "description" TEXT,
     "short_description" TEXT,
     "price" DECIMAL(12,2) NOT NULL,
-    "rating" DECIMAL(3,2) NOT NULL DEFAULT 0,
+    "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "review_count" INTEGER NOT NULL DEFAULT 0,
     "in_stock" BOOLEAN NOT NULL DEFAULT true,
     "stock" INTEGER NOT NULL DEFAULT 0,
@@ -100,7 +99,7 @@ CREATE TABLE "product_categories" (
 
 -- CreateTable
 CREATE TABLE "tags" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "name" VARCHAR(100) NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -118,7 +117,7 @@ CREATE TABLE "product_tags" (
 
 -- CreateTable
 CREATE TABLE "product_features" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "product_id" UUID NOT NULL,
     "description" VARCHAR(500) NOT NULL,
     "display_order" INTEGER NOT NULL DEFAULT 0,
@@ -129,7 +128,7 @@ CREATE TABLE "product_features" (
 
 -- CreateTable
 CREATE TABLE "product_options" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "product_id" UUID NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
@@ -141,7 +140,7 @@ CREATE TABLE "product_options" (
 
 -- CreateTable
 CREATE TABLE "product_option_values" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "option_id" UUID NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -152,7 +151,7 @@ CREATE TABLE "product_option_values" (
 
 -- CreateTable
 CREATE TABLE "product_skus" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "product_id" UUID NOT NULL,
     "sku" VARCHAR(100) NOT NULL,
     "stock" INTEGER NOT NULL DEFAULT 0,
@@ -174,7 +173,7 @@ CREATE TABLE "product_sku_values" (
 
 -- CreateTable
 CREATE TABLE "product_images_storage" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "product_id" UUID NOT NULL,
     "storage_key" VARCHAR(500),
     "storage_thumb_key" VARCHAR(500),
@@ -195,7 +194,7 @@ CREATE TABLE "product_images_storage" (
 
 -- CreateTable
 CREATE TABLE "product_sku_images_storage" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "sku_id" UUID NOT NULL,
     "storage_key" VARCHAR(500),
     "storage_thumb_key" VARCHAR(500),
@@ -217,7 +216,7 @@ CREATE TABLE "product_sku_images_storage" (
 
 -- CreateTable
 CREATE TABLE "category_images_storage" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "category_id" UUID NOT NULL,
     "storage_key" VARCHAR(500),
     "storage_thumb_key" VARCHAR(500),
@@ -237,7 +236,7 @@ CREATE TABLE "category_images_storage" (
 
 -- CreateTable
 CREATE TABLE "orders" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "customer_id" UUID,
     "customer_first_name" VARCHAR(100) NOT NULL,
     "customer_last_name" VARCHAR(100) NOT NULL,
@@ -256,7 +255,7 @@ CREATE TABLE "orders" (
 
 -- CreateTable
 CREATE TABLE "order_items" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "order_id" UUID NOT NULL,
     "product_id" UUID,
     "product_sku_id" UUID,
@@ -270,7 +269,7 @@ CREATE TABLE "order_items" (
 
 -- CreateTable
 CREATE TABLE "order_status_history" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "order_id" UUID NOT NULL,
     "status" "order_status" NOT NULL,
     "changed_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -281,9 +280,8 @@ CREATE TABLE "order_status_history" (
 
 -- CreateTable
 CREATE TABLE "carts" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "user_id" UUID,
-    "session_id" VARCHAR(255),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "session_id" VARCHAR(255) NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -292,9 +290,10 @@ CREATE TABLE "carts" (
 
 -- CreateTable
 CREATE TABLE "cart_items" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "cart_id" UUID NOT NULL,
     "product_id" UUID NOT NULL,
+    "product_sku_id" UUID,
     "quantity" INTEGER NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -303,7 +302,7 @@ CREATE TABLE "cart_items" (
 
 -- CreateTable
 CREATE TABLE "shipments" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "order_id" UUID NOT NULL,
     "address_street" VARCHAR(255) NOT NULL,
     "address_city" VARCHAR(150) NOT NULL,
@@ -331,7 +330,7 @@ CREATE TABLE "schema_migrations" (
 
 -- CreateTable
 CREATE TABLE "staff_notes" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "content" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -342,7 +341,7 @@ CREATE TABLE "staff_notes" (
 
 -- CreateTable
 CREATE TABLE "promotions" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "name" VARCHAR(255) NOT NULL,
     "description" TEXT,
     "type" "promotion_type" NOT NULL,
@@ -361,7 +360,7 @@ CREATE TABLE "promotions" (
 
 -- CreateTable
 CREATE TABLE "promotion_rules" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "promotion_id" UUID NOT NULL,
     "product_id" UUID,
     "category_id" UUID,
@@ -373,7 +372,7 @@ CREATE TABLE "promotion_rules" (
 
 -- CreateTable
 CREATE TABLE "collections" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "name" VARCHAR(255) NOT NULL,
     "slug" VARCHAR(255) NOT NULL,
     "description" TEXT,
@@ -392,7 +391,7 @@ CREATE TABLE "collections" (
 
 -- CreateTable
 CREATE TABLE "collection_items" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "collection_id" UUID NOT NULL,
     "product_id" UUID NOT NULL,
     "position" INTEGER NOT NULL DEFAULT 0,
@@ -403,7 +402,7 @@ CREATE TABLE "collection_items" (
 
 -- CreateTable
 CREATE TABLE "low_stock_alerts" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "order_id" UUID NOT NULL,
     "product_id" UUID NOT NULL,
     "product_name" VARCHAR(255) NOT NULL,
@@ -417,7 +416,7 @@ CREATE TABLE "low_stock_alerts" (
 
 -- CreateTable
 CREATE TABLE "banners" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "title" VARCHAR(255) NOT NULL,
     "description" TEXT,
     "filter_config" JSONB NOT NULL DEFAULT '{}',
@@ -442,11 +441,10 @@ CREATE TABLE "banners" (
 
 -- CreateTable
 CREATE TABLE "product_reviews" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "product_id" UUID NOT NULL,
-    "user_id" UUID,
     "order_id" UUID,
-    "reviewer_name" VARCHAR(100),
+    "reviewer_name" VARCHAR(100) NOT NULL,
     "rating" INTEGER NOT NULL,
     "title" VARCHAR(255),
     "text" TEXT,
@@ -459,8 +457,8 @@ CREATE TABLE "product_reviews" (
 
 -- CreateTable
 CREATE TABLE "favorites" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "user_id" UUID NOT NULL,
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
+    "session_id" VARCHAR(255) NOT NULL,
     "product_id" UUID NOT NULL,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -469,7 +467,7 @@ CREATE TABLE "favorites" (
 
 -- CreateTable
 CREATE TABLE "suppliers" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "name" VARCHAR(255) NOT NULL,
     "url" VARCHAR(500),
     "phone" VARCHAR(50) NOT NULL,
@@ -477,7 +475,6 @@ CREATE TABLE "suppliers" (
     "email" VARCHAR(255),
     "description" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "products" TEXT NOT NULL DEFAULT '',
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -486,7 +483,7 @@ CREATE TABLE "suppliers" (
 
 -- CreateTable
 CREATE TABLE "product_suppliers" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "product_id" UUID NOT NULL,
     "supplier_id" UUID NOT NULL,
     "current_price" DECIMAL(12,2) NOT NULL,
@@ -500,7 +497,7 @@ CREATE TABLE "product_suppliers" (
 
 -- CreateTable
 CREATE TABLE "supplier_product_prices" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "product_id" UUID NOT NULL,
     "supplier_id" UUID NOT NULL,
     "price" DECIMAL(12,2) NOT NULL,
@@ -514,7 +511,7 @@ CREATE TABLE "supplier_product_prices" (
 
 -- CreateTable
 CREATE TABLE "contacts" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "name" VARCHAR(150) NOT NULL,
     "email" VARCHAR(255) NOT NULL,
     "phone" VARCHAR(30),
@@ -530,7 +527,7 @@ CREATE TABLE "contacts" (
 
 -- CreateTable
 CREATE TABLE "audit_logs" (
-    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT uuid_generate_v7(),
     "user_email" VARCHAR(255) NOT NULL,
     "action" VARCHAR(50) NOT NULL,
     "entity" VARCHAR(50) NOT NULL,
@@ -581,6 +578,12 @@ CREATE INDEX "idx_products_status" ON "products"("status");
 CREATE INDEX "idx_products_is_featured" ON "products"("is_featured");
 
 -- CreateIndex
+CREATE INDEX "idx_products_name_trgm" ON "products" USING GIN ("name" gin_trgm_ops);
+
+-- CreateIndex
+CREATE INDEX "idx_products_description_trgm" ON "products" USING GIN ("description" gin_trgm_ops);
+
+-- CreateIndex
 CREATE INDEX "idx_product_categories_category_id" ON "product_categories"("category_id");
 
 -- CreateIndex
@@ -588,6 +591,9 @@ CREATE INDEX "idx_product_categories_product_id" ON "product_categories"("produc
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tags_name_key" ON "tags"("name");
+
+-- CreateIndex
+CREATE INDEX "idx_product_tags_tag_id" ON "product_tags"("tag_id");
 
 -- CreateIndex
 CREATE INDEX "product_features_product_id_idx" ON "product_features"("product_id");
@@ -609,6 +615,9 @@ CREATE UNIQUE INDEX "product_skus_sku_unique" ON "product_skus"("sku");
 
 -- CreateIndex
 CREATE INDEX "idx_product_skus_product_id" ON "product_skus"("product_id");
+
+-- CreateIndex
+CREATE INDEX "idx_product_sku_values_option_value_id" ON "product_sku_values"("option_value_id");
 
 -- CreateIndex
 CREATE INDEX "idx_product_images_product_id" ON "product_images_storage"("product_id");
@@ -638,28 +647,40 @@ CREATE INDEX "idx_orders_customer_email" ON "orders"("customer_email");
 CREATE INDEX "idx_orders_status" ON "orders"("status");
 
 -- CreateIndex
+CREATE INDEX "idx_orders_status_created_at" ON "orders"("status", "created_at" DESC);
+
+-- CreateIndex
 CREATE INDEX "idx_order_items_order_id" ON "order_items"("order_id");
 
 -- CreateIndex
 CREATE INDEX "idx_order_items_sku_id" ON "order_items"("product_sku_id");
 
 -- CreateIndex
+CREATE INDEX "idx_order_items_product_id" ON "order_items"("product_id");
+
+-- CreateIndex
 CREATE INDEX "idx_order_status_history_order_id" ON "order_status_history"("order_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "carts_user_unique" ON "carts"("user_id");
+CREATE UNIQUE INDEX "carts_session_unique" ON "carts"("session_id");
 
 -- CreateIndex
 CREATE INDEX "idx_carts_session_id" ON "carts"("session_id");
 
 -- CreateIndex
-CREATE INDEX "idx_carts_user_id" ON "carts"("user_id");
-
--- CreateIndex
 CREATE INDEX "idx_cart_items_cart_id" ON "cart_items"("cart_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "cart_items_unique_product" ON "cart_items"("cart_id", "product_id");
+CREATE INDEX "idx_cart_items_product_id" ON "cart_items"("product_id");
+
+-- CreateIndex
+CREATE INDEX "idx_cart_items_sku_id" ON "cart_items"("product_sku_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "cart_items_unique_product_sku" ON "cart_items"("cart_id", "product_id", "product_sku_id") WHERE (product_sku_id IS NOT NULL);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "cart_items_unique_product_base" ON "cart_items"("cart_id", "product_id") WHERE (product_sku_id IS NULL);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "shipments_order_unique" ON "shipments"("order_id");
@@ -746,25 +767,19 @@ CREATE INDEX "idx_banners_display_order" ON "banners"("display_order");
 CREATE INDEX "idx_product_reviews_product_id" ON "product_reviews"("product_id");
 
 -- CreateIndex
-CREATE INDEX "idx_product_reviews_user_id" ON "product_reviews"("user_id");
-
--- CreateIndex
 CREATE INDEX "idx_product_reviews_order_id" ON "product_reviews"("order_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "product_reviews_unique" ON "product_reviews"("product_id", "user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "product_reviews_order_unique" ON "product_reviews"("product_id", "order_id");
 
 -- CreateIndex
-CREATE INDEX "idx_favorites_user_id" ON "favorites"("user_id");
+CREATE INDEX "idx_favorites_session_id" ON "favorites"("session_id");
 
 -- CreateIndex
 CREATE INDEX "idx_favorites_product_id" ON "favorites"("product_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "favorites_unique" ON "favorites"("user_id", "product_id");
+CREATE UNIQUE INDEX "favorites_unique" ON "favorites"("session_id", "product_id");
 
 -- CreateIndex
 CREATE INDEX "idx_suppliers_name" ON "suppliers"("name");
@@ -786,6 +801,9 @@ CREATE INDEX "idx_supplier_product_prices_main" ON "supplier_product_prices"("pr
 
 -- CreateIndex
 CREATE INDEX "idx_supplier_product_prices_supplier" ON "supplier_product_prices"("supplier_id", "created_at" DESC);
+
+-- CreateIndex
+CREATE INDEX "idx_supplier_prices_changed_by" ON "supplier_product_prices"("changed_by");
 
 -- CreateIndex
 CREATE INDEX "idx_contacts_email" ON "contacts"("email");
@@ -866,13 +884,13 @@ ALTER TABLE "order_items" ADD CONSTRAINT "order_items_sku_fk" FOREIGN KEY ("prod
 ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "carts" ADD CONSTRAINT "carts_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_cart_fk" FOREIGN KEY ("cart_id") REFERENCES "carts"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_sku_fk" FOREIGN KEY ("product_sku_id") REFERENCES "product_skus"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "shipments" ADD CONSTRAINT "shipments_order_fk" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -908,13 +926,7 @@ ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_order_fk" FOREIGN 
 ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "product_reviews" ADD CONSTRAINT "product_reviews_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE "favorites" ADD CONSTRAINT "favorites_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE "favorites" ADD CONSTRAINT "favorites_user_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "product_suppliers" ADD CONSTRAINT "product_suppliers_product_fk" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE NO ACTION;

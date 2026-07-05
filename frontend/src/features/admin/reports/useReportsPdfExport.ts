@@ -19,6 +19,7 @@ export function useReportsPdfExport() {
      * @param fileName Nombre del archivo PDF
      */
     async function generatePdf({ rootRef, fileName }: { rootRef: RefObject<HTMLElement | null>, fileName: string }) {
+        if (loading) return;
         if (!rootRef.current) return;
         setLoading(true);
         try {
