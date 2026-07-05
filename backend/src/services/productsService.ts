@@ -882,22 +882,13 @@ export async function getPublicProducts(query: ProductQuery) {
   where.AND = [
     ...(where.AND || []),
     {
-      OR: [
-        {
+      productCategories: {
+        some: {
           category: {
             isVisible: true,
           },
         },
-        {
-          productCategories: {
-            some: {
-              category: {
-                isVisible: true,
-              },
-            },
-          },
-        },
-      ],
+      },
     },
   ];
 
