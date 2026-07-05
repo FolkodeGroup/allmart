@@ -28,6 +28,9 @@ done
 
 echo "[Docker] PostgreSQL disponible. Ejecutando migraciones de Prisma..."
 
+# Construir DATABASE_URL dinámicamente para la CLI de Prisma y prisma.config.ts
+export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME}?schema=public"
+
 # Ejecutar migraciones nativas de Prisma para entornos de producción
 npx prisma migrate deploy
 
