@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { contactsService } from '../../../services/contactsService';
 import { Modal } from '../../../components/ui/Modal';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
@@ -10,6 +10,7 @@ import { MessageSquare } from 'lucide-react';
 import sectionStyles from '../shared/AdminSection.module.css';
 import styles from './AdminContacts.module.css';
 import { Search } from 'lucide-react';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 interface Contact {
   id: string;
@@ -37,7 +38,7 @@ export function AdminContacts() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0)
+  const [totalPages, setTotalPages] = useState(0);
   // Filters
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,6 +58,13 @@ export function AdminContacts() {
   // Debounce search
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Mapeo de opciones de estado para el Dropdown unificado
+  const statusOptions = useMemo(() => [
+    { value: '', label: 'Todos los estados' },
+    { value: 'unread', label: 'No leídas' },
+    { value: 'read', label: 'Leídas' }
+  ], []);
 
   useEffect(() => {
     if (searchTimer.current) clearTimeout(searchTimer.current);
@@ -109,7 +117,6 @@ export function AdminContacts() {
     } finally {
       setTogglingIds(prev => { const next = new Set(prev); next.delete(contact.id); return next; });
     }
-
   };
 
   const handleOpenDetail = (contact: Contact) => {
@@ -210,16 +217,17 @@ export function AdminContacts() {
           autoCorrect="off"
           autoCapitalize="off"
         />
-        <select
-          value={statusFilter}
-          onChange={e => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }}
-          className={styles.filterSelect}
-          aria-label="Filtrar por estado"
-        >
-          <option value="">Todos los estados</option>
-          <option value="unread">No leídas</option>
-          <option value="read">Leídas</option>
-        </select>
+        
+        {/* Dropdown de Estado Unificado */}
+        <div style={{ width: '180px', display: 'inline-block' }}>
+          <Dropdown
+            options={statusOptions}
+            value={statusFilter}
+            onChange={(val) => { setStatusFilter(val as StatusFilter); setPage(1); }}
+            placeholder="Todos los estados"
+          />
+        </div>
+
         {(statusFilter || debouncedSearch) && (
           <button
             type="button"

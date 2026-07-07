@@ -15,6 +15,8 @@ import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { apiFetch } from '../../../utils/apiClient';
 import styles from './AdminPromotions.module.css';
 import { Search } from 'lucide-react';
+import { DatePicker } from '../../../components/ui/DatePicker/DatePicker';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 interface AdminProduct {
   id: string;
@@ -118,6 +120,13 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     interceptNavigation(() => onCancel());
   }, [interceptNavigation, onCancel]);
 
+  // Mapeo de opciones de tipo de descuento para el Dropdown
+  const typeOptions = useMemo(() => [
+    { value: 'percentage', label: TYPE_LABELS.percentage },
+    { value: 'fixed', label: TYPE_LABELS.fixed },
+    { value: 'bogo', label: TYPE_LABELS.bogo }
+  ], []);
+
   // ─── Init from existing promotion ────────────────────────────────────────
   useEffect(() => {
     if (promotion) {
@@ -218,6 +227,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     );
   }
 
+  
   function toggleCategory(id: string) {
     setSelectedCategoryIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -316,11 +326,21 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               <textarea id="promo-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles para el administrador" rows={2} />
             </div>
             <div className={styles.formRow}>
+              {/* Dropdown unificado para el tipo de descuento asociado a un label semántico */}
               <div className={styles.formGroup}>
-                <label htmlFor="promo-type">Tipo de Descuento *</label>
-                <select id="promo-type" value={type} onChange={(e) => handleTypeChange(e.target.value as Promotion['type'])}>
-                  {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
+                <label
+                  htmlFor="promo-type"
+                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
+                >
+                  Tipo de Descuento *
+                </label>
+                <Dropdown
+                  id="promo-type"
+                  options={typeOptions}
+                  value={type}
+                  onChange={(val) => handleTypeChange(val as Promotion['type'])}
+                  placeholder="Seleccionar tipo..."
+                />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="promo-value">Valor *</label>
@@ -330,13 +350,24 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               </div>
             </div>
             <div className={styles.formRow}>
+              {/* DatePickers customizados unificados con labels semánticos */}
               <div className={styles.formGroup}>
-                <label htmlFor="promo-start">Fecha de Inicio *</label>
-                <input id="promo-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <label
+                  htmlFor="promo-start"
+                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
+                >
+                  Fecha de Inicio *
+                </label>
+                <DatePicker id="promo-start" value={startDate} onChange={setStartDate} />
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="promo-end">Fecha de Fin *</label>
-                <input id="promo-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                <label
+                  htmlFor="promo-end"
+                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
+                >
+                  Fecha de Fin *
+                </label>
+                <DatePicker id="promo-end" value={endDate} onChange={setEndDate} />
               </div>
             </div>
             <div className={styles.formRow}>

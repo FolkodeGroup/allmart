@@ -5,7 +5,7 @@
  *   Pestaña 2: Matriz de Productos (vista de qué productos cubre cada promo)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Promotion } from './promotionsService';
 import { promotionsService } from './promotionsService';
 import AdminPromotionForm from './AdminPromotionForm';
@@ -15,6 +15,7 @@ import styles from './AdminPromotions.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
 import { Search } from 'lucide-react';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 type ViewMode = 'list' | 'form';
 type MainTab = 'campaigns' | 'matrix';
@@ -136,6 +137,24 @@ const AdminPromotions: React.FC = () => {
     setViewMode('list');
   }
 
+  // Opciones de filtrado por estado de promoción para el Dropdown
+  const filterActiveOptions = useMemo(() => [
+    { value: '', label: 'Todas' },
+    { value: 'true', label: 'Activas' },
+    { value: 'false', label: 'Inactivas' }
+  ], []);
+
+  const activeFilterValue = useMemo(() => {
+    return filterActive === undefined ? '' : filterActive ? 'true' : 'false';
+  }, [filterActive]);
+
+  const handleFilterActiveChange = (val: string) => {
+    setFilterActive(
+      val === '' ? undefined : val === 'true'
+    );
+    setPage(1);
+  };
+
   if (viewMode === 'form') {
     return (
       <AdminPromotionForm
@@ -174,38 +193,33 @@ const AdminPromotions: React.FC = () => {
       {/* ─── Tab: Campaigns ────────────────────────────────────────── */}
       {mainTab === 'campaigns' && (
         <>
-          <div className={styles.filters}>
+          <div className={styles.filters} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <div className={styles.searchWrap}>
               <Search size={16} className={styles.searchIcon} />
               <input
                 type="text"
+                className={styles.searchInput}
                 placeholder="Buscar promociones..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className={styles.searchInput}
                 autoComplete="off"
                 spellCheck="false"
                 autoCorrect="off"
                 autoCapitalize="off"
               />
             </div>
-            <select
-              value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
-              onChange={(e) => {
-                setFilterActive(
-                  e.target.value === '' ? undefined : e.target.value === 'true'
-                );
-                setPage(1);
-              }}
-              className={styles.selectFilter}
-            >
-              <option value="">Todas</option>
-              <option value="true">Activas</option>
-              <option value="false">Inactivas</option>
-            </select>
+            {/* Custom Dropdown de Estado unificado */}
+            <div style={{ flex: '0 0 160px', minWidth: '160px' }}>
+              <Dropdown
+                options={filterActiveOptions}
+                value={activeFilterValue}
+                onChange={handleFilterActiveChange}
+                placeholder="Todas"
+              />
+            </div>
           </div>
 
           {error && <div className={styles.error}>{error}</div>}

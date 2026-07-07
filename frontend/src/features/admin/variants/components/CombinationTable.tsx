@@ -165,7 +165,7 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
     if (isEmpty) {
         return (
             <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>📦</span>
+                <span className={styles.emptyIcon}></span>
                 <p>Todavía no hay combinaciones.</p>
                 <small>Usá el botón de arriba para agregar la primera.</small>
             </div>

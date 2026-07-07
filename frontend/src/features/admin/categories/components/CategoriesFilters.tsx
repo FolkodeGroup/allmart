@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from '../AdminCategories.module.css';
 import { CategorySearchInput } from '../../../../components/ui/CategorySearchInput';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 interface CategoriesFiltersProps {
   search: string;
@@ -25,27 +26,28 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
   isVisible,
   setIsVisible,
 }) => {
-  return (
-    <div
-      className={styles.filters}
-      style={{
+  // ── Mapeo de opciones para el Dropdown de Visibilidad ──
+  const visibilityOptions = useMemo(() => [
+    { value: 'all', label: 'Todas' },
+    { value: 'visible', label: 'Visibles' },
+    { value: 'hidden', label: 'Ocultas' },
+  ], []);
 
-      }}
-    >
-      {/* 🔍 Buscador */}
+  return (
+    <div className={styles.filters}>
+      {/* Buscador */}
       <div className={styles.searchWrapper}>
         <CategorySearchInput
           value={search}
           onChange={setSearch}
           placeholder="Buscar categoría por nombre o slug..."
         />
-        {/* 📊 Cantidad */}
+        {/* Cantidad */}
         <span className={styles.count}>{total} categorías</span>
       </div>
 
-
-      <div className={styles.filtersRow}>
-        {/* 🔢 Mín productos */}
+      <div className={styles.filtersRow} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* Mín productos */}
         <input
           type="number"
           min={0}
@@ -59,7 +61,7 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           className={styles.filtersRowItem}
         />
 
-        {/* 🔢 Máx productos */}
+        {/* Máx productos */}
         <input
           type="number"
           min={0}
@@ -73,18 +75,16 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           className={styles.filtersRowItem}
         />
 
-        {/* 👁️ Estado */}
-        <select
-          value={isVisible}
-          onChange={(e) =>
-            setIsVisible(e.target.value as 'all' | 'visible' | 'hidden')
-          }
-          className={styles.filtersRowItem}
-        >
-          <option value="all">Todas</option>
-          <option value="visible">Visibles</option>
-          <option value="hidden">Ocultas</option>
-        </select>
+        {/* Filtro de Visibilidad Unificado con Custom Dropdown */}
+        <div style={{ flex: '1 1 140px', minWidth: '140px', maxWidth: '200px' }}>
+          <Dropdown
+            id="visibility-filter"
+            options={visibilityOptions}
+            value={isVisible}
+            onChange={(val) => setIsVisible(val as 'all' | 'visible' | 'hidden')}
+            placeholder="Todas"
+          />
+        </div>
       </div>
     </div>
   );

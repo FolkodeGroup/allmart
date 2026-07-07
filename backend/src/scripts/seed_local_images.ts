@@ -367,7 +367,6 @@ async function main() {
   let totalImages   = 0;
 
   for (const p of PRODUCTS) {
-    console.log(`\n📦 ${p.name}`);
     const productId = await ensureProduct(p);
     totalProducts++;
 

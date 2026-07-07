@@ -1,4 +1,6 @@
+import React, { useMemo } from 'react';
 import styles from '../AdminReports.module.css';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 type OrdersTableFilters = {
     status: string[];
@@ -34,7 +36,15 @@ export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: Ord
         }));
     };
 
-    // Mobile: inputs y select 100%, columnas, espaciado
+    // Mapeo de opciones para el Dropdown unificado
+    const statusDropdownOptions = useMemo(() => [
+        { value: '', label: 'Seleccionar estado...' },
+        ...STATUS_OPTIONS.map(opt => ({
+            value: opt.value,
+            label: opt.label
+        }))
+    ], []);
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 600;
 
     return (
@@ -42,28 +52,20 @@ export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: Ord
             className={styles.advancedFiltersWrap}
             style={isMobile ? { flexDirection: 'column', gap: 10, width: '100%' } : {}}
         >
-            <label className={styles.advancedLabel} style={isMobile ? { width: '100%' } : {}}>
-                <strong>Estado</strong>
-                <select
+            <div className={styles.advancedLabel} style={{ width: isMobile ? '100%' : '180px' }}>
+                <strong style={{ display: 'block', marginBottom: '8px' }}>Estado</strong>
+                <Dropdown
+                    options={statusDropdownOptions}
                     value=""
-                    onChange={e => {
-                        e.preventDefault();
-                        const val = e.target.value;
+                    onChange={(val) => {
                         if (val) handleAddStatus(val);
                     }}
-                    className={styles.advancedMultiSelect}
-                    style={isMobile ? { width: '100%' } : {}}
-                >
-                    <option value="">Seleccionar estado...</option>
-                    {STATUS_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    ))}
-                </select>
-            </label>
+                    placeholder="Seleccionar estado..."
+                />
+            </div>
+            
             {/* Chips de estados seleccionados */}
-            <div className={styles.statusChips} style={isMobile ? { width: '100%', flexWrap: 'wrap', gap: 6 } : {}}>
+            <div className={styles.statusChips} style={isMobile ? { width: '100%', flexWrap: 'wrap', gap: 6, marginTop: '8px' } : { marginTop: '8px' }}>
                 {ordersTableFilters.status.map(s => {
                     const label = STATUS_OPTIONS.find(o => o.value === s)?.label || s;
                     return (

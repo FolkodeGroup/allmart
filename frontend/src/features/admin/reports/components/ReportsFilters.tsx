@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from '../AdminReports.module.css';
+import { DatePicker } from '../../../../components/ui/DatePicker/DatePicker';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 export type PredefinedPeriod = '7d' | '30d' | '90d' | 'all';
 
@@ -41,8 +43,6 @@ function useIsMobile() {
 export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
     value,
     onChange,
-    minDate,
-    maxDate,
 }) => {
     const isCustom = value.type === 'custom';
     const isMobile = useIsMobile();
@@ -51,13 +51,17 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
         onChange({ type: 'predefined', period });
     };
 
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value: dateValue } = e.target;
+    // Mapeo de opciones de período para el Dropdown unificado
+    const periodOptions = useMemo(() => [
+        { value: '7d', label: 'Últimos 7 días' },
+        { value: '30d', label: 'Últimos 30 días' },
+        { value: '90d', label: 'Últimos 90 días' },
+        { value: 'all', label: 'Todo el tiempo' }
+    ], []);
 
-        const prevRange =
-            value.type === 'custom'
-                ? value.range
-                : { from: '', to: '' };
+    // Handler específico para procesar el string directo devuelto por el DatePicker
+    const handleDatePickerChange = (name: 'from' | 'to', dateValue: string) => {
+        const prevRange = value.type === 'custom' ? value.range : { from: '', to: '' };
 
         if (value.type === 'custom') {
             onChange({
@@ -65,7 +69,6 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                 range: { ...value.range, [name]: dateValue },
             });
         } else {
-
             onChange({
                 type: 'custom',
                 range: {
@@ -83,43 +86,31 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
         return (
             <div className={styles.filtersBarMobile}>
                 <span className={styles.filtersLabel}>Filtros</span>
-                <select
-                    className={styles.filtersSelectMobile}
-                    value={value.type === 'predefined' ? value.period : ''}
-                    onChange={e => onChange({ type: 'predefined', period: e.target.value as PredefinedPeriod })}
-                >
-                    <option value="7d">Últimos 7 días</option>
-                    <option value="30d">Últimos 30 días</option>
-                    <option value="90d">Últimos 90 días</option>
-                    <option value="all">Todo el tiempo</option>
-                </select>
+                <div style={{ width: '100%' }}>
+                    <Dropdown
+                        options={periodOptions}
+                        value={value.type === 'predefined' ? value.period : ''}
+                        onChange={val => onChange({ type: 'predefined', period: val as PredefinedPeriod })}
+                        placeholder="Seleccionar período"
+                    />
+                </div>
                 <div className={styles.filtersDatesMobile}>
                     <span className={styles.filtersLabel}>Desde:</span>
-                    <input
-                        type="date"
-                        name="from"
+                    <DatePicker
                         value={isCustom ? value.range.from : ''}
-                        onChange={handleDateChange}
-                        min={minDate}
-                        max={maxDate}
-                        className={styles.dateInputMobile}
+                        onChange={val => handleDatePickerChange('from', val)}
                     />
                     <span className={styles.filtersLabel}>Hasta:</span>
-                    <input
-                        type="date"
-                        name="to"
+                    <DatePicker
                         value={isCustom ? value.range.to : ''}
-                        onChange={handleDateChange}
-                        min={minDate}
-                        max={maxDate}
-                        className={styles.dateInputMobile}
+                        onChange={val => handleDatePickerChange('to', val)}
                     />
                 </div>
             </div>
         );
     }
 
-    // Desktop layout (igual que antes)
+    // Desktop layout
     return (
         <div className={styles.filtersBar}>
             <div className={styles.periodTabs}>
@@ -139,31 +130,21 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                 ))}
             </div>
             <div className={styles.customRangeWrap}>
-                <label className={styles.rangeLabel}>
-                    Desde
-                    <input
-                        type="date"
-                        name="from"
+                <div className={styles.rangeLabel}>
+                    <span>Desde</span>
+                    <DatePicker
                         value={isCustom ? value.range.from : ''}
-                        onChange={handleDateChange}
-                        min={minDate}
-                        max={maxDate}
-                        className={styles.dateInput}
+                        onChange={val => handleDatePickerChange('from', val)}
                     />
-                </label>
+                </div>
                 <span className={styles.rangeSeparator}>—</span>
-                <label className={styles.rangeLabel}>
-                    Hasta
-                    <input
-                        type="date"
-                        name="to"
+                <div className={styles.rangeLabel}>
+                    <span>Hasta</span>
+                    <DatePicker
                         value={isCustom ? value.range.to : ''}
-                        onChange={handleDateChange}
-                        min={minDate}
-                        max={maxDate}
-                        className={styles.dateInput}
+                        onChange={val => handleDatePickerChange('to', val)}
                     />
-                </label>
+                </div>
                 <button
                     type="button"
                     className={isCustom ? styles.clearBtn : styles.clearBtnDisabled}

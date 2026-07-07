@@ -12,6 +12,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductSelector } from './ProductSelector';
 import { apiFetch } from '../../../utils/apiClient';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import styles from './AdminCollections.module.css';
 
 type RequiredFieldKey = 'name' | 'slug' | 'displayPosition' | 'productIds';
@@ -111,6 +112,30 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   }>({});
   const [loading, setLoading] = useState(false);
   const missingFieldsDescriptionId = useId();
+
+  // ─── Opciones para Dropdowns Unificados ─────────────────────────────────────
+  const typeOptions = useMemo(() => [
+    { value: 'manual', label: 'Manual — el admin elige los productos' },
+    { value: 'auto_sales', label: 'Automática — top vendidos por categoría' }
+  ], []);
+
+  const positionOptions = useMemo(() => [
+    { value: 'home', label: 'Home' },
+    { value: 'category', label: 'Categoría' }
+  ], []);
+
+  const categoryOptions = useMemo(() => [
+    { value: '', label: 'Todas las categorías' },
+    ...categories.map(cat => ({ value: cat.id, label: cat.name }))
+  ], [categories]);
+
+  const windowOptions = useMemo(() => [
+    { value: '7', label: 'Última semana (7 días)' },
+    { value: '30', label: 'Último mes (30 días)' },
+    { value: '60', label: 'Últimos 2 meses (60 días)' },
+    { value: '90', label: 'Últimos 3 meses (90 días)' },
+    { value: '365', label: 'Último año (365 días)' }
+  ], []);
 
   // Cargar categorías para el selector de auto_sales
   useEffect(() => {
@@ -322,18 +347,17 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       {syncMsg && <div className={styles.successMsg}>{syncMsg}</div>}
 
       <form onSubmit={handleSubmit} className={styles.form} noValidate>
-        {/* ── Tipo de colección ── */}
+        {/* ── Tipo de colección (Selector Unificado) ── */}
         <div className={styles.formGroup}>
-          <label htmlFor="collection-type">Tipo de colección</label>
-          <select
+          <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Tipo de colección</span>
+          <Dropdown
             id="collection-type"
+            options={typeOptions}
             value={formData.type}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-          >
-            <option value="manual">Manual — el admin elige los productos</option>
-            <option value="auto_sales">Automática — top vendidos por categoría</option>
-          </select>
-          <small>
+            onChange={(val) => setFormData({ ...formData, type: val })}
+            placeholder="Seleccionar tipo..."
+          />
+          <small style={{ marginTop: '6px' }}>
             {isAutoSales
               ? 'Los productos se calculan automáticamente desde las ventas. Podés sincronizar manualmente o esperar el recálculo diario.'
               : 'Vos elegís qué productos aparecen y en qué orden.'}
@@ -382,24 +406,22 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
 
         <div className={styles.formRow}>
+          {/* ── Posición de Display (Selector Unificado) ── */}
           <div className={styles.formGroup}>
-            <label htmlFor="collection-display-pos">Posición de Display *</label>
-            <select
+            <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Posición de Display *</span>
+            <Dropdown
               id="collection-display-pos"
+              options={positionOptions}
               value={formData.displayPosition}
-              onChange={(e) => {
+              onChange={(val) => {
                 setFormData({
                   ...formData,
-                  displayPosition: e.target.value as Collection['displayPosition'],
+                  displayPosition: val as Collection['displayPosition'],
                 });
                 setFieldErrors((prev) => ({ ...prev, displayPosition: undefined }));
               }}
-              className={fieldErrors.displayPosition ? styles.inputError : undefined}
-              aria-invalid={!!fieldErrors.displayPosition}
-            >
-              <option value="home">Home</option>
-              <option value="category">Categoría</option>
-            </select>
+              placeholder="Seleccionar posición..."
+            />
             {fieldErrors.displayPosition && (
               <span className={styles.fieldError}>{fieldErrors.displayPosition}</span>
             )}
@@ -426,46 +448,39 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
             <legend>Configuración automática por ventas</legend>
 
             <div className={styles.formRow}>
+              {/* ── Categoría (Selector Unificado) ── */}
               <div className={styles.formGroup}>
-                <label htmlFor="auto-category">Categoría (opcional)</label>
-                <select
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Categoría (opcional)</span>
+                <Dropdown
                   id="auto-category"
+                  options={categoryOptions}
                   value={formData.params.categoryId}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
-                      params: { ...formData.params, categoryId: e.target.value },
+                      params: { ...formData.params, categoryId: val },
                     })
                   }
-                >
-                  <option value="">Todas las categorías</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-                <small>Dejar vacío para mostrar top global de ventas</small>
+                  placeholder="Todas las categorías"
+                />
+                <small style={{ marginTop: '6px' }}>Dejar vacío para mostrar top global de ventas</small>
               </div>
 
+              {/* ── Ventana de tiempo (Selector Unificado) ── */}
               <div className={styles.formGroup}>
-                <label htmlFor="auto-window">Ventana de tiempo (días)</label>
-                <select
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Ventana de tiempo (días)</span>
+                <Dropdown
                   id="auto-window"
-                  value={formData.params.windowDays}
-                  onChange={(e) =>
+                  options={windowOptions}
+                  value={String(formData.params.windowDays)}
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
-                      params: { ...formData.params, windowDays: Number(e.target.value) },
+                      params: { ...formData.params, windowDays: Number(val) },
                     })
                   }
-                >
-                  <option value={7}>Última semana (7 días)</option>
-                  <option value={30}>Último mes (30 días)</option>
-                  <option value={60}>Últimos 2 meses (60 días)</option>
-                  <option value={90}>Últimos 3 meses (90 días)</option>
-                  <option value={365}>Último año (365 días)</option>
-                </select>
+                  placeholder="Seleccionar período..."
+                />
               </div>
 
               <div className={styles.formGroup}>
@@ -487,7 +502,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
               </div>
             </div>
 
-            {/* Botón de sincronización manual (solo al editar) */}
+            {/* Botón de Sincronización */}
             {collection && (
               <div className={styles.syncRow}>
                 <button

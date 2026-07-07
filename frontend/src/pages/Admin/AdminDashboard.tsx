@@ -178,17 +178,24 @@ export function AdminDashboard() {
         return (
           <div className={styles.quickGrid}>
             {[
-              { icon: '📦', title: 'Productos', desc: 'Catálogo, precios y stock', to: '/admin/productos', color: 'primary', ok: can('products.view') },
-              { icon: '🛒', title: 'Pedidos', desc: 'Gestionar pedidos recibidos', to: '/admin/pedidos', color: 'accent', ok: can('orders.view') },
-              { icon: '📊', title: 'Reportes', desc: 'Métricas y estadísticas', to: '/admin/reportes', color: 'warm', ok: can('reports.view') },
-              { icon: '🏷️', title: 'Categorías', desc: 'Organizar catálogo', to: '/admin/categorias', color: 'secondary', ok: can('products.view') },
-              { icon: '🎨', title: 'Banners', desc: 'Contenido promocional', to: '/admin/banners', color: 'primary', ok: true },
-              { icon: '⚙️', title: 'Configuración', desc: 'Ajustes de la tienda', to: '/admin/configuracion', color: 'secondary', ok: true },
+              { icon: 'bi bi-box-seam', title: 'Productos', desc: 'Catálogo, precios y stock', to: '/admin/productos', color: 'primary', ok: can('products.view') },
+              { icon: 'bi bi-cart3', title: 'Pedidos', desc: 'Gestionar pedidos recibidos', to: '/admin/pedidos', color: 'accent', ok: can('orders.view') },
+              { icon: 'bi bi-bar-chart-line', title: 'Reportes', desc: 'Métricas y estadísticas', to: '/admin/reportes', color: 'warm', ok: can('reports.view') },
+              { icon: 'bi bi-tags', title: 'Categorías', desc: 'Organizar catálogo', to: '/admin/categorias', color: 'secondary', ok: can('products.view') },
+              { icon: 'bi bi-image', title: 'Banners', desc: 'Contenido promocional', to: '/admin/banners', color: 'primary', ok: true },
+              { icon: 'bi bi-gear', title: 'Configuración', desc: 'Ajustes de la tienda', to: '/admin/configuracion', color: 'secondary', ok: true },
             ]
               .filter((s) => s.ok)
               .map((s) => (
-                <Link key={s.to} to={s.to} className={`${styles.quickCard} ${styles['quick_' + s.color]}`}>
-                  <span className={styles.quickIcon}>{s.icon}</span>
+                <Link 
+                  key={s.to} 
+                  to={s.to} 
+                  /* Agregamos dinámicamente la clase correspondiente al color de Allmart */
+                  className={`${styles.quickCard} ${styles[s.color]}`}
+                >
+                  <span className={styles.quickIcon}>
+                    <i className={s.icon}></i>
+                  </span>
                   <div className={styles.quickInfo}>
                     <span className={styles.quickTitle}>{s.title}</span>
                     <span className={styles.quickDesc}>{s.desc}</span>

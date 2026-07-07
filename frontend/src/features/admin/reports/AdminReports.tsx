@@ -466,7 +466,7 @@ export function AdminReports() {
       {/* Header */}
       <div className={sectionStyles.header}>
         {/* <h1 className={styles.panelTitle + ' fadeIn'}>
-          <span className={sectionStyles.icon}>📊</span> Reportes y estadísticas
+          <span className={sectionStyles.icon}></span> Reportes y estadísticas
         </h1> */}
         <p className={sectionStyles.subtitle + ' fadeInFast'}>
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
@@ -596,7 +596,7 @@ export function AdminReports() {
           {/* Gráfica de ventas */}
           <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle + ' fadeInFast'}>📈 Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
+              <h2 className={styles.panelTitle + ' fadeInFast'}>Ventas — {filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}</h2>
               <span className={styles.panelSubtitle + ' fadeInFast'}>
                 {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
                 {' · '}ingresos de pedidos activos
@@ -609,7 +609,7 @@ export function AdminReports() {
                 className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
                 onClick={() => setSalesViewMode('chart')}
               >
-                📊 Gráfico
+                Gráfico
               </button>
             </div>
             {salesContent}
@@ -619,7 +619,7 @@ export function AdminReports() {
           <div className={styles.twoCol + ' fadeIn'}>
             <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>🏆 Productos más vendidos</h2>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>Productos más vendidos</h2>
                 <p className={styles.panelSubtitle + ' fadeInFast'}>Por ingresos generados</p>
               </div>
               <ProductRanking
@@ -631,7 +631,7 @@ export function AdminReports() {
 
             <div className={styles.panel + ' fadeInFast'}>
               <div className={styles.panelHeader}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>📦 Por estado de pedido</h2>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>Por estado de pedido</h2>
                 <span className={styles.panelSubtitle + ' fadeInFast'}>Todos los pedidos del período</span>
               </div>
               {periodOrders.length === 0 ? (
@@ -650,7 +650,7 @@ export function AdminReports() {
           <div className={styles.panel + ' fadeIn'}>
             <div className={styles.panelHeader}>
               <div className={styles.panelHeaderLeft}>
-                <h2 className={styles.panelTitle + ' fadeInFast'}>📋 Últimos pedidos del período</h2>
+                <h2 className={styles.panelTitle + ' fadeInFast'}>Últimos pedidos del período</h2>
                 <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
               </div>
 

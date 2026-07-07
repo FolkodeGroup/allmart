@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from '../../features/admin/products/AdminProducts.module.css';
 import { Search } from 'lucide-react';
 import type { StatusFilter, StockLevelFilter } from '../../features/admin/products/productsService';
+import { Dropdown } from './Dropdown/Dropdown';
 
 interface ProductFiltersProps {
   search: string;
@@ -29,75 +30,90 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   stockLevelFilter,
   setStockLevelFilter,
   total,
-}) => (
-  <nav className={styles.filters} aria-label="Filtros de productos">
-    {/* Buscador full-width */}
-    <div className={styles.searchRow}>
-      <div className={styles.searchWrapper}>
-        <Search size={16} className={styles.searchIcon} />
-        <label htmlFor="search-products" className="sr-only">Buscar productos</label>
-        <input
-          ref={inputRef}
-          id="search-products"
-          className={styles.searchInput}
-          type="search"
-          placeholder="Buscar por nombre, SKU..."
-          value={search}
-          autoComplete="off"
-          spellCheck="false"
-          autoCorrect="off"
-          autoCapitalize="off"
-          onChange={e => {
-            setSearch(e.target.value);
-          }}
-          aria-label="Buscar productos por nombre o SKU"
-        />
-        <span className={styles.count} aria-live="polite">{total} productos</span>
+}) => {
+  // ── Mapeo de opciones para el Dropdown de Categorías ──
+  const categoryOptions = useMemo(() => [
+    { value: '', label: 'Todas las categorías' },
+    ...categories.map(c => ({ value: c.id, label: c.name }))
+  ], [categories]);
+
+  // ── Mapeo de opciones para el Dropdown de Estados ──
+  const statusOptions = useMemo(() => [
+    { value: 'all', label: 'Todos los estados' },
+    { value: 'active', label: 'Activos' },
+    { value: 'inactive', label: 'Inactivos' }
+  ], []);
+
+  // ── Mapeo de opciones para el Dropdown de Stocks ──
+  const stockOptions = useMemo(() => [
+    { value: 'all', label: 'Todos los stocks' },
+    { value: 'no_stock', label: 'Sin stock' },
+    { value: 'low_stock', label: 'Stock bajo' },
+    { value: 'in_stock', label: 'Con stock' }
+  ], []);
+
+  return (
+    <nav className={styles.filters} aria-label="Filtros de productos">
+      {/* Buscador full-width */}
+      <div className={styles.searchRow}>
+        <div className={styles.searchWrapper}>
+          <Search size={16} className={styles.searchIcon} />
+          <label htmlFor="search-products" className="sr-only">Buscar productos</label>
+          <input
+            ref={inputRef}
+            id="search-products"
+            className={styles.searchInput}
+            type="search"
+            placeholder="Buscar por nombre, SKU..."
+            value={search}
+            autoComplete="off"
+            spellCheck="false"
+            autoCorrect="off"
+            autoCapitalize="off"
+            onChange={e => {
+              setSearch(e.target.value);
+            }}
+            aria-label="Buscar productos por nombre o SKU"
+          />
+          <span className={styles.count} aria-live="polite">{total} productos</span>
+        </div>
       </div>
-    </div>
 
-    {/* Filtros */}
-    <div className={styles.filtersRow}>
-      <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
-      <select
-        id="category-filter"
-        className={styles.select}
-        value={categoryFilter}
-        onChange={e => setCategoryFilter(e.target.value)}
-        aria-label="Filtrar por categoría"
-      >
-        <option value="">Todas las categorías</option>
-        {categories.map(c => (
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>
+      {/* Filtros Unificados con el componente Custom Dropdown */}
+      <div className={styles.filtersRow} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 200px', minWidth: '200px', maxWidth: '300px' }}>
+          <span className="sr-only">Filtrar por categoría</span>
+          <Dropdown
+            id="category-filter"
+            options={categoryOptions}
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            placeholder="Todas las categorías"
+          />
+        </div>
 
-      <label htmlFor="status-filter" className="sr-only">Filtrar por estado</label>
-      <select
-        id="status-filter"
-        className={styles.select}
-        value={statusFilter}
-        onChange={e => setStatusFilter(e.target.value as StatusFilter)}
-        aria-label="Filtrar por estado"
-      >
-        <option value="all">Todos los estados</option>
-        <option value="active">Activos</option>
-        <option value="inactive">Inactivos</option>
-      </select>
+        <div style={{ flex: '1 1 160px', minWidth: '160px', maxWidth: '220px' }}>
+          <span className="sr-only">Filtrar por estado</span>
+          <Dropdown
+            id="status-filter"
+            options={statusOptions}
+            value={statusFilter}
+            onChange={val => setStatusFilter(val as StatusFilter)}
+            placeholder="Todos los estados"
+          />
+        </div>
 
-      <label htmlFor="stock-filter" className="sr-only">Filtrar por stock</label>
-      <select
-        id="stock-filter"
-        className={styles.select}
-        value={stockLevelFilter}
-        onChange={e => setStockLevelFilter(e.target.value as StockLevelFilter)}
-        aria-label="Filtrar por stock"
-      >
-        <option value="all">Todos los stocks</option>
-        <option value="no_stock">Sin stock</option>
-        <option value="low_stock">Stock bajo</option>
-        <option value="in_stock">Con stock</option>
-      </select>
-    </div>
-  </nav>
-);
+        <div style={{ flex: '1 1 160px', minWidth: '160px', maxWidth: '220px' }}>
+          <span className="sr-only">Filtrar por stock</span>
+          <Dropdown
+            id="stock-filter"
+            options={stockOptions}
+            value={stockLevelFilter}
+            onChange={val => setStockLevelFilter(val as StockLevelFilter)}
+            placeholder="Todos los stocks"
+          />
+        </div>
+      </div>
+    </nav>
+  );
+};

@@ -1,22 +1,12 @@
-
-// ─────────────────────────────────────────────────────────────────────────────
-// OrdersFiltersBar.tsx
-// Barra de filtros avanzada para la tabla de pedidos.
-// Versión actual (reemplaza a OrdersFilters legacy).
-//
-// Diferencias con OrdersFilters (legacy):
-//  - Recibe un objeto `filters` unificado en lugar de props individuales.
-//  - Usa StatusChipSelect para selección múltiple de estados.
-//  - Incluye filtros de rango de total ($ mín / $ máx).
-//  - El debounce y el reset de página se manejan en AdminOrders, no aquí.
-// ─────────────────────────────────────────────────────────────────────────────
-// components/OrdersFiltersBar.tsx
+// src/features/admin/orders/components/OrdersFiltersBar.tsx
+import { useMemo } from 'react';
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
 import { Search } from 'lucide-react';
+import { DatePicker } from '../../../../components/ui/DatePicker/DatePicker';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
-// Definidos localmente para no depender del helper global en este componente de UI puro
 const STATUS_OPTIONS: OrderStatus[] = [
     'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
 ];
@@ -29,16 +19,6 @@ const STATUS_LABELS = {
     cancelado: 'Cancelado',
 } as Record<OrderStatus, string>;
 
-/**
- * Props de OrdersFiltersBar.
- *
- * @param filters          - Estado actual de todos los filtros (del hook useOrdersFilters).
- * @param onChange         - Callback para actualizar cualquier campo del filtro.
- *                           Siempre recibe el objeto completo con spread: `{ ...filters, campo: valor }`.
- * @param onReset          - Resetea todos los filtros a sus valores vacíos.
- * @param hasActiveFilters - True si hay al menos un filtro activo; controla visibilidad del botón "Limpiar".
- * @param disabled         - Deshabilita todos los inputs durante un fetch en curso.
- */
 interface Props {
     filters: OrdersFiltersState;
     onChange: (filters: OrdersFiltersState) => void;
@@ -47,21 +27,17 @@ interface Props {
     disabled?: boolean;
 }
 
-/**
- * OrdersFiltersBar — barra de filtros completa para la gestión de pedidos.
- *
- * Campos disponibles:
- *  - Búsqueda libre (cliente, email, N° de pedido)
- *  - Estado (selección múltiple via StatusChipSelect)
- *  - Rango de fechas (desde / hasta)
- *  - Rango de total ($ mín / $ máx)
- *
- * Patrón de actualización: cada input llama a `onChange({ ...filters, campo: nuevoValor })`.
- * Esto garantiza que siempre se envía el objeto completo, sin perder otros campos activos.
- */
 export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters, disabled }: Props) {
-    return (
+    // ── Mapeo de opciones para el Dropdown unificado de Estados ──
+    const dropdownOptions = useMemo(() => [
+        { value: '', label: 'Todos los estados' },
+        ...STATUS_OPTIONS.map(s => ({
+            value: s,
+            label: STATUS_LABELS[s]
+        }))
+    ], []);
 
+    return (
         <div className={styles.filtersWrap}>
             <div>
                 <h2 className={styles.filtersTitle}>Filtros</h2>
@@ -75,71 +51,51 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             className={styles.searchInput}
                             id="order-search"
                             type="text"
-                            placeholder="Buscar por cliente, email o N° de pedido..."
+                            placeholder="Buscar por cliente, email..."
                             value={filters.search}
                             onChange={e => onChange({ ...filters, search: e.target.value })}
                             disabled={disabled}
-                            aria-label="Buscar pedidos"
                             autoComplete="off"
-                            spellCheck="false"
-                            autoCorrect="off"
-                            autoCapitalize="off"
                         />
                     </div>
                 </div>
 
-                {/*
-                  StatusChipSelect: selector múltiple de estados.
-                  `selected` recibe el array de estados activos; `onChange` actualiza solo `statuses`.
-                  chipClose no tiene clase específica (chipCloseClassName recibe styles.chipClose
-                  que puede no existir; es intencional para dejarlo sin estilo forzado).
-                */}
-                <div className={styles.filterSelectWrap}>
-                    <label className={styles.dateLabel} htmlFor="order-status">Estado</label>
-                    <select
-                        className={styles.filterSelect}
+                {/* Dropdown Unificado de Estado */}
+                <div className={styles.filterSelectWrap} style={{ minWidth: '180px' }}>
+                    <span className={styles.dateLabel}>Estado</span>
+                    <Dropdown
                         id="order-status"
+                        options={dropdownOptions}
                         value={filters.status}
-                        onChange={e => onChange({ ...filters, status: e.target.value as OrderStatus | '' })}
+                        onChange={val => onChange({ ...filters, status: val as OrderStatus | '' })}
                         disabled={disabled}
-                        aria-label="Filtrar por estado"
-                    >
-                        <option value="">Todos los estados</option>
-                        {STATUS_OPTIONS.map(s => (
-                            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                        ))}
-                    </select>
+                        placeholder="Todos los estados"
+                    />
                 </div>
 
-                {/* ── Rango de fechas ── */}
+                {/* Calendarios Customizados (DatePicker) */}
                 <div className={styles.dateFilters}>
                     <div className={styles.dateFiltersSeparation}>
-                        <label className={styles.dateLabel} htmlFor="order-date-from">Desde</label>
-                        <input
-                            className={styles.dateInput}
+                        <span className={styles.dateLabel}>Desde</span>
+                        <DatePicker
                             id="order-date-from"
-                            type="date"
                             value={filters.dateFrom}
-                            onChange={e => onChange({ ...filters, dateFrom: e.target.value })}
+                            onChange={val => onChange({ ...filters, dateFrom: val })}
                             disabled={disabled}
-                            aria-label="Filtrar desde fecha"
                         />
                     </div>
                     <div className={styles.dateFiltersSeparation}>
-                        <label className={styles.dateLabel} htmlFor="order-date-to">Hasta</label>
-                        <input
-                            className={styles.dateInput}
+                        <span className={styles.dateLabel}>Hasta</span>
+                        <DatePicker
                             id="order-date-to"
-                            type="date"
                             value={filters.dateTo}
-                            onChange={e => onChange({ ...filters, dateTo: e.target.value })}
+                            onChange={val => onChange({ ...filters, dateTo: val })}
                             disabled={disabled}
-                            aria-label="Filtrar hasta fecha"
                         />
                     </div>
                 </div>
 
-                {/* ── Rango de total ── */}
+                {/* Rango de Total */}
                 <div className={styles.totalFilters}>
                     <div className={styles.totalFiltersSeparation}>
                         <label className={styles.totalLabel} htmlFor="order-total-min">$ Mín</label>
@@ -148,7 +104,6 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             id="order-total-min"
                             type="number"
                             min={0}
-                            step={1}
                             placeholder="0"
                             value={filters.totalMin}
                             onChange={e => onChange({ ...filters, totalMin: e.target.value })}
@@ -162,7 +117,6 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             id="order-total-max"
                             type="number"
                             min={0}
-                            step={1}
                             placeholder="Sin límite"
                             value={filters.totalMax}
                             onChange={e => onChange({ ...filters, totalMax: e.target.value })}
@@ -171,15 +125,12 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     </div>
                 </div>
 
-                {/* Botón "Limpiar": solo visible cuando hay algún filtro activo */}
-                {
-                    hasActiveFilters && (
-                        <button className={styles.clearBtn} type="button" onClick={onReset} aria-label="Limpiar filtros">
-                            ✕ Limpiar
-                        </button>
-                    )
-                }
+                {hasActiveFilters && (
+                    <button className={styles.clearBtn} type="button" onClick={onReset} aria-label="Limpiar filtros">
+                        ✕ Limpiar
+                    </button>
+                )}
             </div>
-        </div >
+        </div>
     );
 }

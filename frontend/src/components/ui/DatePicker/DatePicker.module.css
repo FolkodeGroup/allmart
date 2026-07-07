@@ -1,0 +1,202 @@
+/* ============================================================
+   DATEPICKER STYLES: src/components/ui/DatePicker/DatePicker.module.css
+   ============================================================ */
+
+.container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--control-text-muted);
+  pointer-events: none;
+  z-index: 2;
+  transition: color var(--transition-fast);
+}
+
+.input {
+  width: 100%;
+  height: 42px;
+  padding: 0 36px 0 36px !important;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm, 14px);
+  font-weight: 500;
+  color: var(--control-text);
+  background-color: var(--control-bg);
+  border: 1.5px solid var(--control-border);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast), 
+              background-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+}
+
+.inputWrapper:hover .input {
+  border-color: var(--control-border-hover);
+}
+
+.inputWrapper:hover .inputIcon {
+  color: var(--control-border-focus);
+}
+
+.input:focus {
+  border-color: var(--control-border-focus);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.22);
+}
+
+body[data-admin-theme='dark'] .input:focus,
+.admin-dark .input:focus {
+  box-shadow: 0 0 0 3px rgba(221, 176, 140, 0.25);
+}
+
+.clearButton {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--control-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  z-index: 2;
+}
+
+.clearButton:hover {
+  color: var(--color-error);
+  background-color: rgba(199, 80, 80, 0.08);
+}
+
+/* ── Popover Panel ── */
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: var(--z-dropdown, 100);
+  width: 290px;
+  background-color: var(--control-overlay-bg);
+  border: 1.5px solid var(--control-border);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--control-shadow);
+  padding: 16px;
+  animation: popIn 0.18s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Header del Calendario ── */
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.monthLabel {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm, 14px);
+  font-weight: 700;
+  color: var(--control-text);
+  text-transform: capitalize;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm, 4px);
+  background-color: var(--control-bg);
+  color: var(--control-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.navButton:hover {
+  background-color: var(--control-bg-hover);
+  border-color: var(--control-border-hover);
+}
+
+/* ── Grilla del Calendario ── */
+.weekdaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.weekday {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--control-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 0;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.day {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm, 4px);
+  color: var(--control-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+/* Hover de marca unificado (Verdecito corporativo en Light / Naranja en Dark) */
+.day:hover:not(.dayEmpty):not(.daySelected) {
+  background-color: var(--control-hover-bg) !important;
+  color: var(--control-hover-text) !important;
+}
+
+.dayEmpty {
+  pointer-events: none;
+}
+
+.dayToday {
+  border: 1.5px solid var(--calendar-day-today-border) !important;
+}
+
+.daySelected {
+  background-color: var(--calendar-day-selected-bg) !important;
+  color: var(--calendar-day-selected-text) !important;
+  font-weight: 700;
+}

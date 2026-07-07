@@ -3,7 +3,7 @@
  * Página principal de gestión de colecciones.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Collection } from './collectionsService';
 import { collectionsService } from './collectionsService';
 import AdminCollectionForm from './AdminCollectionForm';
@@ -12,6 +12,7 @@ import styles from './AdminCollections.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { Search } from 'lucide-react';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 type ViewMode = 'list' | 'form';
 
@@ -59,7 +60,6 @@ const AdminCollections: React.FC = () => {
     }
   }
 
-
   function handleDelete(id: string) {
     setIdsToDelete([id]);
     setDeleteModalOpen(true);
@@ -71,16 +71,12 @@ const AdminCollections: React.FC = () => {
     setDeleteModalOpen(true);
   }
 
-
   async function handleConfirmDelete() {
     if (!idsToDelete.length) return;
     setDeleting(true);
     setError(null);
     try {
-      // Bulk delete: eliminar todas en paralelo
       await Promise.all(idsToDelete.map((id) => collectionsService.delete(id)));
-      // Feedback visual (reemplaza por tu sistema de toasts preferido)
-      // toast.success(idsToDelete.length > 1 ? 'Colecciones eliminadas' : 'Colección eliminada');
       setDeleteModalOpen(false);
       setIdsToDelete([]);
       setSelectedIds([]);
@@ -91,7 +87,6 @@ const AdminCollections: React.FC = () => {
       setDeleting(false);
     }
   }
-
 
   function handleCancelDelete() {
     setDeleteModalOpen(false);
@@ -117,6 +112,19 @@ const AdminCollections: React.FC = () => {
   function handleFormCancel() {
     setViewMode('list');
   }
+
+  // ─── Opciones para Dropdowns Unificados ─────────────────────────────────────
+  const positionOptions = useMemo(() => [
+    { value: '', label: 'Todas las posiciones' },
+    { value: 'home', label: 'Home' },
+    { value: 'category', label: 'Categoría' }
+  ], []);
+
+  const activeOptions = useMemo(() => [
+    { value: '', label: 'Todas las de estado' },
+    { value: 'true', label: 'Activas' },
+    { value: 'false', label: 'Inactivas' }
+  ], []);
 
   if (viewMode === 'form') {
     return (
@@ -149,7 +157,7 @@ const AdminCollections: React.FC = () => {
         </div>
       </div>
 
-      <div className={styles.filters}>
+      <div className={styles.filters} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
         <div className={styles.searchWrap}>
           <Search size={16} className={styles.searchIcon} />
           <input
@@ -167,32 +175,34 @@ const AdminCollections: React.FC = () => {
             autoCapitalize="off"
           />
         </div>
-        <select
-          value={displayPosition}
-          onChange={(e) => {
-            setDisplayPosition(e.target.value);
-            setPage(1);
-          }}
-          className={styles.selectFilter}
-        >
-          <option value="">Todas las posiciones</option>
-          <option value="home">Home</option>
-          <option value="category">Categoría</option>
-        </select>
-        <select
-          value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
-          onChange={(e) => {
-            setFilterActive(
-              e.target.value === '' ? undefined : e.target.value === 'true'
-            );
-            setPage(1);
-          }}
-          className={styles.selectFilter}
-        >
-          <option value="">Todas</option>
-          <option value="true">Activas</option>
-          <option value="false">Inactivas</option>
-        </select>
+
+        {/* Dropdown Unificado: Posiciones */}
+        <div style={{ flex: '1 1 180px', minWidth: '180px', maxWidth: '240px' }}>
+          <Dropdown
+            options={positionOptions}
+            value={displayPosition}
+            onChange={(val) => {
+              setDisplayPosition(val);
+              setPage(1);
+            }}
+            placeholder="Todas las posiciones"
+          />
+        </div>
+
+        {/* Dropdown Unificado: Activo/Inactivo */}
+        <div style={{ flex: '1 1 150px', minWidth: '150px', maxWidth: '200px' }}>
+          <Dropdown
+            options={activeOptions}
+            value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
+            onChange={(val) => {
+              setFilterActive(
+                val === '' ? undefined : val === 'true'
+              );
+              setPage(1);
+            }}
+            placeholder="Todas"
+          />
+        </div>
       </div>
 
       {error && <div className={styles.error}>{error}</div>}
@@ -248,7 +258,6 @@ const AdminCollections: React.FC = () => {
                       <Badge>
                         {collection.displayOrder}
                       </Badge>
-
                     </td>
                     <td>{collection.productCount}</td>
                     <td>
