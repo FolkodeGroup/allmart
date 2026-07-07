@@ -181,9 +181,10 @@ body[data-admin-theme='dark'] .input:focus,
   transition: all var(--transition-fast);
 }
 
+/* Hover de marca unificado (Verdecito corporativo en Light / Naranja en Dark) */
 .day:hover:not(.dayEmpty):not(.daySelected) {
-  background-color: var(--calendar-day-hover);
-  color: var(--control-text);
+  background-color: var(--control-hover-bg) !important;
+  color: var(--control-hover-text) !important;
 }
 
 .dayEmpty {

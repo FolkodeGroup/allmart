@@ -1,11 +1,12 @@
 // features/admin/banners/BannerFilterBuilder.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import type { BannerFilterConfig, BannerTag, BannerDestinationType } from '../../../types/bannerFilter';
 import { BANNER_TAGS } from '../../../types/bannerFilter';
 import { bannerFilterToUrl } from '../../../utils/bannerFilterToUrl';
 import type { Category } from '../../../types/index';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { fetchAdminProducts } from '../products/productsService';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import styles from './BannerFilterBuilder.module.css';
 
 interface ProductOption {
@@ -86,6 +87,15 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
         onChange({ ...value, tags: next.length ? next : undefined });
     }
 
+    // Mapear categorías del backend al formato esperado por el Dropdown
+    const categoryOptions = useMemo(() => [
+        { value: '', label: '— Todas las categorías —' },
+        ...categories.map(cat => ({
+            value: cat.slug,
+            label: cat.name
+        }))
+    ], [categories]);
+
     return (
         <div className={styles.wrapper}>
             <p className={styles.hint}>
@@ -116,18 +126,14 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
             {/* ── Categoría ── */}
             {destinationType === 'category' && (
                 <div className={styles.field}>
-                    <label htmlFor="banner-filter-category" className={styles.label}>Categoría</label>
-                    <select
+                    <span className={styles.label}>Categoría</span>
+                    <Dropdown
                         id="banner-filter-category"
+                        options={categoryOptions}
                         value={value.categorySlug ?? ''}
-                        onChange={e => handleCategoryChange(e.target.value)}
-                        className="unified-select"
-                    >
-                        <option value="">— Todas las categorías —</option>
-                        {categories.map(cat => (
-                            <option key={cat.id} value={cat.slug}>{cat.name}</option>
-                        ))}
-                    </select>
+                        onChange={handleCategoryChange}
+                        placeholder="Todas las categorías"
+                    />
                 </div>
             )}
 

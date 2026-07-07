@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from '../AdminReports.module.css';
 import { DatePicker } from '../../../../components/ui/DatePicker/DatePicker';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 export type PredefinedPeriod = '7d' | '30d' | '90d' | 'all';
 
@@ -50,6 +51,14 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
         onChange({ type: 'predefined', period });
     };
 
+    // Mapeo de opciones de período para el Dropdown unificado
+    const periodOptions = useMemo(() => [
+        { value: '7d', label: 'Últimos 7 días' },
+        { value: '30d', label: 'Últimos 30 días' },
+        { value: '90d', label: 'Últimos 90 días' },
+        { value: 'all', label: 'Todo el tiempo' }
+    ], []);
+
     // Handler específico para procesar el string directo devuelto por el DatePicker
     const handleDatePickerChange = (name: 'from' | 'to', dateValue: string) => {
         const prevRange = value.type === 'custom' ? value.range : { from: '', to: '' };
@@ -77,16 +86,14 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
         return (
             <div className={styles.filtersBarMobile}>
                 <span className={styles.filtersLabel}>Filtros</span>
-                <select
-                    className={`unified-select ${styles.filtersSelectMobile}`}
-                    value={value.type === 'predefined' ? value.period : ''}
-                    onChange={e => onChange({ type: 'predefined', period: e.target.value as PredefinedPeriod })}
-                >
-                    <option value="7d">Últimos 7 días</option>
-                    <option value="30d">Últimos 30 días</option>
-                    <option value="90d">Últimos 90 días</option>
-                    <option value="all">Todo el tiempo</option>
-                </select>
+                <div style={{ width: '100%' }}>
+                    <Dropdown
+                        options={periodOptions}
+                        value={value.type === 'predefined' ? value.period : ''}
+                        onChange={val => onChange({ type: 'predefined', period: val as PredefinedPeriod })}
+                        placeholder="Seleccionar período"
+                    />
+                </div>
                 <div className={styles.filtersDatesMobile}>
                     <span className={styles.filtersLabel}>Desde:</span>
                     <DatePicker

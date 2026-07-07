@@ -4,10 +4,11 @@
 // o desde el modal de detalle. Incluye un paso de confirmación inline.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { STATUS_OPTIONS, STATUS_LABELS } from './../utils/ordersHelpers';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 /**
  * Props de OrderStatusSelector.
@@ -46,14 +47,25 @@ export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value,
   // Estado local para el valor "en vuelo" antes de confirmar
   const [pendingStatus, setPendingStatus] = useState<OrderStatus>(value);
 
+  // Sincronizar el estado local si el valor cambia desde el exterior
+  React.useEffect(() => {
+    setPendingStatus(value);
+  }, [value]);
+
+  // Mapear el array de estados planos al formato { value, label } requerido por el Dropdown
+  const dropdownOptions = useMemo(() => {
+    return STATUS_OPTIONS.map(status => ({
+      value: status,
+      label: STATUS_LABELS[status],
+    }));
+  }, []);
+
   /**
-  * Se dispara al cambiar el select.
+  * Se dispara al seleccionar una opción del dropdown.
   * Notifica al padre de inmediato para permitir marcado de isDirty,
   * aunque el usuario todavía no haya confirmado.
   */
-
-  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = e.target.value as OrderStatus;
+  const handleSelect = (newStatus: OrderStatus) => {
     setPendingStatus(newStatus);
 
     // Notificación optimista: el padre puede marcar isDirty sin esperar confirmación
@@ -61,18 +73,14 @@ export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value,
   };
 
   return (
-    <div className={`${styles.orderStatusSelectorContainer} ${className}`}>
-      <select
-        className="unified-select"
+    <div className={`${styles.orderStatusSelectorContainer} ${className}`} style={{ width: '100%', minWidth: '160px' }}>
+      <Dropdown
+        options={dropdownOptions}
         value={pendingStatus}
-        onChange={handleSelect}
+        onChange={(newVal) => handleSelect(newVal as OrderStatus)}
         disabled={disabled}
-        aria-label="Cambiar estado"
-      >
-        {STATUS_OPTIONS.map(s => (
-          <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-        ))}
-      </select>
+        placeholder="Cambiar estado"
+      />
     </div>
   );
 };

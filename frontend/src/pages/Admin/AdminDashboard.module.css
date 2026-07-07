@@ -546,20 +546,20 @@
 .quickCard {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   padding: var(--space-4);
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-bg-primary);
+  background: var(--color-bg-secondary); /* Integra perfectamente con el fondo secundario de la app */
   text-decoration: none;
   color: var(--color-text-primary);
-  transition: all 0.2s ease-out;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .quickCard:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-md);
+  background: var(--color-bg-primary); /* Se eleva sutilmente cambiando su fondo */
 }
 
 .quickCard:focus-visible {
@@ -567,25 +567,43 @@
   outline-offset: 2px;
 }
 
-.quick_primary {
-  border-left: 3px solid var(--color-primary);
+/* ── Dinamic Colors Hover Mapping ── */
+.quickCard.primary:hover {
+  border-color: var(--color-primary-light);
+}
+.quickCard.primary:hover .quickIcon {
+  color: var(--color-primary-light);
 }
 
-.quick_accent {
-  border-left: 3px solid var(--color-accent);
+.quickCard.accent:hover {
+  border-color: var(--color-accent);
+}
+.quickCard.accent:hover .quickIcon {
+  color: var(--color-accent);
 }
 
-.quick_warm {
-  border-left: 3px solid var(--color-warm-gray);
+.quickCard.warm:hover {
+  border-color: var(--color-warm-gray);
+}
+.quickCard.warm:hover .quickIcon {
+  color: var(--color-warm-gray);
 }
 
-.quick_secondary {
-  border-left: 3px solid var(--color-border);
+.quickCard.secondary:hover {
+  border-color: var(--color-primary-dark);
+}
+.quickCard.secondary:hover .quickIcon {
+  color: var(--color-primary-dark);
 }
 
 .quickIcon {
   font-size: 1.5rem;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
 }
 
 .quickInfo {
@@ -598,8 +616,9 @@
 .quickTitle {
   font-family: var(--font-heading);
   font-size: var(--text-sm);
-  font-weight: var(--font-bold);
+  font-weight: var(--font-semibold);
   color: var(--color-text-primary);
+  margin: 0;
 }
 
 .quickDesc {
@@ -609,6 +628,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
 }
 
 /* ── Recent Orders Table ─────────────────────────────────────── */
@@ -756,7 +776,6 @@
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 1;
@@ -774,8 +793,6 @@
   font-weight: var(--font-medium);
   text-transform: capitalize;
 }
-
-
 
 /* ── Responsive ──────────────────────────────────────────────── */
 

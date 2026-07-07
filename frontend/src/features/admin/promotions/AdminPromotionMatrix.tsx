@@ -4,13 +4,14 @@
  * Permite bulk-assign/unassign desde aquí.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { PromotionMatrixItem, PromotionProductsResult } from './promotionsService';
 import { promotionsService } from './promotionsService';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 import { Search } from 'lucide-react';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   active: { label: 'Activa', className: 'badgeActive' },
@@ -61,6 +62,15 @@ const AdminPromotionMatrix: React.FC = () => {
     itemName: string;
   } | null>(null);
   const [deletingLoading, setDeletingLoading] = useState(false);
+
+  // Mapeo de opciones para el Dropdown unificado
+  const statusOptions = useMemo(() => [
+    { value: 'all', label: 'Todos los estados' },
+    { value: 'active', label: 'Activas' },
+    { value: 'upcoming', label: 'Próximas' },
+    { value: 'inactive', label: 'Inactivas' },
+    { value: 'expired', label: 'Vencidas' }
+  ], []);
 
   const loadMatrix = useCallback(async () => {
     setLoading(true);
@@ -210,19 +220,17 @@ const AdminPromotionMatrix: React.FC = () => {
             autoCapitalize="off"
           />
         </div>
-        {/* Selector Unificado */}
-        <select
-          className="unified-select"
-          style={{ width: 'auto', minWidth: '220px' }}
-          value={filterStatus}
-          onChange={(e) => { setFilterStatus(e.target.value as typeof filterStatus); setMatrixPage(1); }}
-        >
-          <option value="all">Todos los estados</option>
-          <option value="active">Activas</option>
-          <option value="upcoming">Próximas</option>
-          <option value="inactive">Inactivas</option>
-          <option value="expired">Vencidas</option>
-        </select>
+        
+        {/* Dropdown de Estado Unificado */}
+        <div style={{ width: '220px', display: 'inline-block' }}>
+          <Dropdown
+            options={statusOptions}
+            value={filterStatus}
+            onChange={(val) => { setFilterStatus(val as typeof filterStatus); setMatrixPage(1); }}
+            placeholder="Todos los estados"
+          />
+        </div>
+        
         <button className={styles.btnSmall} onClick={loadMatrix} disabled={loading}>
           ↻ Actualizar
         </button>

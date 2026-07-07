@@ -135,8 +135,6 @@ async function main() {
     orderBy: { createdAt: 'asc' },
   });
 
-  console.log(`\n📦  Found ${products.length} active products\n`);
-
   if (products.length === 0) {
     console.log('No active products found — nothing to seed.');
     return;

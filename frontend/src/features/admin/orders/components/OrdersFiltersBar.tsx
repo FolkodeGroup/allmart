@@ -1,9 +1,11 @@
 // src/features/admin/orders/components/OrdersFiltersBar.tsx
+import { useMemo } from 'react';
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 import styles from '../AdminOrders.module.css';
 import { Search } from 'lucide-react';
 import { DatePicker } from '../../../../components/ui/DatePicker/DatePicker';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 const STATUS_OPTIONS: OrderStatus[] = [
     'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
@@ -26,6 +28,15 @@ interface Props {
 }
 
 export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters, disabled }: Props) {
+    // ── Mapeo de opciones para el Dropdown unificado de Estados ──
+    const dropdownOptions = useMemo(() => [
+        { value: '', label: 'Todos los estados' },
+        ...STATUS_OPTIONS.map(s => ({
+            value: s,
+            label: STATUS_LABELS[s]
+        }))
+    ], []);
+
     return (
         <div className={styles.filtersWrap}>
             <div>
@@ -49,21 +60,17 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     </div>
                 </div>
 
-                {/* Select Unificado de Estado */}
-                <div className={styles.filterSelectWrap}>
-                    <label className={styles.dateLabel} htmlFor="order-status">Estado</label>
-                    <select
-                        className="unified-select"
+                {/* Dropdown Unificado de Estado */}
+                <div className={styles.filterSelectWrap} style={{ minWidth: '180px' }}>
+                    <span className={styles.dateLabel}>Estado</span>
+                    <Dropdown
                         id="order-status"
+                        options={dropdownOptions}
                         value={filters.status}
-                        onChange={e => onChange({ ...filters, status: e.target.value as OrderStatus | '' })}
+                        onChange={val => onChange({ ...filters, status: val as OrderStatus | '' })}
                         disabled={disabled}
-                    >
-                        <option value="">Todos los estados</option>
-                        {STATUS_OPTIONS.map(s => (
-                            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                        ))}
-                    </select>
+                        placeholder="Todos los estados"
+                    />
                 </div>
 
                 {/* Calendarios Customizados (DatePicker) */}

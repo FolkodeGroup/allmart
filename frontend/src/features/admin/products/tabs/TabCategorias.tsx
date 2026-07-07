@@ -1,7 +1,8 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import type { TabFormState, SetField } from '../components/types';
 import type { Category } from '../../../../types';
 import styles from '../AdminProductFormPage.module.css';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 interface TabCategoriasProps extends TabFormState {
     setField: SetField;
@@ -21,25 +22,30 @@ export const TabCategorias = memo(function TabCategorias({
     onAdditionalCategoriesChange,
     getCategoryLabel,
 }: TabCategoriasProps) {
+    
+    // ── Mapeo de categorías para el componente Dropdown Customizado ──
+    const categoryOptions = useMemo(() => {
+        return categories.map(c => ({
+            value: c.id,
+            label: getCategoryLabel(c)
+        }));
+    }, [categories, getCategoryLabel]);
+
     return (
         <fieldset className={styles.fieldset}>
             <div className={styles.field}>
                 <label className={styles.label} htmlFor="product-category">
                     Categoría Principal *
                 </label>
-                <select
-                    className={`unified-select ${fieldErrors.category ? styles.inputError : ''}`}
+                {/* 🟢 Reemplazo por el componente Dropdown unificado con control total de UI/Hover */}
+                <Dropdown
                     id="product-category"
+                    options={categoryOptions}
                     value={form.category.id}
-                    onChange={e => onPrimaryCategoryChange(e.target.value)}
-                >
-                    <option value="">Seleccioná una categoría...</option>
-                    {categories.map(c => (
-                        <option key={c.id} value={c.id}>
-                            {getCategoryLabel(c)}
-                        </option>
-                    ))}
-                </select>
+                    onChange={onPrimaryCategoryChange}
+                    placeholder="Seleccioná una categoría..."
+                    className={fieldErrors.category ? styles.inputError : ''}
+                />
                 {fieldErrors.category && (
                     <span className={styles.errorText}>{fieldErrors.category}</span>
                 )}

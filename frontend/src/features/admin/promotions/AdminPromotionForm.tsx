@@ -16,6 +16,7 @@ import { apiFetch } from '../../../utils/apiClient';
 import styles from './AdminPromotions.module.css';
 import { Search } from 'lucide-react';
 import { DatePicker } from '../../../components/ui/DatePicker/DatePicker';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 interface AdminProduct {
   id: string;
@@ -118,6 +119,13 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
   const handleCancel = useCallback(() => {
     interceptNavigation(() => onCancel());
   }, [interceptNavigation, onCancel]);
+
+  // Mapeo de opciones de tipo de descuento para el Dropdown
+  const typeOptions = useMemo(() => [
+    { value: 'percentage', label: TYPE_LABELS.percentage },
+    { value: 'fixed', label: TYPE_LABELS.fixed },
+    { value: 'bogo', label: TYPE_LABELS.bogo }
+  ], []);
 
   // ─── Init from existing promotion ────────────────────────────────────────
   useEffect(() => {
@@ -317,11 +325,16 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               <textarea id="promo-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles para el administrador" rows={2} />
             </div>
             <div className={styles.formRow}>
+              {/* Dropdown unificado para el tipo de descuento */}
               <div className={styles.formGroup}>
-                <label htmlFor="promo-type">Tipo de Descuento *</label>
-                <select id="promo-type" className="unified-select" value={type} onChange={(e) => handleTypeChange(e.target.value as Promotion['type'])}>
-                  {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Tipo de Descuento *</span>
+                <Dropdown
+                  id="promo-type"
+                  options={typeOptions}
+                  value={type}
+                  onChange={(val) => handleTypeChange(val as Promotion['type'])}
+                  placeholder="Seleccionar tipo..."
+                />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="promo-value">Valor *</label>
@@ -331,12 +344,13 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               </div>
             </div>
             <div className={styles.formRow}>
+              {/* DatePickers customizados unificados */}
               <div className={styles.formGroup}>
-                <label htmlFor="promo-start">Fecha de Inicio *</label>
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Fecha de Inicio *</span>
                 <DatePicker id="promo-start" value={startDate} onChange={setStartDate} />
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="promo-end">Fecha de Fin *</label>
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Fecha de Fin *</span>
                 <DatePicker id="promo-end" value={endDate} onChange={setEndDate} />
               </div>
             </div>

@@ -25,6 +25,7 @@ import { logAdminActivity } from '../../../services/adminActivityLogService';
 import { CategoriesMasterDetailLayout } from './CategoriesMasterDetailLayout';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 type CategorySortField = 'name' | 'slug' | 'itemCount' | 'isVisible';
 type CategorySortDirection = 'asc' | 'desc';
@@ -96,6 +97,14 @@ export function AdminCategories() {
     closeBulkAction
   } = useCategoryBulkActions();
 
+  // Opciones de ordenamiento para el Dropdown unificado
+  const sortOptions = useMemo(() => [
+    { value: 'name', label: 'Nombre' },
+    { value: 'slug', label: 'Slug' },
+    { value: 'itemCount', label: 'Productos' },
+    { value: 'isVisible', label: 'Estado' }
+  ], []);
+
   // Fetch categories cuando los filtros cambian
   useEffect(() => {
     refreshCategories({
@@ -146,11 +155,11 @@ export function AdminCategories() {
   };
 
   const handleNew = () => {
-    navigate('/admin/categorias/nueva');
+    navigate('/admin/categories/nueva');
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/admin/categorias/${id}/editar`);
+    navigate(`/admin/categories/${id}/editar`);
   };
 
   const validateImageFile = (file: File) => {
@@ -354,6 +363,12 @@ export function AdminCategories() {
   const hasChildren = editId ? categories.some((cat) => cat.parentId === editId) : false;
   const parentOptions = categories.filter((cat) => !cat.parentId && cat.id !== editId);
 
+  // Mapeo de opciones de categoría padre para el Dropdown en el modal
+  const parentCategoryOptions = useMemo(() => [
+    { value: '', label: 'Sin categoría padre' },
+    ...parentOptions.map((cat) => ({ value: cat.id, label: cat.name }))
+  ], [parentOptions]);
+
   const [exportLoadingCat, setExportLoadingCat] = useState<ExportFormat | null>(null);
 
   const handleExportCSV = () => {
@@ -426,16 +441,14 @@ export function AdminCategories() {
           <div className={styles.sortContainer}>
             <div className={styles.sortControls}>
               <span className={styles.sortLabel}>Ordenar:</span>
-              <select
-                value={sortField}
-                onChange={(e) => setSortField(e.target.value as CategorySortField)}
-                className={styles.sortSelect}
-              >
-                <option value="name">Nombre</option>
-                <option value="slug">Slug</option>
-                <option value="itemCount">Productos</option>
-                <option value="isVisible">Estado</option>
-              </select>
+              <div style={{ width: '130px', display: 'inline-block' }}>
+                <Dropdown
+                  options={sortOptions}
+                  value={sortField}
+                  onChange={(val) => setSortField(val as CategorySortField)}
+                  placeholder="Ordenar por..."
+                />
+              </div>
               <button
                 onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
                 className={styles.sortButton}
@@ -615,29 +628,22 @@ export function AdminCategories() {
             />
           </label>
 
-          <label style={{ display: 'grid', gap: 6 }} htmlFor="modal-category-parent">
+          <div style={{ display: 'grid', gap: 6 }}>
             <span style={{ fontWeight: 600 }}>Categoría padre</span>
-            <select
+            <Dropdown
               id="modal-category-parent"
-              name="modalCategoryParent"
+              options={parentCategoryOptions}
               value={formData.parentId}
-              onChange={(e) => setFormData((prev) => ({ ...prev, parentId: e.target.value }))}
+              onChange={(val) => setFormData((prev) => ({ ...prev, parentId: val }))}
               disabled={formSubmitting || hasChildren}
-              style={{ borderRadius: 8, border: '1px solid #d1d5db', padding: '10px 12px' }}
-            >
-              <option value="">Sin categoría padre</option>
-              {parentOptions.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Sin categoría padre"
+            />
             {hasChildren && (
               <span style={{ fontSize: 12, color: '#6b7280' }}>
                 Esta categoría ya tiene subcategorías, no puede asignarse como hija.
               </span>
             )}
-          </label>
+          </div>
 
           <label style={{ display: 'grid', gap: 6 }} htmlFor="modal-category-image">
             <span style={{ fontWeight: 600 }}>Imagen</span>

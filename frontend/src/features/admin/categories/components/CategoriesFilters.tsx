@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from '../AdminCategories.module.css';
 import { CategorySearchInput } from '../../../../components/ui/CategorySearchInput';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 interface CategoriesFiltersProps {
   search: string;
@@ -25,6 +26,13 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
   isVisible,
   setIsVisible,
 }) => {
+  // ── Mapeo de opciones para el Dropdown de Visibilidad ──
+  const visibilityOptions = useMemo(() => [
+    { value: 'all', label: 'Todas' },
+    { value: 'visible', label: 'Visibles' },
+    { value: 'hidden', label: 'Ocultas' },
+  ], []);
+
   return (
     <div className={styles.filters}>
       {/* Buscador */}
@@ -38,7 +46,7 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
         <span className={styles.count}>{total} categorías</span>
       </div>
 
-      <div className={styles.filtersRow}>
+      <div className={styles.filtersRow} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
         {/* Mín productos */}
         <input
           type="number"
@@ -67,19 +75,16 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           className={styles.filtersRowItem}
         />
 
-        {/* Filtro de Visibilidad Unificado */}
-        <select
-          value={isVisible}
-          onChange={(e) =>
-            setIsVisible(e.target.value as 'all' | 'visible' | 'hidden')
-          }
-          className="unified-select"
-          style={{ width: 'auto', minWidth: '140px' }}
-        >
-          <option value="all">Todas</option>
-          <option value="visible">Visibles</option>
-          <option value="hidden">Ocultas</option>
-        </select>
+        {/* Filtro de Visibilidad Unificado con Custom Dropdown */}
+        <div style={{ flex: '1 1 140px', minWidth: '140px', maxWidth: '200px' }}>
+          <Dropdown
+            id="visibility-filter"
+            options={visibilityOptions}
+            value={isVisible}
+            onChange={(val) => setIsVisible(val as 'all' | 'visible' | 'hidden')}
+            placeholder="Todas"
+          />
+        </div>
       </div>
     </div>
   );

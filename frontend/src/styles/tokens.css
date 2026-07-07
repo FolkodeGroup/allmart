@@ -43,6 +43,8 @@
   --control-text-muted: var(--color-text-tertiary);
   --control-shadow: var(--shadow-sm);
   --control-overlay-bg: var(--color-bg-primary);
+  --control-hover-bg: #769282;                         /* Verde Salvia Corporativo */
+  --control-hover-text: #FFFFFF;                       /* Contraste perfecto AAA (> 4.5:1) */
 
   /* ── Calendar Specific Tokens (Light Mode) ── */
   --calendar-day-hover: rgba(118, 146, 130, 0.12);
@@ -223,6 +225,8 @@ body[data-admin-theme='dark'],
   --control-text-muted:        #b6a68a;
   --control-shadow:            0 4px 16px rgba(0, 0, 0, 0.3);
   --control-overlay-bg:        #232a2f;
+  --control-hover-bg:          #e99e26;                         /* Naranja Acento Allmart */
+  --control-hover-text:        #050708;                         /* Negro carbón de alto contraste (> 4.5:1) */
 
   /* ── Calendar Specific Tokens (Dark Mode) ── */
   --calendar-day-hover:         rgba(221, 176, 140, 0.15);
