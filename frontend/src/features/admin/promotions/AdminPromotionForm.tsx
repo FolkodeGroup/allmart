@@ -227,6 +227,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     );
   }
 
+  
   function toggleCategory(id: string) {
     setSelectedCategoryIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -325,9 +326,14 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               <textarea id="promo-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles para el administrador" rows={2} />
             </div>
             <div className={styles.formRow}>
-              {/* Dropdown unificado para el tipo de descuento */}
+              {/* Dropdown unificado para el tipo de descuento asociado a un label semántico */}
               <div className={styles.formGroup}>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Tipo de Descuento *</span>
+                <label
+                  htmlFor="promo-type"
+                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
+                >
+                  Tipo de Descuento *
+                </label>
                 <Dropdown
                   id="promo-type"
                   options={typeOptions}
@@ -344,13 +350,23 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               </div>
             </div>
             <div className={styles.formRow}>
-              {/* DatePickers customizados unificados */}
+              {/* DatePickers customizados unificados con labels semánticos */}
               <div className={styles.formGroup}>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Fecha de Inicio *</span>
+                <label
+                  htmlFor="promo-start"
+                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
+                >
+                  Fecha de Inicio *
+                </label>
                 <DatePicker id="promo-start" value={startDate} onChange={setStartDate} />
               </div>
               <div className={styles.formGroup}>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Fecha de Fin *</span>
+                <label
+                  htmlFor="promo-end"
+                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
+                >
+                  Fecha de Fin *
+                </label>
                 <DatePicker id="promo-end" value={endDate} onChange={setEndDate} />
               </div>
             </div>
