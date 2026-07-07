@@ -14,7 +14,7 @@ export interface Promotion {
   startDate: string;
   endDate: string;
   minPurchaseAmount?: number;
-  maxDiscount?: number;
+  maxDiscount?: number | null;
   isActive: boolean;
   priority: number;
   createdAt: string;
