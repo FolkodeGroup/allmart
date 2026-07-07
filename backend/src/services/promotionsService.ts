@@ -14,8 +14,8 @@ export interface CreatePromotionDTO {
   value: number;
   startDate: Date;
   endDate: Date;
-  minPurchaseAmount?: number;
-  maxDiscount?: number;
+  minPurchaseAmount?: number | null;
+  maxDiscount?: number | null;
   isActive?: boolean;
   priority?: number;
   rules?: {
@@ -31,8 +31,8 @@ export interface UpdatePromotionDTO {
   value?: number;
   startDate?: Date;
   endDate?: Date;
-  minPurchaseAmount?: number;
-  maxDiscount?: number;
+  minPurchaseAmount?: number | null;
+  maxDiscount?: number | null;
   isActive?: boolean;
   priority?: number;
   rules?: {
@@ -244,8 +244,12 @@ export async function updatePromotion(id: string, dto: UpdatePromotionDTO): Prom
       value: dto.value !== undefined ? new Decimal(dto.value) : undefined,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-      minPurchaseAmount: dto.minPurchaseAmount ? new Decimal(dto.minPurchaseAmount) : undefined,
-      maxDiscount: dto.maxDiscount ? new Decimal(dto.maxDiscount) : undefined,
+      minPurchaseAmount: dto.minPurchaseAmount !== undefined && dto.minPurchaseAmount !== null
+        ? new Decimal(dto.minPurchaseAmount)
+        : undefined,
+      maxDiscount: dto.maxDiscount !== undefined && dto.maxDiscount !== null
+        ? new Decimal(dto.maxDiscount)
+        : null,
       isActive: dto.isActive,
       priority: dto.priority,
     },
