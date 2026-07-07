@@ -101,19 +101,19 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
                         className={`${styles.typeBtn} ${destinationType === 'category' ? styles.typeBtnActive : ''}`}
                         onClick={() => handleDestinationChange('category')}
                     >
-                        📂 Categoría
+                        Categoría
                     </button>
                     <button
                         type="button"
                         className={`${styles.typeBtn} ${destinationType === 'products' ? styles.typeBtnActive : ''}`}
                         onClick={() => handleDestinationChange('products')}
                     >
-                        📦 Productos específicos
+                        Productos específicos
                     </button>
                 </div>
             </div>
 
-            {/* ── Categoría ───────────────────────────────────────────── */}
+            {/* ── Categoría ── */}
             {destinationType === 'category' && (
                 <div className={styles.field}>
                     <label htmlFor="banner-filter-category" className={styles.label}>Categoría</label>
@@ -121,7 +121,7 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
                         id="banner-filter-category"
                         value={value.categorySlug ?? ''}
                         onChange={e => handleCategoryChange(e.target.value)}
-                        className={styles.select}
+                        className="unified-select"
                     >
                         <option value="">— Todas las categorías —</option>
                         {categories.map(cat => (

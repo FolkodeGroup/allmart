@@ -1,9 +1,10 @@
-/* ============================================
-   ALLMART GLOBAL STYLES
-   ============================================ */
+/* ============================================================
+   ALLMART GLOBAL STYLES & UNIFIED CONTROLS
+   Location: src/styles/global.css
+   ============================================================ */
 @import './tokens.css';
 
-/* ── Reset ── */
+/* ── Reset General ── */
 *,
 *::before,
 *::after {
@@ -58,18 +59,20 @@ input, textarea, select {
   outline: none;
 }
 
-/* Quita las flechas en Chrome, Safari, Edge y Opera */
+/* Quita las flechas de número en Chrome, Safari, Edge y Opera */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Quita las flechas en Firefox */
+/* Quita las flechas de número en Firefox */
 input[type="number"] {
+  appearance: none;
   -moz-appearance: textfield;
 }
 
+/* ── Tipografía Estilizada ── */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: var(--font-semibold);
@@ -87,19 +90,19 @@ p {
   color: var(--color-text-secondary);
 }
 
-/* ── Focus Styles (Accessibility) ── */
+/* ── Enfoque de Accesibilidad (Focus Styles) ── */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* ── Selection ── */
+/* ── Selección de Texto ── */
 ::selection {
   background-color: var(--color-primary);
   color: var(--color-neutral-light);
 }
 
-/* ── Scrollbar ── */
+/* ── Scrollbar de Navegador Personalizada ── */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -117,7 +120,7 @@ p {
   background: var(--color-warm-gray);
 }
 
-/* ── Utility Classes ── */
+/* ── Clases de Utilidad ── */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -130,10 +133,90 @@ p {
   border-width: 0;
 }
 
-/* ── Responsive Typography ── */
+/* ── Tipografía Responsiva ── */
 @media (max-width: 768px) {
   h1 { font-size: var(--text-2xl); }
   h2 { font-size: var(--text-xl); }
   h3 { font-size: var(--text-lg); }
   h4 { font-size: var(--text-base); }
+}
+
+/* ============================================================
+   ESTILOS DE SELECT UNIFICADO (Tema Claro y Oscuro)
+   ============================================================ */
+
+select,
+.unified-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  height: 42px;
+  padding: 0 var(--space-8, 24px) 0 var(--space-3, 12px) !important;
+  font-family: var(--font-ui) !important;
+  font-size: var(--text-sm, 14px) !important;
+  font-weight: 500 !important;
+  color: var(--control-text) !important;
+  background-color: var(--control-bg) !important;
+  border: 1.5px solid var(--control-border) !important;
+  border-radius: var(--radius-md, 8px) !important;
+  box-shadow: var(--control-shadow) !important;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), 
+              background-color var(--transition-fast), 
+              box-shadow var(--transition-fast);
+  
+  /* Chevron SVG personalizado integrado con variables CSS */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24' stroke='%23769282' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 14px !important;
+}
+
+/* Ajuste de chevron para modo oscuro */
+body[data-admin-theme='dark'] select,
+.admin-dark select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24' stroke='%23DDB08C' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
+}
+
+/* ── Estados Interactivos de Selectores ── */
+
+select:hover:not(:disabled),
+.unified-select:hover:not(:disabled) {
+  border-color: var(--control-border-hover) !important;
+  background-color: var(--control-bg-hover) !important;
+}
+
+select:focus-visible,
+.unified-select:focus-visible,
+select:focus {
+  outline: none !important;
+  border-color: var(--control-border-focus) !important;
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.22) !important;
+}
+
+body[data-admin-theme='dark'] select:focus-visible,
+body[data-admin-theme='dark'] select:focus,
+.admin-dark select:focus-visible,
+.admin-dark select:focus {
+  box-shadow: 0 0 0 3px rgba(221, 176, 140, 0.25) !important;
+}
+
+select:disabled,
+.unified-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--color-bg-secondary) !important;
+  border-color: var(--color-border-light) !important;
+}
+
+/* Estilo para las opciones nativas del sistema */
+select option {
+  background-color: var(--control-overlay-bg);
+  color: var(--control-text);
+  font-family: var(--font-ui);
+  padding: 8px;
 }

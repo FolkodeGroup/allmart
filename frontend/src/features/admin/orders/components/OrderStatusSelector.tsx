@@ -4,7 +4,6 @@
 // o desde el modal de detalle. Incluye un paso de confirmación inline.
 // ─────────────────────────────────────────────────────────────────────────────
 
-
 import React, { useState } from 'react';
 import { STATUS_OPTIONS, STATUS_LABELS } from './../utils/ordersHelpers';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
@@ -43,7 +42,7 @@ interface OrderStatusSelectorProps {
  * de persistir el cambio recae en el padre (OrderItem, OrderDetailModal).
  */
 
-export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value, onChange, disabled }) => {
+export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value, onChange, disabled, className = '' }) => {
   // Estado local para el valor "en vuelo" antes de confirmar
   const [pendingStatus, setPendingStatus] = useState<OrderStatus>(value);
 
@@ -62,9 +61,9 @@ export const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ value,
   };
 
   return (
-    <div className={styles.orderStatusSelectorContainer}>
+    <div className={`${styles.orderStatusSelectorContainer} ${className}`}>
       <select
-        className={styles.statusSelect}
+        className="unified-select"
         value={pendingStatus}
         onChange={handleSelect}
         disabled={disabled}

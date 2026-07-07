@@ -179,19 +179,20 @@ const AdminPromotions: React.FC = () => {
               <Search size={16} className={styles.searchIcon} />
               <input
                 type="text"
+                className={styles.searchInput}
                 placeholder="Buscar promociones..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
-                className={styles.searchInput}
                 autoComplete="off"
                 spellCheck="false"
                 autoCorrect="off"
                 autoCapitalize="off"
               />
             </div>
+            {/* Selector Unificado */}
             <select
               value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
               onChange={(e) => {
@@ -200,7 +201,8 @@ const AdminPromotions: React.FC = () => {
                 );
                 setPage(1);
               }}
-              className={styles.selectFilter}
+              className="unified-select"
+              style={{ width: 'auto', minWidth: '160px' }}
             >
               <option value="">Todas</option>
               <option value="true">Activas</option>

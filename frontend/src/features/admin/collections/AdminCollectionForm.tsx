@@ -322,11 +322,12 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       {syncMsg && <div className={styles.successMsg}>{syncMsg}</div>}
 
       <form onSubmit={handleSubmit} className={styles.form} noValidate>
-        {/* ── Tipo de colección ── */}
+        {/* ── Tipo de colección (Selector Unificado) ── */}
         <div className={styles.formGroup}>
           <label htmlFor="collection-type">Tipo de colección</label>
           <select
             id="collection-type"
+            className="unified-select"
             value={formData.type}
             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
           >
@@ -382,6 +383,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
 
         <div className={styles.formRow}>
+          {/* ── Posición de Display (Selector Unificado) ── */}
           <div className={styles.formGroup}>
             <label htmlFor="collection-display-pos">Posición de Display *</label>
             <select
@@ -394,7 +396,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                 });
                 setFieldErrors((prev) => ({ ...prev, displayPosition: undefined }));
               }}
-              className={fieldErrors.displayPosition ? styles.inputError : undefined}
+              className={`unified-select ${fieldErrors.displayPosition ? styles.inputError : ''}`}
               aria-invalid={!!fieldErrors.displayPosition}
             >
               <option value="home">Home</option>
@@ -426,10 +428,12 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
             <legend>Configuración automática por ventas</legend>
 
             <div className={styles.formRow}>
+              {/* ── Categoría (Selector Unificado) ── */}
               <div className={styles.formGroup}>
                 <label htmlFor="auto-category">Categoría (opcional)</label>
                 <select
                   id="auto-category"
+                  className="unified-select"
                   value={formData.params.categoryId}
                   onChange={(e) =>
                     setFormData({
@@ -448,10 +452,12 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                 <small>Dejar vacío para mostrar top global de ventas</small>
               </div>
 
+              {/* ── Ventana de tiempo (Selector Unificado) ── */}
               <div className={styles.formGroup}>
                 <label htmlFor="auto-window">Ventana de tiempo (días)</label>
                 <select
                   id="auto-window"
+                  className="unified-select"
                   value={formData.params.windowDays}
                   onChange={(e) =>
                     setFormData({

@@ -15,6 +15,7 @@ import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { apiFetch } from '../../../utils/apiClient';
 import styles from './AdminPromotions.module.css';
 import { Search } from 'lucide-react';
+import { DatePicker } from '../../../components/ui/DatePicker/DatePicker';
 
 interface AdminProduct {
   id: string;
@@ -318,7 +319,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label htmlFor="promo-type">Tipo de Descuento *</label>
-                <select id="promo-type" value={type} onChange={(e) => handleTypeChange(e.target.value as Promotion['type'])}>
+                <select id="promo-type" className="unified-select" value={type} onChange={(e) => handleTypeChange(e.target.value as Promotion['type'])}>
                   {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
@@ -332,11 +333,11 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label htmlFor="promo-start">Fecha de Inicio *</label>
-                <input id="promo-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <DatePicker id="promo-start" value={startDate} onChange={setStartDate} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="promo-end">Fecha de Fin *</label>
-                <input id="promo-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                <DatePicker id="promo-end" value={endDate} onChange={setEndDate} />
               </div>
             </div>
             <div className={styles.formRow}>

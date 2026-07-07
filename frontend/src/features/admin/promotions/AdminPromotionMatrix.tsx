@@ -210,8 +210,10 @@ const AdminPromotionMatrix: React.FC = () => {
             autoCapitalize="off"
           />
         </div>
+        {/* Selector Unificado */}
         <select
-          className={styles.selectFilter}
+          className="unified-select"
+          style={{ width: 'auto', minWidth: '220px' }}
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value as typeof filterStatus); setMatrixPage(1); }}
         >

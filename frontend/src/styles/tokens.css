@@ -1,12 +1,15 @@
-/* ============================================
+/* ============================================================
    ALLMART DESIGN TOKENS
-   ============================================ */
+   Location: src/styles/tokens.css
+   ============================================================ */
 
 :root {
-  /* ── Color Palette ── */
+  /* ── Color Palette (Base Colors) ── */
   --color-primary: #769282;
-   --color-primary-rgb: 118,146,130;
-  --color-primary-light: #8fa99a;  --color-primary-light-rgb: 143,169,154;  --color-primary-dark: #5d7568;
+  --color-primary-rgb: 118, 146, 130;
+  --color-primary-light: #8fa99a;
+  --color-primary-light-rgb: 143, 169, 154;
+  --color-primary-dark: #5d7568;
   --color-accent: #DDB08C;
   --color-accent-light: #e8c5a8;
   --color-accent-dark: #c89a70;
@@ -16,7 +19,7 @@
   --color-warm-gray: #AEA491;
   --color-warm-gray-light: #c4b8a8;
 
-  /* ── Semantic Colors ── */
+  /* ── Semantic Colors (Light Mode) ── */
   --color-bg-primary: #FFFFFF;
   --color-bg-secondary: #F2EFEB;
   --color-bg-tertiary: #F9F7F4;
@@ -30,47 +33,58 @@
   --color-error: #C75050;
   --color-overlay: rgba(0, 0, 0, 0.4);
 
-   /* ── Admin confirm/warning modals ── */
-   --admin-confirm-modal-bg: #ffffff;
-   --admin-confirm-modal-border: #e7dfd5;
-   --admin-confirm-modal-text: #2f3331;
-   --admin-confirm-modal-text-muted: #5f645f;
-   --admin-confirm-modal-overlay: rgba(16, 18, 20, 0.42);
-   --admin-confirm-modal-shadow: 0 22px 56px rgba(30, 24, 18, 0.18);
-   --admin-confirm-cancel-bg: #f3eee8;
-   --admin-confirm-cancel-border: #ddd2c6;
-   --admin-confirm-cancel-text: #2f3835;
-   --admin-confirm-cancel-hover-bg: #ebe3da;
-   --admin-confirm-danger-bg: #e75646;
-   --admin-confirm-danger-border: #e75646;
-   --admin-confirm-danger-text: #ffffff;
-   --admin-confirm-danger-hover-bg: #d44739;
+  /* ── Control UI Tokens (Light Mode) ── */
+  --control-bg: var(--color-bg-primary);
+  --control-bg-hover: rgba(118, 146, 130, 0.06);
+  --control-border: var(--color-border);
+  --control-border-hover: var(--color-primary-light);
+  --control-border-focus: var(--color-primary);
+  --control-text: var(--color-text-primary);
+  --control-text-muted: var(--color-text-tertiary);
+  --control-shadow: var(--shadow-sm);
+  --control-overlay-bg: var(--color-bg-primary);
 
-  /* ── Inverse Colors (for light mode) ── */
+  /* ── Calendar Specific Tokens (Light Mode) ── */
+  --calendar-day-hover: rgba(118, 146, 130, 0.12);
+  --calendar-day-selected-bg: var(--color-primary);
+  --calendar-day-selected-text: #FFFFFF;
+  --calendar-day-today-border: var(--color-accent);
+
+  /* ── Confirm & Warning Modals (Light Mode) ── */
+  --admin-confirm-modal-bg: #ffffff;
+  --admin-confirm-modal-border: #e7dfd5;
+  --admin-confirm-modal-text: #2f3331;
+  --admin-confirm-modal-text-muted: #5f645f;
+  --admin-confirm-modal-overlay: rgba(16, 18, 20, 0.42);
+  --admin-confirm-modal-shadow: 0 22px 56px rgba(30, 24, 18, 0.18);
+  --admin-confirm-cancel-bg: #f3eee8;
+  --admin-confirm-cancel-border: #ddd2c6;
+  --admin-confirm-cancel-text: #2f3835;
+  --admin-confirm-cancel-hover-bg: #ebe3da;
+  --admin-confirm-danger-bg: #e75646;
+  --admin-confirm-danger-border: #e75646;
+  --admin-confirm-danger-text: #ffffff;
+  --admin-confirm-danger-hover-bg: #d44739;
+
+  /* ── Inverse and Status Colors ── */
   --color-normal-gray: #676767;
-
   --color-primary-light-inverse: #767676;
   --color-primary-dark-inverse: #4A4A4A;
-
   --color-accent-light-inverse: #A9A9A9;
   --color-accent-dark-inverse: #AEA491;
-
   --color-dif-mode-light: #ebffef;
   --color-dif-mode: #769282;
   --color-dif-mode-dark: #5d7568;
-
   --color-active-mode: rgba(23, 209, 132, 0.12);
   --color-error-mode: #e74c3c;
   --color-error-mode-hover: #c91c1c;
-
-
   --color-text-instock: #166534;
   --color-text-outofstock: #b91c1c;
 
   /* ── Typography ── */
-   --font-heading: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-   --font-body: 'Merriweather', Georgia, 'Times New Roman', serif;
-   --font-ui: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-heading: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 
   /* ── Font Sizes ── */
   --text-xs: 0.75rem;     /* 12px */
@@ -108,12 +122,12 @@
   --space-4: 1rem;       /* 16px */
   --space-5: 1.25rem;    /* 20px */
   --space-6: 1.5rem;     /* 24px */
-   --space-8: 1.5rem;     /* 24px */
-   --space-10: 2rem;      /* 32px */
-   --space-12: 2.5rem;    /* 40px */
-   --space-16: 3rem;      /* 48px */
-   --space-20: 3.5rem;    /* 56px */
-   --space-24: 4rem;      /* 64px */
+  --space-8: 1.5rem;     /* 24px */
+  --space-10: 2rem;      /* 32px */
+  --space-12: 2.5rem;    /* 40px */
+  --space-16: 3rem;      /* 48px */
+  --space-20: 3.5rem;    /* 56px */
+  --space-24: 4rem;      /* 64px */
 
   /* ── Border Radius ── */
   --radius-sm: 4px;
@@ -155,10 +169,15 @@
   --header-height-scrolled: 64px;
 }
 
-body[data-admin-theme='dark'] {
+/* ============================================================
+   ADMIN DARK MODE & OVERRIDES
+   ============================================================ */
+
+body[data-admin-theme='dark'],
+.admin-dark {
   color-scheme: dark;
 
-  /* ── Paleta de Colores de Modo Oscuro para Portales y Body ── */
+  /* ── Palette Overrides ── */
   --color-primary:             #5d7568;
   --color-primary-light:       #cbe7c9;
   --color-primary-dark:        #7ba882;
@@ -169,53 +188,49 @@ body[data-admin-theme='dark'] {
   --color-neutral-light:       #f3f3f3;
   --color-warm-gray:           #b6a68a;
 
-  /* ── Fondos Semánticos ── */
+  /* ── Semantic Backgrounds ── */
   --color-bg-primary:          #232a2f;
   --color-bg-secondary:        #181c1f;
   --color-bg-tertiary:         #1e2529;
   --color-bg-card:             #232a2f;
 
-  /* ── Alias de Superficie ── */
+  /* ── Surface Aliases ── */
   --color-surface:             #232a2f;
   --color-surface-subtle:      #1d2328;
 
-  /* ── Tipografía y Textos ── */
+  /* ── Typography & Text ── */
   --color-text-primary:        #f3f3f3;
   --color-text-secondary:      #cbe7c9;
   --color-text-tertiary:       #AEA491;
   --color-text-inverse:        #181c1f;
 
-  /* ── Bordes ── */
+  /* ── Borders ── */
   --color-border:              #2d3a3f;
   --color-border-light:        #263038;
 
-  /* ── Estados Semánticos ── */
+  /* ── Semantic Statuses ── */
   --color-success:             #a3c9a8;
   --color-error:               #e07070;
   --color-overlay:             rgba(0, 0, 0, 0.6);
 
-  --color-normal-gray:         #888888;
-  --color-primary-light-inverse: #8fa99a;
-  --color-primary-dark-inverse: #5d7568;
-  --color-accent-light-inverse: #e8c5a8;
-  --color-accent-dark-inverse: #c89a70;
-  --color-dif-mode-light:      rgba(221, 176, 140, 0.16);
-  --color-dif-mode:            #c89a70;
-  --color-dif-mode-dark:       #c89a70d9;
-  --color-active-mode:         rgba(209, 107, 23, 0.12);
-  --color-error-mode:          #c91414dc;
-  --color-error-mode-hover:    #c91c1c;
-  --color-text-instock:        #fff;
-  --color-text-outofstock:     #fff;
+  /* ── Control UI Tokens (Dark Mode) ── */
+  --control-bg:                #1f262a;
+  --control-bg-hover:          rgba(221, 176, 140, 0.08);
+  --control-border:            #2d3a3f;
+  --control-border-hover:      #40535a;
+  --control-border-focus:      var(--color-accent);
+  --control-text:              #f3f3f3;
+  --control-text-muted:        #b6a68a;
+  --control-shadow:            0 4px 16px rgba(0, 0, 0, 0.3);
+  --control-overlay-bg:        #232a2f;
 
-  /* ── Sombras para fondos oscuros ── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.4);
+  /* ── Calendar Specific Tokens (Dark Mode) ── */
+  --calendar-day-hover:         rgba(221, 176, 140, 0.15);
+  --calendar-day-selected-bg:   var(--color-accent);
+  --calendar-day-selected-text: #181c1f;
+  --calendar-day-today-border:  var(--color-primary-light);
 
-  /* ── Variables de modales de confirmación (ModalConfirm) ── */
+  /* ── Confirm & Warning Modals (Dark Mode) ── */
   --admin-confirm-modal-bg: #353132;
   --admin-confirm-modal-border: #4c4341;
   --admin-confirm-modal-text: #f5f1ea;
@@ -230,79 +245,23 @@ body[data-admin-theme='dark'] {
   --admin-confirm-danger-border: #6d494e;
   --admin-confirm-danger-text: #ff8b90;
   --admin-confirm-danger-hover-bg: #7b5459;
-}
 
-/* ── Breakpoints (reference, used in media queries) ──
-   Mobile:  375px
-   Tablet:  768px
-   Desktop: 1024px
-   Wide:    1440px
-   ─────────────────────────────────────────── */
-
-/* ============================================
-   ADMIN DARK MODE — applied when .dark class is on admin container
-   ============================================ */
-
-:is( .admin-dark) {
-  color-scheme: dark;
-
-  /* ── Palette overrides ── */
-  --color-primary:             #5d7568;
-  --color-primary-light:       #cbe7c9;
-  --color-primary-dark:        #7ba882;
-  --color-accent:              #ddb08c;
-  --color-accent-light:        #e8c5a8;
-  --color-accent-dark:         #c89a70;
-  --color-neutral-dark:        #181c1f;
-  --color-neutral-light:       #f3f3f3;
-  --color-warm-gray:           #b6a68a;
-
-  /* ── Semantic background ── */
-  --color-bg-primary:          #232a2f;
-  --color-bg-secondary:        #181c1f;
-  --color-bg-tertiary:         #1e2529;
-  --color-bg-card:             #232a2f;
-
-  /* ── Surface aliases (used by admin form/card components) ── */
-  --color-surface:             #232a2f;
-  --color-surface-subtle:      #1d2328;
-
-  /* ── Text ── */
-  --color-text-primary:        #f3f3f3;
-  --color-text-secondary:      #cbe7c9;
-  --color-text-tertiary:       #AEA491;
-  --color-text-inverse:        #181c1f;
-
-  /* ── Borders ── */
-  --color-border:              #2d3a3f;
-  --color-border-light:        #263038;
-
-  /* ── Status / Semantic ── */
-  --color-success:             #a3c9a8;
-  --color-error:               #e07070;
-  --color-overlay:             rgba(0, 0, 0, 0.6);
-
-  /* ── Inverse Colors (for dark mode) ── */
-  --color-normal-gray: #888888;
-
+  /* ── Inverse and Active/Error helpers ── */
+  --color-normal-gray:         #888888;
   --color-primary-light-inverse: #8fa99a;
   --color-primary-dark-inverse: #5d7568;
-
   --color-accent-light-inverse: #e8c5a8;
   --color-accent-dark-inverse: #c89a70;
+  --color-dif-mode-light:      rgba(221, 176, 140, 0.16);
+  --color-dif-mode:            #c89a70;
+  --color-dif-mode-dark:       #c89a70d9;
+  --color-active-mode:         rgba(209, 107, 23, 0.12);
+  --color-error-mode:          #c91414dc;
+  --color-error-mode-hover:    #c91c1c;
+  --color-text-instock:        #ffffff;
+  --color-text-outofstock:     #ffffff;
 
-  --color-dif-mode-light: rgba(221, 176, 140, 0.16);
-  --color-dif-mode: #c89a70;
-  --color-dif-mode-dark: #c89a70d9;
-
-  --color-active-mode: rgba(209, 107, 23, 0.12);
-  --color-error-mode: #c91414dc;
-  --color-error-mode-hover: #c91c1c;
-
-   --color-text-instock: #fff;
-   --color-text-outofstock: #fff;
-
-  /* ── Shadows (darker/deeper on dark bg) ── */
+  /* ── Shadows (Dark Mode) ── */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);

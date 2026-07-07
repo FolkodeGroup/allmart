@@ -26,26 +26,20 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
   setIsVisible,
 }) => {
   return (
-    <div
-      className={styles.filters}
-      style={{
-
-      }}
-    >
-      {/* 🔍 Buscador */}
+    <div className={styles.filters}>
+      {/* Buscador */}
       <div className={styles.searchWrapper}>
         <CategorySearchInput
           value={search}
           onChange={setSearch}
           placeholder="Buscar categoría por nombre o slug..."
         />
-        {/* 📊 Cantidad */}
+        {/* Cantidad */}
         <span className={styles.count}>{total} categorías</span>
       </div>
 
-
       <div className={styles.filtersRow}>
-        {/* 🔢 Mín productos */}
+        {/* Mín productos */}
         <input
           type="number"
           min={0}
@@ -59,7 +53,7 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           className={styles.filtersRowItem}
         />
 
-        {/* 🔢 Máx productos */}
+        {/* Máx productos */}
         <input
           type="number"
           min={0}
@@ -73,13 +67,14 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           className={styles.filtersRowItem}
         />
 
-        {/* 👁️ Estado */}
+        {/* Filtro de Visibilidad Unificado */}
         <select
           value={isVisible}
           onChange={(e) =>
             setIsVisible(e.target.value as 'all' | 'visible' | 'hidden')
           }
-          className={styles.filtersRowItem}
+          className="unified-select"
+          style={{ width: 'auto', minWidth: '140px' }}
         >
           <option value="all">Todas</option>
           <option value="visible">Visibles</option>

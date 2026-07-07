@@ -28,7 +28,7 @@ export const TabCategorias = memo(function TabCategorias({
                     Categoría Principal *
                 </label>
                 <select
-                    className={`${styles.input} ${fieldErrors.category ? styles.inputError : ''}`}
+                    className={`unified-select ${fieldErrors.category ? styles.inputError : ''}`}
                     id="product-category"
                     value={form.category.id}
                     onChange={e => onPrimaryCategoryChange(e.target.value)}
@@ -57,6 +57,7 @@ export const TabCategorias = memo(function TabCategorias({
                     value={additionalCategoryIds}
                     onChange={onAdditionalCategoriesChange}
                     disabled={categories.length === 0}
+                    style={{ minHeight: '120px' }}
                 >
                     {categories
                         .filter(c => c.id !== form.category.id)

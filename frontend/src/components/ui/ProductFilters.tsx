@@ -56,15 +56,16 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       </div>
     </div>
 
-    {/* Filtros */}
+    {/* Filtros Unificados con la clase .unified-select */}
     <div className={styles.filtersRow}>
       <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
       <select
         id="category-filter"
-        className={styles.select}
+        className="unified-select"
         value={categoryFilter}
         onChange={e => setCategoryFilter(e.target.value)}
         aria-label="Filtrar por categoría"
+        style={{ width: 'auto', minWidth: '200px' }}
       >
         <option value="">Todas las categorías</option>
         {categories.map(c => (
@@ -75,10 +76,11 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       <label htmlFor="status-filter" className="sr-only">Filtrar por estado</label>
       <select
         id="status-filter"
-        className={styles.select}
+        className="unified-select"
         value={statusFilter}
         onChange={e => setStatusFilter(e.target.value as StatusFilter)}
         aria-label="Filtrar por estado"
+        style={{ width: 'auto', minWidth: '160px' }}
       >
         <option value="all">Todos los estados</option>
         <option value="active">Activos</option>
@@ -88,10 +90,11 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
       <label htmlFor="stock-filter" className="sr-only">Filtrar por stock</label>
       <select
         id="stock-filter"
-        className={styles.select}
+        className="unified-select"
         value={stockLevelFilter}
         onChange={e => setStockLevelFilter(e.target.value as StockLevelFilter)}
         aria-label="Filtrar por stock"
+        style={{ width: 'auto', minWidth: '160px' }}
       >
         <option value="all">Todos los stocks</option>
         <option value="no_stock">Sin stock</option>

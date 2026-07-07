@@ -37,7 +37,7 @@ export function AdminContacts() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0)
+  const [totalPages, setTotalPages] = useState(0);
   // Filters
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,7 +109,6 @@ export function AdminContacts() {
     } finally {
       setTogglingIds(prev => { const next = new Set(prev); next.delete(contact.id); return next; });
     }
-
   };
 
   const handleOpenDetail = (contact: Contact) => {
@@ -210,10 +209,12 @@ export function AdminContacts() {
           autoCorrect="off"
           autoCapitalize="off"
         />
+        {/* Selector Unificado */}
         <select
           value={statusFilter}
           onChange={e => { setStatusFilter(e.target.value as StatusFilter); setPage(1); }}
-          className={styles.filterSelect}
+          className="unified-select"
+          style={{ width: 'auto', minWidth: '180px' }}
           aria-label="Filtrar por estado"
         >
           <option value="">Todos los estados</option>
