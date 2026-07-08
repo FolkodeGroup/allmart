@@ -408,23 +408,25 @@ export function AdminContacts() {
         title="Detalle de la consulta"
         size="md"
         showCloseButton
+        className={styles.modalPanel}
+        overlayClassName={styles.modalOverlay}
+        bodyClassName={styles.modalBody}
+        actionsClassName={styles.modalActions}
         actions={
           <>
             <button
               type="button"
-              className={styles.btnRead}
+              className={styles.modalPrimaryButton}
               onClick={handleSaveNotes}
               disabled={savingNotes}
-              style={{ minWidth: 120, background: '#16a34a', color: '#fff' }}
             >
               {savingNotes ? 'Guardando...' : 'Guardar notas'}
             </button>
             <button
               type="button"
-              className={styles.btnUnread}
+              className={styles.modalSecondaryButton}
               onClick={() => setDetailContact(null)}
               disabled={savingNotes}
-              style={{ minWidth: 100 }}
             >
               Cerrar
             </button>
@@ -440,7 +442,7 @@ export function AdminContacts() {
             </div>
             <div className={styles.detailRow}>
               <span className={styles.detailLabel}>Email</span>
-              <a href={`mailto:${detailContact.email}`} className={styles.detailValue} style={{ color: '#6366f1' }}>
+              <a href={`mailto:${detailContact.email}`} className={`${styles.detailValue} ${styles.detailLink}`}>
                 {detailContact.email}
               </a>
             </div>
@@ -456,7 +458,7 @@ export function AdminContacts() {
             </div>
             <div className={styles.detailRow}>
               <span className={styles.detailLabel}>Estado</span>
-              <span className={`${styles.statusBadge} ${detailContact.status === 'unread' ? styles.unreadBadgeStatus : styles.readBadge}`}>
+              <span className={`${styles.statusBadge} ${detailContact.status === 'unread' ? styles.unreadBadgeStatusmodal : styles.readBadgemodal}`}>
                 {detailContact.status === 'unread' ? '● No leída' : '✓ Leída'}
               </span>
             </div>
@@ -475,16 +477,7 @@ export function AdminContacts() {
                 rows={3}
                 disabled={savingNotes}
                 placeholder="Agregar notas internas sobre esta consulta..."
-                style={{
-                  width: '100%',
-                  borderRadius: 8,
-                  border: '1px solid #d1d5db',
-                  padding: '10px 12px',
-                  resize: 'vertical',
-                  fontFamily: 'inherit',
-                  fontSize: '0.875rem',
-                  boxSizing: 'border-box',
-                }}
+                className={styles.notesTextarea}
               />
             </div>
           </div>
@@ -496,23 +489,26 @@ export function AdminContacts() {
         open={!!deleteConfirmId}
         onClose={() => !deleting && setDeleteConfirmId(null)}
         title="Eliminar consulta"
+        showCloseButton
+        className={styles.modalPanel}
+        overlayClassName={styles.modalOverlay}
+        bodyClassName={styles.modalBody}
+        actionsClassName={styles.modalActions}
         actions={
           <>
             <button
               type="button"
-              className={styles.btnDelete}
+              className={styles.modalDangerButton}
               onClick={handleDeleteConfirmed}
               disabled={deleting}
-              style={{ minWidth: 100 }}
             >
               {deleting ? 'Eliminando...' : 'Eliminar'}
             </button>
             <button
               type="button"
-              className={styles.btnUnread}
+              className={styles.modalSecondaryButton}
               onClick={() => setDeleteConfirmId(null)}
               disabled={deleting}
-              style={{ minWidth: 100 }}
             >
               Cancelar
             </button>
@@ -520,7 +516,7 @@ export function AdminContacts() {
         }
         disableClose={deleting}
       >
-        <p>¿Estás seguro de que querés eliminar esta consulta? Esta acción no se puede deshacer.</p>
+        <p className={styles.modalContentText}>¿Estás seguro de que querés eliminar esta consulta? Esta acción no se puede deshacer.</p>
       </Modal>
     </div>
   );
