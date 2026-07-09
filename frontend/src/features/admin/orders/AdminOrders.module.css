@@ -322,6 +322,8 @@
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
 
+
+
 .searchInput::placeholder {
   color: var(--color-text-tertiary);
 }
