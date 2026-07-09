@@ -1,29 +1,36 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  font-family: var(--font-ui);
-  font-weight: var(--font-semibold);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  padding: var(--space-1) var(--space-3);
+  gap: 0.4em;
+  padding: 0.2em 0.7em;
   border-radius: var(--radius-full);
-  line-height: 1.4;
-}
-
-.discount {
-  background-color: var(--color-accent-dark);
-  color: var(--color-neutral-dark);
+  font-weight: 600;
+  font-size: 0.97em;
+  line-height: 1;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
 }
 
 .new {
-  background-color: var(--color-primary);
+  background: var(--color-primary);
   color: var(--color-neutral-light);
+}
+
+/* Pending / warning */
+.warning {
+  background: var(--color-accent-dark);
+  color: var(--color-neutral-dark);
+}
+
+/* Cancelled / danger */
+.discount {
+  background: var(--color-accent-dark);
+  color: var(--color-neutral-dark);
 }
 
 .outOfStock {
   background-color: var(--color-soft-gray);
-  color: var(--color-neutral-light);
+  color: var(--color-text-inverse);
 }
 
 .limited {

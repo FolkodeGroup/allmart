@@ -10,7 +10,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from 'react';
-import styles from '../AdminOrders.module.css';
+import { Badge } from '../../../../components/ui/Badge/Badge';
+import { STATUS_LABELS } from '../utils/ordersHelpers';
 import type { OrderStatus } from '../ordersService';
 
 interface Props {
@@ -18,38 +19,20 @@ interface Props {
   status: OrderStatus;
 }
 
-/**
- * OrderStatusTag — indicador visual compacto de estado.
- *
- * Lógica de estilos:
- *  - 'cancelado'  → borde rojo + icono ⚠️  (statusDanger)
- *  - 'pendiente'  → borde amarillo + icono ⏳ (statusWarning)
- *  - resto        → estilo base neutro sin icono (statusTag)
- *
- * El texto del estado se capitaliza con charAt(0).toUpperCase() en lugar de
- * usar CSS text-transform, para que funcione correctamente en todos los browsers.
- */
+const STATUS_VARIANTS: Record<OrderStatus, 'discount' | 'new' | 'outOfStock'> = {
+  pendiente: 'discount',
+  confirmado: 'new',
+  'en-preparacion': 'new',
+  enviado: 'new',
+  entregado: 'new',
+  cancelado: 'outOfStock',
+};
 
 export const OrderStatusTag: React.FC<Props> = ({ status }) => {
-  let indicator = null;
-  let className = styles.statusTag;
-
-  if (status === 'cancelado') {
-    indicator = <span className={styles.statusDangerIcon} title="Cancelado"></span>;
-    className += ' ' + styles.statusDanger;
-  } else if (status === 'pendiente') {
-    indicator = <span className={styles.statusWarningIcon} title="Pendiente de pago"></span>;
-    className += ' ' + styles.statusWarning;
-  }
-
-  // Los demás estados (confirmado, en-preparacion, enviado, entregado) no
-  // tienen indicador especial: se muestran con el estilo base neutral.
-
   return (
-    <span className={className}>
-      {indicator}
-      <span className={styles.statusTagText}>{status.charAt(0).toUpperCase() + status.slice(1)}</span>
-    </span>
+    <Badge variant={STATUS_VARIANTS[status] ?? 'new'}>
+      {STATUS_LABELS[status]}
+    </Badge>
   );
 };
 
