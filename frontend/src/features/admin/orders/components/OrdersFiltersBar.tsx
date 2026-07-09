@@ -54,7 +54,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             placeholder="Buscar por cliente, email..."
                             value={filters.search}
                             onChange={e => onChange({ ...filters, search: e.target.value })}
-                            disabled={disabled}
+                            disabled={false}
                             autoComplete="off"
                         />
                     </div>
@@ -68,7 +68,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                         options={dropdownOptions}
                         value={filters.status}
                         onChange={val => onChange({ ...filters, status: val as OrderStatus | '' })}
-                        disabled={disabled}
+                        disabled={false}
                         placeholder="Todos los estados"
                     />
                 </div>
@@ -81,7 +81,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             id="order-date-from"
                             value={filters.dateFrom}
                             onChange={val => onChange({ ...filters, dateFrom: val })}
-                            disabled={disabled}
+                            disabled={false}
                         />
                     </div>
                     <div className={styles.dateFiltersSeparation}>
@@ -90,7 +90,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             id="order-date-to"
                             value={filters.dateTo}
                             onChange={val => onChange({ ...filters, dateTo: val })}
-                            disabled={disabled}
+                            disabled={false}
                         />
                     </div>
                 </div>
@@ -107,7 +107,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             placeholder="0"
                             value={filters.totalMin}
                             onChange={e => onChange({ ...filters, totalMin: e.target.value })}
-                            disabled={disabled}
+                            disabled={false}
                         />
                     </div>
                     <div className={styles.totalFiltersSeparation}>
@@ -120,7 +120,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                             placeholder="Sin límite"
                             value={filters.totalMax}
                             onChange={e => onChange({ ...filters, totalMax: e.target.value })}
-                            disabled={disabled}
+                            disabled={false}
                         />
                     </div>
                 </div>
