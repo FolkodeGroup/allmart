@@ -10,7 +10,7 @@ import { Router } from 'express';
 import * as ctrl from '../../controllers/admin/auditLogsController';
 import { authMiddleware } from '../../middlewares/auth';
 import { requireRole } from '../../middlewares/permissions';
-import { UserRole } from '../../types';
+import { UserRole, AuthenticatedRequest } from '../../types'; // 🟢 CORRECCIÓN: Importamos AuthenticatedRequest
 import * as auditService from '../../services/auditService';
 import { sendSuccess } from '../../utils/response';
 
@@ -23,8 +23,9 @@ router.use(requireRole(UserRole.ADMIN, UserRole.EDITOR));
 // GET /api/admin/audit-logs — Consulta de logs en el panel de administración
 router.get('/', ctrl.getLogs);
 
-// 🟢 NUEVO: POST /api/admin/audit-logs — Recibe y registra logs de auditoría enviados desde el cliente
-router.post('/', async (req, res) => {
+// POST /api/admin/audit-logs — Recibe y registra logs de auditoría enviados desde el cliente
+// 🟢 CORRECCIÓN: Tipamos "req" de forma explícita como AuthenticatedRequest para resolver el error del linter
+router.post('/', async (req: AuthenticatedRequest, res) => {
   try {
     const { action, entity, entityId, details } = req.body;
     

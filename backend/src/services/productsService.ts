@@ -79,7 +79,7 @@ async function updateProductCategories(productId: string, categoryIds: string[])
 async function updateProductTags(productId: string, tags: string[]): Promise<void> {
   const uniqueTags = Array.from(new Set(tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
 
-  // 1. Desvincular tags que no correspondan
+  // 1. Desvincular de manera atómica los tags antiguos que ya no corresponden
   await prisma.productTag.deleteMany({
     where: {
       productId,
@@ -87,21 +87,25 @@ async function updateProductTags(productId: string, tags: string[]): Promise<voi
     }
   });
 
-  // 2. Insertar/Vincular los nuevos
-  for (const tagName of uniqueTags) {
-    const tag = await prisma.tag.upsert({
-      where: { name: tagName },
-      update: {},
-      create: { name: tagName }
-    });
+  // 2. Ejecutar los upserts de forma paralela en la base de datos (concurrencia sin bloqueos secuenciales)
+  if (uniqueTags.length > 0) {
+    await Promise.all(
+      uniqueTags.map(async (tagName) => {
+        const tag = await prisma.tag.upsert({
+          where: { name: tagName },
+          update: {},
+          create: { name: tagName }
+        });
 
-    await prisma.productTag.upsert({
-      where: {
-        productId_tagId: { productId, tagId: tag.id }
-      },
-      update: {},
-      create: { productId, tagId: tag.id }
-    });
+        await prisma.productTag.upsert({
+          where: {
+            productId_tagId: { productId, tagId: tag.id }
+          },
+          update: {},
+          create: { productId, tagId: tag.id }
+        });
+      })
+    );
   }
 }
 
@@ -109,7 +113,7 @@ async function updateProductFeatures(productId: string, features: string[]): Pro
   // Limpiar features existentes para este producto
   await prisma.productFeature.deleteMany({ where: { productId } });
 
-  // Insertar nuevas features respetando el orden
+  // Insertar nuevas de una sola vez mediante createMany (1 sola consulta en lugar de un bucle de consultas individuales)
   if (features.length > 0) {
     await prisma.productFeature.createMany({
       data: features.map((desc, idx) => ({
