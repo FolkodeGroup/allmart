@@ -1,6 +1,7 @@
 /**
  * services/productVariantsService.ts
- * Lógica de negocio para variantes de producto usando el nuevo esquema relacional (ProductOption y ProductOptionValue).
+ * Lógica de negocio para variantes de producto usando un Diff inteligente no destructivo
+ * para proteger las relaciones relacionales de SKU ante eliminaciones en cascada.
  */
 
 import { prisma } from '../config/prisma';
@@ -104,15 +105,31 @@ export async function updateVariant(
     });
 
     if (valuesArray !== undefined) {
-      await tx.productOptionValue.deleteMany({
+      // 1. Obtener valores que ya existen actualmente en la base de datos
+      const existingValues = await tx.productOptionValue.findMany({
         where: { optionId: variantId }
       });
 
-      if (valuesArray.length > 0) {
+      const incomingNames = valuesArray.map(v => v.trim()).filter(Boolean);
+
+      // 2. Identificar qué valores fueron eliminados por el usuario
+      const toDelete = existingValues.filter(ev => !incomingNames.includes(ev.name));
+      if (toDelete.length > 0) {
+        await tx.productOptionValue.deleteMany({
+          where: {
+            id: { in: toDelete.map(d => d.id) }
+          }
+        });
+      }
+
+      // 3. Identificar qué valores son nuevos y deben crearse
+      const existingNames = existingValues.map(ev => ev.name);
+      const toCreate = incomingNames.filter(name => !existingNames.includes(name));
+      if (toCreate.length > 0) {
         await tx.productOptionValue.createMany({
-          data: valuesArray.map((val: string) => ({
+          data: toCreate.map(name => ({
             optionId: variantId,
-            name: val
+            name
           }))
         });
       }
@@ -128,7 +145,6 @@ export async function updateVariant(
 }
 
 export async function deleteVariant(productId: string, variantId: string): Promise<void> {
-  // Optimización: Unica consulta de eliminación atómica
   const result = await prisma.productOption.deleteMany({
     where: {
       id: variantId,

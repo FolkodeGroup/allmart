@@ -1,11 +1,10 @@
 /**
  * backend/src/services/productSkusService.ts
- * Servicio para gestión de SKUs y variantes de producto.
+ * Servicio para gestión de SKUs con Logs de Diagnóstico integrados para depuración.
  */
 
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
-
 
 export interface Sku {
   id: string;
@@ -30,6 +29,7 @@ export interface ProductSkuRow {
   productId: string;
   sku: string;
   attributes: Record<string, string>;
+  variant?: string;
   images?: string[];
   stock: number;
   price?: number | null;
@@ -87,18 +87,21 @@ function toDto(row: any): ProductSkuRow {
     price = Number(row.product.price);
   }
 
+  const variant = Object.values(attributes).join(' / ') || '—';
+
   return {
     id: row.id,
     productId: row.productId,
     sku: row.sku,
     attributes,
+    variant,
     images,
     stock: row.stock,
     price,
     isActive: row.isActive,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-  };
+  } as any;
 }
 
 function ensureModelAvailable(): void {
@@ -120,7 +123,10 @@ export async function getSkusByProduct(productId: string): Promise<ProductSkuRow
       productSkuImages: { select: { id: true } }
     }
   });
-  return rows.map(toDto);
+
+  const mapped = rows.map(toDto);
+
+  return mapped;
 }
 
 export async function getSkuById(productId: string, skuId: string): Promise<ProductSkuRow> {
@@ -146,6 +152,7 @@ export async function createSku(
 ): Promise<ProductSkuRow> {
   ensureModelAvailable();
   
+
   const exists = await prisma.product.findUnique({ where: { id: productId } });
   if (!exists) throw createError('Producto no encontrado', 404);
 
@@ -161,7 +168,6 @@ export async function createSku(
     throw createError('El SKU ya está en uso', 409);
   }
 
-  // Interceptación de valores negativos antes de la DB
   const parsedPrice = dto.price !== undefined ? parseSafePrice(dto.price) : undefined;
   if (parsedPrice !== undefined && parsedPrice !== null && parsedPrice < 0) {
     throw createError('El precio de la variante no puede ser negativo', 400);
@@ -170,7 +176,7 @@ export async function createSku(
     throw createError('El stock de la variante no puede ser negativo', 400);
   }
 
-  const attrs = dto.attributes ?? {};
+  const attrs = dto.attributes || (dto as any).attributeValues || (dto as any).options || (dto as any).specs || {};
 
   return await prisma.$transaction(async (tx) => {
     const product = await tx.product.findUnique({
@@ -191,6 +197,7 @@ export async function createSku(
     });
 
     for (const [optionName, valueName] of Object.entries(attrs)) {
+      
       let option = await tx.productOption.findUnique({
         where: { productId_name: { productId, name: optionName } }
       });
@@ -201,11 +208,11 @@ export async function createSku(
       }
 
       let optionValue = await tx.productOptionValue.findUnique({
-        where: { optionId_name: { optionId: option.id, name: valueName } }
+        where: { optionId_name: { optionId: option.id, name: valueName as string } }
       });
       if (!optionValue) {
         optionValue = await tx.productOptionValue.create({
-          data: { optionId: option.id, name: valueName }
+          data: { optionId: option.id, name: valueName as string }
         });
       }
 
@@ -253,7 +260,6 @@ export async function updateSku(
     }
   }
 
-  // Interceptación de valores negativos antes de la DB
   const parsedPrice = dto.price !== undefined ? parseSafePrice(dto.price) : undefined;
   if (parsedPrice !== undefined && parsedPrice !== null && parsedPrice < 0) {
     throw createError('El precio de la variante no puede ser negativo', 400);
@@ -286,12 +292,15 @@ export async function updateSku(
       data: dataToUpdate
     });
 
-    if (dto.attributes !== undefined) {
+    const attrs = dto.attributes || (dto as any).attributeValues || (dto as any).options || (dto as any).specs;
+    
+
+    if (attrs !== undefined) {
       await tx.productSkuValue.deleteMany({
         where: { skuId }
       });
 
-      for (const [optionName, valueName] of Object.entries(dto.attributes)) {
+      for (const [optionName, valueName] of Object.entries(attrs)) {
         let option = await tx.productOption.findUnique({
           where: { productId_name: { productId, name: optionName } }
         });
@@ -302,16 +311,16 @@ export async function updateSku(
         }
 
         let optionValue = await tx.productOptionValue.findUnique({
-          where: { optionId_name: { optionId: option.id, name: valueName } }
+          where: { optionId_name: { optionId: option.id, name: valueName as string } }
         });
         if (!optionValue) {
           optionValue = await tx.productOptionValue.create({
-            data: { optionId: option.id, name: valueName }
+            data: { optionId: option.id, name: valueName as string }
           });
         }
 
         await tx.productSkuValue.create({
-          data: { skuId, optionValueId: optionValue.id }
+          data: { skuId: skuId, optionValueId: optionValue.id }
         });
       }
     }

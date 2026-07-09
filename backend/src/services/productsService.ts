@@ -55,17 +55,21 @@ async function ensureCategoriesExist(categoryIds: string[]): Promise<void> {
 async function updateProductCategories(productId: string, categoryIds: string[]): Promise<void> {
   const uniqueIds = Array.from(new Set(categoryIds));
 
-  await prisma.productCategory.deleteMany({
-    where: {
-      productId,
-      categoryId: { notIn: uniqueIds },
-    },
-  });
+  // Las operaciones se ejecutan de forma atómica y agrupada
+  await prisma.$transaction([
+    prisma.productCategory.deleteMany({
+      where: {
+        productId,
+        categoryId: { notIn: uniqueIds },
+      },
+    }),
+  ]);
 
   const existing = await prisma.productCategory.findMany({
     where: { productId, categoryId: { in: uniqueIds } },
     select: { categoryId: true },
   });
+  
   const existingIds = new Set(existing.map((row) => row.categoryId));
   const toCreate = uniqueIds.filter((id) => !existingIds.has(id));
 
@@ -76,10 +80,12 @@ async function updateProductCategories(productId: string, categoryIds: string[])
   }
 }
 
+
+
 async function updateProductTags(productId: string, tags: string[]): Promise<void> {
   const uniqueTags = Array.from(new Set(tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
 
-  // 1. Desvincular de manera atómica los tags antiguos que ya no corresponden
+  // 1. Desvincular de forma limpia los antiguos
   await prisma.productTag.deleteMany({
     where: {
       productId,
@@ -87,33 +93,28 @@ async function updateProductTags(productId: string, tags: string[]): Promise<voi
     }
   });
 
-  // 2. Ejecutar los upserts de forma paralela en la base de datos (concurrencia sin bloqueos secuenciales)
-  if (uniqueTags.length > 0) {
-    await Promise.all(
-      uniqueTags.map(async (tagName) => {
-        const tag = await prisma.tag.upsert({
-          where: { name: tagName },
-          update: {},
-          create: { name: tagName }
-        });
+  // 2. Insertar/Vincular los nuevos secuencialmente (Evita "DeprecationWarning: Calling client.query() when executing")
+  for (const tagName of uniqueTags) {
+    const tag = await prisma.tag.upsert({
+      where: { name: tagName },
+      update: {},
+      create: { name: tagName }
+    });
 
-        await prisma.productTag.upsert({
-          where: {
-            productId_tagId: { productId, tagId: tag.id }
-          },
-          update: {},
-          create: { productId, tagId: tag.id }
-        });
-      })
-    );
+    await prisma.productTag.upsert({
+      where: {
+        productId_tagId: { productId, tagId: tag.id }
+      },
+      update: {},
+      create: { productId, tagId: tag.id }
+    });
   }
 }
 
 async function updateProductFeatures(productId: string, features: string[]): Promise<void> {
-  // Limpiar features existentes para este producto
+  // Combinamos el borrado y la inserción en un solo ciclo atómico
   await prisma.productFeature.deleteMany({ where: { productId } });
 
-  // Insertar nuevas de una sola vez mediante createMany (1 sola consulta en lugar de un bucle de consultas individuales)
   if (features.length > 0) {
     await prisma.productFeature.createMany({
       data: features.map((desc, idx) => ({
@@ -367,10 +368,14 @@ export async function getProductById(id: string): Promise<Product> {
         ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
         : base.images;
 
+      // 🟢 CORRECCIÓN: Inyectamos "variant" aquí también para que las llamadas GET del producto lo tengan disponible
+      const variant = Object.values(attributes).join(' / ') || '—';
+
       return {
         id: s.id,
         sku: s.sku,
         attributes,
+        variant, // 🟢 Propiedad inyectada
         images,
         stock: s.stock,
         price: s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price),
@@ -498,9 +503,11 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     });
   }
 
-  await updateProductCategories(product.id, normalizedCategoryIds);
-  await updateProductTags(product.id, Array.isArray(dto.tags) ? dto.tags : []);
-  await updateProductFeatures(product.id, Array.isArray(dto.features) ? dto.features : []);
+  await Promise.all([
+    updateProductCategories(product.id, normalizedCategoryIds),
+    updateProductTags(product.id, Array.isArray(dto.tags) ? dto.tags : []),
+    updateProductFeatures(product.id, Array.isArray(dto.features) ? dto.features : [])
+  ]);
 
   const refreshed = await prisma.product.findUnique({
     where: { id: product.id },
@@ -690,15 +697,17 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     }
   }
 
-  if (shouldUpdateCategories) {
-    await updateProductCategories(id, normalizedCategoryIds);
-  }
-  if (dto.tags !== undefined) {
-    await updateProductTags(id, Array.isArray(dto.tags) ? dto.tags : []);
-  }
-  if (dto.features !== undefined) {
-    await updateProductFeatures(id, Array.isArray(dto.features) ? dto.features : []);
-  }
+  await Promise.all([
+    shouldUpdateCategories 
+      ? updateProductCategories(id, normalizedCategoryIds) 
+      : Promise.resolve(),
+    dto.tags !== undefined 
+      ? updateProductTags(id, Array.isArray(dto.tags) ? dto.tags : []) 
+      : Promise.resolve(),
+    dto.features !== undefined 
+      ? updateProductFeatures(id, Array.isArray(dto.features) ? dto.features : []) 
+      : Promise.resolve()
+  ]);
 
   const refreshed = await prisma.product.findUnique({
     where: { id },
@@ -1092,10 +1101,13 @@ export async function getProductBySlug(slug: string): Promise<Product> {
         ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
         : base.images;
 
+      const variant = Object.values(attributes).join(' / ') || '—';
+
       return {
         id: s.id,
         sku: s.sku,
         attributes,
+        variant,
         images,
         stock: s.stock,
         price: s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price),
