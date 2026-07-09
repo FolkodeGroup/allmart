@@ -8,6 +8,161 @@
   gap: 1.5rem;
 }
 
+/* ── Theme-aware modals ───────────────────────────────── */
+.modalOverlay {
+  background: var(--admin-confirm-modal-overlay);
+  backdrop-filter: blur(6px);
+}
+
+.modalPanel {
+  background: var(--admin-confirm-modal-bg);
+  color: var(--admin-confirm-modal-text);
+  border: 1px solid var(--admin-confirm-modal-border);
+  box-shadow: var(--admin-confirm-modal-shadow);
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.875rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.modalActions > button {
+  min-width: 140px;
+}
+
+.modalPrimaryButton,
+.modalSecondaryButton,
+.modalDangerButton {
+  border-radius: 12px;
+  padding: 0.85rem 1.15rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+
+.modalPrimaryButton {
+  background: var(--admin-confirm-danger-bg);
+  color: var(--admin-confirm-danger-text);
+  border: 1px solid var(--admin-confirm-danger-border);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.modalPrimaryButton:hover:not(:disabled) {
+  background: var(--admin-confirm-danger-hover-bg);
+  border-color: var(--admin-confirm-danger-hover-bg);
+  transform: translateY(-1px);
+}
+
+.modalSecondaryButton {
+  background: var(--admin-confirm-cancel-bg);
+  color: var(--admin-confirm-cancel-text);
+  border: 1px solid var(--admin-confirm-cancel-border);
+}
+
+.modalSecondaryButton:hover:not(:disabled) {
+  background: var(--admin-confirm-cancel-hover-bg);
+  transform: translateY(-1px);
+}
+
+.modalDangerButton {
+  background: var(--admin-confirm-danger-bg);
+  color: var(--admin-confirm-danger-text);
+  border: 1px solid var(--admin-confirm-danger-border);
+}
+
+.modalDangerButton:hover:not(:disabled) {
+  background: var(--admin-confirm-danger-hover-bg);
+  border-color: var(--admin-confirm-danger-hover-bg);
+  transform: translateY(-1px);
+}
+
+.modalPrimaryButton:focus-visible,
+.modalSecondaryButton:focus-visible,
+.modalDangerButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 118, 146, 130), 0.24);
+}
+
+.modalPrimaryButton:disabled,
+.modalSecondaryButton:disabled,
+.modalDangerButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.modalContentText {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--admin-confirm-modal-text-muted);
+  text-align: center;
+}
+
+.detailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.detailLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--admin-confirm-modal-text-muted);
+}
+
+.detailValue {
+  color: var(--admin-confirm-modal-text);
+  line-height: 1.5;
+}
+
+.detailLink {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.detailLink:hover {
+  text-decoration: underline;
+}
+
+.detailMessage {
+  margin: 0;
+  color: var(--admin-confirm-modal-text);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.notesTextarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  padding: 10px 12px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.875rem;
+  box-sizing: border-box;
+}
+
+.notesTextarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
+}
+
 /* ── Header ─────────────────────────────────────────────── */
 .header {
   display: flex;
@@ -277,9 +432,21 @@
   color: #fff;
 }
 
+.unreadBadgeStatusmodal {
+  background: var(--color-error-mode);
+  color: #fff;
+  max-width: 17%;
+}
+
 .readBadge {
   background: var(--color-primary);
   color: #fff;
+}
+
+.readBadgemodal {
+  background: var(--color-primary);
+  color: #fff;
+  max-width: 14%;
 }
 
 /* ── Row actions ───────────────────────────────────────── */
@@ -420,24 +587,24 @@
 }
 
 .detailLabel {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-primary);
 }
 
 .detailValue {
   font-size: 0.875rem;
-  color: #1f2937;
+  color: var(--color-text-primary);
   word-break: break-word;
 }
 
 .detailMessage {
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--color-text-primary);
   line-height: 1.6;
   white-space: pre-wrap;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 0.75rem;
   margin: 0;
