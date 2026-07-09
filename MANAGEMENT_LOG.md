@@ -2138,3 +2138,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1242: 1212 renderizar los gráficos como tablas legibles en el pdf de reportes | 2026-07-05 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1252: 1209 permitir volver a sin tope el descuento máximo al editar una promoción | 2026-07-07 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1255: 1219 renderizado en vivo de filtros actualizar mientras se escribe | 2026-07-09 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1256: 1220 unificar estilos de estados de pedidos entre dashboard y vista de pedidos | 2026-07-09 |
