@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import styles from './Badge.module.css';
 
-type BadgeVariant = 'discount' | 'new' | 'outOfStock'| 'limited';
+type BadgeVariant = 'discount' | 'new' | 'outOfStock'| 'limited' | 'warning';
 
 interface BadgeProps {
   variant?: BadgeVariant;

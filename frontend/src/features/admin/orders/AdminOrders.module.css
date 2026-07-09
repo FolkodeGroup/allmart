@@ -14,7 +14,6 @@
 .statusTag {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
   padding: 0.2em 0.7em;
   border-radius: var(--radius-full);
   font-weight: 600;
