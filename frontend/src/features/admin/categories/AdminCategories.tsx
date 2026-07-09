@@ -155,11 +155,11 @@ export function AdminCategories() {
   };
 
   const handleNew = () => {
-    navigate('/admin/categories/nueva');
+    navigate('/admin/categorias/nueva')
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/admin/categories/${id}/editar`);
+    navigate(`/admin/categorias/${id}/editar`);
   };
 
   const validateImageFile = (file: File) => {
