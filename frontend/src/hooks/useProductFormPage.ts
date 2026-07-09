@@ -81,38 +81,43 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     useEffect(() => {
         const initForm = async () => {
             setLoading(true);
-            if (productId) {
-                const p = getProduct(productId);
-                if (p) {
-                    const { id: _id, ...rest } = p;
-                    void _id;
-                    const variants = await loadProductVariants(productId);
-                    const loadedForm = { ...rest, variants: variants || [] };
-                    const normalizedCategoryIds =
-                        Array.isArray(loadedForm.categoryIds) && loadedForm.categoryIds.length > 0
-                            ? loadedForm.categoryIds
-                            : loadedForm.category?.id
-                                ? [loadedForm.category.id]
-                                : [];
-                    const formWithCategories = { ...loadedForm, categoryIds: normalizedCategoryIds };
-                    setForm(formWithCategories);
-                    setInitialForm(formWithCategories);
-                    loadImages(productId);
+            try {
+                if (productId) {
+                    const p = getProduct(productId);
+                    if (p) {
+                        const { id: _id, ...rest } = p;
+                        void _id;
+                        const variants = await loadProductVariants(productId);
+                        const loadedForm = { ...rest, variants: variants || [] };
+                        const normalizedCategoryIds =
+                            Array.isArray(loadedForm.categoryIds) && loadedForm.categoryIds.length > 0
+                                ? loadedForm.categoryIds
+                                : loadedForm.category?.id
+                                    ? [loadedForm.category.id]
+                                    : [];
+                        const formWithCategories = { ...loadedForm, categoryIds: normalizedCategoryIds };
+                        setForm(formWithCategories);
+                        setInitialForm(formWithCategories);
+                        loadImages(productId);
+                    }
+                } else {
+                    const newForm = { ...EMPTY_FORM };
+                    const recentDefaults = getMostRecentDefaults();
+                    if (recentDefaults) {
+                        newForm.stock = recentDefaults.stock;
+                        newForm.inStock = recentDefaults.visible;
+                    }
+                    setForm(newForm);
+                    setInitialForm(newForm);
+                    clearImages();
                 }
-            } else {
-                const newForm = { ...EMPTY_FORM };
-                const recentDefaults = getMostRecentDefaults();
-                if (recentDefaults) {
-                    newForm.stock = recentDefaults.stock;
-                    newForm.inStock = recentDefaults.visible;
-                }
-                setForm(newForm);
-                setInitialForm(newForm);
-                clearImages();
+                setError('');
+                setFieldErrors({});
+            } catch (err) {
+                console.error('Error inicializando el formulario de productos:', err);
+            } finally {
+                setLoading(false);
             }
-            setError('');
-            setFieldErrors({});
-            setLoading(false);
         };
         initForm();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -146,8 +151,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     }, [form, initialForm, onUnsavedChanges, shallowCompareRelevantFields]);
 
     // ── Stable field setter — KEY FIX for focus bug ────────────────────────
-    // Using useCallback with no deps on `form` prevents reference churn;
-    // child inputs receive the same function reference each render.
     const setField = useCallback(<K extends keyof Omit<AdminProduct, 'id'>>(
         key: K,
         value: Omit<AdminProduct, 'id'>[K]
@@ -159,7 +162,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             delete next[key as string];
             return next;
         });
-    }, []); // stable reference — no deps needed because setForm is stable
+    }, []);
 
     // ── Validation ─────────────────────────────────────────────────────────
     const validateForm = useCallback((): boolean => {
@@ -195,24 +198,36 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
                 const { images: _omitted, ...formWithoutImages } = sanitizedForm;
                 void _omitted;
                 await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
-                logAdminActivity({
-                    timestamp: new Date().toISOString(),
-                    user: userEmail,
-                    action: 'edit',
-                    entity: 'product',
-                    entityId: productId,
-                    details: { ...formWithoutImages },
-                });
+                
+                // 🟢 CORRECCIÓN: Aislamos de forma segura sin usar .catch() ya que logAdminActivity no devuelve un Promise.
+                try {
+                    logAdminActivity({
+                        timestamp: new Date().toISOString(),
+                        user: userEmail,
+                        action: 'edit',
+                        entity: 'product',
+                        entityId: productId,
+                        details: { ...formWithoutImages },
+                    });
+                } catch (auditErr) {
+                    console.warn('[Audit Log Warning] Registro de auditoría omitido de manera segura:', auditErr);
+                }
             } else {
                 const created = await addProduct(sanitizedForm) as AdminProduct;
-                logAdminActivity({
-                    timestamp: new Date().toISOString(),
-                    user: userEmail,
-                    action: 'create',
-                    entity: 'product',
-                    entityId: created?.id,
-                    details: { ...sanitizedForm },
-                });
+                
+                // 🟢 CORRECCIÓN: Aislamos de manera segura aquí también.
+                try {
+                    logAdminActivity({
+                        timestamp: new Date().toISOString(),
+                        user: userEmail,
+                        action: 'create',
+                        entity: 'product',
+                        entityId: created?.id,
+                        details: { ...sanitizedForm },
+                    });
+                } catch (auditErr) {
+                    console.warn('[Audit Log Warning] Registro de auditoría omitido de manera segura:', auditErr);
+                }
             }
             onSuccess();
         } catch (err) {
@@ -332,7 +347,8 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             setShowAddImgForm(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
             await refreshCurrentPage();
-        } catch {
+        } catch (err) {
+            console.error('Error durante la subida de imagen:', err);
             setImgError('Error al subir la imagen');
         }
     }, [imgFile, imgNewAlt, productId, uploadImage, refreshCurrentPage]);
@@ -345,17 +361,25 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             setDeletingImgId(imageId);
             try {
                 await deleteImage(productId, imageId);
-                logAdminActivity({
-                    timestamp: new Date().toISOString(),
-                    user: userEmail,
-                    action: 'delete',
-                    entity: 'product-image',
-                    entityId: imageId,
-                    details: { productId },
-                });
+                
+                // 🟢 CORRECCIÓN: Envolvemos en try-catch síncrono en lugar de encadenar .catch().
+                // Esto erradica el error de "Cannot read properties of undefined (reading 'catch')".
+                try {
+                    logAdminActivity({
+                        timestamp: new Date().toISOString(),
+                        user: userEmail,
+                        action: 'delete',
+                        entity: 'product-image',
+                        entityId: imageId,
+                        details: { productId },
+                    });
+                } catch (auditErr) {
+                    console.warn('[Audit Log Warning] Registro de auditoría omitido de manera segura:', auditErr);
+                }
+
                 await refreshCurrentPage();
-            } catch {
-                // error surfaced via context
+            } catch (err) {
+                console.error('Error eliminando la imagen:', err);
             } finally {
                 setDeletingImgId(null);
             }

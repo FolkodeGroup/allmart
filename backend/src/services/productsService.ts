@@ -447,7 +447,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
         }
 
         // Caso B: Imagen local duplicada (Clonamos metadatos de R2 para no duplicar storage físico)
-        const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
+        const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
         if (isLocalImageMatch) {
           const existingImageId = isLocalImageMatch[1];
           const existingImg = await prisma.productImageStorage.findUnique({
@@ -634,7 +634,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
             };
           }
 
-          const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
+          const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
           if (isLocalImageMatch) {
             const existingImageId = isLocalImageMatch[1];
             let existingImg: any = existingImages.find(img => img.id === existingImageId);
