@@ -10,12 +10,23 @@ export function useAdminTheme() {
 
   useEffect(() => {
     localStorage.setItem('admin-theme', theme);
-    // Los modales se renderizan por portal en document.body, por eso el tema
-    // del admin también se refleja en body para que los confirm/warning tomen
-    // los colores correctos en modo claro y oscuro.
-    document.body.setAttribute('data-admin-theme', theme);
+    
+    // Aplicamos los estilos según el tema activo en el panel administrador
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
+      document.body.setAttribute('data-admin-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
+      document.body.setAttribute('data-admin-theme', 'light');
+    }
 
+    // Limpieza estricta: al desmontar el layout de administración (salida al sitio público),
+    // removemos cualquier clase o propiedad oscura global del navegador.
     return () => {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
       document.body.removeAttribute('data-admin-theme');
     };
   }, [theme]);
