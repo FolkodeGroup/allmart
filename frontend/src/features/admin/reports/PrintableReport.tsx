@@ -25,7 +25,6 @@ export interface PrintableReportProps {
     };
 }
 
-const BarChart = React.lazy(() => import('./components/BarChart'));
 const DonutChart = React.lazy(() => import('./components/DonutChart'));
 
 const PRINT_PAGE_WIDTH = 794;
