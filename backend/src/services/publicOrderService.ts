@@ -18,7 +18,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const normalizedEmail = customer.email.trim().toLowerCase();
-  
+
   if (!emailRegex.test(normalizedEmail)) {
     throw createError('Email inválido', 400);
   }
@@ -54,7 +54,7 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
 
   // 1. Ejecución de la transacción de Base de Datos
   const result = await prisma.$transaction(async (tx) => {
-    
+
     // CRM: Upsert del Customer basado en Email
     const customerRecord = await tx.customer.upsert({
       where: { email: normalizedEmail },
@@ -98,7 +98,8 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
       let updatedStock: number;
       let realSkuId: string | null;
 
-      if (skuId) {
+      // Se añade la validación para ignorar "original" y tratarlo como producto base
+      if (skuId && skuId !== 'original' && skuId !== 'null') {
         const updatedSku = await tx.productSku.update({
           where: { id: skuId },
           data: { stock: { decrement: item.quantity } }

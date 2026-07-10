@@ -38,7 +38,7 @@ export function HomePage() {
     try {
       const data = await publicCollectionsService.getHomeCollections();
       
-      // Extraer slugs de todos los productos de todas las colecciones para traer sus imágenes reales
+      // Extraer slugs de todos los productos de todas las colecciones
       const allSlugs = data
         .flatMap(col => col.products?.map(p => p.slug) || [])
         .filter(Boolean);
@@ -56,17 +56,18 @@ export function HomePage() {
                 ? first 
                 : (first && typeof first === 'object' && typeof first.url === 'string' ? first.url : '');
               if (url) {
-                imageMap.set(p.slug, url);
+                // 🟢 CLAVE: Guardamos en el mapa usando el ID como clave, que es inmutable
+                imageMap.set(p.id, url);
               }
             }
           });
 
-          // Inyectar las imágenes reales de R2 sobre las colecciones
+          // Inyectar las imágenes reales de R2 sobre las colecciones usando ID
           const updatedCollections = data.map(col => ({
             ...col,
             products: col.products?.map(p => ({
               ...p,
-              imageUrl: imageMap.get(p.slug) || p.imageUrl
+              imageUrl: imageMap.get(p.id) || p.imageUrl
             }))
           }));
 
@@ -110,7 +111,7 @@ export function HomePage() {
       />
       <AboutSection />
 
-      {/* Secciones de Colecciones - Dinámicas con degradación vertical */}
+      {/* Secciones de Colecciones */}
       {loading && (
         <section className="collection-section collection-section--primary">
           <div className="section-inner">

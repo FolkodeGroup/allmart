@@ -13,6 +13,8 @@ import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { ProductSelector } from './ProductSelector';
 import { apiFetch } from '../../../utils/apiClient';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
+import { useAdminProducts } from '../../../context/useAdminProductsContext';
+import { normalizeImageUrl } from '../../../utils/imageUrl';
 import styles from './AdminCollections.module.css';
 
 type RequiredFieldKey = 'name' | 'slug' | 'displayPosition' | 'productIds';
@@ -65,6 +67,8 @@ interface Props {
 }
 
 const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }) => {
+  const { products: liveProducts } = useAdminProducts();
+
   const [formData, setFormData] = useState<{
     name: string;
     slug: string;
@@ -538,13 +542,20 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                 setFormData({ ...formData, productIds });
                 setFieldErrors((prev) => ({ ...prev, productIds: undefined }));
               }}
+              // 🟢 MEJORA: Realiza la búsqueda cruzada por ID usando los productos cargados en el Admin
               initialProducts={
-                collection?.products?.map((p) => ({
-                  id: p.id,
-                  name: p.name,
-                  price: p.price,
-                  imageUrl: p.imageUrl,
-                })) ?? []
+                collection?.products?.map((p) => {
+                  const liveProduct = liveProducts.find((lp) => lp.id === p.id);
+                  const liveImageUrl = liveProduct?.images?.[0];
+                  return {
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    imageUrl: liveImageUrl && !liveImageUrl.includes('placeholder.png')
+                      ? liveImageUrl
+                      : (normalizeImageUrl(p.imageUrl) ?? undefined),
+                  };
+                }) ?? []
               }
             />
             {fieldErrors.productIds && (

@@ -40,7 +40,7 @@ function getProductCategoryIds(product: Product): string[] {
 
 /**
  * Resuelve la mejor imagen posible para un producto de colección.
- * Utiliza la URL del R2 de Cloudflare resuelta en el lote, y tiene como respaldo la búsqueda en memoria de productos activos.
+ * Utiliza el mapeo por ID y tiene como respaldo la cuadrícula en vivo.
  */
 function getCollectionProductImage(
   product: { id: string; imageUrl?: ImageUrlCandidate }, 
@@ -171,7 +171,6 @@ export function ProductListPage() {
   }, []);
 
   /* Cargar colecciones de categoría cuando se selecciona una categoría */
-  /* NOTA: Se integra búsqueda en vivo cruzada para que carguen siempre las imágenes correctas de R2 */
   useEffect(() => {
     if (!selectedCategory) {
       setCategoryCollections([]);
@@ -204,17 +203,18 @@ export function ProductListPage() {
                   ? first
                   : (first && typeof first === 'object' && typeof first.url === 'string' ? first.url : '');
                 if (url) {
-                  imageMap.set(p.slug, url);
+                  // 🟢 CLAVE: Guardamos en el mapa usando el ID como clave
+                  imageMap.set(p.id, url);
                 }
               }
             });
 
-            // Enriquecer la colección del banner con las imágenes en vivo
+            // Enriquecer la colección del banner con las imágenes en vivo usando ID
             const updatedCollections = collections.map((col) => ({
               ...col,
               products: col.products?.map((p) => ({
                 ...p,
-                imageUrl: imageMap.get(p.slug) || p.imageUrl,
+                imageUrl: imageMap.get(p.id) || p.imageUrl,
               })),
             }));
 

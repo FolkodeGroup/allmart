@@ -114,16 +114,18 @@ export async function addItem(
 ): Promise<CartDTO> {
   const cart = await findOrCreateCart(sessionId);
 
-  // Validación de seguridad para prevenir cantidades nulas o negativas
   if (quantity <= 0) {
     throw createError('La cantidad a agregar debe ser mayor a cero', 400);
   }
+
+  // Normalización preventiva de "original" o "null"
+  const normalizedSkuId = (productSkuId && productSkuId !== 'original' && productSkuId !== 'null') ? productSkuId : null;
 
   const existingItem = await prisma.cartItem.findFirst({
     where: { 
       cartId: cart.id, 
       productId,
-      productSkuId: productSkuId ?? null,
+      productSkuId: normalizedSkuId,
     },
   });
 
@@ -137,7 +139,7 @@ export async function addItem(
       data: { 
         cartId: cart.id, 
         productId, 
-        productSkuId: productSkuId ?? null,
+        productSkuId: normalizedSkuId,
         quantity,
       },
     });
@@ -158,12 +160,13 @@ export async function updateItem(
   }
 
   const cart = await findOrCreateCart(sessionId);
+  const normalizedSkuId = (productSkuId && productSkuId !== 'original' && productSkuId !== 'null') ? productSkuId : null;
 
   const item = await prisma.cartItem.findFirst({
     where: { 
       cartId: cart.id, 
       productId,
-      productSkuId: productSkuId ?? null,
+      productSkuId: normalizedSkuId,
     },
   });
 
@@ -184,12 +187,13 @@ export async function removeItem(
   productSkuId: string | null
 ): Promise<CartDTO> {
   const cart = await findOrCreateCart(sessionId);
+  const normalizedSkuId = (productSkuId && productSkuId !== 'original' && productSkuId !== 'null') ? productSkuId : null;
 
   await prisma.cartItem.deleteMany({
     where: { 
       cartId: cart.id, 
       productId,
-      productSkuId: productSkuId ?? null,
+      productSkuId: normalizedSkuId,
     },
   });
 
