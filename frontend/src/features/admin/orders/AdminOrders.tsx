@@ -53,20 +53,23 @@ function AdminOrders() {
   const { filters, setFilters, hasActiveFilters, filtered, reset } = useOrdersFilters(orders)
 
   /**
-   * debouncedFilters: copia de `filters` que se actualiza con 400ms de delay.
-   * Se usa para resetear la página solo cuando el usuario deja de escribir,
-   * evitando resets en cada keystroke.
+   * debouncedSearch: solo la búsqueda tiene debouncing de 150ms para el fetch server-side.
+   * El filtrado client-side ocurre instantáneamente sin esperar.
    */
-  const [debouncedFilters, setDebouncedFilters] = useState(filters);
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+
+  /**
+   * fetchFilters: usado SOLO para el fetch server-side (con debounce).
+   * El filtrado visual en UI ocurre con `filtered` de useOrdersFilters (client-side, instantáneo).
+   */
+  const fetchFilters = useMemo(() => ({
+    ...filters,
+    search: debouncedSearch,
+  }), [filters, debouncedSearch]);
 
   /**
    * adaptedFilters: transforma el estado de filtros al formato que espera
    * useReportsExport para saber qué tipo de filtro aplicar en la exportación.
-   *
-   * Lógica:
-   *  - Si hay rango de fechas → type: 'custom'
-   *  - Si hay exactamente 1 estado seleccionado → type: 'predefined', period: ese estado
-   *  - En cualquier otro caso → type: 'predefined', period: 'todos'
    */
   const adaptedFilters = useMemo(() => {
     if (filters.dateFrom || filters.dateTo) {
@@ -86,19 +89,19 @@ function AdminOrders() {
     } as const;
   }, [filters]);
 
-  // Debounce de 400ms sobre los filtros para evitar resets de página continuos
+  // Debounce de 150ms solo para la búsqueda (para el fetch server-side)
   useEffect(() => {
     const t = setTimeout(() => {
-      setDebouncedFilters(filters);
-    }, 400);
+      setDebouncedSearch(filters.search);
+    }, 150);
 
     return () => clearTimeout(t);
-  }, [filters]);
+  }, [filters.search]);
 
-  // Volver a la primera página cada vez que los filtros (debounced) cambien
+  // Volver a la primera página cada vez que cambien los filtros
   useEffect(() => {
     setPage(1);
-  }, [debouncedFilters]);
+  }, [filters]);
 
   // ── Fetch paginado ──────────────────────────────────────────────
   /**
@@ -131,16 +134,15 @@ function AdminOrders() {
       };
 
       // Pasar búsqueda al backend (server-side)
-      if (debouncedFilters.search) params.q = debouncedFilters.search;
+      if (fetchFilters.search) params.q = fetchFilters.search;
       // Cuando hay exactamente un estado seleccionado, filtrar en el backend
-      // Con múltiples estados, el filtro client-side en useOrdersFilters se encarga
-      if (debouncedFilters.status.length === 1) params.status = debouncedFilters.status[0];
+      if (fetchFilters.status.length === 1) params.status = fetchFilters.status[0];
 
-      const res = await fetchAdminOrders(token, params);
+      const res = await fetchAdminOrders(token, params, controller.signal);
       const normalized = res.data.map(mapApiOrderToOrder);
 
       // reset=true reemplaza la lista; reset=false acumula (para load more)
-      setTotalPages(res.totalPages); // Si el backend devuelve totalPages, actualizarlo
+      setTotalPages(res.totalPages);
       setOrders(prev => reset ? normalized : [...prev, ...normalized]);
     } catch (e: unknown) {
       // Ignorar errores de abort; solo mostrar toast si fue un error real
@@ -148,13 +150,13 @@ function AdminOrders() {
     } finally {
       setIsLoading(false);
     }
-  }, [token, page, PAGE_SIZE, debouncedFilters]);
+  }, [token, page, PAGE_SIZE, fetchFilters]);
 
   // Cargar pedidos al montar y cada vez que cambien los filtros (debounced) o el token
   useEffect(() => {
     fetchOrders(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, debouncedFilters, page]);
+  }, [token, fetchFilters, page]);
 
   // Cargar más cuando el usuario avanza de página (solo si page > 1)
   /*useEffect(() => {
@@ -301,7 +303,7 @@ function AdminOrders() {
         onChange={setFilters}
         onReset={reset}
         hasActiveFilters={hasActiveFilters}
-        disabled={isLoading}
+        disabled={false}
       />
 
       {/* ── Lista de pedidos ── */}

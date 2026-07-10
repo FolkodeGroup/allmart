@@ -145,7 +145,8 @@ export function mapApiOrderToOrder(api: ApiOrder): Order {
 
 export async function fetchAdminOrders(
   token: string,
-  params: { page?: number; limit?: number; q?: string; status?: OrderStatus; paymentStatus?: PaymentStatus } = {}
+  params: { page?: number; limit?: number; q?: string; status?: OrderStatus; paymentStatus?: PaymentStatus } = {},
+  signal?: AbortSignal
 ): Promise<PaginatedApiOrders> {
   const qs = new URLSearchParams();
   if (params.page) qs.set('page', String(params.page));
@@ -155,7 +156,7 @@ export async function fetchAdminOrders(
   if (params.paymentStatus) qs.set('paymentStatus', params.paymentStatus);
 
   const url = `/api/admin/orders${qs.toString() ? `?${qs.toString()}` : ''}`;
-  const body = await apiFetch<ApiSuccess<PaginatedApiOrders>>(url, {}, token);
+  const body = await apiFetch<ApiSuccess<PaginatedApiOrders>>(url, { signal }, token);
   return body.data;
 }
 

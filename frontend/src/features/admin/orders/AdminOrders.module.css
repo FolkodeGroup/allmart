@@ -14,7 +14,6 @@
 .statusTag {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
   padding: 0.2em 0.7em;
   border-radius: var(--radius-full);
   font-weight: 600;
@@ -321,6 +320,8 @@
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
 }
+
+
 
 .searchInput::placeholder {
   color: var(--color-text-tertiary);

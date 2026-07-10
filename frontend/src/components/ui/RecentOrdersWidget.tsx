@@ -9,12 +9,12 @@ import { Link } from 'react-router-dom';
 import { formatOrderCode } from '../../utils/orders';
 
 const STATUS_COLORS = {
-  pendiente: 'new' as const,
+  pendiente: 'discount' as const,
   confirmado: 'new' as const,
   'en-preparacion': 'new' as const,
   enviado: 'new' as const,
   entregado: 'new' as const,
-  cancelado: 'discount' as const,
+  cancelado: 'outOfStock' as const,
 };
 
 export default function RecentOrdersWidget() {
