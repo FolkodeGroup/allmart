@@ -1,22 +1,11 @@
 /**
  * components/CollectionSlider.tsx
  * Carrusel de productos estilo MercadoLibre — identidad visual Allmart.
- *
- * Layout:
- *  ┌─────────────────────────────────────────────────────┐
- *  │  Título colección              Ver todos →           │
- *  ├──── ‹ ──────────── [cards ×N] ──────── › ──────────┤
- *  └─────────────────────────────────────────────────────┘
- *
- * Flechas: circulares, fuera del viewport, Allmart accent border.
- * Cards:   blancas, borde sutil, hover shadow + lift.
- * Precio:  formateado con separadores (es-AR).
- * Mobile:  flechas ocultas, swipe nativo (overflow-x scroll + snap).
  */
 
 import React, { useEffect, useId, useRef, useState, useCallback } from 'react';
 import styles from './CollectionSlider.module.css';
-import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../utils/imageUrl';
+import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
 
 export interface CollectionProduct {
   id: string;
@@ -51,6 +40,18 @@ function formatPrice(price: number | string): string {
   const num = typeof price === 'string' ? parseFloat(price) : price;
   if (isNaN(num)) return String(price);
   return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+/**
+ * Resuelve la mejor imagen posible para un producto de colección.
+ * Si el snapshot de la colección está roto o vacío, apunta a la miniatura en vivo del producto.
+ */
+function getCollectionProductImage(product: { id: string; imageUrl?: ImageUrlCandidate }) {
+  const url = normalizeImageUrl(product.imageUrl);
+  if (url && !url.includes('placeholder.png')) {
+    return url;
+  }
+  return `/api/images/products/${product.id}/thumb`;
 }
 
 // ─── Componente ────────────────────────────────────────────────────────────────
@@ -154,8 +155,9 @@ const CollectionSlider: React.FC<Props> = ({
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const t = e.currentTarget;
-    if (t.dataset.fb === '1') return;
-    t.dataset.fb = '1';
+    if (t.src === DEFAULT_IMAGE_PLACEHOLDER || t.src.startsWith('data:image/')) {
+      return;
+    }
     t.src = DEFAULT_IMAGE_PLACEHOLDER;
   };
 
@@ -296,7 +298,7 @@ const ProductCard: React.FC<CardProps> = ({
   onClick,
   onImageError,
 }) => {
-  const imageUrl = normalizeImageUrl(product.imageUrl) ?? DEFAULT_IMAGE_PLACEHOLDER;
+  const imageUrl = getCollectionProductImage(product);
   return (
     <article
       className={styles.slide}

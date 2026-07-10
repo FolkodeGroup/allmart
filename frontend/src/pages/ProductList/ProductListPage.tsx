@@ -10,6 +10,7 @@ import { fetchPublicCategories } from '../../services/categoriesService';
 import { publicCollectionsService, type PublicCollection } from '../../services/publicCollectionsService';
 import { configService, type SortOption } from '../../services/configService';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
+import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, type ImageUrlCandidate } from '../../utils/imageUrl';
 import styles from './ProductListPage.module.css';
 
 const FALLBACK_SORT_OPTIONS: SortOption[] = [
@@ -35,6 +36,33 @@ function getProductCategoryIds(product: Product): string[] {
   if (product.categoryId) ids.add(product.categoryId);
   if (product.category?.id) ids.add(product.category.id);
   return Array.from(ids);
+}
+
+/**
+ * Resuelve la mejor imagen posible para un producto de colección.
+ * Utiliza la URL del R2 de Cloudflare resuelta en el lote, y tiene como respaldo la búsqueda en memoria de productos activos.
+ */
+function getCollectionProductImage(
+  product: { id: string; imageUrl?: ImageUrlCandidate }, 
+  liveProducts: Product[]
+): string {
+  // 1. Usar el imageUrl de la colección si ya está resuelto en vivo desde R2
+  const url = normalizeImageUrl(product.imageUrl);
+  if (url && !url.includes('placeholder.png')) {
+    return url;
+  }
+
+  // 2. Respaldo: Buscar en los productos cargados en memoria en la cuadrícula de la página
+  const liveProduct = liveProducts.find((p) => p.id === product.id);
+  if (liveProduct && liveProduct.images && liveProduct.images.length > 0) {
+    const firstImg = liveProduct.images[0];
+    if (firstImg && !firstImg.includes('placeholder.png')) {
+      return firstImg;
+    }
+  }
+
+  // 3. Fallback final si no hay ninguna imagen disponible
+  return DEFAULT_IMAGE_PLACEHOLDER;
 }
 
 export function ProductListPage() {
@@ -143,18 +171,70 @@ export function ProductListPage() {
   }, []);
 
   /* Cargar colecciones de categoría cuando se selecciona una categoría */
+  /* NOTA: Se integra búsqueda en vivo cruzada para que carguen siempre las imágenes correctas de R2 */
   useEffect(() => {
-    if (selectedCategory) {
-      publicCollectionsService
-        .getCollectionsByPosition('category')
-        .then(setCategoryCollections)
-        .catch((error) => {
-          console.error('Error loading category collections:', error);
-          setCategoryCollections([]);
-        });
-    } else {
+    if (!selectedCategory) {
       setCategoryCollections([]);
+      return;
     }
+
+    let cancelled = false;
+
+    publicCollectionsService
+      .getCollectionsByPosition('category')
+      .then(async (collections) => {
+        if (cancelled) return;
+
+        // Extraer todos los slugs de los productos que componen el banner de categorías
+        const allSlugs = collections
+          .flatMap((col) => col.products?.map((p) => p.slug) || [])
+          .filter(Boolean);
+
+        if (allSlugs.length > 0) {
+          try {
+            // Consultar en lote las imágenes activas de R2 Cloudflare sin filtros de categoría
+            const productsResponse = await fetchPublicProducts({ slugs: allSlugs.join(','), limit: 50 });
+            if (cancelled) return;
+
+            const imageMap = new Map<string, string>();
+            productsResponse.data.forEach((p) => {
+              if (Array.isArray(p.images) && p.images.length > 0) {
+                const first = p.images[0];
+                const url = typeof first === 'string'
+                  ? first
+                  : (first && typeof first === 'object' && typeof first.url === 'string' ? first.url : '');
+                if (url) {
+                  imageMap.set(p.slug, url);
+                }
+              }
+            });
+
+            // Enriquecer la colección del banner con las imágenes en vivo
+            const updatedCollections = collections.map((col) => ({
+              ...col,
+              products: col.products?.map((p) => ({
+                ...p,
+                imageUrl: imageMap.get(p.slug) || p.imageUrl,
+              })),
+            }));
+
+            setCategoryCollections(updatedCollections);
+          } catch (fetchErr) {
+            console.error('Error fetching live product images for category collections:', fetchErr);
+            setCategoryCollections(collections);
+          }
+        } else {
+          setCategoryCollections(collections);
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading category collections:', error);
+        if (!cancelled) setCategoryCollections([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedCategory]);
 
   /* Cargar colección específica cuando viene ?coleccion= en la URL */
@@ -190,25 +270,6 @@ export function ProductListPage() {
       .then(({ data, total }) => {
         setTotalProducts(total ?? null);
         const mappedProducts = data.map((p) => mapApiProductToProduct(p, categories));
-
-        /* Filtrar por "En Oferta" si está habilitado
-        if (showOnlyOnSale) {
-          mappedProducts = mappedProducts.filter((p) => activeDiscounts.has(p.id));
-        }
-        if (tag) {
-          mappedProducts = mappedProducts.filter(p =>
-            p.tags.some(t => t.toLowerCase() === tag)
-          );
-        }
-        if (showOnlyNovedad) {
-          mappedProducts = mappedProducts.filter(p =>
-            p.tags.some(t => t.toLowerCase() === 'novedad')
-          );
-        }
-
-        if (slugList.length > 0) {
-          mappedProducts = mappedProducts.filter(p => slugList.includes(p.slug));
-        }*/
 
         if (page === 1) {
           setProducts(mappedProducts);
@@ -349,29 +410,37 @@ export function ProductListPage() {
                 <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Esta colección aún no tiene productos.</p>
               ) : (
                 <div className={styles.collectionViewGrid}>
-                  {colProducts.map((product) => (
-                    <button
-                      key={product.id}
-                      type="button"
-                      className={styles.collectionViewCard}
-                      onClick={() => { window.location.href = `/producto/${product.slug}`; }}
-                    >
-                      <div className={styles.collectionViewImg}>
-                        <img
-                          src={product.imageUrl || '/placeholder.png'}
-                          alt={product.name}
-                          loading="lazy"
-                          onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
-                        />
-                      </div>
-                      <div className={styles.collectionViewCardInfo}>
-                        <p className={styles.collectionViewCardName}>{product.name}</p>
-                        <p className={styles.collectionViewCardPrice}>
-                          ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
+                  {colProducts.map((product) => {
+                    const imageUrl = getCollectionProductImage(product, products);
+                    return (
+                      <button
+                        key={product.id}
+                        type="button"
+                        className={styles.collectionViewCard}
+                        onClick={() => { window.location.href = `/producto/${product.slug}`; }}
+                      >
+                        <div className={styles.collectionViewImg}>
+                          <img
+                            src={imageUrl}
+                            alt={product.name}
+                            loading="lazy"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (target.src !== DEFAULT_IMAGE_PLACEHOLDER) {
+                                target.src = DEFAULT_IMAGE_PLACEHOLDER;
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className={styles.collectionViewCardInfo}>
+                          <p className={styles.collectionViewCardName}>{product.name}</p>
+                          <p className={styles.collectionViewCardPrice}>
+                            ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </>
@@ -402,28 +471,36 @@ export function ProductListPage() {
                   )}
                 </div>
                 <div className={styles.categoryBannerProducts}>
-                  {(collection.products ?? []).slice(0, 5).map((product) => (
-                    <button
-                      key={product.id}
-                      type="button"
-                      className={styles.categoryBannerCard}
-                      onClick={() => { window.location.href = `/producto/${product.slug}`; }}
-                      title={product.name}
-                    >
-                      <div className={styles.categoryBannerImg}>
-                        <img
-                          src={product.imageUrl || '/placeholder.png'}
-                          alt={product.name}
-                          loading="lazy"
-                          onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
-                        />
-                      </div>
-                      <p className={styles.categoryBannerProductName}>{product.name}</p>
-                      <p className={styles.categoryBannerPrice}>
-                        ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
-                      </p>
-                    </button>
-                  ))}
+                  {(collection.products ?? []).slice(0, 5).map((product) => {
+                    const imageUrl = getCollectionProductImage(product, products);
+                    return (
+                      <button
+                        key={product.id}
+                        type="button"
+                        className={styles.categoryBannerCard}
+                        onClick={() => { window.location.href = `/producto/${product.slug}`; }}
+                        title={product.name}
+                      >
+                        <div className={styles.categoryBannerImg}>
+                          <img
+                            src={imageUrl}
+                            alt={product.name}
+                            loading="lazy"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (target.src !== DEFAULT_IMAGE_PLACEHOLDER) {
+                                target.src = DEFAULT_IMAGE_PLACEHOLDER;
+                              }
+                            }}
+                          />
+                        </div>
+                        <p className={styles.categoryBannerProductName}>{product.name}</p>
+                        <p className={styles.categoryBannerPrice}>
+                          ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+                        </p>
+                      </button>
+                    );
+                  })}
                 </div>
                 <a
                   href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}

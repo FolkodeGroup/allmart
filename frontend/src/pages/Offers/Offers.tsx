@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import type { PublicPromotion, PublicCollection } from '../../services/publicCollectionsService';
 import { publicCollectionsService } from '../../services/publicCollectionsService';
+import { fetchPublicProducts } from '../../services/productsService';
 import CollectionSlider from '../../components/CollectionSlider';
 import styles from './Offers.module.css';
 import '../../styles/collections.css';
@@ -29,7 +30,42 @@ const Offers: React.FC = () => {
         publicCollectionsService.getHomeCollections(),
       ]);
       setPromotions(promosResult);
-      setCollections(collectionsResult);
+
+      // Extraer todos los slugs para la búsqueda cruzada de imágenes reales en R2
+      const allSlugs = collectionsResult
+        .flatMap(col => col.products?.map(p => p.slug) || [])
+        .filter(Boolean);
+
+      if (allSlugs.length > 0) {
+        try {
+          const productsResponse = await fetchPublicProducts({ slugs: allSlugs.join(','), limit: 100 });
+          const imageMap = new Map<string, string>();
+          productsResponse.data.forEach(p => {
+            if (Array.isArray(p.images) && p.images.length > 0) {
+              const first = p.images[0];
+              const url = typeof first === 'string' 
+                ? first 
+                : (first && typeof first === 'object' && typeof first.url === 'string' ? first.url : '');
+              if (url) {
+                imageMap.set(p.slug, url);
+              }
+            }
+          });
+
+          const updatedCollections = collectionsResult.map(col => ({
+            ...col,
+            products: col.products?.map(p => ({
+              ...p,
+              imageUrl: imageMap.get(p.slug) || p.imageUrl
+            }))
+          }));
+          setCollections(updatedCollections);
+        } catch {
+          setCollections(collectionsResult);
+        }
+      } else {
+        setCollections(collectionsResult);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error cargando ofertas');
       console.error('Error loading offers:', err);
@@ -74,7 +110,7 @@ const Offers: React.FC = () => {
       {collections.length > 0 && (
         <section className={styles.section}>
           <h2>Colecciones Especiales</h2>
-            <div className={styles.collectionsGrid}>
+          <div className={styles.collectionsGrid}>
             {collections.map((collection, index) => {
               const isEven = index % 2 === 0;
               const themeClass = isEven ? 'collection-section--primary' : 'collection-section--inverse';

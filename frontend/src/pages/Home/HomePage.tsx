@@ -5,6 +5,7 @@ import type { PublicCollection } from '../../services/publicCollectionsService';
 import { publicCollectionsService } from '../../services/publicCollectionsService';
 import type { PublicBanner } from '../../services/publicBannersService';
 import { publicBannersService } from '../../services/publicBannersService';
+import { fetchPublicProducts } from '../../services/productsService';
 import CollectionSlider from '../../components/CollectionSlider';
 import '../../styles/collections.css';
 import BannerSlider from '../../components/BannerSlider';
@@ -17,7 +18,6 @@ export function HomePage() {
     () => publicCollectionsService.getCached() ?? []
   );
   
-  // SE MODIFICA: Se remueve la ordenación manual por displayOrder del caché inicial
   const [banners, setBanners] = useState<PublicBanner[]>(
     () => publicBannersService.getCached() ?? []
   );
@@ -37,23 +37,61 @@ export function HomePage() {
     setError(null);
     try {
       const data = await publicCollectionsService.getHomeCollections();
-      setCollections(data);
+      
+      // Extraer slugs de todos los productos de todas las colecciones para traer sus imágenes reales
+      const allSlugs = data
+        .flatMap(col => col.products?.map(p => p.slug) || [])
+        .filter(Boolean);
+
+      if (allSlugs.length > 0) {
+        try {
+          // Consultar en lote las imágenes en vivo desde R2
+          const productsResponse = await fetchPublicProducts({ slugs: allSlugs.join(','), limit: 100 });
+          
+          const imageMap = new Map<string, string>();
+          productsResponse.data.forEach(p => {
+            if (Array.isArray(p.images) && p.images.length > 0) {
+              const first = p.images[0];
+              const url = typeof first === 'string' 
+                ? first 
+                : (first && typeof first === 'object' && typeof first.url === 'string' ? first.url : '');
+              if (url) {
+                imageMap.set(p.slug, url);
+              }
+            }
+          });
+
+          // Inyectar las imágenes reales de R2 sobre las colecciones
+          const updatedCollections = data.map(col => ({
+            ...col,
+            products: col.products?.map(p => ({
+              ...p,
+              imageUrl: imageMap.get(p.slug) || p.imageUrl
+            }))
+          }));
+
+          setCollections(updatedCollections);
+        } catch (fetchErr) {
+          console.error('Error al sincronizar imágenes en vivo para las colecciones del Home:', fetchErr);
+          setCollections(data);
+        }
+      } else {
+        setCollections(data);
+      }
     } catch (err) {
       console.error('Error loading home collections:', err);
-      setError(null); // No mostrar error al usuario, solo en console
+      setError(null);
     } finally {
       setLoading(false);
     }
   }
 
-  // SE MODIFICA: Se remueve la ordenación por displayOrder de la respuesta del servicio
   async function loadBanners() {
     try {
       const data = await publicBannersService.getActiveBanners();
       setBanners(data);
     } catch (err) {
       console.error('Error loading banners:', err);
-      // No mostrar error al usuario - los banners son opcionales
     }
   }
 
@@ -71,7 +109,6 @@ export function HomePage() {
         limit={4}
       />
       <AboutSection />
-
 
       {/* Secciones de Colecciones - Dinámicas con degradación vertical */}
       {loading && (
@@ -111,7 +148,6 @@ export function HomePage() {
       )}
 
       <ContactForm />
-
       <Benefits />
     </main>
   );

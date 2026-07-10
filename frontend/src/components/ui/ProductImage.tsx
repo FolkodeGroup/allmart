@@ -104,7 +104,12 @@ export const ProductImage: React.FC<ProductImageProps> = ({
           }}
           onLoad={() => setLoaded(true)}
           onError={e => {
-            (e.currentTarget as HTMLImageElement).src = placeholder;
+            const target = e.currentTarget as HTMLImageElement;
+            // Disyuntor para evitar bucle si el marcador de posición también falla
+            if (target.src === placeholder || target.src.startsWith('data:image/')) {
+              return;
+            }
+            target.src = placeholder;
             setLoaded(true);
           }}
         />
