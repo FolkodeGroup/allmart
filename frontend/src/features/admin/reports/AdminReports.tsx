@@ -476,6 +476,27 @@ export function AdminReports() {
     if (page > maxPage) setPage(maxPage || 1);
   }, [filteredOrdersTable, pageSize, page]);
 
+
+  const exportBarData = useMemo(() => {
+    if (barData.length <= 30) return barData;
+
+    const groupSize = Math.ceil(barData.length / 30);
+
+    const result = [];
+
+    for (let i = 0; i < barData.length; i += groupSize) {
+      const chunk = barData.slice(i, i + groupSize);
+
+      result.push({
+        dateKey: chunk[0].dateKey,
+        label: `${chunk[0].label} - ${chunk[chunk.length - 1].label}`,
+        value: chunk.reduce((sum, d) => sum + d.value, 0),
+      });
+    }
+
+    return result;
+  }, [barData]);
+
   const salesContent = useMemo(() => {
     if (salesViewMode === 'chart') {
       return (
@@ -575,6 +596,35 @@ export function AdminReports() {
           >
             {exportingExcel ? 'Generando Excel…' : 'Descargar Excel'}
           </button>
+          {/* 🆕 BOTÓN PDF */}
+          <button
+            type="button"
+            className={styles.exportResumeBtn}
+            style={{ marginLeft: 8 }}
+            disabled={pdfLoading}
+            onClick={async () => {
+              try {
+                // aseguramos vista correcta del gráfico
+                if (salesViewMode !== 'chart') {
+                  setSalesViewMode('chart');
+                  await new Promise(res => setTimeout(res, 300));
+                }
+
+                // 👇 ESTO DISPARA TODO TU FLUJO ACTUAL
+                setShowHiddenPdf(true);
+
+              } catch (err) {
+                console.error(err);
+                setNotif({
+                  open: true,
+                  type: 'error',
+                  message: 'Error al iniciar exportación PDF.'
+                });
+              }
+            }}
+          >
+            {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
+          </button>
         </div>
         {/* Contenedor invisible para exportación PDF fiel */}
         {showHiddenPdf && (
@@ -583,7 +633,7 @@ export function AdminReports() {
               ref={hiddenPdfRef}
               filters={filters}
               metrics={metrics}
-              barData={barData}
+              barData={exportBarData}
               statusSlices={statusSlices}
               periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
               ordersTableProps={{ orders: filteredOrdersTable }}
@@ -592,7 +642,6 @@ export function AdminReports() {
         )}
 
       </div>
-
       {/* KPI Cards */}
       {
         isLoading ? (
