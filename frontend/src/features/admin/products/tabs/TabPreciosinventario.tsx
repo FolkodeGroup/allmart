@@ -138,18 +138,6 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                 </label>
             </div>
 
-            <div className={styles.checkRow} style={{ marginTop: '0.75rem' }}>
-                <input
-                    type="checkbox"
-                    id="isFeatured"
-                    checked={form.isFeatured || false}
-                    onChange={e => setField('isFeatured', e.target.checked)}
-                    style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
-                />
-                <label htmlFor="isFeatured" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                    Marcar como producto destacado
-                </label>
-            </div>
         </fieldset>
     );
 });
