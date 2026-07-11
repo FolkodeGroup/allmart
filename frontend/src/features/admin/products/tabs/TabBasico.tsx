@@ -97,6 +97,22 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
         validateField('slug', newSlug);
     }, [setField, validateField]);
 
+    const toggleTag = useCallback((tag: string, checked: boolean) => {
+        const nextTags = checked
+            ? (form.tags.includes(tag) ? form.tags : [...form.tags, tag])
+            : form.tags.filter(t => t !== tag);
+        setField('tags', nextTags);
+    }, [form.tags, setField]);
+
+    const handleFeaturedToggle = useCallback((checked: boolean) => {
+        setField('isFeatured', checked);
+        if (checked) {
+            toggleTag('destacado', true);
+        } else {
+            toggleTag('destacado', false);
+        }
+    }, [setField, toggleTag]);
+
     return (
         <>
             <fieldset className={styles.fieldset}>
@@ -208,22 +224,40 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                 <legend className={styles.legend}>Etiquetas</legend>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="product-tags">Agregar etiqueta</label>
-                    <div className={styles.field}>
-                        <label className={styles.fieldCheckbox}>
-                            <input
-                                type="checkbox"
-                                checked={form.tags.includes('novedad')}
-                                onChange={(e) => {
-                                    if (e.target.checked) {
-                                        if (!form.tags.includes('novedad')) {
-                                            setField('tags', [...form.tags, 'novedad']);
-                                        }
-                                    } else {
-                                        setField('tags', form.tags.filter(t => t !== 'novedad'));
-                                    }
-                                }}
-                            />
-                            Marcar como Novedad
+                    <div className={styles.checkRow} style={{ marginTop: '0.25rem' }}>
+                        <input
+                            type="checkbox"
+                            id="product-offer"
+                            checked={form.tags.includes('oferta')}
+                            onChange={(e) => toggleTag('oferta', e.target.checked)}
+                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                        />
+                        <label htmlFor="product-offer" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            En Oferta
+                        </label>
+                    </div>
+                    <div className={styles.checkRow} style={{ marginTop: '0.5rem' }}>
+                        <input
+                            type="checkbox"
+                            id="product-novedad"
+                            checked={form.tags.includes('novedad')}
+                            onChange={(e) => toggleTag('novedad', e.target.checked)}
+                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                        />
+                        <label htmlFor="product-novedad" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            Novedad
+                        </label>
+                    </div>
+                    <div className={styles.checkRow} style={{ marginTop: '0.5rem' }}>
+                        <input
+                            type="checkbox"
+                            id="product-featured"
+                            checked={form.isFeatured || false}
+                            onChange={(e) => handleFeaturedToggle(e.target.checked)}
+                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                        />
+                        <label htmlFor="product-featured" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            Producto Destacado
                         </label>
                     </div>
                     <div className={styles.tagRow}>
