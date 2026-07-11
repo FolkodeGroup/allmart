@@ -129,14 +129,14 @@ function AdminOrders() {
     setIsLoading(true);
     try {
       const params: Record<string, string | number> = {
-        page: reset ? 1 : page,
+        page,
         limit: PAGE_SIZE,
       };
 
       // Pasar búsqueda al backend (server-side)
       if (fetchFilters.search) params.q = fetchFilters.search;
-      // Cuando hay exactamente un estado seleccionado, filtrar en el backend
-      if (fetchFilters.status.length === 1) params.status = fetchFilters.status[0];
+      // Pasar estado al backend (server-side)
+      if (fetchFilters.status) params.status = fetchFilters.status;
 
       const res = await fetchAdminOrders(token, params, controller.signal);
       const normalized = res.data.map(mapApiOrderToOrder);
