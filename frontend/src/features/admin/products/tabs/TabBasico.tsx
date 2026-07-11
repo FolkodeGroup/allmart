@@ -6,7 +6,7 @@ import {
     getInlineFieldError,
     calculateNameQualityScore,
 } from '../../../../utils/productFormUtils';
-import { ValidationHelper, SkuSuggestion} from '../components/ValidationHelper';
+import { ValidationHelper, SkuSuggestion } from '../components/ValidationHelper';
 import styles from '../AdminProductFormPage.module.css';
 
 export type TabBasicoRef = {
@@ -186,7 +186,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             success={!!(form.slug && !localErrors.slug)}
                         />
                     )}
-                    
+
                 </div>
 
                 <div className={styles.field}>
