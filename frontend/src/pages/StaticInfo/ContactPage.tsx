@@ -191,7 +191,7 @@ export function ContactPage() {
             <div className={styles.fieldControl}>
               <input
                 id="contact-full-name"
-                className={`${styles.fieldInput} ${getFieldStatus('fullName') === 'valid' ? styles.fieldValid : ''} ${getFieldStatus('fullName') === 'invalid' ? styles.fieldInvalid : ''}`}
+                className={`${styles.regretfieldInput} ${getFieldStatus('fullName') === 'valid' ? styles.fieldValid : ''} ${getFieldStatus('fullName') === 'invalid' ? styles.fieldInvalid : ''}`}
                 name="fullName"
                 type="text"
                 value={form.fullName}
