@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ProductImage } from '../../components/ui/ProductImage';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
+import { CartPriceDisplay } from '../../components/ui/CartPriceDisplay/CartPriceDisplay';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
 import styles from './CartPage.module.css';
 
@@ -43,6 +44,14 @@ export function CartPage() {
 
   const shippingThreshold = 50000;
   const freeShipping = totalPrice >= shippingThreshold;
+
+  // Calcular el monto total original sin descuentos
+  const totalWithoutDiscount = items.reduce((sum, i) => {
+    return sum + i.product.price * i.quantity;
+  }, 0);
+
+  // Monto total ahorrado con descuentos
+  const totalSavings = totalWithoutDiscount - totalPrice;
   return (
     <main className={styles.page}>
       <h1 className={styles.heading}>
@@ -55,7 +64,7 @@ export function CartPage() {
       <div className={styles.layout}>
         {/* ── Lista de ítems ── */}
         <ul className={styles.itemList} aria-label="Productos en el carrito">
-          {items.map(({ product, quantity }) => (
+          {items.map(({ product, quantity, discount }) => (
             <li key={product.id} className={styles.item}>
               <Link to={`/producto/${product.slug}`}>
                 <ProductImage
@@ -88,6 +97,8 @@ export function CartPage() {
                 ) : (
                   <span className={styles.itemCategory}>{product.category.name}</span>
                 )}
+
+                {/* Mostrar precio unitario simple */}
                 <span className={styles.itemUnitPrice}>
                   {formatPrice(product.price)} c/u
                 </span>
@@ -123,9 +134,20 @@ export function CartPage() {
               </div>
 
               <div className={styles.itemRight}>
-                <span className={styles.itemSubtotal}>
-                  {formatPrice(product.price * quantity)}
-                </span>
+                <div className={styles.itemSubtotalContainer}>
+                  {discount ? (
+                    <CartPriceDisplay
+                      originalPrice={product.price}
+                      discount={discount}
+                      quantity={quantity}
+                      showDiscountBadge={true}
+                    />
+                  ) : (
+                    <span className={styles.itemSubtotal}>
+                      {formatPrice(product.price * quantity)}
+                    </span>
+                  )}
+                </div>
                 <button
                   className={styles.removeBtn}
                   onClick={() => removeFromCart(product.id)}
@@ -145,8 +167,15 @@ export function CartPage() {
 
           <div className={styles.summaryRow}>
             <span>Subtotal ({totalItems} {totalItems === 1 ? 'ítem' : 'ítems'})</span>
-            <span>{formatPrice(totalPrice)}</span>
+            <span>{formatPrice(totalWithoutDiscount)}</span>
           </div>
+
+          {totalSavings > 0 && (
+            <div className={styles.summaryRow} style={{ color: '#10b981', fontWeight: 500 }}>
+              <span>Descuentos</span>
+              <span>-{formatPrice(totalSavings)}</span>
+            </div>
+          )}
 
           <div className={styles.summaryRow}>
             <span>Envío</span>

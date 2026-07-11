@@ -314,6 +314,7 @@ export function ProductDetailPage() {
           selectedAttributes: {},
         },
         quantity,
+        discount: dynamicDiscount,
       });
     } else {
       const imagesForCart =
@@ -343,7 +344,7 @@ export function ProductDetailPage() {
           selectedAttributes: selectedVariants,
         };
 
-      addToCart({ product: productForCart, quantity });
+      addToCart({ product: productForCart, quantity, discount: dynamicDiscount });
     }
 
     setAddedFeedback(true);
@@ -520,10 +521,8 @@ export function ProductDetailPage() {
             {(() => {
               const basePrice = selectedSku?.price ?? product.price;
               if (dynamicDiscount) {
-                const final = dynamicDiscount.finalPrice && dynamicDiscount.originalPrice === product.price
-                  ? Math.max(0, Math.round((basePrice / product.price) * dynamicDiscount.finalPrice))
-                  : dynamicDiscount.finalPrice;
-                return <ProductPrice price={final} size="lg" />;
+                // Pasar el descuento a ProductPrice para que lo muestre correctamente
+                return <ProductPrice price={basePrice} discount={dynamicDiscount} size="lg" />;
               }
               return <ProductPrice price={basePrice} size="lg" />;
             })()}

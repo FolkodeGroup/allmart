@@ -1,6 +1,7 @@
 .priceBlock {
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.5em;
   margin: 0.5em 0;
 }
@@ -16,27 +17,68 @@
   font-size: 1rem;
   color: #a3a3a3;
   text-decoration: line-through;
-  margin-left: 0.5em;
+  font-weight: 400;
+}
+
+.discountedContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 
 .discountBadge {
   background: #ef4444;
   color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 0.5em;
-  padding: 0.1em 0.7em;
-  margin-left: 0.5em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 6px;
   letter-spacing: 0.5px;
   display: inline-block;
+}
+
+.sm {
+  gap: 0.25em;
 }
 
 .sm .currentPrice {
   font-size: 1.1rem;
 }
+
+.sm .originalPrice {
+  font-size: 0.85rem;
+}
+
+.sm .discountBadge {
+  font-size: 0.7rem;
+  padding: 1px 4px;
+}
+
+.md {
+  gap: 0.5em;
+}
+
 .md .currentPrice {
   font-size: 1.5rem;
 }
+
+.md .originalPrice {
+  font-size: 1rem;
+}
+
+.lg {
+  gap: 0.75em;
+}
+
 .lg .currentPrice {
   font-size: 2rem;
+}
+
+.lg .originalPrice {
+  font-size: 1.25rem;
+}
+
+.lg .discountBadge {
+  font-size: 0.95rem;
+  padding: 4px 8px;
 }
