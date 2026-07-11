@@ -2,9 +2,31 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { TabBasico } from '../TabBasico';
+import type { SetField } from '../components/types';
+
+interface TestFormState {
+    name: string;
+    slug: string;
+    description: string;
+    shortDescription: string;
+    price: number;
+    images: string[];
+    category: { id: string; name: string; slug: string; isVisible: boolean };
+    categoryIds: string[];
+    tags: string[];
+    rating: number;
+    reviewCount: number;
+    inStock: boolean;
+    isFeatured: boolean;
+    sku: string;
+    features: string[];
+    stock: number;
+    variants: unknown[];
+    primarySupplierId: string | null;
+}
 
 function TestHarness() {
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<TestFormState>({
         name: 'Producto demo',
         slug: 'producto-demo',
         description: '',
@@ -25,15 +47,15 @@ function TestHarness() {
         primarySupplierId: null as string | null,
     });
 
-    const setField = (key: string, value: unknown) => {
-        setForm((prev) => ({ ...prev, [key]: value } as typeof prev));
+    const setField: SetField = (key, value) => {
+        setForm((prev) => ({ ...prev, [key]: value }));
     };
 
     return (
         <TabBasico
-            form={form as any}
+            form={form}
             errors={{}}
-            setField={setField as any}
+            setField={setField}
             tagInput=""
             setTagInput={vi.fn()}
             featureInput=""
