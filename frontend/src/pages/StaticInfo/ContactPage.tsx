@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import type { ChangeEvent, FormEvent, FocusEvent } from 'react';
 import { Modal } from '../../components/ui/Modal';
 import { StaticInfoLayout, type StaticInfoSection } from './StaticInfoLayout';
 import styles from './ContactPage.module.css';
@@ -66,21 +66,81 @@ export function ContactPage() {
     return 'contacto@allmart.com.ar';
   }, []);
 
-  const isValid =
-    form.fullName.trim().length > 2 &&
-    form.email.trim().includes('@') &&
-    form.message.trim().length >= 10;
+  const fullNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+
+  const [touchedFields, setTouchedFields] = useState({
+    fullName: false,
+    email: false,
+    message: false,
+  });
+
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const getFieldError = (field: 'fullName' | 'email' | 'message', value: string) => {
+    const trimmed = value.trim();
+    if (field === 'fullName') {
+      if (trimmed.length === 0) return 'Ingresá tu nombre y apellido.';
+      if (trimmed.length < 3) return 'El nombre debe tener al menos 3 caracteres.';
+      return '';
+    }
+    if (field === 'email') {
+      if (trimmed.length === 0) return 'Ingresá tu correo electrónico.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Ingresá un correo válido.';
+      return '';
+    }
+    if (field === 'message') {
+      if (trimmed.length === 0) return 'Ingresá tu mensaje.';
+      if (trimmed.length < 10) return 'El mensaje debe tener al menos 10 caracteres.';
+      return '';
+    }
+    return '';
+  };
+
+  const fieldErrors = {
+    fullName: getFieldError('fullName', form.fullName),
+    email: getFieldError('email', form.email),
+    message: getFieldError('message', form.message),
+  };
+
+  const isFormValid = !fieldErrors.fullName && !fieldErrors.email && !fieldErrors.message;
+
+  const getFieldStatus = (field: 'fullName' | 'email' | 'message') => {
+    const error = fieldErrors[field];
+    if (error && (touchedFields[field] || submitAttempted)) return 'invalid';
+    if (!error && (touchedFields[field] || submitAttempted)) return 'valid';
+    return undefined;
+  };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (submitAttempted || name === 'fullName' || name === 'email' || name === 'message') {
+      setTouchedFields((prev) => ({ ...prev, [name]: true }));
+    }
+  };
+
+  const handleBlur = (event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name } = event.target;
+    if (name === 'fullName' || name === 'email' || name === 'message') {
+      setTouchedFields((prev) => ({ ...prev, [name]: true }));
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitAttempted(true);
+    setTouchedFields({ fullName: true, email: true, message: true });
 
-    if (!isValid) {
-      setStatusMessage('Completá nombre, email válido y un mensaje de al menos 10 caracteres.');
+    if (!isFormValid) {
+      if (fieldErrors.fullName) {
+        fullNameRef.current?.focus();
+      } else if (fieldErrors.email) {
+        emailRef.current?.focus();
+      } else if (fieldErrors.message) {
+        messageRef.current?.focus();
+      }
       return;
     }
 
@@ -89,6 +149,8 @@ export function ContactPage() {
     setStatusMessage('Se abrió tu cliente de correo para enviar la consulta al equipo de Allmart.');
     setIsModalOpen(false);
     setForm(INITIAL_FORM);
+    setTouchedFields({ fullName: false, email: false, message: false });
+    setSubmitAttempted(false);
   };
 
   return (
@@ -112,40 +174,80 @@ export function ContactPage() {
         title="Enviar consulta"
         showCloseButton
         size="md"
+        ariaDescribedBy="contact-form-note"
       >
-        <form className={styles.formGrid} onSubmit={handleSubmit}>
-          <p className={styles.helperText}>
+        <form className={styles.formGrid} onSubmit={handleSubmit} noValidate aria-describedby="contact-form-note">
+          <p id="contact-form-note" className={styles.helperText}>
             El correo será enviado a <span className={styles.emailText}>{contactEmail}</span>
+          </p>
+          <p className={styles.requiredNote}>
+            <span className={styles.requiredMarker}>*</span> Campos obligatorios
           </p>
 
           <div className={styles.fieldGroup}>
             <label className={styles.fieldLabel} htmlFor="contact-full-name">
-              Nombre y apellido
+              Nombre y apellido <span className={styles.requiredMarker}>*</span>
             </label>
-            <input
-              id="contact-full-name"
-              className={styles.fieldInput}
-              name="fullName"
-              type="text"
-              value={form.fullName}
-              onChange={handleChange}
-              required
-            />
+            <div className={styles.fieldControl}>
+              <input
+                id="contact-full-name"
+                className={`${styles.fieldInput} ${getFieldStatus('fullName') === 'valid' ? styles.fieldValid : ''} ${getFieldStatus('fullName') === 'invalid' ? styles.fieldInvalid : ''}`}
+                name="fullName"
+                type="text"
+                value={form.fullName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Tu nombre completo"
+                required
+                aria-required="true"
+                aria-invalid={getFieldStatus('fullName') === 'invalid'}
+                aria-describedby={fieldErrors.fullName && (touchedFields.fullName || submitAttempted) ? 'contact-full-name-error' : undefined}
+                ref={fullNameRef}
+              />
+              {(getFieldStatus('fullName') === 'valid' || getFieldStatus('fullName') === 'invalid') && (
+                <span className={`${styles.validationIcon} ${getFieldStatus('fullName') === 'valid' ? styles.validationIconValid : styles.validationIconInvalid}`}>
+                  {getFieldStatus('fullName') === 'valid' ? '✓' : '⚠'}
+                </span>
+              )}
+            </div>
+            {fieldErrors.fullName && (touchedFields.fullName || submitAttempted) && (
+              <span id="contact-full-name-error" className={styles.fieldError} role="alert">
+                {fieldErrors.fullName}
+              </span>
+            )}
           </div>
 
           <div className={styles.fieldGroup}>
             <label className={styles.fieldLabel} htmlFor="contact-email">
-              Correo electrónico
+              Correo electrónico <span className={styles.requiredMarker}>*</span>
             </label>
-            <input
-              id="contact-email"
-              className={styles.fieldInput}
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
+            <div className={styles.fieldControl}>
+              <input
+                id="contact-email"
+                className={`${styles.fieldInput} ${getFieldStatus('email') === 'valid' ? styles.fieldValid : ''} ${getFieldStatus('email') === 'invalid' ? styles.fieldInvalid : ''}`}
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="tu@email.com"
+                required
+                aria-required="true"
+                aria-invalid={getFieldStatus('email') === 'invalid'}
+                aria-describedby={fieldErrors.email && (touchedFields.email || submitAttempted) ? 'contact-email-error' : undefined}
+                ref={emailRef}
+              />
+              {(getFieldStatus('email') === 'valid' || getFieldStatus('email') === 'invalid') && (
+                <span className={`${styles.validationIcon} ${getFieldStatus('email') === 'valid' ? styles.validationIconValid : styles.validationIconInvalid}`}>
+                  {getFieldStatus('email') === 'valid' ? '✓' : '⚠'}
+                </span>
+              )}
+            </div>
+            {fieldErrors.email && (touchedFields.email || submitAttempted) && (
+              <span id="contact-email-error" className={styles.fieldError} role="alert">
+                {fieldErrors.email}
+              </span>
+            )}
           </div>
 
           <div className={styles.fieldGroup}>
@@ -159,6 +261,7 @@ export function ContactPage() {
               type="text"
               value={form.orderNumber}
               onChange={handleChange}
+              placeholder="Ej: 123456"
             />
           </div>
 
@@ -173,22 +276,40 @@ export function ContactPage() {
               type="text"
               value={form.subject}
               onChange={handleChange}
-              placeholder="Ej: Consulta por envio"
+              placeholder="Ej: Consulta por envío"
             />
           </div>
 
           <div className={styles.fieldGroup}>
             <label className={styles.fieldLabel} htmlFor="contact-message">
-              Mensaje
+              Mensaje <span className={styles.requiredMarker}>*</span>
             </label>
-            <textarea
-              id="contact-message"
-              className={styles.fieldTextarea}
-              name="message"
-              value={form.message}
-              onChange={handleChange}
-              required
-            />
+            <div className={styles.fieldControl}>
+              <textarea
+                id="contact-message"
+                className={`${styles.fieldTextarea} ${getFieldStatus('message') === 'valid' ? styles.fieldValid : ''} ${getFieldStatus('message') === 'invalid' ? styles.fieldInvalid : ''}`}
+                name="message"
+                value={form.message}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Contanos cómo podemos ayudarte..."
+                required
+                aria-required="true"
+                aria-invalid={getFieldStatus('message') === 'invalid'}
+                aria-describedby={fieldErrors.message && (touchedFields.message || submitAttempted) ? 'contact-message-error' : undefined}
+                ref={messageRef}
+              />
+              {(getFieldStatus('message') === 'valid' || getFieldStatus('message') === 'invalid') && (
+                <span className={`${styles.validationIcon} ${getFieldStatus('message') === 'valid' ? styles.validationIconValid : styles.validationIconInvalid}`}>
+                  {getFieldStatus('message') === 'valid' ? '✓' : '⚠'}
+                </span>
+              )}
+            </div>
+            {fieldErrors.message && (touchedFields.message || submitAttempted) && (
+              <span id="contact-message-error" className={styles.fieldError} role="alert">
+                {fieldErrors.message}
+              </span>
+            )}
           </div>
 
           <div className={styles.modalActions}>
