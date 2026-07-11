@@ -231,7 +231,8 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         <div className={styles.priceRow}>
           {dynamicDiscount ? (
             <ProductPrice
-              price={dynamicDiscount.finalPrice}
+              price={product.price}
+              discount={dynamicDiscount}
               size="md"
             />
           ) : (

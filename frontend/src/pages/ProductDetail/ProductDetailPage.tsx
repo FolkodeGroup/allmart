@@ -96,7 +96,7 @@ export function ProductDetailPage() {
         try {
           const { data } = await fetchPublicProducts({
             category: category.slug,
-            limit: 8 
+            limit: 8
           });
 
           if (cancelled) return;
@@ -167,7 +167,7 @@ export function ProductDetailPage() {
       Object.entries(sku.attributes || {}).forEach(([k, v]) => {
         const key = k.toLowerCase();
         const value = String(v).trim();
-        if (!value) return; 
+        if (!value) return;
 
         if (!map[key]) map[key] = new Set();
         map[key].add(value);
@@ -189,7 +189,7 @@ export function ProductDetailPage() {
 
   const matchingSku = useMemo(() => {
     if (!product?.skus) return null;
-    
+
     // 🟢 CORRECCIÓN: Si no hay selección, obligamos a que no haga match con el primer SKU para no robar el precio base
     if (Object.keys(selectedVariants).length === 0) return null;
 
@@ -255,6 +255,7 @@ export function ProductDetailPage() {
           selectedAttributes: {},
         },
         quantity,
+        discount: dynamicDiscount,
       });
     } else {
       const imagesForCart =
@@ -284,7 +285,7 @@ export function ProductDetailPage() {
           selectedAttributes: selectedVariants,
         };
 
-      addToCart({ product: productForCart, quantity });
+      addToCart({ product: productForCart, quantity, discount: dynamicDiscount });
     }
 
     setAddedFeedback(true);
@@ -453,10 +454,8 @@ export function ProductDetailPage() {
             {(() => {
               const basePrice = selectedSku?.price ?? product.price;
               if (dynamicDiscount) {
-                const final = dynamicDiscount.finalPrice && dynamicDiscount.originalPrice === product.price
-                  ? Math.max(0, Math.round((basePrice / product.price) * dynamicDiscount.finalPrice))
-                  : dynamicDiscount.finalPrice;
-                return <ProductPrice price={final} size="lg" />;
+                // Pasar el descuento a ProductPrice para que lo muestre correctamente
+                return <ProductPrice price={basePrice} discount={dynamicDiscount} size="lg" />;
               }
               return <ProductPrice price={basePrice} size="lg" />;
             })()}

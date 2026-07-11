@@ -67,10 +67,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const toggleCart = () => {};
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
-  const totalPrice = items.reduce(
-    (sum, i) => sum + i.product.price * i.quantity,
-    0
-  );
+  const totalPrice = items.reduce((sum, i) => {
+    const unitPrice = i.discount?.finalPrice ?? i.product.price;
+    return sum + unitPrice * i.quantity;
+  }, 0);
 
   return (
     <CartContext.Provider
