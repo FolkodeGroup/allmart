@@ -180,8 +180,7 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
                         </g>
                     );
                 })}
-                {/* Línea de referencia del objetivo mensual */}
-                {referenceLine}
+
 
                 {/* BARRAS */}
                 {data.map((d, i) => {
@@ -238,6 +237,8 @@ const BarChart = ({ data, formatValue, monthlyGoal }: Props) => {
                         </g>
                     );
                 })}
+                {/* Línea de referencia del objetivo mensual */}
+                {referenceLine}
                 {/* TOOLTIP */}
                 {hoveredIdx !== null && hoveredItem && (() => {
                     const step = (dynamicW - padLeft - padRight) / data.length;

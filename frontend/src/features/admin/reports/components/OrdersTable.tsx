@@ -10,6 +10,7 @@ export interface OrdersTableProps {
     total?: number;
     onPageChange?: (page: number) => void;
     onPageSizeChange?: (size: number) => void;
+    printMode?: boolean;
 }
 
 function useIsMobile() {
@@ -40,8 +41,22 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     total,
     onPageChange,
     onPageSizeChange,
+    printMode = false,
 }) => {
     const isMobile = useIsMobile();
+    const badgeStyle: React.CSSProperties = {
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
+        lineHeight: 1.2,
+        minHeight: 24,
+        whiteSpace: 'nowrap',
+        verticalAlign: 'top',
+        boxSizing: 'border-box',
+        textAlign: 'center',
+        width: 'fit-content',
+        maxWidth: '100%',
+    };
 
     // Mobile: selector de cantidad arriba, filtros 100%, paginación touch-friendly, cards con fecha dd/mm/aa
     if (isMobile) {
@@ -126,16 +141,24 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
 
     // Tabla desktop (sin cambios)
     return (
-        <div className={styles.summaryTableWrap} aria-label="Tabla de pedidos" role="region">
-            <table className={styles.summaryTable}>
+        <div
+            className={styles.summaryTableWrap}
+            aria-label="Tabla de pedidos"
+            role="region"
+            style={printMode ? { overflow: 'visible', maxHeight: 'none', margin: 0, border: '1px solid #d0d7de' } : undefined}
+        >
+            <table
+                className={styles.summaryTable}
+                style={printMode ? { fontSize: 11, borderCollapse: 'collapse' } : undefined}
+            >
                 <thead>
                     <tr>
-                        <th>N° Pedido</th>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th className={styles.tdRight}>Total</th>
-                        <th>Estado</th>
-                        <th>Pago</th>
+                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>N° Pedido</th>
+                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>Fecha</th>
+                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>Cliente</th>
+                        <th className={styles.tdRight} style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' } : undefined}>Total</th>
+                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, textAlign: 'center', width: 140 } : undefined}>Estado</th>
+                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, textAlign: 'center', width: 140 } : undefined}>Pago</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -148,24 +171,36 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
                                             : o.status === 'entregado' ? 'Entregado'
                                                 : 'Cancelado';
                         const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
+                        const statusClassName = printMode ? undefined : `${styles.stBadge} ${stClass}`;
+                        const paymentClassName = printMode ? undefined : `${styles.payBadge} ${o.paymentStatus === 'abonado' ? styles.payAbonado : styles.payPending}`;
+                        const paymentText = o.paymentStatus === 'abonado' ? '✓ Abonado' : '○ Sin abonar';
+
                         return (
                             <tr key={o.id}>
-                                <td className={styles.tblId}>#{formatOrderCode(o.id)}</td>
-                                <td className={styles.tblDate}>
+                                <td className={styles.tblId} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11 } : undefined}>#{formatOrderCode(o.id)}</td>
+                                <td className={styles.tblDate} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>
                                     {formatShortDate(o.createdAt)}
                                 </td>
-                                <td className={styles.tblCustomer}>
+                                <td className={styles.tblCustomer} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11 } : undefined}>
                                     {o.customer.firstName} {o.customer.lastName}
                                 </td>
-                                <td className={`${styles.tblTotal} ${styles.tdRight}`}>
+                                <td className={`${styles.tblTotal} ${styles.tdRight}`} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' } : undefined}>
                                     {o.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
                                 </td>
-                                <td>
-                                    <span className={`${styles.stBadge} ${stClass}`}>{statusLabel}</span>
+                                <td style={printMode ? { padding: '0.55rem 0.7rem', textAlign: 'center', whiteSpace: 'nowrap' } : undefined}>
+                                    <span
+                                        className={statusClassName}
+                                        style={printMode ? { ...badgeStyle, minWidth: 112, padding: '0', background: 'transparent', color: '#111827', fontWeight: 600, letterSpacing: '0.02em', } : undefined}
+                                    >
+                                        {statusLabel}
+                                    </span>
                                 </td>
-                                <td>
-                                    <span className={`${styles.payBadge} ${o.paymentStatus === 'abonado' ? styles.payAbonado : styles.payPending}`}>
-                                        {o.paymentStatus === 'abonado' ? '✓ Abonado' : '○ Sin abonar'}
+                                <td style={printMode ? { padding: '0.55rem 0.7rem', textAlign: 'center', whiteSpace: 'nowrap' } : undefined}>
+                                    <span
+                                        className={paymentClassName}
+                                        style={printMode ? { ...badgeStyle, minWidth: 116, padding: '0', background: 'transparent', color: '#111827', fontWeight: 600, letterSpacing: '0.02em', } : undefined}
+                                    >
+                                        {paymentText}
                                     </span>
                                 </td>
                             </tr>
