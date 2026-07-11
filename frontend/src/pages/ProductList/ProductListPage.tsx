@@ -43,7 +43,7 @@ function getProductCategoryIds(product: Product): string[] {
  * Utiliza el mapeo por ID y tiene como respaldo la cuadrícula en vivo.
  */
 function getCollectionProductImage(
-  product: { id: string; imageUrl?: ImageUrlCandidate }, 
+  product: { id: string; imageUrl?: ImageUrlCandidate },
   liveProducts: Product[]
 ): string {
   // 1. Usar el imageUrl de la colección si ya está resuelto en vivo desde R2
@@ -170,13 +170,8 @@ export function ProductListPage() {
     loadActiveDiscounts();
   }, []);
 
-  /* Cargar colecciones de categoría cuando se selecciona una categoría */
+  /* Cargar colecciones de categoría (usada tanto en listado global como por categoría) */
   useEffect(() => {
-    if (!selectedCategory) {
-      setCategoryCollections([]);
-      return;
-    }
-
     let cancelled = false;
 
     publicCollectionsService
@@ -203,7 +198,6 @@ export function ProductListPage() {
                   ? first
                   : (first && typeof first === 'object' && typeof first.url === 'string' ? first.url : '');
                 if (url) {
-                  // 🟢 CLAVE: Guardamos en el mapa usando el ID como clave
                   imageMap.set(p.id, url);
                 }
               }
@@ -218,13 +212,13 @@ export function ProductListPage() {
               })),
             }));
 
-            setCategoryCollections(updatedCollections);
+            if (!cancelled) setCategoryCollections(updatedCollections);
           } catch (fetchErr) {
             console.error('Error fetching live product images for category collections:', fetchErr);
-            setCategoryCollections(collections);
+            if (!cancelled) setCategoryCollections(collections);
           }
         } else {
-          setCategoryCollections(collections);
+          if (!cancelled) setCategoryCollections(collections);
         }
       })
       .catch((error) => {
@@ -235,7 +229,7 @@ export function ProductListPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedCategory]);
+  }, [/* run on mount and when categories/products change if needed */]);
 
   /* Cargar colección específica cuando viene ?coleccion= en la URL */
   useEffect(() => {
@@ -366,6 +360,16 @@ export function ProductListPage() {
       uncategorized,
     };
   }, [childCategories, selectedCategoryInfo, visibleProducts]);
+
+  // Mapa rápido: categoryId -> PublicCollection (colecciones con displayPosition='category')
+  const collectionByCategoryId = useMemo(() => {
+    const map = new Map<string, PublicCollection>();
+    for (const col of categoryCollections) {
+      const catId = col.params && typeof col.params.categoryId === 'string' ? (col.params.categoryId as string) : undefined;
+      if (catId) map.set(catId, col);
+    }
+    return map;
+  }, [categoryCollections]);
 
   /* Vista de colección específica */
   if (isCollectionView) {
@@ -641,11 +645,31 @@ export function ProductListPage() {
             groupedProducts ? (
               <div className={styles.groupedProducts}>
                 {groupedProducts.groups.map((group) => (
-                  <section key={group.category.id} className={styles.groupSection}>
-                    <div className={styles.groupHeader}>
-                      <h3 className={styles.groupTitle}>{group.category.name}</h3>
-                      <span className={styles.groupCount}>{group.products.length}</span>
-                    </div>
+                    <section key={group.category.id} className={styles.groupSection}>
+                      {/* Banner de colección asociada a la categoría (si existe) */}
+                      {collectionByCategoryId.has(group.category.id) && (
+                        (() => {
+                          const col = collectionByCategoryId.get(group.category.id)!;
+                          return (
+                            <div className={styles.groupCollectionBanner}>
+                              {col.imageUrl && (
+                                <div className={styles.groupCollectionImg}>
+                                  <img src={col.imageUrl} alt={col.name} />
+                                </div>
+                              )}
+                              <div className={styles.groupCollectionInfo}>
+                                <div className={styles.groupCollectionTitle}>{col.name}</div>
+                                {col.description && <div className={styles.groupCollectionDesc}>{col.description}</div>}
+                              </div>
+                              <a href={`/productos?coleccion=${encodeURIComponent(col.slug)}`} className={styles.groupCollectionViewAll}>Ver todos</a>
+                            </div>
+                          );
+                        })()
+                      )}
+                      <div className={styles.groupHeader}>
+                        <h3 className={styles.groupTitle}>{group.category.name}</h3>
+                        <span className={styles.groupCount}>{group.products.length}</span>
+                      </div>
                     <div className={styles.productsGrid}>
                       {group.products.map((product) => (
                         <ProductCard key={product.id} product={product} />

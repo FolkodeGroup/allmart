@@ -193,6 +193,62 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+/* Banner compacto para mostrar la colección asociada a una categoría */
+.groupCollectionBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.03), rgba(255,255,255,0));
+  margin-bottom: var(--space-2);
+}
+
+.groupCollectionImg {
+  width: 72px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.groupCollectionImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.groupCollectionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.groupCollectionTitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.groupCollectionDesc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.groupCollectionViewAll {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  margin-left: var(--space-2);
+  flex-shrink: 0;
+}
+
 .groupTitle {
   font-family: var(--font-heading);
   font-size: var(--text-base);
