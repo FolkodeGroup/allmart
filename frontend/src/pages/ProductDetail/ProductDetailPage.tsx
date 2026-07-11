@@ -70,6 +70,7 @@ export function ProductDetailPage() {
     setSelectedImage(0);
     setRelatedProducts([]);
     setSelectedVariants({});
+    setQuantity(1);
 
     const loadProduct = async () => {
       try {
@@ -96,7 +97,7 @@ export function ProductDetailPage() {
         try {
           const { data } = await fetchPublicProducts({
             category: category.slug,
-            limit: 8 
+            limit: 8
           });
 
           if (cancelled) return;
@@ -167,7 +168,7 @@ export function ProductDetailPage() {
       Object.entries(sku.attributes || {}).forEach(([k, v]) => {
         const key = k.toLowerCase();
         const value = String(v).trim();
-        if (!value) return; 
+        if (!value) return;
 
         if (!map[key]) map[key] = new Set();
         map[key].add(value);
@@ -189,7 +190,7 @@ export function ProductDetailPage() {
 
   const matchingSku = useMemo(() => {
     if (!product?.skus) return null;
-    
+
     // 🟢 CORRECCIÓN: Si no hay selección, obligamos a que no haga match con el primer SKU para no robar el precio base
     if (Object.keys(selectedVariants).length === 0) return null;
 
