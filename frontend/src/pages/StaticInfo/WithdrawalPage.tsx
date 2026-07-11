@@ -124,7 +124,7 @@ export function WithdrawalPage() {
             </label>
             <input
               id="withdrawal-full-name"
-              className={styles.fieldInput}
+              className={styles.regretfieldInput}
               name="fullName"
               type="text"
               value={form.fullName}
@@ -139,7 +139,7 @@ export function WithdrawalPage() {
             </label>
             <input
               id="withdrawal-email"
-              className={styles.fieldInput}
+              className={styles.regretfieldInput}
               name="email"
               type="email"
               value={form.email}
@@ -154,7 +154,7 @@ export function WithdrawalPage() {
             </label>
             <input
               id="withdrawal-order-number"
-              className={styles.fieldInput}
+              className={styles.regretfieldInput}
               name="orderNumber"
               type="text"
               value={form.orderNumber}
@@ -168,7 +168,7 @@ export function WithdrawalPage() {
             </label>
             <input
               id="withdrawal-purchase-date"
-              className={styles.fieldInput}
+              className={styles.regretfieldInput}
               name="purchaseDate"
               type="date"
               value={form.purchaseDate}
@@ -182,7 +182,7 @@ export function WithdrawalPage() {
             </label>
             <textarea
               id="withdrawal-reason"
-              className={styles.fieldTextarea}
+              className={styles.regretfieldTextarea}
               name="reason"
               value={form.reason}
               onChange={handleChange}
