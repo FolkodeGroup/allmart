@@ -9,13 +9,15 @@ import styles from './DiscountBadge.module.css';
 interface Props {
   discountPercentage?: number;
   discountAmount?: number;
-  promotionType?: string;
+  promotionType?: 'percentage' | 'fixed' | 'bogo' | string;
+  display?: 'overlay' | 'inline';
 }
 
 const DiscountBadge: React.FC<Props> = ({
   discountPercentage,
   discountAmount,
   promotionType,
+  display = 'overlay',
 }) => {
   let badgeText = '';
   if (promotionType === 'bogo') {
@@ -23,13 +25,15 @@ const DiscountBadge: React.FC<Props> = ({
   } else if (promotionType === 'percentage' && discountPercentage && discountPercentage > 0) {
     badgeText = `-${Math.round(discountPercentage)}%`;
   } else if (promotionType === 'fixed' && discountAmount && discountAmount > 0) {
-    badgeText = `-$${discountAmount.toFixed(2)}`;
+    badgeText = `-$${discountAmount.toFixed(0)}`;
   } else {
     return null;
   }
 
+  const className = display === 'inline' ? styles.inlineBadge : styles.badge;
+
   return (
-    <div className={styles.badge}>
+    <div className={className} data-promotion-type={promotionType}>
       <span className={styles.badgeText}>{badgeText}</span>
     </div>
   );
