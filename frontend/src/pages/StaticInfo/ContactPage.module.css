@@ -63,6 +63,10 @@
   font-weight: var(--font-medium);
 }
 
+.fieldControl {
+  position: relative;
+}
+
 .fieldInput,
 .fieldTextarea {
   width: 100%;
@@ -74,6 +78,48 @@
   color: #1b2c22;
   background: #fff;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.fieldValid {
+  border-color: #16a34a;
+}
+
+.fieldInvalid {
+  border-color: #dc2626;
+}
+
+.validationIcon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.validationIconValid {
+  color: #16a34a;
+}
+
+.validationIconInvalid {
+  color: #dc2626;
+}
+
+.fieldError {
+  color: #b91c1c;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.requiredNote {
+  font-family: var(--font-body);
+  color: #41584b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.requiredMarker {
+  color: #dc2626;
 }
 
 .fieldInput:focus,
@@ -105,6 +151,22 @@
   justify-content: flex-end;
   gap: var(--space-3);
   margin-top: var(--space-2);
+}
+
+.fieldInput:focus,
+.fieldTextarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(47, 95, 70, 0.14);
+}
+
+.fieldInvalid:focus,
+.fieldTextarea.fieldInvalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.fieldValid:focus,
+.fieldTextarea.fieldValid:focus {
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
 }
 
 @media (max-width: 520px) {
