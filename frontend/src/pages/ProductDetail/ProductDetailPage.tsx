@@ -16,6 +16,7 @@ import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import { ProductReviews } from '../../components/ProductReviews/ProductReviews';
 import VariantSelector from '../../components/VariantSelector/VariantSelector';
+import DiscountBadge from '../../components/DiscountBadge';
 
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
@@ -423,12 +424,19 @@ export function ProductDetailPage() {
         </div>
 
         <div className={styles.info}>
-          <div className={styles.badges}>
-            {isNew && <Badge variant="new">Nuevo</Badge>}
-          </div>
-
           <span className={styles.category}>{product.category.name}</span>
           <h1 className={styles.productName}>{product.name}</h1>
+          <div className={styles.badges}>
+            {dynamicDiscount && (
+              <DiscountBadge
+                discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
+                discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
+                promotionType={dynamicDiscount?.promotionType}
+                display="inline"
+              />
+            )}
+            {isNew && <Badge variant="new">Nuevo</Badge>}
+          </div>
 
           <div className={styles.rating}>
             <span className={styles.stars}>{renderStars(product.rating)}</span>
