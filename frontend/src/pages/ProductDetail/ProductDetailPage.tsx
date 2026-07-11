@@ -162,7 +162,8 @@ export function ProductDetailPage() {
   const isProductFavorite = product ? isFavorite(product.id) : false;
 
   const variantMap = useMemo(() => {
-    const map: Record<string, Set<string>> = {};
+    const map: Record<string, string[]> = {};
+    const seen: Record<string, Set<string>> = {};
 
     product?.skus?.forEach(sku => {
       Object.entries(sku.attributes || {}).forEach(([k, v]) => {
@@ -170,13 +171,20 @@ export function ProductDetailPage() {
         const value = String(v).trim();
         if (!value) return;
 
-        if (!map[key]) map[key] = new Set();
-        map[key].add(value);
+        if (!map[key]) {
+          map[key] = [];
+          seen[key] = new Set();
+        }
+        // Only add if not already added (preserve order, avoid duplicates)
+        if (!seen[key].has(value)) {
+          map[key].push(value);
+          seen[key].add(value);
+        }
       });
     });
 
     Object.keys(map).forEach(k => {
-      if (map[k].size === 0) delete map[k];
+      if (map[k].length === 0) delete map[k];
     });
 
     return map;
@@ -218,6 +226,55 @@ export function ProductDetailPage() {
 
       return matchesOther && getAttr(sku, attr) === value;
     });
+  }
+
+  /**
+   * Finds compatible variants and auto-selects the first compatible value
+   * for each variant group that doesn't have a selection yet.
+   */
+  function findCompatibleVariants(newSelection: Record<string, string>): Record<string, string> {
+    if (!product?.skus || Object.keys(variantMap).length === 0) {
+      return newSelection;
+    }
+
+    const result = { ...newSelection };
+
+    // Find all SKUs that match the current selection
+    const compatibleSkus = product.skus.filter(sku => {
+      return Object.entries(result).every(([k, v]) => {
+        return getAttr(sku, k) === v;
+      });
+    });
+
+    // If no compatible SKUs found, return current selection
+    if (compatibleSkus.length === 0) {
+      return result;
+    }
+
+    // For each variant group in variantMap that doesn't have a selection, auto-select the first compatible value
+    for (const attr of Object.keys(variantMap)) {
+      if (!result[attr]) {
+        // Get all possible values for this attribute from compatible SKUs
+        const possibleValues = new Set<string>();
+        compatibleSkus.forEach(sku => {
+          const value = getAttr(sku, attr);
+          if (value) {
+            possibleValues.add(value);
+          }
+        });
+
+        // Select the first available value in the original order (not alphabetical)
+        const originalOrderedValues = variantMap[attr] || [];
+        for (const value of originalOrderedValues) {
+          if (possibleValues.has(value)) {
+            result[attr] = value;
+            break;
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   function normalizeColor(value: string): string | null {
@@ -429,7 +486,8 @@ export function ProductDetailPage() {
                                 delete next[attr];
                                 return next;
                               }
-                              return { ...prev, [attr]: val };
+                              const newSelection = { ...prev, [attr]: val };
+                              return findCompatibleVariants(newSelection);
                             })
                           }
                         >
@@ -482,7 +540,7 @@ export function ProductDetailPage() {
                   key={group.id}
                   group={group}
                   selected={selectedVariants[group.id]}
-                  onSelect={(value) => setSelectedVariants(prev => ({ ...prev, [group.id]: value }))}
+                  onSelect={(value) => setSelectedVariants(prev => findCompatibleVariants({ ...prev, [group.id]: value }))}
                 />
               ))}
             </div>
