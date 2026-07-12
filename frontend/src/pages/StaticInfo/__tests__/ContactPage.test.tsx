@@ -31,7 +31,8 @@ describe('ContactPage', () => {
 
     await userEvent.click(submitButton);
 
-    expect(screen.getByText(/Ingresá un correo válido/i)).toBeInTheDocument();
+    const emailError = await screen.findByText(/Ingresá un correo válido/i);
+    expect(emailError).toBeInTheDocument();
     expect(emailInput).toHaveFocus();
   });
 });
