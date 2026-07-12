@@ -20,12 +20,12 @@ import {
 
 function prismaStatusToOrderStatus(s: string): OrderStatus {
   const map: Record<string, OrderStatus> = {
-    pendiente:        OrderStatus.PENDING,
-    confirmado:       OrderStatus.CONFIRMED,
-    en_preparacion:   OrderStatus.PROCESSING,
-    enviado:          OrderStatus.SHIPPED,
-    entregado:        OrderStatus.DELIVERED,
-    cancelado:        OrderStatus.CANCELLED,
+    pendiente: OrderStatus.PENDING,
+    confirmado: OrderStatus.CONFIRMED,
+    en_preparacion: OrderStatus.PROCESSING,
+    enviado: OrderStatus.SHIPPED,
+    entregado: OrderStatus.DELIVERED,
+    cancelado: OrderStatus.CANCELLED,
   };
   return map[s] ?? (s as OrderStatus);
 }
@@ -33,19 +33,19 @@ function prismaStatusToOrderStatus(s: string): OrderStatus {
 function prismaPaymentToPaymentStatus(s: string): PaymentStatus {
   const map: Record<string, PaymentStatus> = {
     no_abonado: PaymentStatus.UNPAID,
-    abonado:    PaymentStatus.PAID,
+    abonado: PaymentStatus.PAID,
   };
   return map[s] ?? (s as PaymentStatus);
 }
 
 function orderStatusToPrismaStatus(s: OrderStatus): any {
   const map: Record<OrderStatus, string> = {
-    [OrderStatus.PENDING]:    'pendiente',
-    [OrderStatus.CONFIRMED]:  'confirmado',
+    [OrderStatus.PENDING]: 'pendiente',
+    [OrderStatus.CONFIRMED]: 'confirmado',
     [OrderStatus.PROCESSING]: 'en_preparacion',
-    [OrderStatus.SHIPPED]:    'enviado',
-    [OrderStatus.DELIVERED]:  'entregado',
-    [OrderStatus.CANCELLED]:  'cancelado',
+    [OrderStatus.SHIPPED]: 'enviado',
+    [OrderStatus.DELIVERED]: 'entregado',
+    [OrderStatus.CANCELLED]: 'cancelado',
   };
   return map[s] ?? s;
 }
@@ -53,7 +53,7 @@ function orderStatusToPrismaStatus(s: OrderStatus): any {
 function paymentStatusToPrismaStatus(s: PaymentStatus): any {
   const map: Record<PaymentStatus, string> = {
     [PaymentStatus.UNPAID]: 'no_abonado',
-    [PaymentStatus.PAID]:   'abonado',
+    [PaymentStatus.PAID]: 'abonado',
   };
   return map[s] ?? s;
 }
@@ -77,6 +77,25 @@ function bulkActionToTargetStatus(action: AdminBulkOrderAction): OrderStatus {
   return OrderStatus.CANCELLED;
 }
 
+function getOrderItemVariant(item: any): { productSkuId?: string; sku?: string; variant?: string } {
+  const productSkuId = item.productSkuId ?? undefined;
+  const sku = item.productSku?.sku ?? undefined;
+
+  const attributes: Record<string, string> = {};
+  if (Array.isArray(item.productSku?.skuValues)) {
+    item.productSku.skuValues.forEach((sv: any) => {
+      const optionName = sv.optionValue?.option?.name;
+      const valueName = sv.optionValue?.name;
+      if (optionName && valueName) {
+        attributes[optionName] = valueName;
+      }
+    });
+  }
+
+  const variant = Object.values(attributes).join(' / ') || sku || undefined;
+  return { productSkuId, sku, variant };
+}
+
 function toOrder(row: any): Order {
   return {
     id: row.id,
@@ -93,13 +112,19 @@ function toOrder(row: any): Order {
     paidAt: row.paidAt || undefined,
     notes: row.notes ?? undefined,
     items: Array.isArray(row.orderItems)
-      ? row.orderItems.map((item: any) => ({
-        productId: item.productId || '',
-        productName: item.productName,
-        productImage: item.productImage || undefined,
-        unitPrice: Number(item.unitPrice),
-        quantity: item.quantity,
-      }))
+      ? row.orderItems.map((item: any) => {
+        const variantData = getOrderItemVariant(item);
+        return {
+          productId: item.productId || '',
+          productSkuId: variantData.productSkuId,
+          sku: variantData.sku,
+          variant: variantData.variant,
+          productName: item.productName,
+          productImage: item.productImage || undefined,
+          unitPrice: Number(item.unitPrice),
+          quantity: item.quantity,
+        };
+      })
       : [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -111,10 +136,10 @@ function toOrder(row: any): Order {
  * mitigando de raíz la deriva de datos (Data Drift) al cancelar u omitir transacciones.
  */
 async function handleCustomerMetricsOnStatusChange(
-  tx: any, 
-  customerId: string | null, 
-  oldStatus: string, 
-  newStatus: string, 
+  tx: any,
+  customerId: string | null,
+  oldStatus: string,
+  newStatus: string,
   total: number
 ) {
   if (!customerId) return;
@@ -155,8 +180,8 @@ export async function getAllOrders(query: AdminOrdersQueryDTO): Promise<Paginate
   if (q) {
     where.OR = [
       { customerFirstName: { contains: q, mode: 'insensitive' } },
-      { customerLastName:  { contains: q, mode: 'insensitive' } },
-      { customerEmail:     { contains: q, mode: 'insensitive' } },
+      { customerLastName: { contains: q, mode: 'insensitive' } },
+      { customerEmail: { contains: q, mode: 'insensitive' } },
     ];
   }
 
@@ -165,7 +190,17 @@ export async function getAllOrders(query: AdminOrdersQueryDTO): Promise<Paginate
       where,
       skip,
       take: Number(limit),
-      include: { orderItems: true },
+      include: {
+        orderItems: {
+          include: {
+            productSku: {
+              include: {
+                skuValues: { include: { optionValue: { include: { option: true } } } }
+              }
+            }
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     }),
     prisma.order.count({ where })
@@ -183,7 +218,15 @@ export async function getOrderById(id: string): Promise<AdminOrderDTO> {
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
-      orderItems: true,
+      orderItems: {
+        include: {
+          productSku: {
+            include: {
+              skuValues: { include: { optionValue: { include: { option: true } } } }
+            }
+          }
+        }
+      },
       orderStatusHistory: { orderBy: { changedAt: 'asc' } }
     }
   });
@@ -192,13 +235,19 @@ export async function getOrderById(id: string): Promise<AdminOrderDTO> {
 
   return {
     ...toOrder(order),
-    items: order.orderItems.map(item => ({
-      productId: item.productId || '',
-      productName: item.productName,
-      productImage: item.productImage || undefined,
-      unitPrice: Number(item.unitPrice),
-      quantity: item.quantity
-    })),
+    items: order.orderItems.map(item => {
+      const variantData = getOrderItemVariant(item);
+      return {
+        productId: item.productId || '',
+        productSkuId: variantData.productSkuId,
+        sku: variantData.sku,
+        variant: variantData.variant,
+        productName: item.productName,
+        productImage: item.productImage || undefined,
+        unitPrice: Number(item.unitPrice),
+        quantity: item.quantity
+      };
+    }),
     statusHistory: order.orderStatusHistory.map(h => ({
       status: prismaStatusToOrderStatus(h.status),
       changedAt: h.changedAt
@@ -304,7 +353,7 @@ export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO):
 
       await tx.order.update({ where: { id: orderId }, data: { status: targetPrismaStatus } });
       await tx.orderStatusHistory.create({ data: { orderId, status: targetPrismaStatus, note: note ?? null } });
-      
+
       // Ajustar métricas del cliente para cada pedido modificado en bloque
       await handleCustomerMetricsOnStatusChange(tx, row.customerId, row.status, targetPrismaStatus, Number(row.total));
 
@@ -325,38 +374,38 @@ export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO):
 }
 
 export async function createOrder(dto: CreateOrderDTO): Promise<Order> {
-    if (dto.total < 0) {
-      throw createError('El total del pedido no puede ser negativo', 400);
-    }
-    const row = await prisma.order.create({
-      data: {
-        customerFirstName: dto.customer.firstName,
-        customerLastName:  dto.customer.lastName,
-        customerEmail:     dto.customer.email,
-        customerPhone:     dto.customer.phone ?? null,
-        total:             dto.total,
-        notes:             dto.notes ?? null,
-        status:            'pendiente',
-        paymentStatus:     'no_abonado',
-      },
-    });
-    return toOrder(row);
+  if (dto.total < 0) {
+    throw createError('El total del pedido no puede ser negativo', 400);
+  }
+  const row = await prisma.order.create({
+    data: {
+      customerFirstName: dto.customer.firstName,
+      customerLastName: dto.customer.lastName,
+      customerEmail: dto.customer.email,
+      customerPhone: dto.customer.phone ?? null,
+      total: dto.total,
+      notes: dto.notes ?? null,
+      status: 'pendiente',
+      paymentStatus: 'no_abonado',
+    },
+  });
+  return toOrder(row);
 }
 
 export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Order> {
-    if (dto.total !== undefined && dto.total < 0) {
-      throw createError('El total del pedido no puede ser negativo', 400);
-    }
-    const data: any = {};
-    if (dto.status) data.status = orderStatusToPrismaStatus(dto.status);
-    if (dto.paymentStatus) data.paymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
-    if (dto.paidAt) data.paidAt = dto.paidAt;
-    if (dto.notes) data.notes = dto.notes;
-    if (dto.total !== undefined) data.total = dto.total;
-  
-    const row = await prisma.order.update({
-      where: { id },
-      data,
-    });
-    return toOrder(row);
+  if (dto.total !== undefined && dto.total < 0) {
+    throw createError('El total del pedido no puede ser negativo', 400);
+  }
+  const data: any = {};
+  if (dto.status) data.status = orderStatusToPrismaStatus(dto.status);
+  if (dto.paymentStatus) data.paymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
+  if (dto.paidAt) data.paidAt = dto.paidAt;
+  if (dto.notes) data.notes = dto.notes;
+  if (dto.total !== undefined) data.total = dto.total;
+
+  const row = await prisma.order.update({
+    where: { id },
+    data,
+  });
+  return toOrder(row);
 }
