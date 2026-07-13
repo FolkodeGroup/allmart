@@ -65,10 +65,13 @@ export async function getProductDiscount(
         .forEach((value) => categoryList.push(value));
     }
 
+    const quantity = req.query.quantity ? parseInt(req.query.quantity as string, 10) : 1;
+
     const discount = await discountService.getBestDiscount(
       productId,
       parseFloat(price as string),
-      Array.from(new Set(categoryList))
+      Array.from(new Set(categoryList)),
+      quantity
     );
 
     res.json(discount || { message: 'No hay descuentos aplicables' });

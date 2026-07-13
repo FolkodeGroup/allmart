@@ -2,6 +2,7 @@
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
 import { CartDTO, CartItemDTO } from '../types/cart';
+import * as discountService from './discountService';
 
 // ─── Helpers ──────────────────────────────────────────────
 
@@ -57,8 +58,12 @@ export async function findOrCreateCart(sessionId: string) {
 }
 
 // Convierte un cart de Prisma a CartDTO
-function mapCartToDTO(cart: any): CartDTO {
-  const items: CartItemDTO[] = cart.cartItems.map((ci: any) => {
+async function mapCartToDTO(cart: any): Promise<CartDTO> {
+  const items: CartItemDTO[] = [];
+
+  let computedTotal = 0;
+
+  for (const ci of cart.cartItems) {
     let unitPrice = Number(ci.product.price);
     let productImage = undefined;
 
@@ -75,23 +80,38 @@ function mapCartToDTO(cart: any): CartDTO {
       productImage = `/api/images/products/${ci.product.productImages[0].id}`;
     }
 
-    return {
+    // Request best discount for the specific quantity in cart
+    const appliedDiscount = await discountService.getBestDiscount(
+      ci.productId,
+      unitPrice,
+      [],
+      ci.quantity
+    ).catch(() => null);
+
+    const itemTotal = appliedDiscount && appliedDiscount.totalFinalPrice !== undefined
+      ? appliedDiscount.totalFinalPrice
+      : unitPrice * ci.quantity;
+
+    computedTotal += itemTotal;
+
+    const itemDTO: CartItemDTO = {
       productId: ci.productId,
       productSkuId: ci.productSkuId ?? undefined,
       quantity: ci.quantity,
       productName: ci.product.name,
       productImage,
       unitPrice,
-    };
-  });
+      appliedDiscount: appliedDiscount ?? null,
+    } as any;
 
-  const total = items.reduce((sum, item) => sum + item.quantity * (item.unitPrice ?? 0), 0);
+    items.push(itemDTO);
+  }
 
   return {
     id: cart.id,
     sessionId: cart.sessionId ?? undefined,
     items,
-    total,
+    total: Math.round(computedTotal * 100) / 100,
     createdAt: cart.createdAt,
     updatedAt: cart.updatedAt,
   };
@@ -122,8 +142,8 @@ export async function addItem(
   const normalizedSkuId = (productSkuId && productSkuId !== 'original' && productSkuId !== 'null') ? productSkuId : null;
 
   const existingItem = await prisma.cartItem.findFirst({
-    where: { 
-      cartId: cart.id, 
+    where: {
+      cartId: cart.id,
       productId,
       productSkuId: normalizedSkuId,
     },
@@ -136,9 +156,9 @@ export async function addItem(
     });
   } else {
     await prisma.cartItem.create({
-      data: { 
-        cartId: cart.id, 
-        productId, 
+      data: {
+        cartId: cart.id,
+        productId,
         productSkuId: normalizedSkuId,
         quantity,
       },
@@ -163,8 +183,8 @@ export async function updateItem(
   const normalizedSkuId = (productSkuId && productSkuId !== 'original' && productSkuId !== 'null') ? productSkuId : null;
 
   const item = await prisma.cartItem.findFirst({
-    where: { 
-      cartId: cart.id, 
+    where: {
+      cartId: cart.id,
       productId,
       productSkuId: normalizedSkuId,
     },
@@ -190,8 +210,8 @@ export async function removeItem(
   const normalizedSkuId = (productSkuId && productSkuId !== 'original' && productSkuId !== 'null') ? productSkuId : null;
 
   await prisma.cartItem.deleteMany({
-    where: { 
-      cartId: cart.id, 
+    where: {
+      cartId: cart.id,
       productId,
       productSkuId: normalizedSkuId,
     },

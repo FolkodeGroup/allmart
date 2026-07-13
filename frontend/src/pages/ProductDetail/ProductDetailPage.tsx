@@ -131,8 +131,8 @@ export function ProductDetailPage() {
 
   const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
 
-  // 🟢 FIX: Preseleccionar la primera variante basándose directamente en product.skus para asegurar su ejecución
- useEffect(() => {
+  // 🟢 FIX: Autoseleccionar la variante más barata disponible para coincidir con el precio del catálogo
+  useEffect(() => {
     if (product && product.skus && product.skus.length > 0 && Object.keys(selectedVariants).length === 0) {
       
       // Ordenamos las variantes por precio de menor a mayor
@@ -312,10 +312,26 @@ export function ProductDetailPage() {
     syncFavorite(product);
   }, [isProductFavorite, syncFavorite, product]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
 
+    // 🟢 FIX: Renombrado a 'isSimpleProduct' y utilizado correctamente en la condición
     const isSimpleProduct = variantGroups.length === 0;
+
+    // Antes de agregar, solicitar descuento para la cantidad seleccionada
+    const categoryIds = Array.isArray(product.categoryIds)
+      ? product.categoryIds
+      : product.categoryId
+        ? [product.categoryId]
+        : [];
+
+    const discountForQty = await (async () => {
+      try {
+        return await publicCollectionsService.getProductDiscount(product.id, product.price, categoryIds, quantity);
+      } catch {
+        return dynamicDiscount;
+      }
+    })();
 
     if (isSimpleProduct) {
       addToCart({
@@ -325,7 +341,7 @@ export function ProductDetailPage() {
           selectedAttributes: {},
         },
         quantity,
-        discount: dynamicDiscount,
+        discount: discountForQty ?? dynamicDiscount,
       });
     } else {
       const imagesForCart =
@@ -355,7 +371,7 @@ export function ProductDetailPage() {
           selectedAttributes: selectedVariants,
         };
 
-      addToCart({ product: productForCart, quantity, discount: dynamicDiscount });
+      addToCart({ product: productForCart, quantity, discount: discountForQty ?? dynamicDiscount });
     }
 
     setAddedFeedback(true);
