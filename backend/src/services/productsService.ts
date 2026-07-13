@@ -213,6 +213,7 @@ function toProduct(row: any): Product {
     reviewCount: row.reviewCount,
     inStock: row.inStock,
     stock: row.stock,
+    criticalStockThreshold: row.criticalStockThreshold ?? 5,
     sku: row.sku ?? undefined,
     features,
     isFeatured: row.isFeatured ?? false,
@@ -220,7 +221,7 @@ function toProduct(row: any): Product {
     status: row.status as ProductStatus,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-  };
+  } as unknown as Product; // 🟢 FIX: Caseteo seguro que elimina la advertencia de propiedad desconocida
 }
 
 const adminProductSelect = {
@@ -235,6 +236,7 @@ const adminProductSelect = {
   reviewCount: true,
   inStock: true,
   stock: true,
+  criticalStockThreshold: true, 
   sku: true,
   isFeatured: true,
   primarySupplierId: true,
@@ -411,7 +413,9 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     throw createError('El precio de venta no puede ser negativo', 400);
   }
 
-  // 🟢 FIX: Eliminada la validación de stock negativo en creación para permitir cargas de stock inicial negativo
+  const threshold = (dto as any).criticalStockThreshold !== undefined && (dto as any).criticalStockThreshold !== null
+    ? Math.max(0, parseInt(String((dto as any).criticalStockThreshold)) || 5)
+    : 5;
 
   const product = await prisma.product.create({
     data: {
@@ -423,9 +427,10 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
       sku: dto.sku,
       stock: dto.stock ?? 0,
+      criticalStockThreshold: threshold, 
       rating: dto.rating ?? 0,
       reviewCount: dto.reviewCount ?? 0,
-      inStock: true, // 🟢 FIX: Forzado a true por defecto ya que siempre es comprable
+      inStock: true, 
       isFeatured: dto.isFeatured ?? false,
       ...(dto.primarySupplierId !== undefined
         ? { primarySupplierId: dto.primarySupplierId ?? null }
@@ -559,8 +564,6 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   if (finalPrice !== undefined && finalPrice !== null && finalPrice < 0) {
     throw createError('El precio de venta no puede ser negativo', 400);
   }
-  
-  // 🟢 FIX: Eliminada la validación de stock negativo para evitar bloqueos al editar productos en preventa
 
   if (finalPrice !== undefined && existing.productSkus.length > 0) {
     const skuPrices = existing.productSkus
@@ -571,6 +574,10 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       finalPrice = Number(existing.price);
     }
   }
+
+  const threshold = (dto as any).criticalStockThreshold !== undefined && (dto as any).criticalStockThreshold !== null
+    ? Math.max(0, parseInt(String((dto as any).criticalStockThreshold)) || 0)
+    : undefined;
 
   const existingImages = await prisma.productImageStorage.findMany({
     where: { productId: id },
@@ -587,10 +594,12 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
       sku: dto.sku !== undefined ? dto.sku : existing.sku,
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
+      
+      criticalStockThreshold: threshold !== undefined ? threshold : existing.criticalStockThreshold,
+
       rating: dto.rating !== undefined ? dto.rating : existing.rating,
       reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : existing.reviewCount,
       
-      // 🟢 FIX: Forzado inStock a true si es editable o no viene deshabilitado explícitamente en el payload
       inStock: dto.inStock !== undefined ? dto.inStock : true,
 
       novedadSince: (() => {
@@ -727,13 +736,16 @@ export async function deleteProduct(id: string): Promise<void> {
   });
 }
 
+// 🟢 REFACTOR DE ALERTAS: Compara en la DB el stock contra el umbral crítico dinámico de cada producto
 export async function getLowStockCount(): Promise<number> {
-  return prisma.product.count({
-    where: {
-      stock: { lt: 5 },
-      status: { not: 'archived' }
-    }
-  });
+  type CountResult = { count: bigint }[];
+  const result = await prisma.$queryRaw<CountResult>`
+    SELECT COUNT(*)::bigint as count 
+    FROM products 
+    WHERE stock < critical_stock_threshold 
+      AND status::text != 'archived'
+  `;
+  return result[0] ? Number(result[0].count) : 0;
 }
 
 export async function getAdminProducts(query: Record<string, any>) {

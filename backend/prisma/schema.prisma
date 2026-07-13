@@ -87,6 +87,10 @@ model Product {
   reviewCount           Int                    @default(0) @map("review_count")
   inStock               Boolean                @default(true) @map("in_stock")
   stock                 Int                    @default(0)
+  
+  // 🟢 NUEVO: Umbral de stock crítico independiente por producto (Por defecto 5)
+  criticalStockThreshold Int                   @default(5) @map("critical_stock_threshold")
+  
   sku                   String?                @unique(map: "products_sku_unique") @db.VarChar(100)
   isFeatured            Boolean                @default(false) @map("is_featured")
   status                ProductStatus          @default(active)

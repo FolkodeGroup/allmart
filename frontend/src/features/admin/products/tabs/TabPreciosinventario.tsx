@@ -17,20 +17,32 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-    // 🟢 FIX: Verificamos si el producto tiene variantes para bloquear los campos base
+    // 🟢 FIX: Casteo interno seguro para añadir propiedades personalizadas sin romper los tipos de Omit<AdminProduct>
+    const formValues = form as unknown as {
+        price: number;
+        stock: number;
+        inStock: boolean;
+        criticalStockThreshold?: number;
+    };
+
     const hasVariants = form.variants && form.variants.length > 0;
 
     useImperativeHandle(ref, () => ({
         validate: () => {
             const errs: Record<string, string> = {};
             if (!hasVariants) {
-                if (!form.price || form.price <= 0) errs.price = 'El precio debe ser mayor a 0';
-                if (form.stock < 0) errs.stock = 'El stock no puede ser negativo';
+                if (!formValues.price || formValues.price <= 0) errs.price = 'El precio debe ser mayor a 0';
+                if (formValues.stock < 0) errs.stock = 'El stock no puede ser negativo';
+                
+                // 🟢 NUEVO: Validación de valores positivos para el umbral
+                if (formValues.criticalStockThreshold !== undefined && formValues.criticalStockThreshold < 0) {
+                    errs.criticalStockThreshold = 'El umbral de stock crítico no puede ser negativo';
+                }
             }
             setLocalErrors(errs);
             return errs;
         }
-    }), [form, hasVariants]);
+    }), [formValues, hasVariants]);
 
     const validateField = useCallback((fieldName: string, value: unknown) => {
         const error = getInlineFieldError(value, fieldName);
@@ -83,7 +95,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             type="number"
                             min={0}
                             step={0.01}
-                            value={form.price === 0 ? '' : form.price}
+                            value={formValues.price === 0 ? '' : formValues.price}
                             onChange={e => {
                                 const raw = e.target.value;
                                 const val = raw === '' ? 0 : Number(raw);
@@ -99,7 +111,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                     {!hasVariants && touched.price && (
                         <ValidationHelper
                             error={localErrors.price}
-                            success={!!(form.price > 0 && !localErrors.price)}
+                            success={!!(formValues.price > 0 && !localErrors.price)}
                         />
                     )}
                 </div>
@@ -114,7 +126,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             id="product-stock"
                             type="number"
                             min={0}
-                            value={form.stock === 0 ? '' : form.stock}
+                            value={formValues.stock === 0 ? '' : formValues.stock}
                             onChange={e => {
                                 const raw = e.target.value;
                                 const val = raw === '' ? 0 : Number(raw);
@@ -129,7 +141,43 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                     {!hasVariants && touched.stock && (
                         <ValidationHelper
                             error={localErrors.stock}
-                            success={!!(form.stock >= 0 && !localErrors.stock)}
+                            success={!!(formValues.stock >= 0 && !localErrors.stock)}
+                        />
+                    )}
+                </div>
+            </div>
+
+            <div className={styles.row} style={{ marginTop: '1rem' }}>
+                <div className={styles.field}>
+                    <label className={styles.label} htmlFor="product-critical-threshold">Umbral de stock crítico</label>
+                    <div className={styles.inputWithIcon} style={{ position: 'relative' }}>
+                        <i className="bi bi-exclamation-triangle" style={iconStyle}></i>
+                        <input
+                            className={`${styles.input} ${touched.criticalStockThreshold && localErrors.criticalStockThreshold ? styles.inputError : ''}`}
+                            style={{ paddingLeft: '36px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
+                            id="product-critical-threshold"
+                            type="number"
+                            min={0}
+                            value={formValues.criticalStockThreshold === undefined ? 5 : (formValues.criticalStockThreshold === 0 ? '' : formValues.criticalStockThreshold)}
+                            onChange={e => {
+                                const raw = e.target.value;
+                                const val = raw === '' ? 0 : Math.max(0, parseInt(raw) || 0);
+                                // 🟢 FIX: Caseteo seguro usando Parameters para evitar 'any' y pasar ESLint
+                                setField('criticalStockThreshold' as unknown as Parameters<typeof setField>[0], val);
+                                validateField('criticalStockThreshold', val);
+                            }}
+                            placeholder="5"
+                            onBlur={() => handleBlur('criticalStockThreshold')}
+                            disabled={hasVariants}
+                        />
+                    </div>
+                    <p className={styles.fieldHint} style={{ marginTop: '4px' }}>
+                        Se generarán alertas automáticas en el panel si el stock desciende por debajo de este valor.
+                    </p>
+                    {!hasVariants && touched.criticalStockThreshold && (
+                        <ValidationHelper
+                            error={localErrors.criticalStockThreshold}
+                            success={!!(formValues.criticalStockThreshold !== undefined && formValues.criticalStockThreshold >= 0 && !localErrors.criticalStockThreshold)}
                         />
                     )}
                 </div>
@@ -139,7 +187,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                 <input
                     type="checkbox"
                     id="inStock"
-                    checked={form.inStock}
+                    checked={formValues.inStock}
                     onChange={e => setField('inStock', e.target.checked)}
                     style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                     disabled={hasVariants}

@@ -7,6 +7,9 @@ interface ProductDetailPricingProps {
 }
 
 export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
+  // 🟢 FIX: Recuperamos el umbral crítico del producto sin usar 'any' para pasar ESLint
+  const threshold = (product as unknown as { criticalStockThreshold?: number }).criticalStockThreshold ?? 5;
+
   return (
     <div className={styles.container}>
       {/* Pricing Overview Cards */}
@@ -58,6 +61,12 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
             <span className={styles.detailValue}>{product.stock}</span>
           </div>
 
+          {/* 🟢 NUEVO: Umbral de stock crítico mostrado en la ficha */}
+          <div className={styles.detailRow}>
+            <span className={styles.detailLabel}>Umbral de stock crítico</span>
+            <span className={styles.detailValue}>{threshold} unidades</span>
+          </div>
+
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Estado</span>
             <span className={`${styles.detailValue} ${product.inStock ? styles.inStock : styles.outOfStock}`}>
@@ -66,9 +75,10 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
           </div>
         </div>
 
-        {product.stock <= 10 && product.stock > 0 && (
+        {/* 🟢 CORREGIDO: Alerta de stock bajo usando el umbral dinámico del producto */}
+        {product.stock <= threshold && product.stock > 0 && (
           <div className={styles.warning}>
-            ⚠️ Stock bajo: Solo quedan {product.stock} unidades
+            ⚠️ Stock bajo: Solo quedan {product.stock} unidades (Umbral crítico: {threshold})
           </div>
         )}
 
