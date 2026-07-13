@@ -115,10 +115,6 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
         realSkuId = null; // Asignación explícita
       }
 
-      if (updatedStock < 0) {
-        throw createError(`Stock insuficiente para ${item.productName}`, 409);
-      }
-
       await tx.orderItem.create({
         data: {
           orderId: order.id,
