@@ -1,0 +1,370 @@
+/* ============================================================================
+   ALLMART — HORIZONTAL COMPACT ATTRIBUTES STYLES (Zero Scrollbar)
+   ============================================================================ */
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  width: 100%;
+}
+
+.fieldHint {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #9ca3af);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Fila de creación de nuevo grupo */
+.newGroupRow {
+  display: flex;
+  gap: var(--space-2, 8px);
+  max-width: 480px;
+  width: 100%;
+}
+
+.input {
+  flex: 1;
+  background: #111823;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary, #d97706);
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #d97706;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.addBtn:hover {
+  background: #b45309;
+}
+
+.btnIcon {
+  font-size: 1rem;
+  line-height: 1;
+  margin-bottom: 1px;
+}
+
+/* ── Atributos List (Filas Horizontales) ── */
+.attributesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Fila flexible principal - Se remueve overflow y altura rígida */
+.variantRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: #141b25;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background 0.15s ease;
+}
+
+.variantRow:hover {
+  background: #18222f;
+}
+
+.variantLabelBlock {
+  min-width: 90px;
+  max-width: 120px;
+  flex-shrink: 0;
+}
+
+.variantGroupName {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2b07e; /* Tono dorado/cálido */
+  text-transform: capitalize;
+}
+
+/* Contenedor de Chips - Fluye y envuelve automáticamente si no hay espacio */
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #202b36;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.tagRemoveBtn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tagRemoveBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ef4444;
+}
+
+/* Input y botón para añadir valor (compactos) */
+.addValueInputBlock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.compactInput {
+  width: 100%;
+  background: #111823;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  transition: border-color 0.15s ease;
+}
+
+.compactInput:focus {
+  outline: none;
+  border-color: var(--color-primary, #d97706);
+}
+
+.compactAddBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #202b36;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a0aec0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.15s ease;
+}
+
+.compactAddBtn:hover {
+  background: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+/* Botón de borrado de grupo minimalista */
+.deleteGroupBtn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.deleteGroupBtn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+.emptyPlaceholder {
+  text-align: center;
+  padding: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--color-text-muted, #9ca3af);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Combinaciones Toolbar e inputs de Modal ── */
+.combinationsSection {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.combinationsToolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.addCombinationBtn,
+.bulkGenerateBtn {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.addCombinationBtn {
+  background: #d97706;
+  color: #ffffff;
+  border: none;
+}
+
+.addCombinationBtn:hover:not(:disabled) {
+  background: #b45309;
+}
+
+.bulkGenerateBtn {
+  background: #202b36;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bulkGenerateBtn:hover:not(:disabled) {
+  background: #293845;
+}
+
+.addCombinationBtn:disabled,
+.bulkGenerateBtn:disabled {
+  background: #111823 !important;
+  color: #4b5563 !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  cursor: not-allowed;
+}
+
+/* Estilos para campos de Modal oficial */
+.modalFieldsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e2b07e;
+}
+
+.modalRowFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cancelBtn,
+.submitBtn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 100px;
+  transition: all 0.15s ease;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a0aec0;
+}
+
+.cancelBtn:hover {
+  background: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
+}
+
+.submitBtn {
+  background: #d97706;
+  color: #ffffff;
+  border: none;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #b45309;
+}
+
+.submitBtn:disabled {
+  background: #111823;
+  color: #4b5563;
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-family: var(--font-ui);
+  margin-top: 2px;
+}

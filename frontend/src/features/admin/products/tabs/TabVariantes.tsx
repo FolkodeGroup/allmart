@@ -7,9 +7,9 @@ import { getStoredToken } from '../../../../utils/apiClient';
 import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
-import { Modal } from '../../../../components/ui/Modal'; // 🟢 FIX: Usamos el Modal del Design System
+import { Modal } from '../../../../components/ui/Modal';
 import type { UploadFileState } from '../../images';
-import styles from '../AdminProductFormPage.module.css';
+import styles from './TabVariantes.module.css'; // 🟢 FIX: Usamos estilos propios e independientes
 import toast from 'react-hot-toast';
 
 export type TabVariantesRef = {
@@ -40,7 +40,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     errors = {},
 }, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
-
     const [isSubmittingCombo, setIsSubmittingCombo] = useState(false);
 
     interface Sku {
@@ -175,7 +174,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         const variantValuesLists = form.variants.map((g: { values: string[] }) => g.values);
 
         if (variantValuesLists.some((list: string[]) => list.length === 0)) {
-            toast.error('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
+            toast.error('Todos los grupos de variantes deben tener al menos un valor cargado.');
             return;
         }
 
@@ -398,11 +397,12 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     return (
         <fieldset className={styles.fieldset}>
             <p className={styles.fieldHint}>
-                Agrupá opciones como Color o Tamaño. Gestiona todas tus variantes desde la pestaña de
+                Agrupá opciones como Color o Tamaño. Gestioná todas tus variantes desde la pestaña de
                 Variantes en esta vista.
             </p>
 
-            <div className={styles.tagRow}>
+            {/* Fila de creación de grupos compacta */}
+            <div className={styles.newGroupRow}>
                 <input
                     className={styles.input}
                     value={newGroupName}
@@ -416,82 +416,90 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     onClick={onAddVariantGroup}
                     aria-label="Agregar grupo de variantes"
                 >
-                    <i className="bi bi-plus-lg" style={{ marginRight: '4px' }}></i> Grupo
+                    <span className={styles.btnIcon}>+</span> Grupo
                 </button>
             </div>
             {localErrors.variants && <span className={styles.errorText}>{localErrors.variants}</span>}
 
-            {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
-                <div key={group.id} className={styles.variantGroup}>
-                    <div className={styles.variantGroupHeader}>
-                        <span className={styles.variantGroupName}>
-                            <i className="bi bi-layers-half" style={{ marginRight: '8px', color: 'var(--color-primary)' }}></i>
-                            {group.name}
-                        </span>
+            {/* 🟢 REDISEÑO COMPACTO EN FILAS HORIZONTALES PARA LOS ATRIBUTOS */}
+            <div className={styles.attributesList}>
+                {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
+                    <div key={group.id} className={styles.variantRow}>
+                        
+                        {/* 1. Nombre sutil como Label */}
+                        <div className={styles.variantLabelBlock}>
+                            <span className={styles.variantGroupName}>
+                                {group.name}
+                            </span>
+                        </div>
+
+                        {/* 2. Chips minimalistas que fluyen horizontalmente (flex-wrap) */}
+                        <div className={styles.tagsContainer}>
+                            {group.values.map((val: string) => (
+                                <span key={val} className={styles.tagChip}>
+                                    {val}
+                                    <button
+                                        type="button"
+                                        className={styles.tagRemoveBtn}
+                                        onClick={() => onRemoveVariantValue(group.id, val)}
+                                        aria-label={`Eliminar variante ${val}`}
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+
+                        {/* 3. Input de valor compacto integrado en la fila */}
+                        <div className={styles.addValueInputBlock}>
+                            <input
+                                className={styles.compactInput}
+                                value={newGroupValues[group.id] ?? ''}
+                                onChange={e =>
+                                    setNewGroupValues(prev => ({ ...prev, [group.id]: e.target.value }))
+                                }
+                                onKeyDown={e =>
+                                    e.key === 'Enter' && (e.preventDefault(), onAddVariantValue(group.id))
+                                }
+                                placeholder={`Añadir valor...`}
+                            />
+                            <button
+                                type="button"
+                                className={styles.compactAddBtn}
+                                onClick={() => onAddVariantValue(group.id)}
+                                aria-label={`Agregar valor a ${group.name}`}
+                            >
+                                +
+                            </button>
+                        </div>
+
+                        {/* 4. Tacho de basura minimalista y compacto */}
                         <button
                             type="button"
-                            className={styles.removeBtn}
+                            className={styles.deleteGroupBtn}
                             onClick={() => onRemoveVariantGroup(group.id)}
                             aria-label={`Eliminar grupo ${group.name}`}
                         >
-                            <i className="bi bi-trash" style={{ color: 'var(--color-error)' }}></i>
+                            ×
                         </button>
                     </div>
-
-                    <div className={styles.tags}>
-                        {group.values.map((val: string) => (
-                            <span key={val} className={styles.tag}>
-                                {val}
-                                <button
-                                    type="button"
-                                    className={styles.tagRemove}
-                                    onClick={() => onRemoveVariantValue(group.id, val)}
-                                    aria-label={`Eliminar variante ${val}`}
-                                >
-                                    <i className="bi bi-x-lg"></i>
-                                </button>
-                            </span>
-                        ))}
-                    </div>
-
-                    <div className={styles.tagRow}>
-                        <input
-                            className={styles.input}
-                            value={newGroupValues[group.id] ?? ''}
-                            onChange={e =>
-                                setNewGroupValues(prev => ({ ...prev, [group.id]: e.target.value }))
-                            }
-                            onKeyDown={e =>
-                                e.key === 'Enter' && (e.preventDefault(), onAddVariantValue(group.id))
-                            }
-                            placeholder={`Agregar valor a ${group.name}...`}
-                        />
-                        <button
-                            type="button"
-                            className={styles.addBtn}
-                            onClick={() => onAddVariantValue(group.id)}
-                            aria-label={`Agregar valor a ${group.name}`}
-                        >
-                            <i className="bi bi-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            ))}
+                ))}
+            </div>
 
             {(form.variants ?? []).length === 0 && (
-                <p className={styles.fieldHint} style={{ marginTop: '8px', fontStyle: 'italic' }}>
-                    Todavía no hay grupos de variantes. Creá uno arriba.
+                <p className={styles.emptyPlaceholder}>
+                    Todavía no hay grupos de variantes creados. Creá el primero arriba.
                 </p>
             )}
 
+            {/* ── SECCIÓN 2: COMBINACIONES ── */}
             <div className={styles.combinationsSection}>
-                <div className={styles.combinationsToolbar} style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <div className={styles.combinationsToolbar}>
                     <button
                         type="button"
-                        className={styles.addCombinationBtn}
+                        className={styles.bulkGenerateBtn}
                         onClick={handleBulkGenerate}
                         disabled={!isEdit || !productId || (form.variants ?? []).length === 0}
-                        style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', boxShadow: 'none' }}
                     >
                         ⚡ Generar matriz de combinaciones
                     </button>
@@ -506,7 +514,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 </div>
 
                 {(!isEdit || !productId) && (
-                    <p className={styles.fieldHint} style={{ marginTop: '4px' }}>
+                    <p className={styles.fieldHint} style={{ marginTop: '4px', fontStyle: 'italic' }}>
                         Guarda el producto primero para poder crear combinaciones.
                     </p>
                 )}
@@ -519,7 +527,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 />
             </div>
 
-            {/* 🟢 FIX: Modal Oficial del Design System para Agregar/Editar Combinación */}
+            {/* Modal oficial del Design System de Allmart */}
             <Modal
                 open={combinationModalOpen}
                 onClose={() => setCombinationModalOpen(false)}
@@ -533,7 +541,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             className={styles.cancelBtn} 
                             disabled={isSubmittingCombo} 
                             onClick={() => setCombinationModalOpen(false)}
-                            style={{ minWidth: 100 }}
                         >
                             Cancelar
                         </button>
@@ -542,14 +549,13 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             className={styles.submitBtn}
                             onClick={handleCreateCombination}
                             disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
-                            style={{ minWidth: 120 }}
                         >
                             {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
                         </button>
                     </>
                 }
             >
-                <div style={{ display: 'grid', gap: '16px', padding: '8px 0' }}>
+                <div className={styles.modalFieldsContainer}>
                     {(!form.variants || form.variants.length === 0) && (
                         <p className={styles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
                     )}
@@ -600,7 +606,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     </div>
 
                     {/* Precio & Stock */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className={styles.modalRowFields}>
                         <div className={styles.field}>
                             <label htmlFor="combination-price" className={styles.label}>Precio</label>
                             <input
