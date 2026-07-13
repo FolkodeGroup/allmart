@@ -316,7 +316,11 @@ export function ContactPage() {
             <button type="button" className={styles.secondaryButton} onClick={() => setIsModalOpen(false)}>
               Cerrar
             </button>
-            <button type="submit" className={styles.primaryButton}>
+            <button 
+              type="submit" 
+              className={styles.primaryButton}
+              disabled={!isFormValid}
+            >
               Enviar por correo
             </button>
           </div>

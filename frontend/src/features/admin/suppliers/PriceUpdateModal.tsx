@@ -59,7 +59,7 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                 <div className={styles.formContainer}>
                     <div className={styles.infoRow}>
                         <div className={styles.infoField}>
-                            <label>Precio de Venta</label>
+                            <label htmlFor="precio">Precio de Venta</label>
                             <div className={styles.infoValue}>{fmt.format(currentPrice)}</div>
                         </div>
                     </div>
@@ -74,7 +74,6 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                                 value={cost}
                                 onChange={e => setCost(e.target.value)}
                                 className={errors.cost ? styles.inputError : ''}
-                                autoFocus
                             />
                             {errors.cost && <span className={styles.errorMsg}>{errors.cost}</span>}
                             {!errors.cost && currentCost !== costNum && costNum > 0 && (

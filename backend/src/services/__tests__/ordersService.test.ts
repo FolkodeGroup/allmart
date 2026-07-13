@@ -7,7 +7,7 @@
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import * as ordersService from '../ordersService';
 import { prisma } from '../../config/prisma';
-import { createError } from '../../middlewares/errorHandler';
+
 
 // Mock prisma
 vi.mock('../../config/prisma', () => ({

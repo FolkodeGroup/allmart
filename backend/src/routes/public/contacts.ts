@@ -1,14 +1,17 @@
 /**
- * routes/public/contacts.ts
+ * backend/src/routes/public/contacts.ts
  * Rutas públicas para contactos.
- * POST /api/contacts - Enviar un formulario de contacto
  */
 
 import { Router } from 'express';
-import { submitContactForm } from '../../controllers/public/contactsController';
+import { submitContactForm, submitWithdrawalForm } from '../../controllers/public/contactsController';
 
 const router = Router();
 
+// Formulario de contacto general
 router.post('/', submitContactForm);
+
+// NUEVO: Formulario específico de arrepentimiento
+router.post('/withdrawal', submitWithdrawalForm);
 
 export default router;

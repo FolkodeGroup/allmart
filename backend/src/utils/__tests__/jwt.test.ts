@@ -1,7 +1,7 @@
 /**
  * Tests para el módulo JWT (signToken, verifyToken).
  */
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi} from 'vitest';
 
 // Mock env before importing jwt utils
 vi.mock('../../config/env', () => ({

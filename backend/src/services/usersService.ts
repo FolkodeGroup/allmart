@@ -5,7 +5,7 @@
 
 import { UserRole as PrismaUserRole } from '@prisma/client';
 import { prisma } from '../config/prisma';
-import { User, CreateUserDTO, PublicUser } from '../models/User';
+import { CreateUserDTO, PublicUser } from '../models/User';
 import { UserRole } from '../types';
 import { hashPassword } from '../utils/bcrypt';
 import { createError } from '../middlewares/errorHandler';

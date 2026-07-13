@@ -29,7 +29,7 @@ export function authMiddleware(
     const decoded = verifyToken(token);
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch {
     res.status(401).json({ success: false, message: 'Token inválido o expirado' });
   }
 }

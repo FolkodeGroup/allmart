@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ChangeEvent, FormEvent, FocusEvent } from 'react';
 import styles from './ContactForm.module.css';
 import { contactsService } from '../../../services/contactsService';
 
@@ -17,37 +18,71 @@ export function ContactForm() {
     message: '',
   });
 
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // 1. Validaciones en tiempo real derivadas del estado actual
+  const nameError = formData.name.trim().length > 0 && formData.name.trim().length < 2
+    ? 'El nombre debe tener al menos 2 caracteres.'
+    : '';
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailError = formData.email.trim().length > 0 && !emailRegex.test(formData.email.trim())
+    ? 'Ingresá un correo electrónico válido.'
+    : '';
+
+  const messageError = formData.message.trim().length > 0 && formData.message.trim().length < 10
+    ? 'El mensaje debe tener al menos 10 caracteres.'
+    : '';
+
+  // El formulario es válido solo si no hay errores activos y los campos requeridos tienen contenido
+  const isFormValid =
+    !nameError &&
+    !emailError &&
+    !messageError &&
+    formData.name.trim().length >= 2 &&
+    emailRegex.test(formData.email.trim()) &&
+    formData.message.trim().length >= 10;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Limpiar errores cuando el usuario empieza a escribir
+    
+    // Al tipear, marcamos el campo como tocado para dar feedback inmediato
+    setTouched(prev => ({ ...prev, [name]: true }));
     if (error) setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleBlur = (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!isFormValid) return;
+
     setLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
       await contactsService.submitContact({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || undefined,
-        message: formData.message,
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone?.trim() || undefined,
+        message: formData.message.trim(),
       });
 
       setSuccess(true);
       setFormData({ name: '', email: '', phone: '', message: '' });
+      setTouched({}); // Limpiamos los campos tocados
 
       // Ocultar mensaje de éxito después de 5 segundos
       setTimeout(() => setSuccess(false), 5000);
-    } catch (err: Error | unknown) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error al enviar el mensaje. Intenta de nuevo.');
     } finally {
       setLoading(false);
@@ -65,8 +100,9 @@ export function ContactForm() {
           </p>
         </div>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <div className={styles.grid}>
+            {/* Campo Nombre */}
             <div className={styles.field}>
               <label htmlFor="name" className={styles.label_input}>
                 Nombre *
@@ -77,14 +113,18 @@ export function ContactForm() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Tu nombre completo"
                 required
-                minLength={2}
                 disabled={loading}
-                className={styles.input}
+                className={`${styles.input} ${touched.name && nameError ? styles.inputError : ''}`}
               />
+              {touched.name && nameError && (
+                <span className={styles.errorMessage}>{nameError}</span>
+              )}
             </div>
 
+            {/* Campo Email */}
             <div className={styles.field}>
               <label htmlFor="email" className={styles.label_input}>
                 Email *
@@ -95,13 +135,18 @@ export function ContactForm() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="tu@email.com"
                 required
                 disabled={loading}
-                className={styles.input}
+                className={`${styles.input} ${touched.email && emailError ? styles.inputError : ''}`}
               />
+              {touched.email && emailError && (
+                <span className={styles.errorMessage}>{emailError}</span>
+              )}
             </div>
 
+            {/* Campo Teléfono */}
             <div className={styles.field}>
               <label htmlFor="phone" className={styles.label_input}>
                 Teléfono
@@ -118,6 +163,7 @@ export function ContactForm() {
               />
             </div>
 
+            {/* Campo Mensaje */}
             <div className={styles.field + ' ' + styles.fullwidth}>
               <label htmlFor="message" className={styles.label_input}>
                 Mensaje *
@@ -127,13 +173,16 @@ export function ContactForm() {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Cuéntanos cómo podemos ayudarte..."
                 required
-                minLength={10}
                 rows={6}
                 disabled={loading}
-                className={styles.textarea}
+                className={`${styles.textarea} ${touched.message && messageError ? styles.inputError : ''}`}
               />
+              {touched.message && messageError && (
+                <span className={styles.errorMessage}>{messageError}</span>
+              )}
             </div>
           </div>
 
@@ -159,7 +208,7 @@ export function ContactForm() {
             <button
               type="submit"
               className={styles.button}
-              disabled={loading}
+              disabled={loading || !isFormValid}
             >
               {loading ? 'Enviando...' : 'Enviar Mensaje'}
             </button>
