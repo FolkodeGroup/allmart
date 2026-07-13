@@ -1,3 +1,4 @@
+// frontend/src/pages/ProductDetail/ProductDetailPage.tsx
 import { useState, useEffect, useMemo } from 'react';
 import type { VariantGroup } from '../../context/AdminProductsContext';
 import { useParams, Link } from 'react-router-dom';
@@ -128,6 +129,33 @@ export function ProductDetailPage() {
     };
   }, [slug]);
 
+  const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
+
+  // 🟢 FIX: Autoseleccionar la variante más barata disponible para coincidir con el precio del catálogo
+  useEffect(() => {
+    if (product && product.skus && product.skus.length > 0 && Object.keys(selectedVariants).length === 0) {
+      
+      // Ordenamos las variantes por precio de menor a mayor
+      const sortedSkus = [...product.skus].sort((a, b) => {
+        const priceA = a.price ?? product.price;
+        const priceB = b.price ?? product.price;
+        return priceA - priceB;
+      });
+
+      // Seleccionamos la más barata que tenga stock (o la más barata en su defecto)
+      const defaultSku = sortedSkus.find(s => s.stock > 0) || sortedSkus[0];
+
+      if (defaultSku && defaultSku.attributes) {
+        // Normalizamos todas las llaves a minúsculas
+        const normalizedAttrs: Record<string, string> = {};
+        Object.entries(defaultSku.attributes).forEach(([k, v]) => {
+          normalizedAttrs[k.toLowerCase()] = v;
+        });
+        setSelectedVariants(normalizedAttrs);
+      }
+    }
+  }, [product, selectedVariants]);
+
   // Cuando se cambia de SKU, volvemos a la primera imagen de la galería
   useEffect(() => {
     setSelectedImage(0);
@@ -155,10 +183,8 @@ export function ProductDetailPage() {
     };
 
     loadDiscount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product?.id, product?.price, product?.categoryId, product?.categoryIds]);
+  }, [product]);
 
-  const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
   const isNew = product ? product.tags.includes('nuevo') : false;
   const isProductFavorite = product ? isFavorite(product.id) : false;
 
@@ -176,7 +202,6 @@ export function ProductDetailPage() {
           map[key] = [];
           seen[key] = new Set();
         }
-        // Only add if not already added (preserve order, avoid duplicates)
         if (!seen[key].has(value)) {
           map[key].push(value);
           seen[key].add(value);
@@ -199,8 +224,6 @@ export function ProductDetailPage() {
 
   const matchingSku = useMemo(() => {
     if (!product?.skus) return null;
-
-    // 🟢 CORRECCIÓN: Si no hay selección, obligamos a que no haga match con el primer SKU para no robar el precio base
     if (Object.keys(selectedVariants).length === 0) return null;
 
     return product.skus.find(sku => {
@@ -229,33 +252,24 @@ export function ProductDetailPage() {
     });
   }
 
-  /**
-   * Finds compatible variants and auto-selects the first compatible value
-   * for each variant group that doesn't have a selection yet.
-   */
   function findCompatibleVariants(newSelection: Record<string, string>): Record<string, string> {
     if (!product?.skus || Object.keys(variantMap).length === 0) {
       return newSelection;
     }
 
     const result = { ...newSelection };
-
-    // Find all SKUs that match the current selection
     const compatibleSkus = product.skus.filter(sku => {
       return Object.entries(result).every(([k, v]) => {
         return getAttr(sku, k) === v;
       });
     });
 
-    // If no compatible SKUs found, return current selection
     if (compatibleSkus.length === 0) {
       return result;
     }
 
-    // For each variant group in variantMap that doesn't have a selection, auto-select the first compatible value
     for (const attr of Object.keys(variantMap)) {
       if (!result[attr]) {
-        // Get all possible values for this attribute from compatible SKUs
         const possibleValues = new Set<string>();
         compatibleSkus.forEach(sku => {
           const value = getAttr(sku, attr);
@@ -264,7 +278,6 @@ export function ProductDetailPage() {
           }
         });
 
-        // Select the first available value in the original order (not alphabetical)
         const originalOrderedValues = variantMap[attr] || [];
         for (const value of originalOrderedValues) {
           if (possibleValues.has(value)) {
@@ -296,17 +309,31 @@ export function ProductDetailPage() {
     if (!product || !isProductFavorite) {
       return;
     }
-
     syncFavorite(product);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isProductFavorite, syncFavorite]); // 🟢 CORRECCIÓN: Se agrega syncFavorite y se silencia la dependencia de 'product' para evitar bucle de re-renderizado
+  }, [isProductFavorite, syncFavorite, product]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
 
-    const isOriginal = Object.keys(selectedVariants).length === 0;
+    // 🟢 FIX: Renombrado a 'isSimpleProduct' y utilizado correctamente en la condición
+    const isSimpleProduct = variantGroups.length === 0;
 
-    if (isOriginal) {
+    // Antes de agregar, solicitar descuento para la cantidad seleccionada
+    const categoryIds = Array.isArray(product.categoryIds)
+      ? product.categoryIds
+      : product.categoryId
+        ? [product.categoryId]
+        : [];
+
+    const discountForQty = await (async () => {
+      try {
+        return await publicCollectionsService.getProductDiscount(product.id, product.price, categoryIds, quantity);
+      } catch {
+        return dynamicDiscount;
+      }
+    })();
+
+    if (isSimpleProduct) {
       addToCart({
         product: {
           ...product,
@@ -314,7 +341,7 @@ export function ProductDetailPage() {
           selectedAttributes: {},
         },
         quantity,
-        discount: dynamicDiscount,
+        discount: discountForQty ?? dynamicDiscount,
       });
     } else {
       const imagesForCart =
@@ -344,7 +371,7 @@ export function ProductDetailPage() {
           selectedAttributes: selectedVariants,
         };
 
-      addToCart({ product: productForCart, quantity, discount: dynamicDiscount });
+      addToCart({ product: productForCart, quantity, discount: discountForQty ?? dynamicDiscount });
     }
 
     setAddedFeedback(true);
@@ -447,28 +474,12 @@ export function ProductDetailPage() {
           </div>
 
           <span className={styles.sku}>
-            SKU: {Object.keys(selectedVariants).length === 0 ? product.sku : (selectedSku?.sku ?? product.sku)}
+            SKU: {variantGroups.length === 0 ? product.sku : (selectedSku?.sku ?? product.sku)}
           </span>
 
+          {/* 🟢 FIX: Eliminamos el bloque que renderizaba el botón "Original" */}
           {Object.keys(variantMap).length > 0 && (
             <div className={styles.variantsBlock}>
-              <div className={styles.variantGroup}>
-                <span className={styles.variantLabel}>Original</span>
-                <div className={styles.variantOptions}>
-                  <button
-                    className={[
-                      styles.variantOption,
-                      Object.keys(selectedVariants).length === 0
-                        ? styles.variantOptionSelected
-                        : '',
-                    ].join(' ').trim()}
-                    onClick={() => setSelectedVariants({})}
-                  >
-                    {product.name}
-                  </button>
-                </div>
-              </div>
-
               {Object.entries(variantMap).map(([attr, values]) => (
                 <div key={attr} className={styles.variantGroup}>
                   <span className={styles.variantLabel}>{attr}</span>
@@ -490,11 +501,6 @@ export function ProductDetailPage() {
                           ].join(' ').trim()}
                           onClick={() =>
                             setSelectedVariants(prev => {
-                              if (prev[attr] === val) {
-                                const next = { ...prev };
-                                delete next[attr];
-                                return next;
-                              }
                               const newSelection = { ...prev, [attr]: val };
                               return findCompatibleVariants(newSelection);
                             })
@@ -521,7 +527,6 @@ export function ProductDetailPage() {
             {(() => {
               const basePrice = selectedSku?.price ?? product.price;
               if (dynamicDiscount) {
-                // Pasar el descuento a ProductPrice para que lo muestre correctamente
                 return <ProductPrice price={basePrice} discount={dynamicDiscount} size="lg" />;
               }
               return <ProductPrice price={basePrice} size="lg" />;

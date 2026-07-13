@@ -5,6 +5,7 @@ export interface CartItemDTO {
   productName?: string;
   productImage?: string;
   unitPrice?: number;
+  appliedDiscount?: any;
 }
 
 export interface CartDTO {

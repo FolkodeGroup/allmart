@@ -176,12 +176,15 @@ export const publicCollectionsService = {
   /**
    * Obtiene el descuento para un producto específico
    */
-  async getProductDiscount(productId: string, price: number, categoryIds: string[] = []): Promise<ProductDiscount | null> {
+  async getProductDiscount(productId: string, price: number, categoryIds: string[] = [], quantity?: number): Promise<ProductDiscount | null> {
     const params = new URLSearchParams({
       price: String(price),
     });
     if (categoryIds.length > 0) {
       params.set('categoryIds', categoryIds.join(','));
+    }
+    if (quantity !== undefined) {
+      params.set('quantity', String(quantity));
     }
     try {
       const result = await apiFetch(`/api/promotions/product-discount/${productId}?${params}`) as unknown;

@@ -186,12 +186,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  width: 100%;
 }
 
 .mainImageWrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1; /* 🟢 FIX: Opcional, pero asegura que el diseño no salte. También puedes usar max-height: 500px */
+  aspect-ratio: 1 / 1;
   border-radius: var(--radius-xl);
   overflow: hidden;
   background: var(--color-bg-secondary);
@@ -204,7 +205,7 @@
 .mainImage {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* 🟢 FIX: Asegura que la imagen se ajuste sin recortarse */
+  object-fit: contain;
   object-position: center; 
   transition: transform var(--transition-slow);
 }
@@ -213,38 +214,61 @@
   transform: scale(1.03);
 }
 
+/* 🟢 FIX: El contenedor ocupa el 100% y permite scroll si hay muchas fotos */
 .thumbnails {
   display: flex;
   gap: var(--space-3);
-  aspect-ratio: 1 / 1; /* 🟢 Miniaturas también cuadradas */
-  width: 80px;
-  height: 80px;
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: var(--space-2); /* Espacio para que respire el scrollbar */
+  scrollbar-width: thin; /* Firefox */
 }
 
+/* Estilo de scrollbar elegante para Chrome/Safari/Edge */
+.thumbnails::-webkit-scrollbar {
+  height: 6px;
+}
+.thumbnails::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thumbnails::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 10px;
+}
+
+/* 🟢 FIX: flex-shrink: 0 evita que se aplasten */
 .thumbnail {
   width: 80px;
   height: 80px;
+  flex-shrink: 0; 
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: border-color var(--transition-base);
+  transition: all var(--transition-base);
   background: var(--color-bg-secondary);
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.thumbnail:hover,
+.thumbnail:hover {
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
+}
+
 .thumbnail.active {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
+/* 🟢 FIX: cover hace que la miniatura llene el cuadrado perfecto */
 .thumbnailImg {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* 🟢 Asegura que la miniatura se ajuste sin recortarse */
+  object-fit: cover; 
+  object-position: center;
 }
 
 /* ── Product Info ── */

@@ -1,8 +1,8 @@
 /**
  * Tests para el middleware de autenticación.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { Response, NextFunction } from 'express';
+import { describe, it, expect, vi } from 'vitest';
+import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../../types';
 
 // Mock env

@@ -3,7 +3,7 @@ import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { ProductListPanel } from './ProductListPanel';
 import { ProductDetailPanel } from './ProductDetailPanel';
 import styles from './MasterDetailLayout.module.css';
-import { AdminVariantsProvider } from '../../../context';
+import { AdminVariantsProvider } from '../../../context/AdminVariantsProvider';
 
 interface MasterDetailLayoutProps {
   products: AdminProduct[];

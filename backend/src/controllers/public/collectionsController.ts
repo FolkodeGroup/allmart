@@ -9,7 +9,7 @@ import * as collectionsService from '../../services/collectionsService';
 export async function getCollection(
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> {
   try {
     const { slug } = req.params;
@@ -25,7 +25,7 @@ export async function getCollection(
 export async function getCollectionsByPosition(
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> {
   try {
     const { position } = req.params;
@@ -50,7 +50,7 @@ export async function getCollectionsByPosition(
 export async function getHomeCollections(
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> {
   try {
     const collections = await collectionsService.getCollectionsByDisplayPosition('home');

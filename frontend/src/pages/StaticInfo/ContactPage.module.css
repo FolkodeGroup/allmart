@@ -12,6 +12,7 @@
   border-radius: var(--radius-md);
   padding: 0.72rem 1.05rem;
   transition: all var(--transition-base);
+  cursor: pointer;
 }
 
 .primaryButton {
@@ -20,9 +21,18 @@
   border: 1px solid #2f5f46;
 }
 
-.primaryButton:hover {
+.primaryButton:hover:not(:disabled) {
   background: #244a37;
   border-color: #244a37;
+}
+
+/* NUEVO: Botón de envío deshabilitado */
+.primaryButton:disabled {
+  background: #9ca3af !important;
+  border-color: #9ca3af !important;
+  color: #f3f4f6 !important;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .secondaryButton {
@@ -84,6 +94,58 @@
 .fieldTextarea:focus {
   border-color: #2f5f46;
   box-shadow: 0 0 0 3px rgba(47, 95, 70, 0.14);
+  outline: none;
+}
+
+/* NUEVO: Clases de validación visual */
+.fieldValid {
+  border-color: #2f5f46 !important;
+}
+
+.fieldInvalid {
+  border-color: #e53e3e !important;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15) !important;
+}
+
+.fieldError {
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-family: var(--font-ui);
+  font-weight: 500;
+}
+
+.fieldControl {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.validationIcon {
+  position: absolute;
+  right: 12px;
+  font-size: var(--text-sm);
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.validationIconValid {
+  color: #2f5f46;
+}
+
+.validationIconInvalid {
+  color: #e53e3e;
+}
+
+.requiredMarker {
+  color: #e53e3e;
+}
+
+.requiredNote {
+  font-size: 0.75rem;
+  color: #718096;
+  font-family: var(--font-ui);
 }
 
 .fieldTextarea {

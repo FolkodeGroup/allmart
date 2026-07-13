@@ -30,6 +30,8 @@ interface OrderItemProps {
   onSelect: (id: string) => void;
   onDetail: (order: Order) => void;
   index: number;
+  editing: boolean;
+  setEditingId: (id: string | null) => void;
 }
 
 /** Props de OrdersTable. Recibe la lista ya filtrada desde AdminOrders. */
@@ -49,6 +51,7 @@ interface OrdersTableProps {
  * Solo visible en pantallas ≥ 640px (controlado por CSS `.tableWrapper`).
  */
 export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersTableProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
   return (
     <div className={styles.tableWrapper} style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
       <table className={styles.table} style={{ minWidth: 900 }}>
@@ -72,6 +75,8 @@ export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersT
               onSelect={onSelect}
               onDetail={onDetail}
               index={index}
+              editing={editingId === order.id}
+              setEditingId={setEditingId}
             />
           ))}
         </tbody>
@@ -80,13 +85,6 @@ export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersT
   );
 }
 
-// OrderItem reutilizable para la tabla
-interface OrderItemProps {
-  order: Order;
-  selected: boolean;
-  onSelect: (id: string) => void;
-  onDetail: (order: Order) => void;
-}
 
 /**
  * OrderItem — fila individual de la tabla de pedidos.
@@ -100,13 +98,11 @@ interface OrderItemProps {
  * excepto en la celda del estado donde el click se propaga de forma controlada.
  */
 
-export function OrderItem({ order, onDetail, index }: OrderItemProps) {
+export function OrderItem({ order, onDetail, index, editing, setEditingId }: OrderItemProps) {
   const totalQty = order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0); // Cantidad total de ítems sumando todas las líneas del pedido
 
   const { updateOrderStatus } = useAdminOrders();
 
-  // `editing`: controla si se muestra el selector de estado o el badge de solo lectura
-  const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   /**
@@ -145,7 +141,7 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
       toast.error('No se pudo actualizar el estado');
     } finally {
       setLoading(false);
-      setEditing(false);
+      setEditingId(null);
     }
   };
 
@@ -156,6 +152,8 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
         cursor: 'pointer',
         animation: `fadeSlideUp 0.22s ease both`,
         animationDelay: `${index * 35}ms`,
+        position: `relative`,
+        zIndex: editing ? 10 : 0,
       }}
       onClick={() => onDetail(order)}
       role="button"
@@ -163,9 +161,9 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
     >
       {/* ID truncado a 8 caracteres para legibilidad */}
-      <td className={styles.tdOrder} >
+      < td className={styles.tdOrder} >
         #{formatOrderCode(order.id)}
-      </td>
+      </td >
       <td className={styles.tdDate}>{formatDate(order.createdAt)}</td>
       <td className={styles.tdCustomer}>
         <div className={styles.customerTd}>{order.customer.firstName} {order.customer.lastName}</div>
@@ -194,8 +192,15 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
           <span
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 90 }}
             tabIndex={0}
-            onClick={e => { e.stopPropagation(); setEditing(true); }}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setEditing(true); } }}
+            onClick={e => {
+              e.stopPropagation();
+              setEditingId(order.id);
+            }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setEditingId(order.id);
+              }
+            }}
             aria-label="Cambiar estado"
             role="button"
           >
@@ -212,6 +217,6 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
           <Button variant="secondary" size="sm" aria-label="Ver detalle del pedido">Ver →</Button>
         </Tooltip>
       </td>
-    </tr>
+    </tr >
   );
 }

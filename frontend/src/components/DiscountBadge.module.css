@@ -3,7 +3,7 @@
 .badge {
   position: absolute;
   top: 8px;
-  right: 8px;
+  left: 8px;
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   border-radius: 50%;
   width: 56px;
@@ -29,7 +29,7 @@
     width: 48px;
     height: 48px;
     top: 4px;
-    right: 4px;
+    left: 4px;
   }
 
   .badgeText {

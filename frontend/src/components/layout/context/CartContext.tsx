@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { CartContext, CART_STORAGE_KEY } from './CartContextUtils';
 import type { CartItem } from '../../../types';
@@ -30,7 +29,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     saveCartToStorage(items);
   }, [items]);
 
-  const addToCart = (newItem: CartItem) => {
+  // 🚀 OPTIMIZACIÓN: Memoizamos todas las funciones
+  const addToCart = useCallback((newItem: CartItem) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.product.id === newItem.product.id);
       if (existing) {
@@ -42,13 +42,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, newItem];
     });
-  };
+  }, []);
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = useCallback((productId: string) => {
     setItems((prev) => prev.filter((i) => i.product.id !== productId));
-  };
+  }, []);
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -58,35 +58,46 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         i.product.id === productId ? { ...i, quantity } : i
       )
     );
-  };
+  }, [removeFromCart]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
-  const toggleCart = () => {};
+  const toggleCart = useCallback(() => {}, []);
 
-  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
-  const totalPrice = items.reduce((sum, i) => {
+  // 🚀 OPTIMIZACIÓN: Memoizamos los cálculos pesados
+  const totalItems = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
+  
+  const totalPrice = useMemo(() => items.reduce((sum, i) => {
     const unitPrice = i.discount?.finalPrice ?? i.product.price;
     return sum + unitPrice * i.quantity;
-  }, 0);
+  }, 0), [items]);
+
+  // 🚀 OPTIMIZACIÓN: Memoizamos el objeto final del Provider
+  const contextValue = useMemo(() => ({
+    items,
+    totalItems,
+    totalPrice,
+    toggleCart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+  }), [
+    items,
+    totalItems,
+    totalPrice,
+    toggleCart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart
+  ]);
 
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        totalItems,
-        totalPrice,
-        toggleCart,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
 };
-

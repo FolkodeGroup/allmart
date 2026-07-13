@@ -191,7 +191,6 @@ export async function serveProductImage(id: string): Promise<{ data: Buffer; mim
     if (env.R2_PUBLIC_URL) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
     } else {
-      // 🟢 CORRECCIÓN: Si no hay CDN público, descargamos usando el SDK de AWS R2 y servimos el Buffer directamente
       try {
         const response = await r2Client.send(new GetObjectCommand({
           Bucket: env.R2_BUCKET_NAME,
@@ -202,7 +201,10 @@ export async function serveProductImage(id: string): Promise<{ data: Buffer; mim
           return { data: Buffer.from(byteArray), mimeType: row.mimeType };
         }
       } catch (err) {
-        console.error('[R2 Proxy] Error fetching full image from R2:', err);
+        const errorName = (err as { name?: string })?.name;
+        if (errorName !== 'NoSuchKey') {
+          console.error('[R2 Proxy] Error fetching full image from R2:', err);
+        }
       }
     }
   }
@@ -225,7 +227,6 @@ export async function serveProductImageThumb(id: string): Promise<{ data: Buffer
     if (env.R2_PUBLIC_URL) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${key}` };
     } else {
-      // 🟢 CORRECCIÓN: Fallback Proxy R2 para las miniaturas del buscador
       try {
         const response = await r2Client.send(new GetObjectCommand({
           Bucket: env.R2_BUCKET_NAME,
@@ -236,7 +237,10 @@ export async function serveProductImageThumb(id: string): Promise<{ data: Buffer
           return { data: Buffer.from(byteArray), mimeType: row.mimeType };
         }
       } catch (err) {
-        console.error('[R2 Proxy] Error fetching thumbnail from R2:', err);
+        const errorName = (err as { name?: string })?.name;
+        if (errorName !== 'NoSuchKey') {
+          console.error('[R2 Proxy] Error fetching thumbnail from R2:', err);
+        }
       }
     }
   }
@@ -301,7 +305,10 @@ export async function serveCategoryImage(id: string): Promise<{ data: Buffer; mi
         const byteArray = await response.Body?.transformToByteArray();
         if (byteArray) return { data: Buffer.from(byteArray), mimeType: row.mimeType };
       } catch (err) {
-        console.error('[R2 Proxy] Error fetching category image:', err);
+        const errorName = (err as { name?: string })?.name;
+        if (errorName !== 'NoSuchKey') {
+          console.error('[R2 Proxy] Error fetching category image:', err);
+        }
       }
     }
   }
@@ -325,7 +332,10 @@ export async function serveCategoryImageThumb(id: string): Promise<{ data: Buffe
         const byteArray = await response.Body?.transformToByteArray();
         if (byteArray) return { data: Buffer.from(byteArray), mimeType: row.mimeType };
       } catch (err) {
-        console.error('[R2 Proxy] Error fetching category thumb:', err);
+        const errorName = (err as { name?: string })?.name;
+        if (errorName !== 'NoSuchKey') {
+          console.error('[R2 Proxy] Error fetching category thumb:', err);
+        }
       }
     }
   }

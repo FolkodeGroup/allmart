@@ -1,5 +1,4 @@
-
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useAdminOrders } from '../../../context/AdminOrdersContext';
 import type { Order } from '../../../context/AdminOrdersContext';
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -12,10 +11,9 @@ import type { ReportsFiltersValue, PredefinedPeriod } from './components/Reports
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-import { Suspense } from 'react';
 import { Notification } from '../../../components/ui/Notification';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
-import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName, exportReportsSummaryXLSX } from '../../../utils/exportHelpers';//import { generateMockOrders } from './components/DatosMockeados';
+import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName, exportReportsSummaryXLSX } from '../../../utils/exportHelpers';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
 import { SalesTableView } from './components/SalesTableView';
@@ -29,14 +27,15 @@ import { ReportsCharts } from './components/ReportsCharts';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { Search } from 'lucide-react';
 
+/* ── Importación Dinámica (Lazy Load) corregida al principio ── */
+const DonutChart = lazy(() => import('./components/DonutChart'));
+
 /* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency', currency: 'ARS', minimumFractionDigits: 0,
   }).format(n);
 }
-
-
 
 function isoDateLabel(iso: string) {
   const d = new Date(iso);
@@ -57,7 +56,6 @@ function lastNDayKeys(n: number): string[] {
 }
 
 function orderDateKey(createdAt: string): string {
-  // Normaliza a ms y luego a key local
   const ms = createdAtToMs(createdAt);
   return getDayKeyLocalFromMs(ms);
 }
@@ -72,11 +70,6 @@ const PERIOD_LABELS: Record<Period, string> = {
   'all': 'Todo el tiempo',
   'custom': 'Rango personalizado',
 };
-
-// Lazy loading de gráficos optimizado (cada chunk por separado, no se recrea en cada render)
-// const BarChart = React.lazy(() => import('./components/BarChart'));
-import DonutChart from './components/DonutChart';
-
 
 export interface OrdersTableProps {
   orders: Order[];
@@ -94,11 +87,10 @@ export interface OrdersTableProps {
  * @module AdminReports
  */
 export function AdminReports() {
-
   const { orders } = useAdminOrders();
-  //const orders = useMemo(() => generateMockOrders(50), []);
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
+  
   // Unsaved changes detection
   const {
     setIsDirty,
@@ -106,30 +98,24 @@ export function AdminReports() {
     confirmNavigation,
     cancelNavigation,
   } = useUnsavedChangesWarning({ active: true });
-  // Eliminado: showUnsavedModal, setShowUnsavedModal (no se usan más)
-  // Filtros avanzados SOLO para la tabla de pedidos
+
   const [ordersTableFilters, setOrdersTableFilters] = useState<{ status: string[]; clientQuery: string; productQuery: string }>({ status: [], clientQuery: '', productQuery: '' });
   const [now, setNow] = useState(() => Date.now());
-  // Estado de paginación
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   // Feedback de exportación
   const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
-  // Eliminado: Estado para alternar la vista del top de productos
 
   // PDF export
-  const pdfRootRef = useRef<HTMLDivElement>(null); // para la UI visible
-  const hiddenPdfRef = useRef<HTMLDivElement>(null); // para exportación offscreen
+  const pdfRootRef = useRef<HTMLDivElement>(null); 
+  const hiddenPdfRef = useRef<HTMLDivElement>(null); 
   const { generatePdf, loading: pdfLoading } = useReportsPdfExport();
-  // Estado para mostrar/ocultar el contenedor offscreen
   const [showHiddenPdf, setShowHiddenPdf] = useState(false);
-  // Estado para cambiar vista de gráfico barchart
   const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
   const isGeneratingRef = useRef(false);
-
   const barChartCaptureRef = useRef<HTMLDivElement>(null);
   const donutChartCaptureRef = useRef<HTMLDivElement>(null);
   const [exportingExcel, setExportingExcel] = useState(false);
@@ -142,18 +128,14 @@ export function AdminReports() {
 
     const run = async () => {
       try {
-        // 🧠 1. esperar a que React pinte el DOM
         await new Promise(requestAnimationFrame);
 
-        // 🧠 2. asegurar que el ref existe
         if (!hiddenPdfRef.current) {
           await new Promise(res => setTimeout(res, 100));
         }
 
-        // 🧠 3. esperar gráficos + lazy + layout
         await new Promise(res => setTimeout(res, 1000));
 
-        // 🧠 4. generar PDF
         await generatePdf({
           rootRef: hiddenPdfRef,
           fileName: 'reporte-resumen.pdf'
@@ -186,24 +168,15 @@ export function AdminReports() {
     return () => clearInterval(id);
   }, []);
 
-  // Resetear a página 1 cuando cambian los filtros
   useEffect(() => {
     setPage(1);
   }, [pageSize, filters]);
 
-  // Detectar cambios en filtros generales o de pedidos
   useEffect(() => {
     setIsDirty(true);
   }, [filters, setIsDirty]);
 
-  // Bloquear navegación interna (react-router-dom v6+)
-  // Si usas react-router, puedes usar useBlocker o usePrompt aquí
-
-  // Determinar periodo para lógica existente
-
-  // Calcular min/max fechas para inputs
   const allDates = orders.map(o => {
-    // normaliza strings YYYY-MM-DD o ISO con hora
     const ms = createdAtToMs(o.createdAt);
     return formatDateLocal(new Date(ms));
   });
@@ -215,13 +188,9 @@ export function AdminReports() {
       ...o,
       createdAtMs: createdAtToMs(o.createdAt)
     }))
-  },
-    [orders]);
+  }, [orders]);
 
-  // Objetivo mensual
   const { monthlyGoal } = useMonthlyGoal();
-  // Filtrado extendido
-  // periodOrders: solo filtra por período (filtros generales)
   const {
     period,
     periodOrders,
@@ -235,7 +204,6 @@ export function AdminReports() {
     now
   );
 
-  /* ── Comparativa período anterior ── */
   const prevPeriodRevenue = useMemo(() => {
     if (period === 'all') return null;
 
@@ -249,8 +217,6 @@ export function AdminReports() {
 
     return prevOrders.reduce((s, o) => s + o.total, 0);
   }, [ordersWithTime, period, now]);
-
-
 
   const KPISkeleton = () => (
     <div className={styles.kpiCard}>
@@ -266,7 +232,6 @@ export function AdminReports() {
     ? ((kpis.totalRevenue - prevPeriodRevenue) / prevPeriodRevenue) * 100
     : null;
 
-  // Métricas para ReportsMetrics
   const metrics = [
     {
       key: 'revenue',
@@ -312,7 +277,6 @@ export function AdminReports() {
       return lastNDayKeys(days);
     }
 
-    // custom range
     if (filters.type === 'custom') {
       const { from: rangeFrom, to: rangeTo } = filters.range;
       if (!rangeFrom || !rangeTo) return [];
@@ -323,7 +287,7 @@ export function AdminReports() {
 
       while (currentMs <= endMs) {
         result.push(formatDateLocal(new Date(currentMs)));
-        currentMs += 86400000; // +1 día
+        currentMs += 86400000;
       }
 
       return result;
@@ -332,14 +296,12 @@ export function AdminReports() {
     return [];
   }, [filters]);
 
-  /* ── Datos para BarChart ── */
   const barData = useMemo(() => {
-    // Caso: todo el tiempo → agrupar por mes
     if (period === 'all') {
       const map = new Map<string, number>();
       ordersWithTime.forEach(o => {
         if (o.status === 'cancelado') return;
-        const k = o.createdAt.slice(0, 7); // YYYY-MM
+        const k = o.createdAt.slice(0, 7); 
         map.set(k, (map.get(k) ?? 0) + o.total);
       });
       return [...map.entries()]
@@ -351,13 +313,7 @@ export function AdminReports() {
         }));
     }
 
-    // ✅ FIX: separar el caso 'custom' del predefinido.
-    // Antes, 'custom' caía en el branch predefinido y usaba lastNDayKeys(90)
-    // en lugar de las claves del rango seleccionado, resultando en un mapa
-    // vacío para el rango custom → sin datos en gráfico ni tabla.
     if (period === 'custom') {
-      // dayKeys ya contiene las claves YYYY-MM-DD del rango personalizado
-      // generadas correctamente por parseDateStartLocal + formatDateLocal
       const map = new Map<string, number>(dayKeys.map(k => [k, 0]));
       activeOrders.forEach(o => {
         const k = orderDateKey(o.createdAt);
@@ -370,7 +326,6 @@ export function AdminReports() {
       }));
     }
 
-    // Caso: períodos predefinidos (7d, 30d, 90d)
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
     const keys = lastNDayKeys(days);
     const map = new Map<string, number>(keys.map(k => [k, 0]));
@@ -385,7 +340,6 @@ export function AdminReports() {
     }));
   }, [ordersWithTime, activeOrders, period, dayKeys]);
 
-  /* ── Top productos ── */
   const topProducts = useMemo(() => {
     const map = new Map<string, { id: string; name: string; qty: number; revenue: number; productImage?: string }>();
     activeOrders.forEach(o =>
@@ -405,7 +359,6 @@ export function AdminReports() {
 
   const maxProductRevenue = topProducts[0]?.revenue ?? 1;
 
-  /* ── Distribución por estado ── */
   const statusSlices = useMemo(() => {
     const map = new Map<string, number>();
 
@@ -421,10 +374,6 @@ export function AdminReports() {
     }));
   }, [periodOrders]);
 
-
-
-
-  // Skeletons memoizados y reutilizables
   const BarChartSkeleton = React.memo(function BarChartSkeleton() {
     return (
       <div className={styles.skeletonChartContainer}>
@@ -476,12 +425,10 @@ export function AdminReports() {
     if (page > maxPage) setPage(maxPage || 1);
   }, [filteredOrdersTable, pageSize, page]);
 
-
   const exportBarData = useMemo(() => {
     if (barData.length <= 30) return barData;
 
     const groupSize = Math.ceil(barData.length / 30);
-
     const result = [];
 
     for (let i = 0; i < barData.length; i += groupSize) {
@@ -508,7 +455,6 @@ export function AdminReports() {
       );
     }
 
-    //  La tabla siempre renderiza, muestra "Sin ventas" por fila internamente
     return (
       <div className={styles.fadeIn}>
         <SalesTableView
@@ -530,9 +476,6 @@ export function AdminReports() {
     <div className={`${sectionStyles.page} ${styles.reportsPage} dark:bg-gray-900 dark:text-gray-100`} ref={pdfRootRef}>
       {/* Header */}
       <div className={sectionStyles.header}>
-        {/* <h1 className={styles.panelTitle + ' fadeIn'}>
-          <span className={sectionStyles.icon}>📊</span> Reportes y estadísticas
-        </h1> */}
         <p className={sectionStyles.subtitle + ' fadeInFast'}>
           Analizá el rendimiento de tu tienda: ventas, productos más vendidos y evolución del negocio.
         </p>
@@ -558,7 +501,6 @@ export function AdminReports() {
           maxDate={maxDate}
         />
         <div>
-
           <span className={styles.exportLabel}>Descargar resumen:</span>
           <button
             type="button"
@@ -596,7 +538,7 @@ export function AdminReports() {
           >
             {exportingExcel ? 'Generando Excel…' : 'Descargar Excel'}
           </button>
-          {/* 🆕 BOTÓN PDF */}
+          
           <button
             type="button"
             className={styles.exportResumeBtn}
@@ -604,15 +546,11 @@ export function AdminReports() {
             disabled={pdfLoading}
             onClick={async () => {
               try {
-                // aseguramos vista correcta del gráfico
                 if (salesViewMode !== 'chart') {
                   setSalesViewMode('chart');
                   await new Promise(res => setTimeout(res, 300));
                 }
-
-                // 👇 ESTO DISPARA TODO TU FLUJO ACTUAL
                 setShowHiddenPdf(true);
-
               } catch (err) {
                 console.error(err);
                 setNotif({
@@ -626,6 +564,7 @@ export function AdminReports() {
             {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
           </button>
         </div>
+
         {/* Contenedor invisible para exportación PDF fiel */}
         {showHiddenPdf && (
           <div style={{ position: 'absolute', left: -9999, top: 0, width: 900, pointerEvents: 'none', zIndex: -1 }}>
@@ -640,8 +579,8 @@ export function AdminReports() {
             />
           </div>
         )}
-
       </div>
+
       {/* KPI Cards */}
       {
         isLoading ? (
@@ -711,7 +650,6 @@ export function AdminReports() {
               </div>
               <div className={styles.viewToggleGroup + ' fadeInFast'}>
                 <span className={styles.viewToggleLabel}>Vista:</span>
-
                 <button
                   className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
                   onClick={() => setSalesViewMode('chart')}
@@ -808,7 +746,6 @@ export function AdminReports() {
 
               {/* Filtros rápidos para la tabla de pedidos */}
               <div className={styles.advancedFiltersWrap + ' fadeInFast'}>
-
                 <label className={styles.advancedLabel}>
                   <strong>Cliente</strong>
                   <div className={styles.searchWrap}>
@@ -851,7 +788,8 @@ export function AdminReports() {
                 </label>
                 <OrdersFilters
                   ordersTableFilters={ordersTableFilters}
-                  setOrdersTableFilters={setOrdersTableFilters} />
+                  setOrdersTableFilters={setOrdersTableFilters} 
+                />
                 <div className={styles.advancedActions}>
                   <button
                     type="button"
@@ -866,6 +804,7 @@ export function AdminReports() {
                   </button>
                 </div>
               </div>
+              
               {periodOrders.length === 0 ? (
                 <p className={styles.noData + ' fadeCross'}>Sin pedidos en este período.</p>
               ) : (
@@ -885,7 +824,7 @@ export function AdminReports() {
                         value={pageSize}
                         onChange={(e) => {
                           setPageSize(Number(e.target.value));
-                          setPage(1); // resetear página
+                          setPage(1); 
                         }}
                         className={styles.pageSizeSelect}
                       >
@@ -908,7 +847,6 @@ export function AdminReports() {
           </>
         )
       }
-    </div >
+    </div>
   );
 }
-

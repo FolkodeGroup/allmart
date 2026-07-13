@@ -24,7 +24,7 @@ import { Response, NextFunction } from 'express';
 import * as variantsService from '../../services/productVariantsService';
 import { sendSuccess } from '../../utils/response';
 import { AuthenticatedRequest } from '../../types';
-import { CreateProductVariantDTO, UpdateProductVariantDTO } from '../../models/ProductVariant';
+import { UpdateProductVariantDTO } from '../../models/ProductVariant';
 
 export async function index(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {

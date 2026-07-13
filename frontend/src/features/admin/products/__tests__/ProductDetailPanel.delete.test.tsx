@@ -1,8 +1,5 @@
-/**
- * frontend/src/features/admin/products/__tests__/ProductDetailPanel.delete.test.tsx
- * Tests para la confirmación de eliminación en el panel de detalle del producto.
- * Verifica que aparece un modal de confirmación antes de eliminar un producto desde el detalle.
- */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
