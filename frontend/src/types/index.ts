@@ -1,6 +1,20 @@
 /* ============================================
    ALLMART TYPE DEFINITIONS
    ============================================ */
+
+export interface Discount {
+  promotionId: string;
+  promotionName: string;
+  originalPrice: number;
+  discountAmount: number;
+  finalPrice: number;
+  discountPercentage: number;
+  promotionType: string;
+  priority: number;
+  validUntil?: string;
+  minPurchase?: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -23,7 +37,7 @@ export interface Product {
   primarySupplierId?: string | null;
   skus?: Array<{ id: string; sku: string; attributes: Record<string, string>; stock: number; price?: number; images?: string[] }>
   selectedAttributes?: Record<string, string>;
-  appliedDiscount?: any | null;
+  appliedDiscount?: Discount | null;
 }
 
 export interface Category {
@@ -40,6 +54,7 @@ export interface Category {
 export interface CartItem {
   product: Product;
   quantity: number;
+  discount?: Discount | null;
 }
 
 export interface NavigationItem {

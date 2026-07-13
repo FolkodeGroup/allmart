@@ -16,6 +16,7 @@ import { ProductPrice } from '../../components/ui/ProductPrice/ProductPrice';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
 import { ProductReviews } from '../../components/ProductReviews/ProductReviews';
 import VariantSelector from '../../components/VariantSelector/VariantSelector';
+import DiscountBadge from '../../components/DiscountBadge';
 
 import styles from './ProductDetailPage.module.css';
 import { useCart } from '../../components/layout/context/CartContextUtils';
@@ -70,6 +71,7 @@ export function ProductDetailPage() {
     setSelectedImage(0);
     setRelatedProducts([]);
     setSelectedVariants({});
+    setQuantity(1);
 
     const loadProduct = async () => {
       try {
@@ -96,7 +98,7 @@ export function ProductDetailPage() {
         try {
           const { data } = await fetchPublicProducts({
             category: category.slug,
-            limit: 8 
+            limit: 8
           });
 
           if (cancelled) return;
@@ -161,21 +163,29 @@ export function ProductDetailPage() {
   const isProductFavorite = product ? isFavorite(product.id) : false;
 
   const variantMap = useMemo(() => {
-    const map: Record<string, Set<string>> = {};
+    const map: Record<string, string[]> = {};
+    const seen: Record<string, Set<string>> = {};
 
     product?.skus?.forEach(sku => {
       Object.entries(sku.attributes || {}).forEach(([k, v]) => {
         const key = k.toLowerCase();
         const value = String(v).trim();
-        if (!value) return; 
+        if (!value) return;
 
-        if (!map[key]) map[key] = new Set();
-        map[key].add(value);
+        if (!map[key]) {
+          map[key] = [];
+          seen[key] = new Set();
+        }
+        // Only add if not already added (preserve order, avoid duplicates)
+        if (!seen[key].has(value)) {
+          map[key].push(value);
+          seen[key].add(value);
+        }
       });
     });
 
     Object.keys(map).forEach(k => {
-      if (map[k].size === 0) delete map[k];
+      if (map[k].length === 0) delete map[k];
     });
 
     return map;
@@ -189,7 +199,7 @@ export function ProductDetailPage() {
 
   const matchingSku = useMemo(() => {
     if (!product?.skus) return null;
-    
+
     // 🟢 CORRECCIÓN: Si no hay selección, obligamos a que no haga match con el primer SKU para no robar el precio base
     if (Object.keys(selectedVariants).length === 0) return null;
 
@@ -217,6 +227,55 @@ export function ProductDetailPage() {
 
       return matchesOther && getAttr(sku, attr) === value;
     });
+  }
+
+  /**
+   * Finds compatible variants and auto-selects the first compatible value
+   * for each variant group that doesn't have a selection yet.
+   */
+  function findCompatibleVariants(newSelection: Record<string, string>): Record<string, string> {
+    if (!product?.skus || Object.keys(variantMap).length === 0) {
+      return newSelection;
+    }
+
+    const result = { ...newSelection };
+
+    // Find all SKUs that match the current selection
+    const compatibleSkus = product.skus.filter(sku => {
+      return Object.entries(result).every(([k, v]) => {
+        return getAttr(sku, k) === v;
+      });
+    });
+
+    // If no compatible SKUs found, return current selection
+    if (compatibleSkus.length === 0) {
+      return result;
+    }
+
+    // For each variant group in variantMap that doesn't have a selection, auto-select the first compatible value
+    for (const attr of Object.keys(variantMap)) {
+      if (!result[attr]) {
+        // Get all possible values for this attribute from compatible SKUs
+        const possibleValues = new Set<string>();
+        compatibleSkus.forEach(sku => {
+          const value = getAttr(sku, attr);
+          if (value) {
+            possibleValues.add(value);
+          }
+        });
+
+        // Select the first available value in the original order (not alphabetical)
+        const originalOrderedValues = variantMap[attr] || [];
+        for (const value of originalOrderedValues) {
+          if (possibleValues.has(value)) {
+            result[attr] = value;
+            break;
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   function normalizeColor(value: string): string | null {
@@ -255,6 +314,7 @@ export function ProductDetailPage() {
           selectedAttributes: {},
         },
         quantity,
+        discount: dynamicDiscount,
       });
     } else {
       const imagesForCart =
@@ -284,7 +344,7 @@ export function ProductDetailPage() {
           selectedAttributes: selectedVariants,
         };
 
-      addToCart({ product: productForCart, quantity });
+      addToCart({ product: productForCart, quantity, discount: dynamicDiscount });
     }
 
     setAddedFeedback(true);
@@ -365,12 +425,19 @@ export function ProductDetailPage() {
         </div>
 
         <div className={styles.info}>
-          <div className={styles.badges}>
-            {isNew && <Badge variant="new">Nuevo</Badge>}
-          </div>
-
           <span className={styles.category}>{product.category.name}</span>
           <h1 className={styles.productName}>{product.name}</h1>
+          <div className={styles.badges}>
+            {dynamicDiscount && (
+              <DiscountBadge
+                discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
+                discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
+                promotionType={dynamicDiscount?.promotionType}
+                display="inline"
+              />
+            )}
+            {isNew && <Badge variant="new">Nuevo</Badge>}
+          </div>
 
           <div className={styles.rating}>
             <span className={styles.stars}>{renderStars(product.rating)}</span>
@@ -428,7 +495,8 @@ export function ProductDetailPage() {
                                 delete next[attr];
                                 return next;
                               }
-                              return { ...prev, [attr]: val };
+                              const newSelection = { ...prev, [attr]: val };
+                              return findCompatibleVariants(newSelection);
                             })
                           }
                         >
@@ -453,10 +521,8 @@ export function ProductDetailPage() {
             {(() => {
               const basePrice = selectedSku?.price ?? product.price;
               if (dynamicDiscount) {
-                const final = dynamicDiscount.finalPrice && dynamicDiscount.originalPrice === product.price
-                  ? Math.max(0, Math.round((basePrice / product.price) * dynamicDiscount.finalPrice))
-                  : dynamicDiscount.finalPrice;
-                return <ProductPrice price={final} size="lg" />;
+                // Pasar el descuento a ProductPrice para que lo muestre correctamente
+                return <ProductPrice price={basePrice} discount={dynamicDiscount} size="lg" />;
               }
               return <ProductPrice price={basePrice} size="lg" />;
             })()}
@@ -481,7 +547,7 @@ export function ProductDetailPage() {
                   key={group.id}
                   group={group}
                   selected={selectedVariants[group.id]}
-                  onSelect={(value) => setSelectedVariants(prev => ({ ...prev, [group.id]: value }))}
+                  onSelect={(value) => setSelectedVariants(prev => findCompatibleVariants({ ...prev, [group.id]: value }))}
                 />
               ))}
             </div>

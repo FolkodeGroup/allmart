@@ -349,6 +349,19 @@
   background: var(--color-primary-dark);
 }
 
+/* ── Price Display with Discount ── */
+.itemPriceUnit {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.itemSubtotalContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+}
+
 .itemVariants {
   display: flex;
   flex-wrap: wrap;

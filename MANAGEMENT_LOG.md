@@ -2123,19 +2123,76 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1225: 1206 no renderizar productos de categorías hijas ocultas en la home | 2026-07-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1224: Cambio implementado y verificado. | 2026-07-04 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1223: 🔄 Registrar puntaje de gestión | 2026-07-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1251: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1250: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1249: chore: trackear favicon y webmanifest en git para el build de produccion | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1248: ci: agregar variables de entorno de Cloudflare R2 al despliegue autom… | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1247: 🔄 Registrar puntaje de gestión | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1246: Revert "1212 renderizar los gráficos como tablas legibles en el pdf de reportes" | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1245: 🔄 Registrar puntaje de gestión | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1244: git add backend/Dockerfile prisma.config.ts docker-entrypoint.sh pris… | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1243: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1241: 🔄 Actualización automática de puntajes semanal | 2026-07-05 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1240: fix prisma config | 2026-07-05 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1239: Fix dockerfile | 2026-07-05 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1238: Fix(Dockerfile) | 2026-07-05 |
 | dgimenezdeveloper | 5 | Apertura de PR | PR #1237: Delete archivos huerfanos frontend | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1251: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1250: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1249: chore: trackear favicon y webmanifest en git para el build de produccion | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1248: ci: agregar variables de entorno de Cloudflare R2 al despliegue autom… | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1246: Revert "1212 renderizar los gráficos como tablas legibles en el pdf de reportes" | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1245: 🔄 Registrar puntaje de gestión | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1244: git add backend/Dockerfile prisma.config.ts docker-entrypoint.sh pris… | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1243: Fix dockerfile | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1242: 1212 renderizar los gráficos como tablas legibles en el pdf de reportes | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1242: 1212 renderizar los gráficos como tablas legibles en el pdf de reportes | 2026-07-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1241: 🔄 Actualización automática de puntajes semanal | 2026-07-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1240: fix prisma config | 2026-07-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1239: Fix dockerfile | 2026-07-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1238: Fix(Dockerfile) | 2026-07-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1237: Delete archivos huerfanos frontend | 2026-07-05 |
-| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1199: 🔄 Actualización automática de puntajes semanal | 2026-07-02 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1231: 1215 corregir cálculo de ventas totales para rangos personalizados error de  1 día | 2026-07-04 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1233: Refactor prisma 250626 | 2026-07-04 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1244: git add backend/Dockerfile prisma.config.ts docker-entrypoint.sh pris… | 2026-07-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1242: 1212 renderizar los gráficos como tablas legibles en el pdf de reportes | 2026-07-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1252: 1209 permitir volver a sin tope el descuento máximo al editar una promoción | 2026-07-07 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1255: 1219 renderizado en vivo de filtros actualizar mientras se escribe | 2026-07-09 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1256: 1220 unificar estilos de estados de pedidos entre dashboard y vista de pedidos | 2026-07-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1236: 🔄 Registrar puntaje de gestión | 2026-07-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1253: 1063 homogeneización de dropdowns hovers de marca y rediseño de componentes de calendario | 2026-07-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1253: 1063 homogeneización de dropdowns hovers de marca y rediseño de componentes de calendario | 2026-07-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1253: 1063 homogeneización de dropdowns hovers de marca y rediseño de componentes de calendario | 2026-07-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1252: 1209 permitir volver a sin tope el descuento máximo al editar una promoción | 2026-07-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1063: Homogeneización de dropdowns (hovers de marca) y rediseño de componentes de calendario | 2026-07-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1258: 🔄 Registrar puntaje de gestión | 2026-07-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1257: 🔄 Registrar puntaje de gestión | 2026-07-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1258: 🔄 Registrar puntaje de gestión | 2026-07-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1257: 🔄 Registrar puntaje de gestión | 2026-07-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1256: 1220 unificar estilos de estados de pedidos entre dashboard y vista de pedidos | 2026-07-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1255: 1219 renderizado en vivo de filtros actualizar mientras se escribe | 2026-07-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1254: Se alinea los estilos de los modales de Ver y Eliminar en Consultas c… | 2026-07-09 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1247: 🔄 Registrar puntaje de gestión | 2026-07-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1260: 🔄 Registrar puntaje de gestión | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1267: Formulario de Arrepentimiento no debe Verse Afectado por Dark Mode del Admin | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1266: Mejorar UX del Formulario de Contacto - Validaciones y Avisos Claros | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1265: Mostrar Descuento de Promoción Aplicado en el Carrito de Compra | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1264: Mostrar tipo de descuento aplicado en el detalle del producto | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1263: Seleccionar automáticamente la primera variante compatible al elegir una variante asociada | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1262: Mostrar colección de categoría en la vista de categorías al pulsar Ver todas las categorías | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1261: Resetear cantidad a 1 al cambiar entre detalles de productos | 2026-07-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1259: Productos destacados del admin deben mostrarse en Home y en el listado de productos | 2026-07-10 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1287: 1278 unificar y agregar checkboxes de etiquetas en el formulario de producto | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1277: add discount handling to cart and product components improve visibility | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1276: 1267 formulario de arrepentimiento no debe verse afectado por dark mode del admin | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1275: 1266 mejorar ux del formulario de contacto   validaciones y avisos claros | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1274: 1264 mostrar tipo de descuento aplicado en el detalle del producto | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1273: 1263 seleccionar automáticamente la primera variante compatible al elegir una variante asociada | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1272: 1262 mostrar colección de categoría en la vista de categorías al pulsar ver todas las categorías | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1271: AdminOrders fix fetching orders with status filter and page pagination | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1270: 1261 resetear cantidad a 1 al cambiar entre detalles de productos | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1269: Solution Implemented | 2026-07-11 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1268: 1214 mejorar estilos y legibilidad de pdfs exportados desde reportes | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1286: VALIDACIÓN DE DATOS EN FORMULARIO DE ARREPENTIMIENTO | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1285: ESTILOS DARK MODE EN FORMULARIO DE CONTACTO | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1284: VALIDACIÓN DE STOCK EN CHECKOUT | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1283: REPOSICIONAR BADGE DE DESCUENTO A ESQUINA SUPERIOR IZQUIERDA | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1282: Corregir cálculo del descuento BOGO en la vista de Promociones | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1281: Corregir dropdown de estado en la tabla de pedidos para que no corte las opciones | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1280: Mostrar variante comprada en el detalle de un pedido | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1279: Enmarcar el apartado de Proveedor en el formulario de producto | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1278: Unificar y agregar checkboxes de etiquetas en el formulario de producto | 2026-07-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |

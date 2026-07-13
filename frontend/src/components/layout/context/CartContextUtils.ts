@@ -1,7 +1,7 @@
 import { useContext, createContext } from 'react';
-import type { CartItem } from '../../../types';
+import type { CartItem, Discount } from '../../../types';
 
-export type { CartItem };
+export type { CartItem, Discount };
 
 export const CART_STORAGE_KEY = 'allmart_cart';
 

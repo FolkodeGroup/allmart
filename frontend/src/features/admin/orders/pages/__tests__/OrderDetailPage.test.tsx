@@ -74,7 +74,7 @@ vi.mock('../../../../services/adminActivityLogService', () => ({
 }));
 
 vi.mock('../../../../components/ui/Button/Button', () => ({
-  Button: ({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void; [key: string]: unknown }) => (
+  Button: ({ children, onClick, ...props }: { children: React.ReactNode; onClick?: () => void;[key: string]: unknown }) => (
     <button onClick={onClick} {...props}>{children}</button>
   ),
 }));
@@ -123,7 +123,7 @@ describe('OrderDetailPage', () => {
 
   it('should render loading state initially', () => {
     (ordersService.fetchAdminOrderById as unknown as typeof ordersService.fetchAdminOrderById).mockImplementation(
-      () => new Promise(() => {}) // Never resolves
+      () => new Promise(() => { }) // Never resolves
     );
 
     render(
@@ -214,6 +214,38 @@ describe('OrderDetailPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Productos · 2 ítems/)).toBeInTheDocument();
+    });
+  });
+
+  it('should render selected variant or sku for order items', async () => {
+    const variantOrder = {
+      ...mockOrder,
+      items: [
+        {
+          productId: 'product-1',
+          productSkuId: 'sku-1',
+          sku: 'PROD-A-XL',
+          variant: 'XL',
+          productName: 'Product A',
+          productImage: 'image.jpg',
+          quantity: 1,
+          unitPrice: 75.00,
+        },
+      ],
+      total: 75.00,
+    };
+
+    (ordersService.fetchAdminOrderById as unknown as { mockResolvedValue: (val: unknown) => void }).mockResolvedValue(variantOrder);
+
+    render(
+      <BrowserRouter>
+        <OrderDetailPage />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/XL/)).toBeInTheDocument();
+      expect(screen.getByText(/PROD-A-XL/)).toBeInTheDocument();
     });
   });
 });

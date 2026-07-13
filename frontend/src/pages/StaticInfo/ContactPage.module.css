@@ -63,6 +63,10 @@
   font-weight: var(--font-medium);
 }
 
+.regretfieldInput {
+  background: white;
+}
+
 .fieldInput,
 .fieldTextarea {
   width: 100%;

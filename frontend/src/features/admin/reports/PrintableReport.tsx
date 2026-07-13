@@ -1,9 +1,8 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useMemo, useState, Suspense } from 'react';
 import type { ReportsFiltersValue } from './components/ReportsFilters';
 import type { OrdersTableProps } from './AdminReports';
 import { OrdersTable } from './components/OrdersTable';
-import { generateMockOrders } from "./components/DatosMockeados";
-import { chunkOrdersForPDF } from "./components/chunkOrdersForPDF";
+import { chunkOrdersForPDF } from './components/chunkOrdersForPDF';
 // import { flushSync } from 'react-dom';
 
 export interface PrintableReportProps {
@@ -26,10 +25,66 @@ export interface PrintableReportProps {
     };
 }
 
-const BarChart = React.lazy(() => import('./components/BarChart'));
 const DonutChart = React.lazy(() => import('./components/DonutChart'));
-// IMPORTA DATOS MOCKEADOS PARA PRUEBA
 
+const PRINT_PAGE_WIDTH = 794;
+const PRINT_PAGE_HEIGHT = 1123;
+
+const projectPalette = {
+    primary: '#769282',
+    primaryDark: '#5d7568',
+    accent: '#DDB08C',
+    bgSecondary: '#F2EFEB',
+    bgTertiary: '#F9F7F4',
+    textPrimary: '#1A1A1A',
+    textSecondary: '#4A4A4A',
+    border: '#E5E2DD',
+    borderLight: '#F0EDE8',
+};
+
+function formatCurrency(value: number) {
+    return `$${value.toLocaleString('es-AR')}`;
+}
+
+function groupByWeek(data: Array<{ dateKey: string; label: string; value: number }>) {
+    const grouped: Record<string, { label: string; value: number }> = {};
+
+    for (const item of data) {
+        const date = new Date(item.dateKey);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const weekOfMonth = Math.ceil(date.getDate() / 7);
+        const key = `${year}-${month}-S${weekOfMonth}`;
+        if (!grouped[key]) {
+            grouped[key] = { label: `${year}-${month}-S${weekOfMonth}`, value: 0 };
+        }
+        grouped[key].value += item.value;
+    }
+
+    return Object.values(grouped);
+}
+
+function renderSalesTable(data: Array<{ dateKey: string; label: string; value: number }>) {
+    const rows = data.length > 12 ? groupByWeek(data) : data;
+    return (
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 12 }}>
+            <thead>
+                <tr>
+                    <th style={tableHeadCell}>Periodo</th>
+                    <th style={tableHeadCell}>Ventas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows.map((item, index) => (
+                    <tr key={index} style={{ background: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                        <td style={tableBodyCell}>{item.label}</td>
+                        <td style={{ ...tableBodyCell, textAlign: 'right' }}>{formatCurrency(item.value)}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+}
 
 export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportProps>(
     (
@@ -45,10 +100,7 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
         ref
     ) => {
         const now = new Date().toLocaleString('es-AR');
-
-        // --- USAR DATOS MOCKEADOS PARA DEBUG DE PAGINACIÓN ---
-        // const orders = ordersTableProps.orders; // ← Descomenta esta línea para usar los pedidos reales
-        const orders = generateMockOrders(31) // ← Comenta esta línea para usar los pedidos reales
+        const orders = useMemo(() => ordersTableProps.orders ?? [], [ordersTableProps.orders]);
 
         const [ordersChunks, setOrdersChunks] = useState<typeof orders[]>([]);
         useEffect(() => {
@@ -71,31 +123,39 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
             <div
                 ref={ref}
                 style={{
-                    background: '#fff',
-                    color: '#000',
-                    padding: "2rem",
-                    margin: "1rem",
-                    width: 900,
-                    fontFamily: 'Arial, sans-serif',
-                    fontSize: 12,
-                    lineHeight: 1.4,
+                    background: projectPalette.bgTertiary,
+                    color: projectPalette.textPrimary,
+                    padding: '24px',
+                    margin: '0 auto',
+                    width: PRINT_PAGE_WIDTH,
+                    fontFamily: 'Inter, Arial, sans-serif',
+                    fontSize: 11,
+                    lineHeight: 1.45,
+                    boxSizing: 'border-box',
                 }}
             >
                 {/* 🟢 PÁGINA 1 (RESUMEN) */}
-                <div className="pdf-page-1">
+                <div className="pdf-page-1" style={pageFrameStyle}>
                     {/* HEADER */}
-                    <header style={{ marginBottom: 24 }}>
-                        <h1 style={{ fontSize: 22, margin: 0 }}>
-                            REPORTE DE PEDIDOS
-                        </h1>
-                        <div style={{ marginTop: 8 }}>
-                            <div><b>Fecha de generación:</b> {now}</div>
-                            <div><b>Período:</b> {periodLabel}</div>
+                    <header style={{ marginBottom: 20, borderBottom: `2px solid ${projectPalette.primary}`, paddingBottom: 10 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                            <div>
+                                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: projectPalette.primary }}>
+                                    Resumen administrativo
+                                </div>
+                                <h1 style={{ fontSize: 22, margin: '4px 0 0', color: '#111827' }}>
+                                    REPORTE DE PEDIDOS
+                                </h1>
+                            </div>
+                            <div style={{ textAlign: 'right', fontSize: 10, color: projectPalette.textSecondary }}>
+                                <div><b>Fecha:</b> {now}</div>
+                                <div><b>Período:</b> {periodLabel}</div>
+                            </div>
                         </div>
                     </header>
                     {/* FILTROS */}
-                    <section style={{ marginBottom: 24 }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <section style={{ marginBottom: 18 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1' }}>
                             <tbody>
                                 {ordersTableFilters?.status && (
                                     <tr>
@@ -125,8 +185,8 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                         </table>
                     </section>
                     {/* KPIs */}
-                    <section style={{ marginBottom: 32 }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <section style={{ marginBottom: 20 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1' }}>
                             <thead>
                                 <tr>
                                     {metrics.map(m => (
@@ -152,19 +212,15 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 24,
+                            gap: 16,
                         }}
                     >
-                        <div style={{ ...box, border: "none" }}>
+                        <div style={{ ...box, border: '1px solid #dbe2ea', padding: 14 }}>
                             <h3 style={title}>Ventas</h3>
-                            <Suspense fallback="Cargando gráfico...">
-                                <BarChart
-                                    data={barData}
-                                    formatValue={(n: number) =>
-                                        `$${n.toLocaleString('es-AR')}`
-                                    }
-                                />
-                            </Suspense>
+                            <div style={{ fontSize: 10, color: projectPalette.textSecondary, marginBottom: 10 }}>
+                                Se muestra el resumen de ventas de manera tabular para impresión.
+                            </div>
+                            {renderSalesTable(barData)}
                         </div>
                         <div
                             style={{
@@ -172,6 +228,8 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
+                                border: '1px solid #dbe2ea',
+                                padding: 14,
                             }}
                         >
                             <div>
@@ -190,25 +248,27 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                         key={index}
                         className={`pdf-page-${index + 2}`}
                         style={{
+                            ...pageFrameStyle,
                             pageBreakBefore: 'always',
-                            border: '2px solid red', // DEBUG: visualiza cada página
-                            marginBottom: 24,
+                            marginTop: 18,
                         }}
                     >
-                        <h3 style={{ marginBottom: 8 }}>
-                            Detalle de pedidos
-                        </h3>
-                        <div style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                            <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>
+                                Detalle de pedidos
+                            </h3>
+                            <span style={{ fontSize: 10, color: '#475569' }}>
+                                Página {index + 2} · {chunk.length} pedidos
+                            </span>
+                        </div>
+                        <div style={{ marginBottom: 10, fontSize: 10, color: '#475569' }}>
                             <b>Total de pedidos:</b> {orders.length}
                         </div>
-                        <div style={{ border: '1px solid #000', padding: 8 }}>
-                            {/* Fuerza que cada fila ocupe más espacio para debug visual del paginado */}
-                            <div style={{ height: 24 }} />
-                            <OrdersTable orders={chunk} />
-                            <div style={{ height: 24 }} />
+                        <div style={{ border: '1px solid #dbe2ea', padding: 8, background: '#fff' }}>
+                            <OrdersTable orders={chunk} printMode />
                         </div>
-                        <div style={{ fontSize: 10, color: '#c00', marginTop: 8 }}>
-                            Página de tabla #{index + 2} - Pedidos en esta página: {chunk.length}
+                        <div style={{ fontSize: 9, marginTop: 8, color: '#64748b', textAlign: 'right' }}>
+                            Generado el {now}
                         </div>
                     </div>
                 ))}
@@ -220,38 +280,75 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
 PrintableReport.displayName = 'PrintableReport';
 
 /* 🔹 estilos reutilizables */
+const pageFrameStyle: React.CSSProperties = {
+    background: '#ffffff',
+    color: projectPalette.textPrimary,
+    border: `1px solid ${projectPalette.border}`,
+    borderRadius: 10,
+    padding: '20px 22px 24px',
+    width: PRINT_PAGE_WIDTH,
+    minHeight: PRINT_PAGE_HEIGHT,
+    boxSizing: 'border-box',
+    margin: '0 auto 18px',
+};
+
 const cellLabel: React.CSSProperties = {
-    fontWeight: 600,
-    border: '1px solid #000',
-    padding: 6,
+    fontWeight: 700,
+    border: `1px solid ${projectPalette.border}`,
+    padding: '7px 8px',
     width: '30%',
+    background: projectPalette.bgSecondary,
+    color: projectPalette.primaryDark,
 };
 
 const cellValue: React.CSSProperties = {
-    border: '1px solid #000',
-    padding: 6,
+    border: `1px solid ${projectPalette.border}`,
+    padding: '7px 8px',
+    color: projectPalette.textPrimary,
 };
 
 const thStyle: React.CSSProperties = {
-    border: '1px solid #000',
-    padding: 8,
-    background: '#eee',
+    border: `1px solid ${projectPalette.border}`,
+    padding: '8px 10px',
+    background: projectPalette.bgSecondary,
     textAlign: 'center',
+    color: projectPalette.primaryDark,
+    fontSize: 11,
 };
 
 const tdStyle: React.CSSProperties = {
-    border: '1px solid #000',
-    padding: 8,
+    border: `1px solid ${projectPalette.border}`,
+    padding: '8px 10px',
     textAlign: 'center',
+    color: projectPalette.textPrimary,
+};
+
+const tableHeadCell: React.CSSProperties = {
+    border: `1px solid ${projectPalette.border}`,
+    padding: '8px 10px',
+    background: projectPalette.bgSecondary,
+    textAlign: 'left',
+    color: projectPalette.primaryDark,
+    fontSize: 11,
+    fontWeight: 700,
+};
+
+const tableBodyCell: React.CSSProperties = {
+    border: `1px solid ${projectPalette.border}`,
+    padding: '8px 10px',
+    fontSize: 11,
+    color: projectPalette.textPrimary,
 };
 
 const box: React.CSSProperties = {
-    border: '1px solid #000',
+    borderRadius: 8,
     padding: 12,
+    background: '#fff',
 };
 
 const title: React.CSSProperties = {
     marginBottom: 8,
     fontSize: 14,
-    fontWeight: 600,
+    fontWeight: 700,
+    color: '#0f172a',
 };

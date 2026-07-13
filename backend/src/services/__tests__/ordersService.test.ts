@@ -41,10 +41,22 @@ describe('ordersService.getOrderById', () => {
           id: '550e8400-e29b-41d4-a716-446655440001',
           orderId: '550e8400-e29b-41d4-a716-446655440000',
           productId: '550e8400-e29b-41d4-a716-446655440010',
+          productSkuId: 'sku-1',
           productName: 'Product A',
           productImage: 'image.jpg',
           quantity: 2,
           unitPrice: 75.00,
+          productSku: {
+            sku: 'PROD-A-XL',
+            skuValues: [
+              {
+                optionValue: {
+                  option: { name: 'Talle' },
+                  name: 'XL'
+                }
+              }
+            ]
+          }
         },
       ],
       orderStatusHistory: [
@@ -79,6 +91,11 @@ describe('ordersService.getOrderById', () => {
     expect(result.paymentStatus).toBe('abonado');
     expect(result.items).toHaveLength(1);
     expect(result.statusHistory).toHaveLength(2);
+    expect(result.items[0]).toMatchObject({
+      productSkuId: 'sku-1',
+      sku: 'PROD-A-XL',
+      variant: 'XL'
+    });
   });
 
   it('should throw 404 error when order does not exist', async () => {

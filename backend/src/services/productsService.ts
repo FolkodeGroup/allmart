@@ -69,7 +69,7 @@ async function updateProductCategories(productId: string, categoryIds: string[])
     where: { productId, categoryId: { in: uniqueIds } },
     select: { categoryId: true },
   });
-  
+
   const existingIds = new Set(existing.map((row) => row.categoryId));
   const toCreate = uniqueIds.filter((id) => !existingIds.has(id));
 
@@ -134,10 +134,10 @@ async function uploadBase64ToR2(productId: string, base64Str: string, position: 
   if (!matches) {
     throw createError('Formato de imagen Base64 inválido', 400);
   }
-  
+
   const buffer = Buffer.from(matches[2], 'base64');
   const base = sharp(buffer).rotate();
-  
+
   const { data: fullBuffer, info: fullInfo } = await base
     .clone()
     .resize({ width: MAX_WIDTH, withoutEnlargement: true })
@@ -182,7 +182,7 @@ function toProduct(row: any): Product {
     : Array.isArray(row.categoryIds)
       ? row.categoryIds
       : [];
-  
+
   const primaryCategoryId = categoryIds[0] ?? '';
 
   // Reconstruimos tags desde la relación N:M
@@ -264,7 +264,7 @@ function buildAdminProductsWhere(query: Record<string, any>): Record<string, any
     where.status = status;
   } else {
     // Si no se filtra por un estado en particular, excluimos los archivados (Soft Delete)
-    where.status = { not: 'archived' }; 
+    where.status = { not: 'archived' };
   }
 
   if (stockLevel && stockLevel !== 'all') {
@@ -342,7 +342,7 @@ export async function getProductById(id: string): Promise<Product> {
       }
     },
   });
-  
+
   if (!row) throw createError('Producto no encontrado', 404);
   const base = toProduct(row);
 
@@ -525,7 +525,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
 export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<Product> {
   const existing = await prisma.product.findUnique({
     where: { id },
-    include: { 
+    include: {
       productCategories: { select: { categoryId: true } },
       productSkus: { where: { isActive: true } },
       productTags: { include: { tag: true } }
@@ -649,7 +649,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
           if (isLocalImageMatch) {
             const existingImageId = isLocalImageMatch[1];
             let existingImg: any = existingImages.find(img => img.id === existingImageId);
-            
+
             if (!existingImg) {
               existingImg = await prisma.productImageStorage.findUnique({
                 where: { id: existingImageId },
@@ -698,14 +698,14 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   }
 
   await Promise.all([
-    shouldUpdateCategories 
-      ? updateProductCategories(id, normalizedCategoryIds) 
+    shouldUpdateCategories
+      ? updateProductCategories(id, normalizedCategoryIds)
       : Promise.resolve(),
-    dto.tags !== undefined 
-      ? updateProductTags(id, Array.isArray(dto.tags) ? dto.tags : []) 
+    dto.tags !== undefined
+      ? updateProductTags(id, Array.isArray(dto.tags) ? dto.tags : [])
       : Promise.resolve(),
-    dto.features !== undefined 
-      ? updateProductFeatures(id, Array.isArray(dto.features) ? dto.features : []) 
+    dto.features !== undefined
+      ? updateProductFeatures(id, Array.isArray(dto.features) ? dto.features : [])
       : Promise.resolve()
   ]);
 
@@ -725,7 +725,7 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
 export async function deleteProduct(id: string): Promise<void> {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) throw createError('Producto no encontrado', 404);
-  
+
   const timestamp = Date.now();
   const archivedSlug = `${existing.slug}-archived-${timestamp}`;
   const archivedSku = existing.sku ? `${existing.sku}-archived-${timestamp}` : null;
@@ -733,21 +733,21 @@ export async function deleteProduct(id: string): Promise<void> {
   await prisma.product.update({
     where: { id },
     data: {
-      status: 'archived', 
+      status: 'archived',
       slug: archivedSlug,
       sku: archivedSku,
-      inStock: false,     
+      inStock: false,
       stock: 0,
     },
   });
 }
 
 export async function getLowStockCount(): Promise<number> {
-  return prisma.product.count({ 
-    where: { 
+  return prisma.product.count({
+    where: {
       stock: { lt: 5 },
       status: { not: 'archived' }
-    } 
+    }
   });
 }
 
@@ -812,25 +812,83 @@ type ProductQuery = {
 };
 
 export async function getPublicProducts(query: ProductQuery) {
-  const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs } = query;
+  const { category, tag, q, sort, page = 1, limit = 12, isFeatured, slugs, isOnSale, isNovedad } = query;
 
   const where: Record<string, any> = {
-    status: 'active', 
+    status: 'active',
   };
 
   if (Array.isArray(slugs) && slugs.length > 0) {
     where.slug = { in: slugs };
   }
 
-  if (typeof isFeatured === 'boolean') {
-    where.isFeatured = isFeatured;
+  // Handle special tags that map to product fields or direct parameters
+  let effectiveTag = tag;
+  let effectiveIsFeatured = isFeatured;
+
+  // "destacado" maps to isFeatured = true, not a regular tag
+  if (tag?.toLowerCase() === 'destacado') {
+    effectiveIsFeatured = true;
+    effectiveTag = undefined; // Don't treat it as a regular tag
   }
 
-  if (tag) {
+  // Apply isFeatured filter
+  if (typeof effectiveIsFeatured === 'boolean') {
+    where.isFeatured = effectiveIsFeatured;
+  }
+
+  // Handle "oferta" tag via isOnSale parameter or tag parameter
+  // These should be mutually exclusive or result in the same filter
+  if (isOnSale === true || tag?.toLowerCase() === 'oferta') {
+    const saleProducts = await prisma.productTag.findMany({
+      where: {
+        tag: {
+          name: 'oferta'
+        }
+      },
+      select: { productId: true }
+    });
+
+    const ids = saleProducts.map(r => r.productId);
+    if (ids.length === 0) {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
+
+    where.id = where.id
+      ? { in: (where.id as any).in.filter((id: string) => ids.includes(id)) }
+      : { in: ids };
+
+    effectiveTag = undefined; // Don't process as regular tag
+  }
+  // Handle "novedad" tag via isNovedad parameter or tag parameter
+  else if (isNovedad === true || tag?.toLowerCase() === 'novedad') {
+    const novedadProducts = await prisma.productTag.findMany({
+      where: {
+        tag: {
+          name: 'novedad'
+        }
+      },
+      select: { productId: true }
+    });
+
+    const ids = novedadProducts.map(r => r.productId);
+    if (ids.length === 0) {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
+
+    where.id = where.id
+      ? { in: (where.id as any).in.filter((id: string) => ids.includes(id)) }
+      : { in: ids };
+
+    effectiveTag = undefined; // Don't process as regular tag
+  }
+
+  // Handle regular tags (not special tags like "destacado", "oferta", "novedad")
+  if (effectiveTag) {
     const taggedProducts = await prisma.productTag.findMany({
       where: {
         tag: {
-          name: tag.toLowerCase()
+          name: effectiveTag.toLowerCase()
         }
       },
       select: { productId: true }
@@ -958,7 +1016,7 @@ export async function getPublicProducts(query: ProductQuery) {
     ? await prisma.product.findMany({
         where: { id: { in: ids } },
         orderBy,
-        include: { 
+        include: {
           productImages: { select: { id: true }, orderBy: { position: 'asc' } },
           productCategories: { select: { categoryId: true } },
           productTags: { include: { tag: true } },
@@ -1034,7 +1092,7 @@ export async function getPublicProducts(query: ProductQuery) {
   const productsWithDiscounts = await applyDiscountsToProducts(mappedProducts);
 
   return {
-    data: productsWithDiscounts, 
+    data: productsWithDiscounts,
     total,
     page,
     limit,
@@ -1075,7 +1133,7 @@ export async function getProductBySlug(slug: string): Promise<Product> {
       }
     },
   });
-  
+
   if (!row) throw createError('Producto no encontrado', 404);
   const base = toProduct(row);
 
