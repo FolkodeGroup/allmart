@@ -60,27 +60,40 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Si la dependencia viene de node_modules
           if (id.includes('node_modules')) {
-            // Aislamos la librería de Excel que es enorme
-            if (id.includes('xlsx')) {
+            // 1. Planillas de cálculo (SheetJS / xlsx)
+            if (id.includes('xlsx') || id.includes('excel')) {
               return 'vendor-excel';
             }
-            // Aislamos las librerías de gráficos para que no pesen en el core
+            // 2. Gráficos (Recharts / D3)
             if (id.includes('recharts') || id.includes('d3')) {
               return 'vendor-charts';
             }
-            // El resto de las librerías comunes (React, etc.)
+            // 3. Generación de PDFs e imágenes al vuelo (jspdf, html2canvas, pdfmake, etc.)
+            if (
+              id.includes('pdf') || 
+              id.includes('html2canvas') || 
+              id.includes('jspdf') || 
+              id.includes('pdfmake')
+            ) {
+              return 'vendor-pdf';
+            }
+            // 4. React Core (React, ReactDOM, Router, etc.)
+            if (id.includes('react') || id.includes('scheduler') || id.includes('router')) {
+              return 'vendor-react';
+            }
+            // 5. Íconos (Lucide y afines)
+            if (id.includes('lucide') || id.includes('icons')) {
+              return 'vendor-icons';
+            }
+            // 6. El resto de las librerías utilitarias más livianas
             return 'vendor-base';
           }
         },
       },
     },
-    // Podés subir el límite de advertencia si considerás que tu admin tolera chunks más pesados
-    chunkSizeWarningLimit: 1000, 
+    // Subimos el límite del warning a 1500 kB (1.5 MB), ya que para paneles de administración 
+    // complejos es un número súper normal y saludable una vez segmentado.
+    chunkSizeWarningLimit: 1500,
   },
-  // Optimization for development
-  ssr: {
-    noExternal: ['recharts'], // Ensure recharts is bundled
-  },
-})
+});
