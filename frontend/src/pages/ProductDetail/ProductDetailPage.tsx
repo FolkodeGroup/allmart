@@ -301,10 +301,25 @@ export function ProductDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isProductFavorite, syncFavorite]); // 🟢 CORRECCIÓN: Se agrega syncFavorite y se silencia la dependencia de 'product' para evitar bucle de re-renderizado
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
 
     const isOriginal = Object.keys(selectedVariants).length === 0;
+
+    // Antes de agregar, solicitar descuento para la cantidad seleccionada
+    const categoryIds = Array.isArray(product.categoryIds)
+      ? product.categoryIds
+      : product.categoryId
+        ? [product.categoryId]
+        : [];
+
+    const discountForQty = await (async () => {
+      try {
+        return await publicCollectionsService.getProductDiscount(product.id, product.price, categoryIds, quantity);
+      } catch {
+        return dynamicDiscount;
+      }
+    })();
 
     if (isOriginal) {
       addToCart({
@@ -314,7 +329,7 @@ export function ProductDetailPage() {
           selectedAttributes: {},
         },
         quantity,
-        discount: dynamicDiscount,
+        discount: discountForQty ?? dynamicDiscount,
       });
     } else {
       const imagesForCart =
@@ -344,7 +359,7 @@ export function ProductDetailPage() {
           selectedAttributes: selectedVariants,
         };
 
-      addToCart({ product: productForCart, quantity, discount: dynamicDiscount });
+      addToCart({ product: productForCart, quantity, discount: discountForQty ?? dynamicDiscount });
     }
 
     setAddedFeedback(true);

@@ -4,12 +4,23 @@ import { prisma } from '../config/prisma';
 export interface DiscountResult {
   promotionId: string;
   promotionName: string;
+  // unit price of the product
   originalPrice: number;
-  discountAmount: number;
-  finalPrice: number;
+  // number of units the discount was calculated for
+  quantity: number;
+  // totals (for the given quantity)
+  totalOriginalPrice: number;
+  totalDiscountAmount: number;
+  totalFinalPrice: number;
+  // per-unit values for frontend compatibility
+  discountAmount?: number;
+  finalPrice?: number;
+  // percentage of discount relative to total original price
   discountPercentage: number;
   promotionType: string;
   priority: number;
+  // how many free items (for BOGO)
+  freeItems?: number;
 }
 
 /**
@@ -49,32 +60,45 @@ export async function getPromotionRulesForProduct(
  */
 export function calculateDiscount(
   promotion: Promotion,
-  originalPrice: number
-): { discountAmount: number; finalPrice: number; discountPercentage: number } {
-  let discountAmount = 0;
+  originalPrice: number,
+  quantity: number = 1
+): { totalDiscountAmount: number; totalFinalPrice: number; discountPercentage: number; freeItems?: number } {
+  let totalDiscountAmount = 0;
   const value = promotion.value.toNumber();
 
+  const totalOriginal = originalPrice * quantity;
+
   if (promotion.type === 'percentage') {
-    discountAmount = (originalPrice * value) / 100;
+    totalDiscountAmount = (totalOriginal * value) / 100;
   } else if (promotion.type === 'fixed') {
-    discountAmount = value;
+    // fixed is considered per unit in previous implementation, but keep it simple: cap at totalOriginal
+    totalDiscountAmount = value * quantity;
   } else if (promotion.type === 'bogo') {
-    discountAmount = originalPrice;
+    // BOGO: free items equal to floor(quantity / 2)
+    if (quantity < 2) {
+      totalDiscountAmount = 0;
+    } else {
+      const freeItems = Math.floor(quantity / 2);
+      totalDiscountAmount = originalPrice * freeItems;
+      // assign freeItems via return
+      // will attach in return value
+    }
   }
 
-  // Aplicar descuento máximo si existe
+  // Aplicar descuento máximo si existe (se aplica sobre el total)
   if (promotion.maxDiscount) {
     const maxDiscount = promotion.maxDiscount.toNumber();
-    discountAmount = Math.min(discountAmount, maxDiscount);
+    totalDiscountAmount = Math.min(totalDiscountAmount, maxDiscount);
   }
 
-  // Asegurar que el descuento no sea negativo ni mayor que el precio
-  discountAmount = Math.max(0, Math.min(discountAmount, originalPrice));
-  const finalPrice = originalPrice - discountAmount;
-  const discountPercentage =
-    originalPrice > 0 ? (discountAmount / originalPrice) * 100 : 0;
+  // Asegurar que el descuento no sea negativo ni mayor que el total original
+  totalDiscountAmount = Math.max(0, Math.min(totalDiscountAmount, totalOriginal));
+  const totalFinalPrice = totalOriginal - totalDiscountAmount;
+  const discountPercentage = totalOriginal > 0 ? (totalDiscountAmount / totalOriginal) * 100 : 0;
 
-  return { discountAmount, finalPrice, discountPercentage };
+  const freeItems = promotion.type === 'bogo' && quantity >= 2 ? Math.floor(quantity / 2) : 0;
+
+  return { totalDiscountAmount, totalFinalPrice, discountPercentage, freeItems: freeItems || undefined };
 }
 
 /**
@@ -84,7 +108,8 @@ export function calculateDiscount(
 export async function getBestDiscount(
   productId: string,
   originalPrice: number,
-  categoryIds: string[] = []
+  categoryIds: string[] = [],
+  quantity: number = 1
 ): Promise<DiscountResult | null> {
   try {
     // Obtener promociones activas
@@ -114,24 +139,30 @@ export async function getBestDiscount(
         if (originalPrice < minAmount) continue;
       }
 
-      const { discountAmount, finalPrice, discountPercentage } = calculateDiscount(
+      const { totalDiscountAmount, totalFinalPrice, discountPercentage, freeItems } = calculateDiscount(
         promotion,
-        originalPrice
+        originalPrice,
+        quantity
       );
 
       const result: DiscountResult = {
         promotionId: promotion.id,
         promotionName: promotion.name,
         originalPrice,
-        discountAmount: Math.round(discountAmount * 100) / 100,
-        finalPrice: Math.round(finalPrice * 100) / 100,
+        quantity,
+        totalOriginalPrice: Math.round(originalPrice * quantity * 100) / 100,
+        totalDiscountAmount: Math.round(totalDiscountAmount * 100) / 100,
+        totalFinalPrice: Math.round(totalFinalPrice * 100) / 100,
+        discountAmount: Math.round((totalDiscountAmount / Math.max(1, quantity)) * 100) / 100,
+        finalPrice: Math.round((totalFinalPrice / Math.max(1, quantity)) * 100) / 100,
         discountPercentage: Math.round(discountPercentage * 100) / 100,
         promotionType: promotion.type,
         priority: promotion.priority,
+        freeItems,
       };
 
       // Mantener el descuento más favorable (mayor descuento absoluto)
-      if (!bestDiscount || result.discountAmount > bestDiscount.discountAmount) {
+      if (!bestDiscount || result.totalDiscountAmount > bestDiscount.totalDiscountAmount) {
         bestDiscount = result;
       }
     }
@@ -216,23 +247,29 @@ export async function applyDiscountsToProducts(
         if (price < minAmount) continue;
       }
 
-      const { discountAmount, finalPrice, discountPercentage } = calculateDiscount(
+      const { totalDiscountAmount, totalFinalPrice, discountPercentage, freeItems } = calculateDiscount(
         promotion,
-        price
+        price,
+        1
       );
 
       const result = {
         promotionId: promotion.id,
         promotionName: promotion.name,
         originalPrice: price,
-        discountAmount: Math.round(discountAmount * 100) / 100,
-        finalPrice: Math.round(finalPrice * 100) / 100,
-        discountPercentage: Math.round(discountPercentage * 100) / 100,
+        quantity: 1,
+        totalOriginalPrice: Math.round(price * 1 * 100) / 100,
+        totalDiscountAmount: Math.round(totalDiscountAmount * 100) / 100,
+        totalFinalPrice: Math.round(totalFinalPrice * 100) / 100,
+          discountAmount: Math.round((totalDiscountAmount / Math.max(1, 1)) * 100) / 100,
+          finalPrice: Math.round((totalFinalPrice / Math.max(1, 1)) * 100) / 100,
+          discountPercentage: Math.round(discountPercentage * 100) / 100,
         promotionType: promotion.type,
         priority: promotion.priority,
+        freeItems,
       };
 
-      if (!bestDiscount || result.discountAmount > bestDiscount.discountAmount) {
+      if (!bestDiscount || result.totalDiscountAmount > bestDiscount.totalDiscountAmount) {
         bestDiscount = result;
       }
     }
@@ -274,9 +311,10 @@ export async function getActiveDiscounts(): Promise<
       const product = rule.product;
       const originalPrice = product.price.toNumber();
 
-      const { discountAmount, finalPrice, discountPercentage } = calculateDiscount(
+      const { totalDiscountAmount, totalFinalPrice, discountPercentage, freeItems } = calculateDiscount(
         promotion,
-        originalPrice
+        originalPrice,
+        1
       );
 
       discounts.push({
@@ -285,11 +323,16 @@ export async function getActiveDiscounts(): Promise<
           promotionId: promotion.id,
           promotionName: promotion.name,
           originalPrice,
-          discountAmount: Math.round(discountAmount * 100) / 100,
-          finalPrice: Math.round(finalPrice * 100) / 100,
+          quantity: 1,
+          totalOriginalPrice: Math.round(originalPrice * 1 * 100) / 100,
+          totalDiscountAmount: Math.round(totalDiscountAmount * 100) / 100,
+          totalFinalPrice: Math.round(totalFinalPrice * 100) / 100,
+          discountAmount: Math.round((totalDiscountAmount / Math.max(1, 1)) * 100) / 100,
+          finalPrice: Math.round((totalFinalPrice / Math.max(1, 1)) * 100) / 100,
           discountPercentage: Math.round(discountPercentage * 100) / 100,
           promotionType: promotion.type,
           priority: promotion.priority,
+          freeItems,
         },
       });
 
