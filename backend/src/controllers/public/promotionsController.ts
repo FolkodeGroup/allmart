@@ -10,7 +10,7 @@ import * as discountService from '../../services/discountService';
 export async function getActivePromotions(
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> {
   try {
     const promotions = await promotionsService.getActivePromotions();
@@ -25,7 +25,7 @@ export async function getActivePromotions(
 export async function getActiveDiscounts(
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> {
   try {
     const discounts = await discountService.getActiveDiscounts();
@@ -40,7 +40,7 @@ export async function getActiveDiscounts(
 export async function getProductDiscount(
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> {
   try {
     const { productId } = req.params;

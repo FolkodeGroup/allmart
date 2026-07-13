@@ -59,34 +59,25 @@ export default defineConfig({
     // Enable code splitting for better caching and lazy loading
     rollupOptions: {
       output: {
-        // División dinámica de chunks para evitar dependencias circulares
         manualChunks(id) {
-          // 1. Dependencias externas (node_modules)
+          // Si la dependencia viene de node_modules
           if (id.includes('node_modules')) {
-            // 🟢 SOLUCIÓN CIRCULAR: Combinamos react, mui, emotion, framer-motion, recharts y d3 en 'vendor-base'
-            // Esto elimina la referencia circular entre el módulo de gráficos y las librerías de UI base.
-            if (
-              id.includes('react/') || id.includes('react-dom/') || id.includes('react-router-dom/') ||
-              id.includes('@mui/') || id.includes('@emotion/') || id.includes('framer-motion/') ||
-              id.includes('recharts/') || id.includes('d3-')
-            ) {
-              return 'vendor-base';
+            // Aislamos la librería de Excel que es enorme
+            if (id.includes('xlsx')) {
+              return 'vendor-excel';
             }
-            if (id.includes('react-hook-form/') || id.includes('@hookform/resolvers/') || id.includes('zod/')) {
-              return 'vendor-forms';
+            // Aislamos las librerías de gráficos para que no pesen en el core
+            if (id.includes('recharts') || id.includes('d3')) {
+              return 'vendor-charts';
             }
+            // El resto de las librerías comunes (React, etc.)
+            return 'vendor-base';
           }
-
-          // 2. Agrupar todas las características de administración en un solo bloque 'admin-core'.
-          if (id.includes('src/features/admin/')) {
-            return 'admin-core';
-          }
-        }
+        },
       },
     },
-    // 🟢 OPTIMIZACIÓN: Aumentamos el límite de advertencia para acomodar el bloque base consolidado y el admin core
-    chunkSizeWarningLimit: 1600,
-    minify: 'esbuild',
+    // Podés subir el límite de advertencia si considerás que tu admin tolera chunks más pesados
+    chunkSizeWarningLimit: 1000, 
   },
   // Optimization for development
   ssr: {

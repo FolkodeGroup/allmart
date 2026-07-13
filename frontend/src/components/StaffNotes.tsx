@@ -345,7 +345,6 @@ export default function StaffNotes() {
         uiState.editingId,
         uiState.deletingId,
         uiState.deletingConfirm,
-        uiState.actionsHiddenFor,
         uiState.editContent,
         updateUiState,
         toggleExpanded,

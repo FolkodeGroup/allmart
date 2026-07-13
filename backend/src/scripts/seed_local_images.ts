@@ -314,7 +314,7 @@ async function ensureProduct(p: ProductDef): Promise<string> {
     await (prisma as any).productCategory.create({
       data: { productId: product.id, categoryId: p.categoryId },
     });
-  } catch (_) { /* ya existe */ }
+  } catch { /* ya existe */ }
 
   console.log(`  ✅ Creado: ${p.name} → ${product.id}`);
   return product.id as string;
