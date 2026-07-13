@@ -9,7 +9,6 @@ import styles from './Header.module.css';
 import { useCart } from '../context/CartContextUtils';
 import { useFavorites } from '../context/FavoritesContextUtils';
 import { ProductSearch } from '../../ui/ProductSearch';
-import { useProductSearch } from '../../../hooks/useProductSearch';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { fetchPublicProducts, mapApiProductToProduct } from '../../../services/productsService';
 
@@ -24,17 +23,33 @@ export function Header() {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebouncedValue(query, 300);
 
-  const [products, setProducts] = useState<Product[]>([]);
   const [results, setResults] = useState<Product[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // 🚀 OPTIMIZACIÓN: Autocompletado directo y dinámico al backend cuando cambia el query
   useEffect(() => {
-    fetchPublicProducts({})
+    if (!debouncedQuery.trim()) {
+      setResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    let active = true;
+
+    fetchPublicProducts({ q: debouncedQuery, limit: 5 })
       .then((res) => {
-        setProducts(res.data.map((p) => mapApiProductToProduct(p, allCategories)));
+        if (!active) return;
+        const mapped = res.data.map((p) => mapApiProductToProduct(p, allCategories));
+        setResults(mapped);
+        setShowDropdown(true);
       })
       .catch(console.error);
-  }, [allCategories]);
+
+    return () => {
+      active = false;
+    };
+  }, [debouncedQuery, allCategories]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -70,16 +85,6 @@ export function Header() {
     };
   }, []);
 
-  const filteredResults = useProductSearch({
-    query: debouncedQuery,
-    products,
-  });
-
-  useEffect(() => {
-    setResults(filteredResults.slice(0, 5));
-    setShowDropdown(debouncedQuery.length > 0);
-  }, [filteredResults, debouncedQuery]);
-
   const handleSearchSubmit = () => {
     if (!query.trim()) return;
     window.location.href = `/productos?q=${encodeURIComponent(query)}`;
@@ -92,15 +97,6 @@ export function Header() {
   const handleCloseDropdown = () => {
     setShowDropdown(false);
   };
-
-  useEffect(() => {
-    const handleClickOutside = (_e: MouseEvent) => {
-      setShowDropdown(false);
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -234,7 +230,6 @@ export function Header() {
         aria-label="Navegación móvil"
         aria-hidden={!mobileMenuOpen}
       >
-        {/* Backdrop: clic para cerrar */}
         <div
           className={styles.mobileNavBackdrop}
           onClick={() => setMobileMenuOpen(false)}
@@ -276,7 +271,6 @@ export function Header() {
             Favoritos
           </Link>
 
-          {/* Todas las Categorías en menú móvil */}
           {allCategories.length > 0 && (
             <details className={styles.mobileCategory}>
               <summary className={styles.mobileCategorySummary}>
