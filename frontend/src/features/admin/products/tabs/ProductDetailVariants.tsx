@@ -3,18 +3,17 @@ import toast from 'react-hot-toast';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import styles from './ProductDetailVariants.module.css';
-import commonStyles from '../AdminProductFormPage.module.css'; // Usamos estilos comunes para los inputs
+import commonStyles from '../AdminProductFormPage.module.css'; 
 import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
 import type { UploadFileState } from '../../images';
 import { getStoredToken } from '../../../../utils/apiClient';
 import { useAdminVariants } from '../../../../hooks/useAdminVariants';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
-import { VariantGroupsGrid } from '../../variants/components/VariantGroupsGrid';
 import { VariantForm } from '../../variants/components/VariantForm';
 import { VariantEditModal } from '../../variants/components/VariantEditModal';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
-import { Modal } from '../../../../components/ui/Modal'; // 🟢 FIX: Modal oficial
+import { Modal } from '../../../../components/ui/Modal';
 
 interface ProductDetailVariantsProps {
   productId: string;
@@ -41,10 +40,10 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // 🟢 ESTADO DE CARGA PARA UX DEL MODAL
+  // Estado de carga para UX del Modal
   const [isSubmittingCombo, setIsSubmittingCombo] = useState(false);
 
-  // Modal avanzado
+  // Modal avanzado de nombres/valores
   const [editModal, setEditModal] = useState<{ open: boolean; groupId: string | null }>({ open: false, groupId: null });
   const [editModalData, setEditModalData] = useState<{ name: string; values: string[] }>({ name: '', values: [] });
 
@@ -57,9 +56,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     lastLoadedProductRef.current = productId;
     loadVariants(productId);
     loadSkus(productId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId]);
-
+  }, [productId, loadVariants, loadSkus]);
 
   const handleAddGroup = async () => {
     if (!newGroupName.trim()) {
@@ -75,11 +72,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
-  const handleEditName = async (id: string, newName: string) => {
-    if (!newName.trim()) return;
-    await updateVariant(productId, id, { name: newName.trim() });
-  };
-
   const handleDelete = async (id: string) => {
     await deleteVariant(productId, id);
   };
@@ -92,14 +84,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   const handleRemoveValue = async (groupId: string, value: string) => {
     await removeValueFromVariant(productId, groupId, value);
-  };
-
-  const handleEditValue = async (groupId: string, oldValue: string, newValue: string) => {
-    if (!newValue.trim()) return;
-    const group = variants.find((v) => v.id === groupId);
-    if (!group) return;
-    const values = group.values.map((val: string) => (val === oldValue ? newValue.trim() : val));
-    await updateVariant(productId, groupId, { values });
   };
 
   const handleOpenEditModal = (groupId: string) => {
@@ -130,7 +114,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     { sku?: string; attributes: Record<string, string>; price?: number; stock?: number }[]
   >([]);
 
-  // Estados para el Modal de Confirmación de Eliminación Individual Customizado
+  // Estados para el Modal de Confirmación de Eliminación Individual
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [skuToDeleteId, setSkuToDeleteId] = useState<string | null>(null);
 
@@ -153,7 +137,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   }, [uploadedFiles, setPrimary]);
 
-  // ─── 1. SKU Automático Reactivo ─────────────────────────────────────────────
+  // SKU Automático Reactivo
   useEffect(() => {
     if (combinationModalOpen && !editingSkuId && product?.sku) {
       const attrValues = Object.values(combinationAttrs).filter(Boolean);
@@ -199,7 +183,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationStock('');
     setCombinationImages('');
 
-    // Precio Heredado
     setCombinationPrice(product?.price && product.price > 0 ? product.price : '');
     setCombinationSku(product?.sku ? `${product.sku}-` : '');
 
@@ -213,7 +196,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationModalOpen(true);
   };
 
-  // ─── 3. Generación en Matriz (Bulk Generate) ──────────────────────────────
   const handleBulkGenerate = async () => {
     if (!productId) return;
     if (!variants || variants.length === 0) {
@@ -279,7 +261,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     if (!productId || combosToCreate.length === 0) return;
     setBulkConfirmOpen(false);
 
-    // 🟢 OPTIMISTIC UI: Cerrar modal instantáneamente
     setCreatedCombinations(prev => [...combosToCreate, ...prev]);
     const loadingToast = toast.loading(`Generando ${combosToCreate.length} combinaciones...`);
 
@@ -300,7 +281,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const handleCreateCombination = async () => {
     if (!productId) return;
     
-    setIsSubmittingCombo(true); // 🟢 Bloqueamos UI
+    setIsSubmittingCombo(true);
 
     const attrs = { ...combinationAttrs };
     const sku = combinationSku.trim();
@@ -321,7 +302,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       return;
     }
 
-    // 🟢 OPTIMISTIC UI: Cerrar modal instantáneamente
     setCombinationModalOpen(false);
     setEditingSkuId(null);
     setCombinationAttrs({});
@@ -330,7 +310,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationStock('');
     setCombinationImages('');
 
-    // Inyectar en tabla para feedback visual 0ms
     const optimisticCombo: CreatedCombination = { 
         sku: sku || undefined, 
         attributes: attrs, 
@@ -440,17 +419,19 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   return (
     <div className={styles.container}>
-      {/* ── 1. Opciones del producto ── */}
+      {/* ── 1. OPCIONES DEL PRODUCTO (REDISEÑO EN FILA HORIZONTAL) ── */}
       <section className={styles.section}>
         <div className={styles.sectionHeading}>
           <span className={styles.sectionStep}>1</span>
           <div>
             <h2 className={styles.sectionTitle}>Opciones del producto</h2>
             <p className={styles.sectionDesc}>
-              Definí los grupos de variantes (ej. Color, Talle) y sus valores posibles.
+              Definí los grupos de variantes (ej. Color, Talle) y sus valores de forma compacta.
             </p>
           </div>
         </div>
+        
+        {/* Selector de nuevo grupo */}
         <VariantForm
           newGroupName={newGroupName}
           setNewGroupName={setNewGroupName}
@@ -458,21 +439,81 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           error={errors.group || ''}
           canCreate={true}
         />
-        <VariantGroupsGrid
-          groups={variants}
-          onEditName={handleEditName}
-          onDelete={handleDelete}
-          onEditValue={handleEditValue}
-          onAddValue={handleAddValue}
-          onRemoveValue={handleRemoveValue}
-          canEdit={true}
-          canDelete={true}
-          newValues={newValues}
-          setNewValue={(groupId, value) => setNewValues(v => ({ ...v, [groupId]: value }))}
-          errors={{}}
-          isPendingNavigation={false}
-          onOpenEditModal={handleOpenEditModal}
-        />
+
+        {/* 🟢 RENDERIZADO EN FILA HORIZONTAL DE CHIPS (IGUAL A TABVARIANTES) */}
+        <div className={styles.attributesList}>
+          {variants.map((group) => (
+            <div key={group.id} className={styles.variantRow}>
+              
+              {/* Etiqueta del Atributo */}
+              <div className={styles.variantLabelBlock}>
+                <span className={styles.variantGroupName}>
+                  {group.name}
+                </span>
+                <button
+                  type="button"
+                  className={styles.compactEditBtn}
+                  onClick={() => handleOpenEditModal(group.id)}
+                  title={`Editar grupo ${group.name}`}
+                >
+                  📝
+                </button>
+              </div>
+
+              {/* Contenedor de Chips horizontal flexible sin desborde */}
+              <div className={styles.tagsContainer}>
+                {group.values.map((val: string) => (
+                  <span key={val} className={styles.tagChip}>
+                    {val}
+                    <button
+                      type="button"
+                      className={styles.tagRemoveBtn}
+                      onClick={() => handleRemoveValue(group.id, val)}
+                      aria-label={`Eliminar variante ${val}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              {/* Input compacto alineado */}
+              <div className={styles.addValueInputBlock}>
+                <input
+                  className={styles.compactInput}
+                  value={newValues[group.id] ?? ''}
+                  onChange={e => setNewValues(v => ({ ...v, [group.id]: e.target.value }))}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddValue(group.id, newValues[group.id] ?? ''))}
+                  placeholder={`Añadir...`}
+                />
+                <button
+                  type="button"
+                  className={styles.compactAddBtn}
+                  onClick={() => handleAddValue(group.id, newValues[group.id] ?? '')}
+                  aria-label={`Agregar valor a ${group.name}`}
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Botón borrar grupo entero */}
+              <button
+                type="button"
+                className={styles.deleteGroupBtn}
+                onClick={() => handleDelete(group.id)}
+                aria-label={`Eliminar grupo ${group.name}`}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {variants.length === 0 && (
+          <p className={styles.emptyPlaceholder}>
+            No hay grupos de variantes. Creá uno arriba.
+          </p>
+        )}
 
         <VariantEditModal
           open={editModal.open}
@@ -483,7 +524,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         />
       </section>
 
-      {/* ── 2. Combinaciones ── */}
+      {/* ── 2. COMBINACIONES ── */}
       <section className={styles.section}>
         <div className={styles.sectionHeading}>
           <span className={styles.sectionStep}>2</span>
@@ -495,13 +536,12 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           </div>
         </div>
 
-        <div className={styles.combinationsToolbar} style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+        <div className={styles.combinationsToolbar}>
           <button
             type="button"
-            className={styles.addCombinationBtn}
+            className={styles.bulkGenerateBtn}
             onClick={handleBulkGenerate}
             disabled={!productId || variants.length === 0}
-            style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', boxShadow: 'none' }}
           >
             ⚡ Generar matriz de combinaciones
           </button>
@@ -529,7 +569,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         />
       </section>
 
-      {/* 🟢 FIX: Modal Oficial del Design System */}
+      {/* Modal oficial */}
       <Modal
         open={combinationModalOpen}
         onClose={() => setCombinationModalOpen(false)}
@@ -540,35 +580,33 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           <>
             <button 
               type="button" 
-              className={commonStyles.cancelBtn} 
+              className={styles.cancelBtn} 
               disabled={isSubmittingCombo} 
               onClick={() => setCombinationModalOpen(false)}
-              style={{ minWidth: 100 }}
             >
               Cancelar
             </button>
             <button
               type="button"
-              className={commonStyles.submitBtn}
+              className={styles.submitBtn}
               onClick={handleCreateCombination}
               disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
-              style={{ minWidth: 120 }}
             >
               {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
             </button>
           </>
         }
       >
-        <div style={{ display: 'grid', gap: '16px', padding: '8px 0' }}>
+        <div className={styles.modalFieldsContainer}>
           {(!variants || variants.length === 0) && (
             <p className={commonStyles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
           )}
 
           {variants.map((group) => (
-            <div key={group.id} className={commonStyles.field}>
-              <label className={commonStyles.label}>{group.name}</label>
+            <div key={group.id} className={styles.field}>
+              <label className={styles.label}>{group.name}</label>
               <select
-                className={commonStyles.input}
+                className={styles.input}
                 value={combinationAttrs[group.name] ?? ''}
                 onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
               >
@@ -580,20 +618,20 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             </div>
           ))}
 
-          <div className={commonStyles.field}>
-            <label htmlFor="combination-sku" className={commonStyles.label}>SKU *</label>
+          <div className={styles.field}>
+            <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
             <input
               id="combination-sku"
-              className={`${commonStyles.input} ${combinationErrors.sku ? commonStyles.inputError : ''}`}
+              className={`${styles.input} ${combinationErrors.sku ? styles.inputError : ''}`}
               value={combinationSku}
               onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
               onBlur={() => runCombinationValidation()}
             />
-            {combinationErrors.sku && <div className={commonStyles.errorText}>{combinationErrors.sku}</div>}
+            {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
           </div>
 
-          <div className={commonStyles.field}>
-            <label htmlFor="combination-images" className={commonStyles.label}>Imágenes</label>
+          <div className={styles.field}>
+            <label htmlFor="combination-images" className={styles.label}>Imágenes</label>
             <div style={{ marginTop: '8px' }}>
               <ImageUploader onAddFiles={addFiles} />
               <ImagePreviewList
@@ -603,17 +641,17 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 onSetPrimary={setPrimary}
               />
             </div>
-            {combinationErrors.images && <div className={commonStyles.errorText}>{combinationErrors.images}</div>}
+            {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div className={commonStyles.field}>
-              <label htmlFor="combination-price" className={commonStyles.label}>Precio</label>
+          <div className={styles.modalRowFields}>
+            <div className={styles.field}>
+              <label htmlFor="combination-price" className={styles.label}>Precio</label>
               <input
                 id="combination-price"
                 type="number"
                 step="0.01"
-                className={`${commonStyles.input} ${combinationErrors.price ? commonStyles.inputError : ''}`}
+                className={`${styles.input} ${combinationErrors.price ? styles.inputError : ''}`}
                 value={combinationPrice === '' ? '' : String(combinationPrice)}
                 onChange={e => {
                   setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
@@ -621,15 +659,15 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 }}
                 onBlur={() => runCombinationValidation()}
               />
-              {combinationErrors.price && <div className={commonStyles.errorText}>{combinationErrors.price}</div>}
+              {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
             </div>
 
-            <div className={commonStyles.field}>
-              <label htmlFor="combination-stock" className={commonStyles.label}>Stock</label>
+            <div className={styles.field}>
+              <label htmlFor="combination-stock" className={styles.label}>Stock</label>
               <input
                 id="combination-stock"
                 type="number"
-                className={commonStyles.input}
+                className={styles.input}
                 value={combinationStock === '' ? '' : String(combinationStock)}
                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
               />

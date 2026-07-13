@@ -1,5 +1,5 @@
 /* ============================================================================
-   ALLMART — HORIZONTAL COMPACT ATTRIBUTES STYLES (Zero Scrollbar)
+   ALLMART — HORIZONTAL COMPACT ATTRIBUTES STYLES (Brand Identity Guarded)
    ============================================================================ */
 
 .fieldset {
@@ -42,27 +42,27 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary, #d97706);
+  border-color: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
 }
 
 .addBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #d97706;
-  color: #ffffff;
+  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
+  color: #111823; /* Texto oscuro para mejor contraste con el color arena */
   border: none;
   border-radius: 8px;
   padding: 8px 16px;
   font-family: var(--font-ui);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.82rem;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .addBtn:hover {
-  background: #b45309;
+  background: #ca9c78; /* 🟢 CORREGIDO: Tono arena oscuro elegante */
 }
 
 .btnIcon {
@@ -79,7 +79,7 @@
   width: 100%;
 }
 
-/* Fila flexible principal - Se remueve overflow y altura rígida */
+/* Fila flexible principal */
 .variantRow {
   display: flex;
   align-items: center;
@@ -107,11 +107,11 @@
   font-family: var(--font-heading);
   font-size: 0.85rem;
   font-weight: 700;
-  color: #e2b07e; /* Tono dorado/cálido */
+  color: #e2b07e;
   text-transform: capitalize;
 }
 
-/* Contenedor de Chips - Fluye y envuelve automáticamente si no hay espacio */
+/* Contenedor de Chips */
 .tagsContainer {
   display: flex;
   flex-wrap: wrap;
@@ -156,7 +156,7 @@
   color: #ef4444;
 }
 
-/* Input y botón para añadir valor (compactos) */
+/* Input y botón para añadir valor */
 .addValueInputBlock {
   display: flex;
   align-items: center;
@@ -179,7 +179,7 @@
 
 .compactInput:focus {
   outline: none;
-  border-color: var(--color-primary, #d97706);
+  border-color: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
 }
 
 .compactAddBtn {
@@ -198,12 +198,12 @@
 }
 
 .compactAddBtn:hover {
-  background: #d97706;
-  color: #ffffff;
-  border-color: #d97706;
+  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
+  color: #111823;
+  border-color: var(--color-accent, #ddb08c);
 }
 
-/* Botón de borrado de grupo minimalista */
+/* Botón de borrado de grupo */
 .deleteGroupBtn {
   background: transparent;
   border: none;
@@ -264,13 +264,13 @@
 }
 
 .addCombinationBtn {
-  background: #d97706;
-  color: #ffffff;
+  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
+  color: #111823;
   border: none;
 }
 
 .addCombinationBtn:hover:not(:disabled) {
-  background: #b45309;
+  background: #ca9c78; /* 🟢 CORREGIDO: Tono arena oscuro elegante */
 }
 
 .bulkGenerateBtn {
@@ -291,7 +291,7 @@
   cursor: not-allowed;
 }
 
-/* Estilos para campos de Modal oficial */
+/* Estilos de Modal */
 .modalFieldsContainer {
   display: flex;
   flex-direction: column;
@@ -342,13 +342,13 @@
 }
 
 .submitBtn {
-  background: #d97706;
-  color: #ffffff;
+  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
+  color: #111823;
   border: none;
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: #b45309;
+  background: #ca9c78; /* 🟢 CORREGIDO: Tono arena oscuro elegante */
 }
 
 .submitBtn:disabled {
