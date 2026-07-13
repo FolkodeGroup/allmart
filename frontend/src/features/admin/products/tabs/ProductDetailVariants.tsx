@@ -107,6 +107,9 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [combinationPrice, setCombinationPrice] = useState<number | ''>('');
   const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
   const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
+  
+  // 🟢 NUEVO: Estado para rastrear el intento de envío del modal de combinación
+  const [submitComboAttempted, setSubmitComboAttempted] = useState(false);
 
   // --- Modal de confirmación de generación masiva ---
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
@@ -188,6 +191,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
     setEditingSkuId(null);
     setCombinationErrors({});
+    setSubmitComboAttempted(false); // 🟢 Reset de intento de submit
     try {
       setFiles([] as UploadFileState[]);
     } catch {
@@ -278,9 +282,24 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
+  // 🟢 VALIDACIÓN DE ESTADO REACTIVO PARA EL BOTÓN "CREAR"
+  const hasMissingAttrs = variants.some(g => !combinationAttrs[g.name] || !combinationAttrs[g.name].trim());
+  const isComboFormInvalid = 
+    !combinationSku.trim() || 
+    hasMissingAttrs ||
+    !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price);
+
   const handleCreateCombination = async () => {
     if (!productId) return;
     
+    setSubmitComboAttempted(true);
+
+    const validation = runCombinationValidation();
+    if (isComboFormInvalid || (validation && (validation.sku || validation.images || validation.price))) {
+      toast.error('Completá los campos obligatorios antes de continuar.');
+      return;
+    }
+
     setIsSubmittingCombo(true);
 
     const attrs = { ...combinationAttrs };
@@ -296,12 +315,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     
     const price = combinationPrice === '' ? undefined : Number(combinationPrice);
 
-    const validation = runCombinationValidation();
-    if (validation && (validation.sku || validation.images || validation.price)) {
-      setIsSubmittingCombo(false);
-      return;
-    }
-
     setCombinationModalOpen(false);
     setEditingSkuId(null);
     setCombinationAttrs({});
@@ -309,6 +322,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationPrice('');
     setCombinationStock('');
     setCombinationImages('');
+    setSubmitComboAttempted(false);
 
     const optimisticCombo: CreatedCombination = { 
         sku: sku || undefined, 
@@ -380,6 +394,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationPrice(typeof sku.price === 'number' ? sku.price : '');
     setCombinationImages(Array.isArray(sku.images) ? sku.images.join('\n') : '');
     setEditingSkuId(id);
+    setSubmitComboAttempted(false);
     if (Array.isArray(sku.images) && sku.images.length > 0) {
       const initial: UploadFileState[] = sku.images.map((url) => ({ uid: `remote-${Math.random().toString(36).slice(2, 8)}`, previewUrl: url, remoteUrl: url, status: 'success' } as UploadFileState));
       setFiles(initial);
@@ -419,7 +434,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   return (
     <div className={styles.container}>
-      {/* ── 1. OPCIONES DEL PRODUCTO (REDISEÑO EN FILA HORIZONTAL) ── */}
+      {/* ── 1. OPCIONES DEL PRODUCTO ── */}
       <section className={styles.section}>
         <div className={styles.sectionHeading}>
           <span className={styles.sectionStep}>1</span>
@@ -431,7 +446,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           </div>
         </div>
         
-        {/* Selector de nuevo grupo */}
         <VariantForm
           newGroupName={newGroupName}
           setNewGroupName={setNewGroupName}
@@ -440,12 +454,9 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           canCreate={true}
         />
 
-        {/* 🟢 RENDERIZADO EN FILA HORIZONTAL DE CHIPS (IGUAL A TABVARIANTES) */}
         <div className={styles.attributesList}>
           {variants.map((group) => (
             <div key={group.id} className={styles.variantRow}>
-              
-              {/* Etiqueta del Atributo */}
               <div className={styles.variantLabelBlock}>
                 <span className={styles.variantGroupName}>
                   {group.name}
@@ -460,7 +471,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 </button>
               </div>
 
-              {/* Contenedor de Chips horizontal flexible sin desborde */}
               <div className={styles.tagsContainer}>
                 {group.values.map((val: string) => (
                   <span key={val} className={styles.tagChip}>
@@ -477,7 +487,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 ))}
               </div>
 
-              {/* Input compacto alineado */}
               <div className={styles.addValueInputBlock}>
                 <input
                   className={styles.compactInput}
@@ -496,7 +505,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 </button>
               </div>
 
-              {/* Botón borrar grupo entero */}
               <button
                 type="button"
                 className={styles.deleteGroupBtn}
@@ -569,7 +577,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         />
       </section>
 
-      {/* Modal oficial */}
+      {/* 🟢 MODAL DE COMBINACIÓN BLINDADO CON VALIDACIONES EXPLICITAS */}
       <Modal
         open={combinationModalOpen}
         onClose={() => setCombinationModalOpen(false)}
@@ -590,7 +598,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
               type="button"
               className={styles.submitBtn}
               onClick={handleCreateCombination}
-              disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
+              disabled={isSubmittingCombo || isComboFormInvalid}
             >
               {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
             </button>
@@ -602,34 +610,46 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             <p className={commonStyles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
           )}
 
-          {variants.map((group) => (
-            <div key={group.id} className={styles.field}>
-              <label className={styles.label}>{group.name}</label>
-              <select
-                className={styles.input}
-                value={combinationAttrs[group.name] ?? ''}
-                onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
-              >
-                <option value="">-- Seleccionar --</option>
-                {group.values.map(value => (
-                  <option key={value} value={value}>{value}</option>
-                ))}
-              </select>
-            </div>
-          ))}
+          {/* 🟢 VALIDACIÓN DE SELECTS DE ATRIBUTOS */}
+          {variants.map((group) => {
+            const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
+            return (
+              <div key={group.id} className={styles.field}>
+                <label className={styles.label}>{group.name} *</label>
+                <select
+                  className={`${styles.input} ${isAttrMissing ? styles.inputError : ''}`}
+                  value={combinationAttrs[group.name] ?? ''}
+                  onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
+                >
+                  <option value="">-- Seleccionar --</option>
+                  {group.values.map(value => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+                {isAttrMissing && (
+                  <span className={styles.errorText}>Tenés que seleccionar un valor para {group.name}.</span>
+                )}
+              </div>
+            );
+          })}
 
+          {/* 🟢 VALIDACIÓN DE SKU */}
           <div className={styles.field}>
             <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
             <input
               id="combination-sku"
-              className={`${styles.input} ${combinationErrors.sku ? styles.inputError : ''}`}
+              className={`${styles.input} ${(combinationErrors.sku || (submitComboAttempted && !combinationSku.trim())) ? styles.inputError : ''}`}
               value={combinationSku}
               onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
               onBlur={() => runCombinationValidation()}
             />
             {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
+            {!combinationErrors.sku && submitComboAttempted && !combinationSku.trim() && (
+              <div className={styles.errorText}>El campo SKU es obligatorio.</div>
+            )}
           </div>
 
+          {/* Imágenes */}
           <div className={styles.field}>
             <label htmlFor="combination-images" className={styles.label}>Imágenes</label>
             <div style={{ marginTop: '8px' }}>

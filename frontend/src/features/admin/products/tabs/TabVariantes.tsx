@@ -7,9 +7,9 @@ import { getStoredToken } from '../../../../utils/apiClient';
 import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
-import { Modal } from '../../../../components/ui/Modal';
+import { Modal } from '../../../../components/ui/Modal'; 
 import type { UploadFileState } from '../../images';
-import styles from './TabVariantes.module.css'; // 🟢 FIX: Usamos estilos propios e independientes
+import styles from './TabVariantes.module.css';
 import toast from 'react-hot-toast';
 
 export type TabVariantesRef = {
@@ -40,6 +40,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     errors = {},
 }, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
+
     const [isSubmittingCombo, setIsSubmittingCombo] = useState(false);
 
     interface Sku {
@@ -78,6 +79,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
     const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
     
+    // 🟢 NUEVO: Estado para rastrear el intento de envío del modal
+    const [submitComboAttempted, setSubmitComboAttempted] = useState(false);
+
     const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
     const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
 
@@ -155,6 +159,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationSku(form.sku ? `${form.sku}-` : '');
         setEditingSkuId(null);
         setCombinationErrors({});
+        setSubmitComboAttempted(false); // 🟢 Reset del intento de submit
         try {
             setFiles([] as UploadFileState[]);
         } catch {
@@ -174,7 +179,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         const variantValuesLists = form.variants.map((g: { values: string[] }) => g.values);
 
         if (variantValuesLists.some((list: string[]) => list.length === 0)) {
-            toast.error('Todos los grupos de variantes deben tener al menos un valor cargado.');
+            toast.error('Todos los grupos de variantes deben tener al menos un valor cargado para generar combinaciones.');
             return;
         }
 
@@ -250,9 +255,25 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }
     };
 
+    // 🟢 VALIDACIÓN DE ESTADO REACTIVO PARA EL BOTÓN "CREAR"
+    const activeVariants = form.variants ?? [];
+    const hasMissingAttrs = activeVariants.some((g: { name: string }) => !combinationAttrs[g.name] || !combinationAttrs[g.name].trim());
+    const isComboFormInvalid = 
+        !combinationSku.trim() || 
+        hasMissingAttrs ||
+        !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price);
+
     const handleCreateCombination = async () => {
         if (!productId) return;
         
+        setSubmitComboAttempted(true);
+
+        const validation = runCombinationValidation();
+        if (isComboFormInvalid || (validation && (validation.sku || validation.images || validation.price))) {
+            toast.error('Completá todos los campos obligatorios.');
+            return;
+        }
+
         setIsSubmittingCombo(true); 
 
         const attrs = { ...combinationAttrs };
@@ -268,12 +289,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         
         const price = combinationPrice === '' ? undefined : Number(combinationPrice);
 
-        const validation = runCombinationValidation();
-        if (validation && (validation.sku || validation.images || validation.price)) {
-            setIsSubmittingCombo(false);
-            return;
-        }
-
         setCombinationModalOpen(false);
         setEditingSkuId(null);
         setCombinationAttrs({});
@@ -281,6 +296,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationPrice('');
         setCombinationStock('');
         setCombinationImages('');
+        setSubmitComboAttempted(false);
 
         const optimisticCombo: CreatedCombination = { 
             sku: sku || undefined, 
@@ -342,6 +358,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationPrice(typeof sku.price === 'number' ? sku.price : '');
         setCombinationImages(Array.isArray(sku.images) ? sku.images.join('\n') : '');
         setEditingSkuId(id);
+        setSubmitComboAttempted(false);
         if (Array.isArray(sku.images) && sku.images.length > 0) {
             const initial: UploadFileState[] = sku.images.map((url: string) => ({
                 uid: `remote-${Math.random().toString(36).slice(2, 8)}`,
@@ -401,7 +418,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 Variantes en esta vista.
             </p>
 
-            {/* Fila de creación de grupos compacta */}
             <div className={styles.newGroupRow}>
                 <input
                     className={styles.input}
@@ -421,19 +437,15 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             </div>
             {localErrors.variants && <span className={styles.errorText}>{localErrors.variants}</span>}
 
-            {/* 🟢 REDISEÑO COMPACTO EN FILAS HORIZONTALES PARA LOS ATRIBUTOS */}
             <div className={styles.attributesList}>
                 {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
                     <div key={group.id} className={styles.variantRow}>
-                        
-                        {/* 1. Nombre sutil como Label */}
                         <div className={styles.variantLabelBlock}>
                             <span className={styles.variantGroupName}>
                                 {group.name}
                             </span>
                         </div>
 
-                        {/* 2. Chips minimalistas que fluyen horizontalmente (flex-wrap) */}
                         <div className={styles.tagsContainer}>
                             {group.values.map((val: string) => (
                                 <span key={val} className={styles.tagChip}>
@@ -450,7 +462,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             ))}
                         </div>
 
-                        {/* 3. Input de valor compacto integrado en la fila */}
                         <div className={styles.addValueInputBlock}>
                             <input
                                 className={styles.compactInput}
@@ -461,7 +472,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                 onKeyDown={e =>
                                     e.key === 'Enter' && (e.preventDefault(), onAddVariantValue(group.id))
                                 }
-                                placeholder={`Añadir valor...`}
+                                placeholder={`Añadir...`}
                             />
                             <button
                                 type="button"
@@ -473,7 +484,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             </button>
                         </div>
 
-                        {/* 4. Tacho de basura minimalista y compacto */}
                         <button
                             type="button"
                             className={styles.deleteGroupBtn}
@@ -492,7 +502,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 </p>
             )}
 
-            {/* ── SECCIÓN 2: COMBINACIONES ── */}
             <div className={styles.combinationsSection}>
                 <div className={styles.combinationsToolbar}>
                     <button
@@ -527,7 +536,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 />
             </div>
 
-            {/* Modal oficial del Design System de Allmart */}
+            {/* 🟢 MODAL DE COMBINACIÓN BLINDADO CON VALIDACIONES EXPLICITAS */}
             <Modal
                 open={combinationModalOpen}
                 onClose={() => setCombinationModalOpen(false)}
@@ -548,7 +557,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             type="button"
                             className={styles.submitBtn}
                             onClick={handleCreateCombination}
-                            disabled={isSubmittingCombo || !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price)}
+                            disabled={isSubmittingCombo || isComboFormInvalid}
                         >
                             {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
                         </button>
@@ -560,34 +569,43 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         <p className={styles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
                     )}
 
-                    {/* Selectores de Variantes */}
-                    {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
-                        <div key={group.id} className={styles.field}>
-                            <label className={styles.label}>{group.name}</label>
-                            <select
-                                className={styles.input}
-                                value={combinationAttrs[group.name] ?? ''}
-                                onChange={e => setCombinationAttrs((prev: Record<string, string>) => ({ ...prev, [group.name]: e.target.value }))}
-                            >
-                                <option value="">-- Seleccionar --</option>
-                                {group.values.map((value: string) => (
-                                    <option key={value} value={value}>{value}</option>
-                                ))}
-                            </select>
-                        </div>
-                    ))}
+                    {/* 🟢 VALIDACIÓN DE SELECTS DE ATRIBUTOS */}
+                    {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => {
+                        const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
+                        return (
+                            <div key={group.id} className={styles.field}>
+                                <label className={styles.label}>{group.name} *</label>
+                                <select
+                                    className={`${styles.input} ${isAttrMissing ? styles.inputError : ''}`}
+                                    value={combinationAttrs[group.name] ?? ''}
+                                    onChange={e => setCombinationAttrs((prev: Record<string, string>) => ({ ...prev, [group.name]: e.target.value }))}
+                                >
+                                    <option value="">-- Seleccionar --</option>
+                                    {group.values.map((value: string) => (
+                                        <option key={value} value={value}>{value}</option>
+                                    ))}
+                                </select>
+                                {isAttrMissing && (
+                                    <span className={styles.errorText}>Tenés que seleccionar un valor para {group.name}.</span>
+                                )}
+                            </div>
+                        );
+                    })}
 
-                    {/* SKU */}
+                    {/* 🟢 VALIDACIÓN DE SKU */}
                     <div className={styles.field}>
                         <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
                         <input
                             id="combination-sku"
-                            className={`${styles.input} ${combinationErrors.sku ? styles.inputError : ''}`}
+                            className={`${styles.input} ${(combinationErrors.sku || (submitComboAttempted && !combinationSku.trim())) ? styles.inputError : ''}`}
                             value={combinationSku}
                             onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
                             onBlur={() => runCombinationValidation()}
                         />
                         {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
+                        {!combinationErrors.sku && submitComboAttempted && !combinationSku.trim() && (
+                            <div className={styles.errorText}>El campo SKU es obligatorio.</div>
+                        )}
                     </div>
 
                     {/* Imágenes */}
