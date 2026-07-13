@@ -156,6 +156,8 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
         cursor: 'pointer',
         animation: `fadeSlideUp 0.22s ease both`,
         animationDelay: `${index * 35}ms`,
+        position: `relative`,
+        zIndex: editing ? 10 : 0,
       }}
       onClick={() => onDetail(order)}
       role="button"
@@ -163,9 +165,9 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
     >
       {/* ID truncado a 8 caracteres para legibilidad */}
-      <td className={styles.tdOrder} >
+      < td className={styles.tdOrder} >
         #{formatOrderCode(order.id)}
-      </td>
+      </td >
       <td className={styles.tdDate}>{formatDate(order.createdAt)}</td>
       <td className={styles.tdCustomer}>
         <div className={styles.customerTd}>{order.customer.firstName} {order.customer.lastName}</div>
@@ -212,6 +214,6 @@ export function OrderItem({ order, onDetail, index }: OrderItemProps) {
           <Button variant="secondary" size="sm" aria-label="Ver detalle del pedido">Ver →</Button>
         </Tooltip>
       </td>
-    </tr>
+    </tr >
   );
 }
