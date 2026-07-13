@@ -9,10 +9,10 @@ import { PriceUpdateModal } from '../../suppliers/PriceUpdateModal';
 import { PriceHistoryModal } from '../../suppliers/PriceHistoryModal';
 import styles from './ProductSupplierSection.module.css';
 
-const fmt = new Intl.NumberFormat('es-AR', { 
-    style: 'currency', 
-    currency: 'ARS', 
-    maximumFractionDigits: 0 
+const fmt = new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0
 });
 
 interface ProductSupplierSectionProps {
@@ -85,7 +85,7 @@ export function ProductSupplierSection({
     // Datos derivados
     const primaryLink = productLinks.find(l => l.supplierId === primarySupplierId) ?? null;
     const otherLinks = productLinks.filter(l => l.supplierId !== primarySupplierId);
-    
+
     const selectedSupplierName = primarySupplierId
         ? allSuppliers.find(s => s.id === primarySupplierId)?.name ?? 'Proveedor seleccionado'
         : null;
@@ -165,73 +165,70 @@ export function ProductSupplierSection({
     }
 
     return (
-        <div className={styles.section}>
+        <fieldset className={styles.fieldset}>
             {/* ── Dropdown de Proveedor Principal ── */}
-            <div className={styles.fieldGroup}>
-                <label htmlFor="primary-supplier-select" className={styles.label}>
-                    <i className="bi bi-truck" style={{ marginRight: '8px', color: 'var(--color-primary)' }}></i>
-                    Proveedor Principal
-                </label>
-                <div className={styles.dropdown} ref={dropdownRef}>
-                    <button
-                        id="primary-supplier-select"
-                        type="button"
-                        className={styles.dropdownTrigger}
-                        onClick={() => setOpen(v => !v)}
-                        disabled={suppliersLoading || actionLoading === 'select'}
-                    >
-                        <span className={selectedSupplierName ? styles.selectedName : styles.placeholder}>
-                            {suppliersLoading ? 'Cargando proveedores...'
-                                : actionLoading === 'select' ? 'Asignando...'
+            <legend className={styles.legend}>
+                Proveedor Principal
+            </legend>
+            <div className={styles.dropdown} ref={dropdownRef}>
+                <button
+                    id="primary-supplier-select"
+                    type="button"
+                    className={styles.dropdownTrigger}
+                    onClick={() => setOpen(v => !v)}
+                    disabled={suppliersLoading || actionLoading === 'select'}
+                >
+                    <span className={selectedSupplierName ? styles.selectedName : styles.placeholder}>
+                        {suppliersLoading ? 'Cargando proveedores...'
+                            : actionLoading === 'select' ? 'Asignando...'
                                 : selectedSupplierName ?? 'Sin proveedor'}
-                        </span>
-                        {primarySupplierId && (
-                            <div
-                                className={styles.clearBtn}
-                                onClick={e => { e.stopPropagation(); handleSelect(null); }}
-                                title="Quitar proveedor principal"
-                                role="button"
-                                tabIndex={0}
-                            >
-                                <i className="bi bi-x-circle"></i>
-                            </div>
-                        )}
-                        <i className={`bi bi-chevron-down ${styles.chevron} ${open ? styles.chevronOpen : ''}`}></i>
-                    </button>
-                    {open && (
-                        <div className={styles.dropdownList}>
-                            <div className={styles.searchBox}>
-                                <input
-                                    type="text"
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    placeholder="Buscar proveedor..."
-                                    className={styles.searchInput}
-                                />
-                            </div>
-                            <div className={styles.options}>
-                                <button type="button" className={styles.option} onClick={() => handleSelect(null)}>
-                                    <span className={styles.optionNone}>— Sin proveedor —</span>
-                                </button>
-                                {filtered.length === 0 ? (
-                                    <div className={styles.noOptions}>Sin resultados</div>
-                                ) : filtered.map(s => (
-                                    <button
-                                        key={s.id}
-                                        type="button"
-                                        className={`${styles.option} ${s.id === primarySupplierId ? styles.optionActive : ''}`}
-                                        onClick={() => handleSelect(s.id)}
-                                    >
-                                        <span className={styles.optionName}>{s.name}</span>
-                                        {s.id === primarySupplierId && (
-                                            <i className="bi bi-star-fill" style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}></i>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
+                    </span>
+                    {primarySupplierId && (
+                        <div
+                            className={styles.clearBtn}
+                            onClick={e => { e.stopPropagation(); handleSelect(null); }}
+                            title="Quitar proveedor principal"
+                            role="button"
+                            tabIndex={0}
+                        >
+                            <i className="bi bi-x-circle"></i>
                         </div>
                     )}
-                </div>
+                    <i className={`bi bi-chevron-down ${styles.chevron} ${open ? styles.chevronOpen : ''}`}></i>
+                </button>
+                {open && (
+                    <div className={styles.dropdownList}>
+                        <div className={styles.searchBox}>
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Buscar proveedor..."
+                                className={styles.searchInput}
+                            />
+                        </div>
+                        <div className={styles.options}>
+                            <button type="button" className={styles.option} onClick={() => handleSelect(null)}>
+                                <span className={styles.optionNone}>— Sin proveedor —</span>
+                            </button>
+                            {filtered.length === 0 ? (
+                                <div className={styles.noOptions}>Sin resultados</div>
+                            ) : filtered.map(s => (
+                                <button
+                                    key={s.id}
+                                    type="button"
+                                    className={`${styles.option} ${s.id === primarySupplierId ? styles.optionActive : ''}`}
+                                    onClick={() => handleSelect(s.id)}
+                                >
+                                    <span className={styles.optionName}>{s.name}</span>
+                                    {s.id === primarySupplierId && (
+                                        <i className="bi bi-star-fill" style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}></i>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ── Card del Proveedor Principal ── */}
@@ -239,8 +236,8 @@ export function ProductSupplierSection({
                 <div className={styles.supplierCard}>
                     {linksLoading ? (
                         <div className={styles.cardLoading}>
-                             <div className={styles.spinner}></div>
-                             <span>Cargando datos del proveedor...</span>
+                            <div className={styles.spinner}></div>
+                            <span>Cargando datos del proveedor...</span>
                         </div>
                     ) : primaryLink ? (
                         <>
@@ -257,15 +254,14 @@ export function ProductSupplierSection({
                                 </div>
                                 <div className={styles.stat}>
                                     <span className={styles.statLabel}>Margen</span>
-                                    <span className={`${styles.statValue} ${
-                                        primaryLink.cost && primaryLink.currentPrice
-                                            ? (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 10
-                                                ? styles.statDanger
-                                                : (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 15
-                                                    ? styles.statWarn
-                                                    : styles.statOk
-                                            : ''
-                                    }`}>
+                                    <span className={`${styles.statValue} ${primaryLink.cost && primaryLink.currentPrice
+                                        ? (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 10
+                                            ? styles.statDanger
+                                            : (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 15
+                                                ? styles.statWarn
+                                                : styles.statOk
+                                        : ''
+                                        }`}>
                                         {primaryLink.cost != null && primaryLink.currentPrice > 0
                                             ? `${(((primaryLink.currentPrice - primaryLink.cost) / primaryLink.cost) * 100).toFixed(1)}%`
                                             : '—'}
@@ -377,6 +373,6 @@ export function ProductSupplierSection({
                     onClose={() => setViewingHistory(null)}
                 />
             )}
-        </div>
+        </fieldset>
     );
 }
