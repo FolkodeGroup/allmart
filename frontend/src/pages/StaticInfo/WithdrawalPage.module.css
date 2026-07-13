@@ -1,3 +1,4 @@
+/* frontend/src/pages/StaticInfo/WithdrawalPage.module.css */
 .introCard {
   border: 1px dashed rgba(47, 95, 70, 0.45);
   background: #f4faf6;
@@ -44,18 +45,6 @@
   color: #23382c;
 }
 
-.fieldInput,
-.fieldTextarea {
-  width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 0.66rem 0.78rem;
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  color: #1c2e24;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
 .regretfieldInput,
 .regretfieldTextarea {
   background: white;
@@ -75,16 +64,25 @@
   line-height: var(--leading-relaxed);
 }
 
-.fieldInput:focus,
-.fieldTextarea:focus {
+.regretfieldInput:focus,
+.regretfieldTextarea:focus {
   border-color: #2f5f46;
   box-shadow: 0 0 0 3px rgba(47, 95, 70, 0.15);
+  outline: none;
 }
 
-.fieldTextarea {
-  min-height: 120px;
-  resize: vertical;
-  line-height: var(--leading-relaxed);
+/* NUEVO: Clases para validación visual */
+.inputError {
+  border-color: #e53e3e !important;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15) !important;
+}
+
+.errorMessage {
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-family: var(--font-ui);
+  font-weight: 500;
 }
 
 .formActions {
@@ -102,11 +100,20 @@
   border-radius: var(--radius-md);
   padding: 0.72rem 1.05rem;
   transition: all var(--transition-base);
+  cursor: pointer;
 }
 
-.submitButton:hover {
+.submitButton:hover:not(:disabled) {
   background: #244a37;
   border-color: #244a37;
+}
+
+/* NUEVO: Estado deshabilitado */
+.submitButton:disabled {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .errorBox,
