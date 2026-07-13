@@ -78,22 +78,16 @@ export default defineConfig({
             ) {
               return 'vendor-pdf';
             }
-            // 4. React Core (React, ReactDOM, Router, etc.)
-            if (id.includes('react') || id.includes('scheduler') || id.includes('router')) {
-              return 'vendor-react';
-            }
-            // 5. Íconos (Lucide y afines)
+            // 4. Íconos (Lucide y afines)
             if (id.includes('lucide') || id.includes('icons')) {
               return 'vendor-icons';
             }
-            // 6. El resto de las librerías utilitarias más livianas
+            // 5. Dejamos que React y las librerías fuertemente acopladas queden en vendor-base
             return 'vendor-base';
           }
         },
       },
     },
-    // Subimos el límite del warning a 1500 kB (1.5 MB), ya que para paneles de administración 
-    // complejos es un número súper normal y saludable una vez segmentado.
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 1500, // Ajustamos el límite a 1.5MB que es excelente para un admin panel
   },
 });
