@@ -2195,3 +2195,4 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1280: Mostrar variante comprada en el detalle de un pedido | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1279: Enmarcar el apartado de Proveedor en el formulario de producto | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1278: Unificar y agregar checkboxes de etiquetas en el formulario de producto | 2026-07-11 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
