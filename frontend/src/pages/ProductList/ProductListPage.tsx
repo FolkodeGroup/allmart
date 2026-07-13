@@ -38,10 +38,6 @@ function getProductCategoryIds(product: Product): string[] {
   return Array.from(ids);
 }
 
-/**
- * Resuelve la mejor imagen posible para un producto de colección.
- * Utiliza el mapeo por ID y tiene como respaldo la cuadrícula en vivo.
- */
 function getCollectionProductImage(
   product: { id: string; imageUrl?: ImageUrlCandidate },
   liveProducts: Product[]
@@ -69,6 +65,10 @@ export function ProductListPage() {
   const urlTag = searchParams.get('tag') ?? '';
   const urlPriceRanges = searchParams.get('priceRanges') ?? '';
   const urlColeccion = searchParams.get('coleccion') ?? '';
+  
+  // 🟢 FIX: Capturamos el parámetro 'q' de la URL
+  const urlQuery = searchParams.get('q') ?? '';
+
   const tag = urlTag.trim().toLowerCase();
   const hasFeaturedTag = tag === 'destacado';
   const hasOfertaTag = tag === 'oferta';
@@ -97,7 +97,6 @@ export function ProductListPage() {
 
   const isCollectionView = urlColeccion.length > 0;
 
-  // 🚀 OPTIMIZACIÓN: Convertimos arrays a strings primitivos para dependencias seguras de useEffect
   const priceRangesStr = selectedPriceRanges.join(',');
 
   useEffect(() => {
@@ -225,6 +224,10 @@ export function ProductListPage() {
     if (selectedCategory) params.category = selectedCategory;
     if (urlTag) params.tag = urlTag;
     if (urlSlugs) params.slugs = urlSlugs;
+    
+    // 🟢 FIX: Inyectamos el parámetro 'q' a la consulta de la API
+    if (urlQuery) params.q = urlQuery;
+
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
     if (showOnlyFeatured) params.isFeatured = true;
     if (showOnlyOnSale) params.isOnSale = true;
@@ -251,13 +254,14 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  // 🚀 OPTIMIZACIÓN: Dependencias limpias y primitivas
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, urlSlugs, page, priceRangesStr, categories]);
+  // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de actualización
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, urlSlugs, page, priceRangesStr, categories, urlQuery]);
 
-  /* Resetear paginación cuando cambian filtros relevantes */
+  /* Resetear paginación cuando cambian filtros relevantes o el query */
   useEffect(() => {
     setPage(1);
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, priceRangesStr]);
+  // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de reseteo de página
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, priceRangesStr, urlQuery]);
 
   const handleLoadMore = () => {
     if (isLoadingMore) return;
@@ -429,10 +433,15 @@ export function ProductListPage() {
 
   return (
     <main className={styles.page}>
+      {/* Breadcrumb */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
-        <span className={styles.breadcrumbCurrent}>Productos</span>
+        
+        {/* 🟢 FIX: Si hay una búsqueda activa, lo reflejamos de forma elegante en el breadcrumb */}
+        <span className={styles.breadcrumbCurrent}>
+          {urlQuery ? `Búsqueda: "${urlQuery}"` : 'Productos'}
+        </span>
       </nav>
 
       {categoryCollections.length > 0 && (

@@ -172,9 +172,7 @@ export async function createSku(
   if (parsedPrice !== undefined && parsedPrice !== null && parsedPrice < 0) {
     throw createError('El precio de la variante no puede ser negativo', 400);
   }
-  if (dto.stock !== undefined && dto.stock < 0) {
-    throw createError('El stock de la variante no puede ser negativo', 400);
-  }
+  
 
   const attrs = dto.attributes || (dto as any).attributeValues || (dto as any).options || (dto as any).specs || {};
 
@@ -264,9 +262,7 @@ export async function updateSku(
   if (parsedPrice !== undefined && parsedPrice !== null && parsedPrice < 0) {
     throw createError('El precio de la variante no puede ser negativo', 400);
   }
-  if (dto.stock !== undefined && dto.stock < 0) {
-    throw createError('El stock de la variante no puede ser negativo', 400);
-  }
+  
 
   return await prisma.$transaction(async (tx) => {
     const product = await tx.product.findUnique({
