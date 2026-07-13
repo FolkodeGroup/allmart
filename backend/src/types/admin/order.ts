@@ -19,6 +19,9 @@ export interface AdminOrdersQueryDTO {
  */
 export interface AdminOrderItemDTO {
   productId: string;
+  productSkuId?: string;
+  sku?: string;
+  variant?: string;
   productName: string;
   productImage?: string;
   unitPrice: number;

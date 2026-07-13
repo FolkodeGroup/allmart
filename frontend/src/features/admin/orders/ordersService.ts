@@ -42,6 +42,9 @@ interface ApiSuccess<T> {
 
 interface ApiOrderItem {
   productId: string;
+  productSkuId?: string;
+  sku?: string;
+  variant?: string;
   productName: string;
   productImage?: string;
   quantity: number;
@@ -125,11 +128,15 @@ export function mapApiOrderToOrder(api: ApiOrder): Order {
     },
     items: (api.items ?? []).map((item) => ({
       productId: item.productId,
+      productSkuId: item.productSkuId,
+      sku: item.sku,
+      variant: item.variant,
       productName: item.productName,
       productImage: item.productImage,
       quantity: item.quantity,
       unitPrice: Number(item.unitPrice),
     })),
+
     total: Number(api.total),
     status: normalizeOrderStatus(api.status),
     paymentStatus: normalizePaymentStatus(api.paymentStatus),

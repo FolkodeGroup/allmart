@@ -52,6 +52,12 @@
   gap: 0.5rem;
 }
 
+.itemVariant {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
 /* ── Estado del pedido ── */
 
 .statusRow {

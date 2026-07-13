@@ -385,8 +385,16 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
                             <tbody>
                                 {order.items.map(item => (
                                     // Key compuesta para manejar casos donde productId podría repetirse
-                                    <tr key={item.productId + item.productName}>
-                                        <td>{item.productName}</td>
+                                    <tr key={`${item.productId}-${item.productSkuId ?? 'base'}-${item.productName}`}>
+                                        <td>
+                                            <div>{item.productName}</div>
+                                            {(item.variant || item.sku) && (
+                                                <div className={styles.itemVariant}>
+                                                    {item.variant || item.sku}
+                                                    {item.variant && item.sku ? ` · ${item.sku}` : ''}
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className={styles.tdCenter}>{item.quantity}</td>
                                         <td className={styles.tdRight}>{formatPrice(item.unitPrice)}</td>
                                         <td className={styles.tdRight}>{formatPrice(item.unitPrice * item.quantity)}</td>
