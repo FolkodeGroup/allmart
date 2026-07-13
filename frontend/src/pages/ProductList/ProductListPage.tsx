@@ -46,13 +46,11 @@ function getCollectionProductImage(
   product: { id: string; imageUrl?: ImageUrlCandidate },
   liveProducts: Product[]
 ): string {
-  // 1. Usar el imageUrl de la colección si ya está resuelto en vivo desde R2
   const url = normalizeImageUrl(product.imageUrl);
   if (url && !url.includes('placeholder.png')) {
     return url;
   }
 
-  // 2. Respaldo: Buscar en los productos cargados en memoria en la cuadrícula de la página
   const liveProduct = liveProducts.find((p) => p.id === product.id);
   if (liveProduct && liveProduct.images && liveProduct.images.length > 0) {
     const firstImg = liveProduct.images[0];
@@ -61,7 +59,6 @@ function getCollectionProductImage(
     }
   }
 
-  // 3. Fallback final si no hay ninguna imagen disponible
   return DEFAULT_IMAGE_PLACEHOLDER;
 }
 
@@ -92,18 +89,16 @@ export function ProductListPage() {
   const [sortOptions, setSortOptions] = useState<SortOption[]>(FALLBACK_SORT_OPTIONS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeDiscounts, setActiveDiscounts] = useState<Set<string>>(new Set());
   const [categoryCollections, setCategoryCollections] = useState<PublicCollection[]>([]);
   const [activeCollection, setActiveCollection] = useState<PublicCollection | null>(null);
   const [collectionLoading, setCollectionLoading] = useState(false);
 
   const urlSlugs = searchParams.get('slugs') ?? '';
-  const slugList = useMemo(
-    () => urlSlugs ? urlSlugs.split(',').filter(Boolean) : [],
-    [urlSlugs]
-  );
 
   const isCollectionView = urlColeccion.length > 0;
+
+  // 🚀 OPTIMIZACIÓN: Convertimos arrays a strings primitivos para dependencias seguras de useEffect
+  const priceRangesStr = selectedPriceRanges.join(',');
 
   useEffect(() => {
     const next = urlSubCategory || urlCategory;
@@ -152,25 +147,7 @@ export function ProductListPage() {
       .catch(() => setCategories([]));
   }, []);
 
-  /* Cargar descuentos activos para filtro "En Oferta" */
-  useEffect(() => {
-    const loadActiveDiscounts = async () => {
-      try {
-        const discounts = await publicCollectionsService.getActiveDiscounts();
-        const productIds = new Set(
-          discounts.map((item: { productId: string }) => item.productId)
-        );
-        setActiveDiscounts(productIds);
-      } catch (error) {
-        console.error('Error loading active discounts:', error);
-        setActiveDiscounts(new Set());
-      }
-    };
-
-    loadActiveDiscounts();
-  }, []);
-
-  /* Cargar colecciones de categoría (usada tanto en listado global como por categoría) */
+  /* Cargar colecciones de categoría */
   useEffect(() => {
     let cancelled = false;
 
@@ -179,14 +156,12 @@ export function ProductListPage() {
       .then(async (collections) => {
         if (cancelled) return;
 
-        // Extraer todos los slugs de los productos que componen el banner de categorías
         const allSlugs = collections
           .flatMap((col) => col.products?.map((p) => p.slug) || [])
           .filter(Boolean);
 
         if (allSlugs.length > 0) {
           try {
-            // Consultar en lote las imágenes activas de R2 Cloudflare sin filtros de categoría
             const productsResponse = await fetchPublicProducts({ slugs: allSlugs.join(','), limit: 50 });
             if (cancelled) return;
 
@@ -203,7 +178,6 @@ export function ProductListPage() {
               }
             });
 
-            // Enriquecer la colección del banner con las imágenes en vivo usando ID
             const updatedCollections = collections.map((col) => ({
               ...col,
               products: col.products?.map((p) => ({
@@ -229,7 +203,7 @@ export function ProductListPage() {
     return () => {
       cancelled = true;
     };
-  }, [/* run on mount and when categories/products change if needed */]);
+  }, []);
 
   /* Cargar colección específica cuando viene ?coleccion= en la URL */
   useEffect(() => {
@@ -255,7 +229,8 @@ export function ProductListPage() {
     if (showOnlyFeatured) params.isFeatured = true;
     if (showOnlyOnSale) params.isOnSale = true;
     if (showOnlyNovedad) params.isNovedad = true;
-    if (selectedPriceRanges.length > 0) params.priceRanges = selectedPriceRanges.join(',');
+    if (priceRangesStr) params.priceRanges = priceRangesStr;
+    
     setError(null);
     if (page === 1) setLoading(true);
     else setIsLoadingMore(true);
@@ -276,12 +251,13 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, activeDiscounts, categories, urlSlugs, slugList, page, showOnlyNovedad, selectedPriceRanges]);
+  // 🚀 OPTIMIZACIÓN: Dependencias limpias y primitivas
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, urlSlugs, page, priceRangesStr, categories]);
 
   /* Resetear paginación cuando cambian filtros relevantes */
   useEffect(() => {
     setPage(1);
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, selectedPriceRanges]);
+  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, priceRangesStr]);
 
   const handleLoadMore = () => {
     if (isLoadingMore) return;
@@ -361,7 +337,6 @@ export function ProductListPage() {
     };
   }, [childCategories, selectedCategoryInfo, visibleProducts]);
 
-  // Mapa rápido: categoryId -> PublicCollection (colecciones con displayPosition='category')
   const collectionByCategoryId = useMemo(() => {
     const map = new Map<string, PublicCollection>();
     for (const col of categoryCollections) {
@@ -393,7 +368,6 @@ export function ProductListPage() {
             <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Colección no encontrada.</p>
           ) : (
             <>
-              {/* Header de la colección */}
               <div className={styles.collectionViewHeader}>
                 {activeCollection.imageUrl && (
                   <img src={activeCollection.imageUrl} alt={activeCollection.name} className={styles.collectionViewBanner} />
@@ -409,7 +383,6 @@ export function ProductListPage() {
                 </div>
               </div>
 
-              {/* Grilla de productos */}
               {colProducts.length === 0 ? (
                 <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Esta colección aún no tiene productos.</p>
               ) : (
@@ -456,7 +429,6 @@ export function ProductListPage() {
 
   return (
     <main className={styles.page}>
-      {/* Breadcrumb */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
@@ -646,7 +618,6 @@ export function ProductListPage() {
               <div className={styles.groupedProducts}>
                 {groupedProducts.groups.map((group) => (
                     <section key={group.category.id} className={styles.groupSection}>
-                      {/* Banner de colección asociada a la categoría (si existe) */}
                       {collectionByCategoryId.has(group.category.id) && (
                         (() => {
                           const col = collectionByCategoryId.get(group.category.id)!;

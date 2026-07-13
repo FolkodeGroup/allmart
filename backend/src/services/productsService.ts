@@ -992,36 +992,25 @@ export async function getPublicProducts(query: ProductQuery) {
 
   const ids = idsRow.map(r => r.id);
 
+  // 🚀 OPTIMIZACIÓN EXTREMA: Solo traemos lo que la tarjeta (ProductCard) necesita
   const rows = ids.length > 0
     ? await prisma.product.findMany({
       where: { id: { in: ids } },
       orderBy,
       include: {
-        productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+        // Solo traemos las primeras 2 imágenes (suficiente para la tarjeta y el hover)
+        productImages: { select: { id: true }, orderBy: { position: 'asc' }, take: 2 },
         productCategories: { select: { categoryId: true } },
         productTags: { include: { tag: true } },
-        productFeatures: { orderBy: { displayOrder: 'asc' } },
-        productOptions: {
-          where: { isActive: true },
-          include: {
-            values: true
-          }
-        },
+        // ❌ NO traemos productFeatures ni productOptions (no se ven en la grilla)
+        
+        // ✅ De los SKUs, SOLO traemos precio y stock para calcular el "Desde $X"
         productSkus: {
           where: { isActive: true },
-          include: {
-            skuValues: {
-              include: {
-                optionValue: {
-                  include: {
-                    option: true
-                  }
-                }
-              }
-            },
-            productSkuImages: {
-              select: { id: true }
-            }
+          select: { 
+            price: true, 
+            stock: true,
+            isActive: true
           }
         }
       },
@@ -1029,50 +1018,22 @@ export async function getPublicProducts(query: ProductQuery) {
     : [];
 
   const mappedProducts = rows.map((row) => {
+    // Usamos tu función base
     const base = toProduct(row);
 
-    const variants = (row as any).productOptions?.map((opt: any) => ({
-      id: opt.id,
-      name: opt.name,
-      values: opt.values?.map((val: any) => val.name) ?? [],
-    })) ?? [];
-    (base as any).variants = variants;
+    // Como es la grilla, no necesitamos mandar el array de variantes al front
+    (base as any).variants = [];
+    (base as any).skus = [];
 
-    if (Array.isArray((row as any).productSkus)) {
-      const skus = (row as any).productSkus.map((s: any) => {
-        const attributes: Record<string, string> = {};
-        if (Array.isArray(s.skuValues)) {
-          for (const sv of s.skuValues) {
-            if (sv.optionValue && sv.optionValue.option) {
-              attributes[sv.optionValue.option.name] = sv.optionValue.name;
-            }
-          }
-        }
-
-        const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
-          ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
-          : base.images;
-
-        return {
-          id: s.id,
-          sku: s.sku,
-          attributes,
-          images,
-          stock: s.stock,
-          price: s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price),
-          isActive: s.isActive,
-        };
-      });
-      (base as any).skus = skus;
-
-      // 🟢 FIX: Consolidar precio y stock del padre en base a las variantes activas
-      if (skus.length > 0) {
-        const activeSkus = skus.filter((s: any) => s.isActive);
-        if (activeSkus.length > 0) {
-          base.price = Math.min(...activeSkus.map((s: any) => s.price));
-          base.stock = activeSkus.reduce((sum: number, s: any) => sum + (s.stock || 0), 0);
-          base.inStock = base.stock > 0;
-        }
+    // 🟢 Calculamos el precio mínimo y stock total usando la data ultra-liviana
+    if (Array.isArray((row as any).productSkus) && (row as any).productSkus.length > 0) {
+      const skus = (row as any).productSkus;
+      
+      const activeSkus = skus.filter((s: any) => s.isActive);
+      if (activeSkus.length > 0) {
+        base.price = Math.min(...activeSkus.map((s: any) => s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price)));
+        base.stock = activeSkus.reduce((sum: number, s: any) => sum + (s.stock || 0), 0);
+        base.inStock = base.stock > 0;
       }
     }
 

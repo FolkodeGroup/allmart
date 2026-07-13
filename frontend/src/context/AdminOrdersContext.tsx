@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import {
@@ -172,22 +172,35 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
     [orders]
   );
 
+  // 🚀 OPTIMIZACIÓN: Memoizamos el objeto del contexto para evitar re-renders masivos
+  const contextValue = useMemo(() => ({
+    orders,
+    isLoading,
+    refreshOrders,
+    addOrder,
+    updateOrderStatus: updateOrderStatusHandler,
+    bulkUpdateOrderStatus,
+    updateOrder: updateOrderHandler,
+    deleteOrder: deleteOrderHandler,
+    getOrder,
+    markAsPaid,
+    getPendingOrdersCount,
+  }), [
+    orders,
+    isLoading,
+    refreshOrders,
+    addOrder,
+    updateOrderStatusHandler,
+    bulkUpdateOrderStatus,
+    updateOrderHandler,
+    deleteOrderHandler,
+    getOrder,
+    markAsPaid,
+    getPendingOrdersCount
+  ]);
+
   return (
-    <AdminOrdersContext.Provider
-      value={{
-        orders,
-        isLoading,
-        refreshOrders,
-        addOrder,
-        updateOrderStatus: updateOrderStatusHandler,
-        bulkUpdateOrderStatus,
-        updateOrder: updateOrderHandler,
-        deleteOrder: deleteOrderHandler,
-        getOrder,
-        markAsPaid,
-        getPendingOrdersCount,
-      }}
-    >
+    <AdminOrdersContext.Provider value={contextValue}>
       {children}
     </AdminOrdersContext.Provider>
   );
