@@ -410,9 +410,8 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   if (parsedPrice < 0) {
     throw createError('El precio de venta no puede ser negativo', 400);
   }
-  if (dto.stock !== undefined && dto.stock !== null && dto.stock < 0) {
-    throw createError('El stock físico no puede ser negativo', 400);
-  }
+
+  // 🟢 FIX: Eliminada la validación de stock negativo en creación para permitir cargas de stock inicial negativo
 
   const product = await prisma.product.create({
     data: {
@@ -426,7 +425,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       stock: dto.stock ?? 0,
       rating: dto.rating ?? 0,
       reviewCount: dto.reviewCount ?? 0,
-      inStock: dto.inStock ?? true,
+      inStock: true, // 🟢 FIX: Forzado a true por defecto ya que siempre es comprable
       isFeatured: dto.isFeatured ?? false,
       ...(dto.primarySupplierId !== undefined
         ? { primarySupplierId: dto.primarySupplierId ?? null }
@@ -560,9 +559,8 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   if (finalPrice !== undefined && finalPrice !== null && finalPrice < 0) {
     throw createError('El precio de venta no puede ser negativo', 400);
   }
-  if (dto.stock !== undefined && dto.stock !== null && dto.stock < 0) {
-    throw createError('El stock físico no puede ser negativo', 400);
-  }
+  
+  // 🟢 FIX: Eliminada la validación de stock negativo para evitar bloqueos al editar productos en preventa
 
   if (finalPrice !== undefined && existing.productSkus.length > 0) {
     const skuPrices = existing.productSkus
@@ -591,11 +589,10 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
       rating: dto.rating !== undefined ? dto.rating : existing.rating,
       reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : existing.reviewCount,
-      inStock: dto.inStock !== undefined
-        ? dto.inStock
-        : dto.stock !== undefined
-          ? dto.stock > 0
-          : existing.inStock,
+      
+      // 🟢 FIX: Forzado inStock a true si es editable o no viene deshabilitado explícitamente en el payload
+      inStock: dto.inStock !== undefined ? dto.inStock : true,
+
       novedadSince: (() => {
         const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
         if (incomingTags === null) return undefined;
@@ -1033,7 +1030,9 @@ export async function getPublicProducts(query: ProductQuery) {
       if (activeSkus.length > 0) {
         base.price = Math.min(...activeSkus.map((s: any) => s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price)));
         base.stock = activeSkus.reduce((sum: number, s: any) => sum + (s.stock || 0), 0);
-        base.inStock = base.stock > 0;
+        
+        // 🟢 FIX: Siempre en true ya que habilitamos compras ilimitadas sin importar el stock
+        base.inStock = true; 
       }
     }
 
@@ -1131,7 +1130,9 @@ export async function getProductBySlug(slug: string): Promise<Product> {
       if (activeSkus.length > 0) {
         base.price = Math.min(...activeSkus.map((s: any) => s.price));
         base.stock = activeSkus.reduce((sum: number, s: any) => sum + (s.stock || 0), 0);
-        base.inStock = base.stock > 0;
+        
+        // 🟢 FIX: Siempre en true ya que habilitamos compras ilimitadas sin importar el stock
+        base.inStock = true; 
       }
     }
   }
