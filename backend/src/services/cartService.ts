@@ -81,18 +81,12 @@ async function mapCartToDTO(cart: any): Promise<CartDTO> {
     }
 
     // Request best discount for the specific quantity in cart
-    let appliedDiscount = null;
-    try {
-      appliedDiscount = await discountService.getBestDiscount(
-        ci.productId,
-        unitPrice,
-        [],
-        ci.quantity
-      );
-    } catch (err) {
-      // ignore discount errors and proceed without discount
-      appliedDiscount = null;
-    }
+    const appliedDiscount = await discountService.getBestDiscount(
+      ci.productId,
+      unitPrice,
+      [],
+      ci.quantity
+    ).catch(() => null);
 
     const itemTotal = appliedDiscount && appliedDiscount.totalFinalPrice !== undefined
       ? appliedDiscount.totalFinalPrice
