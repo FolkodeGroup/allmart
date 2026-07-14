@@ -154,11 +154,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setItems([]);
   }, []);
 
-  const toggleCart = useCallback(() => {}, []);
+  const toggleCart = useCallback(() => { }, []);
 
   // 🚀 OPTIMIZACIÓN: Memoizamos los cálculos pesados
   const totalItems = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
-  
+
   const totalPrice = useMemo(() => items.reduce((sum, i) => {
     const unitPrice = i.discount?.finalPrice ?? i.product.price;
     return sum + unitPrice * i.quantity;
