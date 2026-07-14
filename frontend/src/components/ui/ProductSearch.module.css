@@ -16,10 +16,14 @@
     background-color: #fff;
 }
 
+.searchInput::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
 .searchInput:focus {
-    border-color: #4f46e5;
-    /* violeta */
-    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.15);
 }
 
 .clearButton {
