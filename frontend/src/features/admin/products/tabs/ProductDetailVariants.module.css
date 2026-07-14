@@ -16,7 +16,8 @@
   padding: var(--space-4);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  background: #0f151d;
+  background: var(--color-bg-tertiary);
+  /* 🟢 CORREGIDO: Identidad Allmart */
 }
 
 .sectionHeading {
@@ -33,8 +34,9 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
-  color: #111823;
+  background: var(--color-primary, #ddb08c);
+  /* 🟢 CORREGIDO: Identidad Allmart */
+  color: var(--color-neutral-light);
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: var(--font-bold);
@@ -72,7 +74,7 @@
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  background: #141b25;
+  background: var(--color-bg-secondary);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   width: 100%;
@@ -81,7 +83,7 @@
 }
 
 .variantRow:hover {
-  background: #18222f;
+  background: var(--color-bg-hover);
 }
 
 .variantLabelBlock {
@@ -97,7 +99,7 @@
   font-family: var(--font-heading);
   font-size: 0.85rem;
   font-weight: 700;
-  color: #e2b07e;
+  color: var(--color-text-primary);
   text-transform: capitalize;
   white-space: nowrap;
   overflow: hidden;
@@ -134,9 +136,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #202b36;
+  background: var(--color-bg-tertiary);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #f3f4f6;
+  color: var(--color-text-primary);
   padding: 4px 10px;
   border-radius: 999px;
   font-family: var(--font-ui);
@@ -177,11 +179,11 @@
 
 .compactInput {
   width: 100%;
-  background: #111823;
+  background: var(--color-bg-tertiary);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   padding: 6px 10px;
-  color: #ffffff;
+  color: var(--color-text-primary);
   font-family: var(--font-ui);
   font-size: 0.78rem;
   transition: border-color 0.15s ease;
@@ -189,7 +191,8 @@
 
 .compactInput:focus {
   outline: none;
-  border-color: var(--color-primary, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
+  border-color: var(--color-primary);
+  /* 🟢 CORREGIDO: Identidad Allmart */
 }
 
 .compactAddBtn {
@@ -198,9 +201,9 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: #202b36;
+  background: var(--color-bg-tertiary);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #a0aec0;
+  color: var(--color-text-primary);
   border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
@@ -208,9 +211,10 @@
 }
 
 .compactAddBtn:hover {
-  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
+  background: var(--color-bg-hover);
+  /* 🟢 CORREGIDO: Identidad Allmart */
   color: #111823;
-  border-color: var(--color-accent, #ddb08c);
+  border-color: var(--color-primary);
 }
 
 /* Botón de borrado de grupo */
@@ -274,29 +278,31 @@
 }
 
 .addCombinationBtn {
-  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
-  color: #111823;
+  background: var(--color-primary);
+  /* 🟢 CORREGIDO: Identidad Allmart */
+  color: var(--color-neutral-light);
   border: none;
 }
 
 .addCombinationBtn:hover:not(:disabled) {
-  background: #ca9c78; /* 🟢 CORREGIDO: Tono arena oscuro elegante */
+  background: var(--color-primary);
+  /* 🟢 CORREGIDO: Tono arena oscuro elegante */
 }
 
 .bulkGenerateBtn {
-  background: #202b36;
-  color: #ffffff;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bulkGenerateBtn:hover:not(:disabled) {
-  background: #293845;
+  background: var(--color-bg-secondary);
 }
 
 .addCombinationBtn:disabled,
 .bulkGenerateBtn:disabled {
-  background: #111823 !important;
-  color: #4b5563 !important;
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-muted) !important;
   border-color: rgba(255, 255, 255, 0.05) !important;
   cursor: not-allowed;
 }
@@ -319,7 +325,7 @@
   font-family: var(--font-ui);
   font-size: 0.8rem;
   font-weight: 600;
-  color: #e2b07e;
+  color: var(--color-text-primary);
 }
 
 .modalRowFields {
@@ -343,27 +349,30 @@
 .cancelBtn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #a0aec0;
+  color: var(--color-text-primary);
 }
 
 .cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.02);
-  color: #ffffff;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
 }
 
 .submitBtn {
-  background: var(--color-accent, #ddb08c); /* 🟢 CORREGIDO: Identidad Allmart */
-  color: #111823;
+  background: var(--color-primary);
+  /* 🟢 CORREGIDO: Identidad Allmart */
+  color: var(--color-neutral-light);
   border: none;
 }
 
 .submitBtn:hover:not(:disabled) {
-  background: #ca9c78; /* 🟢 CORREGIDO: Tono arena oscuro elegante */
+  background: var(--color-primary-dark);
+  /* 🟢 CORREGIDO: Tono arena oscuro elegante */
 }
 
+
 .submitBtn:disabled {
-  background: #111823;
-  color: #4b5563;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
