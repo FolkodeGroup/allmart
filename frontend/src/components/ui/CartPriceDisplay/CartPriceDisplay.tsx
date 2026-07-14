@@ -40,18 +40,25 @@ export const CartPriceDisplay: React.FC<CartPriceDisplayProps> = ({
     const finalPrice = finalUnitPrice * quantity;
     const discountAmount = discount.discountAmount * quantity;
 
+    // Determinar si mostrar precio original tachado
+    // Solo mostrar tachado para descuentos "percentage" o "fixed", NO para "bogo"
+    const shouldShowStrikethrough =
+        discount.promotionType === 'percentage' || discount.promotionType === 'fixed';
+
     return (
         <div className={styles.priceContainer}>
-            {/* Precio original tachado */}
-            <span className={styles.originalPrice}>
-                {formatPrice(originalPrice * quantity)}
-                {/* Badge de descuento */}
-                {showDiscountBadge && (
-                    <span className={styles.discountBadge}>
-                        -{discount.discountPercentage.toFixed(0)}%
-                    </span>
-                )}
-            </span>
+            {/* Precio original tachado (solo para descuentos percentage o fixed) */}
+            {shouldShowStrikethrough && (
+                <span className={styles.originalPrice}>
+                    {formatPrice(originalPrice * quantity)}
+                    {/* Badge de descuento */}
+                    {showDiscountBadge && (
+                        <span className={styles.discountBadge}>
+                            -{discount.discountPercentage.toFixed(0)}%
+                        </span>
+                    )}
+                </span>
+            )}
 
             {/* Precio con descuento */}
             <span className={styles.discountedPrice}>

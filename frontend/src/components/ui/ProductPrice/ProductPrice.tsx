@@ -25,11 +25,18 @@ export const ProductPrice: React.FC<ProductPriceProps> = ({
   size = "md",
   discountPercentage,
 }) => {
-  // Si hay descuento, mostrar precio original tachado + precio con descuento
+  // Determinar si mostrar precio original tachado
+  // Solo mostrar tachado para descuentos "percentage" o "fixed", NO para "bogo"
+  const shouldShowStrikethrough = discount &&
+    (discount.promotionType === 'percentage' || discount.promotionType === 'fixed');
+
+  // Si hay descuento, mostrar precio original (tachado si aplica) + precio con descuento
   if (discount) {
     return (
       <div className={`${styles.priceBlock} ${styles[size]} ${className}`.trim()}>
-        <span className={styles.originalPrice}>{formatPrice(price)}</span>
+        {shouldShowStrikethrough && (
+          <span className={styles.originalPrice}>{formatPrice(price)}</span>
+        )}
         <div className={styles.discountedContainer}>
           <span className={styles.currentPrice}>{formatPrice(discount.finalPrice)}</span>
           {discountPercentage && (
