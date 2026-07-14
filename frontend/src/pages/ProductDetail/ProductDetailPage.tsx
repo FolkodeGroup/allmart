@@ -134,7 +134,7 @@ export function ProductDetailPage() {
   // 🟢 FIX: Autoseleccionar la variante más barata disponible para coincidir con el precio del catálogo
   useEffect(() => {
     if (product && product.skus && product.skus.length > 0 && Object.keys(selectedVariants).length === 0) {
-      
+
       // Ordenamos las variantes por precio de menor a mayor
       const sortedSkus = [...product.skus].sort((a, b) => {
         const priceA = a.price ?? product.price;
@@ -242,49 +242,55 @@ export function ProductDetailPage() {
   }, [matchingSku, selectedVariants]);
 
   function isOptionAvailable(attr: string, value: string) {
-    return product?.skus?.some(sku => {
-      const matchesOther = Object.entries(selectedVariants).every(([k, v]) => {
-        if (k === attr) return true;
-        return getAttr(sku, k) === v;
-      });
+    if (!product?.skus) return false;
 
-      return matchesOther && getAttr(sku, attr) === value;
+    const isColorGroup = attr.toLowerCase().includes('color') || normalizeColor(value) !== null;
+    const otherSelectedAttrs = Object.entries(selectedVariants).filter(([k]) => k !== attr);
+
+    return product.skus.some(sku => {
+      if (getAttr(sku, attr) !== value) return false;
+      if (isColorGroup) return true;
+      return otherSelectedAttrs.every(([k, v]) => getAttr(sku, k) === v);
     });
   }
 
-  function findCompatibleVariants(newSelection: Record<string, string>): Record<string, string> {
+  function findCompatibleVariants(newSelection: Record<string, string>, changedAttr?: string): Record<string, string> {
     if (!product?.skus || Object.keys(variantMap).length === 0) {
       return newSelection;
     }
 
     const result = { ...newSelection };
-    const compatibleSkus = product.skus.filter(sku => {
-      return Object.entries(result).every(([k, v]) => {
-        return getAttr(sku, k) === v;
-      });
-    });
 
-    if (compatibleSkus.length === 0) {
+    const hasExactMatch = () => product.skus?.some(sku => {
+      return Object.entries(result).every(([k, v]) => getAttr(sku, k) === v);
+    }) ?? false;
+
+    if (hasExactMatch()) {
       return result;
     }
 
-    for (const attr of Object.keys(variantMap)) {
-      if (!result[attr]) {
-        const possibleValues = new Set<string>();
-        compatibleSkus.forEach(sku => {
-          const value = getAttr(sku, attr);
-          if (value) {
-            possibleValues.add(value);
-          }
+    let removedSomething = true;
+    while (removedSomething) {
+      removedSomething = false;
+
+      for (const key of Object.keys(result)) {
+        if (key === changedAttr) continue;
+
+        const reducedSelection = { ...result };
+        delete reducedSelection[key];
+
+        const hasCompatibleSku = product.skus.some(sku => {
+          return Object.entries(reducedSelection).every(([k, v]) => getAttr(sku, k) === v);
         });
 
-        const originalOrderedValues = variantMap[attr] || [];
-        for (const value of originalOrderedValues) {
-          if (possibleValues.has(value)) {
-            result[attr] = value;
-            break;
-          }
+        if (hasCompatibleSku) {
+          delete result[key];
+          removedSomething = true;
         }
+      }
+
+      if (hasExactMatch()) {
+        break;
       }
     }
 
@@ -502,7 +508,7 @@ export function ProductDetailPage() {
                           onClick={() =>
                             setSelectedVariants(prev => {
                               const newSelection = { ...prev, [attr]: val };
-                              return findCompatibleVariants(newSelection);
+                              return findCompatibleVariants(newSelection, attr);
                             })
                           }
                         >
@@ -552,7 +558,7 @@ export function ProductDetailPage() {
                   key={group.id}
                   group={group}
                   selected={selectedVariants[group.id]}
-                  onSelect={(value) => setSelectedVariants(prev => findCompatibleVariants({ ...prev, [group.id]: value }))}
+                  onSelect={(value) => setSelectedVariants(prev => findCompatibleVariants({ ...prev, [group.id]: value }, group.id))}
                 />
               ))}
             </div>
