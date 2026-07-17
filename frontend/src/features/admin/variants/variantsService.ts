@@ -41,6 +41,7 @@ export interface CreateVariantChildPayload {
   stock?: number;
   images?: string[];
   price?: number;
+  criticalStockThreshold?: number;
 }
 
 export interface VariantChild {
@@ -50,6 +51,7 @@ export interface VariantChild {
   stock?: number;
   images?: string[];
   price?: number;
+  criticalStockThreshold?: number;
 }
 
 /** POST /api/admin/products/:productId/variants/children */

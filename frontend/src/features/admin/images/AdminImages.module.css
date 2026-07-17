@@ -681,6 +681,8 @@
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.12s, background 0.12s, color 0.12s;
+  z-index: 20;
+  pointer-events: auto;
 }
 
 

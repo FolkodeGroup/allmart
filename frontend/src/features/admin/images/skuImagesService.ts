@@ -34,3 +34,7 @@ export async function updateSkuImageMeta(token: string, productId: string, skuId
     const body = await apiFetch<ApiSuccess<ApiSkuImage>>(`/api/admin/products/${productId}/variants/skus/${skuId}/images/${imageId}/meta`, { method: 'PATCH', body: JSON.stringify(payload) }, token);
     return body.data;
 }
+
+export async function deleteSkuImage(token: string, productId: string, skuId: string, imageId: string) {
+    await apiFetch<ApiSuccess<null>>(`/api/admin/products/${productId}/variants/skus/${skuId}/images/${imageId}`, { method: 'DELETE' }, token);
+}

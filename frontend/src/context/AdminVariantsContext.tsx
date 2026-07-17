@@ -38,8 +38,8 @@ interface AdminVariantsContextType {
   removeValueFromVariant: (productId: string, variantId: string, value: string) => Promise<void>;
   skus: VariantChild[];
   loadSkus: (productId: string) => Promise<void>;
-  createVariantChild: (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number }) => Promise<unknown>;
-  updateVariantChild: (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number }) => Promise<VariantChild>;
+  createVariantChild: (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number; criticalStockThreshold?: number }) => Promise<unknown>;
+  updateVariantChild: (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number; criticalStockThreshold?: number }) => Promise<VariantChild>;
   deleteVariantChild: (productId: string, skuId: string) => Promise<void>;
 }
 
