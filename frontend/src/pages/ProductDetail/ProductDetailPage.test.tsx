@@ -208,4 +208,69 @@ describe('ProductDetailPage', () => {
       });
     }
   });
+
+  it('adds separate cart lines for different variant combinations', async () => {
+    vi.useFakeTimers();
+
+    const mockProduct = {
+      id: 'p1',
+      slug: 'bateria-hudson',
+      name: 'Batería Hudson',
+      description: 'Desc',
+      price: 12800,
+      categoryId: 'cat-1',
+      categoryIds: ['cat-1'],
+      tags: [],
+      rating: 4,
+      reviewCount: 1,
+      inStock: true,
+      sku: 'BAT-001',
+      images: ['img-1.jpg'],
+      skus: [
+        { id: 'sku1', sku: 'BAT-001-N-G', attributes: { Color: 'Negro', Tamaño: 'Grande' }, stock: 10, price: 12800, images: ['img-1.jpg'] },
+        { id: 'sku2', sku: 'BAT-001-V-G', attributes: { Color: 'Verde', Tamaño: 'Grande' }, stock: 8, price: 12800, images: ['img-3.jpg'] },
+      ],
+    };
+
+    mocks.fetchPublicProductBySlugMock.mockResolvedValue(mockProduct);
+
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/producto/:slug',
+          element: <ProductDetailPage />,
+        },
+      ],
+      { initialEntries: ['/producto/bateria-hudson'] }
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByRole('heading', { name: 'Batería Hudson' })).toBeInTheDocument();
+
+    const verdeButton = screen.getAllByRole('button').find(btn => btn.textContent === 'Verde');
+    const negroButton = screen.getAllByRole('button').find(btn => btn.textContent === 'Negro');
+    expect(verdeButton).toBeDefined();
+    expect(negroButton).toBeDefined();
+
+    fireEvent.click(verdeButton!);
+    const firstAddToCartBtn = await screen.findByRole('button', { name: /agregar al carrito/i });
+    fireEvent.click(firstAddToCartBtn);
+    expect(mocks.addToCartMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const secondAddToCartBtn = await screen.findByRole('button', { name: /agregar al carrito/i });
+    fireEvent.click(negroButton!);
+    await waitFor(() => expect(secondAddToCartBtn).toBeEnabled());
+    fireEvent.click(secondAddToCartBtn);
+
+    expect(mocks.addToCartMock).toHaveBeenCalledTimes(2);
+    expect(mocks.addToCartMock.mock.calls[0][0].product.id).toBe('p1::sku2');
+    expect(mocks.addToCartMock.mock.calls[1][0].product.id).toBe('p1::sku1');
+
+    vi.useRealTimers();
+  });
 });
