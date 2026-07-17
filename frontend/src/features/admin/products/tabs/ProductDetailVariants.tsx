@@ -126,7 +126,15 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   // Estado optimista para eliminación inmediata (0ms percibidos en UI)
   const [deletedSkuIds, setDeletedSkuIds] = useState<Set<string>>(new Set());
 
-  type CreatedCombination = { id?: string; sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number };
+  type CreatedCombination = {
+    id?: string;
+    sku?: string;
+    attributes: Record<string, string>;
+    stock?: number;
+    images?: string[];
+    price?: number;
+    criticalStockThreshold?: number;
+  };
   const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
   const [editingSkuId, setEditingSkuId] = useState<string | null>(null);
 

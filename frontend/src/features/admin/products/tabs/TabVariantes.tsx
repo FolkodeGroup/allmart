@@ -24,6 +24,7 @@ type CreatedCombination = {
     stock?: number;
     price?: number;
     images?: string[];
+    criticalStockThreshold?: number;
 };
 
 export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(function TabVariantes({
