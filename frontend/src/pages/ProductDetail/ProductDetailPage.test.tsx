@@ -210,8 +210,6 @@ describe('ProductDetailPage', () => {
   });
 
   it('adds separate cart lines for different variant combinations', async () => {
-    vi.useFakeTimers();
-
     const mockProduct = {
       id: 'p1',
       slug: 'bateria-hudson',
@@ -256,21 +254,19 @@ describe('ProductDetailPage', () => {
     fireEvent.click(verdeButton!);
     const firstAddToCartBtn = await screen.findByRole('button', { name: /agregar al carrito/i });
     fireEvent.click(firstAddToCartBtn);
-    expect(mocks.addToCartMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mocks.addToCartMock).toHaveBeenCalledTimes(1));
 
-    await act(async () => {
-      vi.advanceTimersByTime(2000);
-    });
+    await waitFor(
+      () => expect(screen.getByRole('button', { name: /agregar al carrito/i })).toBeEnabled(),
+      { timeout: 3000 }
+    );
 
-    const secondAddToCartBtn = await screen.findByRole('button', { name: /agregar al carrito/i });
     fireEvent.click(negroButton!);
-    await waitFor(() => expect(secondAddToCartBtn).toBeEnabled());
+    const secondAddToCartBtn = await screen.findByRole('button', { name: /agregar al carrito/i });
     fireEvent.click(secondAddToCartBtn);
+    await waitFor(() => expect(mocks.addToCartMock).toHaveBeenCalledTimes(2));
 
-    expect(mocks.addToCartMock).toHaveBeenCalledTimes(2);
     expect(mocks.addToCartMock.mock.calls[0][0].product.id).toBe('p1::sku2');
     expect(mocks.addToCartMock.mock.calls[1][0].product.id).toBe('p1::sku1');
-
-    vi.useRealTimers();
   });
 });
