@@ -22,6 +22,7 @@ import { ProductHeader } from '../../../components/ui/ProductHeader';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { ProductFilters } from '../../../components/ui/ProductFilters';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 // Styles
 import sectionStyles from '../shared/AdminSection.module.css';
@@ -256,6 +257,12 @@ export function AdminProducts() {
     );
   }, [products, search]);
 
+  const sortOptions = useMemo(() => [
+    { value: 'name', label: 'Nombre' },
+    { value: 'sku', label: 'SKU' },
+    { value: 'category', label: 'Categoría' },
+  ], []);
+
   // Sort products based on sort field and direction
   const sortedProducts = useMemo(() => {
     const ordered = [...filteredProducts];
@@ -397,15 +404,14 @@ export function AdminProducts() {
                   <div className={styles.sortContainer}>
                     <div className={styles.sortControls}>
                       <span className={styles.sortLabel}>Ordenar:</span>
-                      <select
-                        value={sortField}
-                        onChange={(e) => setSortField(e.target.value as ProductSortField)}
-                        className={styles.sortSelect}
-                      >
-                        <option value="name">Nombre</option>
-                        <option value="sku">SKU</option>
-                        <option value="category">Categoría</option>
-                      </select>
+                      <div style={{ width: '130px', display: 'inline-block' }}>
+                        <Dropdown
+                          options={sortOptions}
+                          value={sortField}
+                          onChange={(val) => setSortField(val as ProductSortField)}
+                          placeholder="Ordenar por..."
+                        />
+                      </div>
                       <button
                         onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
                         className={styles.sortButton}
