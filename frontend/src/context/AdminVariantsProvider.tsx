@@ -127,7 +127,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     await updateVariant(productId, variantId, { values: newValues });
   }, [variants, updateVariant]);
 
-  const createVariantChild = useCallback(async (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number }) => {
+  const createVariantChild = useCallback(async (productId: string, payload: { sku?: string; attributes: Record<string, string>; stock?: number; images?: string[]; price?: number; criticalStockThreshold?: number }) => {
     // 🟢 FIX: Omitimos el successMsg aquí para que el Toast solo salga desde TabVariantes.tsx (donde controlamos el estado Optimista)
     return withLoading(async () => {
       const t = requireToken();
@@ -143,7 +143,7 @@ export function AdminVariantsProvider({ children }: { children: ReactNode }) {
     });
   }, [loadSkus, requireToken, withLoading]);
 
-  const updateVariantChild = useCallback(async (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number }) => {
+  const updateVariantChild = useCallback(async (productId: string, skuId: string, payload: { sku?: string; attributes?: Record<string, string>; stock?: number; images?: string[]; price?: number; criticalStockThreshold?: number }) => {
     // 🟢 FIX: Omitimos el successMsg aquí también
     return withLoading(async () => {
       const t = requireToken();

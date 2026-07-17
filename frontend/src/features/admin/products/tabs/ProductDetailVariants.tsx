@@ -3,9 +3,10 @@ import toast from 'react-hot-toast';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
 import styles from './ProductDetailVariants.module.css';
-import commonStyles from '../AdminProductFormPage.module.css'; 
+import commonStyles from '../AdminProductFormPage.module.css';
 import { ImageUploader, ImagePreviewList, useImageUpload } from '../../images';
 import type { UploadFileState } from '../../images';
+import * as skuImagesService from '../../images/skuImagesService';
 import { getStoredToken } from '../../../../utils/apiClient';
 import { useAdminVariants } from '../../../../hooks/useAdminVariants';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
@@ -105,9 +106,10 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [combinationStock, setCombinationStock] = useState<number | ''>('');
   const [combinationImages, setCombinationImages] = useState<string>('');
   const [combinationPrice, setCombinationPrice] = useState<number | ''>('');
+  const [combinationCriticalThreshold, setCombinationCriticalThreshold] = useState<number | ''>('');
   const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
   const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
-  
+
   // 🟢 NUEVO: Estado para rastrear el intento de envío del modal de combinación
   const [submitComboAttempted, setSubmitComboAttempted] = useState(false);
 
@@ -173,6 +175,12 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
 
     const result = validateCombination({ sku: combinationSku, skuBase: product?.sku, images: imagesInput, price: combinationPrice });
+
+    // Validación local para umbral de stock crítico
+    if (combinationCriticalThreshold !== '' && (Number.isNaN(Number(combinationCriticalThreshold)) || Number(combinationCriticalThreshold) < 0)) {
+      (result as CombinationValidationErrors).price = (result as CombinationValidationErrors).price ?? undefined; // keep existing
+      // We'll store a separate error flag via setCombinationErrors below
+    }
     setCombinationErrors(result);
     return result;
   }, [combinationSku, combinationImages, combinationPrice, product?.sku, uploadedFiles]);
@@ -187,6 +195,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationImages('');
 
     setCombinationPrice(product?.price && product.price > 0 ? product.price : '');
+    setCombinationCriticalThreshold('');
     setCombinationSku(product?.sku ? `${product.sku}-` : '');
 
     setEditingSkuId(null);
@@ -284,14 +293,15 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   // 🟢 VALIDACIÓN DE ESTADO REACTIVO PARA EL BOTÓN "CREAR"
   const hasMissingAttrs = variants.some(g => !combinationAttrs[g.name] || !combinationAttrs[g.name].trim());
-  const isComboFormInvalid = 
-    !combinationSku.trim() || 
+  const isComboFormInvalid =
+    !combinationSku.trim() ||
     hasMissingAttrs ||
-    !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price);
+    !!(combinationErrors.sku || combinationErrors.images || combinationErrors.price) ||
+    (combinationCriticalThreshold !== '' && (Number.isNaN(Number(combinationCriticalThreshold)) || Number(combinationCriticalThreshold) < 0));
 
   const handleCreateCombination = async () => {
     if (!productId) return;
-    
+
     setSubmitComboAttempted(true);
 
     const validation = runCombinationValidation();
@@ -307,13 +317,14 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     const stock = combinationStock === '' ? undefined : Number(combinationStock);
     let images = undefined as string[] | undefined;
     const raw = combinationImages.trim();
-    
+
     if (raw) {
       if (raw.includes('\n')) images = raw.split('\n').map(s => s.trim()).filter(Boolean);
       else images = [raw];
     }
-    
+
     const price = combinationPrice === '' ? undefined : Number(combinationPrice);
+    const critical = combinationCriticalThreshold === '' ? undefined : Number(combinationCriticalThreshold);
 
     setCombinationModalOpen(false);
     setEditingSkuId(null);
@@ -324,18 +335,19 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationImages('');
     setSubmitComboAttempted(false);
 
-    const optimisticCombo: CreatedCombination = { 
-        sku: sku || undefined, 
-        attributes: attrs, 
-        stock, 
-        images: uploadedFiles.map(f => f.remoteUrl || f.previewUrl).filter(Boolean) as string[], 
-        price 
+    const optimisticCombo: CreatedCombination = {
+      sku: sku || undefined,
+      attributes: attrs,
+      stock,
+      images: uploadedFiles.map(f => f.remoteUrl || f.previewUrl).filter(Boolean) as string[],
+      price,
+      criticalStockThreshold: critical,
     };
     setCreatedCombinations(prev => [optimisticCombo, ...prev]);
 
     try {
       let persistedSkuId: string | undefined = undefined;
-      
+
       if (editingSkuId) {
         persistedSkuId = editingSkuId;
       } else {
@@ -360,20 +372,70 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       }
 
       if (persistedSkuId) {
-        await updateVariantChild(productId, persistedSkuId, { images, price, stock, sku: sku || undefined, attributes: attrs });
+        await updateVariantChild(productId, persistedSkuId, { images, price, stock, sku: sku || undefined, attributes: attrs, criticalStockThreshold: critical });
       }
 
       setFiles([]);
       toast.success(editingSkuId ? 'Combinación actualizada' : 'Combinación creada con éxito');
-      
+
       await loadSkus(productId);
-      
+
     } catch(err) {
       console.error('Error al guardar variante:', err);
       toast.error('Ocurrió un error al guardar la combinación');
       setCreatedCombinations(prev => prev.filter(c => c.sku !== sku));
     } finally {
       setIsSubmittingCombo(false);
+    }
+  };
+
+  // Manejo de eliminación de miniaturas (pendientes y persistidas)
+  const handleRemoveUploadedFile = async (uid: string) => {
+    const file = uploadedFiles.find(f => f.uid === uid);
+    if (!file) return;
+
+    // Si es un archivo local (pendiente de upload) o tiene File asociado, sólo eliminar localmente
+    if (file.file || file.status !== 'success' || !file.remoteUrl) {
+      removeFile(uid);
+      return;
+    }
+
+    // Imagen persistida - si no hay editingSkuId, sólo preview
+    if (!editingSkuId) {
+      removeFile(uid);
+      toast.success('Imagen eliminada del preview');
+      return;
+    }
+
+    // Guardamos copia para rollback
+    const copy = file;
+    setFiles(prev => prev.filter(x => x.uid !== uid));
+
+    try {
+      if (file.id) {
+        await skuImagesService.deleteSkuImage(token, productId, editingSkuId, file.id);
+      } else {
+        const remainingRemote = uploadedFiles.filter(x => x.uid !== uid && x.remoteUrl).map(x => x.remoteUrl!);
+        await updateVariantChild(productId, editingSkuId, { images: remainingRemote });
+      }
+      toast.success('Imagen eliminada');
+      await loadSkus(productId);
+    } catch (err) {
+      const status = err && typeof err === 'object' && 'status' in err ? (err as any).status : undefined;
+      if (status === 403) {
+        try {
+          const remainingRemote = uploadedFiles.filter(x => x.uid !== uid && x.remoteUrl).map(x => x.remoteUrl!);
+          await updateVariantChild(productId, editingSkuId, { images: remainingRemote });
+          toast.success('Imagen eliminada (referencia eliminada, borrado en servidor no permitido)');
+          await loadSkus(productId);
+          return;
+        } catch (err2) {
+          // fallthrough to rollback below
+        }
+      }
+
+      setFiles(prev => [copy, ...prev]);
+      toast.error('No se pudo eliminar la imagen en el servidor');
     }
   };
 
@@ -395,8 +457,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationImages(Array.isArray(sku.images) ? sku.images.join('\n') : '');
     setEditingSkuId(id);
     setSubmitComboAttempted(false);
-    if (Array.isArray(sku.images) && sku.images.length > 0) {
-      const initial: UploadFileState[] = sku.images.map((url) => ({ uid: `remote-${Math.random().toString(36).slice(2, 8)}`, previewUrl: url, remoteUrl: url, status: 'success' } as UploadFileState));
+      if (Array.isArray(sku.images) && sku.images.length > 0) {
+      const initial: UploadFileState[] = sku.images.map((url) => {
+        const str = String(url);
+        const m = str.match(/\/api\/images\/sku\/([A-Za-z0-9-_.]+)/);
+        const id = m ? m[1] : undefined;
+        return ({ uid: `remote-${Math.random().toString(36).slice(2, 8)}`, previewUrl: url, remoteUrl: url, status: 'success', id } as UploadFileState);
+      });
       setFiles(initial);
     } else {
       setFiles([] as UploadFileState[]);
@@ -445,7 +512,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             </p>
           </div>
         </div>
-        
+
         <VariantForm
           newGroupName={newGroupName}
           setNewGroupName={setNewGroupName}
@@ -586,10 +653,10 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         size="md"
         actions={
           <>
-            <button 
-              type="button" 
-              className={styles.cancelBtn} 
-              disabled={isSubmittingCombo} 
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              disabled={isSubmittingCombo}
               onClick={() => setCombinationModalOpen(false)}
             >
               Cancelar
@@ -653,10 +720,10 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           <div className={styles.field}>
             <label htmlFor="combination-images" className={styles.label}>Imágenes</label>
             <div style={{ marginTop: '8px' }}>
-              <ImageUploader onAddFiles={addFiles} />
+              <ImageUploader onAddFiles={addFiles} onReject={(rej) => rej.forEach(r => toast.error(`${r.file.name}: ${r.reason}`))} />
               <ImagePreviewList
                 items={uploadedFiles}
-                onRemove={removeFile}
+                onRemove={handleRemoveUploadedFile}
                 onRetry={retry}
                 onSetPrimary={setPrimary}
               />
@@ -692,6 +759,20 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
               />
             </div>
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="combination-critical" className={styles.label}>Umbral stock crítico</label>
+            <input
+              id="combination-critical"
+              type="number"
+              className={`${styles.input} ${combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
+              value={combinationCriticalThreshold === '' ? '' : String(combinationCriticalThreshold)}
+              onChange={e => setCombinationCriticalThreshold(e.target.value === '' ? '' : Number(e.target.value))}
+            />
+            {combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
+              <div className={styles.errorText}>El umbral no puede ser negativo.</div>
+            )}
           </div>
         </div>
       </Modal>

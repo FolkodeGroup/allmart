@@ -4,7 +4,7 @@ import styles from './AdminImages.module.css';
 
 interface Props {
     items: UploadFileState[];
-    onRemove: (id: string) => void;
+    onRemove: (id: string) => void | Promise<void>;
     onRetry: (id: string) => void;
     onSetPrimary: (id: string) => void;
 }
