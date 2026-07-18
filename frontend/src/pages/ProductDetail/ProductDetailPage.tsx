@@ -48,6 +48,20 @@ export function ProductDetailPage() {
 
   const selectedSku = useMemo(() => product?.skus?.find(s => s.id === selectedSkuId) ?? null, [product?.skus, selectedSkuId]);
 
+  function buildSelectedAttributesKey(attributes: Record<string, string>) {
+    const normalizedEntries = Object.entries(attributes || {})
+      .map(([key, value]) => [String(key).trim().toLowerCase(), String(value).trim()])
+      .filter(([, value]) => value !== '');
+
+    if (normalizedEntries.length === 0) return 'original';
+
+    const normalizedRecord = Object.fromEntries(
+      normalizedEntries.sort(([a], [b]) => a.localeCompare(b))
+    );
+
+    return JSON.stringify(normalizedRecord);
+  }
+
   const skuImages = useMemo(() => {
     if (Object.keys(selectedVariants).length === 0) return (product?.images ?? []).filter(Boolean);
     const source = (selectedSku?.images && selectedSku.images.length > 0) ? selectedSku.images : (product?.images ?? []);
@@ -236,7 +250,7 @@ export function ProductDetailPage() {
   useEffect(() => {
     if (matchingSku) {
       setSelectedSkuId(matchingSku.id);
-    } else if (Object.keys(selectedVariants).length === 0) {
+    } else {
       setSelectedSkuId(null);
     }
   }, [matchingSku, selectedVariants]);
@@ -311,6 +325,13 @@ export function ProductDetailPage() {
     return el.style.color || null;
   }
 
+  function formatSelectedAttributes(attributes: Record<string, string>) {
+    return Object.entries(attributes)
+      .filter(([, value]) => value !== undefined && value !== null && value !== '')
+      .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`)
+      .join('; ');
+  }
+
   useEffect(() => {
     if (!product || !isProductFavorite) {
       return;
@@ -321,8 +342,9 @@ export function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
 
-    // 🟢 FIX: Renombrado a 'isSimpleProduct' y utilizado correctamente en la condición
-    const isSimpleProduct = variantGroups.length === 0;
+    // 🟢 FIX: Detectar si el producto tiene variantes reales en base a los grupos de variantes o los SKUs.
+    const hasVariants = variantGroups.length > 0 || (Array.isArray(product.skus) && product.skus.length > 0);
+    const isSimpleProduct = !hasVariants;
 
     // Antes de agregar, solicitar descuento para la cantidad seleccionada
     const categoryIds = Array.isArray(product.categoryIds)
@@ -357,13 +379,17 @@ export function ProductDetailPage() {
 
       const cartProductId = selectedSku
         ? `${product.id}::${selectedSku.id}`
-        : `${product.id}::original`;
+        : `${product.id}::${buildSelectedAttributesKey(selectedVariants)}`;
+
+      const selectedLabel = selectedSku
+        ? formatSelectedAttributes(selectedSku.attributes ?? {})
+        : formatSelectedAttributes(selectedVariants);
 
       const productForCart = selectedSku
         ? {
           ...product,
           id: cartProductId,
-          name: product.name,
+          name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
           sku: selectedSku.sku,
           price: selectedSku.price ?? product.price,
           images: imagesForCart,
@@ -372,7 +398,7 @@ export function ProductDetailPage() {
         : {
           ...product,
           id: cartProductId,
-          name: product.name,
+          name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
           images: imagesForCart,
           selectedAttributes: selectedVariants,
         };
