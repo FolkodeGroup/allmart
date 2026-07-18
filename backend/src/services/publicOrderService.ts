@@ -100,12 +100,23 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
 
       // Se añade la validación para ignorar "original" y tratarlo como producto base
       if (skuId && skuId !== 'original' && skuId !== 'null') {
-        const updatedSku = await tx.productSku.update({
-          where: { id: skuId },
-          data: { stock: { decrement: item.quantity } }
-        });
-        updatedStock = updatedSku.stock;
-        realSkuId = skuId;
+        try {
+          const updatedSku = await tx.productSku.update({
+            where: { id: skuId },
+            data: { stock: { decrement: item.quantity } }
+          });
+          updatedStock = updatedSku.stock;
+          realSkuId = skuId;
+        } catch (err: any) {
+          // Si no existe el SKU (p.ej. frontend envió un key de atributos en vez de un id),
+          // caemos al update del producto base para no romper la transacción.
+          const updatedProduct = await tx.product.update({
+            where: { id: realProductId },
+            data: { stock: { decrement: item.quantity } }
+          });
+          updatedStock = updatedProduct.stock;
+          realSkuId = null;
+        }
       } else {
         const updatedProduct = await tx.product.update({
           where: { id: realProductId },
