@@ -118,6 +118,14 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
                   alt={banner.altText || banner.title}
                   className={styles.bannerImage}
                   onError={handleImageError}
+                  // 🟢 FIX LCP: Prioridad máxima solo a la primera imagen, el resto lazy
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  // 🟢 FIX CLS: Dimensiones explícitas basadas en el reporte de PageSpeed
+                  width="1186"
+                  height="667"
+                  // 🟢 FIX LCP: Ayuda al navegador a saber qué tamaño renderizará
+                  sizes="(max-width: 768px) 100vw, 1200px"
                 />
               </div>
             </div>

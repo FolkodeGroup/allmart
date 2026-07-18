@@ -88,6 +88,8 @@ export function CategoryGrid() {
                     alt={cat.name}
                     loading="lazy"
                     decoding="async"
+                    width="400"
+                    height="400"
                   />
                 ) : (
                   <div className={styles.imagePlaceholder}>🗂️</div>

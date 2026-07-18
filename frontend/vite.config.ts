@@ -55,39 +55,37 @@ export default defineConfig({
       },
     },
   },
+  // 🟢 PROXY DE PREVIEW: Necesario para que la API responda en producción local
+  preview: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
-    // Enable code splitting for better caching and lazy loading
+    target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // 1. Planillas de cálculo (SheetJS / xlsx)
+            // 🟢 ULTRA-SEGURO: Solo separamos las librerías gigantes que están 100% aisladas.
+            // React, Lucide y el resto se quedan en el bundle base. 
+            // Esto garantiza CERO advertencias y CERO errores circulares en el navegador.
             if (id.includes('xlsx') || id.includes('excel')) {
               return 'vendor-excel';
             }
-            // 2. Gráficos (Recharts / D3)
             if (id.includes('recharts') || id.includes('d3')) {
               return 'vendor-charts';
             }
-            // 3. Generación de PDFs e imágenes al vuelo (jspdf, html2canvas, pdfmake, etc.)
-            if (
-              id.includes('pdf') || 
-              id.includes('html2canvas') || 
-              id.includes('jspdf') || 
-              id.includes('pdfmake')
-            ) {
+            if (id.includes('pdf') || id.includes('html2canvas') || id.includes('jspdf') || id.includes('pdfmake')) {
               return 'vendor-pdf';
             }
-            // 4. Íconos (Lucide y afines)
-            if (id.includes('lucide') || id.includes('icons')) {
-              return 'vendor-icons';
-            }
-            // 5. Dejamos que React y las librerías fuertemente acopladas queden en vendor-base
-            return 'vendor-base';
           }
         },
       },
     },
-    chunkSizeWarningLimit: 1500, // Ajustamos el límite a 1.5MB que es excelente para un admin panel
+    chunkSizeWarningLimit: 1500,
   },
 });

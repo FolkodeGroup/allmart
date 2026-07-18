@@ -6,10 +6,14 @@ export function AboutSection() {
       <div className={styles.inner}>
         <img
           className={styles.image}
-          src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"
+          // 🟢 WebP y calidad optimizada
+          src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=75&fm=webp"
           alt="Interior de hogar decorado con productos Allmart"
           loading="lazy"
           decoding="async"
+          // 🟢 Dimensiones explícitas
+          width="601"
+          height="450"
         />
         <div className={styles.content}>
           <span className={styles.label}>Sobre</span>

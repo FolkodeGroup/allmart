@@ -102,6 +102,7 @@ export function HomePage() {
 
   return (
     <main>
+      {/* 🟢 Renderizado inmediato si la promesa ya está resuelta o en caché */}
       {banners.length > 0 && <BannerSlider banners={banners} />}
       <CategoryGrid />
       <FeaturedProducts

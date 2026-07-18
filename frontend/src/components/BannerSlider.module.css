@@ -119,14 +119,19 @@
 }
 
 /* Dots navigation */
-.dots {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  z-index: 2;
+.dot {
+  width: 10px;           /* Tamaño visual del punto ligeramente mayor */
+  height: 10px;
+  margin: 0 4px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  /* 🟢 Solución Accesibilidad: Incrementa el área táctil sin deformar el punto */
+  padding: 8px;          
+  box-sizing: content-box; 
+  background-clip: content-box; /* El color solo se aplica al contenido, no al padding */
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .dot {
