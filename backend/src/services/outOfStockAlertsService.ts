@@ -56,16 +56,22 @@ export async function getOutOfStockAlerts(
   const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.min(Math.floor(limit), 100) : 20;
   const skip = (safePage - 1) * safeLimit;
 
-  // Obtener productos sin stock
-  const productsWithoutStock = await prisma.product.findMany({
-    where: { 
-      stock: { lte: 0 },
-      status: { not: ProductStatus.archived } // 🔒 CORRECCIÓN: Uso de enum de Prisma
-    },
-    select: { id: true, name: true, sku: true, stock: true },
-  });
+  // Obtener productos sin stock (base product) y SKUs sin stock (variants)
+  const [productsWithoutStock, skusWithoutStock] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        stock: { lte: 0 },
+        status: { not: ProductStatus.archived }
+      },
+      select: { id: true, name: true, sku: true, stock: true },
+    }),
+    prisma.productSku.findMany({
+      where: { stock: { lte: 0 }, isActive: true },
+      select: { id: true, productId: true, sku: true, stock: true },
+    }),
+  ]);
 
-  if (productsWithoutStock.length === 0) {
+  if (productsWithoutStock.length === 0 && skusWithoutStock.length === 0) {
     return {
       data: [],
       total: 0,
@@ -76,16 +82,16 @@ export async function getOutOfStockAlerts(
   }
 
   const productIds = productsWithoutStock.map(p => p.id);
+  const skuIds = skusWithoutStock.map(s => s.id);
 
-  // Obtener órdenes pendientes/confirmadas que contienen estos productos
+  // Obtener órdenes pendientes/confirmadas que contienen estos productos o SKUs
   const ordersWithOutOfStockItems = await prisma.order.findMany({
     where: {
       status: { in: ['pendiente', 'confirmado'] },
-      orderItems: {
-        some: {
-          productId: { in: productIds },
-        },
-      },
+      OR: [
+        { orderItems: { some: { productId: { in: productIds } } } },
+        { orderItems: { some: { productSkuId: { in: skuIds } } } },
+      ],
     },
     select: {
       id: true,
@@ -98,11 +104,15 @@ export async function getOutOfStockAlerts(
       createdAt: true,
       orderItems: {
         where: {
-          productId: { in: productIds },
+          OR: [
+            { productId: { in: productIds } },
+            { productSkuId: { in: skuIds } },
+          ],
         },
         select: {
           id: true,
           productId: true,
+          productSkuId: true,
           productName: true,
           quantity: true,
           unitPrice: true,
@@ -111,11 +121,12 @@ export async function getOutOfStockAlerts(
     },
   });
 
-  // Agrupar por producto
-  const alertsByProduct = new Map<string, OutOfStockAlert>();
+  // Agrupar por producto o por SKU (clave compuesta)
+  const alertsByKey = new Map<string, OutOfStockAlert>();
 
   for (const product of productsWithoutStock) {
-    alertsByProduct.set(product.id, {
+    const key = product.id; // product-level alert
+    alertsByKey.set(key, {
       productId: product.id,
       productName: product.name,
       productSku: product.sku,
@@ -126,10 +137,30 @@ export async function getOutOfStockAlerts(
     });
   }
 
+  for (const sku of skusWithoutStock) {
+    const key = `${sku.productId}::${sku.id}`; // sku-level alert key
+    // Try to reuse product name if available
+    const parent = productsWithoutStock.find(p => p.id === sku.productId);
+    const name = parent ? parent.name : 'Producto';
+    alertsByKey.set(key, {
+      productId: sku.productId,
+      productName: name,
+      productSku: sku.sku,
+      stock: sku.stock,
+      totalPendingOrders: 0,
+      totalQuantityOrdered: 0,
+      orders: [],
+    });
+  }
+
   // Llenar datos de órdenes
   for (const order of ordersWithOutOfStockItems) {
     for (const item of order.orderItems) {
-      const alert = alertsByProduct.get(item.productId!);
+      // determine if this item maps to a sku-level alert or product-level alert
+      const skuKey = item.productSkuId ? `${item.productId}::${item.productSkuId}` : null;
+      const productKey = item.productId!;
+
+      const alert = (skuKey && alertsByKey.has(skuKey)) ? alertsByKey.get(skuKey)! : alertsByKey.get(productKey);
       if (alert) {
         // Agregar orden si no existe
         if (!alert.orders.find(o => o.id === order.id)) {
@@ -164,7 +195,7 @@ export async function getOutOfStockAlerts(
   }
 
   // Filtrar solo alertas que tienen órdenes
-  const alertsWithOrders = Array.from(alertsByProduct.values())
+  const alertsWithOrders = Array.from(alertsByKey.values())
     .filter(alert => alert.orders.length > 0)
     .sort((a, b) => b.totalQuantityOrdered - a.totalQuantityOrdered);
 
@@ -187,7 +218,7 @@ export async function getOutOfStockAlerts(
  */
 export async function getOutOfStockAlertCount(): Promise<number> {
   const productsWithoutStock = await prisma.product.findMany({
-    where: { 
+    where: {
       stock: { lte: 0 },
       status: { not: ProductStatus.archived } // 🔒 CORRECCIÓN: Uso de enum de Prisma
     },
