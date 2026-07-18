@@ -2199,3 +2199,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1292: 1282 corregir cálculo del descuento bogo en la vista de promociones | 2026-07-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1295: Permitir compras de productos que tengan 0 stock | 2026-07-13 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1319: 1309 descontar stock de la variante comprada en el admin al comprar desde el home | 2026-07-18 |
