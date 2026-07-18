@@ -6,15 +6,6 @@ import { getCachedPublicCategories } from '../../../services/categoriesService';
 import { Button } from '../../../components/ui/Button/Button';
 import styles from './CategoryGrid.module.css';
 
-/**
- * Divide el nombre de la categoría en dos partes:
- * - prefix: primera(s) palabra(s) en peso regular
- * - bold: última(s) palabra(s) en negrita
- *
- * Regla: si el nombre contiene "para" o "y", se parte tras esa palabra.
- * Si empieza con "Especial", se parte tras "Especial".
- * En otro caso todo va en bold.
- */
 function splitCategoryName(name: string): { prefix: string; bold: string } {
   const lowerName = name.toLowerCase();
 
@@ -68,8 +59,15 @@ export function CategoryGrid() {
         </p>
       </div>
 
+      {/* 🟢 SOLUCIÓN CLS: En vez de un texto simple de cargando, renderizamos 6 cajas vacías de tamaño idéntico para reservar el espacio */}
       {isLoading ? (
-        <div className={styles.loading}>Cargando categorías...</div>
+        <div className={styles.grid}>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`${styles.card} ${styles.cardSkeleton}`}>
+              <div className={styles.cardOverlay}></div>
+            </div>
+          ))}
+        </div>
       ) : (
         <div className={styles.grid}>
           {featured.map((cat) => {

@@ -8,17 +8,6 @@ import { CartProvider } from './components/layout/context/CartContext';
 import { FavoritesProvider } from './components/layout/context/FavoritesContext';
 import { CartPage } from './pages/Cart/CartPage';
 import { FavoritesPage } from './pages/Favorites/FavoritesPage';
-import { ContactPage } from './pages/StaticInfo/ContactPage';
-import { FaqPage } from './pages/StaticInfo/FaqPage';
-import { HowToBuyPage } from './pages/StaticInfo/HowToBuyPage';
-import { PrivacyPage } from './pages/StaticInfo/PrivacyPage';
-import { ShippingPage } from './pages/StaticInfo/ShippingPage';
-import { TermsPage } from './pages/StaticInfo/TermsPage';
-import { WithdrawalPage } from './pages/StaticInfo/WithdrawalPage';
-import { AdminLogin } from './pages/AdminLogin/AdminLogin';
-import { AdminLayout } from './pages/Admin/AdminLayout';
-import { AdminDashboard } from './pages/Admin/AdminDashboard';
-import { AdminUserSettings } from './pages/Admin/AdminUserSettings';
 import { AdminRoute } from './components/AdminRoute';
 import { LegacyRedirect } from './components/LegacyRedirect';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -30,13 +19,28 @@ import { RouteErrorBoundary } from './components/RouteErrorBoundary';
 import FullScreenLoader from './components/ui/FullScreenLoader';
 import { useAppReady } from './hooks/useAppReady';
 
+// 🟢 OPTIMIZACIÓN: Lazy loading de las vistas estáticas del cliente público para reducir el bundle base
+const ContactPage = lazy(() => import('./pages/StaticInfo/ContactPage').then(m => ({ default: m.ContactPage })));
+const FaqPage = lazy(() => import('./pages/StaticInfo/FaqPage').then(m => ({ default: m.FaqPage })));
+const HowToBuyPage = lazy(() => import('./pages/StaticInfo/HowToBuyPage').then(m => ({ default: m.HowToBuyPage })));
+const PrivacyPage = lazy(() => import('./pages/StaticInfo/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
+const ShippingPage = lazy(() => import('./pages/StaticInfo/ShippingPage').then(m => ({ default: m.ShippingPage })));
+const TermsPage = lazy(() => import('./pages/StaticInfo/TermsPage').then(m => ({ default: m.TermsPage })));
+const WithdrawalPage = lazy(() => import('./pages/StaticInfo/WithdrawalPage').then(m => ({ default: m.WithdrawalPage })));
+
+// 🟢 OPTIMIZACIÓN: Lazy loading de vistas administrativas clave para aislar dependencias de gráficos y layouts
+const AdminLogin = lazy(() => import('./pages/AdminLogin/AdminLogin').then(m => ({ default: m.AdminLogin })));
+const AdminLayout = lazy(() => import('./pages/Admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
+const AdminDashboard = lazy(() => import('./pages/Admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminUserSettings = lazy(() => import('./pages/Admin/AdminUserSettings').then(m => ({ default: m.AdminUserSettings })));
+
 // Lazy load admin feature components for better code splitting
 const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts').then(m => ({ default: m.AdminProducts })));
 const AdminOrders = lazy(() => import('./features/admin/orders/AdminOrders'));
 const OrderDetailPage = lazy(() => import('./features/admin/orders/pages/OrderDetailPage'));
 const AdminReports = lazy(() => import('./features/admin/reports/AdminReports').then(m => ({ default: m.AdminReports })));
 const SuppliersAdmin = lazy(() => import('./features/admin/suppliers/SuppliersAdmin').then(m => ({ default: m.SuppliersAdmin })));
-const SuppliersAdminFormWrapper = lazy(() => import('./features/admin/suppliers/SuppliersAdminFormWrapper').then(m => ({ default: m.SuppliersAdminFormWrapper, })));
+const SuppliersAdminFormWrapper = lazy(() => import('./features/admin/suppliers/SuppliersAdminFormWrapper').then(m => ({ default: m.SuppliersAdminFormWrapper })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
 const AdminCategoryFormPageWrapper = lazy(() => import('./features/admin/categories/AdminCategoryFormPageWrapper').then(m => ({ default: m.AdminCategoryFormPageWrapper })));
 const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
@@ -58,27 +62,102 @@ const router = createBrowserRouter([
       { path: 'producto/:slug', element: <ProductDetailPage /> },
       { path: 'carrito', element: <CartPage /> },
       { path: 'favoritos', element: <FavoritesPage /> },
-      { path: 'como-comprar', element: <HowToBuyPage /> },
-      { path: 'envios', element: <ShippingPage /> },
-      { path: 'preguntas-frecuentes', element: <FaqPage /> },
-      { path: 'contacto', element: <ContactPage /> },
-      { path: 'terminos', element: <TermsPage /> },
-      { path: 'privacidad', element: <PrivacyPage /> },
-      { path: 'arrepentimiento', element: <WithdrawalPage /> },
+      {
+        path: 'como-comprar',
+        element: (
+          <Suspense fallback={<FullScreenLoader />}>
+            <HowToBuyPage />
+          </Suspense>
+        )
+      },
+      {
+        path: 'envios',
+        element: (
+          <Suspense fallback={<FullScreenLoader />}>
+            <ShippingPage />
+          </Suspense>
+        )
+      },
+      {
+        path: 'preguntas-frecuentes',
+        element: (
+          <Suspense fallback={<FullScreenLoader />}>
+            <FaqPage />
+          </Suspense>
+        )
+      },
+      {
+        path: 'contacto',
+        element: (
+          <Suspense fallback={<FullScreenLoader />}>
+            <ContactPage />
+          </Suspense>
+        )
+      },
+      {
+        path: 'terminos',
+        element: (
+          <Suspense fallback={<FullScreenLoader />}>
+            <TermsPage />
+          </Suspense>
+        )
+      },
+      {
+        path: 'privacidad',
+        element: (
+          <Suspense fallback={<FullScreenLoader />}>
+            <PrivacyPage />
+          </Suspense>
+        )
+      },
+      {
+        path: 'arrepentimiento',
+        element: (
+          <Suspense fallback={<FullScreenLoader />}>
+            <WithdrawalPage />
+          </Suspense>
+        )
+      },
     ],
   },
   {
     path: '/admin/login',
-    element: <AdminLogin />,
+    element: (
+      <Suspense fallback={<FullScreenLoader />}>
+        <AdminLogin />
+      </Suspense>
+    ),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: '/admin',
-    element: <AdminRoute><AdminProvidersWrapper><AdminLayout /></AdminProvidersWrapper></AdminRoute>,
+    element: (
+      <AdminRoute>
+        <AdminProvidersWrapper>
+          <Suspense fallback={<FullScreenLoader />}>
+            <AdminLayout />
+          </Suspense>
+        </AdminProvidersWrapper>
+      </AdminRoute>
+    ),
     errorElement: <RouteErrorBoundary />,
     children: [
-      { path: 'dashboard', element: <AdminDashboard /> },
-      { path: 'configuracion', element: <AdminUserSettings /> },
+      {
+        path: 'dashboard',
+        element: (
+          <Suspense fallback={<AdminLoadingFallback />}>
+            <AdminDashboard />
+          </Suspense>
+        )
+      },
+      {
+        path: 'configuracion',
+        element: (
+          <Suspense fallback={<AdminLoadingFallback />}>
+            <AdminUserSettings />
+          </Suspense>
+        )
+      },
       {
         path: 'productos',
         element: (
@@ -290,4 +369,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

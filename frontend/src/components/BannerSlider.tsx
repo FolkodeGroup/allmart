@@ -1,6 +1,5 @@
 /**
  * components/BannerSlider.tsx
- * Componente para mostrar banners en un carrusel automático en la homepage.
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -26,7 +25,6 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
     if (target.dataset.fallbackApplied === 'true') {
       return;
     }
-
     target.dataset.fallbackApplied = 'true';
     target.src = DEFAULT_IMAGE_PLACEHOLDER;
   };
@@ -39,7 +37,6 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
     }, 5000);
   }, [banners.length]);
 
-  // Auto-advance slides every 5 seconds
   useEffect(() => {
     startAutoAdvance();
     return () => {
@@ -71,7 +68,6 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
     if (touchStartX.current === null || touchStartY.current === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
-    // Solo horizontal (mayor movimiento en X que en Y)
     if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY) {
       if (deltaX < 0) {
         goToNext();
@@ -83,8 +79,13 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
     touchStartY.current = null;
   };
 
+  // 🟢 SOLUCIÓN CLS: Si no hay banners cargados, devolvemos un Skeleton Placeholder con el aspect-ratio correcto
   if (!banners || banners.length === 0) {
-    return null;
+    return (
+      <div className={styles.sliderPlaceholder} aria-hidden="true">
+        <div className={styles.slidesContainerPlaceholder}></div>
+      </div>
+    );
   }
 
   function handleBannerClick(banner: PublicBanner) {
@@ -118,13 +119,10 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
                   alt={banner.altText || banner.title}
                   className={styles.bannerImage}
                   onError={handleImageError}
-                  // 🟢 FIX LCP: Prioridad máxima solo a la primera imagen, el resto lazy
                   fetchPriority={index === 0 ? "high" : "auto"}
                   loading={index === 0 ? "eager" : "lazy"}
-                  // 🟢 FIX CLS: Dimensiones explícitas basadas en el reporte de PageSpeed
                   width="1186"
                   height="667"
-                  // 🟢 FIX LCP: Ayuda al navegador a saber qué tamaño renderizará
                   sizes="(max-width: 768px) 100vw, 1200px"
                 />
               </div>
@@ -133,7 +131,6 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
         })}
       </div>
 
-      {/* Navigation arrows - only show if more than one banner */}
       {banners.length > 1 && (
         <>
           <button
@@ -153,7 +150,6 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
             ›
           </button>
 
-          {/* Dots for slide navigation */}
           <div className={styles.dots}>
             {banners.map((_, index) => (
               <button

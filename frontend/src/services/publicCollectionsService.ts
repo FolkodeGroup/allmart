@@ -73,6 +73,10 @@ export interface ProductDiscount {
   minPurchase?: number;
 }
 
+export interface ActiveProductDiscount extends ProductDiscount {
+  applicableProducts?: Array<{ id: string; name: string }>;
+}
+
 function isValidProductDiscount(value: unknown): value is ProductDiscount {
   if (!value || typeof value !== 'object') {
     return false;
@@ -108,6 +112,8 @@ function normalizeCollection(collection: RawPublicCollection): PublicCollection 
 // Caché de módulo para colecciones del home
 let _collectionsCache: PublicCollection[] | null = null;
 let _collectionsInflight: Promise<PublicCollection[]> | null = null;
+let _activeDiscountsCache: ActiveProductDiscount[] | null = null;
+let _activeDiscountsInflight: Promise<ActiveProductDiscount[]> | null = null;
 
 export const publicCollectionsService = {
   /**
@@ -168,9 +174,34 @@ export const publicCollectionsService = {
    * Obtiene descuentos activos (útil para mostrar badges)
    */
   async getActiveDiscounts(): Promise<
-    { productId: string; discount: ProductDiscount }[]
+    ActiveProductDiscount[]
   > {
-    return apiFetch('/api/promotions/discounts/active');
+    if (_activeDiscountsCache) return _activeDiscountsCache;
+    if (_activeDiscountsInflight) return _activeDiscountsInflight;
+
+    _activeDiscountsInflight = apiFetch<ActiveProductDiscount[]>('/api/promotions/discounts/active')
+      .then((discounts) => {
+        _activeDiscountsCache = Array.isArray(discounts) ? discounts : [];
+        _activeDiscountsInflight = null;
+        return _activeDiscountsCache;
+      })
+      .catch(() => {
+        _activeDiscountsInflight = null;
+        return [];
+      });
+
+    return _activeDiscountsInflight;
+  },
+
+  /** Devuelve el caché actual de descuentos activos de forma síncrona (null si aún no se cargó) */
+  getCachedActiveDiscounts(): ActiveProductDiscount[] | null {
+    return _activeDiscountsCache;
+  },
+
+  /** Invalida caché de descuentos activos */
+  invalidateActiveDiscountsCache() {
+    _activeDiscountsCache = null;
+    _activeDiscountsInflight = null;
   },
 
   /**

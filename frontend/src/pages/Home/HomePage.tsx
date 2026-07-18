@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
-import { CategoryGrid } from '../../features/home/CategoryGrid/CategoryGrid';
-import { FeaturedProducts } from '../../features/home/FeaturedProducts/FeaturedProducts';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import type { PublicCollection } from '../../services/publicCollectionsService';
 import { publicCollectionsService } from '../../services/publicCollectionsService';
 import type { PublicBanner } from '../../services/publicBannersService';
 import { publicBannersService } from '../../services/publicBannersService';
 import { fetchPublicProducts } from '../../services/productsService';
-import CollectionSlider from '../../components/CollectionSlider';
 import '../../styles/collections.css';
 import BannerSlider from '../../components/BannerSlider';
-import { Benefits } from '../../features/home/Benefits/Benefits';
-import { AboutSection } from '../../features/home/AboutSection/AboutSection';
-import { ContactForm } from '../../features/home/ContactForm/ContactForm';
+
+const CategoryGrid = lazy(() => import('../../features/home/CategoryGrid/CategoryGrid').then((m) => ({ default: m.CategoryGrid })));
+const FeaturedProducts = lazy(() => import('../../features/home/FeaturedProducts/FeaturedProducts').then((m) => ({ default: m.FeaturedProducts })));
+const AboutSection = lazy(() => import('../../features/home/AboutSection/AboutSection').then((m) => ({ default: m.AboutSection })));
+const ContactForm = lazy(() => import('../../features/home/ContactForm/ContactForm').then((m) => ({ default: m.ContactForm })));
+const Benefits = lazy(() => import('../../features/home/Benefits/Benefits').then((m) => ({ default: m.Benefits })));
+const CollectionSlider = lazy(() => import('../../components/CollectionSlider'));
 
 export function HomePage() {
   const [collections, setCollections] = useState<PublicCollection[]>(
@@ -104,24 +105,63 @@ export function HomePage() {
     <main>
       {/* 🟢 Renderizado inmediato si la promesa ya está resuelta o en caché */}
       {banners.length > 0 && <BannerSlider banners={banners} />}
-      <CategoryGrid />
-      <FeaturedProducts
-        title="Productos Destacados"
-        tag="destacado"
-        limit={4}
-      />
-      <AboutSection />
+      <Suspense fallback={(
+        <section aria-label="Cargando secciones destacadas" style={{ minHeight: '980px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '72px 24px 0' }}>
+            <div style={{ height: '28px', width: '240px', background: '#e6e2dd', borderRadius: '4px', marginBottom: '16px' }} />
+            <div style={{ height: '54px', width: '380px', background: '#f0ece7', borderRadius: '8px', marginBottom: '28px' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '16px' }}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} style={{ height: '180px', background: '#f2efeb', borderRadius: '18px' }} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}>
+        <CategoryGrid />
+        <FeaturedProducts
+          title="Productos Destacados"
+          tag="destacado"
+          limit={4}
+        />
+        <AboutSection />
+      </Suspense>
 
       {/* Secciones de Colecciones */}
       {loading && (
-        <section className="collection-section collection-section--primary">
-          <div className="section-inner">
-            <p style={{ color: 'var(--color-text-secondary)' }}>Cargando colecciones especiales...</p>
+        <section className="collection-section collection-section--primary" style={{ minHeight: '480px' }}>
+          <div className="section-inner" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
+            {/* 🟢 Solución CLS: Placeholder sutil para evitar el colapso de altura en carga */}
+            <div style={{ height: '32px', width: '280px', background: '#e6e2dd', marginBottom: '24px', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ display: 'flex', gap: '20px', overflow: 'hidden' }}>
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} style={{ flex: '0 0 280px', height: '340px', background: '#f2efeb', borderRadius: '14px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+              ))}
+            </div>
           </div>
+          <style>{`
+            @keyframes pulse {
+              0% { opacity: 0.6; }
+              50% { opacity: 1; }
+              100% { opacity: 0.6; }
+            }
+          `}</style>
         </section>
       )}
 
       {!loading && !error && collections.length > 0 && (
+        <Suspense fallback={(
+          <section className="collection-section collection-section--primary" style={{ minHeight: '480px' }}>
+            <div className="section-inner" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
+              <div style={{ height: '32px', width: '280px', background: '#e6e2dd', marginBottom: '24px', borderRadius: '4px' }} />
+              <div style={{ display: 'flex', gap: '20px', overflow: 'hidden' }}>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} style={{ flex: '0 0 280px', height: '340px', background: '#f2efeb', borderRadius: '14px' }} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}>
         <div>
           {collections.map((collection, index) => {
             const isEvenIndex = index % 2 === 0;
@@ -147,10 +187,13 @@ export function HomePage() {
             );
           })}
         </div>
+        </Suspense>
       )}
 
-      <ContactForm />
-      <Benefits />
+      <Suspense fallback={<div style={{ minHeight: '560px' }} />}>
+        <ContactForm />
+        <Benefits />
+      </Suspense>
     </main>
   );
 }

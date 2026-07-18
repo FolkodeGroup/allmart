@@ -295,3 +295,19 @@
     letter-spacing: var(--tracking-wide);
   }
 }
+
+.cardSkeleton {
+  background: linear-gradient(90deg, #f2efeb 25%, #e6e2dd 50%, #f2efeb 75%);
+  background-size: 200% 100%;
+  animation: grid-shimmer 1.5s infinite linear;
+  cursor: default !important;
+}
+
+@keyframes grid-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -1,3 +1,5 @@
+// frontend/src/features/home/FeaturedProducts/FeaturedProducts.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../../types';
@@ -8,6 +10,7 @@ import {
 import { fetchPublicCategories } from '../../../services/categoriesService';
 import { ProductCard } from '../../products/ProductCard/ProductCard';
 import { Button } from '../../../components/ui/Button/Button';
+import { publicCollectionsService, type ActiveProductDiscount, type ProductDiscount } from '../../../services/publicCollectionsService';
 import styles from './FeaturedProducts.module.css';
 
 interface FeaturedProductsProps {
@@ -30,13 +33,34 @@ export function FeaturedProducts({
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
+  function buildDiscountByProductId(discounts: ActiveProductDiscount[]) {
+    const discountByProductId = new Map<string, ProductDiscount>();
+
+    discounts.forEach((discount) => {
+      discount.applicableProducts?.forEach((product) => {
+        if (!discountByProductId.has(product.id)) {
+          discountByProductId.set(product.id, discount);
+        }
+      });
+    });
+
+    return discountByProductId;
+  }
+
   useEffect(() => {
     Promise.all([
       fetchPublicProducts({ sort: 'newest', limit, isFeatured: true }),
-      fetchPublicCategories()
+      fetchPublicCategories(),
+      publicCollectionsService.getActiveDiscounts(),
     ])
-      .then(([{ data }, categories]) => {
-        setProducts(data.map((p) => mapApiProductToProduct(p, categories)));
+      .then(([{ data }, categories, discounts]) => {
+        const discountByProductId = buildDiscountByProductId(discounts);
+        setProducts(
+          data.map((p) => ({
+            ...mapApiProductToProduct(p, categories),
+            appliedDiscount: discountByProductId.get(p.id) ?? null,
+          }))
+        );
       })
       .catch(() => setProducts([]));
   }, [limit]);
@@ -60,8 +84,6 @@ export function FeaturedProducts({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // El tag se usa para filtrar visualmente; como el backend no soporta tags aún,
-  // se muestran todos los productos cargados.
   const filtered = products;
   const canSlide = filtered.length > cardsPerView;
   const clonedSlides = canSlide
@@ -124,6 +146,8 @@ export function FeaturedProducts({
     touchStartY.current = null;
   };
 
+  const isLoading = products.length === 0;
+
   return (
     <section className={styles.section} aria-label={title}>
       <div className={styles.header}>
@@ -144,15 +168,43 @@ export function FeaturedProducts({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {clonedSlides.map((product, index) => (
-            <div
-              key={`${product.id}-${index}`}
-              className={styles.carouselSlide}
-              style={{ width: `${100 / Math.max(cardsPerView, 1)}%` }}
-            >
-              <ProductCard product={product} variant="featured" />
-            </div>
-          ))}
+          {/* 🟢 SOLUCIÓN CLS: Si está cargando, renderizamos tarjetas con altura reservada para mantener el layout estable */}
+          {isLoading ? (
+            Array.from({ length: cardsPerView }).map((_, idx) => (
+              <div
+                key={`featured-skeleton-${idx}`}
+                className={styles.carouselSlide}
+                style={{ width: `${100 / Math.max(cardsPerView, 1)}%` }}
+              >
+                <div 
+                  style={{ 
+                    height: '420px', 
+                    background: '#f2efeb', 
+                    borderRadius: '20px', 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '18px',
+                    gap: '12px',
+                    animation: 'featured-shimmer-effect 1.5s infinite ease-in-out'
+                  }}
+                >
+                  <div style={{ width: '100%', height: '240px', background: '#e6e2dd', borderRadius: '12px' }}></div>
+                  <div style={{ width: '60%', height: '16px', background: '#e6e2dd', borderRadius: '4px' }}></div>
+                  <div style={{ width: '40%', height: '24px', background: '#e6e2dd', borderRadius: '4px' }}></div>
+                </div>
+              </div>
+            ))
+          ) : (
+            clonedSlides.map((product, index) => (
+              <div
+                key={`${product.id}-${index}`}
+                className={styles.carouselSlide}
+                style={{ width: `${100 / Math.max(cardsPerView, 1)}%` }}
+              >
+                <ProductCard product={product} variant="featured" />
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -163,6 +215,14 @@ export function FeaturedProducts({
           </Button>
         </Link>
       </div>
+
+      <style>{`
+        @keyframes featured-shimmer-effect {
+          0% { opacity: 0.6; }
+          50% { opacity: 1; }
+          100% { opacity: 0.6; }
+        }
+      `}</style>
     </section>
   );
 }

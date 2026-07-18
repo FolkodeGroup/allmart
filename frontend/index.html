@@ -50,7 +50,7 @@
                     link.as = 'image';
                     link.href = url;
                     link.imageSizes = '(max-width: 768px) 100vw, 1200px';
-                    link.fetchPriority = 'high';
+                    link.setAttribute('fetchpriority', 'high');
                     document.head.appendChild(link);
                   }
                 }

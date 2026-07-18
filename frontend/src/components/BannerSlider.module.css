@@ -228,3 +228,35 @@
     border-radius: 4px;
   }
 }
+
+.sliderPlaceholder {
+  position: relative;
+  width: 100%;
+  background: #f2efeb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: var(--space-8);
+}
+
+.slidesContainerPlaceholder {
+  width: 100%;
+  aspect-ratio: 16 / 6;
+  background: linear-gradient(90deg, #f2efeb 25%, #e6e2dd 50%, #f2efeb 75%);
+  background-size: 200% 100%;
+  animation: banner-shimmer 1.5s infinite linear;
+}
+
+@keyframes banner-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .slidesContainerPlaceholder {
+    aspect-ratio: 16 / 9;
+  }
+}
