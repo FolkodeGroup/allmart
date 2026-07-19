@@ -1,17 +1,19 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import type { PublicCollection } from '../../services/publicCollectionsService';
 import { publicCollectionsService } from '../../services/publicCollectionsService';
 import type { PublicBanner } from '../../services/publicBannersService';
 import { publicBannersService } from '../../services/publicBannersService';
 import { fetchPublicProducts } from '../../services/productsService';
-import '../../styles/collections.css';
-import BannerSlider from '../../components/BannerSlider';
+import { bannerFilterToUrl } from '../../utils/bannerFilterToUrl';
+import { DEFAULT_IMAGE_PLACEHOLDER } from '../../utils/imageUrl';
 
 const CategoryGrid = lazy(() => import('../../features/home/CategoryGrid/CategoryGrid').then((m) => ({ default: m.CategoryGrid })));
 const FeaturedProducts = lazy(() => import('../../features/home/FeaturedProducts/FeaturedProducts').then((m) => ({ default: m.FeaturedProducts })));
 const AboutSection = lazy(() => import('../../features/home/AboutSection/AboutSection').then((m) => ({ default: m.AboutSection })));
 const ContactForm = lazy(() => import('../../features/home/ContactForm/ContactForm').then((m) => ({ default: m.ContactForm })));
 const Benefits = lazy(() => import('../../features/home/Benefits/Benefits').then((m) => ({ default: m.Benefits })));
+const BannerSlider = lazy(() => import('../../components/BannerSlider'));
 const CollectionSlider = lazy(() => import('../../components/CollectionSlider'));
 
 export function HomePage() {
@@ -101,10 +103,54 @@ export function HomePage() {
     window.location.href = `/producto/${productSlug}`;
   };
 
+  const heroBanner = banners[0] ?? null;
+  const heroImageUrl = heroBanner?.thumbUrl || heroBanner?.imageUrl || DEFAULT_IMAGE_PLACEHOLDER;
+  const heroTarget = heroBanner ? bannerFilterToUrl(heroBanner.filterConfig ?? {}) : '/productos';
+
   return (
     <main>
-      {/* 🟢 Renderizado inmediato si la promesa ya está resuelta o en caché */}
-      {banners.length > 0 && <BannerSlider banners={banners} />}
+      <section
+        aria-label={heroBanner?.title ?? 'Destacado principal'}
+        style={{
+          maxWidth: '1600px',
+          margin: '0 auto',
+          padding: '0',
+        }}
+      >
+        <Link
+          to={heroTarget}
+          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+          aria-label={heroBanner?.title ? `Ver promoción ${heroBanner.title}` : 'Ver promociones'}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              aspectRatio: '16 / 6',
+              overflow: 'hidden',
+              background: '#f5f5f5',
+            }}
+          >
+            <img
+              src={heroImageUrl}
+              alt={heroBanner?.altText || heroBanner?.title || 'Promoción destacada'}
+              width="1186"
+              height="667"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+              sizes="(max-width: 768px) 100vw, 1600px"
+              style={{
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </div>
+        </Link>
+      </section>
+
       <Suspense fallback={(
         <section aria-label="Cargando secciones destacadas" style={{ minHeight: '980px' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '72px 24px 0' }}>
@@ -125,6 +171,22 @@ export function HomePage() {
           limit={4}
         />
         <AboutSection />
+      </Suspense>
+
+      <Suspense fallback={<div style={{ minHeight: '480px' }} />}>
+        {banners.length > 1 && (
+          <section
+            aria-label="Más promociones"
+            style={{
+              padding: 'var(--space-16) 0',
+              background: 'linear-gradient(180deg, rgba(var(--color-primary-light-rgb), 1) 0%, rgba(var(--color-primary-light-rgb), 0.12) 82%, rgba(255, 255, 255, 1) 100%)',
+            }}
+          >
+            <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
+              <BannerSlider banners={banners.slice(1)} />
+            </div>
+          </section>
+        )}
       </Suspense>
 
       {/* Secciones de Colecciones */}

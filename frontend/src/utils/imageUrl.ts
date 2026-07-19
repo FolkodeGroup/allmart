@@ -19,3 +19,16 @@ export function normalizeImageUrl(value: ImageUrlCandidate): string | undefined 
 
   return undefined;
 }
+
+export function toThumbnailImageUrl(value: ImageUrlCandidate): string | undefined {
+  const normalized = normalizeImageUrl(value);
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (/^\/api\/images\/(products|banners|categories)\/[^/?#]+$/.test(normalized)) {
+    return `${normalized}/thumb`;
+  }
+
+  return normalized;
+}

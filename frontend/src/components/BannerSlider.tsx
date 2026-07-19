@@ -104,6 +104,7 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
       >
         {banners.map((banner, index) => {
           const imageUrl = normalizeImageUrl(banner.imageUrl) ?? DEFAULT_IMAGE_PLACEHOLDER;
+          const thumbUrl = normalizeImageUrl(banner.thumbUrl) ?? imageUrl;
 
           return (
             <div
@@ -115,15 +116,16 @@ const BannerSlider: React.FC<Props> = ({ banners }) => {
             >
               <div className={styles.slideContent}>
                 <img
-                  src={imageUrl}
+                  src={thumbUrl}
                   alt={banner.altText || banner.title}
                   className={styles.bannerImage}
                   onError={handleImageError}
+                  srcSet={`${thumbUrl} 600w, ${imageUrl} 1186w`}
+                  sizes="(max-width: 768px) 100vw, 1200px"
                   fetchPriority={index === 0 ? "high" : "auto"}
                   loading={index === 0 ? "eager" : "lazy"}
                   width="1186"
                   height="667"
-                  sizes="(max-width: 768px) 100vw, 1200px"
                 />
               </div>
             </div>

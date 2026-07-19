@@ -14,6 +14,7 @@ import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
 import { isLowStock } from '../../../utils/inventory';
 import { AlertTriangle, Heart } from 'lucide-react';
 import { useFavorites } from '../../../components/layout/context/FavoritesContextUtils';
+import { toThumbnailImageUrl } from '../../../utils/imageUrl';
 
 interface ProductCardProps {
   // 🟢 SOLUCIÓN TS: Tipado alineado de forma segura usando la firma nativa del descuento del servicio
@@ -32,6 +33,7 @@ function renderStars(rating: number): string {
 
 export function ProductCard({ product, variant = 'default' }: ProductCardProps) {
   const galleryImages = product.images?.length ? product.images : [undefined];
+  const displayImages = galleryImages.map((image) => toThumbnailImageUrl(image) ?? image);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [dynamicDiscount, setDynamicDiscount] = useState<ProductDiscount | null>(null);
   const { isFavorite, toggleFavorite, syncFavorite } = useFavorites();
@@ -132,10 +134,10 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         <Link to={`/producto/${product.slug}`}>
           {hasGallery ? (
             <div className={styles.featuredImageStage}>
-              {galleryImages.map((img, idx) => (
+              {galleryImages.map((_, idx) => (
                 <ProductImage
                   key={`${product.id}-gallery-${idx}`}
-                  src={img}
+                  src={displayImages[idx]}
                   alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
                   className={
                     styles.image +
@@ -155,7 +157,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
             </div>
           ) : (
             <ProductImage
-              src={galleryImages[currentImageIndex]}
+              src={displayImages[currentImageIndex]}
               alt={product.name}
               className={styles.image}
               width={isFeatured ? 420 : 240}

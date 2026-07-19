@@ -9,7 +9,6 @@ import { publicCollectionsService } from '../../services/publicCollectionsServic
 import { fetchPublicProducts } from '../../services/productsService';
 import CollectionSlider from '../../components/CollectionSlider';
 import styles from './Offers.module.css';
-import '../../styles/collections.css';
 
 const Offers: React.FC = () => {
   const [promotions, setPromotions] = useState<PublicPromotion[]>([]);

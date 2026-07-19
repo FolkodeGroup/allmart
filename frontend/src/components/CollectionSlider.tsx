@@ -5,6 +5,7 @@
 
 import React, { useEffect, useId, useRef, useState, useCallback } from 'react';
 import styles from './CollectionSlider.module.css';
+import '../styles/collections.css';
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
 
 export interface CollectionProduct {
