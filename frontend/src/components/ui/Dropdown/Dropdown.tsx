@@ -31,19 +31,53 @@ export function Dropdown({
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
-  const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null);
-
+  const [menuPos, setMenuPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
   const selectedOption = options.find((opt) => opt.value === value);
 
   /**
      * Calcula la posición del menú en coordenadas de viewport, ya que ahora
      * se renderiza vía portal en document.body (position: fixed) para
      * escapar del overflow de contenedores ancestros (ej: .tableWrapper).
+     * Además decide si abrir hacia abajo o hacia arriba (flip) según el
+     * espacio disponible en cada dirección, y limita max-height al espacio
+     * real para que el overflow-y: auto interno del menú sea navegable
+     * (un position: fixed que se sale del viewport no es scrolleable).
+    
      */
   const updateMenuPosition = useCallback(() => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    setMenuPos({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+    const GAP = 6;
+    const MARGIN = 8; // separación mínima del borde de la ventana
+    const PREFERRED_MAX_HEIGHT = 260; // debe matchear .menu { max-height } en el CSS
+
+    const spaceBelow = window.innerHeight - rect.bottom - GAP - MARGIN;
+    const spaceAbove = rect.top - GAP - MARGIN;
+
+    // Preferir abajo; solo abrir arriba si abajo no entra pero arriba sí hay más lugar
+    const openUpwards = spaceBelow < PREFERRED_MAX_HEIGHT && spaceAbove > spaceBelow;
+
+    if (openUpwards) {
+      setMenuPos({
+        bottom: window.innerHeight - rect.top + GAP,
+        left: rect.left,
+        width: rect.width,
+        maxHeight: Math.min(PREFERRED_MAX_HEIGHT, spaceAbove),
+      });
+    } else {
+      setMenuPos({
+        top: rect.bottom + GAP,
+        left: rect.left,
+        width: rect.width,
+        maxHeight: Math.min(PREFERRED_MAX_HEIGHT, spaceBelow),
+      });
+    }
   }, []);
 
   // Cerrar al hacer clic fuera
@@ -167,8 +201,14 @@ export function Dropdown({
           role="listbox"
           tabIndex={-1}
           onKeyDown={handleKeyDown}
-          style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, width: menuPos.width }}
-        >
+          style={{
+            position: 'fixed',
+            top: menuPos.top,
+            bottom: menuPos.bottom,
+            left: menuPos.left,
+            width: menuPos.width,
+            maxHeight: menuPos.maxHeight,
+          }}        >
           {options.map((option, index) => {
             const isSelected = option.value === value;
             const isFocused = index === focusedIndex;

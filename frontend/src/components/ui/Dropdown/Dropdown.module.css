@@ -92,6 +92,7 @@ body[data-admin-theme='dark'] .chevron,
   border: 1.5px solid var(--control-border);
   border-radius: var(--radius-lg, 12px);
   box-shadow: var(--control-shadow);
+  /* fallback; se sobreescribe inline con el espacio real disponible */
   max-height: 260px;
   overflow-y: auto;
   animation: popIn 0.16s cubic-bezier(0.4, 0, 0.2, 1) both;
