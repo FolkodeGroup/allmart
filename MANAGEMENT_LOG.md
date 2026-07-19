@@ -2188,15 +2188,53 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1268: 1214 mejorar estilos y legibilidad de pdfs exportados desde reportes | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1286: VALIDACIÓN DE DATOS EN FORMULARIO DE ARREPENTIMIENTO | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1285: ESTILOS DARK MODE EN FORMULARIO DE CONTACTO | 2026-07-11 |
-| FedericoPaal | 3 | Creación de issue | Issue #1284: VALIDACIÓN DE STOCK EN CHECKOUT | 2026-07-11 |
+| FedericoPaal | 3 | Creación de issue | Issue #1284: Permitir compras de productos que tengan 0 stock | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1283: REPOSICIONAR BADGE DE DESCUENTO A ESQUINA SUPERIOR IZQUIERDA | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1282: Corregir cálculo del descuento BOGO en la vista de Promociones | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1281: Corregir dropdown de estado en la tabla de pedidos para que no corte las opciones | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1280: Mostrar variante comprada en el detalle de un pedido | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1279: Enmarcar el apartado de Proveedor en el formulario de producto | 2026-07-11 |
 | FedericoPaal | 3 | Creación de issue | Issue #1278: Unificar y agregar checkboxes de etiquetas en el formulario de producto | 2026-07-11 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1292: 1282 corregir cálculo del descuento bogo en la vista de promociones | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1295: Permitir compras de productos que tengan 0 stock | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1319: 1309 descontar stock de la variante comprada en el admin al comprar desde el home | 2026-07-18 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1288: 🔄 Actualización automática de puntajes semanal | 2026-07-12 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1298: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1297: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1291: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1298: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1297: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1295: Permitir compras de productos que tengan 0 stock | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1294: 1281 corregir dropdown de estado en la tabla de pedidos para que no corte las opciones | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1293: Resultado Final | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1292: 1282 corregir cálculo del descuento bogo en la vista de promociones | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1291: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1289: ajuste de estilos en el apartado de proveedor principal en el formulario de alta de producto | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1288: 🔄 Actualización automática de puntajes semanal | 2026-07-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1260: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1111: SKU de primera combinación debe heredarse del SKU de producto en el formulario de Alta/Edición | 2026-07-13 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1300: 🔄 Registrar puntaje de gestión | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1309: Descontar stock de la variante comprada en el Admin al comprar desde el Home | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1308: Corregir estilos del dropdown del filtro Ordenar en la vista de Productos | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1307: Permitir agregar el mismo producto con distintas variantes como líneas separadas en el Carrito | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1306: Formulario de Variantes: validar imágenes, arreglar inputs, añadir umbral de stock crítico y permitir eliminar imágenes por índice | 2026-07-14 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1305: Ajustar estilos en la pestaña "Variantes" para modo oscuro/claro | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1304: Aumentar contraste del título "Nueva Promoción" en modo oscuro | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1303: Inputs y controles del formulario "Nuevo producto" deben respetar modo Claro/Oscuro | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1302: Quitar icono de cruz duplicado en el buscador del Home al buscar productos | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1301: Aplicar BOGO automáticamente cuando cantidad en carrito pasa a par y actualizar card de producto | 2026-07-14 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1299: Detalle de producto (Home): no tachar precio BOGO y permitir selección correcta de variantes | 2026-07-14 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1316: 1306 formulario de variantes validar imágenes arreglar inputs añadir umbral de stock crítico y permitir eliminar imágenes por índice | 2026-07-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1315: 1305 ajustar estilos en la pestaña variantes para modo oscuroclaro | 2026-07-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1314: fix color de titulo de nueva promoción | 2026-07-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1313: estilos ajustados en formulario "Nuevo producto" | 2026-07-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1312: Quitar icono de cruz duplicado en el buscador del Home | 2026-07-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1311: 1301 aplicar bogo automáticamente cuando cantidad en carrito pasa a par y actualizar card de producto | 2026-07-17 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1310: 1299 detalle de producto home no tachar precio bogo y permitir selección correcta de variantes | 2026-07-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1321: 🔄 Registrar puntaje de gestión | 2026-07-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1319: 1309 descontar stock de la variante comprada en el admin al comprar desde el home | 2026-07-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1318: 1308 corregir estilos del dropdown del filtro ordenar en la vista de productos | 2026-07-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1317: 1307 permitir agregar el mismo producto con distintas variantes como líneas separadas en el carrito | 2026-07-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1300: 🔄 Registrar puntaje de gestión | 2026-07-18 |
+| FedericoPaal | 3 | Creación de issue | Issue #1322: Implementar métrica de Tiempo de Entrega Promedio en Vista de Análisis | 2026-07-18 |
+| FedericoPaal | 3 | Creación de issue | Issue #1320: Agregar campo de tiempo de entrega en ABM de Productos y Tabla Informativa | 2026-07-18 |
