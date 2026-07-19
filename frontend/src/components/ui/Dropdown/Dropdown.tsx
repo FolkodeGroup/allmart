@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import styles from './Dropdown.module.css';
+import { createPortal } from 'react-dom';
 
 export interface DropdownOption {
   value: string;
@@ -29,13 +30,30 @@ export function Dropdown({
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
+
+  /**
+     * Calcula la posición del menú en coordenadas de viewport, ya que ahora
+     * se renderiza vía portal en document.body (position: fixed) para
+     * escapar del overflow de contenedores ancestros (ej: .tableWrapper).
+     */
+  const updateMenuPosition = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    setMenuPos({ top: rect.bottom + 6, left: rect.left, width: rect.width });
+  }, []);
 
   // Cerrar al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     }
@@ -47,9 +65,25 @@ export function Dropdown({
     };
   }, [isOpen]);
 
+  // Reposicionar mientras el menú esté abierto (capture:true para detectar
+  // scroll de contenedores internos, que no burbujean el evento)
+  useEffect(() => {
+    if (!isOpen) return;
+    updateMenuPosition();
+    window.addEventListener('scroll', updateMenuPosition, true);
+    window.addEventListener('resize', updateMenuPosition);
+    return () => {
+      window.removeEventListener('scroll', updateMenuPosition, true);
+      window.removeEventListener('resize', updateMenuPosition);
+    };
+  }, [isOpen, updateMenuPosition]);
+
   const handleToggle = () => {
     if (!disabled) {
-      setIsOpen((prev) => !prev);
+      setIsOpen((prev) => {
+        if (!prev) updateMenuPosition();
+        return !prev;
+      });
       setFocusedIndex(-1);
     }
   };
@@ -126,12 +160,14 @@ export function Dropdown({
         />
       </button>
 
-      {isOpen && (
-        <ul 
-          className={styles.menu} 
-          role="listbox" 
+      {isOpen && menuPos && createPortal(
+        <ul
+          ref={menuRef}
+          className={styles.menu}
+          role="listbox"
           tabIndex={-1}
           onKeyDown={handleKeyDown}
+          style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, width: menuPos.width }}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -143,9 +179,8 @@ export function Dropdown({
                 role="option"
                 aria-selected={isSelected}
                 tabIndex={-1}
-                className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${
-                  isFocused ? styles.optionFocused : ''
-                }`}
+                className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${isFocused ? styles.optionFocused : ''
+                  }`}
                 onClick={() => handleSelect(option.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -158,7 +193,8 @@ export function Dropdown({
               </li>
             );
           })}
-        </ul>
+        </ul>,
+        document.body
       )}
 
       {/* Select de respaldo invisible para pruebas de Testing Library, autocompletado y soporte nativo de formularios */}
