@@ -50,7 +50,9 @@ describe('useAutocomplete', () => {
       result.current.setQuery('ap');
     });
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
 
     expect(result.current.filteredSuggestions).toHaveLength(0);
 
@@ -58,7 +60,9 @@ describe('useAutocomplete', () => {
       result.current.setQuery('app');
     });
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
 
     expect(result.current.filteredSuggestions.length).toBeGreaterThan(0);
   });
@@ -182,7 +186,9 @@ describe('useAutocomplete', () => {
       result.current.setQuery('test');
     });
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
 
     expect(mockSearch).toHaveBeenCalledWith('test');
     expect(result.current.filteredSuggestions).toContain('Custom Result 1');
@@ -203,7 +209,9 @@ describe('useAutocomplete', () => {
       result.current.setQuery('test');
     });
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
 
     expect(result.current.filteredSuggestions).toEqual([]);
   });
@@ -221,7 +229,9 @@ describe('useAutocomplete', () => {
       result.current.setQuery('Item');
     });
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
 
     expect(result.current.filteredSuggestions.length).toBeLessThanOrEqual(5);
   });
@@ -238,7 +248,9 @@ describe('useAutocomplete', () => {
       result.current.setQuery('  APPLE  ');
     });
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
 
     expect(result.current.filteredSuggestions).toContain('apple');
   });

@@ -15,6 +15,7 @@ describe('publicCollectionsService', () => {
     vi.clearAllMocks();
     // Limpiar el caché de módulo entre tests para que cada test trabaje con datos frescos
     publicCollectionsService.invalidateCache();
+    publicCollectionsService.invalidateActiveDiscountsCache();
   });
 
   describe('getHomeCollections', () => {
