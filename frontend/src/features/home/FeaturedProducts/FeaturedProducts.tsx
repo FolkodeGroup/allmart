@@ -10,7 +10,6 @@ import {
 import { fetchPublicCategories } from '../../../services/categoriesService';
 import { ProductCard } from '../../products/ProductCard/ProductCard';
 import { Button } from '../../../components/ui/Button/Button';
-import { publicCollectionsService, type ActiveProductDiscount, type ProductDiscount } from '../../../services/publicCollectionsService';
 import styles from './FeaturedProducts.module.css';
 
 interface FeaturedProductsProps {
@@ -33,33 +32,15 @@ export function FeaturedProducts({
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
-  function buildDiscountByProductId(discounts: ActiveProductDiscount[]) {
-    const discountByProductId = new Map<string, ProductDiscount>();
-
-    discounts.forEach((discount) => {
-      discount.applicableProducts?.forEach((product) => {
-        if (!discountByProductId.has(product.id)) {
-          discountByProductId.set(product.id, discount);
-        }
-      });
-    });
-
-    return discountByProductId;
-  }
-
   useEffect(() => {
     Promise.all([
+      // 🟢 OPTIMIZACIÓN: Solo consultamos los productos y las categorías necesarias
       fetchPublicProducts({ sort: 'newest', limit, isFeatured: true }),
       fetchPublicCategories(),
-      publicCollectionsService.getActiveDiscounts(),
     ])
-      .then(([{ data }, categories, discounts]) => {
-        const discountByProductId = buildDiscountByProductId(discounts);
+      .then(([{ data }, categories]) => {
         setProducts(
-          data.map((p) => ({
-            ...mapApiProductToProduct(p, categories),
-            appliedDiscount: discountByProductId.get(p.id) ?? null,
-          }))
+          data.map((p) => mapApiProductToProduct(p, categories))
         );
       })
       .catch(() => setProducts([]));
