@@ -2,7 +2,6 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <!-- favicon files generated via favicon.io or similar; replace with actual images -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -10,14 +9,22 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Allmart — Una forma práctica de disfrutar tu hogar. Productos de bazar, decoración y hogar." />
-    <meta name="theme-color" content="#769282" /> <!-- color used by task bars / UI when installing PWA -->
+    <meta name="theme-color" content="#769282" />
     
-    <!-- 🟢 FIX LCP: Preconectar a los CDNs de imágenes para ahorrar ~300ms de latencia -->
-    <link rel="preconnect" href="https://pub-9df94833d53d4e3eae698edbc8afa7f9.r2.dev" crossorigin />
+    <!-- 🟢 PRECONEXIÓN DIRECTA: CDN de Cloudflare R2 con resolución ultra-rápida -->
+    <link rel="preconnect" href="https://imagenes.allmartbazar.com.ar" crossorigin />
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- 🟢 FIX LCP CRÍTICO: Precarga estática directa del primer banner para que Lighthouse lo descubra de inmediato en el HTML puro -->
+    <link 
+      rel="preload" 
+      as="image" 
+      href="https://imagenes.allmartbazar.com.ar/banners/019f47c2-c87c-7422-8938-b27e03de41f6/full.webp" 
+      imagesizes="(max-width: 768px) 100vw, 1600px" 
+      fetchpriority="high" 
+    />
     
     <!-- 🟢 FIX RENDERING: Carga asíncrona no bloqueante de Google Fonts -->
     <link 
@@ -33,39 +40,9 @@
       />
     </noscript>
 
-    <!-- 🟢 FIX LCP: Iniciar fetch de banners de inmediato y precargar la imagen LCP dinámicamente -->
-    <script>
-      (function() {
-        try {
-          window.__bannersPromise = fetch('/api/banners')
-            .then(function(res) { return res.json(); })
-            .then(function(body) {
-              try {
-                if (body && body.success && body.data && body.data.length > 0) {
-                  var firstBanner = body.data[0];
-                  var url = firstBanner.imageUrl;
-                  if (url) {
-                    var link = document.createElement('link');
-                    link.rel = 'preload';
-                    link.as = 'image';
-                    link.href = url;
-                    link.imageSizes = '(max-width: 768px) 100vw, 1200px';
-                    link.setAttribute('fetchpriority', 'high');
-                    document.head.appendChild(link);
-                  }
-                }
-              } catch (e) {
-                console.error('Error preloading banner image:', e);
-              }
-              return body;
-            })
-            .catch(function() { return null; });
-        } catch(e) {}
-      })();
-    </script>
-
     <title>Allmart — Tu hogar, más práctico</title>
-    <!-- Dark mode FOUC prevention: apply stored theme before paint only on Admin routes -->
+    
+    <!-- Dark mode FOUC prevention -->
     <script>
       (function() {
         try {

@@ -1,10 +1,9 @@
 // frontend/src/utils/exportHelpers.ts
 import type { Order } from '../context/AdminOrdersContext';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+// 🟢 SOLUCIÓN TS: Importación exclusiva de tipos (se elimina al compilar, cero peso de red)
+import type * as ExcelJSTypes from 'exceljs';
+
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
-import ExcelJS from 'exceljs';
-import html2canvas from 'html2canvas';
 
 export function getExportFileName(base: string, periodLabel: string, ext: string) {
     const date = new Date();
@@ -38,7 +37,7 @@ export function exportOrdersCSV(orders: Order[], fileName: string): void {
     triggerDownload(blob, fileName);
 }
 
-// 🟢 MODIFICADO: Importación dinámica de XLSX para excluirlo del bundle inicial
+// 🟢 OPTIMIZACIÓN: Importación dinámica de XLSX para excluirlo del bundle inicial
 export async function exportOrdersXLSX(orders: Order[], fileName: string) {
     const XLSX = await import('xlsx');
     const wsData = [
@@ -53,7 +52,11 @@ export async function exportOrdersXLSX(orders: Order[], fileName: string) {
     triggerDownload(blob, fileName);
 }
 
+// 🟢 OPTIMIZACIÓN EXTREMA: Carga asíncrona bajo demanda de jsPDF y autoTable
 export async function exportOrdersPDF(orders: Order[], fileName: string) {
+    const { jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
+
     const doc = new jsPDF({ orientation: 'landscape' });
 
     doc.setFontSize(14);
@@ -107,9 +110,10 @@ function triggerDownload(blob: Blob, fileName: string) {
     URL.revokeObjectURL(url);
 }
 
-
+// 🟢 OPTIMIZACIÓN EXTREMA: Carga dinámica de html2canvas para reportes visuales
 async function captureElementAsBase64(el: HTMLElement | null): Promise<string | null> {
     if (!el) return null;
+    const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(el, { backgroundColor: '#ffffff', scale: 2, useCORS: true });
     return canvas.toDataURL('image/png');
 }
@@ -129,6 +133,7 @@ const STATUS_LABELS_EXPORT: Record<string, string> = {
     cancelado: 'Cancelado',
 };
 
+// 🟢 OPTIMIZACIÓN EXTREMA: Carga dinámica de ExcelJS para evitar fugar más de 400 KB de dependencias
 export async function exportReportsSummaryXLSX(params: {
     metrics: Array<{ key: string; label: string; value: string | number }>;
     barData: Array<{ dateKey: string; label: string; value: number }>;
@@ -149,6 +154,7 @@ export async function exportReportsSummaryXLSX(params: {
         captureElementAsBase64(donutChartEl),
     ]);
 
+    const { default: ExcelJS } = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'Allmart';
     workbook.created = new Date();
@@ -161,17 +167,16 @@ export async function exportReportsSummaryXLSX(params: {
         { width: 20 }, { width: 18 }, { width: 12 },
     ];
 
-    // ── Paleta (misma familia teal que usás en el PDF de pedidos) ──
-    const PRIMARY = 'FF769282';       // --color-primary
-    const PRIMARY_DARK = 'FF5D7568';  // --color-primary-dark
-    const PRIMARY_LIGHT = 'FF8FA99A'; // --color-primary-light
-    //const ACCENT = 'FFDDB08C';        // --color-accent
-    const ACCENT_DARK = 'FFC89A70';   // --color-accent-dark
-    const BAND = 'FFF9F7F4';          // --color-bg-tertiary
-    const WHITE = 'FFFFFFFF';         // --color-neutral-light
-    const GRAY = 'FF767676';          // --color-text-tertiary
+    const PRIMARY = 'FF769282';       
+    const PRIMARY_DARK = 'FF5D7568';  
+    const PRIMARY_LIGHT = 'FF8FA99A'; 
+    const ACCENT_DARK = 'FFC89A70';   
+    const BAND = 'FFF9F7F4';          
+    const WHITE = 'FFFFFFFF';         
+    const GRAY = 'FF767676';          
 
-    const solidFill = (argb: string): ExcelJS.Fill => ({
+    // 🟢 SOLUCIÓN TS: Usamos la firma del tipo importada desde ExcelJSTypes
+    const solidFill = (argb: string): ExcelJSTypes.Fill => ({
         type: 'pattern', pattern: 'solid', fgColor: { argb },
     });
 
@@ -179,7 +184,7 @@ export async function exportReportsSummaryXLSX(params: {
         sheet.mergeCells(rowNum, 1, rowNum, span);
         const cell = sheet.getCell(rowNum, 1);
         cell.font = { bold: true, size: 12, color: { argb: WHITE } };
-        cell.fill = solidFill(PRIMARY_DARK); // antes: TEAL_DARK
+        cell.fill = solidFill(PRIMARY_DARK); 
         cell.alignment = { vertical: 'middle' };
         sheet.getRow(rowNum).height = 20;
     }
@@ -188,7 +193,7 @@ export async function exportReportsSummaryXLSX(params: {
         const r = sheet.getRow(rowNum);
         r.font = { bold: true, color: { argb: WHITE } };
         for (let c = colStart; c <= colEnd; c++) {
-            r.getCell(c).fill = solidFill(PRIMARY_LIGHT); // antes: TEAL_LIGHT
+            r.getCell(c).fill = solidFill(PRIMARY_LIGHT); 
         }
     }
 
@@ -201,7 +206,6 @@ export async function exportReportsSummaryXLSX(params: {
 
     let row = 1;
 
-    // ── Header principal ──
     sheet.mergeCells(`A${row}:D${row}`);
     sheet.getCell(`A${row}`).value = 'REPORTE DE PEDIDOS';
     sheet.getCell(`A${row}`).font = { bold: true, size: 16, color: { argb: WHITE } };
@@ -217,7 +221,6 @@ export async function exportReportsSummaryXLSX(params: {
     sheet.getCell(`A${row}`).font = { italic: true, color: { argb: GRAY } };
     row += 2;
 
-    // ── KPIs ──
     styleSectionTitle(row, 2);
     sheet.getCell(`A${row}`).value = 'RESUMEN';
     row++;
@@ -232,14 +235,12 @@ export async function exportReportsSummaryXLSX(params: {
         const valueCell = sheet.getCell(`B${row}`);
         valueCell.value = m.value;
 
-        // 👉 alineación a la derecha
         valueCell.alignment = { horizontal: 'right' };
         bandRow(row, 1, 2, i % 2 === 1);
         row++;
     });
     row += 2;
 
-    // ── Ventas ──
     styleSectionTitle(row, 4);
     sheet.getCell(`A${row}`).value = 'VENTAS';
     row++;
@@ -267,12 +268,11 @@ export async function exportReportsSummaryXLSX(params: {
         const barCell = sheet.getCell(`D${row}`);
         barCell.value = makeTextBar(d.value, maxVentas);
         barCell.font = { name: 'Consolas', color: { argb: ACCENT_DARK } };
-        bandRow(row, 1, 3, i % 2 === 1); // la col. D (gráfico) queda sin banda para no tapar el color de las barras
+        bandRow(row, 1, 3, i % 2 === 1); 
         row++;
     });
     row += 2;
 
-    // ── Estados: tabla a la izquierda + gráfico a la derecha ──
     styleSectionTitle(row, 3);
     sheet.getCell(`A${row}`).value = 'PEDIDOS POR ESTADO';
     row++;
@@ -286,7 +286,7 @@ export async function exportReportsSummaryXLSX(params: {
     if (donutImg) {
         const imgId = workbook.addImage({ base64: donutImg, extension: 'png' });
         sheet.addImage(imgId, {
-            tl: { col: 3.2, row: estadosHeaderRow }, // columna F, una fila debajo del header
+            tl: { col: 3.2, row: estadosHeaderRow }, 
             ext: { width: 320, height: 260 },
         });
     }
@@ -306,7 +306,6 @@ export async function exportReportsSummaryXLSX(params: {
 
     row = Math.max(estadosHeaderRow + 15, row) + 2;
 
-    // ── Productos más vendidos ──
     styleSectionTitle(row, 3);
     sheet.getCell(`A${row}`).value = 'PRODUCTOS MÁS VENDIDOS';
     row++;
@@ -325,7 +324,6 @@ export async function exportReportsSummaryXLSX(params: {
     });
     row += 2;
 
-    // ── Últimos pedidos del período ──
     styleSectionTitle(row, 6);
     sheet.getCell(`A${row}`).value = 'ÚLTIMOS PEDIDOS DEL PERÍODO';
     row++;
