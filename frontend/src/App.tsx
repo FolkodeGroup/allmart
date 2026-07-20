@@ -1,3 +1,5 @@
+// frontend/src/App.tsx
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { RootLayout } from './components/layout/RootLayout/RootLayout';
