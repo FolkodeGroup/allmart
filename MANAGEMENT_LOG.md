@@ -2200,3 +2200,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1295: Permitir compras de productos que tengan 0 stock | 2026-07-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1319: 1309 descontar stock de la variante comprada en el admin al comprar desde el home | 2026-07-18 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1349: Responsive - Corregir responsive y usabilidad en la vista de Consultas | 2026-07-20 |
