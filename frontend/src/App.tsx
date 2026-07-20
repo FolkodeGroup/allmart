@@ -16,7 +16,6 @@ import { AdminAuthProvider } from './context/AdminAuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AdminLoadingFallback } from './components/ui/AdminLoadingFallback';
-import { AdminProvidersWrapper } from './components/AdminProvidersWrapper';
 import { RouteErrorBoundary } from './components/RouteErrorBoundary';
 import FullScreenLoader from './components/ui/FullScreenLoader';
 import { useAppReady } from './hooks/useAppReady';
@@ -35,6 +34,9 @@ const AdminLogin = lazy(() => import('./pages/AdminLogin/AdminLogin').then(m => 
 const AdminLayout = lazy(() => import('./pages/Admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
 const AdminDashboard = lazy(() => import('./pages/Admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const AdminUserSettings = lazy(() => import('./pages/Admin/AdminUserSettings').then(m => ({ default: m.AdminUserSettings })));
+
+// 🟢 OPTIMIZACIÓN EXTREMA: Lazy loading del wrapper de contextos administrativos para evitar fugar dependencias al bundle público de la Home
+const AdminProvidersWrapper = lazy(() => import('./components/AdminProvidersWrapper').then(m => ({ default: m.AdminProvidersWrapper })));
 
 // Lazy load admin feature components for better code splitting
 const AdminProducts = lazy(() => import('./features/admin/products/AdminProducts').then(m => ({ default: m.AdminProducts })));
@@ -135,11 +137,13 @@ const router = createBrowserRouter([
     path: '/admin',
     element: (
       <AdminRoute>
-        <AdminProvidersWrapper>
-          <Suspense fallback={<FullScreenLoader />}>
-            <AdminLayout />
-          </Suspense>
-        </AdminProvidersWrapper>
+        <Suspense fallback={<FullScreenLoader />}>
+          <AdminProvidersWrapper>
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminLayout />
+            </Suspense>
+          </AdminProvidersWrapper>
+        </Suspense>
       </AdminRoute>
     ),
     errorElement: <RouteErrorBoundary />,
