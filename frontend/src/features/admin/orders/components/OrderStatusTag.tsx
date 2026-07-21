@@ -12,7 +12,7 @@
 import React from 'react';
 import { Badge } from '../../../../components/ui/Badge/Badge';
 import { STATUS_LABELS } from '../utils/ordersHelpers';
-import type { OrderStatus } from '../ordersService';
+import type { OrderStatus } from '../../../../context/AdminOrdersContext';
 
 interface Props {
   /** Estado actual del pedido. Determina el estilo visual del tag. */
@@ -23,6 +23,7 @@ const STATUS_VARIANTS: Record<OrderStatus, 'discount' | 'new' | 'outOfStock'> = 
   pendiente: 'discount',
   confirmado: 'new',
   'en-preparacion': 'new',
+  preparado: 'new',
   enviado: 'new',
   entregado: 'new',
   cancelado: 'outOfStock',
