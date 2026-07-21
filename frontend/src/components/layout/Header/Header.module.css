@@ -102,6 +102,38 @@
   gap: var(--space-2);
 }
 
+.socialActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 0.35rem;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: #2f5f46;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+}
+
+.socialLink:hover {
+  background: rgba(143, 169, 154, 0.2);
+  border-color: rgba(47, 95, 70, 0.25);
+  color: #214834;
+  transform: translateY(-1px);
+}
+
+.socialIcon {
+  width: 18px;
+  height: 18px;
+}
+
 .iconBtn {
   position: relative;
   display: inline-flex;
