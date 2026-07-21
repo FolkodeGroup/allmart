@@ -7,10 +7,11 @@
     justify-content: center;
     padding: var(--space-4);
     z-index: 1150;
+    position: fixed;
 }
 
 .backdropOverlay {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: transparent;
     border: none;
@@ -19,6 +20,8 @@
 }
 
 .modal {
+    position: relative;
+    z-index: 1;
     background: var(--color-bg-primary);
     border-radius: 14px;
     width: 420px;

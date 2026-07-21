@@ -12,8 +12,8 @@ interface PriceUpdateModalProps {
 const REASON_OPTIONS = [
     { value: 'regular', label: 'Regular' },
     { value: 'market_adjustment', label: 'Ajuste de mercado' },
-    { value: 'promotion', label: 'Promocin' },
-    { value: 'negotiation', label: 'Negociacin' },
+    { value: 'promotion', label: 'Promoción' },
+    { value: 'negotiation', label: 'Negociación' },
     { value: 'adjustment', label: 'Ajuste' },
 ];
 const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
