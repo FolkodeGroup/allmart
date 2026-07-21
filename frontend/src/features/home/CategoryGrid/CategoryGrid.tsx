@@ -1,3 +1,5 @@
+// frontend/src/features/home/CategoryGrid/CategoryGrid.tsx
+
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import type { Category } from '../../../types';
@@ -5,6 +7,8 @@ import * as categoriesService from '../../../services/categoriesService';
 import { getCachedPublicCategories } from '../../../services/categoriesService';
 import { Button } from '../../../components/ui/Button/Button';
 import styles from './CategoryGrid.module.css';
+// 🟢 OPTIMIZACIÓN IMÁGENES: Importamos la función de redimensión del CDN de Cloudflare
+import { getOptimizedImageUrl } from '../../../utils/imageUrl';
 
 function splitCategoryName(name: string): { prefix: string; bold: string } {
   const lowerName = name.toLowerCase();
@@ -59,7 +63,6 @@ export function CategoryGrid() {
         </p>
       </div>
 
-      {/* 🟢 SOLUCIÓN CLS: En vez de un texto simple de cargando, renderizamos 6 cajas vacías de tamaño idéntico para reservar el espacio */}
       {isLoading ? (
         <div className={styles.grid}>
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -72,6 +75,10 @@ export function CategoryGrid() {
         <div className={styles.grid}>
           {featured.map((cat) => {
             const { prefix, bold } = splitCategoryName(cat.name);
+            
+            // 🟢 OPTIMIZACIÓN IMÁGENES: Redimensionamos la imagen de categoría a 400px de ancho
+            const optimizedUrl = getOptimizedImageUrl(cat.image, 400);
+
             return (
               <Link
                 key={cat.id}
@@ -82,7 +89,7 @@ export function CategoryGrid() {
                 {cat.image ? (
                   <img
                     className={styles.cardImage}
-                    src={cat.image}
+                    src={optimizedUrl}
                     alt={cat.name}
                     loading="lazy"
                     decoding="async"
