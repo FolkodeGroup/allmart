@@ -148,7 +148,7 @@
 /* ── Tarjetas de resumen ── */
 .summary {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-3);
 }
 
@@ -238,6 +238,10 @@
   background: var(--color-primary, #10b981);
 }
 
+.cardPreparado::before {
+  background: #0ea5e9;
+}
+
 .cardEntregado::before {
   background: #22c55e;
 }
@@ -252,6 +256,10 @@
 
 .numPreparacion {
   color: #7c3aed;
+}
+
+.numPreparado {
+  color: #0284c7;
 }
 
 .numEnviado {
@@ -869,6 +877,11 @@
 .statusPreparacion {
   background: #ede9fe;
   color: #5b21b6;
+}
+
+.statusPreparado {
+  background: #dbeafe;
+  color: #1e3a8a;
 }
 
 .statusEnviado {

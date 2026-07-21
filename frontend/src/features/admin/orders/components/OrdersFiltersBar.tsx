@@ -2,22 +2,11 @@
 import { useMemo } from 'react';
 import type { OrdersFiltersState } from '../hooks/useOrdersFilters';
 import type { OrderStatus } from '../../../../context/AdminOrdersContext';
+import { STATUS_OPTIONS, STATUS_LABELS } from '../utils/ordersHelpers';
 import styles from '../AdminOrders.module.css';
 import { Search } from 'lucide-react';
 import { DatePicker } from '../../../../components/ui/DatePicker/DatePicker';
 import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
-
-const STATUS_OPTIONS: OrderStatus[] = [
-    'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
-];
-const STATUS_LABELS = {
-    pendiente: 'Pendiente',
-    confirmado: 'Confirmado',
-    'en-preparacion': 'En preparación',
-    enviado: 'Enviado',
-    entregado: 'Entregado',
-    cancelado: 'Cancelado',
-} as Record<OrderStatus, string>;
 
 interface Props {
     filters: OrdersFiltersState;

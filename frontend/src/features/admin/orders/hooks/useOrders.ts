@@ -86,7 +86,7 @@ export function useOrders(token: string | undefined, filters: {
 
   // Summary
   const summary = useMemo(() => {
-    return ['pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado'].reduce((acc, s) => {
+    return ['pendiente', 'confirmado', 'en-preparacion', 'preparado', 'enviado', 'entregado', 'cancelado'].reduce((acc, s) => {
       acc[s as OrderStatus] = orders.filter(o => o.status === s).length;
       return acc;
     }, {} as Record<OrderStatus, number>);

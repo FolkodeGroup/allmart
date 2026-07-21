@@ -5,6 +5,7 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
 	pendiente: 'Pendiente',
 	confirmado: 'Confirmado',
 	'en-preparacion': 'En preparación',
+	preparado: 'Preparado',
 	enviado: 'Enviado',
 	entregado: 'Entregado',
 	cancelado: 'Cancelado',
@@ -20,7 +21,7 @@ export function paymentClass(status: PaymentStatus, styles: Record<string, strin
 }
 
 export const STATUS_OPTIONS: OrderStatus[] = [
-	'pendiente', 'confirmado', 'en-preparacion', 'enviado', 'entregado', 'cancelado',
+	'pendiente', 'confirmado', 'en-preparacion', 'preparado', 'enviado', 'entregado', 'cancelado',
 ];
 
 export function statusClass(status: OrderStatus, styles: Record<string, string>): string {
@@ -28,6 +29,7 @@ export function statusClass(status: OrderStatus, styles: Record<string, string>)
 		pendiente: styles.statusPendiente,
 		confirmado: styles.statusConfirmado,
 		'en-preparacion': styles.statusPreparacion,
+		preparado: styles.statusPreparado,
 		enviado: styles.statusEnviado,
 		entregado: styles.statusEntregado,
 		cancelado: styles.statusCancelado,
@@ -58,6 +60,7 @@ export const STATUS_ICONS: Record<OrderStatus, string> = {
 	pendiente: '⏳',
 	confirmado: '✔️',
 	'en-preparacion': '🔧',
+	preparado: '📦',
 	enviado: '🚚',
 	entregado: '✅',
 	cancelado: '❌',
