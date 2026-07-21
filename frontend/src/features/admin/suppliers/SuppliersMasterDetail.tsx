@@ -456,8 +456,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                             <defs>
                                                                 {chartProducts.map((name, i) => (
                                                                     <linearGradient key={name} id={`color${name.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                                                                        <stop offset="5%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.8}/>
-                                                                        <stop offset="95%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.05}/>
+                                                                        <stop offset="5%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.8} />
+                                                                        <stop offset="95%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.05} />
                                                                     </linearGradient>
                                                                 ))}
                                                             </defs>
@@ -476,7 +476,27 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                             />
                                                             <Tooltip
                                                                 formatter={(v: number) => fmt.format(v)}
-                                                                cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
+                                                                cursor={{ fill: 'rgba(118, 146, 130, 0.12)' }}
+                                                                wrapperStyle={{
+                                                                    border: '1px solid var(--color-border)',
+                                                                    borderRadius: 12,
+                                                                    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.12)',
+                                                                }}
+                                                                contentStyle={{
+                                                                    backgroundColor: 'var(--color-bg-card)',
+                                                                    border: 'none',
+                                                                    borderRadius: 12,
+                                                                    color: 'var(--color-text-primary)',
+                                                                    padding: '10px 12px',
+                                                                }}
+                                                                labelStyle={{
+                                                                    color: 'var(--color-text-secondary)',
+                                                                    fontSize: '0.82rem',
+                                                                }}
+                                                                itemStyle={{
+                                                                    color: 'var(--color-text-primary)',
+                                                                    fontSize: '0.82rem',
+                                                                }}
                                                             />
                                                             <Legend wrapperStyle={{ fontSize: 12, paddingTop: '16px' }} />
                                                             {chartProducts.map((name, i) => (
