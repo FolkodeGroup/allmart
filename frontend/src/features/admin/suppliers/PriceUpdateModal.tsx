@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, DollarSign } from 'lucide-react';
 import styles from './PriceUpdateModal.module.css';
 interface PriceUpdateModalProps {
@@ -22,6 +23,12 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
     const costNum = cost ? parseFloat(cost) : 0;
+
+    useEffect(() => {
+        setCost(currentCost != null ? String(currentCost) : '');
+        setReason('market_adjustment');
+        setErrors({});
+    }, [currentCost, currentPrice, productName]);
     const priceNum = currentPrice;
     const margin = priceNum > 0 && costNum > 0
         ? ((priceNum - costNum) / costNum) * 100
@@ -47,10 +54,17 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
             setSaving(false);
         }
     }
-    return (
-        <div className={styles.overlay} onClick={onClose} role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-            <div className={styles.modal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="price-update-modal-title">
+
+    const modalContent = (
+        <div className={styles.backdrop} role="presentation">
+            <button
+                type="button"
+                className={styles.backdropOverlay}
+                onClick={onClose}
+                aria-label="Cerrar modal"
+                tabIndex={-1}
+            />
+            <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="price-update-modal-title">
                 <div className={styles.header}>
                     <div id="price-update-modal-title" className={styles.headerTitle}><DollarSign size={16} /> Actualizar Costo</div>
                     <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
@@ -90,7 +104,7 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                         </div>
                     )}
                     <div className={styles.field}>
-                        <label htmlFor="price-update-reason-select">Razn del cambio</label>
+                        <label htmlFor="price-update-reason-select">Razón del cambio</label>
                         <select id="price-update-reason-select" value={reason} onChange={e => setReason(e.target.value)}>
                             {REASON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
@@ -110,4 +124,10 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
             </div>
         </div>
     );
+
+    if (typeof document === 'undefined') {
+        return modalContent;
+    }
+
+    return createPortal(modalContent, document.body);
 }
