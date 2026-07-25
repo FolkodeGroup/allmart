@@ -224,8 +224,9 @@ function AdminOrders() {
       {/* Resumen / Métricas rápidas */}
       <section className={styles.summary} aria-label="Resumen de pedidos">
         {isLoading ? (
-          // Mostrar 6 skeletons mientras carga (uno por cada tarjeta de estado)
+          // Mostrar 7 skeletons mientras carga (uno por cada tarjeta de estado + total)
           <>
+            <SummarySkeleton />
             <SummarySkeleton />
             <SummarySkeleton />
             <SummarySkeleton />
@@ -246,6 +247,10 @@ function AdminOrders() {
             <div className={`${styles.summaryCard} ${styles.cardPreparacion}`}>
               <span className={`${styles.summaryNum} ${styles.numPreparacion}`}>{summary['en-preparacion']}</span>
               <span className={styles.summaryLabel}>En preparación</span>
+            </div>
+            <div className={`${styles.summaryCard} ${styles.cardPreparado}`}>
+              <span className={`${styles.summaryNum} ${styles.numPreparado}`}>{summary.preparado}</span>
+              <span className={styles.summaryLabel}>Preparados</span>
             </div>
             <div className={`${styles.summaryCard} ${styles.cardEnviado}`}>
               <span className={`${styles.summaryNum} ${styles.numEnviado}`}>{summary.enviado}</span>

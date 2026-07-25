@@ -1,14 +1,5 @@
 import { apiFetch } from '../../../utils/apiClient';
-
-export type OrderStatus =
-  | 'pendiente'
-  | 'confirmado'
-  | 'en-preparacion'
-  | 'enviado'
-  | 'entregado'
-  | 'cancelado';
-
-export type PaymentStatus = 'no-abonado' | 'abonado';
+import type { OrderStatus, PaymentStatus } from '../../../context/AdminOrdersContext';
 
 export interface Order {
   id: string;
@@ -103,6 +94,7 @@ export interface BulkUpdateOrdersResult {
 function normalizeOrderStatus(status: string): OrderStatus {
   const normalized = status.replace('_', '-');
   if (normalized === 'en-preparacion') return 'en-preparacion';
+  if (normalized === 'preparado') return 'preparado';
   if (normalized === 'pendiente') return 'pendiente';
   if (normalized === 'confirmado') return 'confirmado';
   if (normalized === 'enviado') return 'enviado';
