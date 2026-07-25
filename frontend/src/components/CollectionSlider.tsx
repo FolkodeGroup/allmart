@@ -1,3 +1,5 @@
+// frontend/src/components/CollectionSlider.tsx
+
 /**
  * components/CollectionSlider.tsx
  * Carrusel de productos estilo MercadoLibre — identidad visual Allmart.
@@ -6,7 +8,8 @@
 import React, { useEffect, useId, useRef, useState, useCallback } from 'react';
 import styles from './CollectionSlider.module.css';
 import '../styles/collections.css';
-import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
+// 🟢 OPTIMIZACIÓN IMÁGENES: Importamos la función de redimensión del CDN de Cloudflare
+import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, getOptimizedImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
 
 export interface CollectionProduct {
   id: string;
@@ -26,7 +29,6 @@ interface Props {
   onProductClick?: (productSlug: string) => void;
 }
 
-// ─── Constantes ────────────────────────────────────────────────────────────────
 const TRANSITION_MS = 480;
 
 function getLayout(vw: number): { visible: number; gap: number } {
@@ -43,10 +45,6 @@ function formatPrice(price: number | string): string {
   return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
-/**
- * Resuelve la mejor imagen posible para un producto de colección.
- * Si el snapshot de la colección está roto o vacío, apunta a la miniatura en vivo del producto.
- */
 function getCollectionProductImage(product: { id: string; imageUrl?: ImageUrlCandidate }) {
   const url = normalizeImageUrl(product.imageUrl);
   if (url && !url.includes('placeholder.png')) {
@@ -55,7 +53,6 @@ function getCollectionProductImage(product: { id: string; imageUrl?: ImageUrlCan
   return `/api/images/products/${product.id}/thumb`;
 }
 
-// ─── Componente ────────────────────────────────────────────────────────────────
 const CollectionSlider: React.FC<Props> = ({
   title,
   slug,
@@ -73,7 +70,6 @@ const CollectionSlider: React.FC<Props> = ({
   const [transitioning, setTransitioning] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Clones para loop infinito
   const count = products.length;
   const canLoop = count > layout.visible;
   const clones = canLoop ? Math.min(layout.visible, count) : 0;
@@ -102,7 +98,6 @@ const CollectionSlider: React.FC<Props> = ({
     ? [...leadingClones, ...baseSlides, ...trailingClones]
     : baseSlides;
 
-  // ─── Métricas responsive ────────────────────────────────────────────────────
   const syncMetrics = useCallback(() => {
     const vw = window.innerWidth;
     const newLayout = getLayout(vw);
@@ -122,7 +117,6 @@ const CollectionSlider: React.FC<Props> = ({
     return () => window.removeEventListener('resize', syncMetrics);
   }, [syncMetrics, count]);
 
-  // Posición inicial (tras los leading clones)
   useEffect(() => {
     setTransitioning(false);
     setIndex(canLoop ? clones : 0);
@@ -135,7 +129,6 @@ const CollectionSlider: React.FC<Props> = ({
     };
   }, [clones, canLoop, count]);
 
-  // ─── Navegación ─────────────────────────────────────────────────────────────
   const goTo = useCallback((dir: 1 | -1) => {
     if (!canLoop) return;
     setIndex((prev) => prev + dir);
@@ -174,7 +167,6 @@ const CollectionSlider: React.FC<Props> = ({
         </div>
       )}
 
-      {/* ── Cabecera: título + "Ver todos" ── */}
       <div className={styles.header}>
         <h2 id={titleId} className={styles.title}>{title}</h2>
         <a
@@ -189,14 +181,12 @@ const CollectionSlider: React.FC<Props> = ({
         </a>
       </div>
 
-      {/* ── Carrusel: flechas + viewport ── */}
       <div
         className={styles.carouselWrapper}
         role="region"
         aria-roledescription="carrusel"
         aria-labelledby={titleId}
       >
-        {/* Flecha izquierda — oculta en mobile */}
         {canLoop && !isMobile && (
           <button
             type="button"
@@ -210,13 +200,11 @@ const CollectionSlider: React.FC<Props> = ({
           </button>
         )}
 
-        {/* Viewport — móvil: scroll nativo; desktop: transform */}
         <div
           ref={viewportRef}
           className={`${styles.viewport} ${isMobile ? styles.mobileScroll : ''}`}
         >
           {isMobile ? (
-            /* ── Mobile: scroll horizontal nativo con snap ── */
             <div className={styles.mobileTrack} style={{ gap: `${layout.gap}px` }}>
               {products.map((product, i) => (
                 <ProductCard
@@ -231,7 +219,6 @@ const CollectionSlider: React.FC<Props> = ({
               ))}
             </div>
           ) : (
-            /* ── Desktop: transform carrusel con clones ── */
             <div
               className={styles.track}
               style={{
@@ -261,7 +248,6 @@ const CollectionSlider: React.FC<Props> = ({
           )}
         </div>
 
-        {/* Flecha derecha — oculta en mobile */}
         {canLoop && !isMobile && (
           <button
             type="button"
@@ -279,7 +265,6 @@ const CollectionSlider: React.FC<Props> = ({
   );
 };
 
-// ─── ProductCard ───────────────────────────────────────────────────────────────
 interface CardProps {
   product: CollectionProduct;
   index: number;
@@ -300,6 +285,10 @@ const ProductCard: React.FC<CardProps> = ({
   onImageError,
 }) => {
   const imageUrl = getCollectionProductImage(product);
+  
+  // 🟢 OPTIMIZACIÓN IMÁGENES: Redimensionamos la miniatura a 320px de ancho
+  const optimizedUrl = getOptimizedImageUrl(imageUrl, 320);
+
   return (
     <article
       className={styles.slide}
@@ -316,10 +305,9 @@ const ProductCard: React.FC<CardProps> = ({
         tabIndex={isHidden ? -1 : 0}
         aria-label={`Ver ${product.name}`}
       >
-        {/* Imagen */}
         <div className={styles.imgWrapper}>
           <img
-            src={imageUrl}
+            src={optimizedUrl}
             alt={product.name}
             className={styles.img}
             loading="lazy"
@@ -327,7 +315,6 @@ const ProductCard: React.FC<CardProps> = ({
           />
         </div>
 
-        {/* Info */}
         <div className={styles.info}>
           <p className={styles.name}>{product.name}</p>
           <p className={styles.price}>

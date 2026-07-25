@@ -65,9 +65,22 @@ export async function getOutOfStockAlerts(
       },
       select: { id: true, name: true, sku: true, stock: true },
     }),
+    // traer también los valores de opción para construir el nombre de variante
     prisma.productSku.findMany({
       where: { stock: { lte: 0 }, isActive: true },
-      select: { id: true, productId: true, sku: true, stock: true },
+      select: {
+        id: true,
+        productId: true,
+        sku: true,
+        stock: true,
+        skuValues: {
+          select: {
+            optionValue: {
+              select: { name: true }
+            }
+          }
+        }
+      },
     }),
   ]);
 
@@ -141,10 +154,17 @@ export async function getOutOfStockAlerts(
     const key = `${sku.productId}::${sku.id}`; // sku-level alert key
     // Try to reuse product name if available
     const parent = productsWithoutStock.find(p => p.id === sku.productId);
-    const name = parent ? parent.name : 'Producto';
+    const baseName = parent ? parent.name : 'Producto';
+    // construir nombre de variante a partir de los valores de opción si existen
+    const variantParts = Array.isArray(sku.skuValues)
+      ? sku.skuValues.map(v => v.optionValue?.name).filter(Boolean as any)
+      : [];
+    const variantLabel = variantParts.length > 0 ? variantParts.join(' / ') : '';
+    const displayName = variantLabel ? `${baseName} - ${variantLabel}` : baseName;
+
     alertsByKey.set(key, {
       productId: sku.productId,
-      productName: name,
+      productName: displayName,
       productSku: sku.sku,
       stock: sku.stock,
       totalPendingOrders: 0,
@@ -181,10 +201,25 @@ export async function getOutOfStockAlerts(
         // Agregar item a la orden
         const orderInAlert = alert.orders.find(o => o.id === order.id);
         if (orderInAlert && !orderInAlert.items.find(i => i.id === item.id)) {
+          // Si el item refiere a un SKU, tratar de componer "Producto - Variante"
+          let itemDisplayName = item.productName;
+          if (item.productSkuId) {
+            const skuRecord = skusWithoutStock.find(s => s.id === item.productSkuId);
+            if (skuRecord) {
+              const parentRecord = productsWithoutStock.find(p => p.id === skuRecord.productId);
+              const base = parentRecord ? parentRecord.name : item.productName || 'Producto';
+              const parts = Array.isArray(skuRecord.skuValues)
+                ? skuRecord.skuValues.map(v => v.optionValue?.name).filter(Boolean as any)
+                : [];
+              const vlabel = parts.length > 0 ? parts.join(' / ') : '';
+              itemDisplayName = vlabel ? `${base} - ${vlabel}` : base;
+            }
+          }
+
           orderInAlert.items.push({
             id: item.id,
             productId: item.productId!,
-            productName: item.productName,
+            productName: itemDisplayName,
             quantity: item.quantity,
             unitPrice: item.unitPrice.toString(),
           });

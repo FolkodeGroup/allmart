@@ -63,21 +63,27 @@ export function ProductListPage() {
   const urlCategory = searchParams.get('category') ?? '';
   const urlSubCategory = searchParams.get('sub') ?? '';
   const urlTag = searchParams.get('tag') ?? '';
+  const urlTags = searchParams.get('tags') ?? '';
   const urlPriceRanges = searchParams.get('priceRanges') ?? '';
   const urlColeccion = searchParams.get('coleccion') ?? '';
-  
+
   // 🟢 FIX: Capturamos el parámetro 'q' de la URL
   const urlQuery = searchParams.get('q') ?? '';
 
-  const tag = urlTag.trim().toLowerCase();
-  const hasFeaturedTag = tag === 'destacado';
-  const hasOfertaTag = tag === 'oferta';
-  const hasNovedadTag = tag === 'novedad';
+  const selectedTags = useMemo(() => {
+    return Array.from(new Set([
+      ...urlTags.split(','),
+      urlTag,
+    ]
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean)));
+  }, [urlTag, urlTags]);
+
+  const showOnlyFeatured = selectedTags.includes('destacado');
+  const showOnlyOnSale = selectedTags.includes('oferta');
+  const showOnlyNovedad = selectedTags.includes('novedad');
   const [sortBy, setSortBy] = useState('relevance');
   const [selectedCategory, setSelectedCategory] = useState<string>(urlSubCategory || urlCategory);
-  const [showOnlyFeatured, setShowOnlyFeatured] = useState(hasFeaturedTag);
-  const [showOnlyOnSale, setShowOnlyOnSale] = useState(hasOfertaTag);
-  const [showOnlyNovedad, setShowOnlyNovedad] = useState(hasNovedadTag);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -103,18 +109,6 @@ export function ProductListPage() {
     const next = urlSubCategory || urlCategory;
     setSelectedCategory((prev) => (prev === next ? prev : next));
   }, [urlCategory, urlSubCategory]);
-
-  useEffect(() => {
-    setShowOnlyFeatured((prev) => (prev === hasFeaturedTag ? prev : hasFeaturedTag));
-  }, [hasFeaturedTag]);
-
-  useEffect(() => {
-    setShowOnlyOnSale((prev) => (prev === hasOfertaTag ? prev : hasOfertaTag));
-  }, [hasOfertaTag]);
-
-  useEffect(() => {
-    setShowOnlyNovedad((prev) => (prev === hasNovedadTag ? prev : hasNovedadTag));
-  }, [hasNovedadTag]);
 
   useEffect(() => {
     const nextRanges = urlPriceRanges
@@ -222,18 +216,17 @@ export function ProductListPage() {
   useEffect(() => {
     const params: PublicProductsParams = { limit: 9, page };
     if (selectedCategory) params.category = selectedCategory;
-    if (urlTag) params.tag = urlTag;
+    if (selectedTags.includes('destacado')) params.isFeatured = true;
+    if (selectedTags.includes('oferta')) params.isOnSale = true;
+    if (selectedTags.includes('novedad')) params.isNovedad = true;
     if (urlSlugs) params.slugs = urlSlugs;
-    
+
     // 🟢 FIX: Inyectamos el parámetro 'q' a la consulta de la API
     if (urlQuery) params.q = urlQuery;
 
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
-    if (showOnlyFeatured) params.isFeatured = true;
-    if (showOnlyOnSale) params.isOnSale = true;
-    if (showOnlyNovedad) params.isNovedad = true;
     if (priceRangesStr) params.priceRanges = priceRangesStr;
-    
+
     setError(null);
     if (page === 1) setLoading(true);
     else setIsLoadingMore(true);
@@ -254,26 +247,31 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de actualización
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, urlSlugs, page, priceRangesStr, categories, urlQuery]);
+    // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de actualización
+  }, [sortBy, selectedCategory, selectedTags, urlSlugs, page, priceRangesStr, categories, urlQuery]);
 
   /* Resetear paginación cuando cambian filtros relevantes o el query */
   useEffect(() => {
     setPage(1);
-  // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de reseteo de página
-  }, [sortBy, selectedCategory, showOnlyOnSale, urlTag, tag, showOnlyFeatured, showOnlyNovedad, priceRangesStr, urlQuery]);
+    // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de reseteo de página
+  }, [sortBy, selectedCategory, selectedTags, priceRangesStr, urlQuery]);
 
   const handleLoadMore = () => {
     if (isLoadingMore) return;
     setPage((p) => p + 1);
   };
 
-  const updateTagParam = (nextTag: string | null) => {
+  const toggleTag = (tag: string) => {
+    const nextTags = selectedTags.includes(tag)
+      ? selectedTags.filter((item) => item !== tag)
+      : [...selectedTags, tag];
+
     const updated = new URLSearchParams(searchParams);
-    if (nextTag) {
-      updated.set('tag', nextTag);
+    updated.delete('tag');
+    if (nextTags.length > 0) {
+      updated.set('tags', nextTags.join(','));
     } else {
-      updated.delete('tag');
+      updated.delete('tags');
     }
     setSearchParams(updated, { replace: true });
   };
@@ -437,7 +435,7 @@ export function ProductListPage() {
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
-        
+
         {/* 🟢 FIX: Si hay una búsqueda activa, lo reflejamos de forma elegante en el breadcrumb */}
         <span className={styles.breadcrumbCurrent}>
           {urlQuery ? `Búsqueda: "${urlQuery}"` : 'Productos'}
@@ -529,11 +527,7 @@ export function ProductListPage() {
                 type="checkbox"
                 className={styles.filterCheckbox}
                 checked={showOnlyOnSale}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setShowOnlyOnSale(checked);
-                  updateTagParam(checked ? 'oferta' : null);
-                }}
+                onChange={() => toggleTag('oferta')}
               />
               <span className={styles.filterLabel}>En oferta</span>
             </label>
@@ -542,11 +536,7 @@ export function ProductListPage() {
                 type="checkbox"
                 className={styles.filterCheckbox}
                 checked={showOnlyNovedad}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setShowOnlyNovedad(checked);
-                  updateTagParam(checked ? 'novedad' : null);
-                }}
+                onChange={() => toggleTag('novedad')}
               />
               <span className={styles.filterLabel}>Novedades</span>
             </label>
@@ -555,11 +545,7 @@ export function ProductListPage() {
                 type="checkbox"
                 className={styles.filterCheckbox}
                 checked={showOnlyFeatured}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setShowOnlyFeatured(checked);
-                  updateTagParam(checked ? 'destacado' : null);
-                }}
+                onChange={() => toggleTag('destacado')}
               />
               <span className={styles.filterLabel}>Destacados</span>
             </label>
@@ -626,30 +612,30 @@ export function ProductListPage() {
             groupedProducts ? (
               <div className={styles.groupedProducts}>
                 {groupedProducts.groups.map((group) => (
-                    <section key={group.category.id} className={styles.groupSection}>
-                      {collectionByCategoryId.has(group.category.id) && (
-                        (() => {
-                          const col = collectionByCategoryId.get(group.category.id)!;
-                          return (
-                            <div className={styles.groupCollectionBanner}>
-                              {col.imageUrl && (
-                                <div className={styles.groupCollectionImg}>
-                                  <img src={col.imageUrl} alt={col.name} />
-                                </div>
-                              )}
-                              <div className={styles.groupCollectionInfo}>
-                                <div className={styles.groupCollectionTitle}>{col.name}</div>
-                                {col.description && <div className={styles.groupCollectionDesc}>{col.description}</div>}
+                  <section key={group.category.id} className={styles.groupSection}>
+                    {collectionByCategoryId.has(group.category.id) && (
+                      (() => {
+                        const col = collectionByCategoryId.get(group.category.id)!;
+                        return (
+                          <div className={styles.groupCollectionBanner}>
+                            {col.imageUrl && (
+                              <div className={styles.groupCollectionImg}>
+                                <img src={col.imageUrl} alt={col.name} />
                               </div>
-                              <a href={`/productos?coleccion=${encodeURIComponent(col.slug)}`} className={styles.groupCollectionViewAll}>Ver todos</a>
+                            )}
+                            <div className={styles.groupCollectionInfo}>
+                              <div className={styles.groupCollectionTitle}>{col.name}</div>
+                              {col.description && <div className={styles.groupCollectionDesc}>{col.description}</div>}
                             </div>
-                          );
-                        })()
-                      )}
-                      <div className={styles.groupHeader}>
-                        <h3 className={styles.groupTitle}>{group.category.name}</h3>
-                        <span className={styles.groupCount}>{group.products.length}</span>
-                      </div>
+                            <a href={`/productos?coleccion=${encodeURIComponent(col.slug)}`} className={styles.groupCollectionViewAll}>Ver todos</a>
+                          </div>
+                        );
+                      })()
+                    )}
+                    <div className={styles.groupHeader}>
+                      <h3 className={styles.groupTitle}>{group.category.name}</h3>
+                      <span className={styles.groupCount}>{group.products.length}</span>
+                    </div>
                     <div className={styles.productsGrid}>
                       {group.products.map((product) => (
                         <ProductCard key={product.id} product={product} />

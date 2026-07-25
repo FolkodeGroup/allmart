@@ -1,3 +1,5 @@
+// frontend/src/utils/imageUrl.ts
+
 export type ImageUrlCandidate = string | { url?: unknown } | null | undefined;
 
 export const DEFAULT_IMAGE_PLACEHOLDER =
@@ -31,4 +33,27 @@ export function toThumbnailImageUrl(value: ImageUrlCandidate): string | undefine
   }
 
   return normalized;
+}
+
+/**
+ * 🟢 OPTIMIZACIÓN EXTREMA: Genera una URL optimizada dinámicamente mediante redimensión automática de Cloudflare.
+ * Esto reduce el tamaño de descarga de imágenes en móviles convirtiéndolas dinámicamente a WebP o AVIF.
+ */
+export function getOptimizedImageUrl(
+  originalUrl: string | undefined | null,
+  width: number = 400,
+  quality: number = 80
+): string {
+  if (!originalUrl) {
+    return DEFAULT_IMAGE_PLACEHOLDER;
+  }
+
+  const r2Subdomain = 'imagenes.allmartbazar.com.ar';
+  
+  // Si la imagen está en el CDN de Cloudflare R2, aplicamos la redimensión automática
+  if (originalUrl.includes(r2Subdomain)) {
+    return `https://allmartbazar.com.ar/cdn-cgi/image/width=${width},quality=${quality},format=auto/${originalUrl}`;
+  }
+
+  return originalUrl;
 }
