@@ -71,6 +71,30 @@ export function ProductSupplierSection({
 
     useEffect(() => { loadLinks(); }, [loadLinks]);
 
+    useEffect(() => {
+        if (!productId) {
+            setProductLinks([]);
+        }
+    }, [productId]);
+
+    function createLocalLink(supplierId: string): ProductSupplierEntry {
+        const supplier = allSuppliers.find(s => s.id === supplierId);
+        return {
+            id: `${productId ?? 'new'}-${supplierId}`,
+            supplierId,
+            supplierName: supplier?.name ?? 'Proveedor',
+            supplierEmail: supplier?.email ?? null,
+            supplierPhone: supplier?.phone ?? '',
+            supplierIsActive: supplier?.isActive ?? true,
+            currentPrice: currentProductPrice || 1,
+            cost: null,
+            isActive: true,
+            isPrimary: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+    }
+
     // Cerrar dropdown al hacer clic fuera
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -83,12 +107,16 @@ export function ProductSupplierSection({
     }, []);
 
     // Datos derivados
-    const primaryLink = productLinks.find(l => l.supplierId === primarySupplierId) ?? null;
-    const otherLinks = productLinks.filter(l => l.supplierId !== primarySupplierId);
+    const primaryLink = productLinks.find(l => l.isPrimary)
+        ?? productLinks.find(l => l.supplierId === primarySupplierId)
+        ?? null;
+    const otherLinks = productLinks.filter(l => !l.isPrimary);
 
-    const selectedSupplierName = primarySupplierId
-        ? allSuppliers.find(s => s.id === primarySupplierId)?.name ?? 'Proveedor seleccionado'
-        : null;
+    const selectedSupplierName = primaryLink
+        ? primaryLink.supplierName
+        : primarySupplierId
+            ? allSuppliers.find(s => s.id === primarySupplierId)?.name ?? 'Proveedor seleccionado'
+            : null;
 
     const filtered = allSuppliers.filter(s =>
         !search || s.name.toLowerCase().includes(search.toLowerCase())
@@ -98,26 +126,68 @@ export function ProductSupplierSection({
     async function handleSelect(supplierId: string | null) {
         setOpen(false);
         setSearch('');
-        if (!productId) {
-            onPrimaryChange(supplierId);
-            return;
-        }
         if (!supplierId) {
             onPrimaryChange(null);
+            if (!productId) {
+                setProductLinks(prev => prev.map(link => ({ ...link, isPrimary: false })));
+            }
             return;
         }
+
+        const alreadyPrimary = supplierId === primarySupplierId;
+        const hasPrimary = Boolean(primarySupplierId);
+
+        if (!productId) {
+            setProductLinks(prev => {
+                if (!hasPrimary) {
+                    return [
+                        ...prev.map(link => ({ ...link, isPrimary: false })),
+                        { ...createLocalLink(supplierId), isPrimary: true },
+                    ];
+                }
+
+                if (alreadyPrimary) {
+                    return prev;
+                }
+
+                const alreadyAdded = prev.some(link => link.supplierId === supplierId);
+                if (alreadyAdded) return prev;
+
+                return [
+                    ...prev,
+                    createLocalLink(supplierId),
+                ];
+            });
+
+            if (!hasPrimary) {
+                onPrimaryChange(supplierId);
+            }
+            return;
+        }
+
         setActionLoading('select');
         try {
-            const alreadyLinked = productLinks.some(l => l.supplierId === supplierId);
-            if (!alreadyLinked) {
-                await suppliersAdminService.assignSupplier(productId, {
-                    supplierId,
-                    currentPrice: currentProductPrice || 1,
-                    changeReason: 'regular',
-                });
+            if (!hasPrimary) {
+                const alreadyLinked = productLinks.some(l => l.supplierId === supplierId);
+                if (!alreadyLinked) {
+                    await suppliersAdminService.assignSupplier(productId, {
+                        supplierId,
+                        currentPrice: currentProductPrice || 1,
+                        changeReason: 'regular',
+                    });
+                }
+                await suppliersAdminService.setPrimarySupplier(productId, supplierId);
+                onPrimaryChange(supplierId);
+            } else if (!alreadyPrimary) {
+                const alreadyLinked = productLinks.some(l => l.supplierId === supplierId);
+                if (!alreadyLinked) {
+                    await suppliersAdminService.assignSupplier(productId, {
+                        supplierId,
+                        currentPrice: currentProductPrice || 1,
+                        changeReason: 'regular',
+                    });
+                }
             }
-            await suppliersAdminService.setPrimarySupplier(productId, supplierId);
-            onPrimaryChange(supplierId);
             loadLinks();
         } finally {
             setActionLoading(null);
@@ -125,7 +195,23 @@ export function ProductSupplierSection({
     }
 
     async function handleSetPrimary(supplierId: string) {
-        if (!productId) return;
+        if (!productId) {
+            setProductLinks(prev => {
+                const hasSupplier = prev.some(link => link.supplierId === supplierId);
+                const updated = prev.map(link => ({
+                    ...link,
+                    isPrimary: link.supplierId === supplierId,
+                }));
+                if (hasSupplier) return updated;
+                return [
+                    ...updated,
+                    { ...createLocalLink(supplierId), isPrimary: true },
+                ];
+            });
+            onPrimaryChange(supplierId);
+            return;
+        }
+
         setActionLoading(`primary-${supplierId}`);
         try {
             await suppliersAdminService.setPrimarySupplier(productId, supplierId);
@@ -232,7 +318,7 @@ export function ProductSupplierSection({
             </div>
 
             {/* ── Card del Proveedor Principal ── */}
-            {primarySupplierId && productId && (
+            {primaryLink && (
                 <div className={styles.supplierCard}>
                     {linksLoading ? (
                         <div className={styles.cardLoading}>
@@ -292,7 +378,7 @@ export function ProductSupplierSection({
             )}
 
             {/* ── Tabla de Otros Proveedores ── */}
-            {productId && otherLinks.length > 0 && (
+            {otherLinks.length > 0 && (
                 <div className={styles.otherSection}>
                     <div className={styles.otherTitle}>Otros proveedores asignados</div>
                     <div className={styles.otherTable}>
