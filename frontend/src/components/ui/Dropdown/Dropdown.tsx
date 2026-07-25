@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import styles from './Dropdown.module.css';
+import { createPortal } from 'react-dom';
 
 export interface DropdownOption {
   value: string;
@@ -29,13 +30,64 @@ export function Dropdown({
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const menuRef = useRef<HTMLUListElement>(null);
+  const [menuPos, setMenuPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
   const selectedOption = options.find((opt) => opt.value === value);
+
+  /**
+     * Calcula la posición del menú en coordenadas de viewport, ya que ahora
+     * se renderiza vía portal en document.body (position: fixed) para
+     * escapar del overflow de contenedores ancestros (ej: .tableWrapper).
+     * Además decide si abrir hacia abajo o hacia arriba (flip) según el
+     * espacio disponible en cada dirección, y limita max-height al espacio
+     * real para que el overflow-y: auto interno del menú sea navegable
+     * (un position: fixed que se sale del viewport no es scrolleable).
+    
+     */
+  const updateMenuPosition = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const GAP = 6;
+    const MARGIN = 8; // separación mínima del borde de la ventana
+    const PREFERRED_MAX_HEIGHT = 260; // debe matchear .menu { max-height } en el CSS
+
+    const spaceBelow = window.innerHeight - rect.bottom - GAP - MARGIN;
+    const spaceAbove = rect.top - GAP - MARGIN;
+
+    // Preferir abajo; solo abrir arriba si abajo no entra pero arriba sí hay más lugar
+    const openUpwards = spaceBelow < PREFERRED_MAX_HEIGHT && spaceAbove > spaceBelow;
+
+    if (openUpwards) {
+      setMenuPos({
+        bottom: window.innerHeight - rect.top + GAP,
+        left: rect.left,
+        width: rect.width,
+        maxHeight: Math.min(PREFERRED_MAX_HEIGHT, spaceAbove),
+      });
+    } else {
+      setMenuPos({
+        top: rect.bottom + GAP,
+        left: rect.left,
+        width: rect.width,
+        maxHeight: Math.min(PREFERRED_MAX_HEIGHT, spaceBelow),
+      });
+    }
+  }, []);
 
   // Cerrar al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     }
@@ -47,9 +99,25 @@ export function Dropdown({
     };
   }, [isOpen]);
 
+  // Reposicionar mientras el menú esté abierto (capture:true para detectar
+  // scroll de contenedores internos, que no burbujean el evento)
+  useEffect(() => {
+    if (!isOpen) return;
+    updateMenuPosition();
+    window.addEventListener('scroll', updateMenuPosition, true);
+    window.addEventListener('resize', updateMenuPosition);
+    return () => {
+      window.removeEventListener('scroll', updateMenuPosition, true);
+      window.removeEventListener('resize', updateMenuPosition);
+    };
+  }, [isOpen, updateMenuPosition]);
+
   const handleToggle = () => {
     if (!disabled) {
-      setIsOpen((prev) => !prev);
+      setIsOpen((prev) => {
+        if (!prev) updateMenuPosition();
+        return !prev;
+      });
       setFocusedIndex(-1);
     }
   };
@@ -126,13 +194,21 @@ export function Dropdown({
         />
       </button>
 
-      {isOpen && (
-        <ul 
-          className={styles.menu} 
-          role="listbox" 
+      {isOpen && menuPos && createPortal(
+        <ul
+          ref={menuRef}
+          className={styles.menu}
+          role="listbox"
           tabIndex={-1}
           onKeyDown={handleKeyDown}
-        >
+          style={{
+            position: 'fixed',
+            top: menuPos.top,
+            bottom: menuPos.bottom,
+            left: menuPos.left,
+            width: menuPos.width,
+            maxHeight: menuPos.maxHeight,
+          }}        >
           {options.map((option, index) => {
             const isSelected = option.value === value;
             const isFocused = index === focusedIndex;
@@ -143,9 +219,8 @@ export function Dropdown({
                 role="option"
                 aria-selected={isSelected}
                 tabIndex={-1}
-                className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${
-                  isFocused ? styles.optionFocused : ''
-                }`}
+                className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${isFocused ? styles.optionFocused : ''
+                  }`}
                 onClick={() => handleSelect(option.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -158,7 +233,8 @@ export function Dropdown({
               </li>
             );
           })}
-        </ul>
+        </ul>,
+        document.body
       )}
 
       {/* Select de respaldo invisible para pruebas de Testing Library, autocompletado y soporte nativo de formularios */}
