@@ -358,6 +358,7 @@ export function ProductSupplierSection({
             {/* ── Modales ── */}
             {updatingSupplier && (
                 <PriceUpdateModal
+                    key={updatingSupplier.supplierId}
                     productName={productName || updatingSupplier.supplierName}
                     currentPrice={updatingSupplier.currentPrice}
                     currentCost={updatingSupplier.cost}
