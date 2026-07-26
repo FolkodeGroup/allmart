@@ -2238,6 +2238,43 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1300: 🔄 Registrar puntaje de gestión | 2026-07-18 |
 | FedericoPaal | 3 | Creación de issue | Issue #1322: Implementar métrica de Tiempo de Entrega Promedio en Vista de Análisis | 2026-07-18 |
 | FedericoPaal | 3 | Creación de issue | Issue #1320: Agregar campo de tiempo de entrega en ABM de Productos y Tabla Informativa | 2026-07-18 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1341: Responsive - Ajustar margin/padding y agregar icono de lupa en el input de Buscar en responsive de la vista Pedidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1340: Responsive - Corregir responsive de la vista de Categorías para evitar superposiciones y ordenar el layout | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1339: Responsive - Corregir responsive de la vista del formulario de alta/edición de productos | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1338: Responsive - Corregir el header de la card “Alerta de Stock Crítico” para que coincida con “Productos Incompletos” | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1337: Responsive - Habilitar arrastre de componentes en responsive dentro del tab Vista Previa en Dashboard - Personalizar | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1336: Responsive - Reducir altura del header en Admin y evitar que el texto quede oculto por el menú hamburguesa | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1335: Agregar modal de fluctuación de precios al hacer clic en productos del ranking de más vendidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1334: Agregar botón de seña 50% en detalle de Pedido y badge en tabla de pedidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1333: Agregar previsualización de Home en la vista de colecciones al crearse una colección desde Admin como en la vista de Banners | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1332: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1331: Agregar campo de tiempo de entrega en el modal de “Actualizar Costo” para proveedores | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1330: Arreglar modo claro/oscuro del tooltip en la vista de Proveedores sobre el gráfico de fluctuación | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1329: Agregar el estado "Preparado" en la vista Pedidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1328: Ajustar estilos y espaciado en formulario de alta/edición de productos para proveedores | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1327: Agregar iconos de redes sociales junto a favoritos y carrito en el header | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1326: Corregir visualización del nombre de variantes en la vista Sin Stock | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1325: Arreglar renderizado incompleto al quitar filtros de etiquetas en la vista de productos | 2026-07-19 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1349: Responsive - Corregir responsive y usabilidad en la vista de Consultas | 2026-07-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1348: Responsive - Corregir responsive y desbordes en tabs y modal de proveedores | 2026-07-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1347: Responsive - Mejorar responsive y estilos de la tabla de Últimos Pedidos del Período | 2026-07-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1346: Responsive - Mejorar responsive de las cards de Productos más vendidos y Por Estado de Pedido | 2026-07-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1345: Responsive - Corregir responsive y experiencia de filtros en la vista inicial | 2026-07-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1344: Responsive - Corregir responsive y desbordes en el formulario de Banners | 2026-07-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1343: Responsive - Corregir responsive y desbordes en Admin / Colecciones | 2026-07-20 |
+| Mau-bar-iva | 3 | Creación de issue | Issue #1342: Responsive - Corregir desbordes de contenido en las cards y formulario de la vista de Promociones en responsive | 2026-07-20 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1357: 🔄 Registrar puntaje de gestión | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1356: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1355: Arreglar modo claro/oscuro del tooltip en la vista de Proveedores sobre el gráfico de fluctuación | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1354: Agregar el estado "Preparado" en la vista Pedidos | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1353: Ajustar estilos y espaciado en formulario de alta/edición de productos para proveedores | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1352: Agregar iconos de redes sociales junto a favoritos y carrito en el header | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1351: Corregir visualización del nombre de variantes en la vista Sin Stock | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1350: Arreglar renderizado incompleto al quitar filtros de etiquetas en la vista de productos | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1324: Corrección dropdown se ajustó la posición del menú para que se muestre correctamente en la pantalla. | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-25 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1321: 🔄 Registrar puntaje de gestión | 2026-07-25 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1292: 1282 corregir cálculo del descuento bogo en la vista de promociones | 2026-07-13 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
