@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { suppliersAdminService, type ProductPriceHistoryDetailEntry } from './suppliersAdminService';
@@ -7,19 +8,20 @@ import styles from './PriceHistoryModal.module.css';
 const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
 interface PriceHistoryModalProps {
-    supplierId: string;
+    supplierId?: string;
     productId: string;
     productName: string;
     onClose: () => void;
+    variant?: 'default' | 'reports';
 }
 
-export function PriceHistoryModal({ supplierId, productId, productName, onClose }: PriceHistoryModalProps) {
+export function PriceHistoryModal({ supplierId, productId, productName, onClose, variant = 'default' }: PriceHistoryModalProps) {
     const [history, setHistory] = useState<ProductPriceHistoryDetailEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true);
-        suppliersAdminService.getProductPriceHistory(productId, { supplierId })
+        suppliersAdminService.getProductPriceHistory(productId, supplierId ? { supplierId } : {})
             .then(setHistory)
             .catch(() => setHistory([]))
             .finally(() => setLoading(false));
@@ -38,12 +40,18 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose 
         market_adjustment: 'Ajuste de mercado',
     };
 
-    return (
+    const modalClassName = variant === 'reports' ? `${styles.modal} ${styles.modalReports}` : styles.modal;
+    const headerTitleClassName = variant === 'reports' ? `${styles.headerTitle} ${styles.headerTitleReports}` : styles.headerTitle;
+    const bodyClassName = variant === 'reports' ? `${styles.body} ${styles.bodyReports}` : styles.body;
+    const chartSectionClassName = variant === 'reports' ? `${styles.chartSection} ${styles.chartSectionReports}` : styles.chartSection;
+    const tableWrapperClassName = variant === 'reports' ? `${styles.tableWrapper} ${styles.tableWrapperReports}` : styles.tableWrapper;
+
+    return createPortal(
         <div className={styles.overlay} onClick={onClose} role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-            <div className={styles.modal} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="price-history-title">
+            <div className={modalClassName} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="price-history-title">
                 <div className={styles.header}>
-                    <div id="price-history-title" className={styles.headerTitle}>
+                    <div id="price-history-title" className={headerTitleClassName}>
                         <TrendingUp size={16} />
                         <span>Historial de precios — <strong>{productName}</strong></span>
                     </div>
@@ -55,9 +63,9 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose 
                 ) : history.length === 0 ? (
                     <div className={styles.empty}>Sin historial de precios disponible</div>
                 ) : (
-                    <div className={styles.body}>
+                    <div className={bodyClassName}>
                         {/* Sparkline */}
-                        <div className={styles.chartSection}>
+                        <div className={chartSectionClassName}>
                             <ResponsiveContainer width="100%" height={140}>
                                 <LineChart data={chartData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e5e7eb)" />
@@ -73,7 +81,7 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose 
                         </div>
 
                         {/* Table */}
-                        <div className={styles.tableWrapper}>
+                        <div className={tableWrapperClassName}>
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
@@ -110,5 +118,5 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose 
                 )}
             </div>
         </div>
-    );
+        , document.body);
 }

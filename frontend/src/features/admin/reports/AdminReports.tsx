@@ -26,6 +26,7 @@ import { useMonthlyGoal } from '../goals/hooks/useMonthlyGoal';
 import { ReportsCharts } from './components/ReportsCharts';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { Search } from 'lucide-react';
+import { PriceHistoryModal } from '../suppliers/PriceHistoryModal';
 
 /* ── Importación Dinámica (Lazy Load) corregida al principio ── */
 const DonutChart = lazy(() => import('./components/DonutChart'));
@@ -90,7 +91,7 @@ export function AdminReports() {
   const { orders } = useAdminOrders();
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
-  
+
   // Unsaved changes detection
   const {
     setIsDirty,
@@ -109,8 +110,8 @@ export function AdminReports() {
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
 
   // PDF export
-  const pdfRootRef = useRef<HTMLDivElement>(null); 
-  const hiddenPdfRef = useRef<HTMLDivElement>(null); 
+  const pdfRootRef = useRef<HTMLDivElement>(null);
+  const hiddenPdfRef = useRef<HTMLDivElement>(null);
   const { generatePdf, loading: pdfLoading } = useReportsPdfExport();
   const [showHiddenPdf, setShowHiddenPdf] = useState(false);
   const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
@@ -119,6 +120,7 @@ export function AdminReports() {
   const barChartCaptureRef = useRef<HTMLDivElement>(null);
   const donutChartCaptureRef = useRef<HTMLDivElement>(null);
   const [exportingExcel, setExportingExcel] = useState(false);
+  const [selectedPriceHistoryProduct, setSelectedPriceHistoryProduct] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!showHiddenPdf || pdfLoading) return;
@@ -301,7 +303,7 @@ export function AdminReports() {
       const map = new Map<string, number>();
       ordersWithTime.forEach(o => {
         if (o.status === 'cancelado') return;
-        const k = o.createdAt.slice(0, 7); 
+        const k = o.createdAt.slice(0, 7);
         map.set(k, (map.get(k) ?? 0) + o.total);
       });
       return [...map.entries()]
@@ -481,6 +483,15 @@ export function AdminReports() {
         </p>
       </div>
 
+      {selectedPriceHistoryProduct && (
+        <PriceHistoryModal
+          productId={selectedPriceHistoryProduct.id}
+          productName={selectedPriceHistoryProduct.name}
+          onClose={() => setSelectedPriceHistoryProduct(null)}
+          variant="reports"
+        />
+      )}
+
       {/* Modal de confirmación de cambios no guardados */}
       <ConfirmModal
         open={showWarning}
@@ -538,7 +549,7 @@ export function AdminReports() {
           >
             {exportingExcel ? 'Generando Excel…' : 'Descargar Excel'}
           </button>
-          
+
           <button
             type="button"
             className={styles.exportResumeBtn}
@@ -673,6 +684,7 @@ export function AdminReports() {
                   products={topProducts}
                   maxRevenue={maxProductRevenue}
                   formatPrice={formatPrice}
+                  onProductSelect={(product) => setSelectedPriceHistoryProduct({ id: product.id, name: product.name })}
                 />
               </div>
 
@@ -788,7 +800,7 @@ export function AdminReports() {
                 </label>
                 <OrdersFilters
                   ordersTableFilters={ordersTableFilters}
-                  setOrdersTableFilters={setOrdersTableFilters} 
+                  setOrdersTableFilters={setOrdersTableFilters}
                 />
                 <div className={styles.advancedActions}>
                   <button
@@ -804,7 +816,7 @@ export function AdminReports() {
                   </button>
                 </div>
               </div>
-              
+
               {periodOrders.length === 0 ? (
                 <p className={styles.noData + ' fadeCross'}>Sin pedidos en este período.</p>
               ) : (
@@ -824,7 +836,7 @@ export function AdminReports() {
                         value={pageSize}
                         onChange={(e) => {
                           setPageSize(Number(e.target.value));
-                          setPage(1); 
+                          setPage(1);
                         }}
                         className={styles.pageSizeSelect}
                       >

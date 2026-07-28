@@ -1,7 +1,12 @@
 .overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.55);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -16,8 +21,14 @@
     max-height: 85vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
     overflow: hidden;
+}
+
+.modalReports {
+    width: min(960px, 96vw);
+    max-height: 92vh;
+    border-radius: 20px;
 }
 
 .header {
@@ -37,7 +48,13 @@
     color: var(--color-text-secondary);
 }
 
-.headerTitle strong { color: var(--color-text-primary); }
+.headerTitleReports {
+    font-size: 0.95rem;
+}
+
+.headerTitle strong {
+    color: var(--color-text-primary);
+}
 
 .closeBtn {
     background: none;
@@ -49,9 +66,12 @@
     transition: background 0.12s;
 }
 
-.closeBtn:hover { background: var(--color-bg-secondary); }
+.closeBtn:hover {
+    background: var(--color-bg-secondary);
+}
 
-.loading, .empty {
+.loading,
+.empty {
     padding: 40px;
     text-align: center;
     color: var(--color-text-tertiary);
@@ -65,15 +85,27 @@
     flex-direction: column;
 }
 
+.bodyReports {
+    padding-bottom: 4px;
+}
+
 .chartSection {
     padding: 16px 20px 8px;
     border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
 }
 
+.chartSectionReports {
+    padding: 20px 24px 12px;
+}
+
 .tableWrapper {
     flex: 1;
     overflow: auto;
+}
+
+.tableWrapperReports {
+    padding: 0 4px 4px;
 }
 
 .table {
@@ -105,8 +137,33 @@
     vertical-align: middle;
 }
 
-.table tr:last-child td { border-bottom: none; }
+.table tr:last-child td {
+    border-bottom: none;
+}
 
-.low { color: #dc2626; font-weight: 600; }
-.mid { color: #d97706; font-weight: 600; }
-.ok  { color: #16a34a; font-weight: 600; }
+.low {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.mid {
+    color: #d97706;
+    font-weight: 600;
+}
+
+.ok {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .modalReports {
+        width: min(100vw - 20px, 96vw);
+        max-height: 95vh;
+        border-radius: 16px;
+    }
+
+    .chartSectionReports {
+        padding: 16px 16px 10px;
+    }
+}
