@@ -29,7 +29,7 @@ interface OrderDetailContentProps {
 }
 
 export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) => {
-  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid } = useAdminOrders();
+  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid, toggleDeposit } = useAdminOrders();
   const { can } = useAdminAuth();
 
   // ── Estado local ────────────────────────────────────────────────────
@@ -40,6 +40,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [pendingStatus, setPendingStatus] = useState<OrderStatus>(order.status);
   const [statusLoading, setStatusLoading] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [depositLoading, setDepositLoading] = useState(false);
 
   // ── Refs para detectar cambios sin guardar ──────────────────────────
   const originalStatusRef = useRef(order.status);
@@ -131,6 +132,20 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
+  const handleToggleDeposit = async () => {
+    try {
+      setDepositLoading(true);
+      await toggleDeposit(order.id);
+      const action = order.has50PercentDeposit ? 'desactivada' : 'activada';
+      toast.success(`Seña del 50% ${action}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`Error al actualizar seña: ${message}`);
+    } finally {
+      setDepositLoading(false);
+    }
+  };
+
   // Iniciales del cliente para el avatar
   const initials = `${order.customer?.firstName?.[0] ?? ''}${order.customer?.lastName?.[0] ?? ''}`;
 
@@ -209,6 +224,50 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               </span>
             )}
           </div>
+
+          {/* 🆕 Seña del 50% */}
+          <div className={styles.depositSection} style={{ marginTop: '12px' }}>
+            <div className={styles.depositHeader} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '14px', fontWeight: 500, color: '#666' }}>Seña del 50%</span>
+              {order.has50PercentDeposit && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'white',
+                    backgroundColor: '#10b981',
+                    borderRadius: '12px',
+                    padding: '2px 8px',
+                  }}
+                >
+                  50%
+                </span>
+              )}
+            </div>
+            <button
+              className={styles.depositBtn}
+              type="button"
+              onClick={handleToggleDeposit}
+              disabled={depositLoading}
+              style={{
+                padding: '8px 12px',
+                fontSize: '13px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: depositLoading ? 'not-allowed' : 'pointer',
+                backgroundColor: order.has50PercentDeposit ? '#f3f4f6' : '#e0fdf4',
+                color: order.has50PercentDeposit ? '#6b7280' : '#059669',
+                fontWeight: 500,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              {depositLoading ? '...' : (order.has50PercentDeposit ? '✓ Seña activada' : 'Activar seña')}
+            </button>
+          </div>
+
           {!isAbonado && (
             <div className={styles.whatsappActions}>
               {!confirmPaid ? (

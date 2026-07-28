@@ -110,6 +110,7 @@ function toOrder(row: any): Order {
     status: prismaStatusToOrderStatus(row.status),
     paymentStatus: prismaPaymentToPaymentStatus(row.paymentStatus),
     paidAt: row.paidAt || undefined,
+    has50PercentDeposit: row.has50PercentDeposit,
     notes: row.notes ?? undefined,
     items: Array.isArray(row.orderItems)
       ? row.orderItems.map((item: any) => {
@@ -299,6 +300,23 @@ export async function updateOrderPaymentStatus(id: string, dto: { paymentStatus:
 }
 
 /**
+ * Alterna el estado de la seña del 50% para reservar un producto
+ */
+export async function toggleOrderDeposit(id: string): Promise<Order> {
+  const order = await prisma.order.findUnique({ where: { id } });
+  if (!order) throw createError('Pedido no encontrado', 404);
+
+  const updated = await prisma.order.update({
+    where: { id },
+    data: {
+      has50PercentDeposit: !order.has50PercentDeposit
+    }
+  });
+
+  return toOrder(updated);
+}
+
+/**
  * Eliminación lógica (Soft Delete) del pedido para no perder trazabilidad contable
  * ni distorsionar los balances financieros históricos.
  */
@@ -401,6 +419,7 @@ export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Orde
   if (dto.paymentStatus) data.paymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
   if (dto.paidAt) data.paidAt = dto.paidAt;
   if (dto.notes) data.notes = dto.notes;
+  if (dto.has50PercentDeposit !== undefined) data.has50PercentDeposit = dto.has50PercentDeposit;
   if (dto.total !== undefined) data.total = dto.total;
 
   const row = await prisma.order.update({

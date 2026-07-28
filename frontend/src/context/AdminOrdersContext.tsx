@@ -11,6 +11,7 @@ import {
   updateAdminOrder,
   updateAdminOrderPaymentStatus,
   updateAdminOrderStatus,
+  toggleAdminOrderDeposit,
 } from '../features/admin/orders/ordersService';
 
 export type OrderStatus =
@@ -55,6 +56,7 @@ export interface Order {
   status: OrderStatus;
   paymentStatus?: PaymentStatus;
   paidAt?: string;
+  has50PercentDeposit?: boolean;
   notes?: string;
   statusHistory?: OrderHistoryEntry[];
 }
@@ -78,6 +80,7 @@ interface AdminOrdersContextType {
   deleteOrder: (id: string) => Promise<void>;
   getOrder: (id: string) => Order | undefined;
   markAsPaid: (id: string) => Promise<void>;
+  toggleDeposit: (id: string) => Promise<void>;
   getPendingOrdersCount: () => number;
 }
 
@@ -168,6 +171,12 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
     setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, ...updated } : order)));
   }, [token]);
 
+  const toggleDepositHandler = useCallback(async (id: string) => {
+    if (!token) throw new Error('No autenticado');
+    const updated = await toggleAdminOrderDeposit(token, id);
+    setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, ...updated } : order)));
+  }, [token]);
+
   const getPendingOrdersCount = useCallback(
     () => orders.filter((order) => order.status === 'pendiente').length,
     [orders]
@@ -185,6 +194,7 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
     deleteOrder: deleteOrderHandler,
     getOrder,
     markAsPaid,
+    toggleDeposit: toggleDepositHandler,
     getPendingOrdersCount,
   }), [
     orders,
@@ -197,6 +207,7 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
     deleteOrderHandler,
     getOrder,
     markAsPaid,
+    toggleDepositHandler,
     getPendingOrdersCount
   ]);
 
