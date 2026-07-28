@@ -116,6 +116,21 @@
   position: relative;
 }
 
+.categoryVariant {
+  align-items: stretch;
+}
+
+.categoryTrack {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.categoryVariant .slide {
+  min-width: 180px;
+}
+
 /* ── Flechas circulares — fuera del viewport ── */
 .arrow {
   flex-shrink: 0;

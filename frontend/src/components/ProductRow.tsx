@@ -7,6 +7,7 @@ import styles from './ProductRow.module.css';
 export interface ProductRowData {
     id: string;
     name: string;
+    slug?: string;
     sku?: string;
     price?: number;
     imageUrl?: string;
