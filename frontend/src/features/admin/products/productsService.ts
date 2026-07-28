@@ -193,13 +193,13 @@ export function mapApiProductToProduct(api: ApiProduct, categories: Category[]):
     primarySupplierId: api.primarySupplierId ?? null,
     skus: Array.isArray(api.skus)
       ? api.skus.map((row) => ({
-          id: row.id,
-          sku: row.sku,
-          attributes: row.attributes ?? {},
-          stock: typeof row.stock === 'number' ? row.stock : Number(row.stock ?? 0),
-          price: typeof row.price === 'number' ? row.price : row.price !== undefined ? Number(row.price) : undefined,
-          images: Array.isArray(row.images) ? row.images.filter(Boolean) : undefined,
-        }))
+        id: row.id,
+        sku: row.sku,
+        attributes: row.attributes ?? {},
+        stock: typeof row.stock === 'number' ? row.stock : Number(row.stock ?? 0),
+        price: typeof row.price === 'number' ? row.price : row.price !== undefined ? Number(row.price) : undefined,
+        images: Array.isArray(row.images) ? row.images.filter(Boolean) : undefined,
+      }))
       : undefined,
   };
 }
@@ -326,6 +326,10 @@ export async function fetchPublicProducts(
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.tag) qs.set('tag', params.tag);
   if (params.slugs) qs.set('slugs', params.slugs);
+
+  if (typeof params.isFeatured !== 'undefined') {
+    qs.set('isFeatured', String(params.isFeatured));
+  }
 
   if (typeof params.isOnSale !== 'undefined') {
     qs.set('isOnSale', String(params.isOnSale));

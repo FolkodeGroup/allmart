@@ -1,16 +1,122 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 24353 |
-| FedericoPaal | 8439 |
-| Mau-bar-iva | 5258 |
+| dgimenezdeveloper | 24946 |
+| FedericoPaal | 8675 |
+| Mau-bar-iva | 5920 |
 | Nahuel-Dalesio | 1630 |
-| agustin-ovejero | 1472 |
+| agustin-ovejero | 1475 |
 | CelinaJP | 1378 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1357: 🔄 Registrar puntaje de gestión | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1356: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1355: Arreglar modo claro/oscuro del tooltip en la vista de Proveedores sobre el gráfico de fluctuación | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1354: Agregar el estado "Preparado" en la vista Pedidos | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1353: Ajustar estilos y espaciado en formulario de alta/edición de productos para proveedores | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1352: Agregar iconos de redes sociales junto a favoritos y carrito en el header | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1351: Corregir visualización del nombre de variantes en la vista Sin Stock | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1350: Arreglar renderizado incompleto al quitar filtros de etiquetas en la vista de productos | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1324: Corrección dropdown se ajustó la posición del menú para que se muestre correctamente en la pantalla. | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-25 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1321: 🔄 Registrar puntaje de gestión | 2026-07-25 |
+| Mau-bar-iva | 35 | Issue | Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-25 |
+| Mau-bar-iva | 20 | Issue | Arreglar modo claro/oscuro del tooltip en la vista de Proveedores sobre el gráfico de fluctuación | 2026-07-25 |
+| Mau-bar-iva | 25 | Issue | Agregar el estado "Preparado" en la vista Pedidos | 2026-07-25 |
+| Mau-bar-iva | 30 | Issue | Ajustar estilos y espaciado en formulario de alta/edición de productos para proveedores | 2026-07-25 |
+| Mau-bar-iva | 20 | Issue | Agregar iconos de redes sociales junto a favoritos y carrito en el header | 2026-07-25 |
+| Mau-bar-iva | 25 | Issue | Corregir visualización del nombre de variantes en la vista Sin Stock | 2026-07-25 |
+| Mau-bar-iva | 50 | Issue | Arreglar renderizado incompleto al quitar filtros de etiquetas en la vista de productos | 2026-07-25 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1349: Responsive - Corregir responsive y usabilidad en la vista de Consultas | 2026-07-20 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1348: Responsive - Corregir responsive y desbordes en tabs y modal de proveedores | 2026-07-20 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1347: Responsive - Mejorar responsive y estilos de la tabla de Últimos Pedidos del Período | 2026-07-20 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1346: Responsive - Mejorar responsive de las cards de Productos más vendidos y Por Estado de Pedido | 2026-07-20 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1345: Responsive - Corregir responsive y experiencia de filtros en la vista inicial | 2026-07-20 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1344: Responsive - Corregir responsive y desbordes en el formulario de Banners | 2026-07-20 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1343: Responsive - Corregir responsive y desbordes en Admin / Colecciones | 2026-07-20 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1342: Responsive - Corregir desbordes de contenido en las cards y formulario de la vista de Promociones en responsive | 2026-07-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1341: Responsive - Ajustar margin/padding y agregar icono de lupa en el input de Buscar en responsive de la vista Pedidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1340: Responsive - Corregir responsive de la vista de Categorías para evitar superposiciones y ordenar el layout | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1339: Responsive - Corregir responsive de la vista del formulario de alta/edición de productos | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1338: Responsive - Corregir el header de la card “Alerta de Stock Crítico” para que coincida con “Productos Incompletos” | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1337: Responsive - Habilitar arrastre de componentes en responsive dentro del tab Vista Previa en Dashboard - Personalizar | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1336: Responsive - Reducir altura del header en Admin y evitar que el texto quede oculto por el menú hamburguesa | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1335: Agregar modal de fluctuación de precios al hacer clic en productos del ranking de más vendidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1334: Agregar botón de seña 50% en detalle de Pedido y badge en tabla de pedidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1333: Agregar previsualización de Home en la vista de colecciones al crearse una colección desde Admin como en la vista de Banners | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1332: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1331: Agregar campo de tiempo de entrega en el modal de “Actualizar Costo” para proveedores | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1330: Arreglar modo claro/oscuro del tooltip en la vista de Proveedores sobre el gráfico de fluctuación | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1329: Agregar el estado "Preparado" en la vista Pedidos | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1328: Ajustar estilos y espaciado en formulario de alta/edición de productos para proveedores | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1327: Agregar iconos de redes sociales junto a favoritos y carrito en el header | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1326: Corregir visualización del nombre de variantes en la vista Sin Stock | 2026-07-19 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1325: Arreglar renderizado incompleto al quitar filtros de etiquetas en la vista de productos | 2026-07-19 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1321: 🔄 Registrar puntaje de gestión | 2026-07-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1319: 1309 descontar stock de la variante comprada en el admin al comprar desde el home | 2026-07-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1318: 1308 corregir estilos del dropdown del filtro ordenar en la vista de productos | 2026-07-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1317: 1307 permitir agregar el mismo producto con distintas variantes como líneas separadas en el carrito | 2026-07-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1300: 🔄 Registrar puntaje de gestión | 2026-07-18 |
+| FedericoPaal | 35 | Issue | Descontar stock de la variante comprada en el Admin al comprar desde el Home | 2026-07-18 |
+| FedericoPaal | 15 | Issue | Corregir estilos del dropdown del filtro Ordenar en la vista de Productos | 2026-07-18 |
+| FedericoPaal | 40 | Issue | Permitir agregar el mismo producto con distintas variantes como líneas separadas en el Carrito | 2026-07-18 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1322: Implementar métrica de Tiempo de Entrega Promedio en Vista de Análisis | 2026-07-18 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1320: Agregar campo de tiempo de entrega en ABM de Productos y Tabla Informativa | 2026-07-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1316: 1306 formulario de variantes validar imágenes arreglar inputs añadir umbral de stock crítico y permitir eliminar imágenes por índice | 2026-07-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1315: 1305 ajustar estilos en la pestaña variantes para modo oscuroclaro | 2026-07-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1314: fix color de titulo de nueva promoción | 2026-07-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1313: estilos ajustados en formulario "Nuevo producto" | 2026-07-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1312: Quitar icono de cruz duplicado en el buscador del Home | 2026-07-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1311: 1301 aplicar bogo automáticamente cuando cantidad en carrito pasa a par y actualizar card de producto | 2026-07-17 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1310: 1299 detalle de producto home no tachar precio bogo y permitir selección correcta de variantes | 2026-07-17 |
+| FedericoPaal | 40 | Issue | Formulario de Variantes: validar imágenes, arreglar inputs, añadir umbral de stock crítico y permitir eliminar imágenes por índice | 2026-07-17 |
+| Mau-bar-iva | 50 | Issue | Ajustar estilos en la pestaña "Variantes" para modo oscuro/claro | 2026-07-17 |
+| Mau-bar-iva | 25 | Issue | Aumentar contraste del título "Nueva Promoción" en modo oscuro | 2026-07-17 |
+| Mau-bar-iva | 15 | Issue | Inputs y controles del formulario "Nuevo producto" deben respetar modo Claro/Oscuro | 2026-07-17 |
+| Mau-bar-iva | 15 | Issue | Quitar icono de cruz duplicado en el buscador del Home al buscar productos | 2026-07-17 |
+| Mau-bar-iva | 40 | Issue | Aplicar BOGO automáticamente cuando cantidad en carrito pasa a par y actualizar card de producto | 2026-07-17 |
+| Mau-bar-iva | 60 | Issue | Detalle de producto (Home): no tachar precio BOGO y permitir selección correcta de variantes | 2026-07-17 |
+| agustin-ovejero | 3 | Gestión | Creación de issue — Issue #1305: Ajustar estilos en la pestaña "Variantes" para modo oscuro/claro | 2026-07-14 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1300: 🔄 Registrar puntaje de gestión | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1309: Descontar stock de la variante comprada en el Admin al comprar desde el Home | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1308: Corregir estilos del dropdown del filtro Ordenar en la vista de Productos | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1307: Permitir agregar el mismo producto con distintas variantes como líneas separadas en el Carrito | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1306: Formulario de Variantes: validar imágenes, arreglar inputs, añadir umbral de stock crítico y permitir eliminar imágenes por índice | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1304: Aumentar contraste del título "Nueva Promoción" en modo oscuro | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1303: Inputs y controles del formulario "Nuevo producto" deben respetar modo Claro/Oscuro | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1302: Quitar icono de cruz duplicado en el buscador del Home al buscar productos | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1301: Aplicar BOGO automáticamente cuando cantidad en carrito pasa a par y actualizar card de producto | 2026-07-14 |
+| Mau-bar-iva | 3 | Gestión | Creación de issue — Issue #1299: Detalle de producto (Home): no tachar precio BOGO y permitir selección correcta de variantes | 2026-07-14 |
+| dgimenezdeveloper | 50 | Issue | SKU de primera combinación debe heredarse del SKU de producto en el formulario de Alta/Edición | 2026-07-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1298: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1297: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1291: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1298: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1297: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1295: Permitir compras de productos que tengan 0 stock | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1294: 1281 corregir dropdown de estado en la tabla de pedidos para que no corte las opciones | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1293: Resultado Final | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1292: 1282 corregir cálculo del descuento bogo en la vista de promociones | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1291: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1289: ajuste de estilos en el apartado de proveedor principal en el formulario de alta de producto | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1288: 🔄 Actualización automática de puntajes semanal | 2026-07-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1260: 🔄 Registrar puntaje de gestión | 2026-07-13 |
+| dgimenezdeveloper | 3 | Gestión | Asignación de issue a dgimenezdeveloper — Issue #1111: SKU de primera combinación debe heredarse del SKU de producto en el formulario de Alta/Edición | 2026-07-13 |
+| FedericoPaal | 35 | Issue | VALIDACIÓN DE DATOS EN FORMULARIO DE ARREPENTIMIENTO | 2026-07-13 |
+| FedericoPaal | 15 | Issue | REPOSICIONAR BADGE DE DESCUENTO A ESQUINA SUPERIOR IZQUIERDA | 2026-07-13 |
+| FedericoPaal | 50 | Issue | Corregir cálculo del descuento BOGO en la vista de Promociones | 2026-07-13 |
+| Mau-bar-iva | 40 | Issue | Permitir compras de productos que tengan 0 stock | 2026-07-13 |
+| Mau-bar-iva | 30 | Issue | Corregir dropdown de estado en la tabla de pedidos para que no corte las opciones | 2026-07-13 |
+| Mau-bar-iva | 40 | Issue | Mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
+| Mau-bar-iva | 20 | Issue | Enmarcar el apartado de Proveedor en el formulario de producto | 2026-07-13 |
+| Mau-bar-iva | 20 | Issue | Evitar descargas duplicadas del PDF (una sola descarga por acción) | 2026-07-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1288: 🔄 Actualización automática de puntajes semanal | 2026-07-12 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1287: 1278 unificar y agregar checkboxes de etiquetas en el formulario de producto | 2026-07-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1277: add discount handling to cart and product components improve visibility | 2026-07-11 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1276: 1267 formulario de arrepentimiento no debe verse afectado por dark mode del admin | 2026-07-11 |
@@ -31,7 +137,7 @@
 | FedericoPaal | 45 | Issue | Productos destacados del admin deben mostrarse en Home y en el listado de productos | 2026-07-11 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #1286: VALIDACIÓN DE DATOS EN FORMULARIO DE ARREPENTIMIENTO | 2026-07-11 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #1285: ESTILOS DARK MODE EN FORMULARIO DE CONTACTO | 2026-07-11 |
-| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1284: VALIDACIÓN DE STOCK EN CHECKOUT | 2026-07-11 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1284: Permitir compras de productos que tengan 0 stock | 2026-07-11 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #1283: REPOSICIONAR BADGE DE DESCUENTO A ESQUINA SUPERIOR IZQUIERDA | 2026-07-11 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #1282: Corregir cálculo del descuento BOGO en la vista de Promociones | 2026-07-11 |
 | FedericoPaal | 3 | Gestión | Creación de issue — Issue #1281: Corregir dropdown de estado en la tabla de pedidos para que no corte las opciones | 2026-07-11 |
