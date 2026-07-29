@@ -492,3 +492,116 @@
         transform: rotate(360deg);
     }
 }
+
+/* ── Footer de acciones mobile (oculto en desktop) ───────────────────────── */
+.mobileFooter {
+    display: none;
+}
+
+/* ── Responsive: mobile ───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .page {
+        padding-bottom: 76px;
+        /* deja espacio para el footer fijo */
+    }
+
+    .fieldHint {
+        text-align: center;
+    }
+
+    .imageUploadTrigger span {
+        text-align: center;
+    }
+
+    .pageHeader {
+        padding: 10px 14px;
+    }
+
+    .pageTitle {
+        font-size: 0.95rem;
+    }
+
+    /* Ocultamos las acciones del header: se muestran abajo en .mobileFooter */
+    .pageHeaderActions {
+        display: none;
+    }
+
+    .layout {
+        flex-direction: column;
+        padding: 12px 12px 0;
+        gap: 12px;
+    }
+
+    /* Sidebar → tabs horizontales sticky debajo del header */
+    .sidebar {
+        position: relative;
+        top: 0;
+        /* alto aprox. del pageHeader en mobile; ajustá si hace falta */
+        z-index: 30;
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 6px;
+        gap: 6px;
+        scrollbar-width: none;
+    }
+
+    .sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .sidebarList {
+        flex-direction: row;
+        gap: 6px;
+        flex: 1;
+    }
+
+    .sidebarItem {
+        white-space: nowrap;
+        padding: 8px 12px;
+    }
+
+    /* La barra de progreso vertical no aplica en modo horizontal */
+    .sidebarProgress {
+        display: none;
+    }
+
+    /* El content deja de tener su propio scroll: scrollea la página */
+    .content {
+        height: auto;
+        overflow-y: visible;
+        padding-bottom: 24px;
+    }
+
+    .section {
+        padding: 16px;
+        scroll-margin-top: 100px;
+        /* para que el scroll-spy no tape el título bajo los tabs sticky */
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+        /* un campo por fila en mobile */
+    }
+
+    /* Footer fijo con las acciones, visible solo en mobile */
+    .mobileFooter {
+        display: flex;
+        gap: 8px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px 14px;
+        background: var(--color-bg-primary);
+        border-top: 1px solid var(--color-border);
+        z-index: 50;
+    }
+
+    .mobileFooter .cancelBtn,
+    .mobileFooter .submitBtn {
+        flex: 1;
+        padding: 12px 0;
+    }
+}

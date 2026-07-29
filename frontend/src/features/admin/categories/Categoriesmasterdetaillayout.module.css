@@ -50,6 +50,13 @@
     animation: spin 700ms linear infinite;
 }
 
+.listPane {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);
@@ -58,11 +65,31 @@
 
 @media (max-width: 1200px) {
     .container {
+        display: flex;
         flex-direction: column;
         height: auto;
+        min-height: 70vh;
+        overflow: hidden;
     }
 
+    .listPane,
     .detailWrapper {
-        height: 300px;
+        width: 100%;
+        min-height: 70vh;
+        flex: 1 1 auto;
+    }
+
+    /* Por defecto se ve la lista, el detalle queda oculto */
+    .detailWrapper {
+        display: none;
+    }
+
+    /* Cuando el layout está en modo detalle, se invierte */
+    .container.showDetail .listPane {
+        display: none;
+    }
+
+    .container.showDetail .detailWrapper {
+        display: flex;
     }
 }

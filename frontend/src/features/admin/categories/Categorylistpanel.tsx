@@ -1,4 +1,6 @@
 import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useIsMobileViewport } from './hooks/useIsMobileViewport';
 import type { Category } from '../../../types';
 import { FolderSearch, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -38,6 +40,8 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
         },
         ref
     ) => {
+        const navigate = useNavigate();
+        const isMobile = useIsMobileViewport(1200);
         const containerRef = useRef<HTMLElement>(null);
 
         useEffect(() => {
@@ -65,6 +69,14 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                 e.preventDefault();
                 (e.currentTarget.parentElement?.children[index - 1] as HTMLElement)?.focus();
                 onSelectCategory(categories[index - 1].id);
+            }
+        };
+
+        const handleRowActivate = (id: string, slug: string) => {
+            if (isMobile) {
+                navigate(`/admin/categorias/${slug || id}/detalle`);
+            } else {
+                onSelectCategory(id);
             }
         };
 
@@ -111,11 +123,7 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
         }
 
         return (
-            <aside
-                ref={ref ?? containerRef}
-                className={styles.panel}
-                onScroll={handleScroll}
-            >
+            <aside ref={ref ?? containerRef} className={styles.panel} onScroll={handleScroll}>
                 <div className={styles.listContainer} role="listbox" aria-label="Lista de categorías">
                     {categories.map((cat, index) => {
                         const displayName = cat.name?.trim() || cat.slug;
@@ -131,8 +139,17 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                 tabIndex={0}
                                 aria-selected={isSelected}
                                 aria-label={`Seleccionar categoría ${displayName}`}
-                                onClick={() => onSelectCategory(cat.id)}
-                                onKeyDown={(e) => handleKeyDown(e, index)}
+                                onClick={() => handleRowActivate(cat.id, cat.slug)}
+
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        handleRowActivate(cat.id, cat.slug);
+                                    } else {
+                                        handleKeyDown(e, index)
+                                    }
+                                }}
+
                             >
                                 <div className={styles.mainRow}>
                                     {cat.image ? (
@@ -177,7 +194,8 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                     </div>
                                 </div>
 
-                                {(canEdit || canDelete) && (
+                                {/* Quick actions: ocultas en mobile, solo viven en la vista dedicada */}
+                                {!isMobile && (canEdit || canDelete) && (
                                     <div className={styles.quickActions}>
                                         {canEdit && onEdit && (
                                             <button
