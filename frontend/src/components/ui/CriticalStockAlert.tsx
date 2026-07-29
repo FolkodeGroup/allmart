@@ -17,7 +17,9 @@ export default function CriticalStockAlert({ products }: Props) {
   const criticalProducts = products.filter(p => p.stock >= 0 && p.stock <= LOW_STOCK_THRESHOLD);
   const sorted = [...criticalProducts].sort((a, b) => a.stock - b.stock).slice(0, 3);
 
-  
+
+
+  const count = criticalProducts.length;
 
   if (sorted.length === 0) {
     return (
@@ -26,6 +28,7 @@ export default function CriticalStockAlert({ products }: Props) {
           <h2 className={styles.title}>
             Alerta de Stock Crítico
           </h2>
+          <span className={styles.badge}>0</span>
         </div>
         <div className={styles.emptyState}>
           <p className={styles.emptyText}>¡Excelente! No hay productos con stock crítico.</p>
@@ -40,7 +43,9 @@ export default function CriticalStockAlert({ products }: Props) {
         <h2 className={styles.title}>
           Alerta de Stock Crítico
         </h2>
+        <span className={`${styles.badge} ${count > 0 ? styles.badgeAlert : ''}`}>{count}</span>
       </div>
+
       <div className={styles.listContainer}>
         <div className={styles.list}>
           {sorted.map(product => (
