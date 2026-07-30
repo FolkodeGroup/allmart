@@ -371,15 +371,7 @@
   line-height: 1;
 }
 
-@media (max-width: 380px) {
-  .searchIcon {
-    display: none;
-  }
-
-  .searchInput {
-    padding-inline: 0;
-  }
-}
+@media (max-width: 380px) {}
 
 .filterSelect {
   font-family: var(--font-ui);

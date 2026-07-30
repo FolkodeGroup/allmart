@@ -603,4 +603,8 @@
   .itemsTable td {
     padding: 0.4rem 0.25rem;
   }
+
+  .customerFullName {
+    font-size: .8rem;
+  }
 }
