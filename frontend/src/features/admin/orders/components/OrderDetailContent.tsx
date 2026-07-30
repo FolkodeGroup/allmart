@@ -281,8 +281,8 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           <tbody>
             {order.items.map(item => (
               <tr key={`${item.productId}-${item.productSkuId ?? 'base'}-${item.productName}`}>
-                <td>
-                  <div>{item.productName}</div>
+                <td data-label="Producto" className={styles.tdProduct}>
+                  <div className={styles.tdProductName}>{item.productName}</div>
                   {(item.variant || item.sku) && (
                     <div className={styles.itemVariant}>
                       {item.variant || item.sku}
@@ -290,9 +290,9 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     </div>
                   )}
                 </td>
-                <td className={styles.tdCenter}>{item.quantity}</td>
-                <td className={styles.tdRight}>{formatPrice(item.unitPrice)}</td>
-                <td className={styles.tdRight}>{formatPrice(item.unitPrice * item.quantity)}</td>
+                <td data-label="Cant." className={styles.tdCenter}>{item.quantity}</td>
+                <td data-label="P. unit." className={styles.tdRight}>{formatPrice(item.unitPrice)}</td>
+                <td data-label="Subtotal" className={styles.tdRight}>{formatPrice(item.unitPrice * item.quantity)}</td>
               </tr>
             ))}
           </tbody>
