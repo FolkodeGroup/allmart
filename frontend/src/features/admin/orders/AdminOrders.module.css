@@ -762,6 +762,7 @@
   font-size: var(--text-xs);
   color: var(--color-primary-dark);
   letter-spacing: 0.03em;
+  flex: 1;
 }
 
 .mobileCardDate {
