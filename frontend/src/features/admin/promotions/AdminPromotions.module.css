@@ -10,6 +10,8 @@
 .header {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 1rem;
   align-items: center;
   margin-bottom: 24px;
   border-bottom: 1px solid var(--color-border);
@@ -333,8 +335,7 @@ button:disabled {
   }
 
   .btnSmall,
-  .btnSmallSecondary,
-  .btnSmallDanger {
+  .btnSmallSecondary {
     width: 100%;
   }
 }
@@ -661,7 +662,7 @@ button:disabled {
   flex-direction: column;
   position: relative;
   white-space: nowrap;
-  min-width: 30%;
+  min-width: 70%;
   flex: 1;
 }
 
@@ -840,6 +841,7 @@ button:disabled {
 .matrixProductName {
   flex: 1;
   color: var(--color-text-primary);
+  text-transform: capitalize;
 }
 
 .matrixProductCategory {
@@ -889,14 +891,65 @@ button:disabled {
   font-weight: 500;
 }
 
+@media (max-width: 900px) and (min-width: 769px) {
+  .matrixRowHeader {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .matrixRowCounts {
+    flex-shrink: 1;
+    flex-wrap: wrap;
+    row-gap: 6px;
+    justify-content: flex-start;
+  }
+
+  .matrixDates {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .matrixStats {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* La card de promoción: en mobile el header pasa de fila a columna,
+     así el nombre/badges y los contadores/fechas no compiten por el
+     mismo ancho y dejan de solaparse o cortarse por el overflow:hidden. */
+  .matrixRow {
+    position: relative;
+  }
+
+  .matrixRowHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 40px 14px 14px;
+    /* deja lugar a la flecha en la esquina */
+  }
+
+  .matrixRowInfo {
+    width: 100%;
+  }
+
   .matrixRowCounts {
-    flex-wrap: wrap;
-    gap: 8px;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .matrixCountTotal {
+    align-self: flex-start;
+  }
+
+  /* La flecha se saca del flujo y se ancla arriba a la derecha,
+     así no empuja ni corta el resto del contenido */
+  .matrixChevron {
+    position: absolute;
+    top: 14px;
+    right: 14px;
   }
 
   .matrixDetailGrid {
