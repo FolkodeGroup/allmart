@@ -41,7 +41,7 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
         ref
     ) => {
         const navigate = useNavigate();
-        const isMobile = useIsMobileViewport(1200);
+        const isMobile = useIsMobileViewport(768);
         const containerRef = useRef<HTMLElement>(null);
 
         useEffect(() => {

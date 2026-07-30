@@ -39,7 +39,7 @@ export function CategoriesMasterDetailLayout({
         defaultSelectedCategoryId ?? categories[0]?.id
     );
 
-    // controla qué panel se ve en mobile (<=1200px)
+    // controla qué panel se ve en mobile (<=768px)
     const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
 
 
@@ -68,6 +68,7 @@ export function CategoriesMasterDetailLayout({
 
     const handleSelectCategory = useCallback((id: string) => {
         setSelectedCategoryId(id);
+        setMobileView('detail');
     }, []);
 
     const handleBackToList = useCallback(() => {
@@ -106,7 +107,7 @@ export function CategoriesMasterDetailLayout({
                         onToggleVisibility={canEdit ? onToggleVisibility : undefined}
                         canEdit={canEdit}
                         canDelete={canDelete}
-                        onBack={handleBackToList}
+                        onBack={mobileView ? handleBackToList : undefined}
                     />
                 ) : !loading && categories.length > 0 ? (
                     <div className={styles.emptyDetail}>

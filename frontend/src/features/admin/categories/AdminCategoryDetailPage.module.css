@@ -185,7 +185,7 @@
     display: flex;
     gap: 8px;
     padding: 12px 16px;
-    background: #fff;
+    background: var(--color-bg-primary, #fff);
     border-top: 1px solid var(--color-border, #e5e2dd);
 }
 
