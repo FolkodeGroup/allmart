@@ -39,6 +39,10 @@ export function CategoriesMasterDetailLayout({
         defaultSelectedCategoryId ?? categories[0]?.id
     );
 
+    // controla qué panel se ve en mobile (<=768px)
+    const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
+
+
     // When the list changes (e.g. after a filter), keep selection valid
     React.useEffect(() => {
         if (loading) return;
@@ -64,24 +68,33 @@ export function CategoriesMasterDetailLayout({
 
     const handleSelectCategory = useCallback((id: string) => {
         setSelectedCategoryId(id);
+        setMobileView('detail');
+    }, []);
+
+    const handleBackToList = useCallback(() => {
+        setMobileView('list'); // NUEVO
     }, []);
 
     return (
-        <div className={styles.container}>
+        <div
+            className={`${styles.container} ${mobileView === 'detail' ? styles.showDetail : ''}`}
+        >
             {/* ── Left: scrollable category list ──────────────────────── */}
-            <CategoryListPanel
-                categories={categories}
-                loading={loading}
-                error={error}
-                selectedCategoryId={selectedCategoryId}
-                onSelectCategory={handleSelectCategory}
-                onEdit={canEdit ? onEdit : undefined}
-                onDelete={canDelete ? onDelete : undefined}
-                onToggleVisibility={canEdit ? onToggleVisibility : undefined}
-                canEdit={canEdit}
-                canDelete={canDelete}
-                getProductCount={getProductCount}
-            />
+            <div className={styles.listPane}>
+                <CategoryListPanel
+                    categories={categories}
+                    loading={loading}
+                    error={error}
+                    selectedCategoryId={selectedCategoryId}
+                    onSelectCategory={handleSelectCategory}
+                    onEdit={canEdit ? onEdit : undefined}
+                    onDelete={canDelete ? onDelete : undefined}
+                    onToggleVisibility={canEdit ? onToggleVisibility : undefined}
+                    canEdit={canEdit}
+                    canDelete={canDelete}
+                    getProductCount={getProductCount}
+                />
+            </div>
 
             {/* ── Right: detail panel ──────────────────────────────────── */}
             <div className={styles.detailWrapper}>
@@ -94,6 +107,7 @@ export function CategoriesMasterDetailLayout({
                         onToggleVisibility={canEdit ? onToggleVisibility : undefined}
                         canEdit={canEdit}
                         canDelete={canDelete}
+                        onBack={mobileView ? handleBackToList : undefined}
                     />
                 ) : !loading && categories.length > 0 ? (
                     <div className={styles.emptyDetail}>

@@ -177,9 +177,9 @@
 /* ── Meta line ─────────────────────────────────────────────────── */
 .metaLine {
     display: flex;
+    flex-direction: column;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 5px;
     font-size: 11px;
     color: var(--color-text-tertiary);
     overflow: hidden;
@@ -340,9 +340,5 @@
     .panel {
         inset: 0;
         z-index: 100;
-    }
-
-    .visibilityBadge {
-        display: none;
     }
 }

@@ -948,8 +948,14 @@
   min-width: 120px;
 }
 
+.filtersRowItemSelect {
+  flex: 1 1 140px;
+  min-width: 140px;
+  max-width: 200px;
+}
+
 .filtersRowItem:focus,
-.filtersRowItem:hover{
+.filtersRowItem:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -993,6 +999,14 @@
 @media (max-width: 480px) {
   .filters {
     gap: 6px;
+  }
+
+  .filtersRowItem {
+    flex: 1;
+  }
+
+  .filtersRowItemSelect {
+    max-width: none;
   }
 }
 
@@ -1279,11 +1293,17 @@
   border: 1px solid var(--color-border);
 }
 
-.exportBtnContainer{
+.exportBtnContainer {
   display: flex;
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .exportBtnContainer {
+    flex: 1;
+  }
 }
 
 .sortContainer {
@@ -1291,6 +1311,12 @@
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .sortContainer {
+    flex: 1;
+  }
 }
 
 .sortControls {
@@ -1301,6 +1327,13 @@
   background: var(--color-bg-card);
   border-radius: 8px;
   border: 1px solid var(--color-border);
+}
+
+@media (max-width: 480px) {
+  .sortControls {
+    justify-content: space-around;
+    flex: 1;
+  }
 }
 
 .sortLabel {
@@ -1324,7 +1357,7 @@
 }
 
 .sortSelect:focus,
-.sortSelect:hover{
+.sortSelect:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -1344,7 +1377,7 @@
 }
 
 .sortButton:focus,
-.sortButton:hover{
+.sortButton:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
