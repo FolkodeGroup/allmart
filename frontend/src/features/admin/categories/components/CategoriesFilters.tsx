@@ -76,7 +76,7 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
         />
 
         {/* Filtro de Visibilidad Unificado con Custom Dropdown */}
-        <div style={{ flex: '1 1 140px', minWidth: '140px', maxWidth: '200px' }}>
+        <div className={styles.filtersRowItemSelect}>
           <Dropdown
             id="visibility-filter"
             options={visibilityOptions}

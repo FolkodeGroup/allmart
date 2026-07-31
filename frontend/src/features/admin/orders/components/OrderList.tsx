@@ -56,7 +56,7 @@ export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderList
             onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
             style={{
               marginBottom: 16,
-              background: '#fff',
+              background: 'var(--color-bg-primary)',
               animationDelay: `${index * 40}ms`,   // ← añadir index al .map()
             }}
           >

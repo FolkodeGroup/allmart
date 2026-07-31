@@ -21,6 +21,7 @@ export interface Order {
   status: OrderStatus;
   paymentStatus?: PaymentStatus;
   paidAt?: string;
+  has50PercentDeposit?: boolean;
   notes?: string;
   statusHistory?: Array<{ status: OrderStatus; changedAt: string; note?: string }>;
 }
@@ -63,6 +64,7 @@ interface ApiOrder {
   status: string;
   paymentStatus?: string;
   paidAt?: string;
+  has50PercentDeposit?: boolean;
   notes?: string;
   statusHistory?: ApiOrderHistoryEntry[];
 }
@@ -133,6 +135,7 @@ export function mapApiOrderToOrder(api: ApiOrder): Order {
     status: normalizeOrderStatus(api.status),
     paymentStatus: normalizePaymentStatus(api.paymentStatus),
     paidAt: api.paidAt,
+    has50PercentDeposit: api.has50PercentDeposit,
     notes: api.notes,
     statusHistory: (api.statusHistory ?? []).map((entry) => ({
       status: normalizeOrderStatus(entry.status),
@@ -213,6 +216,16 @@ export async function updateAdminOrderPaymentStatus(
   const body = await apiFetch<ApiSuccess<ApiOrder>>(`/api/admin/orders/${id}/payment`, {
     method: 'PATCH',
     body: JSON.stringify({ paymentStatus }),
+  }, token);
+  return mapApiOrderToOrder(body.data);
+}
+
+export async function toggleAdminOrderDeposit(
+  token: string,
+  id: string
+): Promise<Order> {
+  const body = await apiFetch<ApiSuccess<ApiOrder>>(`/api/admin/orders/${id}/deposit`, {
+    method: 'PATCH',
   }, token);
   return mapApiOrderToOrder(body.data);
 }

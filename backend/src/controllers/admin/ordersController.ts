@@ -115,6 +115,24 @@ export async function updatePayment(req: AuthenticatedRequest, res: Response, ne
   }
 }
 
+export async function toggleDeposit(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const order = await ordersService.toggleOrderDeposit(req.params.id);
+
+    await auditService.recordAction({
+      userEmail: req.user?.user || 'desconocido',
+      action: 'editar',
+      entity: 'orders',
+      entityId: order.id,
+      details: { has50PercentDeposit: order.has50PercentDeposit }
+    });
+
+    sendSuccess(res, order, 200, 'Seña del 50% actualizada');
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function exportPdf(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const { status, paymentStatus, q, title } = req.query as Record<string, string | undefined>;

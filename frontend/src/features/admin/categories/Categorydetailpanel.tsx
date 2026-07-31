@@ -8,6 +8,7 @@ import {
     Hash,
     Layers,
     AlertTriangle,
+    ArrowLeft
 } from 'lucide-react';
 import styles from './Categorydetailpanel.module.css';
 
@@ -19,6 +20,7 @@ interface CategoryDetailPanelProps {
     onToggleVisibility?: (id: string, newVisible: boolean) => void;
     canEdit?: boolean;
     canDelete?: boolean;
+    onBack?: () => void;
 }
 
 export function CategoryDetailPanel({
@@ -29,6 +31,7 @@ export function CategoryDetailPanel({
     onToggleVisibility,
     canEdit = true,
     canDelete = true,
+    onBack
 }: CategoryDetailPanelProps) {
     const displayName = category.name?.trim() || category.slug;
     const [imgError, setImgError] = useState(false);
@@ -37,6 +40,16 @@ export function CategoryDetailPanel({
         <div className={styles.panel}>
             {/* ── Header ──────────────────────────────────────────────── */}
             <div className={styles.panelHeader}>
+                {onBack && (
+                    <button
+                        type="button"
+                        className={styles.backBtn}
+                        onClick={onBack}
+                        aria-label="Volver a la lista de categorías"
+                    >
+                        <ArrowLeft size={16} /> Volver
+                    </button>
+                )}
                 <div className={styles.headerContent}>
                     <div className={styles.categoryAvatar}>
                         {category.image && !imgError ? (

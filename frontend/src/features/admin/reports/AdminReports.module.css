@@ -667,6 +667,19 @@
   text-overflow: ellipsis;
 }
 
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background: var(--color-bg-secondary);
+}
+
+.clickableRow:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
 .reportCardModernStats {
   display: flex;
   gap: 2.5rem;

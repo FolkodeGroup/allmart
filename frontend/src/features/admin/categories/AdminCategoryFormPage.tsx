@@ -336,6 +336,26 @@ export function AdminCategoryFormPage({
                 </form>
             </div>
 
+            {/* ── Footer fijo de acciones (solo mobile, ver CSS) ───────────── */}
+            <div className={styles.mobileFooter}>
+                <button
+                    type="button"
+                    className={styles.cancelBtn}
+                    onClick={handleCancel}
+                    disabled={saving}
+                >
+                    Cancelar
+                </button>
+                <button
+                    type="button"
+                    className={styles.submitBtn}
+                    disabled={saving}
+                    onClick={() => formRef.current?.requestSubmit()}
+                >
+                    {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear categoría'}
+                </button>
+            </div>
+
             {/* ── Unsaved changes warning (cancel button or SPA navigation) ─── */}
             <ModalConfirm
                 open={blocker.state === 'blocked'}

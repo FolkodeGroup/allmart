@@ -332,6 +332,7 @@ model Order {
   status             OrderStatus          @default(pendiente)
   paymentStatus      PaymentStatus        @default(no_abonado) @map("payment_status")
   paidAt             DateTime?            @map("paid_at") @db.Timestamptz(6)
+  has50PercentDeposit Boolean             @default(false) @map("has_50_percent_deposit")
   notes              String?
   createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)

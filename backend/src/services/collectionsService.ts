@@ -132,31 +132,38 @@ function toCollectionDTO(
         name: opt.name,
         values: opt.values?.map((val: any) => val.name) ?? [],
       })) ?? [];
-      
+
       const skus = Array.isArray(baseProduct.productSkus)
         ? baseProduct.productSkus.map((s: any) => {
-            const attributes: Record<string, string> = {};
-            if (Array.isArray(s.skuValues)) {
-              for (const sv of s.skuValues) {
-                if (sv.optionValue && sv.optionValue.option) {
-                  attributes[sv.optionValue.option.name] = sv.optionValue.name;
-                }
+          const attributes: Record<string, string> = {};
+          if (Array.isArray(s.skuValues)) {
+            for (const sv of s.skuValues) {
+              if (sv.optionValue && sv.optionValue.option) {
+                attributes[sv.optionValue.option.name] = sv.optionValue.name;
               }
             }
-            const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
-              ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
-              : (Array.isArray(baseProduct.images) ? baseProduct.images : []);
+          }
+          const baseImages = Array.isArray(baseProduct.productImages)
+            ? baseProduct.productImages.map((img: any) => `/api/images/products/${img.id}`)
+            : [];
+          const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
+            ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+            : baseImages;
 
-            return {
-              id: s.id,
-              sku: s.sku,
-              attributes,
-              images,
-              stock: s.stock,
-              price: s.price ? Number(s.price) : Number(baseProduct.price),
-              isActive: s.isActive,
-            };
-          })
+          return {
+            id: s.id,
+            sku: s.sku,
+            attributes,
+            images,
+            stock: s.stock,
+            price: s.price ? Number(s.price) : Number(baseProduct.price),
+            isActive: s.isActive,
+          };
+        })
+        : [];
+
+      const baseImages = Array.isArray(baseProduct.productImages)
+        ? baseProduct.productImages.map((img: any) => `/api/images/products/${img.id}`)
         : [];
 
       return {
@@ -164,7 +171,7 @@ function toCollectionDTO(
         name: baseProduct.name,
         slug: baseProduct.slug,
         price: baseProduct.price.toNumber(),
-        imageUrl: getFirstImageUrl(baseProduct.images),
+        imageUrl: baseProduct.imageUrl ?? baseImages[0],
         position: item.position,
         variants,
         skus,
@@ -209,9 +216,10 @@ export async function getAllCollections(
       orderBy: { displayOrder: 'asc' },
       include: {
         collectionItems: {
-          include: { 
+          include: {
             product: {
               include: {
+                productImages: { select: { id: true }, orderBy: { position: 'asc' } },
                 productOptions: {
                   where: { isActive: true },
                   include: { values: true }
@@ -230,7 +238,7 @@ export async function getAllCollections(
                   }
                 }
               }
-            } 
+            }
           },
           orderBy: { position: 'asc' },
         },
@@ -259,9 +267,10 @@ export async function getCollectionById(id: string): Promise<CollectionResponseD
     where: { id },
     include: {
       collectionItems: {
-        include: { 
+        include: {
           product: {
             include: {
+              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
@@ -280,7 +289,7 @@ export async function getCollectionById(id: string): Promise<CollectionResponseD
                 }
               }
             }
-          } 
+          }
         },
         orderBy: { position: 'asc' },
       },
@@ -306,9 +315,10 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionRespo
     where: { slug },
     include: {
       collectionItems: {
-        include: { 
+        include: {
           product: {
             include: {
+              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
@@ -327,7 +337,7 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionRespo
                 }
               }
             }
-          } 
+          }
         },
         orderBy: { position: 'asc' },
       },
@@ -363,9 +373,10 @@ export async function getCollectionsByDisplayPosition(
     orderBy: { displayOrder: 'asc' },
     include: {
       collectionItems: {
-        include: { 
+        include: {
           product: {
             include: {
+              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
@@ -384,7 +395,7 @@ export async function getCollectionsByDisplayPosition(
                 }
               }
             }
-          } 
+          }
         },
         orderBy: { position: 'asc' },
       },
@@ -408,9 +419,10 @@ export async function getAllCollectionsUnpaginated(): Promise<CollectionResponse
     orderBy: { displayOrder: 'asc' },
     include: {
       collectionItems: {
-        include: { 
+        include: {
           product: {
             include: {
+              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
@@ -429,7 +441,7 @@ export async function getAllCollectionsUnpaginated(): Promise<CollectionResponse
                 }
               }
             }
-          } 
+          }
         },
         orderBy: { position: 'asc' },
       },

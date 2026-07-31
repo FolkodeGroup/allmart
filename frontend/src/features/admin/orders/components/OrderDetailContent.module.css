@@ -322,11 +322,15 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .customerEmailText {
   font-size: 0.85rem;
   color: #64748b;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* ── Productos ── */
@@ -349,6 +353,16 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.02rem;
+}
+
+.tdProduct {
+  word-break: break-word;
+  overflow-wrap: nowrap;
+}
+
+.tdProductName {
+  font-weight: bold;
+  text-transform: capitalize;
 }
 
 .itemsTable td {
@@ -386,6 +400,18 @@
   font-weight: 700;
   color: #059669;
   background: var(--color-bg-tertiary);
+}
+
+.halfpaid {
+  display: 'inline-flex';
+  align-items: 'center';
+  justify-content: 'center';
+  font-size: '12px';
+  font-weight: 600;
+  color: 'white';
+  background: '#10b981';
+  border-radius: '12px';
+  padding: '2px 8px';
 }
 
 /* ── Notas ── */
@@ -571,6 +597,119 @@
   }
 }
 
+/* ── Productos en mobile: tabla → lista de tarjetas ──
+   A partir de este ancho la tabla clásica (4 columnas) deja de tener
+   espacio para respirar y el texto empieza a solaparse/desbordar.
+   Se reemplaza por un patrón de "tarjetas" (cada <tr> es una tarjeta,
+   cada <td> muestra su etiqueta gracias a data-label), que es el
+   approach recomendado de UX para tablas de datos en viewports chicos. */
+@media (max-width: 640px) {
+  .itemsTable {
+    border: none;
+  }
+
+  .itemsTable thead {
+    /* Se oculta el header de la tabla: las etiquetas pasan a
+       generarse por celda con ::before + data-label */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .itemsTable,
+  .itemsTable tbody,
+  .itemsTable tfoot,
+  .itemsTable tr,
+  .itemsTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .itemsTable tbody tr {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+  }
+
+  .itemsTable tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .itemsTable tbody tr:hover {
+    background: var(--color-bg-tertiary) !important;
+  }
+
+  .itemsTable tbody td {
+    padding: 0.35rem 0;
+    border-bottom: none;
+    background: transparent !important;
+  }
+
+  /* Celda del producto: se mantiene como encabezado de la tarjeta */
+  .tdProduct {
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 0.35rem;
+    border-bottom: 1px dashed var(--color-border) !important;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  /* Cant. / P. unit. / Subtotal: fila "etiqueta — valor" */
+  .itemsTable tbody td[data-label]:not(.tdProduct) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    text-align: right;
+  }
+
+  .itemsTable tbody td[data-label]:not(.tdProduct)::before {
+    content: attr(data-label);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03rem;
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* Total: tarjeta destacada, label y valor lado a lado */
+  .itemsTable tfoot tr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+  }
+
+  .totalLabel,
+  .totalValue {
+    padding: 0 !important;
+    width: auto;
+  }
+
+  .totalLabel {
+    text-align: left;
+  }
+
+  .totalValue {
+    text-align: right;
+  }
+}
+
 @media (max-width: 480px) {
   .detailContent {
     gap: 1rem;
@@ -596,11 +735,29 @@
   }
 
   .itemsTable {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 
-  .itemsTable th,
-  .itemsTable td {
-    padding: 0.4rem 0.25rem;
+  .itemsTable tfoot tr {
+    background: var(--color-bg-tertiary);
+    border: none;
+  }
+
+  .itemsTable tfoot tr td {
+    border-bottom: none;
+  }
+
+  .customerCard {
+    padding: 0.75rem;
+  }
+
+  .customerAvatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+
+  .customerFullName {
+    font-size: .8rem;
   }
 }

@@ -83,6 +83,71 @@ export const DashboardWidgetSettings = React.forwardRef<
             setDraggedId(id);
         }, []);
 
+        // Pointer/touch based reordering for mobile devices.
+        const pointerStateRef = React.useRef<{
+            pointerId: number | null;
+            startY: number;
+            draggedId: WidgetId | null;
+        }>({ pointerId: null, startY: 0, draggedId: null });
+
+        const clearPointerListeners = React.useCallback(() => {
+            pointerStateRef.current.pointerId = null;
+            pointerStateRef.current.startY = 0;
+            pointerStateRef.current.draggedId = null;
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
+        }, []);
+
+        const onPointerMove = React.useCallback((ev: PointerEvent) => {
+            // Find element under pointer and update dragOverId
+            const el = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
+            if (!el) return;
+
+            const previewItem = el.closest(`.${styles.previewWidget}`) as HTMLElement | null;
+            if (previewItem) {
+                const id = previewItem.getAttribute('data-widget-id') as WidgetId | null;
+                if (id) setDragOverId(id);
+            } else {
+                setDragOverId(null);
+            }
+        }, []);
+
+        const onPointerUp = React.useCallback(async (ev: PointerEvent) => {
+            // perform drop logic if there is an active dragged item
+            const draggedIdLocal = pointerStateRef.current.draggedId;
+            const targetEl = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
+            let targetId: WidgetId | null = null;
+            if (targetEl) {
+                const previewItem = targetEl.closest(`.${styles.previewWidget}`) as HTMLElement | null;
+                if (previewItem) targetId = previewItem.getAttribute('data-widget-id') as WidgetId | null;
+            }
+
+            if (draggedIdLocal && targetId && draggedIdLocal !== targetId && onReorderWidgets) {
+                const newOrder = [...localOrder];
+                const draggedIndex = newOrder.findIndex((w) => w.id === draggedIdLocal);
+                const targetIndex = newOrder.findIndex((w) => w.id === targetId);
+
+                if (draggedIndex !== -1 && targetIndex !== -1) {
+                    const [draggedWidget] = newOrder.splice(draggedIndex, 1);
+                    newOrder.splice(targetIndex, 0, draggedWidget);
+                    setLocalOrder(newOrder);
+
+                    const widgetOrder = newOrder.map((w) => w.id);
+                    try {
+                        await onReorderWidgets(widgetOrder);
+                    } catch (error) {
+                        console.error('Failed to reorder widgets:', error);
+                        setLocalOrder(widgets);
+                    }
+                }
+            }
+
+            setDraggedId(null);
+            setDragOverId(null);
+            clearPointerListeners();
+        }, [localOrder, onReorderWidgets, widgets, clearPointerListeners]);
+
         const handleDragOver = useCallback((e: React.DragEvent, id: WidgetId) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
@@ -245,6 +310,7 @@ export const DashboardWidgetSettings = React.forwardRef<
                                             enabledWidgetsPreview.map((widget) => (
                                                 <div
                                                     key={widget.id}
+                                                    data-widget-id={widget.id}
                                                     draggable
                                                     onDragStart={(e) => handleDragStart(e, widget.id)}
                                                     onDragOver={(e) => handleDragOver(e, widget.id)}
@@ -255,7 +321,23 @@ export const DashboardWidgetSettings = React.forwardRef<
                                                         draggedId === widget.id ? styles.dragging : ''
                                                     } ${dragOverId === widget.id ? styles.dragOver : ''}`}
                                                 >
-                                                    <span className={styles.dragHandle}>⋮⋮</span>
+                                                    <span
+                                                        className={styles.dragHandle}
+                                                        data-drag-handle
+                                                        onPointerDown={(e) => {
+                                                            if (e.pointerType !== 'touch') return;
+                                                            (e.target as Element).setPointerCapture(e.pointerId);
+                                                            pointerStateRef.current.pointerId = e.pointerId;
+                                                            pointerStateRef.current.startY = e.clientY;
+                                                            pointerStateRef.current.draggedId = widget.id;
+                                                            setDraggedId(widget.id);
+                                                            window.addEventListener('pointermove', onPointerMove);
+                                                            window.addEventListener('pointerup', onPointerUp);
+                                                            window.addEventListener('pointercancel', onPointerUp);
+                                                        }}
+                                                    >
+                                                        ⋮⋮
+                                                    </span>
                                                     <span className={styles.widgetPreviewLabel}>
                                                         {widget.label}
                                                     </span>

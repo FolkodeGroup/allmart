@@ -77,6 +77,7 @@ describe('ordersService.getOrderById', () => {
       ],
     };
 
+    mockOrder.has50PercentDeposit = true;
     (prisma.order.findUnique as any).mockResolvedValue(mockOrder);
 
     const result = await ordersService.getOrderById('550e8400-e29b-41d4-a716-446655440000');
@@ -96,6 +97,34 @@ describe('ordersService.getOrderById', () => {
       sku: 'PROD-A-XL',
       variant: 'XL'
     });
+    expect(result.has50PercentDeposit).toBe(true);
+  });
+
+  it('should toggle the 50% deposit flag in the database and return it', async () => {
+    const orderId = '550e8400-e29b-41d4-a716-446655440000';
+    (prisma.order.findUnique as any).mockResolvedValue({
+      id: orderId,
+      has50PercentDeposit: false,
+    });
+    (prisma.order.update as any) = vi.fn().mockResolvedValue({
+      id: orderId,
+      customerFirstName: 'Juan',
+      customerLastName: 'Pérez',
+      customerEmail: 'juan@example.com',
+      total: 150.00,
+      status: 'confirmado',
+      paymentStatus: 'abonado',
+      paidAt: new Date('2024-01-15'),
+      notes: 'Test notes',
+      createdAt: new Date('2024-01-10'),
+      updatedAt: new Date('2024-01-15'),
+      has50PercentDeposit: true,
+      orderItems: [],
+    });
+
+    const result = await ordersService.toggleOrderDeposit(orderId);
+
+    expect(result.has50PercentDeposit).toBe(true);
   });
 
   it('should throw 404 error when order does not exist', async () => {

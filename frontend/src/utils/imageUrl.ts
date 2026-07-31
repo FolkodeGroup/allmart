@@ -22,6 +22,14 @@ export function normalizeImageUrl(value: ImageUrlCandidate): string | undefined 
   return undefined;
 }
 
+export function getFirstProductImage(product?: { imageUrl?: ImageUrlCandidate } | null): string | undefined {
+  if (!product) {
+    return undefined;
+  }
+
+  return normalizeImageUrl(product.imageUrl);
+}
+
 export function toThumbnailImageUrl(value: ImageUrlCandidate): string | undefined {
   const normalized = normalizeImageUrl(value);
   if (!normalized) {

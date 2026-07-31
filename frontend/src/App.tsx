@@ -47,6 +47,7 @@ const SuppliersAdmin = lazy(() => import('./features/admin/suppliers/SuppliersAd
 const SuppliersAdminFormWrapper = lazy(() => import('./features/admin/suppliers/SuppliersAdminFormWrapper').then(m => ({ default: m.SuppliersAdminFormWrapper })));
 const AdminCategories = lazy(() => import('./features/admin/categories/AdminCategories').then(m => ({ default: m.AdminCategories })));
 const AdminCategoryFormPageWrapper = lazy(() => import('./features/admin/categories/AdminCategoryFormPageWrapper').then(m => ({ default: m.AdminCategoryFormPageWrapper })));
+const AdminCategoryDetailPageWrapper = lazy(() => import('./features/admin/categories/AdminCategoryDetailPageWrapper').then(m => ({ default: m.AdminCategoryDetailPageWrapper })));
 const AdminCategoryProducts = lazy(() => import('./features/admin/categories/AdminCategoryProducts').then(m => ({ default: m.AdminCategoryProducts })));
 const AdminPromotions = lazy(() => import('./features/admin/promotions').then(m => ({ default: m.AdminPromotions })));
 const AdminCollections = lazy(() => import('./features/admin/collections').then(m => ({ default: m.AdminCollections })));
@@ -226,6 +227,15 @@ const router = createBrowserRouter([
           <AdminRoute requiredPermission="categories.view">
             <Suspense fallback={<AdminLoadingFallback />}>
               <AdminCategoryProducts />
+            </Suspense>
+          </AdminRoute>
+        )
+      }, {
+        path: "/admin/categorias/:categoryId/detalle",
+        element: (
+          <AdminRoute requiredPermission="categories.view">
+            <Suspense fallback={<AdminLoadingFallback />}>
+              <AdminCategoryDetailPageWrapper />
             </Suspense>
           </AdminRoute>
         )

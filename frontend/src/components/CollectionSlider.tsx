@@ -10,6 +10,7 @@ import styles from './CollectionSlider.module.css';
 import '../styles/collections.css';
 // 🟢 OPTIMIZACIÓN IMÁGENES: Importamos la función de redimensión del CDN de Cloudflare
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, getOptimizedImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
+import { resolveImageUrl } from '../utils/imageHelpers';
 
 export interface CollectionProduct {
   id: string;
@@ -27,6 +28,9 @@ interface Props {
   products: CollectionProduct[];
   bannerUrl?: string;
   onProductClick?: (productSlug: string) => void;
+  showViewAll?: boolean;
+  previewMode?: boolean;
+  variant?: 'home' | 'category';
 }
 
 const TRANSITION_MS = 480;
@@ -48,9 +52,9 @@ function formatPrice(price: number | string): string {
 function getCollectionProductImage(product: { id: string; imageUrl?: ImageUrlCandidate }) {
   const url = normalizeImageUrl(product.imageUrl);
   if (url && !url.includes('placeholder.png')) {
-    return url;
+    return resolveImageUrl(url) ?? url;
   }
-  return `/api/images/products/${product.id}/thumb`;
+  return resolveImageUrl(`/api/images/products/${product.id}/thumb`) ?? `/api/images/products/${product.id}/thumb`;
 }
 
 const CollectionSlider: React.FC<Props> = ({
@@ -59,6 +63,9 @@ const CollectionSlider: React.FC<Props> = ({
   products,
   bannerUrl,
   onProductClick,
+  showViewAll = true,
+  previewMode = false,
+  variant = 'home',
 }) => {
   const titleId = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -70,26 +77,30 @@ const CollectionSlider: React.FC<Props> = ({
   const [transitioning, setTransitioning] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  const count = products.length;
-  const canLoop = count > layout.visible;
+  const isCategoryVariant = variant === 'category';
+  const effectiveProducts = isCategoryVariant ? products.slice(0, 5) : products;
+  const count = effectiveProducts.length;
+  const canLoop = !isCategoryVariant && count > layout.visible;
   const clones = canLoop ? Math.min(layout.visible, count) : 0;
+  const categoryCardWidth = 180;
+  const cardWidth = isCategoryVariant ? categoryCardWidth : slideW;
 
   type SlideItem = { key: string; product: CollectionProduct; origIdx: number };
   const leadingClones: SlideItem[] = canLoop
-    ? products.slice(-clones).map((p, i) => ({
-        key: `clone-start-${i}`,
-        product: p,
-        origIdx: count - clones + i,
-      }))
+    ? effectiveProducts.slice(-clones).map((p, i) => ({
+      key: `clone-start-${i}`,
+      product: p,
+      origIdx: count - clones + i,
+    }))
     : [];
   const trailingClones: SlideItem[] = canLoop
-    ? products.slice(0, clones).map((p, i) => ({
-        key: `clone-end-${i}`,
-        product: p,
-        origIdx: i,
-      }))
+    ? effectiveProducts.slice(0, clones).map((p, i) => ({
+      key: `clone-end-${i}`,
+      product: p,
+      origIdx: i,
+    }))
     : [];
-  const baseSlides: SlideItem[] = products.map((p, i) => ({
+  const baseSlides: SlideItem[] = effectiveProducts.map((p, i) => ({
     key: `orig-${i}`,
     product: p,
     origIdx: i,
@@ -155,7 +166,7 @@ const CollectionSlider: React.FC<Props> = ({
     t.src = DEFAULT_IMAGE_PLACEHOLDER;
   };
 
-  if (!products || products.length === 0) return null;
+  if (!effectiveProducts || effectiveProducts.length === 0) return null;
 
   const translateX = index * (slideW + layout.gap);
 
@@ -163,104 +174,123 @@ const CollectionSlider: React.FC<Props> = ({
     <div className={styles.root}>
       {bannerUrl && (
         <div className={styles.banner}>
-          <img src={bannerUrl} alt={title} />
+          <img src={resolveImageUrl(bannerUrl) ?? bannerUrl} alt={title} />
         </div>
       )}
 
       <div className={styles.header}>
         <h2 id={titleId} className={styles.title}>{title}</h2>
-        <a
-          href={`/productos?coleccion=${encodeURIComponent(slug)}`}
-          className={styles.viewAll}
-          aria-label={`Ver todos los productos de ${title}`}
-        >
-          Ver todos
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </a>
+        {showViewAll && !previewMode && (
+          <a
+            href={`/productos?coleccion=${encodeURIComponent(slug)}`}
+            className={styles.viewAll}
+            aria-label={`Ver todos los productos de ${title}`}
+          >
+            Ver todos
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </a>
+        )}
       </div>
 
-      <div
-        className={styles.carouselWrapper}
-        role="region"
-        aria-roledescription="carrusel"
-        aria-labelledby={titleId}
-      >
-        {canLoop && !isMobile && (
-          <button
-            type="button"
-            className={`${styles.arrow} ${styles.arrowLeft}`}
-            onClick={() => goTo(-1)}
-            aria-label={`Ver productos anteriores de ${title}`}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M12.5 15L7.5 10l5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        )}
-
+      {isCategoryVariant ? (
+        <div className={`${styles.carouselWrapper} ${styles.categoryVariant}`} role="region" aria-labelledby={titleId}>
+          <div className={`${styles.categoryTrack} ${isMobile ? styles.mobileScroll : ''}`} style={{ gap: `${layout.gap}px` }}>
+            {effectiveProducts.map((product, i) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={i}
+                total={effectiveProducts.length}
+                width={categoryCardWidth}
+                onImageError={handleImageError}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
         <div
-          ref={viewportRef}
-          className={`${styles.viewport} ${isMobile ? styles.mobileScroll : ''}`}
+          className={styles.carouselWrapper}
+          role="region"
+          aria-roledescription="carrusel"
+          aria-labelledby={titleId}
         >
-          {isMobile ? (
-            <div className={styles.mobileTrack} style={{ gap: `${layout.gap}px` }}>
-              {products.map((product, i) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={i}
-                  total={products.length}
-                  width={slideW}
-                  onClick={onProductClick}
-                  onImageError={handleImageError}
-                />
-              ))}
-            </div>
-          ) : (
-            <div
-              className={styles.track}
-              style={{
-                gap: `${layout.gap}px`,
-                transform: `translateX(-${translateX}px)`,
-                transition: transitioning ? `transform ${TRANSITION_MS}ms cubic-bezier(0.22,1,0.36,1)` : 'none',
-              }}
-              onTransitionEnd={handleTransitionEnd}
-              aria-live="off"
+          {canLoop && !isMobile && (
+            <button
+              type="button"
+              className={`${styles.arrow} ${styles.arrowLeft}`}
+              onClick={() => goTo(-1)}
+              aria-label={`Ver productos anteriores de ${title}`}
             >
-              {slides.map((slide, i) => {
-                const visible = i >= index && i < index + layout.visible;
-                return (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M12.5 15L7.5 10l5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
+
+          <div
+            ref={viewportRef}
+            className={`${styles.viewport} ${isMobile ? styles.mobileScroll : ''}`}
+          >
+            {isMobile ? (
+              <div className={styles.mobileTrack} style={{ gap: `${layout.gap}px` }}>
+                {effectiveProducts.map((product, i) => (
                   <ProductCard
-                    key={slide.key}
-                    product={slide.product}
-                    index={slide.origIdx}
-                    total={count}
-                    width={slideW}
-                    isHidden={!visible}
+                    key={product.id}
+                    product={product}
+                    index={i}
+                    total={effectiveProducts.length}
+                    width={cardWidth}
                     onClick={onProductClick}
                     onImageError={handleImageError}
                   />
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                className={styles.track}
+                style={{
+                  gap: `${layout.gap}px`,
+                  transform: `translateX(-${translateX}px)`,
+                  transition: transitioning ? `transform ${TRANSITION_MS}ms cubic-bezier(0.22,1,0.36,1)` : 'none',
+                }}
+                onTransitionEnd={handleTransitionEnd}
+                aria-live="off"
+              >
+                {slides.map((slide, i) => {
+                  const visible = i >= index && i < index + layout.visible;
+                  return (
+                    <ProductCard
+                      key={slide.key}
+                      product={slide.product}
+                      index={slide.origIdx}
+                      total={count}
+                      width={cardWidth}
+                      isHidden={!visible}
+                      onClick={onProductClick}
+                      onImageError={handleImageError}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {canLoop && !isMobile && (
+            <button
+              type="button"
+              className={`${styles.arrow} ${styles.arrowRight}`}
+              onClick={() => goTo(1)}
+              aria-label={`Ver más productos de ${title}`}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M7.5 5l5 5-5 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           )}
         </div>
-
-        {canLoop && !isMobile && (
-          <button
-            type="button"
-            className={`${styles.arrow} ${styles.arrowRight}`}
-            onClick={() => goTo(1)}
-            aria-label={`Ver más productos de ${title}`}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M7.5 5l5 5-5 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 };
@@ -285,7 +315,7 @@ const ProductCard: React.FC<CardProps> = ({
   onImageError,
 }) => {
   const imageUrl = getCollectionProductImage(product);
-  
+
   // 🟢 OPTIMIZACIÓN IMÁGENES: Redimensionamos la miniatura a 320px de ancho
   const optimizedUrl = getOptimizedImageUrl(imageUrl, 320);
 
@@ -298,31 +328,53 @@ const ProductCard: React.FC<CardProps> = ({
       aria-label={`${index + 1} de ${total}: ${product.name}`}
       aria-hidden={isHidden}
     >
-      <button
-        type="button"
-        className={styles.card}
-        onClick={() => onClick?.(product.slug)}
-        tabIndex={isHidden ? -1 : 0}
-        aria-label={`Ver ${product.name}`}
-      >
-        <div className={styles.imgWrapper}>
-          <img
-            src={optimizedUrl}
-            alt={product.name}
-            className={styles.img}
-            loading="lazy"
-            onError={onImageError}
-          />
-        </div>
+      {onClick ? (
+        <button
+          type="button"
+          className={styles.card}
+          onClick={() => onClick(product.slug)}
+          tabIndex={isHidden ? -1 : 0}
+          aria-label={`Ver ${product.name}`}
+        >
+          <div className={styles.imgWrapper}>
+            <img
+              src={optimizedUrl}
+              alt={product.name}
+              className={styles.img}
+              loading="lazy"
+              onError={onImageError}
+            />
+          </div>
 
-        <div className={styles.info}>
-          <p className={styles.name}>{product.name}</p>
-          <p className={styles.price}>
-            <span className={styles.priceSymbol}>$</span>
-            {formatPrice(product.price)}
-          </p>
+          <div className={styles.info}>
+            <p className={styles.name}>{product.name}</p>
+            <p className={styles.price}>
+              <span className={styles.priceSymbol}>$</span>
+              {formatPrice(product.price)}
+            </p>
+          </div>
+        </button>
+      ) : (
+        <div className={styles.card}>
+          <div className={styles.imgWrapper}>
+            <img
+              src={optimizedUrl}
+              alt={product.name}
+              className={styles.img}
+              loading="lazy"
+              onError={onImageError}
+            />
+          </div>
+
+          <div className={styles.info}>
+            <p className={styles.name}>{product.name}</p>
+            <p className={styles.price}>
+              <span className={styles.priceSymbol}>$</span>
+              {formatPrice(product.price)}
+            </p>
+          </div>
         </div>
-      </button>
+      )}
     </article>
   );
 };
