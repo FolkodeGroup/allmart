@@ -1,8 +1,12 @@
 /* ── ProductRow ── */
 .productRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    grid-template-areas:
+        "img info"
+        "img actions";
+    column-gap: 10px;
+    row-gap: 6px;
     padding: 8px 12px;
     width: 100%;
 }
@@ -13,6 +17,7 @@
 }
 
 .productRowImage {
+    grid-area: img;
     width: 40px;
     height: 40px;
     object-fit: cover;
@@ -22,9 +27,9 @@
 }
 
 .productRowInfo {
+    grid-area: info;
     display: flex;
     flex-direction: column;
-    flex: 1;
     min-width: 0;
 }
 
@@ -43,6 +48,8 @@
 }
 
 .productRowRemove {
+    grid-area: actions;
+    justify-self: end;
     background: #f5d4d4;
     color: #c75050;
     border: none;
@@ -50,7 +57,7 @@
     border-radius: 4px;
     font-size: 12px;
     cursor: pointer;
-    flex-shrink: 0;
+    white-space: nowrap;
     transition: background 0.15s;
 }
 
@@ -149,6 +156,7 @@
     color: #797f89;
     padding: 0px 0 3px;
     border-radius: 4px;
+    overflow-wrap: anywhere;
 }
 
 /* SKU */
@@ -164,4 +172,3 @@
     color: #059669;
     /* verde tipo success */
 }
-

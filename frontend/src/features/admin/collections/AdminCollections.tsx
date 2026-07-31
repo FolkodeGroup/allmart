@@ -33,6 +33,33 @@ const AdminCollections: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  // ── Mobile: acordeón + menú de 3 puntos ───────────────────────────────
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  function toggleExpand(id: string) {
+    setExpandedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function toggleMenu(id: string) {
+    setOpenMenuId((prev) => (prev === id ? null : id));
+  }
+
+  // Cierra el menú de 3 puntos al hacer click afuera
+  useEffect(() => {
+    if (!openMenuId) return;
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (!target.closest(`[data-kebab="${openMenuId}"]`)) {
+        setOpenMenuId(null);
+      }
+    }
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [openMenuId]);
+
   const limit = 10;
 
   useEffect(() => {
@@ -242,25 +269,39 @@ const AdminCollections: React.FC = () => {
             ) : (
               collections.map((collection) => {
                 const checked = selectedIds.includes(collection.id);
+                const isExpanded = expandedIds.includes(collection.id);
+                const isMenuOpen = openMenuId === collection.id;
                 return (
-                  <tr key={collection.id}>
-                    <td>
+                  <tr key={collection.id} className={isExpanded ? styles.rowExpanded : undefined}>
+                    <td
+                      className={styles.tdCollectionName}
+                      onClick={() => toggleExpand(collection.id)}
+                    >
                       <strong>{collection.name}</strong>
+                      <button
+                        type="button"
+                        className={styles.expandToggle}
+                        onClick={(e) => { e.stopPropagation(); toggleExpand(collection.id); }}
+                        aria-expanded={isExpanded}
+                        aria-label={isExpanded ? 'Ocultar detalles' : 'Ver detalles'}
+                      >
+                        {isExpanded ? '▲' : '▼'}
+                      </button>
                     </td>
-                    <td className={styles.monospace}>{collection.slug}</td>
-                    <td>
+                    <td data-label="Slug" className={`${styles.monospace} ${styles.detailCell}`}>{collection.slug}</td>
+                    <td data-label="Tipo" className={styles.detailCell}>
                       <span className={collection.type === 'auto_sales' ? styles.badgeAuto : styles.badgeManual}>
                         {collection.type === 'auto_sales' ? 'Auto ventas' : 'Manual'}
                       </span>
                     </td>
-                    <td><strong>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</strong></td>
-                    <td>
+                    <td data-label="Posición" className={styles.detailCell}><strong>{collection.displayPosition === 'home' ? 'Home' : 'Categoría'}</strong></td>
+                    <td data-label="Orden" className={styles.detailCell}>
                       <Badge>
                         {collection.displayOrder}
                       </Badge>
                     </td>
-                    <td>{collection.productCount}</td>
-                    <td>
+                    <td data-label="Productos" className={styles.detailCell}>{collection.productCount}</td>
+                    <td data-label="Estado" className={styles.detailCell}>
                       <span
                         className={
                           collection.isActive ? styles.badgeActive : styles.badgeInactive
@@ -269,8 +310,9 @@ const AdminCollections: React.FC = () => {
                         {collection.isActive ? 'Activa' : 'Inactiva'}
                       </span>
                     </td>
-                    <td>
-                      <div className={styles.actions}>
+                    <td className={styles.actionsCell}>
+                      {/* Desktop: botones visibles siempre */}
+                      <div className={`${styles.actions} ${styles.desktopActions}`}>
                         <button onClick={() => handleEdit(collection)} className={styles.btnSmall}>
                           EDITAR
                         </button>
@@ -281,6 +323,39 @@ const AdminCollections: React.FC = () => {
                         >
                           ELIMINAR
                         </button>
+                      </div>
+                      {/* Mobile: menú de 3 puntos */}
+                      <div className={styles.mobileActionsMenu} data-kebab={collection.id}>
+                        <button
+                          type="button"
+                          className={styles.kebabBtn}
+                          onClick={(e) => { e.stopPropagation(); toggleMenu(collection.id); }}
+                          aria-label="Más acciones"
+                          aria-expanded={isMenuOpen}
+                        >
+                          ⋮
+                        </button>
+                        {isMenuOpen && (
+                          <div className={styles.kebabMenu} role="menu">
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className={styles.kebabMenuItem}
+                              onClick={() => { setOpenMenuId(null); handleEdit(collection); }}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className={`${styles.kebabMenuItem} ${styles.kebabMenuItemDanger}`}
+                              onClick={() => { setOpenMenuId(null); handleDelete(collection.id); }}
+                              disabled={deleting}
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className={styles.selectColCell}>
