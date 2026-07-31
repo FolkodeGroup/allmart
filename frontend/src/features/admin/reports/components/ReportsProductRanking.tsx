@@ -1,3 +1,4 @@
+import { type KeyboardEvent } from 'react';
 import styles from '../AdminReports.module.css';
 
 type Product = {
@@ -12,15 +13,25 @@ interface ProductRankingProps {
     products: Product[];
     maxRevenue: number;
     formatPrice: (n: number) => string;
+    onProductSelect?: (product: Product) => void;
 }
 export function ProductRanking({
     products,
     maxRevenue,
     formatPrice,
+    onProductSelect,
 }: ProductRankingProps) {
     if (!products.length) {
         return <p className={styles.noData}>Sin datos en este período.</p>;
     }
+
+    const handleRowKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, product: Product) => {
+        if (!onProductSelect) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onProductSelect(product);
+        }
+    };
 
     return (
         <div className={styles.tableResponsive}>
@@ -36,7 +47,15 @@ export function ProductRanking({
                 </thead>
                 <tbody>
                     {products.slice(0, 10).map((product, i) => (
-                        <tr key={product.id}>
+                        <tr
+                            key={product.id}
+                            className={onProductSelect ? styles.clickableRow : undefined}
+                            onClick={() => onProductSelect?.(product)}
+                            onKeyDown={(event) => handleRowKeyDown(event, product)}
+                            tabIndex={onProductSelect ? 0 : -1}
+                            role={onProductSelect ? 'button' : undefined}
+                            aria-label={onProductSelect ? `Ver historial de precios de ${product.name}` : undefined}
+                        >
                             <td>
                                 <span className={styles.rankBadgeModern}>#{i + 1}</span>
                             </td>
