@@ -62,6 +62,7 @@ export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersT
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Cliente</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Productos</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Total</th>
+            <th style={{ textAlign: 'left', padding: '18px 20px' }}>Seña</th>
             <th style={{ textAlign: 'left', padding: '18px 20px' }}>Estado</th>
             <th style={{ textAlign: 'left', padding: '18px 20px', width: 80 }}>Acciones</th>
           </tr>
@@ -174,6 +175,29 @@ export function OrderItem({ order, onDetail, index, editing, setEditingId }: Ord
       </td>
       <td className={styles.tdTotal} >
         {formatPrice(order.total)}
+      </td>
+
+      {/* 🆕 Celda de Seña del 50% */}
+      <td style={{ padding: '16px 20px', textAlign: 'center' }}>
+        {order.has50PercentDeposit ? (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'white',
+              backgroundColor: '#10b981',
+              borderRadius: '12px',
+              padding: '4px 10px',
+            }}
+          >
+            50%
+          </span>
+        ) : (
+          <span style={{ fontSize: '12px', color: '#9ca3af' }}>—</span>
+        )}
       </td>
 
       {/*

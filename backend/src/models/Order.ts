@@ -21,6 +21,7 @@ export interface Order {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paidAt?: Date;
+  has50PercentDeposit?: boolean; // 🆕 Seña del 50% para reservar producto
   notes?: string;
   items?: Array<{
     productId: string;
