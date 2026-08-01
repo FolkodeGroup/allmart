@@ -21,7 +21,7 @@ interface NavItem {
   label: string;
   to: string;
   icon: string;
-  iconColor?: string; // <-- Propiedad para inyectar el color de la marca
+  iconColor?: string;
   permission: Permission | null;
   badge: NavBadge;
   children?: NavItem[];
@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     to: "/admin/dashboard",
     icon: "bi bi-house-door",
-    iconColor: "var(--color-accent)", // Dorado/Arena
+    iconColor: "var(--color-accent)",
     permission: null,
     badge: null,
   },
@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
     label: "Catálogo",
     to: "/admin/productos",
     icon: "bi bi-box-seam",
-    iconColor: "var(--color-primary)", // Verde Salvia
+    iconColor: "var(--color-primary)",
     permission: null,
     badge: null,
     children: [
@@ -82,7 +82,7 @@ const navItems: NavItem[] = [
         label: "Sin stock",
         to: "/admin/alertas-sin-stock",
         icon: "bi bi-exclamation-triangle",
-        iconColor: "var(--color-error)", // Rojo suave (Alerta)
+        iconColor: "var(--color-error)",
         permission: null,
         badge: "outOfStock",
       },
@@ -275,15 +275,6 @@ export function AdminLayout() {
 
   return (
     <div className={`${styles.wrapper} ${theme === 'dark' ? 'admin-dark' : ''}`}>
-      <Button
-        className={styles.mobileToggle}
-        onClick={() => setIsMobileOpen(true)}
-        aria-label="Abrir menú móvil"
-        variant="ghost"
-        type="button"
-      >
-        ☰
-      </Button>
       {isMobileOpen && (
         <div
           className={styles.backdrop}
@@ -327,7 +318,7 @@ export function AdminLayout() {
       </aside>
 
       <main className={styles.main}>
-        <AdminHeader />
+        <AdminHeader onOpenMobileMenu={() => setIsMobileOpen(true)} />
         <div
           className={styles.content}
           style={{ display: "flex", flexDirection: "column" }}

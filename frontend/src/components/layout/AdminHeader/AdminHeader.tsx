@@ -1,13 +1,18 @@
-//src/components/layout/Admin/AdminHeader.tsx
+// src/components/layout/AdminHeader/AdminHeader.tsx
 import { useLocation } from "react-router-dom";
 import { useAdminCategories } from "../../../context/AdminCategoriesContext";
 import { formatOrderLabel } from "../../../utils/orders";
+import { Menu } from "lucide-react";
 import styles from "./AdminHeader.module.css";
 
 interface Breadcrumb {
   label: string;
   path: string;
   isActive: boolean;
+}
+
+interface AdminHeaderProps {
+  onOpenMobileMenu?: () => void;
 }
 
 const ROUTE_NAMES: Record<string, string> = {
@@ -17,6 +22,12 @@ const ROUTE_NAMES: Record<string, string> = {
   categorias: "Categorías",
   pedidos: "Pedidos",
   reportes: "Reportes",
+  proveedores: "Proveedores",
+  contactos: "Consultas",
+  banners: "Banners",
+  colecciones: "Colecciones",
+  promociones: "Promociones",
+  configuracion: "Configuración",
 };
 
 function generateBreadcrumbs(pathname: string): Breadcrumb[] {
@@ -51,7 +62,7 @@ function generateBreadcrumbs(pathname: string): Breadcrumb[] {
   return breadcrumbs;
 }
 
-export function AdminHeader() {
+export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
   const location = useLocation();
   const { categories } = useAdminCategories();
 
@@ -96,8 +107,10 @@ export function AdminHeader() {
 
     return crumb;
   });
+
   const currentSection =
     breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard";
+
   const todayLabel = new Intl.DateTimeFormat("es-CO", {
     weekday: "long",
     day: "numeric",
@@ -107,24 +120,36 @@ export function AdminHeader() {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <span className={styles.kicker}>Panel administrativo</span>
-        <h1 className={styles.title}>{currentSection}</h1>
-        <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
-          {breadcrumbs.map((breadcrumb, index) => (
-            <span
-              key={breadcrumb.path}
-              className={breadcrumb.isActive ? styles.breadcrumbActive : ""}
-            >
-              {index > 0 && <span className={styles.separator}>/</span>}
-              {breadcrumb.label}
-            </span>
-          ))}
-        </nav>
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            className={styles.mobileMenuBtn}
+            onClick={onOpenMobileMenu}
+            aria-label="Abrir menú de navegación"
+          >
+            <Menu size={20} strokeWidth={2.2} />
+          </button>
+        )}
+        <div className={styles.headerTitleGroup}>
+          <span className={styles.kicker}>PANEL ADMINISTRATIVO</span>
+          <h1 className={styles.title}>{currentSection}</h1>
+          <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
+            {breadcrumbs.map((breadcrumb, index) => (
+              <span
+                key={breadcrumb.path}
+                className={breadcrumb.isActive ? styles.breadcrumbActive : ""}
+              >
+                {index > 0 && <span className={styles.separator}>/</span>}
+                {breadcrumb.label}
+              </span>
+            ))}
+          </nav>
+        </div>
       </div>
 
       <div className={styles.statusCard}>
-        <span className={styles.statusLabel}>Sesion activa</span>
-        <strong className={styles.statusValue}>Operacion en tiempo real</strong>
+        <span className={styles.statusLabel}>Sesión activa</span>
+        <strong className={styles.statusValue}>Operación en tiempo real</strong>
         <span className={styles.statusDate}>{todayLabel}</span>
       </div>
     </header>
