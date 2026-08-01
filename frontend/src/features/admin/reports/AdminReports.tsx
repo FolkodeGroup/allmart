@@ -511,7 +511,7 @@ export function AdminReports() {
           minDate={minDate}
           maxDate={maxDate}
         />
-        <div>
+        <div className={styles.exportWrap}>
           <span className={styles.exportLabel}>Descargar resumen:</span>
           <button
             type="button"

@@ -121,6 +121,19 @@
     width: 100%;
   }
 
+  .clearFiltersMobileWrap {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+  .clearFiltersMobileWrap .clearBtn,
+  .clearFiltersMobileWrap .clearBtnDisabled {
+    width: 100%;
+    display: block;
+    margin-left: 0;
+  }
+
   .dateInputMobile {
     width: 100%;
     padding: 8px 10px;
@@ -1534,8 +1547,28 @@ ALLMART — ADMIN REPORTS
     flex-wrap: wrap;
   }
 
-  .exportBtn .exportResumeBtn {
+  .exportWrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .exportLabel {
+    margin-right: 0;
+    display: block;
+  }
+
+  .exportResumeBtn,
+  .exportBtn {
+    width: 100%;
     text-align: center;
+    margin-left: 0 !important;
+  }
+
+  /* Asegura separación visible entre botones apilados */
+  .exportWrap button + button {
+    margin-bottom: 0.75rem;
   }
 }
 
