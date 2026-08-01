@@ -214,12 +214,16 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     <div className={`${styles.panel} pdPanelMobileSingleScroll`}>
       <style>{`
         @media (max-width: 1023px) {
-          /* Eliminación del doble scroll en móvil */
+          /* Eliminación del espacio gris excesivo al final de la tarjeta */
           .pdPanelMobileSingleScroll {
             height: auto !important;
+            min-height: 0 !important;
             max-height: none !important;
             overflow-y: visible !important;
-            padding-bottom: 110px !important;
+            padding-left: 6px !important;
+            padding-right: 6px !important;
+            padding-bottom: 16px !important; /* Padding compacto interno */
+            margin-bottom: 84px !important;  /* Margen externo para dejar espacio a la barra fija */
           }
 
           /* Barra 'Volver' pegajosa en móvil */
@@ -232,11 +236,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             gap: 10px;
             width: 100%;
             min-height: 48px;
-            padding: 8px 16px;
+            padding: 8px 12px;
             background: var(--color-bg-primary, #ffffff);
             border-bottom: 1px solid var(--color-border, #e5e2dd);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
           }
 
           .stickyMobileBackBtn {
@@ -254,7 +258,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           }
 
           .pdHeaderCardMobile {
-            margin-top: 4px !important;
+            margin-top: 2px !important;
+            padding: 12px !important;
           }
         }
 

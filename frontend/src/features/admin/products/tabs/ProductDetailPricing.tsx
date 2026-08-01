@@ -7,32 +7,51 @@ interface ProductDetailPricingProps {
 }
 
 export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
-  // 🟢 FIX: Recuperamos el umbral crítico del producto sin usar 'any' para pasar ESLint
   const threshold = (product as unknown as { criticalStockThreshold?: number }).criticalStockThreshold ?? 5;
 
   return (
-    <div className={styles.container}>
-      {/* Pricing Overview Cards */}
-      <div className={styles.cardsGrid}>
-        <div className={styles.card}>
+    <div className={`${styles.container} pricingContainerResponsive`}>
+      <style>{`
+        @media (max-width: 767px) {
+          .pricingContainerResponsive {
+            padding: 4px 0 !important;
+          }
+          .pricingGridResponsive {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+          }
+          .pricingCardResponsive {
+            padding: 12px !important;
+            border-radius: 12px !important;
+          }
+          .pricingValueResponsive {
+            font-size: 18px !important;
+          }
+        }
+      `}</style>
+
+      {/* Tarjetas resumen unificadas (Precio y Stock) */}
+      <div className={`${styles.cardsGrid} pricingGridResponsive`}>
+        <div className={`${styles.card} pricingCardResponsive`}>
           <div className={styles.cardHeader}>
             <DollarSign size={16} />
             <span>Precio actual</span>
           </div>
-          <div className={styles.cardValue}>
+          <div className={`${styles.cardValue} pricingValueResponsive`}>
             ${product.price.toFixed(2)}
           </div>
           <div className={styles.cardMeta}>
             Precio de venta
           </div>
         </div>
-        <div className={styles.card}>
+
+        <div className={`${styles.card} pricingCardResponsive`}>
           <div className={styles.cardHeader}>
             <PackageOpen size={16} />
             <span>Stock</span>
           </div>
-          <div className={`${styles.cardValue} ${product.stock <= 0 ? styles.critical : ''}`}>
-            {product.stock} unidades
+          <div className={`${styles.cardValue} pricingValueResponsive ${product.stock <= 0 ? styles.critical : ''}`}>
+            {product.stock} un.
           </div>
           <div className={styles.cardMeta}>
             {product.inStock ? 'En stock' : 'Agotado'}
@@ -40,42 +59,29 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
         </div>
       </div>
 
-      {/* Pricing Details */}
+      {/* Detalles de Inventario */}
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Detalles de precio</h3>
-        <div className={styles.detailGrid}>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Precio base</span>
-            <span className={styles.detailValue}>${product.price.toFixed(2)}</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Inventory Details */}
-      <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Inventario</h3>
+        <h3 className={styles.sectionTitle}>Inventario y Umbrales</h3>
 
         <div className={styles.detailGrid}>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Stock total</span>
-            <span className={styles.detailValue}>{product.stock}</span>
+            <span className={styles.detailValue}>{product.stock} unidades</span>
           </div>
 
-          {/* 🟢 NUEVO: Umbral de stock crítico mostrado en la ficha */}
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Umbral de stock crítico</span>
             <span className={styles.detailValue}>{threshold} unidades</span>
           </div>
 
           <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Estado</span>
+            <span className={styles.detailLabel}>Estado de publicación</span>
             <span className={`${styles.detailValue} ${product.inStock ? styles.inStock : styles.outOfStock}`}>
               {product.inStock ? 'En stock' : 'Agotado'}
             </span>
           </div>
         </div>
 
-        {/* 🟢 CORREGIDO: Alerta de stock bajo usando el umbral dinámico del producto */}
         {product.stock <= threshold && product.stock > 0 && (
           <div className={styles.warning}>
             ⚠️ Stock bajo: Solo quedan {product.stock} unidades (Umbral crítico: {threshold})
@@ -88,7 +94,6 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
           </div>
         )}
       </section>
-
     </div>
   );
 }

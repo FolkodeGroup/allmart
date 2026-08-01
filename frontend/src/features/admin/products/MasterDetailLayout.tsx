@@ -86,6 +86,7 @@ function MasterDetailLayoutInner({
           .masterDetailMobileContainer,
           .masterDetailMobileContainer .detailWrapper {
             height: auto !important;
+            min-height: 0 !important;
             max-height: none !important;
             overflow-y: visible !important;
           }

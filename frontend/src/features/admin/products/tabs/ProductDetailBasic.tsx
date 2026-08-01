@@ -19,13 +19,25 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
     : `${fullDescription.slice(0, DESC_TRUNCATE_LIMIT)}...`;
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} basicContainerResponsive`}>
+      <style>{`
+        @media (max-width: 767px) {
+          .basicContainerResponsive {
+            padding: 4px 0 !important;
+          }
+          .basicInfoGrid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+          }
+        }
+      `}</style>
+
       {/* 1. Información General */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>
           <Info size={14} /> Información general
         </h3>
-        <div className={styles.infoGrid}>
+        <div className={`${styles.infoGrid} basicInfoGrid`}>
           <div className={styles.field}>
             <span className={styles.label}>Nombre</span>
             <p className={styles.value}>{product.name}</p>
@@ -45,7 +57,7 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
         </div>
       </section>
 
-      {/* 2. Descripción Corta y Completa con Acordeón en Móvil */}
+      {/* 2. Descripción */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>
           <FileText size={14} /> Descripción

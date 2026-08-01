@@ -504,7 +504,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       <style>{`
         @media (max-width: 767px) {
           .pdVariantsContainer {
-            padding-bottom: 120px !important;
+            padding: 4px 0 16px 0 !important;
           }
           .pdToolbarResponsive {
             flex-direction: column !important;
