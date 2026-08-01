@@ -29,17 +29,13 @@ interface CombinationsTableProps {
 }
 
 // ── Menú de tres puntos para cada fila ──────────────────────────────────────
-// Se renderiza en un portal a document.body con position:fixed, calculando
-// sus coordenadas desde el botón disparador. Esto lo desacopla por completo
-// del overflow de .tableWrapper (que es scrolleable) evitando que el menú
-// "empuje" scroll horizontal/vertical en la tabla al abrirse.
 interface RowMenuProps {
     onEdit: () => void;
     onDelete: () => void;
 }
 
 const MENU_WIDTH = 150;
-const MENU_HEIGHT_ESTIMATE = 100; // ajustar si se agregan/quitan items del menú
+const MENU_HEIGHT_ESTIMATE = 100;
 const VIEWPORT_MARGIN = 8;
 
 const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
@@ -48,8 +44,6 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
     const triggerRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Calcula la posición fija del menú en base al botón disparador,
-    // evitando que se salga del viewport por abajo o por los costados.
     const computeCoords = useCallback(() => {
         if (!triggerRef.current) return;
         const rect = triggerRef.current.getBoundingClientRect();
@@ -64,12 +58,12 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
         setCoords({ top, left, openUpward });
     }, []);
 
-    const handleOpen = () => {
+    const handleOpen = (e: React.MouseEvent) => {
+        e.stopPropagation();
         computeCoords();
         setOpen(prev => !prev);
     };
 
-    // Cerrar al hacer clic afuera (considera también el menú portaleado)
     useEffect(() => {
         if (!open) return;
         const handler = (e: MouseEvent) => {
@@ -84,7 +78,6 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
         return () => document.removeEventListener('mousedown', handler);
     }, [open]);
 
-    // Cerrar con Escape
     useEffect(() => {
         if (!open) return;
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
@@ -92,9 +85,6 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
         return () => document.removeEventListener('keydown', handler);
     }, [open]);
 
-    // Al ser position:fixed, sus coordenadas quedan obsoletas si el usuario
-    // scrollea (la tabla, la página, etc.) o redimensiona la ventana.
-    // Cerrarlo es la solución más simple y robusta para ese caso.
     useEffect(() => {
         if (!open) return;
         const close = () => setOpen(false);
@@ -117,22 +107,24 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                 onClick={handleOpen}
                 aria-haspopup="true"
                 aria-expanded={open}
-                aria-label="Acciones"
+                aria-label="Acciones de la combinación"
+                style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
             >
-                <MoreVertical size={15} />
+                <MoreVertical size={18} />
             </button>
 
             {open && coords && createPortal(
                 <div
                     ref={menuRef}
                     className={`${styles.rowDropdown} ${coords.openUpward ? styles.rowDropdownUp : styles.rowDropdownDown}`}
-                    style={{ position: 'fixed', top: coords.top, left: coords.left, width: MENU_WIDTH }}
+                    style={{ position: 'fixed', top: coords.top, left: coords.left, width: MENU_WIDTH, zIndex: 99999 }}
                     role="menu"
                 >
                     <button
                         type="button"
                         className={styles.dropdownItem}
                         role="menuitem"
+                        style={{ minHeight: '44px', display: 'flex', alignItems: 'center' }}
                         onClick={() => run(onEdit)}
                     >
                         Editar
@@ -142,6 +134,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                         type="button"
                         className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
                         role="menuitem"
+                        style={{ minHeight: '44px', display: 'flex', alignItems: 'center' }}
                         onClick={() => run(onDelete)}
                     >
                         Eliminar
@@ -153,7 +146,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
     );
 };
 
-// ── Tabla principal ──────────────────────────────────────────────────────────
+// ── Tabla / Lista principal ──────────────────────────────────────────────────
 export const CombinationsTable: React.FC<CombinationsTableProps> = ({
     skus,
     localCombinations,
@@ -167,118 +160,318 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
             <div className={styles.emptyState}>
                 <span className={styles.emptyIcon}></span>
                 <p>Todavía no hay combinaciones.</p>
-                <small>Usá el botón de arriba para agregar la primera.</small>
+                <small>Usá los botones de arriba para agregar la primera.</small>
             </div>
         );
     }
 
     return (
-        <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-                <thead>
-                    <tr>
-                        <th className={styles.thImg}>Imagen</th>
-                        <th className={styles.thVariant}>Variante</th>
-                        <th className={styles.thSku}>SKU</th>
-                        <th className={styles.thPrice}>Precio</th>
-                        <th className={styles.thStock}>Stock</th>
-                        <th className={styles.thActions}></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {skus.map(s => (
-                        <tr key={s.id} className={styles.row}>
-                            <td className={styles.tdImg}>
-                                {Array.isArray(s.images) && s.images.length > 0 ? (
-                                    <img src={s.images[0]} alt={s.sku ?? 'imagen'} className={styles.thumb} />
-                                ) : (
-                                    <div className={styles.noThumb}>—</div>
-                                )}
-                            </td>
-                            <td className={styles.tdVariant}>
-                                {Object.entries(s.attributes || {}).length > 0 ? (
-                                    <div className={styles.attrList}>
-                                        {Object.entries(s.attributes || {}).map(([k, v]) => (
-                                            <span key={k} className={styles.attrChip}>
-                                                <span className={styles.attrKey}>{k}</span>
-                                                <span className={styles.attrVal}>{v}</span>
-                                            </span>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <span className={styles.na}>—</span>
-                                )}
-                            </td>
-                            <td className={styles.tdSku}>
-                                <code className={styles.skuCode}>{s.sku ?? '—'}</code>
-                            </td>
-                            <td className={styles.tdPrice}>
-                                {typeof s.price === 'number'
-                                    ? `$${s.price.toLocaleString('es-AR')}`
-                                    : <span className={styles.na}>—</span>}
-                            </td>
-                            <td className={styles.tdStock}>
-                                {typeof s.stock === 'number' ? (
-                                    <span className={s.stock === 0 ? styles.stockZero : styles.stockOk}>
-                                        {s.stock}
-                                    </span>
-                                ) : (
-                                    <span className={styles.na}>—</span>
-                                )}
-                            </td>
-                            <td className={styles.tdActions}>
-                                <RowMenu onEdit={() => onEdit(s.id)} onDelete={() => onDelete(s.id)} />
-                            </td>
-                        </tr>
-                    ))}
+        <>
+            <style>{`
+                .combTableDesktopView {
+                    display: block;
+                }
+                .combCardsMobileView {
+                    display: none;
+                }
+                @media (max-width: 767px) {
+                    .combTableDesktopView {
+                        display: none !important;
+                    }
+                    .combCardsMobileView {
+                        display: flex !important;
+                        flex-direction: column;
+                        gap: 12px;
+                        margin-top: 12px;
+                    }
+                }
+                .combMobileCard {
+                    background: var(--color-bg-primary, #ffffff);
+                    border: 1px solid var(--color-border, #e5e2dd);
+                    border-radius: 12px;
+                    padding: 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+                }
+                .combMobileCardTop {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                }
+                .combMobileCardLeft {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex: 1;
+                    min-width: 0;
+                }
+                .combMobileThumb {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 8px;
+                    object-fit: cover;
+                    background: var(--color-bg-secondary, #f8f9fa);
+                    border: 1px solid var(--color-border, #e5e2dd);
+                    flex-shrink: 0;
+                }
+                .combMobileNoThumb {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 8px;
+                    background: var(--color-bg-secondary, #f8f9fa);
+                    border: 1px solid var(--color-border, #e5e2dd);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 12px;
+                    color: var(--color-text-secondary, #666);
+                    flex-shrink: 0;
+                }
+                .combMobileAttrList {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                }
+                .combMobileGrid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 8px;
+                    padding-top: 10px;
+                    border-top: 1px dashed var(--color-border, #e5e2dd);
+                }
+                .combMobileGridBox {
+                    background: var(--color-bg-secondary, #f9fafb);
+                    border-radius: 8px;
+                    padding: 8px 10px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                }
+                .combMobileGridLabel {
+                    font-size: 10px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    color: var(--color-text-secondary, #767676);
+                }
+                .combMobileGridValue {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: var(--color-text-primary, #111827);
+                    word-break: break-all;
+                }
+            `}</style>
 
-                    {localCombinations.map((c, idx) => (
-                        <tr key={c.id ?? `local-${idx}`} className={`${styles.row} ${styles.rowOptimistic}`}>
-                            <td className={styles.tdImg}>
-                                {Array.isArray(c.images) && c.images.length > 0 ? (
-                                    <img src={c.images[0]} alt={c.sku ?? 'imagen'} className={styles.thumb} />
+            {/* VISTA DESKTOP: TABLA TRADICIONAL */}
+            <div className={`${styles.tableWrapper} combTableDesktopView`}>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th className={styles.thImg}>Imagen</th>
+                            <th className={styles.thVariant}>Variante</th>
+                            <th className={styles.thSku}>SKU</th>
+                            <th className={styles.thPrice}>Precio</th>
+                            <th className={styles.thStock}>Stock</th>
+                            <th className={styles.thActions}></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {skus.map(s => (
+                            <tr key={s.id} className={styles.row}>
+                                <td className={styles.tdImg}>
+                                    {Array.isArray(s.images) && s.images.length > 0 ? (
+                                        <img src={s.images[0]} alt={s.sku ?? 'imagen'} className={styles.thumb} />
+                                    ) : (
+                                        <div className={styles.noThumb}>—</div>
+                                    )}
+                                </td>
+                                <td className={styles.tdVariant}>
+                                    {Object.entries(s.attributes || {}).length > 0 ? (
+                                        <div className={styles.attrList}>
+                                            {Object.entries(s.attributes || {}).map(([k, v]) => {
+                                                const cleanKey = k.replace(/[:\s]+$/, '');
+                                                return (
+                                                    <span key={k} className={styles.attrChip}>
+                                                        <span className={styles.attrKey}>{cleanKey}</span>
+                                                        <span className={styles.attrVal}>{v}</span>
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <span className={styles.na}>—</span>
+                                    )}
+                                </td>
+                                <td className={styles.tdSku}>
+                                    <code className={styles.skuCode}>{s.sku ?? '—'}</code>
+                                </td>
+                                <td className={styles.tdPrice}>
+                                    {typeof s.price === 'number'
+                                        ? `$${s.price.toLocaleString('es-AR')}`
+                                        : <span className={styles.na}>—</span>}
+                                </td>
+                                <td className={styles.tdStock}>
+                                    {typeof s.stock === 'number' ? (
+                                        <span className={s.stock === 0 ? styles.stockZero : styles.stockOk}>
+                                            {s.stock}
+                                        </span>
+                                    ) : (
+                                        <span className={styles.na}>—</span>
+                                    )}
+                                </td>
+                                <td className={styles.tdActions}>
+                                    <RowMenu onEdit={() => onEdit(s.id)} onDelete={() => onDelete(s.id)} />
+                                </td>
+                            </tr>
+                        ))}
+
+                        {localCombinations.map((c, idx) => (
+                            <tr key={c.id ?? `local-${idx}`} className={`${styles.row} ${styles.rowOptimistic}`}>
+                                <td className={styles.tdImg}>
+                                    {Array.isArray(c.images) && c.images.length > 0 ? (
+                                        <img src={c.images[0]} alt={c.sku ?? 'imagen'} className={styles.thumb} />
+                                    ) : (
+                                        <div className={styles.noThumb}>—</div>
+                                    )}
+                                </td>
+                                <td className={styles.tdVariant}>
+                                    {Object.entries(c.attributes || {}).length > 0 ? (
+                                        <div className={styles.attrList}>
+                                            {Object.entries(c.attributes || {}).map(([k, v]) => {
+                                                const cleanKey = k.replace(/[:\s]+$/, '');
+                                                return (
+                                                    <span key={k} className={styles.attrChip}>
+                                                        <span className={styles.attrKey}>{cleanKey}</span>
+                                                        <span className={styles.attrVal}>{v}</span>
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <span className={styles.na}>—</span>
+                                    )}
+                                </td>
+                                <td className={styles.tdSku}>
+                                    <code className={styles.skuCode}>{c.sku ?? '—'}</code>
+                                </td>
+                                <td className={styles.tdPrice}>
+                                    {typeof c.price === 'number'
+                                        ? `$${c.price.toLocaleString('es-AR')}`
+                                        : <span className={styles.na}>—</span>}
+                                </td>
+                                <td className={styles.tdStock}>
+                                    {typeof c.stock === 'number' ? (
+                                        <span className={c.stock === 0 ? styles.stockZero : styles.stockOk}>
+                                            {c.stock}
+                                        </span>
+                                    ) : (
+                                        <span className={styles.na}>—</span>
+                                    )}
+                                </td>
+                                <td className={styles.tdActions}>
+                                    <span className={styles.savingBadge}>Guardando…</span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* VISTA MÓVIL: TARJETAS COMPACTAS TOUCH-FRIENDLY */}
+            <div className="combCardsMobileView">
+                {skus.map(s => (
+                    <div key={s.id} className="combMobileCard">
+                        <div className="combMobileCardTop">
+                            <div className="combMobileCardLeft">
+                                {Array.isArray(s.images) && s.images.length > 0 ? (
+                                    <img src={s.images[0]} alt={s.sku ?? 'imagen'} className="combMobileThumb" />
                                 ) : (
-                                    <div className={styles.noThumb}>—</div>
+                                    <div className="combMobileNoThumb">—</div>
                                 )}
-                            </td>
-                            <td className={styles.tdVariant}>
-                                {Object.entries(c.attributes || {}).length > 0 ? (
-                                    <div className={styles.attrList}>
-                                        {Object.entries(c.attributes || {}).map(([k, v]) => (
+                                <div className="combMobileAttrList">
+                                    {Object.entries(s.attributes || {}).map(([k, v]) => {
+                                        const cleanKey = k.replace(/[:\s]+$/, '');
+                                        return (
                                             <span key={k} className={styles.attrChip}>
-                                                <span className={styles.attrKey}>{k}</span>
+                                                <span className={styles.attrKey}>{cleanKey}: </span>
                                                 <span className={styles.attrVal}>{v}</span>
                                             </span>
-                                        ))}
-                                    </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            <RowMenu onEdit={() => onEdit(s.id)} onDelete={() => onDelete(s.id)} />
+                        </div>
+
+                        <div className="combMobileGrid">
+                            <div className="combMobileGridBox">
+                                <span className="combMobileGridLabel">SKU</span>
+                                <code className="combMobileGridValue">{s.sku ?? '—'}</code>
+                            </div>
+                            <div className="combMobileGridBox">
+                                <span className="combMobileGridLabel">Precio</span>
+                                <span className="combMobileGridValue">
+                                    {typeof s.price === 'number' ? `$${s.price.toLocaleString('es-AR')}` : '—'}
+                                </span>
+                            </div>
+                            <div className="combMobileGridBox">
+                                <span className="combMobileGridLabel">Stock</span>
+                                <span className={`${styles.stockOk} ${s.stock === 0 ? styles.stockZero : ''}`}>
+                                    {typeof s.stock === 'number' ? `${s.stock} un.` : '—'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                {localCombinations.map((c, idx) => (
+                    <div key={c.id ?? `local-${idx}`} className={`combMobileCard ${styles.rowOptimistic}`}>
+                        <div className="combMobileCardTop">
+                            <div className="combMobileCardLeft">
+                                {Array.isArray(c.images) && c.images.length > 0 ? (
+                                    <img src={c.images[0]} alt={c.sku ?? 'imagen'} className="combMobileThumb" />
                                 ) : (
-                                    <span className={styles.na}>—</span>
+                                    <div className="combMobileNoThumb">—</div>
                                 )}
-                            </td>
-                            <td className={styles.tdSku}>
-                                <code className={styles.skuCode}>{c.sku ?? '—'}</code>
-                            </td>
-                            <td className={styles.tdPrice}>
-                                {typeof c.price === 'number'
-                                    ? `$${c.price.toLocaleString('es-AR')}`
-                                    : <span className={styles.na}>—</span>}
-                            </td>
-                            <td className={styles.tdStock}>
-                                {typeof c.stock === 'number' ? (
-                                    <span className={c.stock === 0 ? styles.stockZero : styles.stockOk}>
-                                        {c.stock}
-                                    </span>
-                                ) : (
-                                    <span className={styles.na}>—</span>
-                                )}
-                            </td>
-                            <td className={styles.tdActions}>
-                                <span className={styles.savingBadge}>Guardando…</span>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                                <div className="combMobileAttrList">
+                                    {Object.entries(c.attributes || {}).map(([k, v]) => {
+                                        const cleanKey = k.replace(/[:\s]+$/, '');
+                                        return (
+                                            <span key={k} className={styles.attrChip}>
+                                                <span className={styles.attrKey}>{cleanKey}: </span>
+                                                <span className={styles.attrVal}>{v}</span>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            <span className={styles.savingBadge}>Guardando…</span>
+                        </div>
+
+                        <div className="combMobileGrid">
+                            <div className="combMobileGridBox">
+                                <span className="combMobileGridLabel">SKU</span>
+                                <code className="combMobileGridValue">{c.sku ?? '—'}</code>
+                            </div>
+                            <div className="combMobileGridBox">
+                                <span className="combMobileGridLabel">Precio</span>
+                                <span className="combMobileGridValue">
+                                    {typeof c.price === 'number' ? `$${c.price.toLocaleString('es-AR')}` : '—'}
+                                </span>
+                            </div>
+                            <div className="combMobileGridBox">
+                                <span className="combMobileGridLabel">Stock</span>
+                                <span className={`${styles.stockOk} ${c.stock === 0 ? styles.stockZero : ''}`}>
+                                    {typeof c.stock === 'number' ? `${c.stock} un.` : '—'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </>
     );
 };

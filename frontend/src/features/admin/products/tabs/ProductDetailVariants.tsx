@@ -110,7 +110,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
   const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
 
-  // 🟢 NUEVO: Estado para rastrear el intento de envío del modal de combinación
   const [submitComboAttempted, setSubmitComboAttempted] = useState(false);
 
   // --- Modal de confirmación de generación masiva ---
@@ -123,7 +122,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [skuToDeleteId, setSkuToDeleteId] = useState<string | null>(null);
 
-  // Estado optimista para eliminación inmediata (0ms percibidos en UI)
+  // Estado optimista para eliminación inmediata
   const [deletedSkuIds, setDeletedSkuIds] = useState<Set<string>>(new Set());
 
   type CreatedCombination = {
@@ -184,14 +183,12 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
     const result = validateCombination({ sku: combinationSku, skuBase: product?.sku, images: imagesInput, price: combinationPrice });
 
-    // Validación local para umbral de stock crítico
     if (combinationCriticalThreshold !== '' && (Number.isNaN(Number(combinationCriticalThreshold)) || Number(combinationCriticalThreshold) < 0)) {
-      (result as CombinationValidationErrors).price = (result as CombinationValidationErrors).price ?? undefined; // keep existing
-      // We'll store a separate error flag via setCombinationErrors below
+      (result as CombinationValidationErrors).price = (result as CombinationValidationErrors).price ?? undefined;
     }
     setCombinationErrors(result);
     return result;
-  }, [combinationSku, combinationImages, combinationPrice, product?.sku, uploadedFiles]);
+  }, [combinationSku, combinationImages, combinationPrice, product?.sku, uploadedFiles, combinationCriticalThreshold]);
 
   const openCombinationModal = () => {
     const initial: Record<string, string> = {};
@@ -208,7 +205,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
     setEditingSkuId(null);
     setCombinationErrors({});
-    setSubmitComboAttempted(false); // 🟢 Reset de intento de submit
+    setSubmitComboAttempted(false);
     try {
       setFiles([] as UploadFileState[]);
     } catch {
@@ -299,7 +296,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
-  // 🟢 VALIDACIÓN DE ESTADO REACTIVO PARA EL BOTÓN "CREAR"
   const hasMissingAttrs = variants.some(g => !combinationAttrs[g.name] || !combinationAttrs[g.name].trim());
   const isComboFormInvalid =
     !combinationSku.trim() ||
@@ -388,7 +384,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
       await loadSkus(productId);
 
-    } catch(err) {
+    } catch (err) {
       console.error('Error al guardar variante:', err);
       toast.error('Ocurrió un error al guardar la combinación');
       setCreatedCombinations(prev => prev.filter(c => c.sku !== sku));
@@ -397,25 +393,21 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   };
 
-  // Manejo de eliminación de miniaturas (pendientes y persistidas)
   const handleRemoveUploadedFile = async (uid: string) => {
     const file = uploadedFiles.find(f => f.uid === uid);
     if (!file) return;
 
-    // Si es un archivo local (pendiente de upload) o tiene File asociado, sólo eliminar localmente
     if (file.file || file.status !== 'success' || !file.remoteUrl) {
       removeFile(uid);
       return;
     }
 
-    // Imagen persistida - si no hay editingSkuId, sólo preview
     if (!editingSkuId) {
       removeFile(uid);
       toast.success('Imagen eliminada del preview');
       return;
     }
 
-    // Guardamos copia para rollback
     const copy = file;
     setFiles(prev => prev.filter(x => x.uid !== uid));
 
@@ -429,16 +421,16 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       toast.success('Imagen eliminada');
       await loadSkus(productId);
     } catch (err) {
-      const status = err && typeof err === 'object' && 'status' in err ? (err as any).status : undefined;
+      const status = err && typeof err === 'object' && 'status' in err ? (err as Record<string, unknown>).status : undefined;
       if (status === 403) {
         try {
           const remainingRemote = uploadedFiles.filter(x => x.uid !== uid && x.remoteUrl).map(x => x.remoteUrl!);
           await updateVariantChild(productId, editingSkuId, { images: remainingRemote });
-          toast.success('Imagen eliminada (referencia eliminada, borrado en servidor no permitido)');
+          toast.success('Imagen eliminada');
           await loadSkus(productId);
           return;
-        } catch (err2) {
-          // fallthrough to rollback below
+        } catch {
+          // fallthrough to rollback
         }
       }
 
@@ -465,7 +457,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     setCombinationImages(Array.isArray(sku.images) ? sku.images.join('\n') : '');
     setEditingSkuId(id);
     setSubmitComboAttempted(false);
-      if (Array.isArray(sku.images) && sku.images.length > 0) {
+    if (Array.isArray(sku.images) && sku.images.length > 0) {
       const initial: UploadFileState[] = sku.images.map((url) => {
         const str = String(url);
         const m = str.match(/\/api\/images\/sku\/([A-Za-z0-9-_.]+)/);
@@ -508,7 +500,58 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const visibleSkus = (skus || []).filter((s) => !deletedSkuIds.has(s.id));
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} pdVariantsContainer`}>
+      <style>{`
+        @media (max-width: 767px) {
+          .pdVariantsContainer {
+            padding-bottom: 120px !important;
+          }
+          .pdToolbarResponsive {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+          }
+          .pdToolbarResponsive button {
+            width: 100% !important;
+            min-height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .pdVariantRowResponsive {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            padding: 12px !important;
+            border-radius: 12px !important;
+            background: var(--color-bg-secondary, #f8f9fa) !important;
+            border: 1px solid var(--color-border, #e5e2dd) !important;
+          }
+          .pdVariantRowHeader {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+          }
+          .pdAddValueInputBlock {
+            width: 100% !important;
+            display: flex !important;
+            gap: 8px !important;
+          }
+          .pdAddValueInputBlock input {
+            flex: 1 !important;
+            min-height: 44px !important;
+          }
+          .pdAddValueInputBlock button {
+            min-width: 44px !important;
+            min-height: 44px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
+
       {/* ── 1. OPCIONES DEL PRODUCTO ── */}
       <section className={styles.section}>
         <div className={styles.sectionHeading}>
@@ -531,18 +574,28 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
         <div className={styles.attributesList}>
           {variants.map((group) => (
-            <div key={group.id} className={styles.variantRow}>
-              <div className={styles.variantLabelBlock}>
-                <span className={styles.variantGroupName}>
-                  {group.name}
-                </span>
+            <div key={group.id} className={`${styles.variantRow} pdVariantRowResponsive`}>
+              <div className="pdVariantRowHeader">
+                <div className={styles.variantLabelBlock}>
+                  <span className={styles.variantGroupName}>
+                    {group.name}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.compactEditBtn}
+                    onClick={() => handleOpenEditModal(group.id)}
+                    title={`Editar grupo ${group.name}`}
+                  >
+                    📝
+                  </button>
+                </div>
                 <button
                   type="button"
-                  className={styles.compactEditBtn}
-                  onClick={() => handleOpenEditModal(group.id)}
-                  title={`Editar grupo ${group.name}`}
+                  className={styles.deleteGroupBtn}
+                  onClick={() => handleDelete(group.id)}
+                  aria-label={`Eliminar grupo ${group.name}`}
                 >
-                  📝
+                  ×
                 </button>
               </div>
 
@@ -562,13 +615,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 ))}
               </div>
 
-              <div className={styles.addValueInputBlock}>
+              <div className={`${styles.addValueInputBlock} pdAddValueInputBlock`}>
                 <input
                   className={styles.compactInput}
                   value={newValues[group.id] ?? ''}
                   onChange={e => setNewValues(v => ({ ...v, [group.id]: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddValue(group.id, newValues[group.id] ?? ''))}
-                  placeholder={`Añadir...`}
+                  placeholder={`Añadir valor a ${group.name}...`}
                 />
                 <button
                   type="button"
@@ -579,15 +632,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                   +
                 </button>
               </div>
-
-              <button
-                type="button"
-                className={styles.deleteGroupBtn}
-                onClick={() => handleDelete(group.id)}
-                aria-label={`Eliminar grupo ${group.name}`}
-              >
-                ×
-              </button>
             </div>
           ))}
         </div>
@@ -619,7 +663,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           </div>
         </div>
 
-        <div className={styles.combinationsToolbar}>
+        <div className={`${styles.combinationsToolbar} pdToolbarResponsive`}>
           <button
             type="button"
             className={styles.bulkGenerateBtn}
@@ -652,7 +696,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         />
       </section>
 
-      {/* 🟢 MODAL DE COMBINACIÓN BLINDADO CON VALIDACIONES EXPLICITAS */}
+      {/* MODAL DE COMBINACIÓN */}
       <Modal
         open={combinationModalOpen}
         onClose={() => setCombinationModalOpen(false)}
@@ -685,7 +729,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             <p className={commonStyles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
           )}
 
-          {/* 🟢 VALIDACIÓN DE SELECTS DE ATRIBUTOS */}
+          {/* SELECTS DE ATRIBUTOS */}
           {variants.map((group) => {
             const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
             return (
@@ -708,7 +752,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             );
           })}
 
-          {/* 🟢 VALIDACIÓN DE SKU */}
+          {/* SKU */}
           <div className={styles.field}>
             <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
             <input

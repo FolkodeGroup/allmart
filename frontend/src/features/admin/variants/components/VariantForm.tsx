@@ -10,14 +10,6 @@ interface VariantFormProps {
   canCreate: boolean;
 }
 
-/**
- * VariantForm - Formulario para crear nuevos grupos de variantes.
- *
- * Responsabilidades:
- * - Input para nombre del grupo.
- * - Botón para agregar grupo.
- * - Manejo de errores de validación.
- */
 export const VariantForm: React.FC<VariantFormProps> = ({
   newGroupName,
   setNewGroupName,
@@ -33,15 +25,33 @@ export const VariantForm: React.FC<VariantFormProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewGroupName(e.target.value);
-    // Limpiar error al cambiar
-    if (error) setNewGroupName(e.target.value); // Esto debería limpiar el error en el padre
   };
 
   return (
     <div className={styles.addGroupSection}>
-      <div className={styles.addGroupRow}>
+      <style>{`
+        @media (max-width: 639px) {
+          .variantFormRowResponsive {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+          }
+          .variantFormInputResponsive {
+            width: 100% !important;
+            min-height: 44px !important;
+          }
+          .variantFormBtnResponsive {
+            width: 100% !important;
+            min-height: 44px !important;
+            justify-content: center !important;
+            display: flex !important;
+            align-items: center !important;
+          }
+        }
+      `}</style>
+      <div className={`${styles.addGroupRow} variantFormRowResponsive`}>
         <input
-          className={`${styles.groupInput} ${error ? styles.inputError : ''}`}
+          className={`${styles.groupInput} ${error ? styles.inputError : ''} variantFormInputResponsive`}
           type="text"
           placeholder="Nombre del grupo, ej: Color, Tamaño, Material..."
           value={newGroupName}
@@ -49,7 +59,7 @@ export const VariantForm: React.FC<VariantFormProps> = ({
           onKeyDown={handleKeyDown}
         />
         <Tooltip title="Crear un nuevo grupo de variantes para este producto (ej: Color, Tamaño, Material)" placement="top" arrow>
-          <button className={styles.addGroupBtn} onClick={onAddGroup} type="button">
+          <button className={`${styles.addGroupBtn} variantFormBtnResponsive`} onClick={onAddGroup} type="button">
             + Agregar grupo
           </button>
         </Tooltip>

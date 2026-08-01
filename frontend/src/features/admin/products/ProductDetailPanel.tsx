@@ -70,7 +70,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     });
   }, [product.inStock, product.isFeatured]);
 
-  // Centrar automáticamente el botón de la pestaña activa en la cabecera (defensivo para JSDOM)
+  // Centrar automáticamente el botón de la pestaña activa en la cabecera
   useEffect(() => {
     const activeBtn = tabButtonRefs.current[activeTab];
     if (activeBtn && typeof activeBtn.scrollIntoView === 'function') {
@@ -98,12 +98,10 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     }
   }, [canEdit, product.id, statusFlags, updateProduct]);
 
-  // Solicitar confirmación de eliminación
   const handleDeleteClick = useCallback(() => {
     setShowDeleteModal(true);
   }, []);
 
-  // Confirmar y ejecutar eliminación
   const handleConfirmDelete = useCallback(async () => {
     if (!onDelete) return;
 
@@ -117,7 +115,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     }
   }, [product.id, onDelete, onBack]);
 
-  // Cancelar eliminación
   const handleCancelDelete = useCallback(() => {
     setShowDeleteModal(false);
   }, []);
@@ -134,15 +131,12 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
 
-    // Requiere deslizamiento horizontal >= 50px y que el movimiento X sea mayor al vertical Y
     if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY * 1.2) {
       const currentIndex = TAB_ORDER.indexOf(activeTab as Exclude<TabName, 'seo'>);
 
       if (deltaX < 0 && currentIndex < TAB_ORDER.length - 1) {
-        // Swipe izquierda -> Siguiente pestaña
         setActiveTab(TAB_ORDER[currentIndex + 1]);
       } else if (deltaX > 0 && currentIndex > 0) {
-        // Swipe derecha -> Pestaña anterior
         setActiveTab(TAB_ORDER[currentIndex - 1]);
       }
     }
@@ -151,7 +145,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     touchStartY.current = null;
   };
 
-  // Render tab content with suspense fallback
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':
@@ -185,7 +178,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
 
   const currentTabIndex = TAB_ORDER.indexOf(activeTab as Exclude<TabName, 'seo'>);
 
-  // Renderizar la barra de acciones en móviles mediante un portal a document.body
   const renderMobileActions = () => {
     if (!canEdit && !canDelete) return null;
 
@@ -219,15 +211,78 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   };
 
   return (
-    <div className={styles.panel}>
+    <div className={`${styles.panel} pdPanelMobileSingleScroll`}>
+      <style>{`
+        @media (max-width: 1023px) {
+          /* Eliminación del doble scroll en móvil */
+          .pdPanelMobileSingleScroll {
+            height: auto !important;
+            max-height: none !important;
+            overflow-y: visible !important;
+            padding-bottom: 110px !important;
+          }
+
+          /* Barra 'Volver' pegajosa en móvil */
+          .stickyMobileBackBar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            min-height: 48px;
+            padding: 8px 16px;
+            background: var(--color-bg-primary, #ffffff);
+            border-bottom: 1px solid var(--color-border, #e5e2dd);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
+          }
+
+          .stickyMobileBackBtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: none;
+            color: var(--color-primary, #769282);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 0;
+            min-height: 44px;
+          }
+
+          .pdHeaderCardMobile {
+            margin-top: 4px !important;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .stickyMobileBackBar {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* Barra de regreso pegajosa para móvil */}
+      {onBack && (
+        <div className="stickyMobileBackBar">
+          <button
+            type="button"
+            className="stickyMobileBackBtn"
+            onClick={onBack}
+            aria-label="Volver a la lista de productos"
+          >
+            <ArrowLeft size={18} />
+            <span>Volver a Productos</span>
+          </button>
+        </div>
+      )}
+
       {/* Tarjeta de Cabecera Unificada (Info + Pestañas) */}
-      <div className={styles.headerCard}>
+      <div className={`${styles.headerCard} pdHeaderCardMobile`}>
         <div className={styles.panelHeader}>
-          {onBack && (
-            <button type="button" className={styles.mobileBackBtn} onClick={onBack}>
-              <ArrowLeft size={18} /> Volver a la lista
-            </button>
-          )}
           <div className={styles.headerContent}>
             <div className={styles.productTitle}>
               {product.images?.[0] && (
@@ -241,7 +296,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
                 <h2 className={styles.panelTitle}>{product.name}</h2>
                 <p className={styles.productSKU}>{product.sku}</p>
 
-                {/* Badges de estado mejorados con iconos */}
                 <div className={styles.headerStatus}>
                   <button
                     type="button"
@@ -269,7 +323,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
                 </div>
               </div>
             </div>
-            {/* acciones en desktop */}
+
             {(canEdit || canDelete) && (
               <div className={`${styles.panelActions} ${styles.desktopActions}`}>
                 <div className={styles.actions}>
@@ -295,7 +349,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           </div>
         </div>
 
-        {/* Pestañas integradas dentro de la misma tarjeta de cabecera */}
         <div className={styles.tabsContainer}>
           <div className={styles.tabsList}>
             {TAB_ORDER.map(tab => (
@@ -312,7 +365,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       </div>
 
-      {/* Indicador táctil de deslizamiento (solo visible en móviles) */}
       <div className={styles.swipeHintBar}>
         <span className={styles.swipeHintText}>
           {currentTabIndex > 0 && <MoveLeft size={12} />}
@@ -321,7 +373,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </span>
       </div>
 
-      {/* Tab Content con detector de gestos de deslizamiento */}
       <div
         className={styles.tabContent}
         onTouchStart={handleTouchStart}
@@ -330,10 +381,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         {renderTabContent()}
       </div>
 
-      {/* Acciones móviles portaleadas directamente a document.body */}
       {renderMobileActions()}
 
-      {/* Delete confirmation modal */}
       {showDeleteModal && (
         <ModalConfirm
           open={showDeleteModal}

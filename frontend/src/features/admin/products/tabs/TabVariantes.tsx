@@ -42,7 +42,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     errors = {},
 }, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
-
     const [isSubmittingCombo, setIsSubmittingCombo] = useState(false);
 
     interface Sku {
@@ -82,7 +81,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     const [combinationAttrs, setCombinationAttrs] = useState<Record<string, string>>({});
     const [combinationErrors, setCombinationErrors] = useState<CombinationValidationErrors>({});
 
-    // 🟢 NUEVO: Estado para rastrear el intento de envío del modal
     const [submitComboAttempted, setSubmitComboAttempted] = useState(false);
 
     const [createdCombinations, setCreatedCombinations] = useState<CreatedCombination[]>([]);
@@ -145,7 +143,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             images: imagesInput,
             price: combinationPrice,
         });
-        // local threshold validation is checked in the component
         setCombinationErrors(result);
         return result;
     }, [combinationSku, combinationImages, combinationPrice, form.sku, uploadedFiles]);
@@ -164,7 +161,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setCombinationSku(form.sku ? `${form.sku}-` : '');
         setEditingSkuId(null);
         setCombinationErrors({});
-        setSubmitComboAttempted(false); // 🟢 Reset del intento de submit
+        setSubmitComboAttempted(false);
         try {
             setFiles([] as UploadFileState[]);
         } catch {
@@ -260,7 +257,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         }
     };
 
-    // 🟢 VALIDACIÓN DE ESTADO REACTIVO PARA EL BOTÓN "CREAR"
     const activeVariants = form.variants ?? [];
     const hasMissingAttrs = activeVariants.some((g: { name: string }) => !combinationAttrs[g.name] || !combinationAttrs[g.name].trim());
     const isComboFormInvalid =
@@ -347,8 +343,8 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
 
             await loadSkus(productId);
 
-        } catch(err) {
-            console.error('Error al guardar variante:', err);
+        } catch (_err) {
+            console.error('Error al guardar variante:', _err);
             toast.error('Ocurrió un error al guardar la combinación');
             setCreatedCombinations(prev => prev.filter(c => c.sku !== sku));
         } finally {
@@ -379,7 +375,20 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             }
             toast.success('Imagen eliminada');
             await loadSkus(productId!);
-        } catch (err) {
+        } catch (_err) {
+            const status = _err && typeof _err === 'object' && 'status' in _err ? (_err as Record<string, unknown>).status : undefined;
+            if (status === 403) {
+                try {
+                    const remainingRemote = uploadedFiles.filter(x => x.uid !== uid && x.remoteUrl).map(x => x.remoteUrl!);
+                    await updateVariantChild(productId!, editingSkuId, { images: remainingRemote });
+                    toast.success('Imagen eliminada');
+                    await loadSkus(productId!);
+                    return;
+                } catch {
+                    // fallthrough to rollback
+                }
+            }
+
             setFiles(prev => [copy, ...prev]);
             toast.error('No se pudo eliminar la imagen en el servidor');
         }
@@ -455,12 +464,73 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
 
     return (
         <fieldset className={styles.fieldset}>
+            <style>{`
+                @media (max-width: 767px) {
+                    .tabVariantsRowResponsive {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        gap: 10px !important;
+                        padding: 12px !important;
+                        border-radius: 12px !important;
+                        background: var(--color-bg-secondary, #f8f9fa) !important;
+                        border: 1px solid var(--color-border, #e5e2dd) !important;
+                    }
+                    .tabVariantsRowHeaderMobile {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        width: 100% !important;
+                    }
+                    .tabVariantsAddValueResponsive {
+                        width: 100% !important;
+                        display: flex !important;
+                        gap: 8px !important;
+                    }
+                    .tabVariantsAddValueResponsive input {
+                        flex: 1 !important;
+                        min-height: 44px !important;
+                    }
+                    .tabVariantsAddValueResponsive button {
+                        min-width: 44px !important;
+                        min-height: 44px !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+                    .tabVariantsToolbarResponsive {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        gap: 10px !important;
+                    }
+                    .tabVariantsToolbarResponsive button {
+                        width: 100% !important;
+                        min-height: 44px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+                    .tabVariantsNewGroupRow {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        gap: 10px !important;
+                    }
+                    .tabVariantsNewGroupRow input {
+                        width: 100% !important;
+                        min-height: 44px !important;
+                    }
+                    .tabVariantsNewGroupRow button {
+                        width: 100% !important;
+                        min-height: 44px !important;
+                        justify-content: center !important;
+                    }
+                }
+            `}</style>
+
             <p className={styles.fieldHint}>
-                Agrupá opciones como Color o Tamaño. Gestioná todas tus variantes desde la pestaña de
-                Variantes en esta vista.
+                Agrupá opciones como Color o Tamaño. Gestioná todas tus variantes de forma limpia.
             </p>
 
-            <div className={styles.newGroupRow}>
+            <div className={`${styles.newGroupRow} tabVariantsNewGroupRow`}>
                 <input
                     className={styles.input}
                     value={newGroupName}
@@ -481,11 +551,21 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
 
             <div className={styles.attributesList}>
                 {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
-                    <div key={group.id} className={styles.variantRow}>
-                        <div className={styles.variantLabelBlock}>
-                            <span className={styles.variantGroupName}>
-                                {group.name}
-                            </span>
+                    <div key={group.id} className={`${styles.variantRow} tabVariantsRowResponsive`}>
+                        <div className="tabVariantsRowHeaderMobile">
+                            <div className={styles.variantLabelBlock}>
+                                <span className={styles.variantGroupName}>
+                                    {group.name}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                className={styles.deleteGroupBtn}
+                                onClick={() => onRemoveVariantGroup(group.id)}
+                                aria-label={`Eliminar grupo ${group.name}`}
+                            >
+                                ×
+                            </button>
                         </div>
 
                         <div className={styles.tagsContainer}>
@@ -504,7 +584,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             ))}
                         </div>
 
-                        <div className={styles.addValueInputBlock}>
+                        <div className={`${styles.addValueInputBlock} tabVariantsAddValueResponsive`}>
                             <input
                                 className={styles.compactInput}
                                 value={newGroupValues[group.id] ?? ''}
@@ -514,7 +594,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                 onKeyDown={e =>
                                     e.key === 'Enter' && (e.preventDefault(), onAddVariantValue(group.id))
                                 }
-                                placeholder={`Añadir...`}
+                                placeholder={`Añadir valor a ${group.name}...`}
                             />
                             <button
                                 type="button"
@@ -525,15 +605,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                 +
                             </button>
                         </div>
-
-                        <button
-                            type="button"
-                            className={styles.deleteGroupBtn}
-                            onClick={() => onRemoveVariantGroup(group.id)}
-                            aria-label={`Eliminar grupo ${group.name}`}
-                        >
-                            ×
-                        </button>
                     </div>
                 ))}
             </div>
@@ -545,7 +616,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             )}
 
             <div className={styles.combinationsSection}>
-                <div className={styles.combinationsToolbar}>
+                <div className={`${styles.combinationsToolbar} tabVariantsToolbarResponsive`}>
                     <button
                         type="button"
                         className={styles.bulkGenerateBtn}
@@ -578,7 +649,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 />
             </div>
 
-            {/* 🟢 MODAL DE COMBINACIÓN BLINDADO CON VALIDACIONES EXPLICITAS */}
+            {/* MODAL DE COMBINACIÓN */}
             <Modal
                 open={combinationModalOpen}
                 onClose={() => setCombinationModalOpen(false)}
@@ -611,7 +682,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         <p className={styles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
                     )}
 
-                    {/* 🟢 VALIDACIÓN DE SELECTS DE ATRIBUTOS */}
                     {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => {
                         const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
                         return (
@@ -634,11 +704,10 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         );
                     })}
 
-                    {/* 🟢 VALIDACIÓN DE SKU */}
                     <div className={styles.field}>
-                        <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
+                        <label htmlFor="combination-sku-tab" className={styles.label}>SKU *</label>
                         <input
-                            id="combination-sku"
+                            id="combination-sku-tab"
                             className={`${styles.input} ${(combinationErrors.sku || (submitComboAttempted && !combinationSku.trim())) ? styles.inputError : ''}`}
                             value={combinationSku}
                             onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
@@ -650,9 +719,8 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         )}
                     </div>
 
-                    {/* Imágenes */}
                     <div className={styles.field}>
-                        <label htmlFor="combination-images" className={styles.label}>Imágenes</label>
+                        <label htmlFor="combination-images-tab" className={styles.label}>Imágenes</label>
                         <div style={{ marginTop: '8px' }}>
                             <ImageUploader onAddFiles={addFiles} onReject={(rej) => rej.forEach(r => toast.error(`${r.file.name}: ${r.reason}`))} />
                             <ImagePreviewList
@@ -665,12 +733,11 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
                     </div>
 
-                    {/* Precio & Stock */}
                     <div className={styles.modalRowFields}>
                         <div className={styles.field}>
-                            <label htmlFor="combination-price" className={styles.label}>Precio</label>
+                            <label htmlFor="combination-price-tab" className={styles.label}>Precio</label>
                             <input
-                                id="combination-price"
+                                id="combination-price-tab"
                                 type="number"
                                 step="0.01"
                                 className={`${styles.input} ${combinationErrors.price ? styles.inputError : ''}`}
@@ -685,9 +752,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         </div>
 
                         <div className={styles.field}>
-                            <label htmlFor="combination-stock" className={styles.label}>Stock</label>
+                            <label htmlFor="combination-stock-tab" className={styles.label}>Stock</label>
                             <input
-                                id="combination-stock"
+                                id="combination-stock-tab"
                                 type="number"
                                 className={styles.input}
                                 value={combinationStock === '' ? '' : String(combinationStock)}
@@ -696,9 +763,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         </div>
                     </div>
                     <div className={styles.field}>
-                        <label htmlFor="combination-critical" className={styles.label}>Umbral stock crítico</label>
+                        <label htmlFor="combination-critical-tab" className={styles.label}>Umbral stock crítico</label>
                         <input
-                            id="combination-critical"
+                            id="combination-critical-tab"
                             type="number"
                             className={`${styles.input} ${combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
                             value={combinationCriticalThreshold === '' ? '' : String(combinationCriticalThreshold)}
