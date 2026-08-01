@@ -127,6 +127,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             onBlur={() => handleBlur('name')}
                             required
                             placeholder='Escriba un producto'
+                            style={{ minHeight: '44px', fontSize: '16px' }}
                         />
                         {touched.name && (
                             <ValidationHelper
@@ -152,6 +153,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             }}
                             onBlur={() => handleBlur('sku')}
                             placeholder={suggestedSku}
+                            style={{ minHeight: '44px', fontSize: '16px' }}
                         />
                         {!form.sku && showSkuSuggestion && form.name.trim() && (
                             <SkuSuggestion
@@ -179,6 +181,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         onChange={e => handleSlugChange(e.target.value)}
                         onBlur={() => handleBlur('slug')}
                         placeholder="Se genera automáticamente a partir del nombre"
+                        style={{ minHeight: '44px', fontSize: '16px' }}
                     />
                     {touched.slug && (
                         <ValidationHelper
@@ -186,7 +189,6 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             success={!!(form.slug && !localErrors.slug)}
                         />
                     )}
-
                 </div>
 
                 <div className={styles.field}>
@@ -197,6 +199,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         value={form.shortDescription}
                         onChange={e => setField('shortDescription', e.target.value)}
                         maxLength={160}
+                        style={{ minHeight: '44px', fontSize: '16px' }}
                     />
                     <span className={styles.fieldHint}>
                         {form.shortDescription.length}/160 caracteres
@@ -213,6 +216,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         value={form.description}
                         onChange={e => setField('description', e.target.value)}
                         placeholder='Descripción del producto (opcional)'
+                        style={{ fontSize: '16px' }}
                     />
                     <span className={styles.fieldHint}>
                         {form.description.length} caracteres
@@ -223,44 +227,43 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
             <fieldset className={styles.fieldset}>
                 <legend className={styles.legend}>Etiquetas</legend>
                 <div className={styles.field}>
-                    <label className={styles.label} htmlFor="product-tags">Agregar etiqueta</label>
-                    <div className={styles.checkRow} style={{ marginTop: '0.25rem' }}>
+                    <div className={styles.checkRow} style={{ marginTop: '0.25rem', minHeight: '44px', display: 'flex', alignItems: 'center' }}>
                         <input
                             type="checkbox"
                             id="product-offer"
                             checked={form.tags.includes('oferta')}
                             onChange={(e) => toggleTag('oferta', e.target.checked)}
-                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                            style={{ cursor: 'pointer', width: '20px', height: '20px', accentColor: 'var(--color-primary)' }}
                         />
-                        <label htmlFor="product-offer" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        <label htmlFor="product-offer" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}>
                             En Oferta
                         </label>
                     </div>
-                    <div className={styles.checkRow} style={{ marginTop: '0.5rem' }}>
+                    <div className={styles.checkRow} style={{ marginTop: '0.5rem', minHeight: '44px', display: 'flex', alignItems: 'center' }}>
                         <input
                             type="checkbox"
                             id="product-novedad"
                             checked={form.tags.includes('novedad')}
                             onChange={(e) => toggleTag('novedad', e.target.checked)}
-                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                            style={{ cursor: 'pointer', width: '20px', height: '20px', accentColor: 'var(--color-primary)' }}
                         />
-                        <label htmlFor="product-novedad" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        <label htmlFor="product-novedad" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}>
                             Novedad
                         </label>
                     </div>
-                    <div className={styles.checkRow} style={{ marginTop: '0.5rem' }}>
+                    <div className={styles.checkRow} style={{ marginTop: '0.5rem', minHeight: '44px', display: 'flex', alignItems: 'center' }}>
                         <input
                             type="checkbox"
                             id="product-featured"
                             checked={form.isFeatured || false}
                             onChange={(e) => handleFeaturedToggle(e.target.checked)}
-                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                            style={{ cursor: 'pointer', width: '20px', height: '20px', accentColor: 'var(--color-primary)' }}
                         />
-                        <label htmlFor="product-featured" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        <label htmlFor="product-featured" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}>
                             Producto Destacado
                         </label>
                     </div>
-                    <div className={styles.tagRow}>
+                    <div className={styles.tagRow} style={{ marginTop: '8px' }}>
                         <input
                             className={styles.input}
                             id="product-tags"
@@ -268,8 +271,9 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             onChange={e => setTagInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), onAddTag())}
                             placeholder="Ej: destacado, oferta, nuevo..."
+                            style={{ minHeight: '44px', fontSize: '16px' }}
                         />
-                        <button type="button" className={styles.addBtn} onClick={onAddTag}>
+                        <button type="button" className={styles.addBtn} onClick={onAddTag} style={{ minWidth: '44px', minHeight: '44px' }}>
                             <i className="bi bi-plus-lg"></i>
                         </button>
                     </div>
@@ -302,12 +306,14 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         onChange={e => setFeatureInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), onAddFeature())}
                         placeholder="Ej: Material: acero inoxidable"
+                        style={{ minHeight: '44px', fontSize: '16px' }}
                     />
                     <button
                         type="button"
                         className={styles.addBtn}
                         onClick={onAddFeature}
                         aria-label="Agregar característica"
+                        style={{ minWidth: '44px', minHeight: '44px' }}
                     >
                         <i className="bi bi-plus-lg"></i>
                     </button>
