@@ -84,7 +84,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Mobile Adjustments (Stack Navigation) ── */
+/* ── Ajustes moviles (Navegacion limpia en pila) ── */
 @media (max-width: 1024px) {
   .container {
     height: auto;
@@ -92,7 +92,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    display: block; /* Permite que el contenido fluya naturalmente */
+    display: block;
     overflow: visible;
   }
 
@@ -102,20 +102,21 @@
     background: transparent;
   }
 
+  /* Eliminamos el marco/borde envolvente en movil para que coincida con Categorias */
   .detailWrapper {
-    display: none; /* Oculto por defecto en móvil */
+    display: none;
     width: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    overflow: hidden;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
   }
 
-  /* Cuando se selecciona un producto, ocultamos la lista y mostramos el detalle */
   .container.showDetail .listPane {
     display: none;
   }
 
   .container.showDetail .detailWrapper {
-    display: flex;
+    display: block;
   }
 }

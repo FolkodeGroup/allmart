@@ -181,7 +181,7 @@
 
 /* ── Responsive Mobile ── */
 @media (max-width: 1024px) {
-  /* Regla clave: Oculta la barra de herramientas de lista cuando el detalle está abierto en móvil */
+  /* Oculta absolutamente todas las herramientas de la lista (incluida la paginacion) al abrir el detalle en movil */
   .mobileDetailActive .listToolbarArea {
     display: none !important;
   }

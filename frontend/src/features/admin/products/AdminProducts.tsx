@@ -475,12 +475,14 @@ export function AdminProducts() {
                   />
 
                   {total > PAGE_LIMIT && (
-                    <AdminPagination
-                      page={apiPage}
-                      totalPages={apiTotalPages}
-                      onPageChange={handlePageChange}
-                      ariaLabel="Paginación de productos"
-                    />
+                    <div className={styles.listToolbarArea}>
+                      <AdminPagination
+                        page={apiPage}
+                        totalPages={apiTotalPages}
+                        onPageChange={handlePageChange}
+                        ariaLabel="Paginación de productos"
+                      />
+                    </div>
                   )}
                 </div>
               )}

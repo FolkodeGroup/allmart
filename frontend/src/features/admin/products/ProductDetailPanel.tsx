@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -184,6 +185,39 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
 
   const currentTabIndex = TAB_ORDER.indexOf(activeTab as Exclude<TabName, 'seo'>);
 
+  // Renderizar la barra de acciones en móviles mediante un portal a document.body
+  const renderMobileActions = () => {
+    if (!canEdit && !canDelete) return null;
+
+    const actionsMarkup = (
+      <div className={styles.mobileActionsOverlay}>
+        <div className={styles.mobileActionsContainer}>
+          {canEdit && onEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit(product.id)}
+              className={styles.btnEdit}
+            >
+              Editar
+            </button>
+          )}
+          {canDelete && onDelete && (
+            <button
+              type="button"
+              onClick={handleDeleteClick}
+              className={styles.btnDelete}
+            >
+              Eliminar
+            </button>
+          )}
+        </div>
+      </div>
+    );
+
+    if (typeof document === 'undefined') return actionsMarkup;
+    return createPortal(actionsMarkup, document.body);
+  };
+
   return (
     <div className={styles.panel}>
       {/* Header */}
@@ -287,29 +321,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         {renderTabContent()}
       </div>
 
-      {/* actions mobile */}
-      {(canEdit || canDelete) && (
-        <div className={`${styles.panelActions} ${styles.mobileActions}`}>
-          <div className={styles.actions}>
-            {canEdit && onEdit && (
-              <button
-                onClick={() => onEdit(product.id)}
-                className={styles.btnEdit}
-              >
-                Editar
-              </button>
-            )}
-            {canDelete && onDelete && (
-              <button
-                onClick={handleDeleteClick}
-                className={styles.btnDelete}
-              >
-                Eliminar
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Acciones móviles portaleadas directamente a document.body */}
+      {renderMobileActions()}
 
       {/* Delete confirmation modal */}
       {showDeleteModal && (
