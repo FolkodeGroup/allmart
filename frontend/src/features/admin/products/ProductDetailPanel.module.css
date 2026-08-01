@@ -7,40 +7,30 @@
   flex-direction: column;
   height: 100%;
   background: var(--color-bg-primary);
-  border-left: 1px solid var(--color-border);
-  animation: slideInRight 0.3s ease-out;
+  border-left: none; /* El borde lo maneja el wrapper padre */
   overflow: hidden;
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 /* ── Header ── */
 .panelHeader {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
   flex-shrink: 0;
 }
 
+.mobileBackBtn {
+  display: none;
+}
+
 .headerContent {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .productTitle {
@@ -135,33 +125,11 @@
   text-overflow: ellipsis;
 }
 
-.closeBtn {
-  background: none;
-  border: none;
-  font-size: var(--text-lg);
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-  padding: var(--space-2);
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.closeBtn:hover {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
 /* ── Tabs ── */
 .tabsContainer {
   flex-shrink: 0;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg-primary);
-  overflow-x: auto;
-  overflow-y: hidden;
   position: sticky;
   top: 0;
   z-index: 5;
@@ -173,6 +141,14 @@
   padding: 0;
   margin: 0;
   list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabsList::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -188,6 +164,7 @@
   position: relative;
   transition: color 0.2s, background 0.2s;
   border-bottom: 2px solid transparent;
+  scroll-snap-align: start;
 }
 
 .tab:hover {
@@ -212,7 +189,6 @@
 .tabContent {
   flex: 1;
   min-height: 0;
-  max-height: 525px;
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--space-5);
@@ -220,13 +196,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .loadingFallback {
@@ -249,9 +220,7 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 /* ── Footer ── */
@@ -263,6 +232,14 @@
   padding: var(--space-4) var(--space-5);
   background: var(--color-bg-secondary);
   flex-shrink: 0;
+}
+
+.desktopActions {
+  display: flex;
+}
+
+.mobileActions {
+  display: none;
 }
 
 .actions {
@@ -289,15 +266,6 @@
   transform: translateY(-1px);
 }
 
-.btnEdit:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.btnEdit:active {
-  transform: translateY(0);
-}
-
 .btnDelete {
   padding: var(--space-2) var(--space-4);
   background: #dc2626;
@@ -317,27 +285,35 @@
   transform: translateY(-1px);
 }
 
-.btnDelete:focus-visible {
-  outline: 2px solid #dc2626;
-  outline-offset: 2px;
-}
-
-.btnDelete:active {
-  transform: translateY(0);
-}
-
 /* ── Responsive ── */
 @media (max-width: 1024px) {
   .panel {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    border-left: none;
-    border-radius: 0;
+    height: auto;
+    overflow: visible;
+  }
+
+  .mobileBackBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0 0 16px 0;
+    cursor: pointer;
+    width: 100%;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 16px;
   }
 
   .panelHeader {
-    padding: var(--space-3) var(--space-4);
+    align-items: flex-start;
+  }
+
+  .headerContent {
+    width: 100%;
   }
 
   .productImage {
@@ -351,83 +327,34 @@
 
   .tabContent {
     padding: var(--space-4);
+    overflow-y: visible; /* Scroll natural del body */
   }
-}
 
-@media (max-width: 640px) {
-  .panel {
-    position: fixed;
-    inset: 0;
+  .desktopActions {
+    display: none;
+  }
+
+  .mobileActions {
+    display: flex;
+    position: sticky;
+    bottom: 0;
+    background: var(--color-bg-primary);
+    padding: 12px 16px;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
     z-index: 100;
+    border-top: 1px solid var(--color-border);
+    margin: 0;
   }
 
-  .tabsList {
-    gap: 0;
+  .mobileActions .actions {
+    width: 100%;
+    display: flex;
+    gap: 12px;
   }
 
-  .tab {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--text-xs);
+  .mobileActions button {
+    flex: 1;
+    justify-content: center;
+    padding: 12px;
   }
-
-  .panelActions {
-    flex-direction: row;
-    gap: var(--space-2);
-    padding: var(--space-3);
-  }
-
-  .btnEdit,
-  .btnDelete {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--text-xs);
-  }
-}
-
-/* ── Ready to Publish Checklist Container ── */
-.checklistContainer {
-  padding: var(--space-3) var(--space-5);
-  background: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border);
-  flex-shrink: 0;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.checklistContainer :global(.checklistSection) {
-  padding: 0;
-  background: transparent;
-  gap: 0.5rem;
-}
-
-.checklistContainer :global(.sectionTitle) {
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.checklistContainer :global(.checklist) {
-  gap: 0.5rem;
-}
-
-.checklistContainer :global(.checklistItem) {
-  padding: 0.5rem;
-  border-radius: 4px;
-  gap: 0.5rem;
-}
-
-.checklistContainer :global(.checklistIcon) {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-}
-
-.checklistContainer :global(.checklistContent) {
-  gap: 0.125rem;
-}
-
-.checklistContainer :global(.checklistContent strong) {
-  font-size: 0.85rem;
-}
-
-.checklistContainer :global(.checklistContent p) {
-  display: none;
 }

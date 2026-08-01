@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
+import { ArrowLeft } from 'lucide-react';
 import styles from './ProductDetailPanel.module.css';
 
 // Lazy load tab components
@@ -17,7 +18,6 @@ const ProductDetailVariants = React.lazy(() =>
 const ProductDetailImages = React.lazy(() =>
   import('./tabs/ProductDetailImages').then(m => ({ default: m.ProductDetailImages }))
 );
-// ...existing code...
 
 type TabName = 'basic' | 'pricing' | 'variants' | 'images' | 'seo';
 
@@ -27,6 +27,7 @@ interface ProductDetailPanelProps {
   onDelete?: (id: string) => void;
   canEdit?: boolean;
   canDelete?: boolean;
+  onBack?: () => void;
 }
 
 const TAB_LABELS: Record<Exclude<TabName, 'seo'>, string> = {
@@ -44,6 +45,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   onDelete,
   canEdit = true,
   canDelete = true,
+  onBack,
 }: ProductDetailPanelProps) {
   const { updateProduct } = useAdminProducts();
   const [activeTab, setActiveTab] = useState<TabName>('basic');
@@ -91,10 +93,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     try {
       onDelete(product.id);
       setShowDeleteModal(false);
+      if (onBack) onBack(); // Volver a la lista tras eliminar
     } finally {
       setIsDeleting(false);
     }
-  }, [product.id, onDelete]);
+  }, [product.id, onDelete, onBack]);
 
   // Cancelar eliminación
   const handleCancelDelete = useCallback(() => {
@@ -128,12 +131,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             <ProductDetailImages productId={product.id} />
           </Suspense>
         );
-      // case 'seo':
-      //   return (
-      //     <Suspense fallback={<TabLoadingFallback />}>
-      //       <ProductDetailSEO product={product} />
-      //     </Suspense>
-      //   );
       default:
         return null;
     }
@@ -143,6 +140,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     <div className={styles.panel}>
       {/* Header */}
       <div className={styles.panelHeader}>
+        {onBack && (
+          <button type="button" className={styles.mobileBackBtn} onClick={onBack}>
+            <ArrowLeft size={18} /> Volver a la lista
+          </button>
+        )}
         <div className={styles.headerContent}>
           <div className={styles.productTitle}>
             {product.images?.[0] && (
@@ -177,9 +179,9 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
               </div>
             </div>
           </div>
-          {/* actions */}
+          {/* actions desktop */}
           {(canEdit || canDelete) && (
-            <div className={styles.panelActions}>
+            <div className={`${styles.panelActions} ${styles.desktopActions}`}>
               <div className={styles.actions}>
                 {canEdit && onEdit && (
                   <button
@@ -223,7 +225,29 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         {renderTabContent()}
       </div>
 
-
+      {/* actions mobile */}
+      {(canEdit || canDelete) && (
+        <div className={`${styles.panelActions} ${styles.mobileActions}`}>
+          <div className={styles.actions}>
+            {canEdit && onEdit && (
+              <button
+                onClick={() => onEdit(product.id)}
+                className={styles.btnEdit}
+              >
+                Editar
+              </button>
+            )}
+            {canDelete && onDelete && (
+              <button
+                onClick={handleDeleteClick}
+                className={styles.btnDelete}
+              >
+                Eliminar
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Delete confirmation modal */}
       {showDeleteModal && (

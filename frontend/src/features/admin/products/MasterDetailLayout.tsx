@@ -33,6 +33,10 @@ function MasterDetailLayoutInner({
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(
     defaultSelectedProductId
   );
+  
+  // Estado para controlar qué vista se muestra en móviles
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
+  
   const isEmpty = !loading && !error && products.length === 0;
 
   // Auto-select product: prefer defaultSelectedProductId if provided and valid,
@@ -59,6 +63,11 @@ function MasterDetailLayoutInner({
 
   const handleSelectProduct = useCallback((id: string) => {
     setSelectedProductId(id);
+    setMobileView('detail'); // Cambiar a vista de detalle en móviles
+  }, []);
+
+  const handleBackToList = useCallback(() => {
+    setMobileView('list'); // Volver a la lista en móviles
   }, []);
 
   // Memoize the detail content to avoid re-rendering when props don't change
@@ -71,44 +80,49 @@ function MasterDetailLayoutInner({
         onDelete={onDeleteDirect || onDelete}
         canEdit={canEdit}
         canDelete={canDelete}
+        onBack={handleBackToList}
       />
     );
-  }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete]);
+  }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete, handleBackToList]);
 
   return (
-    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''}`}>
+    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''} ${mobileView === 'detail' ? styles.showDetail : ''}`}>
       {/* List Panel (Left) */}
-      <ProductListPanel
-        products={products}
-        loading={loading}
-        error={error}
-        selectedProductId={selectedProductId}
-        onSelectProduct={handleSelectProduct}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        canEdit={canEdit && !!onEdit}
-        canDelete={canDelete && !!onDelete}
-      />
+      <div className={styles.listPane}>
+        <ProductListPanel
+          products={products}
+          loading={loading}
+          error={error}
+          selectedProductId={selectedProductId}
+          onSelectProduct={handleSelectProduct}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          canEdit={canEdit && !!onEdit}
+          canDelete={canDelete && !!onDelete}
+        />
+      </div>
 
       {/* Detail Panel (Right) - Keep provider mounted, conditionally render content */}
-      <AdminVariantsProvider>
-        {detailContent}
-        {/* Empty state when no product selected */}
-        {!selectedProduct && !loading && products.length > 0 && (
-          <div className={styles.emptyDetail}>
-            <div className={styles.emptyDetailContent}>
-              <p>Selecciona un producto para ver sus detalles</p>
+      <div className={styles.detailWrapper}>
+        <AdminVariantsProvider>
+          {detailContent}
+          {/* Empty state when no product selected */}
+          {!selectedProduct && !loading && products.length > 0 && (
+            <div className={styles.emptyDetail}>
+              <div className={styles.emptyDetailContent}>
+                <p>Selecciona un producto para ver sus detalles</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Loading state */}
-        {loading && (
-          <div className={styles.loadingDetail}>
-            <div className={styles.spinner} />
-          </div>
-        )}
-      </AdminVariantsProvider>
+          {/* Loading state */}
+          {loading && (
+            <div className={styles.loadingDetail}>
+              <div className={styles.spinner} />
+            </div>
+          )}
+        </AdminVariantsProvider>
+      </div>
 
       {/* Children toolbar (if provided) */}
       {children && <div className={styles.toolbarArea}>{children}</div>}

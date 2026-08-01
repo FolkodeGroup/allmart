@@ -1,38 +1,43 @@
-/* ============================================
-   ALLMART — MASTER-DETAIL LAYOUT
-   ============================================ */
-
 .container {
-  display: grid;
-  grid-template-columns: 40% 60%;
+  display: flex;
   gap: 0;
-  flex: 1;
-  min-height: 0;
+  height: calc(100vh - 220px);
+  min-height: 500px;
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
   border-radius: 12px;
+  border: 1px solid var(--color-border);
   overflow: hidden;
-  animation: fadeIn 0.3s ease-out;
+  position: relative;
 }
 
 .containerEmpty {
-  grid-template-columns: 1fr;
+  display: block;
+  height: auto;
+  min-height: auto;
+  border: none;
+  background: transparent;
 }
 
+.listPane {
+  width: 380px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-secondary);
+}
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.detailWrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-primary);
+  position: relative;
 }
 
 .emptyDetail {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,19 +47,17 @@
 
 .emptyDetailContent {
   text-align: center;
-}
-
-.emptyDetailContent p {
-  font-family: var(--font-ui);
-  font-size: var(--text-base);
-  margin: 0;
+  padding: 2rem;
 }
 
 .loadingDetail {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-secondary);
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 10;
 }
 
 .spinner {
@@ -63,49 +66,56 @@
   border: 3px solid var(--color-border);
   border-top-color: var(--color-primary);
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  animation: spin 1s linear infinite;
 }
 
 .toolbarArea {
-  grid-column: 1 / -1;
-  padding: var(--space-4);
-  background: var(--color-bg-secondary);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 24px;
+  background: var(--color-bg-primary);
   border-top: 1px solid var(--color-border);
+  z-index: 20;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .container {
-    grid-template-columns: 1fr;
-    flex: 1;
-    min-height: 0;
-  }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-@media (max-width: 768px) {
+/* ── Mobile Adjustments (Stack Navigation) ── */
+@media (max-width: 1024px) {
   .container {
-    grid-template-columns: 1fr;
-    border-radius: 8px;
-  }
-}
-
-@media (max-width: 640px) {
-  .container {
-    grid-template-columns: 1fr;
-    border-radius: 4px;
+    height: auto;
+    min-height: auto;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    display: block; /* Permite que el contenido fluya naturalmente */
+    overflow: visible;
   }
 
-  .emptyDetail {
-    min-height: 300px;
+  .listPane {
+    width: 100%;
+    border-right: none;
+    background: transparent;
   }
 
-  .emptyDetailContent p {
-    font-size: var(--text-sm);
+  .detailWrapper {
+    display: none; /* Oculto por defecto en móvil */
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* Cuando se selecciona un producto, ocultamos la lista y mostramos el detalle */
+  .container.showDetail .listPane {
+    display: none;
+  }
+
+  .container.showDetail .detailWrapper {
+    display: flex;
   }
 }

@@ -33,6 +33,8 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
+const PAGE_LIMIT = 6; // Límite optimizado para vista móvil y tarjetas más amplias
+
 export function AdminProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -212,7 +214,7 @@ export function AdminProducts() {
           status: statusFilter,
           stockLevel: stockLevelFilter,
           page: 1,
-          limit: 10,
+          limit: PAGE_LIMIT,
         });
       }
     };
@@ -243,7 +245,7 @@ export function AdminProducts() {
         status: statusFilter,
         stockLevel: stockLevelFilter,
         page: newPage,
-        limit: 10,
+        limit: PAGE_LIMIT,
       });
     }
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
@@ -404,7 +406,7 @@ export function AdminProducts() {
                   <div className={styles.sortContainer}>
                     <div className={styles.sortControls}>
                       <span className={styles.sortLabel}>Ordenar:</span>
-                      <div style={{ width: '130px', display: 'inline-block' }}>
+                      <div className={styles.sortDropdownWrapper}>
                         <Dropdown
                           options={sortOptions}
                           value={sortField}
@@ -465,7 +467,7 @@ export function AdminProducts() {
                     defaultSelectedProductId={editId || undefined}
                   />
 
-                  {total > 10 && (
+                  {total > PAGE_LIMIT && (
                     <AdminPagination
                       page={apiPage}
                       totalPages={apiTotalPages}
@@ -520,7 +522,7 @@ export function AdminProducts() {
               status: statusFilter,
               stockLevel: stockLevelFilter,
               page: editPage,
-              limit: 10,
+              limit: PAGE_LIMIT,
             });
           }}
           onUnsavedChanges={setUnsavedChanges}

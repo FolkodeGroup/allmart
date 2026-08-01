@@ -301,7 +301,7 @@ export function AdminProductFormPage({
                             productId={productId}
                             images={formProps.form.images}
                             fieldErrors={formProps.fieldErrors}
-                            setField={formProps.setField} // 🟢 PASAMOS LA FUNCIÓN
+                            setField={formProps.setField}
                             onSetImage={formProps.setImage}
                             onAddImageSlot={formProps.addImageSlot}
                             onRemoveImageSlot={formProps.removeImageSlot}
@@ -375,6 +375,7 @@ export function AdminProductFormPage({
                             type="submit"
                             className={styles.submitBtn}
                             disabled={saving}
+                            onClick={() => formRef.current?.requestSubmit()}
                         >
                             {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear producto'}
                         </button>
