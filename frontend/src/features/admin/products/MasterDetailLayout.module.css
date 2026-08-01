@@ -84,7 +84,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Ajustes moviles (Navegacion limpia en pila) ── */
+/* ── Ajustes moviles (Navegacion en Pila con Scroll Interno) ── */
 @media (max-width: 1024px) {
   .container {
     height: auto;
@@ -102,7 +102,6 @@
     background: transparent;
   }
 
-  /* Eliminamos el marco/borde envolvente en movil para que coincida con Categorias */
   .detailWrapper {
     display: none;
     width: 100%;
@@ -118,5 +117,7 @@
 
   .container.showDetail .detailWrapper {
     display: block;
+    height: 100%;
+    overflow: hidden;
   }
 }

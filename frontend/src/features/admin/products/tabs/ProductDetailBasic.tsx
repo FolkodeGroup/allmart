@@ -1,92 +1,123 @@
+import { useState } from 'react';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
-import { AlertCircle, Check } from 'lucide-react';
+import { AlertCircle, Check, ChevronDown, ChevronUp, Tag as TagIcon, ListChecks, FileText, Info } from 'lucide-react';
 import styles from './ProductDetailBasic.module.css';
 
 interface ProductDetailBasicProps {
   product: AdminProduct;
 }
 
+const DESC_TRUNCATE_LIMIT = 150;
+
 export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+
+  const fullDescription = product.description || '';
+  const shouldTruncate = fullDescription.length > DESC_TRUNCATE_LIMIT;
+  const displayedDescription = isDescExpanded || !shouldTruncate
+    ? fullDescription
+    : `${fullDescription.slice(0, DESC_TRUNCATE_LIMIT)}...`;
+
   return (
     <div className={styles.container}>
-      {/* Información general + Descripción en columnas */}
-      <div className={styles.topRow}>
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Información general</h3>
-          <div className={styles.infoGrid}>
-            <div className={styles.field}>
-              <span className={styles.label}>Nombre</span>
-              <p className={styles.value}>{product.name}</p>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>SKU</span>
-              <p className={`${styles.value} ${styles.mono}`}>{product.sku || '-'}</p>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Categoría</span>
-              <p className={styles.value}>{product.category?.name || '-'}</p>
-            </div>
-            <div className={styles.field}>
-              <span className={styles.label}>Slug</span>
-              <p className={`${styles.value} ${styles.mono} ${styles.muted}`}>{product.slug || '-'}</p>
-            </div>
+      {/* 1. Información General */}
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}>
+          <Info size={14} /> Información general
+        </h3>
+        <div className={styles.infoGrid}>
+          <div className={styles.field}>
+            <span className={styles.label}>Nombre</span>
+            <p className={styles.value}>{product.name}</p>
           </div>
-        </section>
+          <div className={styles.field}>
+            <span className={styles.label}>SKU</span>
+            <p className={`${styles.value} ${styles.mono}`}>{product.sku || '-'}</p>
+          </div>
+          <div className={styles.field}>
+            <span className={styles.label}>Categoría</span>
+            <p className={styles.value}>{product.category?.name || '-'}</p>
+          </div>
+          <div className={styles.field}>
+            <span className={styles.label}>Slug</span>
+            <p className={`${styles.value} ${styles.mono} ${styles.muted}`}>{product.slug || '-'}</p>
+          </div>
+        </div>
+      </section>
 
-        <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Descripción</h3>
-          {product.shortDescription && (
-            <div className={styles.field}>
-              <span className={styles.label}>Corta</span>
-              <p className={styles.value}>{product.shortDescription}</p>
-            </div>
-          )}
-          {product.description && (
-            <div className={styles.field}>
-              <span className={styles.label}>Completa</span>
-              <p className={styles.valueText}>{product.description}</p>
-            </div>
-          )}
-          {!product.shortDescription && !product.description && (
-            <p className={styles.empty}>Sin descripción</p>
-          )}
-        </section>
-      </div>
-
-      {/* Fila inferior: características + etiquetas + estado */}
-      <div className={styles.bottomRow}>
-        {product.features && product.features.length > 0 && (
-          <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>Características</h3>
-            <ul className={styles.featuresList}>
-              {product.features.map((f, i) => (
-                <li key={i} className={styles.featureItem}>
-                  <span className={styles.featureDot} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </section>
+      {/* 2. Descripción Corta y Completa con Acordeón en Móvil */}
+      <section className={styles.section}>
+        <h3 className={styles.sectionTitle}>
+          <FileText size={14} /> Descripción
+        </h3>
+        {product.shortDescription && (
+          <div className={styles.field}>
+            <span className={styles.label}>Descripción Corta</span>
+            <p className={styles.valueText}>{product.shortDescription}</p>
+          </div>
         )}
+        {fullDescription ? (
+          <div className={styles.field}>
+            <span className={styles.label}>Descripción Completa</span>
+            <p className={styles.valueText}>{displayedDescription}</p>
+            {shouldTruncate && (
+              <button
+                type="button"
+                className={styles.expandBtn}
+                onClick={() => setIsDescExpanded(!isDescExpanded)}
+              >
+                {isDescExpanded ? (
+                  <>Ver menos <ChevronUp size={14} /></>
+                ) : (
+                  <>Ver más <ChevronDown size={14} /></>
+                )}
+              </button>
+            )}
+          </div>
+        ) : (
+          !product.shortDescription && <p className={styles.empty}>Sin descripción</p>
+        )}
+      </section>
 
+      {/* 3. Características */}
+      {product.features && product.features.length > 0 && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>
+            <ListChecks size={14} /> Características
+          </h3>
+          <ul className={styles.featuresList}>
+            {product.features.map((f, i) => (
+              <li key={i} className={styles.featureItem}>
+                <span className={styles.featureDot} />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* 4. Etiquetas y Estado */}
+      <div className={styles.bottomRow}>
         {product.tags && product.tags.length > 0 && (
           <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>Etiquetas</h3>
+            <h3 className={styles.sectionTitle}>
+              <TagIcon size={14} /> Etiquetas
+            </h3>
             <div className={styles.tagsList}>
               {product.tags.map((tag, i) => (
-                <span key={i} className={styles.tag}>{tag}</span>
+                <span key={i} className={styles.tag}>#{tag}</span>
               ))}
             </div>
           </section>
         )}
 
         <section className={styles.section}>
-          <h3 className={styles.sectionTitle}>Estado</h3>
+          <h3 className={styles.sectionTitle}>Estado de publicación</h3>
           <div className={styles.statusRow}>
             <div className={styles.statusItem}>
-              <span className={styles.label}>En stock</span>
+              <span className={styles.label}>Disponibilidad</span>
               <div className={`${styles.statusBadge} ${product.inStock ? styles.active : styles.inactive}`}>
-                {product.inStock ? <><Check size={13} /><span>Sí</span></> : <><AlertCircle size={13} /><span>No</span></>}
+                {product.inStock ? <><Check size={13} /><span>En Stock</span></> : <><AlertCircle size={13} /><span>Agotado</span></>}
               </div>
             </div>
             <div className={styles.statusItem}>
@@ -96,11 +127,11 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
               </div>
             </div>
             <div className={styles.statusItem}>
-              <span className={styles.label}>Rating</span>
+              <span className={styles.label}>Puntuación</span>
               <p className={styles.ratingValue}>
                 {product.rating
                   ? `${product.rating.toFixed(1)} ⭐ (${product.reviewCount})`
-                  : 'Sin rating'}
+                  : 'Sin opiniones'}
               </p>
             </div>
           </div>
@@ -109,4 +140,3 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
     </div>
   );
 }
-

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
-import { ArrowLeft, MoveLeft, MoveRight } from 'lucide-react';
+import { ArrowLeft, MoveLeft, MoveRight, Check, X, Star } from 'lucide-react';
 import styles from './ProductDetailPanel.module.css';
 
 // Lazy load tab components
@@ -220,86 +220,95 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
 
   return (
     <div className={styles.panel}>
-      {/* Header */}
-      <div className={styles.panelHeader}>
-        {onBack && (
-          <button type="button" className={styles.mobileBackBtn} onClick={onBack}>
-            <ArrowLeft size={18} /> Volver a la lista
-          </button>
-        )}
-        <div className={styles.headerContent}>
-          <div className={styles.productTitle}>
-            {product.images?.[0] && (
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className={styles.productImage}
-              />
-            )}
-            <div className={styles.titleSection}>
-              <h2 className={styles.panelTitle}>{product.name}</h2>
-              <p className={styles.productSKU}>{product.sku}</p>
-              <div className={styles.headerStatus}>
-                <button
-                  type="button"
-                  className={`${styles.statusToggle} ${statusFlags.inStock ? styles.statusToggleActive : styles.statusToggleInactive}`}
-                  onClick={() => handleToggleStatus('inStock')}
-                  disabled={!canEdit || isSavingStatus}
-                  aria-pressed={statusFlags.inStock}
-                >
-                  {statusFlags.inStock ? 'Con Stock' : 'Sin stock'}
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.statusToggle} ${statusFlags.isFeatured ? styles.statusToggleActive : styles.statusToggleInactive}`}
-                  onClick={() => handleToggleStatus('isFeatured')}
-                  disabled={!canEdit || isSavingStatus}
-                  aria-pressed={statusFlags.isFeatured}
-                >
-                  {statusFlags.isFeatured ? 'Destacado' : 'No destacado'}
-                </button>
-              </div>
-            </div>
-          </div>
-          {/* actions desktop */}
-          {(canEdit || canDelete) && (
-            <div className={`${styles.panelActions} ${styles.desktopActions}`}>
-              <div className={styles.actions}>
-                {canEdit && onEdit && (
-                  <button
-                    onClick={() => onEdit(product.id)}
-                    className={styles.btnEdit}
-                  >
-                    Editar
-                  </button>
-                )}
-                {canDelete && onDelete && (
-                  <button
-                    onClick={handleDeleteClick}
-                    className={styles.btnDelete}
-                  >
-                    Eliminar
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Tabs Header */}
-      <div className={styles.tabsContainer}>
-        <div className={styles.tabsList}>
-          {TAB_ORDER.map(tab => (
-            <button
-              key={tab}
-              ref={el => { tabButtonRefs.current[tab] = el; }}
-              className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {TAB_LABELS[tab]}
+      {/* Tarjeta de Cabecera Unificada (Info + Pestañas) */}
+      <div className={styles.headerCard}>
+        <div className={styles.panelHeader}>
+          {onBack && (
+            <button type="button" className={styles.mobileBackBtn} onClick={onBack}>
+              <ArrowLeft size={18} /> Volver a la lista
             </button>
-          ))}
+          )}
+          <div className={styles.headerContent}>
+            <div className={styles.productTitle}>
+              {product.images?.[0] && (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className={styles.productImage}
+                />
+              )}
+              <div className={styles.titleSection}>
+                <h2 className={styles.panelTitle}>{product.name}</h2>
+                <p className={styles.productSKU}>{product.sku}</p>
+
+                {/* Badges de estado mejorados con iconos */}
+                <div className={styles.headerStatus}>
+                  <button
+                    type="button"
+                    className={`${styles.statusToggle} ${statusFlags.inStock ? styles.statusToggleActive : styles.statusToggleInactive}`}
+                    onClick={() => handleToggleStatus('inStock')}
+                    disabled={!canEdit || isSavingStatus}
+                    aria-pressed={statusFlags.inStock}
+                  >
+                    {statusFlags.inStock ? (
+                      <><Check size={14} /> Con Stock</>
+                    ) : (
+                      <><X size={14} /> Sin stock</>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.statusToggle} ${statusFlags.isFeatured ? styles.statusToggleActive : styles.statusToggleInactive}`}
+                    onClick={() => handleToggleStatus('isFeatured')}
+                    disabled={!canEdit || isSavingStatus}
+                    aria-pressed={statusFlags.isFeatured}
+                  >
+                    <Star size={14} fill={statusFlags.isFeatured ? 'currentColor' : 'none'} />
+                    {statusFlags.isFeatured ? 'Destacado' : 'No destacado'}
+                  </button>
+                </div>
+              </div>
+            </div>
+            {/* acciones en desktop */}
+            {(canEdit || canDelete) && (
+              <div className={`${styles.panelActions} ${styles.desktopActions}`}>
+                <div className={styles.actions}>
+                  {canEdit && onEdit && (
+                    <button
+                      onClick={() => onEdit(product.id)}
+                      className={styles.btnEdit}
+                    >
+                      Editar
+                    </button>
+                  )}
+                  {canDelete && onDelete && (
+                    <button
+                      onClick={handleDeleteClick}
+                      className={styles.btnDelete}
+                    >
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Pestañas integradas dentro de la misma tarjeta de cabecera */}
+        <div className={styles.tabsContainer}>
+          <div className={styles.tabsList}>
+            {TAB_ORDER.map(tab => (
+              <button
+                key={tab}
+                ref={el => { tabButtonRefs.current[tab] = el; }}
+                className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {TAB_LABELS[tab]}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

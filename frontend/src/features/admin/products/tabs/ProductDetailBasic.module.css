@@ -21,6 +21,9 @@
 }
 
 .sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -75,6 +78,24 @@
   white-space: pre-line;
 }
 
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0 0 0;
+  width: fit-content;
+}
+
+.expandBtn:hover {
+  text-decoration: underline;
+}
+
 .featuresList {
   list-style: none;
   padding: 0;
@@ -113,6 +134,7 @@
   padding: 4px 10px;
   font-size: 0.8rem;
   color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .statusRow {
@@ -130,7 +152,7 @@
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   padding: 4px 10px;
   border-radius: 8px;
   font-size: 0.8rem;
@@ -151,6 +173,7 @@
   font-size: 0.9rem;
   font-weight: 600;
   margin: 0;
+  color: var(--color-text-primary);
 }
 
 .empty {
