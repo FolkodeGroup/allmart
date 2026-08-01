@@ -70,10 +70,10 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     });
   }, [product.inStock, product.isFeatured]);
 
-  // Centrar automáticamente el botón de la pestaña activa en la cabecera
+  // Centrar automáticamente el botón de la pestaña activa en la cabecera (defensivo para JSDOM)
   useEffect(() => {
     const activeBtn = tabButtonRefs.current[activeTab];
-    if (activeBtn) {
+    if (activeBtn && typeof activeBtn.scrollIntoView === 'function') {
       activeBtn.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
