@@ -44,7 +44,7 @@ export function AdminProductFormPage({
     // Estado para controlar qué sección está activa en la barra lateral de Escritorio
     const [activeSection, setActiveSection] = useState<SectionId>('basico');
 
-    // 🟢 MOBILE-FIRST: En móvil, TODOS los acordeones inician colapsados por defecto
+    // MOBILE-FIRST: Todos los acordeones inician colapsados por defecto
     const [accordionsOpen, setAccordionsOpen] = useState<Record<SectionId, boolean>>({
         basico: false,
         precios: false,
@@ -211,21 +211,25 @@ export function AdminProductFormPage({
                         display: none !important;
                     }
 
-                    /* Header Sólido Opaco Pegajoso (Anti-Overlap) */
+                    /* 🟢 Subencabezado ("← Productos Nuevo producto") en flujo normal de documento */
                     .stickyFormHeaderMobile {
-                        position: sticky !important;
-                        top: 0 !important;
-                        z-index: 100 !important;
-                        background: var(--color-bg-primary, #111827) !important;
-                        border-bottom: 1px solid var(--color-border, #374151) !important;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
-                        padding: 12px 14px !important;
+                        position: relative !important;
+                        top: auto !important;
+                        z-index: 10 !important;
+                        background: transparent !important;
+                        border-bottom: 1px solid var(--color-border, rgba(229, 226, 221, 0.15)) !important;
+                        box-shadow: none !important;
+                        padding: 8px 4px 12px 4px !important;
                         margin: 0 0 12px 0 !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
                     }
 
-                    /* Alineación de estirado 100% ancho uniforme sin saltos de interfaz */
+                    /* 🟢 ELIMINACIÓN DEL FONDO GRIS CONTENEDOR EXTENDIDO */
+                    .formPageMobileResponsive {
+                        background: transparent !important;
+                    }
+
                     .formPageMobileResponsive .layout,
                     .formPageMobileResponsive .content,
                     .formPageMobileResponsive form {
@@ -235,21 +239,23 @@ export function AdminProductFormPage({
                         width: 100% !important;
                         max-width: 100% !important;
                         box-sizing: border-box !important;
-                        padding-left: 4px !important;
-                        padding-right: 4px !important;
-                        padding-bottom: 120px !important; /* Colchón externo para barra fija */
+                        background: transparent !important; /* Transparente para evitar el bloque gris al final */
+                        border: none !important;
+                        box-shadow: none !important;
+                        padding: 4px 4px 120px 4px !important; /* Colchón para los botones fijos inferiores */
+                        min-height: 0 !important;
                     }
 
-                    /* Tarjetas Acordeón 100% Ancho constante */
+                    /* 🟢 Tarjetas Acordeón individuales limpias */
                     .mobileSectionCard {
                         width: 100% !important;
                         max-width: 100% !important;
                         box-sizing: border-box !important;
                         border-radius: 12px !important;
                         border: 1px solid var(--color-border, #374151) !important;
-                        background: var(--color-bg-secondary, #28353d) !important;
+                        background: var(--color-bg-secondary, #28353d) !important; /* Fondo solo en las tarjetas */
                         overflow: hidden !important;
-                        margin-bottom: 12px !important;
+                        margin-bottom: 10px !important;
                         align-self: stretch !important;
                     }
 
@@ -320,7 +326,7 @@ export function AdminProductFormPage({
                         font-size: 12px !important;
                     }
 
-                    /* Barra fija inferior portaleada */
+                    /* 🟢 Barra fija inferior flotante */
                     .fixedBottomBarMobile {
                         position: fixed !important;
                         bottom: 0 !important;
@@ -396,7 +402,7 @@ export function AdminProductFormPage({
             </header>
 
             <div className={styles.layout}>
-                {/* Navegación lateral activa SOLO en Escritorio (oculta en móvil) */}
+                {/* Navegación lateral activa SOLO en Escritorio (oculta en móvil por CSS) */}
                 <nav className={`${styles.sidebar} desktopSidebarOnly`} aria-label="Secciones del formulario">
                     <ul className={styles.sidebarList}>
                         {SECTIONS.map(section => {
