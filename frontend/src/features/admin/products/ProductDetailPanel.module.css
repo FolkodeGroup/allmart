@@ -184,7 +184,7 @@
   position: relative;
   transition: color 0.2s, background 0.2s;
   border-bottom: 2px solid transparent;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
 }
 
 .tab:hover {
@@ -205,6 +205,11 @@
   font-weight: var(--font-semibold);
 }
 
+/* Indicador táctil de deslizamiento (oculto en desktop) */
+.swipeHintBar {
+  display: none;
+}
+
 /* ── Tab Content ── */
 .tabContent {
   flex: 1;
@@ -213,6 +218,7 @@
   overflow-x: hidden;
   padding: var(--space-5);
   animation: fadeIn 0.2s ease-out;
+  touch-action: pan-y;
 }
 
 @keyframes fadeIn {
@@ -305,7 +311,7 @@
   transform: translateY(-1px);
 }
 
-/* ── Responsive ── */
+/* ── Responsive Mobile ── */
 @media (max-width: 1024px) {
   .panel {
     height: auto;
@@ -348,6 +354,25 @@
 
   .panelTitle {
     font-size: var(--text-base);
+  }
+
+  /* Mostrar barra orientativa de deslizamiento en móvil */
+  .swipeHintBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 12px;
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .swipeHintText {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
   }
 
   .tabContent {

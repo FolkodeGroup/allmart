@@ -1,8 +1,8 @@
-import React, { useState, useEffect, Suspense, useCallback } from 'react';
+import React, { useState, useEffect, Suspense, useCallback, useRef } from 'react';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MoveLeft, MoveRight } from 'lucide-react';
 import styles from './ProductDetailPanel.module.css';
 
 // Lazy load tab components
@@ -57,12 +57,29 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   });
   const [isSavingStatus, setIsSavingStatus] = useState(false);
 
+  // Refs para gestos táctiles (Swipe)
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
   useEffect(() => {
     setStatusFlags({
       inStock: product.inStock,
       isFeatured: product.isFeatured ?? false,
     });
   }, [product.inStock, product.isFeatured]);
+
+  // Centrar automáticamente el botón de la pestaña activa en la cabecera
+  useEffect(() => {
+    const activeBtn = tabButtonRefs.current[activeTab];
+    if (activeBtn) {
+      activeBtn.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [activeTab]);
 
   const handleToggleStatus = useCallback(async (field: 'inStock' | 'isFeatured') => {
     if (!canEdit) return;
@@ -93,7 +110,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     try {
       onDelete(product.id);
       setShowDeleteModal(false);
-      if (onBack) onBack(); // Volver a la lista tras eliminar
+      if (onBack) onBack();
     } finally {
       setIsDeleting(false);
     }
@@ -103,6 +120,35 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   const handleCancelDelete = useCallback(() => {
     setShowDeleteModal(false);
   }, []);
+
+  // ── Gestos de deslizamiento horizontal (Swipe Tabs) ──────────────────
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+
+    // Requiere deslizamiento horizontal >= 50px y que el movimiento X sea mayor al vertical Y
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY * 1.2) {
+      const currentIndex = TAB_ORDER.indexOf(activeTab as Exclude<TabName, 'seo'>);
+
+      if (deltaX < 0 && currentIndex < TAB_ORDER.length - 1) {
+        // Swipe izquierda -> Siguiente pestaña
+        setActiveTab(TAB_ORDER[currentIndex + 1]);
+      } else if (deltaX > 0 && currentIndex > 0) {
+        // Swipe derecha -> Pestaña anterior
+        setActiveTab(TAB_ORDER[currentIndex - 1]);
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
 
   // Render tab content with suspense fallback
   const renderTabContent = () => {
@@ -135,6 +181,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         return null;
     }
   };
+
+  const currentTabIndex = TAB_ORDER.indexOf(activeTab as Exclude<TabName, 'seo'>);
 
   return (
     <div className={styles.panel}>
@@ -205,12 +253,13 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs Header */}
       <div className={styles.tabsContainer}>
         <div className={styles.tabsList}>
           {TAB_ORDER.map(tab => (
             <button
               key={tab}
+              ref={el => { tabButtonRefs.current[tab] = el; }}
               className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
               onClick={() => setActiveTab(tab)}
             >
@@ -220,8 +269,21 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       </div>
 
-      {/* Tab Content */}
-      <div className={styles.tabContent}>
+      {/* Indicador táctil de deslizamiento (solo visible en móviles) */}
+      <div className={styles.swipeHintBar}>
+        <span className={styles.swipeHintText}>
+          {currentTabIndex > 0 && <MoveLeft size={12} />}
+          Deslizá horizontalmente para cambiar de pestaña
+          {currentTabIndex < TAB_ORDER.length - 1 && <MoveRight size={12} />}
+        </span>
+      </div>
+
+      {/* Tab Content con detector de gestos de deslizamiento */}
+      <div
+        className={styles.tabContent}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {renderTabContent()}
       </div>
 
