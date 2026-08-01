@@ -64,27 +64,44 @@
   pointer-events: none;
 }
 
-.filtersRow {
+/* ── Mobile Filter Trigger Bar (Oculto en Desktop) ── */
+.mobileFilterBar {
+  display: none;
+}
+
+/* ── Desktop Filters Row ── */
+.filtersRowDesktop {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
-.filterSelect {
+.filterDropdownField {
+  flex: 1 1 200px;
+  min-width: 180px;
+}
+
+.resetFiltersBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 12px;
+  background: transparent;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  font-size: 0.9rem;
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  min-width: 160px;
-  flex: 1;
+  transition: all 0.2s ease;
+  height: 38px;
 }
 
-.filterSelect:focus {
-  outline: none;
-  border-color: var(--color-primary);
+.resetFiltersBtn:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }
 
 .actionsBar {
@@ -154,7 +171,12 @@
   gap: 16px;
 }
 
-/* ── Responsive ── */
+/* ── Estilos del Modal Bottom Sheet Portaleado en Móvil ── */
+.mobileFilterModalOverlay {
+  display: none;
+}
+
+/* ── Responsive Mobile ── */
 @media (max-width: 1024px) {
   .contentArea {
     height: auto;
@@ -172,13 +194,184 @@
   }
 }
 
+@media (max-width: 768px) {
+  .filters {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  /* Ocultar la fila de filtros horizontal en móvil */
+  .filtersRowDesktop {
+    display: none;
+  }
+
+  /* Mostrar la barra de activación del modal móvil */
+  .mobileFilterBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .mobileFilterTriggerBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    cursor: pointer;
+  }
+
+  .resetFiltersBtnMobile {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .activeFilterBadge {
+    background: var(--color-primary);
+    color: var(--color-neutral-light, #ffffff);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  /* ── Modal Bottom Sheet Fijo en Viewport mediante Portal ── */
+  .mobileFilterModalOverlay {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 99999; /* Z-Index máximo para sobresalir sobre headers y sidebars */
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeInModal 0.2s ease-out;
+  }
+
+  .mobileFilterModalContent {
+    width: 100%;
+    max-width: 500px;
+    max-height: 85vh;
+    background: var(--color-bg-primary);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border: 1px solid var(--color-border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+    animation: slideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+  }
+
+  .mobileFilterModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobileFilterModalTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .mobileFilterModalClose {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  .mobileFilterModalBody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .modalFilterField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .modalFilterLabel {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .mobileFilterModalFooter {
+    display: flex;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+    margin-top: auto;
+  }
+
+  .modalResetBtn {
+    padding: 12px 16px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .mobileFilterApplyBtn {
+    flex: 1;
+    padding: 12px;
+    background: var(--color-primary);
+    color: var(--color-neutral-light, #ffffff);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
 @media (max-width: 640px) {
   .count {
     display: none;
-  }
-  
-  .filterSelect {
-    width: 100%;
   }
 
   .sortContainer {
