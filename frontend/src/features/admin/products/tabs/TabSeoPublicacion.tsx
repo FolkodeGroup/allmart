@@ -53,4 +53,4 @@ export const TabSEOPublicacion = memo(function TabSEOPublicacion({
             </div>
         </fieldset>
     );
-});
+}); 

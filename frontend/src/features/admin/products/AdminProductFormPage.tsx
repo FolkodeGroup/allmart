@@ -211,7 +211,7 @@ export function AdminProductFormPage({
                         display: none !important;
                     }
 
-                    /* 🟢 Subencabezado ("← Productos Nuevo producto") en flujo normal de documento */
+                    /* Subencabezado ("← Productos Nuevo producto") en flujo normal */
                     .stickyFormHeaderMobile {
                         position: relative !important;
                         top: auto !important;
@@ -225,9 +225,10 @@ export function AdminProductFormPage({
                         box-sizing: border-box !important;
                     }
 
-                    /* 🟢 ELIMINACIÓN DEL FONDO GRIS CONTENEDOR EXTENDIDO */
+                    /* 🟢 ELIMINACIÓN TOTAL DEL FONDO GRIS EXTENDIDO DEL CONTENEDOR */
                     .formPageMobileResponsive {
                         background: transparent !important;
+                        padding-bottom: 120px !important; /* Colchón para los botones fijos inferiores */
                     }
 
                     .formPageMobileResponsive .layout,
@@ -239,21 +240,23 @@ export function AdminProductFormPage({
                         width: 100% !important;
                         max-width: 100% !important;
                         box-sizing: border-box !important;
-                        background: transparent !important; /* Transparente para evitar el bloque gris al final */
+                        background: transparent !important;
+                        background-color: transparent !important;
                         border: none !important;
                         box-shadow: none !important;
-                        padding: 4px 4px 120px 4px !important; /* Colchón para los botones fijos inferiores */
+                        padding: 0 !important;
                         min-height: 0 !important;
+                        flex: 0 0 auto !important;
                     }
 
-                    /* 🟢 Tarjetas Acordeón individuales limpias */
+                    /* Tarjetas Acordeón individuales limpias */
                     .mobileSectionCard {
                         width: 100% !important;
                         max-width: 100% !important;
                         box-sizing: border-box !important;
                         border-radius: 12px !important;
                         border: 1px solid var(--color-border, #374151) !important;
-                        background: var(--color-bg-secondary, #28353d) !important; /* Fondo solo en las tarjetas */
+                        background: var(--color-bg-secondary, #28353d) !important;
                         overflow: hidden !important;
                         margin-bottom: 10px !important;
                         align-self: stretch !important;
@@ -326,7 +329,7 @@ export function AdminProductFormPage({
                         font-size: 12px !important;
                     }
 
-                    /* 🟢 Barra fija inferior flotante */
+                    /* Barra fija inferior flotante */
                     .fixedBottomBarMobile {
                         position: fixed !important;
                         bottom: 0 !important;
