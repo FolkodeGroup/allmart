@@ -16,6 +16,7 @@ interface MasterDetailLayoutProps {
   canDelete: boolean;
   children?: React.ReactNode;
   defaultSelectedProductId?: string;
+  onMobileViewChange?: (view: 'list' | 'detail') => void;
 }
 
 function MasterDetailLayoutInner({
@@ -29,6 +30,7 @@ function MasterDetailLayoutInner({
   canDelete,
   children,
   defaultSelectedProductId,
+  onMobileViewChange,
 }: MasterDetailLayoutProps) {
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(
     defaultSelectedProductId
@@ -64,11 +66,13 @@ function MasterDetailLayoutInner({
   const handleSelectProduct = useCallback((id: string) => {
     setSelectedProductId(id);
     setMobileView('detail'); // Cambiar a vista de detalle en móviles
-  }, []);
+    onMobileViewChange?.('detail'); // Notificar al componente padre
+  }, [onMobileViewChange]);
 
   const handleBackToList = useCallback(() => {
     setMobileView('list'); // Volver a la lista en móviles
-  }, []);
+    onMobileViewChange?.('list'); // Notificar al componente padre
+  }, [onMobileViewChange]);
 
   // Memoize the detail content to avoid re-rendering when props don't change
   const detailContent = useMemo(() => {

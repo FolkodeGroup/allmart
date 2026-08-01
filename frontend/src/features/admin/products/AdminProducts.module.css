@@ -5,6 +5,12 @@
   min-height: 0;
 }
 
+.listToolbarArea {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .filters {
   display: flex;
   flex-direction: column;
@@ -64,12 +70,10 @@
   pointer-events: none;
 }
 
-/* ── Mobile Filter Trigger Bar (Oculto en Desktop) ── */
 .mobileFilterBar {
   display: none;
 }
 
-/* ── Desktop Filters Row ── */
 .filtersRowDesktop {
   display: flex;
   gap: 12px;
@@ -171,13 +175,17 @@
   gap: 16px;
 }
 
-/* ── Estilos del Modal Bottom Sheet Portaleado en Móvil ── */
 .mobileFilterModalOverlay {
   display: none;
 }
 
 /* ── Responsive Mobile ── */
 @media (max-width: 1024px) {
+  /* Regla clave: Oculta la barra de herramientas de lista cuando el detalle está abierto en móvil */
+  .mobileDetailActive .listToolbarArea {
+    display: none !important;
+  }
+
   .contentArea {
     height: auto;
     overflow: visible;
@@ -200,12 +208,10 @@
     gap: 10px;
   }
 
-  /* Ocultar la fila de filtros horizontal en móvil */
   .filtersRowDesktop {
     display: none;
   }
 
-  /* Mostrar la barra de activación del modal móvil */
   .mobileFilterBar {
     display: flex;
     align-items: center;
@@ -251,7 +257,6 @@
     padding: 2px 8px;
   }
 
-  /* ── Modal Bottom Sheet Fijo en Viewport mediante Portal ── */
   .mobileFilterModalOverlay {
     display: flex;
     position: fixed;
@@ -263,7 +268,7 @@
     height: 100vh;
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(4px);
-    z-index: 99999; /* Z-Index máximo para sobresalir sobre headers y sidebars */
+    z-index: 99999;
     align-items: flex-end;
     justify-content: center;
     animation: fadeInModal 0.2s ease-out;

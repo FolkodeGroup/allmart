@@ -33,11 +33,14 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
-const PAGE_LIMIT = 6; // Límite optimizado para vista móvil y tarjetas más amplias
+const PAGE_LIMIT = 8; // Límite optimizado para vista móvil y tarjetas más amplias
 
 export function AdminProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+  // Estado para controlar si el detalle está abierto en móvil
+  const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
 
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
@@ -361,29 +364,32 @@ export function AdminProducts() {
   return (
     <main
       ref={containerRef}
-      className={`${sectionStyles.page} ${styles.productsPage} dark:bg-gray-900 dark:text-gray-100`}
+      className={`${sectionStyles.page} ${styles.productsPage} ${isMobileDetailOpen ? styles.mobileDetailActive : ''} dark:bg-gray-900 dark:text-gray-100`}
       aria-label="Gestión de productos"
     >
       {viewMode === 'list' && (
         <>
-          <ProductHeader
-            canCreate={can('products.create')}
-            onNew={handleNew}
-          />
+          {/* Contenedor de herramientas de lista (se oculta automáticamente en móvil al abrir el detalle) */}
+          <div className={styles.listToolbarArea}>
+            <ProductHeader
+              canCreate={can('products.create')}
+              onNew={handleNew}
+            />
 
-          <ProductFilters
-            search={search}
-            setSearch={setSearch}
-            inputRef={inputRef as React.RefObject<HTMLInputElement>}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            categories={categories}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            stockLevelFilter={stockLevelFilter}
-            setStockLevelFilter={setStockLevelFilter}
-            total={total}
-          />
+            <ProductFilters
+              search={search}
+              setSearch={setSearch}
+              inputRef={inputRef as React.RefObject<HTMLInputElement>}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              categories={categories}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              stockLevelFilter={stockLevelFilter}
+              setStockLevelFilter={setStockLevelFilter}
+              total={total}
+            />
+          </div>
 
           {isInitialLoad ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
@@ -393,7 +399,7 @@ export function AdminProducts() {
             <>
               {/* Acciones mostradas incluso si está cargando, si hay productos en el render actual */}
               {!error && (products.length > 0 || loading) && (
-                <div className={styles.actionsBar} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                <div className={`${styles.actionsBar} ${styles.listToolbarArea}`} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
                   <div className={styles.exportBtnContainer}>
                     <ExportButtons
                       onExportCSV={handleExportCSV}
@@ -465,6 +471,7 @@ export function AdminProducts() {
                     canEdit={can('products.edit')}
                     canDelete={can('products.delete')}
                     defaultSelectedProductId={editId || undefined}
+                    onMobileViewChange={(view) => setIsMobileDetailOpen(view === 'detail')}
                   />
 
                   {total > PAGE_LIMIT && (

@@ -7,7 +7,7 @@
   flex-direction: column;
   height: 100%;
   background: var(--color-bg-primary);
-  border-left: none; /* El borde lo maneja el wrapper padre */
+  border-left: none;
   overflow: hidden;
 }
 
@@ -123,6 +123,26 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: var(--text-lg);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 /* ── Tabs ── */
@@ -293,19 +313,24 @@
   }
 
   .mobileBackBtn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-    font-weight: 500;
-    padding: 0 0 16px 0;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 14px;
     cursor: pointer;
-    width: 100%;
-    border-bottom: 1px solid var(--color-border);
+    width: fit-content;
     margin-bottom: 16px;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  .mobileBackBtn:active {
+    transform: scale(0.97);
   }
 
   .panelHeader {
@@ -327,7 +352,7 @@
 
   .tabContent {
     padding: var(--space-4);
-    overflow-y: visible; /* Scroll natural del body */
+    overflow-y: visible;
   }
 
   .desktopActions {
