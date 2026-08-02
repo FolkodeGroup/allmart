@@ -472,8 +472,8 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         gap: 10px !important;
                         padding: 12px !important;
                         border-radius: 12px !important;
-                        background: var(--color-bg-secondary, #f8f9fa) !important;
-                        border: 1px solid var(--color-border, #e5e2dd) !important;
+                        background: var(--color-bg-secondary, #28353d) !important;
+                        border: 1px solid var(--color-border, #374151) !important;
                     }
                     .tabVariantsRowHeaderMobile {
                         display: flex !important;
@@ -489,6 +489,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     .tabVariantsAddValueResponsive input {
                         flex: 1 !important;
                         min-height: 44px !important;
+                        font-size: 16px !important;
                     }
                     .tabVariantsAddValueResponsive button {
                         min-width: 44px !important;
@@ -504,7 +505,8 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     }
                     .tabVariantsToolbarResponsive button {
                         width: 100% !important;
-                        min-height: 44px !important;
+                        min-height: 48px !important;
+                        font-size: 15px !important;
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;
@@ -517,11 +519,48 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     .tabVariantsNewGroupRow input {
                         width: 100% !important;
                         min-height: 44px !important;
+                        font-size: 16px !important;
                     }
                     .tabVariantsNewGroupRow button {
                         width: 100% !important;
-                        min-height: 44px !important;
+                        min-height: 48px !important;
                         justify-content: center !important;
+                        font-size: 15px !important;
+                    }
+                    /* Z-INDEX OVERRIDE Y RESTRICCIÓN DE DESBORDAMIENTO EN MODAL */
+                    .comboModalHighZIndex {
+                        z-index: 100005 !important;
+                        overflow-x: hidden !important;
+                        max-width: 100vw !important;
+                        box-sizing: border-box !important;
+                        padding: 12px !important;
+                    }
+                    .modalFieldsContainerResponsive {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                        overflow-x: hidden !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        gap: 12px !important;
+                    }
+                    .modalFieldsContainerResponsive * {
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    .modalRowFieldsResponsive {
+                        display: grid !important;
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 10px !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .modalRowFieldsResponsive {
+                        grid-template-columns: 1fr !important;
                     }
                 }
             `}</style>
@@ -649,13 +688,14 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 />
             </div>
 
-            {/* MODAL DE COMBINACIÓN */}
+            {/* MODAL DE COMBINACIÓN PORTALEADO CON Z-INDEX SUPERIOR Y SIN OVERFLOW HORIZONTAL */}
             <Modal
                 open={combinationModalOpen}
                 onClose={() => setCombinationModalOpen(false)}
                 title={editingSkuId ? 'Editar combinación' : 'Añadir combinación'}
                 disableClose={isSubmittingCombo}
                 size="md"
+                overlayClassName="comboModalHighZIndex"
                 actions={
                     <>
                         <button
@@ -663,6 +703,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             className={styles.cancelBtn}
                             disabled={isSubmittingCombo}
                             onClick={() => setCombinationModalOpen(false)}
+                            style={{ minHeight: '48px', fontSize: '15px' }}
                         >
                             Cancelar
                         </button>
@@ -671,13 +712,14 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             className={styles.submitBtn}
                             onClick={handleCreateCombination}
                             disabled={isSubmittingCombo || isComboFormInvalid}
+                            style={{ minHeight: '48px', fontSize: '15px' }}
                         >
                             {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
                         </button>
                     </>
                 }
             >
-                <div className={styles.modalFieldsContainer}>
+                <div className={`${styles.modalFieldsContainer} modalFieldsContainerResponsive`}>
                     {(!form.variants || form.variants.length === 0) && (
                         <p className={styles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
                     )}
@@ -685,12 +727,14 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => {
                         const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
                         return (
-                            <div key={group.id} className={styles.field}>
-                                <label className={styles.label}>{group.name} *</label>
+                            <div key={group.id} className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
+                                <label className={styles.label} htmlFor={`modal-select-${group.id}`}>{group.name} *</label>
                                 <select
+                                    id={`modal-select-${group.id}`}
                                     className={`${styles.input} ${isAttrMissing ? styles.inputError : ''}`}
                                     value={combinationAttrs[group.name] ?? ''}
                                     onChange={e => setCombinationAttrs((prev: Record<string, string>) => ({ ...prev, [group.name]: e.target.value }))}
+                                    style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
                                 >
                                     <option value="">-- Seleccionar --</option>
                                     {group.values.map((value: string) => (
@@ -704,7 +748,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         );
                     })}
 
-                    <div className={styles.field}>
+                    <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
                         <label htmlFor="combination-sku-tab" className={styles.label}>SKU *</label>
                         <input
                             id="combination-sku-tab"
@@ -712,6 +756,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             value={combinationSku}
                             onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
                             onBlur={() => runCombinationValidation()}
+                            style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
                         />
                         {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
                         {!combinationErrors.sku && submitComboAttempted && !combinationSku.trim() && (
@@ -719,9 +764,9 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         )}
                     </div>
 
-                    <div className={styles.field}>
+                    <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
                         <label htmlFor="combination-images-tab" className={styles.label}>Imágenes</label>
-                        <div style={{ marginTop: '8px' }}>
+                        <div style={{ marginTop: '8px', width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
                             <ImageUploader onAddFiles={addFiles} onReject={(rej) => rej.forEach(r => toast.error(`${r.file.name}: ${r.reason}`))} />
                             <ImagePreviewList
                                 items={uploadedFiles}
@@ -733,8 +778,8 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
                     </div>
 
-                    <div className={styles.modalRowFields}>
-                        <div className={styles.field}>
+                    <div className={`modalRowFieldsResponsive`}>
+                        <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
                             <label htmlFor="combination-price-tab" className={styles.label}>Precio</label>
                             <input
                                 id="combination-price-tab"
@@ -747,11 +792,12 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                     runCombinationValidation();
                                 }}
                                 onBlur={() => runCombinationValidation()}
+                                style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
                             />
                             {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
                         </div>
 
-                        <div className={styles.field}>
+                        <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
                             <label htmlFor="combination-stock-tab" className={styles.label}>Stock</label>
                             <input
                                 id="combination-stock-tab"
@@ -759,10 +805,11 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                 className={styles.input}
                                 value={combinationStock === '' ? '' : String(combinationStock)}
                                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
+                                style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
                             />
                         </div>
                     </div>
-                    <div className={styles.field}>
+                    <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
                         <label htmlFor="combination-critical-tab" className={styles.label}>Umbral stock crítico</label>
                         <input
                             id="combination-critical-tab"
@@ -770,6 +817,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             className={`${styles.input} ${combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
                             value={combinationCriticalThreshold === '' ? '' : String(combinationCriticalThreshold)}
                             onChange={e => setCombinationCriticalThreshold(e.target.value === '' ? '' : Number(e.target.value))}
+                            style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
                         />
                         {combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
                             <div className={styles.errorText}>El umbral no puede ser negativo.</div>

@@ -117,7 +117,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                 <div
                     ref={menuRef}
                     className={`${styles.rowDropdown} ${coords.openUpward ? styles.rowDropdownUp : styles.rowDropdownDown}`}
-                    style={{ position: 'fixed', top: coords.top, left: coords.left, width: MENU_WIDTH, zIndex: 99999 }}
+                    style={{ position: 'fixed', top: coords.top, left: coords.left, width: MENU_WIDTH, zIndex: 100010 }}
                     role="menu"
                 >
                     <button
@@ -158,7 +158,7 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
     if (isEmpty) {
         return (
             <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}></span>
+                <span className={styles.emptyIcon}>📦</span>
                 <p>Todavía no hay combinaciones.</p>
                 <small>Usá los botones de arriba para agregar la primera.</small>
             </div>
@@ -186,14 +186,14 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                     }
                 }
                 .combMobileCard {
-                    background: var(--color-bg-primary, #ffffff);
-                    border: 1px solid var(--color-border, #e5e2dd);
+                    background: var(--color-bg-secondary, #28353d);
+                    border: 1px solid var(--color-border, #374151);
                     border-radius: 12px;
                     padding: 14px;
                     display: flex;
                     flex-direction: column;
                     gap: 10px;
-                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
                 }
                 .combMobileCardTop {
                     display: flex;
@@ -204,7 +204,7 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                 .combMobileCardLeft {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    gap: 12px;
                     flex: 1;
                     min-width: 0;
                 }
@@ -213,21 +213,21 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                     height: 48px;
                     border-radius: 8px;
                     object-fit: cover;
-                    background: var(--color-bg-secondary, #f8f9fa);
-                    border: 1px solid var(--color-border, #e5e2dd);
+                    background: var(--color-bg-primary, #111827);
+                    border: 1px solid var(--color-border, #374151);
                     flex-shrink: 0;
                 }
                 .combMobileNoThumb {
                     width: 48px;
                     height: 48px;
                     border-radius: 8px;
-                    background: var(--color-bg-secondary, #f8f9fa);
-                    border: 1px solid var(--color-border, #e5e2dd);
+                    background: var(--color-bg-primary, #111827);
+                    border: 1px solid var(--color-border, #374151);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 12px;
-                    color: var(--color-text-secondary, #666);
+                    color: var(--color-text-secondary, #9ca3af);
                     flex-shrink: 0;
                 }
                 .combMobileAttrList {
@@ -235,33 +235,73 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                     flex-wrap: wrap;
                     gap: 6px;
                 }
-                .combMobileGrid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr 1fr;
+                .combMobileAttrChip {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 4px 10px;
+                    background: rgba(255, 255, 255, 0.08);
+                    border-radius: 16px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: var(--color-text-primary, #ffffff);
+                }
+                .combMobileAttrKey {
+                    color: var(--color-text-secondary, #9ca3af);
+                    font-weight: 500;
+                }
+                .combMobileDetails {
+                    display: flex;
+                    flex-direction: column;
                     gap: 8px;
                     padding-top: 10px;
-                    border-top: 1px dashed var(--color-border, #e5e2dd);
+                    border-top: 1px dashed var(--color-border, #374151);
                 }
-                .combMobileGridBox {
-                    background: var(--color-bg-secondary, #f9fafb);
+                .combMobileSkuRow {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: var(--color-bg-primary, rgba(0, 0, 0, 0.2));
+                    padding: 8px 12px;
                     border-radius: 8px;
-                    padding: 8px 10px;
+                    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.06));
+                }
+                .combMobileSkuValue {
+                    font-family: monospace;
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: var(--color-text-primary, #ffffff);
+                    word-break: break-all;
+                }
+                .combMobileMetaGrid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                }
+                .combMobileMetaBox {
+                    background: var(--color-bg-primary, rgba(0, 0, 0, 0.2));
+                    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.06));
+                    border-radius: 8px;
+                    padding: 8px 12px;
                     display: flex;
                     flex-direction: column;
                     gap: 2px;
                 }
-                .combMobileGridLabel {
+                .combMobileMetaLabel {
                     font-size: 10px;
                     font-weight: 700;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
-                    color: var(--color-text-secondary, #767676);
+                    color: var(--color-text-secondary, #9ca3af);
                 }
-                .combMobileGridValue {
-                    font-size: 13px;
+                .combMobileMetaValue {
+                    font-size: 15px;
                     font-weight: 700;
-                    color: var(--color-text-primary, #111827);
-                    word-break: break-all;
+                    color: var(--color-text-primary, #ffffff);
+                }
+                .combMobileStockValue {
+                    font-size: 15px;
+                    font-weight: 700;
                 }
             `}</style>
 
@@ -292,10 +332,10 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                     {Object.entries(s.attributes || {}).length > 0 ? (
                                         <div className={styles.attrList}>
                                             {Object.entries(s.attributes || {}).map(([k, v]) => {
-                                                const cleanKey = k.replace(/[:\s]+$/, '');
+                                                const cleanKey = k.replace(/[:\s]+$/, '').trim();
                                                 return (
                                                     <span key={k} className={styles.attrChip}>
-                                                        <span className={styles.attrKey}>{cleanKey}</span>
+                                                        <span className={styles.attrKey}>{cleanKey}:</span>
                                                         <span className={styles.attrVal}>{v}</span>
                                                     </span>
                                                 );
@@ -341,10 +381,10 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                     {Object.entries(c.attributes || {}).length > 0 ? (
                                         <div className={styles.attrList}>
                                             {Object.entries(c.attributes || {}).map(([k, v]) => {
-                                                const cleanKey = k.replace(/[:\s]+$/, '');
+                                                const cleanKey = k.replace(/[:\s]+$/, '').trim();
                                                 return (
                                                     <span key={k} className={styles.attrChip}>
-                                                        <span className={styles.attrKey}>{cleanKey}</span>
+                                                        <span className={styles.attrKey}>{cleanKey}:</span>
                                                         <span className={styles.attrVal}>{v}</span>
                                                     </span>
                                                 );
@@ -380,7 +420,7 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                 </table>
             </div>
 
-            {/* VISTA MÓVIL: TARJETAS COMPACTAS TOUCH-FRIENDLY */}
+            {/* VISTA MÓVIL: TARJETAS ESPACIOSAS DE 2 FILAS */}
             <div className="combCardsMobileView">
                 {skus.map(s => (
                     <div key={s.id} className="combMobileCard">
@@ -393,11 +433,11 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                 )}
                                 <div className="combMobileAttrList">
                                     {Object.entries(s.attributes || {}).map(([k, v]) => {
-                                        const cleanKey = k.replace(/[:\s]+$/, '');
+                                        const cleanKey = k.replace(/[:\s]+$/, '').trim();
                                         return (
-                                            <span key={k} className={styles.attrChip}>
-                                                <span className={styles.attrKey}>{cleanKey}: </span>
-                                                <span className={styles.attrVal}>{v}</span>
+                                            <span key={k} className="combMobileAttrChip">
+                                                <span className="combMobileAttrKey">{cleanKey}:</span>
+                                                <span>{v}</span>
                                             </span>
                                         );
                                     })}
@@ -406,22 +446,27 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                             <RowMenu onEdit={() => onEdit(s.id)} onDelete={() => onDelete(s.id)} />
                         </div>
 
-                        <div className="combMobileGrid">
-                            <div className="combMobileGridBox">
-                                <span className="combMobileGridLabel">SKU</span>
-                                <code className="combMobileGridValue">{s.sku ?? '—'}</code>
+                        <div className="combMobileDetails">
+                            {/* Fila de SKU Completa sin cortes */}
+                            <div className="combMobileSkuRow">
+                                <span className="combMobileMetaLabel">SKU</span>
+                                <code className="combMobileSkuValue">{s.sku ?? '—'}</code>
                             </div>
-                            <div className="combMobileGridBox">
-                                <span className="combMobileGridLabel">Precio</span>
-                                <span className="combMobileGridValue">
-                                    {typeof s.price === 'number' ? `$${s.price.toLocaleString('es-AR')}` : '—'}
-                                </span>
-                            </div>
-                            <div className="combMobileGridBox">
-                                <span className="combMobileGridLabel">Stock</span>
-                                <span className={`${styles.stockOk} ${s.stock === 0 ? styles.stockZero : ''}`}>
-                                    {typeof s.stock === 'number' ? `${s.stock} un.` : '—'}
-                                </span>
+
+                            {/* Rejilla de 2 Columnas para Precio y Stock */}
+                            <div className="combMobileMetaGrid">
+                                <div className="combMobileMetaBox">
+                                    <span className="combMobileMetaLabel">PRECIO</span>
+                                    <span className="combMobileMetaValue">
+                                        {typeof s.price === 'number' ? `$${s.price.toLocaleString('es-AR')}` : '—'}
+                                    </span>
+                                </div>
+                                <div className="combMobileMetaBox">
+                                    <span className="combMobileMetaLabel">STOCK</span>
+                                    <span className={`${styles.stockOk} ${s.stock === 0 ? styles.stockZero : ''} combMobileStockValue`}>
+                                        {typeof s.stock === 'number' ? `${s.stock} un.` : '—'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -438,11 +483,11 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                 )}
                                 <div className="combMobileAttrList">
                                     {Object.entries(c.attributes || {}).map(([k, v]) => {
-                                        const cleanKey = k.replace(/[:\s]+$/, '');
+                                        const cleanKey = k.replace(/[:\s]+$/, '').trim();
                                         return (
-                                            <span key={k} className={styles.attrChip}>
-                                                <span className={styles.attrKey}>{cleanKey}: </span>
-                                                <span className={styles.attrVal}>{v}</span>
+                                            <span key={k} className="combMobileAttrChip">
+                                                <span className="combMobileAttrKey">{cleanKey}:</span>
+                                                <span>{v}</span>
                                             </span>
                                         );
                                     })}
@@ -451,22 +496,25 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                             <span className={styles.savingBadge}>Guardando…</span>
                         </div>
 
-                        <div className="combMobileGrid">
-                            <div className="combMobileGridBox">
-                                <span className="combMobileGridLabel">SKU</span>
-                                <code className="combMobileGridValue">{c.sku ?? '—'}</code>
+                        <div className="combMobileDetails">
+                            <div className="combMobileSkuRow">
+                                <span className="combMobileMetaLabel">SKU</span>
+                                <code className="combMobileSkuValue">{c.sku ?? '—'}</code>
                             </div>
-                            <div className="combMobileGridBox">
-                                <span className="combMobileGridLabel">Precio</span>
-                                <span className="combMobileGridValue">
-                                    {typeof c.price === 'number' ? `$${c.price.toLocaleString('es-AR')}` : '—'}
-                                </span>
-                            </div>
-                            <div className="combMobileGridBox">
-                                <span className="combMobileGridLabel">Stock</span>
-                                <span className={`${styles.stockOk} ${c.stock === 0 ? styles.stockZero : ''}`}>
-                                    {typeof c.stock === 'number' ? `${c.stock} un.` : '—'}
-                                </span>
+
+                            <div className="combMobileMetaGrid">
+                                <div className="combMobileMetaBox">
+                                    <span className="combMobileMetaLabel">PRECIO</span>
+                                    <span className="combMobileMetaValue">
+                                        {typeof c.price === 'number' ? `$${c.price.toLocaleString('es-AR')}` : '—'}
+                                    </span>
+                                </div>
+                                <div className="combMobileMetaBox">
+                                    <span className="combMobileMetaLabel">STOCK</span>
+                                    <span className={`${styles.stockOk} ${c.stock === 0 ? styles.stockZero : ''} combMobileStockValue`}>
+                                        {typeof c.stock === 'number' ? `${c.stock} un.` : '—'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
