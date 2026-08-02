@@ -44,7 +44,6 @@ export function AdminProducts() {
 
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
-  const [editPage, setEditPage] = useState<number>(1);
 
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const resetUnsavedChangesFn = () => { };
@@ -79,13 +78,32 @@ export function AdminProducts() {
   const isFirstRender = useRef(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // ─── Auto-open edit form if 'edit' param is present ───────────────────────
+  // ─── Resetear de forma limpia la vista y solicitar el listado completo de productos ───
+  const handleResetToListWithAllProducts = useCallback(() => {
+    setSearch('');
+    setCategoryFilter('');
+    setStatusFilter('all');
+    setStockLevelFilter('all');
+    setEditId(null);
+    setViewMode('list');
+
+    // Cargar todos los productos de forma limpia
+    refreshProducts({
+      q: '',
+      categoryId: '',
+      status: 'all',
+      stockLevel: 'all',
+      page: 1,
+      limit: PAGE_LIMIT,
+    });
+  }, [refreshProducts]);
+
+  // Auto-abrir formulario si existe el parámetro 'edit' en la URL
   useEffect(() => {
     const editParam = searchParams.get('edit');
     if (editParam && !editId) {
       setEditId(editParam);
       setViewMode('form');
-      // Clear the edit parameter from URL
       setSearchParams(prev => {
         prev.delete('edit');
         return prev;
@@ -114,7 +132,6 @@ export function AdminProducts() {
         },
         token,
       );
-      // Descargar en el navegador
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -180,11 +197,11 @@ export function AdminProducts() {
     }
   }, [products]);
 
-  // Scroll preservation
+  // Preservación del scroll
   const containerRef = useRef<HTMLElement>(null);
   useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'products-master-detail', [apiPage, search, categoryFilter, statusFilter, stockLevelFilter, sortField, sortDirection]);
 
-  // Unsaved changes warning
+  // Modal de advertencia por cambios sin guardar
   const {
     showWarning,
     interceptNavigation,
@@ -195,11 +212,11 @@ export function AdminProducts() {
     onConfirmExit: () => {
       resetUnsavedChangesFn();
       setUnsavedChanges(false);
-      setEditId(null);
+      handleResetToListWithAllProducts();
     },
   });
 
-  // Search & filter
+  // Búsqueda y filtrado
   useEffect(() => {
     const executeFetch = async () => {
       if (search && search.trim().length > 0) {
@@ -253,7 +270,7 @@ export function AdminProducts() {
     }
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
-  // Client-side filtering: only match by name or SKU
+  // Filtrado del lado del cliente por nombre o SKU
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return products;
@@ -268,7 +285,7 @@ export function AdminProducts() {
     { value: 'category', label: 'Categoría' },
   ], []);
 
-  // Sort products based on sort field and direction
+  // Ordenamiento
   const sortedProducts = useMemo(() => {
     const ordered = [...filteredProducts];
 
@@ -293,7 +310,7 @@ export function AdminProducts() {
     return ordered;
   }, [filteredProducts, sortField, sortDirection]);
 
-  // === FORM/EDIT HANDLERS ===
+  // === HANDLERS DE EDICIÓN Y CREACIÓN ===
 
   const handleNew = useCallback(() => {
     if (unsavedChanges) {
@@ -309,15 +326,13 @@ export function AdminProducts() {
 
   const handleEdit = useCallback((id: string) => {
     if (unsavedChanges) {
-      interceptNavigation(() => { setEditId(id); setEditPage(apiPage); setViewMode('form'); });
+      interceptNavigation(() => { setEditId(id); setViewMode('form'); });
     } else {
       setEditId(id);
-      setEditPage(apiPage);
       setViewMode('form');
     }
-  }, [unsavedChanges, interceptNavigation, apiPage]);
+  }, [unsavedChanges, interceptNavigation]);
 
-  // Solicitar confirmación de eliminación
   const handleDelete = useCallback((id: string) => {
     const productToDelete = products.find(p => p.id === id);
     if (productToDelete) {
@@ -326,7 +341,6 @@ export function AdminProducts() {
     }
   }, [products]);
 
-  // Ejecutar eliminación directamente sin modal (usado en el panel de detalle)
   const handleDirectDelete = useCallback((id: string) => {
     try {
       deleteProduct(id);
@@ -337,7 +351,6 @@ export function AdminProducts() {
     }
   }, [deleteProduct]);
 
-  // Confirmar y ejecutar eliminación
   const handleConfirmDelete = useCallback(async () => {
     if (!productToDelete) return;
 
@@ -355,7 +368,6 @@ export function AdminProducts() {
     }
   }, [productToDelete, deleteProduct]);
 
-  // Cancelar eliminación
   const handleCancelDelete = useCallback(() => {
     setShowDeleteModal(false);
     setProductToDelete(null);
@@ -369,7 +381,7 @@ export function AdminProducts() {
     >
       {viewMode === 'list' && (
         <>
-          {/* Contenedor de herramientas de lista (se oculta automáticamente en móvil al abrir el detalle) */}
+          {/* Contenedor de herramientas de lista */}
           <div className={styles.listToolbarArea}>
             <ProductHeader
               canCreate={can('products.create')}
@@ -397,7 +409,6 @@ export function AdminProducts() {
             </div>
           ) : (
             <>
-              {/* Acciones mostradas incluso si está cargando, si hay productos en el render actual */}
               {!error && (products.length > 0 || loading) && (
                 <div className={`${styles.actionsBar} ${styles.listToolbarArea}`} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
                   <div className={styles.exportBtnContainer}>
@@ -518,21 +529,11 @@ export function AdminProducts() {
       {viewMode === 'form' && (
         <AdminProductFormPage
           productId={editId}
-          onBack={() => {
-            setViewMode('list');
-            setEditId(null);
-          }}
+          onBack={handleResetToListWithAllProducts}
           onSuccess={() => {
-            setViewMode('list');
             setUnsavedChanges(false);
-            refreshProducts({
-              q: search,
-              categoryId: categoryFilter,
-              status: statusFilter,
-              stockLevel: stockLevelFilter,
-              page: editPage,
-              limit: PAGE_LIMIT,
-            });
+            handleResetToListWithAllProducts();
+            toast.success('Producto guardado con éxito');
           }}
           onUnsavedChanges={setUnsavedChanges}
         />

@@ -108,10 +108,14 @@ export function AdminProductFormPage({
     const blocker = useBlocker(isDirty);
 
     const handleCancel = useCallback(() => {
-        interceptNavigation(() => {
+        if (isDirty) {
+            interceptNavigation(() => {
+                onBack();
+            });
+        } else {
             onBack();
-        });
-    }, [interceptNavigation, onBack]);
+        }
+    }, [isDirty, interceptNavigation, onBack]);
 
     const toggleAccordion = useCallback((id: SectionId) => {
         setAccordionsOpen(prev => ({ ...prev, [id]: !prev[id] }));
@@ -211,7 +215,7 @@ export function AdminProductFormPage({
                         display: none !important;
                     }
 
-                    /* Subencabezado ("← Productos Nuevo producto") en flujo normal */
+                    /* Subencabezado en flujo normal */
                     .stickyFormHeaderMobile {
                         position: relative !important;
                         top: auto !important;
@@ -225,10 +229,10 @@ export function AdminProductFormPage({
                         box-sizing: border-box !important;
                     }
 
-                    /* 🟢 ELIMINACIÓN TOTAL DEL FONDO GRIS EXTENDIDO DEL CONTENEDOR */
+                    /* ELIMINACIÓN DEL FONDO GRIS EXTENDIDO DEL CONTENEDOR */
                     .formPageMobileResponsive {
                         background: transparent !important;
-                        padding-bottom: 120px !important; /* Colchón para los botones fijos inferiores */
+                        padding-bottom: 120px !important;
                     }
 
                     .formPageMobileResponsive .layout,
@@ -249,7 +253,7 @@ export function AdminProductFormPage({
                         flex: 0 0 auto !important;
                     }
 
-                    /* Tarjetas Acordeón individuales limpias */
+                    /* Tarjetas Acordeón individuales */
                     .mobileSectionCard {
                         width: 100% !important;
                         max-width: 100% !important;
@@ -405,7 +409,7 @@ export function AdminProductFormPage({
             </header>
 
             <div className={styles.layout}>
-                {/* Navegación lateral activa SOLO en Escritorio (oculta en móvil por CSS) */}
+                {/* Navegación lateral activa SOLO en Escritorio */}
                 <nav className={`${styles.sidebar} desktopSidebarOnly`} aria-label="Secciones del formulario">
                     <ul className={styles.sidebarList}>
                         {SECTIONS.map(section => {
