@@ -1,16 +1,42 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 24946 |
-| FedericoPaal | 8675 |
-| Mau-bar-iva | 5920 |
+| dgimenezdeveloper | 25151 |
+| FedericoPaal | 8795 |
+| Mau-bar-iva | 6105 |
 | Nahuel-Dalesio | 1630 |
-| agustin-ovejero | 1475 |
+| agustin-ovejero | 1478 |
 | CelinaJP | 1378 |
 
 
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| agustin-ovejero | 3 | Gestión | Creación de issue — Issue #1371: Exportar PDF del listado de productos en admin falla al generar | 2026-08-01 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1370: 🔄 Registrar puntaje de gestión | 2026-08-01 |
+| dgimenezdeveloper | 10 | Gestión | Revisión de PR — Solicitud de cambios — PR #1369: 1343 responsive   corregir responsive y desbordes en admin colecciones | 2026-08-01 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1368: fix en cards de matriz de productos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1367: 1341 responsive   ajustar marginpadding y agregar icono de lupa en el input de buscar en responsive de la vista pedidos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1366: 1340 responsive   corregir responsive de la vista de categorías para evitar superposiciones y ordenar el layout | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1365: 1338 responsive   corregir el header de la card alerta de stock crítico para que coincida con productos incompletos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1364: 1337 responsive   habilitar arrastre de componentes en responsive dentro del tab vista previa en dashboard   personalizar | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1363: 1336 responsive   reducir altura del header en admin y evitar que el texto quede oculto por el menú hamburguesa | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1362: Se agrega botón de seña 50% en detalle de Pedido y badge en tabla de … | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1361: Agregar modal de fluctuación de precios al hacer clic en productos del ranking de más vendidos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1360: 1333 agregar previsualización de home en la vista de colecciones al crearse una colección desde admin como en la vista de banners | 2026-07-31 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1359: 🔄 Registrar puntaje de gestión | 2026-07-31 |
+| FedericoPaal | 20 | Issue | Responsive - Corregir el header de la card “Alerta de Stock Crítico” para que coincida con “Productos Incompletos” | 2026-07-31 |
+| FedericoPaal | 35 | Issue | Responsive - Habilitar arrastre de componentes en responsive dentro del tab Vista Previa en Dashboard - Personalizar | 2026-07-31 |
+| FedericoPaal | 30 | Issue | Responsive - Reducir altura del header en Admin y evitar que el texto quede oculto por el menú hamburguesa | 2026-07-31 |
+| FedericoPaal | 35 | Issue | Agregar botón de seña 50% en detalle de Pedido y badge en tabla de pedidos | 2026-07-31 |
+| Mau-bar-iva | 50 | Issue | Responsive - Corregir desbordes de contenido en las cards y formulario de la vista de Promociones en responsive | 2026-07-31 |
+| Mau-bar-iva | 15 | Issue | Responsive - Ajustar margin/padding y agregar icono de lupa en el input de Buscar en responsive de la vista Pedidos | 2026-07-31 |
+| Mau-bar-iva | 40 | Issue | Responsive - Corregir responsive de la vista de Categorías para evitar superposiciones y ordenar el layout | 2026-07-31 |
+| Mau-bar-iva | 40 | Issue | Agregar modal de fluctuación de precios al hacer clic en productos del ranking de más vendidos | 2026-07-31 |
+| Mau-bar-iva | 40 | Issue | Agregar previsualización de Home en la vista de colecciones al crearse una colección desde Admin como en la vista de Banners | 2026-07-31 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1359: 🔄 Registrar puntaje de gestión | 2026-07-26 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1358: 🔄 Actualización automática de puntajes semanal | 2026-07-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1358: 🔄 Actualización automática de puntajes semanal | 2026-07-26 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1357: 🔄 Registrar puntaje de gestión | 2026-07-26 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1357: 🔄 Registrar puntaje de gestión | 2026-07-25 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1356: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-25 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1355: Arreglar modo claro/oscuro del tooltip en la vista de Proveedores sobre el gráfico de fluctuación | 2026-07-25 |

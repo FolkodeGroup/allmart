@@ -2275,11 +2275,20 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1324: Corrección dropdown se ajustó la posición del menú para que se muestre correctamente en la pantalla. | 2026-07-25 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-25 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1321: 🔄 Registrar puntaje de gestión | 2026-07-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1292: 1282 corregir cálculo del descuento bogo en la vista de promociones | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1295: Permitir compras de productos que tengan 0 stock | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1319: 1309 descontar stock de la variante comprada en el admin al comprar desde el home | 2026-07-18 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1356: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1368: fix en cards de matriz de productos | 2026-07-31 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1359: 🔄 Registrar puntaje de gestión | 2026-07-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1358: 🔄 Actualización automática de puntajes semanal | 2026-07-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1358: 🔄 Actualización automática de puntajes semanal | 2026-07-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1357: 🔄 Registrar puntaje de gestión | 2026-07-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1368: fix en cards de matriz de productos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1367: 1341 responsive   ajustar marginpadding y agregar icono de lupa en el input de buscar en responsive de la vista pedidos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1366: 1340 responsive   corregir responsive de la vista de categorías para evitar superposiciones y ordenar el layout | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1365: 1338 responsive   corregir el header de la card alerta de stock crítico para que coincida con productos incompletos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1364: 1337 responsive   habilitar arrastre de componentes en responsive dentro del tab vista previa en dashboard   personalizar | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1363: 1336 responsive   reducir altura del header en admin y evitar que el texto quede oculto por el menú hamburguesa | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1362: Se agrega botón de seña 50% en detalle de Pedido y badge en tabla de … | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1361: Agregar modal de fluctuación de precios al hacer clic en productos del ranking de más vendidos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1360: 1333 agregar previsualización de home en la vista de colecciones al crearse una colección desde admin como en la vista de banners | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1359: 🔄 Registrar puntaje de gestión | 2026-07-31 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1370: 🔄 Registrar puntaje de gestión | 2026-08-01 |
+| dgimenezdeveloper | 10 | Revisión de PR — Solicitud de cambios | PR #1369: 1343 responsive   corregir responsive y desbordes en admin colecciones | 2026-08-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1371: Exportar PDF del listado de productos en admin falla al generar | 2026-08-01 |
