@@ -12,7 +12,7 @@ import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { Notification } from '../../../components/ui/Notification';
-import { ConfirmModal } from '../../../components/ui/ConfirmModal';
+import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName, exportReportsSummaryXLSX } from '../../../utils/exportHelpers';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
@@ -25,6 +25,7 @@ import { useReportsData } from './hooks/useReportsData';
 import { useMonthlyGoal } from '../goals/hooks/useMonthlyGoal';
 import { ReportsCharts } from './components/ReportsCharts';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import { Search } from 'lucide-react';
 import { PriceHistoryModal } from '../suppliers/PriceHistoryModal';
 
@@ -101,6 +102,8 @@ export function AdminReports() {
   } = useUnsavedChangesWarning({ active: true });
 
   const [ordersTableFilters, setOrdersTableFilters] = useState<{ status: string[]; clientQuery: string; productQuery: string }>({ status: [], clientQuery: '', productQuery: '' });
+  const [orderSortField, setOrderSortField] = useState<'date' | 'customer' | 'total' | 'status'>('date');
+  const [orderSortDirection, setOrderSortDirection] = useState<'asc' | 'desc'>('desc');
   const [now, setNow] = useState(() => Date.now());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -205,6 +208,37 @@ export function AdminReports() {
     ordersTableFilters,
     now
   );
+
+  const orderSortOptions = useMemo(() => [
+    { value: 'date', label: 'Fecha' },
+    { value: 'customer', label: 'Cliente' },
+    { value: 'total', label: 'Total' },
+    { value: 'status', label: 'Estado' },
+  ] as const, []);
+
+  const sortedFilteredOrdersTable = useMemo(() => {
+    const sorted = [...filteredOrdersTable];
+
+    sorted.sort((a, b) => {
+      if (orderSortField === 'date') {
+        return a.createdAt.localeCompare(b.createdAt);
+      }
+      if (orderSortField === 'customer') {
+        const aName = `${a.customer.firstName || ''} ${a.customer.lastName || ''}`.trim();
+        const bName = `${b.customer.firstName || ''} ${b.customer.lastName || ''}`.trim();
+        return aName.localeCompare(bName, 'es', { sensitivity: 'base' });
+      }
+      if (orderSortField === 'total') {
+        return a.total - b.total;
+      }
+      if (orderSortField === 'status') {
+        return a.status.localeCompare(b.status, 'es', { sensitivity: 'base' });
+      }
+      return 0;
+    });
+
+    return orderSortDirection === 'asc' ? sorted : sorted.reverse();
+  }, [filteredOrdersTable, orderSortField, orderSortDirection]);
 
   const prevPeriodRevenue = useMemo(() => {
     if (period === 'all') return null;
@@ -416,11 +450,11 @@ export function AdminReports() {
   );
 
   const paginatedOrders = useMemo(() => {
-    return filteredOrdersTable.slice(
+    return sortedFilteredOrdersTable.slice(
       (page - 1) * pageSize,
       page * pageSize
     );
-  }, [filteredOrdersTable, page, pageSize]);
+  }, [sortedFilteredOrdersTable, page, pageSize]);
 
   useEffect(() => {
     const maxPage = Math.ceil(filteredOrdersTable.length / pageSize);
@@ -493,12 +527,12 @@ export function AdminReports() {
       )}
 
       {/* Modal de confirmación de cambios no guardados */}
-      <ConfirmModal
+      <ModalConfirm
         open={showWarning}
         title="Tienes cambios sin guardar"
         message="¿Seguro que quieres salir? Se perderán los cambios no guardados."
-        confirmLabel="Salir y descartar cambios"
-        cancelLabel="Cancelar"
+        confirmText="Salir y descartar cambios"
+        cancelText="Cancelar"
         onConfirm={confirmNavigation}
         onCancel={cancelNavigation}
       />
@@ -574,6 +608,58 @@ export function AdminReports() {
           >
             {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
           </button>
+        </div>
+
+        {/* Mobile-only: show quick filters (client/product/status) next to export buttons */}
+        <div className={styles.mobileExportFilters}>
+          <label className={styles.advancedLabel}>
+            <strong>Cliente</strong>
+            <div className={styles.searchWrap}>
+              <Search size={16} className={styles.searchIcon} />
+              <input
+                type="text"
+                value={ordersTableFilters.clientQuery}
+                onChange={e => {
+                  e.preventDefault();
+                  setOrdersTableFilters(f => ({ ...f, clientQuery: e.target.value }))
+                }}
+                placeholder="Nombre o email"
+                className={styles.advancedInput}
+                autoComplete="off"
+                spellCheck="false"
+                autoCorrect="off"
+                autoCapitalize="off"
+              />
+            </div>
+          </label>
+
+          <label className={styles.advancedLabel}>
+            <strong>Producto</strong>
+            <div className={styles.searchWrap}>
+              <Search size={16} className={styles.searchIcon} />
+              <input
+                type="text"
+                value={ordersTableFilters.productQuery}
+                onChange={e => {
+                  e.preventDefault();
+                  setOrdersTableFilters(f => ({ ...f, productQuery: e.target.value }))
+                }}
+                placeholder="Nombre de producto"
+                className={styles.advancedInput}
+                autoComplete="off"
+                spellCheck="false"
+                autoCorrect="off"
+                autoCapitalize="off"
+              />
+            </div>
+          </label>
+
+          <div className={styles.mobileOrdersFilters}>
+            <OrdersFilters
+              ordersTableFilters={ordersTableFilters}
+              setOrdersTableFilters={setOrdersTableFilters}
+            />
+          </div>
         </div>
 
         {/* Contenedor invisible para exportación PDF fiel */}
@@ -712,47 +798,66 @@ export function AdminReports() {
                   <h2 className={styles.panelTitle + ' fadeInFast'}>📋 Últimos pedidos del período</h2>
                   <span className={styles.panelSubtitle + ' fadeInFast'}>{periodOrders.length} pedidos</span>
                 </div>
+              </div>
 
-                <div className={styles.exportWrap + ' fadeInFast'}>
+              <div className={styles.reportActionsBar + ' fadeInFast'}>
+                <div className={styles.reportExportBtnContainer}>
                   <ExportButtons
+                    className={styles.reportExportButtons}
                     onExportCSV={async () => {
-                      if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      if (!sortedFilteredOrdersTable.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
                       setExportLoading('csv');
                       try {
                         const lbl = filters.type === 'predefined' ? filters.period : 'custom';
-                        exportOrdersCSV(periodOrders, getExportFileName('pedidos', lbl, 'csv'));
+                        exportOrdersCSV(sortedFilteredOrdersTable, getExportFileName('pedidos', lbl, 'csv'));
                         setNotif({ open: true, type: 'success', message: 'CSV descargado.' });
                       } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar CSV.' }); }
                       finally { setExportLoading(null); }
                     }}
                     onExportExcel={async () => {
-                      if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      if (!sortedFilteredOrdersTable.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
                       setExportLoading('xlsx');
                       try {
                         const lbl = filters.type === 'predefined' ? filters.period : 'custom';
-                        exportOrdersXLSX(periodOrders, getExportFileName('pedidos', lbl, 'xlsx'));
+                        exportOrdersXLSX(sortedFilteredOrdersTable, getExportFileName('pedidos', lbl, 'xlsx'));
                         setNotif({ open: true, type: 'success', message: 'Excel descargado.' });
                       } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar Excel.' }); }
                       finally { setExportLoading(null); }
                     }}
                     onExportPDF={async () => {
-                      if (!periodOrders.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      if (!sortedFilteredOrdersTable.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
                       setExportLoading('pdf');
                       try {
                         const lbl = filters.type === 'predefined' ? filters.period : 'custom';
-                        await exportOrdersPDF(periodOrders, getExportFileName('pedidos', lbl, 'pdf'));
+                        await exportOrdersPDF(sortedFilteredOrdersTable, getExportFileName('pedidos', lbl, 'pdf'));
                         setNotif({ open: true, type: 'success', message: 'PDF descargado.' });
                       } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar PDF.' }); }
                       finally { setExportLoading(null); }
                     }}
                     loading={exportLoading}
                   />
-                  <Notification
-                    open={notif.open}
-                    type={notif.type}
-                    message={notif.message}
-                    onClose={() => setNotif(n => ({ ...n, open: false }))}
-                  />
+                </div>
+
+                <div className={styles.reportSortContainer}>
+                  <div className={styles.reportSortControls}>
+                    <span className={styles.reportSortLabel}>Ordenar:</span>
+                    <div style={{ width: '140px', display: 'inline-block' }}>
+                      <Dropdown
+                        options={orderSortOptions}
+                        value={orderSortField}
+                        onChange={(val) => setOrderSortField(val as 'date' | 'customer' | 'total' | 'status')}
+                        placeholder="Ordenar por..."
+                      />
+                    </div>
+                    <button
+                      onClick={() => setOrderSortDirection(orderSortDirection === 'asc' ? 'desc' : 'asc')}
+                      className={styles.sortButton}
+                      title={`Ordenar ${orderSortDirection === 'asc' ? 'descendente' : 'ascendente'}`}
+                      type="button"
+                    >
+                      {orderSortDirection === 'asc' ? '▲' : '▼'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -827,9 +932,9 @@ export function AdminReports() {
 
                   <div className={styles.paginationWrap}>
                     <div className={styles.pageSizeWrap}>
-                      {filteredOrdersTable.length > pageSize && (
+                      {sortedFilteredOrdersTable.length > pageSize && (
                         <p className={styles.moreHint + ' fadeInFast'}>
-                          Mostrando {from}-{to} de {filteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
+                          Mostrando {from}-{to} de {sortedFilteredOrdersTable.length} pedidos. Cambiá el tamaño de página o navegá para ver más.
                         </p>
                       )}
                       <select
@@ -848,7 +953,7 @@ export function AdminReports() {
                     </div>
                     <AdminPagination
                       page={page}
-                      totalPages={Math.ceil(filteredOrdersTable.length / pageSize) || 1}
+                      totalPages={Math.ceil(sortedFilteredOrdersTable.length / pageSize) || 1}
                       onPageChange={setPage}
                       ariaLabel="Paginación de pedidos del reporte"
                     />
