@@ -11,7 +11,6 @@ import type { ReportsFiltersValue, PredefinedPeriod } from './components/Reports
 import { ReportsMetrics } from './components/ReportsMetrics';
 import { OrdersTable } from './components/OrdersTable';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-import { Notification } from '../../../components/ui/Notification';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName, exportReportsSummaryXLSX } from '../../../utils/exportHelpers';
 import { ProductRanking } from './components/ReportsProductRanking';
@@ -25,7 +24,7 @@ import { useReportsData } from './hooks/useReportsData';
 import { useMonthlyGoal } from '../goals/hooks/useMonthlyGoal';
 import { ReportsCharts } from './components/ReportsCharts';
 import { ExportButtons } from '../../../components/ui/ExportButtons';
-import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
+import { Dropdown, type DropdownOption } from '../../../components/ui/Dropdown/Dropdown';
 import { Search } from 'lucide-react';
 import { PriceHistoryModal } from '../suppliers/PriceHistoryModal';
 
@@ -109,7 +108,7 @@ export function AdminReports() {
   const [pageSize, setPageSize] = useState(10);
 
   // Feedback de exportación
-  const [notif, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
+  const [, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
 
   // PDF export
@@ -209,12 +208,12 @@ export function AdminReports() {
     now
   );
 
-  const orderSortOptions = useMemo(() => [
+  const orderSortOptions = useMemo<DropdownOption[]>(() => [
     { value: 'date', label: 'Fecha' },
     { value: 'customer', label: 'Cliente' },
     { value: 'total', label: 'Total' },
     { value: 'status', label: 'Estado' },
-  ] as const, []);
+  ], []);
 
   const sortedFilteredOrdersTable = useMemo(() => {
     const sorted = [...filteredOrdersTable];
