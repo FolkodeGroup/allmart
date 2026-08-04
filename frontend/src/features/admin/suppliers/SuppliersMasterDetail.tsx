@@ -17,7 +17,17 @@ import styles from './SuppliersMasterDetail.module.css';
 const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 const fmtN = (v: number | null) => (v === null ? '—' : fmt.format(v));
 const fmtPct = (v: number | null) => (v === null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`);
+const fmtCompact = new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+});
 
+function fmtDateShort(iso: string) {
+    const [, m, d] = iso.split('-');
+    return `${d}/${m}`;
+}
 // ── Date helpers ────────────────────────────────────────────────────────────
 function daysAgoISO(days: number) {
     const d = new Date(); d.setDate(d.getDate() - days); return d.toISOString().slice(0, 10);
@@ -31,6 +41,21 @@ interface SuppliersMasterDetailProps {
     onEdit: (id: string) => void;
 }
 
+function useIsMobile(breakpoint = 480) {
+    const [isMobile, setIsMobile] = useState(
+        () => typeof window !== 'undefined' && window.innerWidth <= breakpoint
+    );
+
+    useEffect(() => {
+        const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, [breakpoint]);
+
+    return isMobile;
+}
+
 export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailProps) {
     const [suppliers, setSuppliers] = useState<AdminSupplierV2[]>([]);
     const [loadingList, setLoadingList] = useState(true);
@@ -39,6 +64,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     const [productSearch, setProductSearch] = useState('');
+    const isMobile = useIsMobile();
 
     // Right panel state
     const [activeTab, setActiveTab] = useState<TabId>('chart');
@@ -451,8 +477,13 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                     </div>
                                                 </div>
                                                 <div className={styles.chartPanel}>
-                                                    <ResponsiveContainer width="100%" height={320}>
-                                                        <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+                                                    <ResponsiveContainer width="100%" height={isMobile ? 240 : 320}>
+                                                        <AreaChart
+                                                            data={chartData}
+                                                            margin={isMobile
+                                                                ? { top: 12, right: 8, left: 0, bottom: 0 }
+                                                                : { top: 20, right: 30, left: 20, bottom: 10 }
+                                                            }>
                                                             <defs>
                                                                 {chartProducts.map((name, i) => (
                                                                     <linearGradient key={name} id={`color${name.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
@@ -464,15 +495,19 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e0e0e0)" />
                                                             <XAxis
                                                                 dataKey="date"
-                                                                tick={{ fontSize: 12, fontWeight: 500 }}
+                                                                tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 500 }}
+                                                                tickFormatter={isMobile ? fmtDateShort : undefined}
                                                                 stroke="var(--color-text-tertiary, #6b7280)"
                                                             />
                                                             <YAxis
-                                                                tick={{ fontSize: 12 }}
-                                                                tickFormatter={(v: number) => fmt.format(v)}
+                                                                tick={{ fontSize: isMobile ? 10 : 12 }}
+                                                                tickFormatter={(v: number) => (isMobile ? fmtCompact : fmt).format(v)}
                                                                 stroke="var(--color-text-tertiary, #6b7280)"
-                                                                width={90}
-                                                                label={{ value: 'Costo', angle: -90, position: 'insideLeft', offset: -5, fontSize: 12, fill: 'var(--color-text-tertiary, #6b7280)' }}
+                                                                width={isMobile ? 42 : 90}
+                                                                label={isMobile ? undefined : {
+                                                                    value: 'Costo', angle: -90, position: 'insideLeft', offset: -5,
+                                                                    fontSize: 12, fill: 'var(--color-text-tertiary, #6b7280)'
+                                                                }}
                                                             />
                                                             <Tooltip
                                                                 formatter={(v: number) => fmt.format(v)}
@@ -498,7 +533,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                     fontSize: '0.82rem',
                                                                 }}
                                                             />
-                                                            <Legend wrapperStyle={{ fontSize: 12, paddingTop: '16px' }} />
+                                                            <Legend wrapperStyle={{ fontSize: isMobile ? 10 : 12, paddingTop: isMobile ? 8 : 16 }} />
                                                             {chartProducts.map((name, i) => (
                                                                 <Area
                                                                     key={name}
@@ -523,7 +558,6 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                     <div className={styles.tableTab}>
                                         <div className={styles.tableActions}>
                                             <div className={styles.tableToolbarLeft}>
-                                                <span className={styles.tableCount}>{filteredProducts.length} de {products.length} producto{products.length !== 1 ? 's' : ''}</span>
                                                 <label className={styles.searchBox}>
                                                     <Search size={14} />
                                                     <input
@@ -533,6 +567,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                         onChange={e => setProductSearch(e.target.value)}
                                                     />
                                                 </label>
+                                                <span className={styles.tableCount}>{filteredProducts.length} de {products.length} producto{products.length !== 1 ? 's' : ''}</span>
+
                                             </div>
                                             <div className={styles.tableToolbarRight}>
                                                 <label className={styles.inlineCheckbox}>
@@ -663,10 +699,16 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                             <div className={styles.histogramSection}>
                                                 <h4 className={styles.sectionTitle}>Distribución de Márgenes</h4>
                                                 <ResponsiveContainer width="100%" height={160}>
-                                                    <BarChart data={products.filter(p => p.margin !== null).map(p => ({ name: p.productName.slice(0, 12), margin: p.margin }))}>
+                                                    <BarChart
+                                                        data={products.filter(p => p.margin !== null).map(p => ({ name: p.productName.slice(0, 12), margin: p.margin }))}
+                                                        margin={isMobile
+                                                            ? { top: 5, right: 8, left: 0, bottom: 0 }
+                                                            : { top: 5, right: 8, left: 0, bottom: 0 }
+                                                        }
+                                                    >
                                                         <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e5e7eb)" />
                                                         <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                                                        <YAxis tick={{ fontSize: 10 }} />
+                                                        <YAxis tick={{ fontSize: 10 }} width={isMobile ? 26 : 36} />
                                                         <Tooltip formatter={(v: number) => `${v.toFixed(1)}%`} />
                                                         <Bar dataKey="margin" fill="#6366f1" radius={[3, 3, 0, 0]} />
                                                     </BarChart>
