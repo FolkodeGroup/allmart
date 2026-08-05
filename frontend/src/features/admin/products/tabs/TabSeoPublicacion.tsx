@@ -1,56 +1,75 @@
 import { memo } from 'react';
 import type { TabSEOPublicacionProps } from '../components/types';
-import styles from '../AdminProductFormPage.module.css';
+import styles from './TabSeoPublicacion.module.css';
 
 export const TabSEOPublicacion = memo(function TabSEOPublicacion({
     form,
-    fieldErrors: _fieldErrors,
 }: TabSEOPublicacionProps) {
+    const siteDomain = 'www.allmartbazar.com.ar';
+    const slug = form.slug || form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const previewUrl = `https://${siteDomain} › producto › ${slug || 'nombre-producto'}`;
+    const previewTitle = form.name ? `${form.name} | Allmart Bazar` : 'Nombre del Producto | Allmart Bazar';
+    const previewDescription = form.shortDescription || form.description || 'Descripción del producto en Allmart Bazar. Encontrá la mejor calidad y precio para tu hogar.';
+
+    const checks = [
+        { label: 'Nombre del producto', ok: !!form.name && form.name.trim().length >= 3 },
+        { label: 'SKU configurado', ok: !!form.sku && form.sku.trim().length > 0 },
+        { label: 'Precio válido', ok: typeof form.price === 'number' && form.price > 0 },
+        { label: 'Categoría asignada', ok: !!form.category?.id },
+        { label: 'Descripción completa', ok: !!form.description && form.description.trim().length > 10 },
+        { label: 'Descripción corta SEO', ok: !!form.shortDescription && form.shortDescription.trim().length >= 10 },
+        { label: 'Etiquetas cargadas', ok: Array.isArray(form.tags) && form.tags.length > 0 },
+        { label: 'Características clave', ok: Array.isArray(form.features) && form.features.length > 0 },
+    ];
+
+    const completedCount = checks.filter(c => c.ok).length;
+    const healthPercentage = Math.round((completedCount / checks.length) * 100);
 
     return (
-        <fieldset className={styles.fieldset}>
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                    gap: '10px',
-                }}
-            >
-                {[
-                    { label: 'Nombre', ok: !!form.name, icon: 'bi-fonts' },
-                    { label: 'Descripción completa', ok: !!form.description, icon: 'bi-justify-left' },
-                    { label: 'Descripción corta', ok: !!form.shortDescription, icon: 'bi-card-text' },
-                    { label: 'Categoría', ok: !!form.category?.id, icon: 'bi-tag' },
-                    { label: 'Precio', ok: form.price > 0, icon: 'bi-currency-dollar' },
-                    { label: 'SKU', ok: !!form.sku, icon: 'bi-hash' },
-                    { label: 'Etiquetas', ok: form.tags.length > 0, icon: 'bi-tags' },
-                    { label: 'Características', ok: (form.features ?? []).length > 0, icon: 'bi-list-check' },
-                ].map(({ label, ok, icon }) => (
-                    <div
-                        key={label}
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '10px 12px',
-                            borderRadius: '8px',
-                            background: ok ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)',
-                            border: `1px solid ${ok ? '#bbf7d0' : '#fde68a'}`,
-                            fontSize: '0.85rem',
-                            minHeight: '44px',
-                        }}
-                    >
-                        <span style={{ color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <i className={`bi ${icon}`} style={{ color: ok ? 'var(--color-primary)' : 'var(--color-accent-dark)' }}></i>
-                            {label}
-                        </span>
-                        <i
-                            className={ok ? "bi bi-check-circle-fill" : "bi bi-exclamation-triangle-fill"}
-                            style={{ color: ok ? '#059669' : '#d97706' }}
-                        ></i>
-                    </div>
-                ))}
+        <div className={styles.seoContainer}>
+            {/* Vista Previa en Google */}
+            <div className={styles.googlePreviewCard}>
+                <div className={styles.googleHeader}>
+                    <span className={styles.googleIcon}>🔍</span>
+                    <span className={styles.googleTitle}>Vista previa en Google</span>
+                </div>
+                <div className={styles.googleSnippet}>
+                    <span className={styles.snippetUrl}>{previewUrl}</span>
+                    <h3 className={styles.snippetTitle}>{previewTitle}</h3>
+                    <p className={styles.snippetDescription}>
+                        {previewDescription.length > 160 ? `${previewDescription.slice(0, 157)}...` : previewDescription}
+                    </p>
+                </div>
             </div>
-        </fieldset>
+
+            {/* Salud del Producto */}
+            <div className={styles.healthCard}>
+                <div className={styles.healthHeader}>
+                    <span className={styles.healthTitle}>Salud de la publicación</span>
+                    <span className={`${styles.healthBadge} ${healthPercentage >= 80 ? styles.healthOk : healthPercentage >= 50 ? styles.healthWarn : styles.healthLow}`}>
+                        {healthPercentage}% Completo
+                    </span>
+                </div>
+                <div className={styles.healthBarTrack}>
+                    <div
+                        className={styles.healthBarFill}
+                        style={{
+                            width: `${healthPercentage}%`,
+                            backgroundColor: healthPercentage >= 80 ? '#10b981' : healthPercentage >= 50 ? '#f59e0b' : '#ef4444'
+                        }}
+                    />
+                </div>
+                <ul className={styles.checkList}>
+                    {checks.map(({ label, ok }) => (
+                        <li key={label} className={styles.checkItem}>
+                            <span className={ok ? styles.checkIconOk : styles.checkIconPending}>
+                                {ok ? '✓' : '○'}
+                            </span>
+                            <span className={ok ? styles.checkTextOk : styles.checkTextPending}>{label}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
     );
-}); 
+});

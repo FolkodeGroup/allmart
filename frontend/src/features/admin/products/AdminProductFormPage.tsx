@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useBlocker } from 'react-router-dom';
 import { useProductForm } from '../../../hooks/useProductFormPage';
@@ -22,16 +22,7 @@ interface Props {
     onUnsavedChanges?: (unsaved: boolean) => void;
 }
 
-const SECTIONS = [
-    { id: 'basico', label: 'Básico', icon: 'bi bi-file-earmark-text' },
-    { id: 'precios', label: 'Precios y stock', icon: 'bi bi-currency-dollar' },
-    { id: 'categorias', label: 'Categorías', icon: 'bi bi-tags' },
-    { id: 'imagenes', label: 'Imágenes', icon: 'bi bi-image' },
-    { id: 'variantes', label: 'Variantes', icon: 'bi bi-layers' },
-    { id: 'seo', label: 'SEO / Publicación', icon: 'bi bi-globe' },
-] as const;
-
-type SectionId = typeof SECTIONS[number]['id'];
+type SectionId = 'basico' | 'precios' | 'categorias' | 'imagenes' | 'variantes' | 'seo';
 
 export function AdminProductFormPage({
     productId,
@@ -41,24 +32,15 @@ export function AdminProductFormPage({
 }: Props) {
     const formRef = React.useRef<HTMLFormElement | null>(null);
 
-    // Estado para controlar qué sección está activa en la barra lateral de Escritorio
-    const [activeSection, setActiveSection] = useState<SectionId>('basico');
-
-    // MOBILE-FIRST: Todos los acordeones inician colapsados por defecto
+    // MOBILE-FIRST: Acordeones para pantalla táctil (< 768px)
     const [accordionsOpen, setAccordionsOpen] = useState<Record<SectionId, boolean>>({
-        basico: false,
-        precios: false,
-        categorias: false,
-        imagenes: false,
-        variantes: false,
-        seo: false,
+        basico: true,
+        precios: true,
+        categorias: true,
+        imagenes: true,
+        variantes: true,
+        seo: true,
     });
-
-    const sectionRefs = useRef<Record<SectionId, HTMLElement | null>>({
-        basico: null, precios: null, categorias: null,
-        imagenes: null, variantes: null, seo: null,
-    });
-    const observerRef = useRef<IntersectionObserver | null>(null);
 
     const formProps = useProductForm({
         productId,
@@ -132,45 +114,8 @@ export function AdminProductFormPage({
         });
     }, []);
 
-    // ── Scroll spy para navegación lateral en Escritorio ─────────────────
-    useEffect(() => {
-        observerRef.current?.disconnect();
-        observerRef.current = new IntersectionObserver(
-            entries => {
-                const visible = entries
-                    .filter(e => e.isIntersecting)
-                    .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-                if (visible.length > 0) {
-                    setActiveSection(visible[0].target.id as SectionId);
-                }
-            },
-            { threshold: 0.3, rootMargin: '-60px 0px -60% 0px' }
-        );
-
-        SECTIONS.forEach(s => {
-            const el = sectionRefs.current[s.id];
-            if (el) observerRef.current?.observe(el);
-        });
-
-        return () => observerRef.current?.disconnect();
-    }, []);
-
-    const scrollToSection = useCallback((id: SectionId) => {
-        setActiveSection(id);
-        setAccordionsOpen(prev => ({ ...prev, [id]: true }));
-        sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, []);
-
-    const setSectionRef = useCallback(
-        (id: SectionId) => (el: HTMLElement | null) => {
-            sectionRefs.current[id] = el;
-        },
-        []
-    );
-
     const { sectionErrors, saving, error, isEdit, loading } = formProps;
 
-    // Renderizado portaleado de la barra de acciones inferior para móvil
     const renderMobileBottomBar = () => {
         const barMarkup = (
             <div className="fixedBottomBarMobile">
@@ -210,12 +155,6 @@ export function AdminProductFormPage({
         <div className={`${styles.page} formPageMobileResponsive`}>
             <style>{`
                 @media (max-width: 767px) {
-                    /* Ocultar barra lateral/tabs de navegación en móvil */
-                    .desktopSidebarOnly {
-                        display: none !important;
-                    }
-
-                    /* Subencabezado en flujo normal */
                     .stickyFormHeaderMobile {
                         position: relative !important;
                         top: auto !important;
@@ -229,41 +168,9 @@ export function AdminProductFormPage({
                         box-sizing: border-box !important;
                     }
 
-                    /* ELIMINACIÓN DEL FONDO GRIS EXTENDIDO DEL CONTENEDOR */
                     .formPageMobileResponsive {
                         background: transparent !important;
                         padding-bottom: 120px !important;
-                    }
-
-                    .formPageMobileResponsive .layout,
-                    .formPageMobileResponsive .content,
-                    .formPageMobileResponsive form {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        align-items: stretch !important;
-                        width: 100% !important;
-                        max-width: 100% !important;
-                        box-sizing: border-box !important;
-                        background: transparent !important;
-                        background-color: transparent !important;
-                        border: none !important;
-                        box-shadow: none !important;
-                        padding: 0 !important;
-                        min-height: 0 !important;
-                        flex: 0 0 auto !important;
-                    }
-
-                    /* Tarjetas Acordeón individuales */
-                    .mobileSectionCard {
-                        width: 100% !important;
-                        max-width: 100% !important;
-                        box-sizing: border-box !important;
-                        border-radius: 12px !important;
-                        border: 1px solid var(--color-border, #374151) !important;
-                        background: var(--color-bg-secondary, #28353d) !important;
-                        overflow: hidden !important;
-                        margin-bottom: 10px !important;
-                        align-self: stretch !important;
                     }
 
                     .accordionHeaderButton {
@@ -304,10 +211,6 @@ export function AdminProductFormPage({
                         display: none !important;
                     }
 
-                    .desktopBottomBar {
-                        display: none !important;
-                    }
-
                     .accordionToggleBarMobile {
                         display: flex !important;
                         align-items: center !important;
@@ -333,7 +236,6 @@ export function AdminProductFormPage({
                         font-size: 12px !important;
                     }
 
-                    /* Barra fija inferior flotante */
                     .fixedBottomBarMobile {
                         position: fixed !important;
                         bottom: 0 !important;
@@ -373,6 +275,7 @@ export function AdminProductFormPage({
                 }
             `}</style>
 
+            {/* Header pegajoso superior */}
             <header className={`${styles.pageHeader} stickyFormHeaderMobile`}>
                 <div className={styles.pageHeaderInner}>
                     <button
@@ -385,7 +288,7 @@ export function AdminProductFormPage({
                         Productos
                     </button>
                     <h1 className={styles.pageTitle}>
-                        {isEdit ? 'Editar producto' : 'Nuevo producto'}
+                        {isEdit ? `Editar producto: ${formProps.form.name || 'Sin nombre'}` : 'Nuevo producto'}
                     </h1>
                 </div>
                 <div className={styles.pageHeaderActions}>
@@ -408,113 +311,233 @@ export function AdminProductFormPage({
                 </div>
             </header>
 
-            <div className={styles.layout}>
-                {/* Navegación lateral activa SOLO en Escritorio */}
-                <nav className={`${styles.sidebar} desktopSidebarOnly`} aria-label="Secciones del formulario">
-                    <ul className={styles.sidebarList}>
-                        {SECTIONS.map(section => {
-                            const hasError = sectionErrors[section.id as keyof typeof sectionErrors];
-                            const isActive = activeSection === section.id;
-                            return (
-                                <li key={section.id}>
-                                    <button
-                                        type="button"
-                                        className={`${styles.sidebarItem} ${isActive ? styles.sidebarItemActive : ''}`}
-                                        onClick={() => scrollToSection(section.id)}
-                                    >
-                                        <i
-                                            className={`${section.icon} ${styles.sidebarIcon}`}
-                                            style={{
-                                                color: isActive ? 'white' : 'var(--color-primary)',
-                                                fontSize: '1.1rem'
-                                            }}
-                                        />
-                                        <span className={styles.sidebarLabel}>{section.label}</span>
-                                        {hasError && (
-                                            <i
-                                                className="bi bi-exclamation-circle-fill"
-                                                style={{ color: 'var(--color-error)', marginLeft: 'auto', fontSize: '0.8rem' }}
-                                                title="Sección con errores"
-                                            />
-                                        )}
-                                    </button>
-                                </li>
-                            );
-                        })}
-                    </ul>
-
-                    <div className={styles.sidebarProgress}>
-                        <div
-                            className={styles.sidebarProgressBar}
-                            style={{
-                                height: `${(SECTIONS.findIndex(s => s.id === activeSection) + 1) / SECTIONS.length * 100}%`
-                            }}
-                        />
-                    </div>
-                </nav>
-
-                {/* Control para expandir/colapsar todas las secciones en Móvil */}
-                <div className="accordionToggleBarMobile">
-                    <button
-                        type="button"
-                        className="accordionToggleBtn"
-                        onClick={() => toggleAllAccordions(true)}
-                    >
-                        Expandir todo
-                    </button>
-                    <span className="accordionToggleSep">•</span>
-                    <button
-                        type="button"
-                        className="accordionToggleBtn"
-                        onClick={() => toggleAllAccordions(false)}
-                    >
-                        Colapsar todo
-                    </button>
-                </div>
-
-                <form
-                    ref={formRef}
-                    className={styles.content}
-                    onSubmit={formProps.handleSubmit}
-                    noValidate
+            {/* Control para expandir/colapsar todas las secciones en Móvil */}
+            <div className="accordionToggleBarMobile">
+                <button
+                    type="button"
+                    className="accordionToggleBtn"
+                    onClick={() => toggleAllAccordions(true)}
                 >
-                    {/* ── Básico ── */}
-                    <section id="basico" ref={setSectionRef('basico')} className={`${styles.section} mobileSectionCard`}>
-                        <button
-                            type="button"
-                            className="accordionHeaderButton"
-                            onClick={() => toggleAccordion('basico')}
-                            aria-expanded={accordionsOpen.basico}
-                        >
-                            <div className="accordionHeaderLeft">
-                                <i className="bi bi-file-earmark-text" style={{ color: 'var(--color-primary)' }} />
-                                <span>Información Básica</span>
-                                {sectionErrors.basico && (
-                                    <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
-                                )}
+                    Expandir todo
+                </button>
+                <span className="accordionToggleSep">•</span>
+                <button
+                    type="button"
+                    className="accordionToggleBtn"
+                    onClick={() => toggleAllAccordions(false)}
+                >
+                    Colapsar todo
+                </button>
+            </div>
+
+            <form
+                ref={formRef}
+                onSubmit={formProps.handleSubmit}
+                noValidate
+            >
+                <div className={styles.layout}>
+                    {/* COLUMNA PRINCIPAL (Izquierda - 68%) */}
+                    <div className={styles.mainColumn}>
+                        {/* ── Básico ── */}
+                        <section id="basico" className={styles.cardSection}>
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('basico')}
+                                aria-expanded={accordionsOpen.basico}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-file-earmark-text" style={{ color: 'var(--color-primary)' }} />
+                                    <span>Información Básica</span>
+                                    {sectionErrors.basico && (
+                                        <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
+                                    )}
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.basico ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.basico ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-file-earmark-text" /> Información Básica
+                                </h2>
+                                <TabBasico
+                                    form={formProps.form}
+                                    fieldErrors={formProps.fieldErrors}
+                                    isEdit={formProps.isEdit}
+                                    setField={formProps.setField}
+                                    tagInput={formProps.tagInput}
+                                    setTagInput={formProps.setTagInput}
+                                    featureInput={formProps.featureInput}
+                                    setFeatureInput={formProps.setFeatureInput}
+                                    onAddTag={formProps.addTag}
+                                    onRemoveTag={formProps.removeTag}
+                                    onAddFeature={formProps.addFeature}
+                                    onRemoveFeature={formProps.removeFeature}
+                                />
                             </div>
-                            <i className={`bi bi-chevron-${accordionsOpen.basico ? 'up' : 'down'}`} />
-                        </button>
+                        </section>
 
-                        <div className={`accordionBodyMobile ${!accordionsOpen.basico ? 'accordionBodyHidden' : ''}`}>
-                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
-                                Información Básica
+                        {/* ── Precios y Stock ── */}
+                        <section id="precios" className={styles.cardSection}>
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('precios')}
+                                aria-expanded={accordionsOpen.precios}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-currency-dollar" style={{ color: 'var(--color-primary)' }} />
+                                    <span>Precio y Stock</span>
+                                    {sectionErrors.precios && (
+                                        <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
+                                    )}
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.precios ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.precios ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-currency-dollar" /> Precios y Stock
+                                </h2>
+                                <TabPreciosInventario
+                                    form={formProps.form}
+                                    fieldErrors={formProps.fieldErrors}
+                                    isEdit={formProps.isEdit}
+                                    setField={formProps.setField}
+                                />
+                            </div>
+                        </section>
+
+                        {/* ── Variantes y Combinaciones ── */}
+                        <section id="variantes" className={styles.cardSection}>
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('variantes')}
+                                aria-expanded={accordionsOpen.variantes}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-layers" style={{ color: 'var(--color-primary)' }} />
+                                    <span>Variantes</span>
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.variantes ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.variantes ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-layers" /> Variantes y Combinaciones
+                                </h2>
+                                <TabVariantes
+                                    form={formProps.form}
+                                    fieldErrors={formProps.fieldErrors}
+                                    isEdit={formProps.isEdit}
+                                    productId={productId}
+                                    setField={formProps.setField}
+                                    newGroupName={formProps.newGroupName}
+                                    setNewGroupName={formProps.setNewGroupName}
+                                    newGroupValues={formProps.newGroupValues}
+                                    setNewGroupValues={formProps.setNewGroupValues}
+                                    onAddVariantGroup={formProps.addVariantGroup}
+                                    onRemoveVariantGroup={formProps.removeVariantGroup}
+                                    onAddVariantValue={formProps.addVariantValue}
+                                    onRemoveVariantValue={formProps.removeVariantValue}
+                                />
+                            </div>
+                        </section>
+
+                        {/* ── Imágenes ── */}
+                        <section id="imagenes" className={styles.cardSection}>
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('imagenes')}
+                                aria-expanded={accordionsOpen.imagenes}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-image" style={{ color: 'var(--color-primary)' }} />
+                                    <span>Imágenes</span>
+                                    {sectionErrors.imagenes && (
+                                        <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
+                                    )}
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.imagenes ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.imagenes ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-image" /> Galería de Imágenes
+                                </h2>
+                                <TabImagenes
+                                    isEdit={formProps.isEdit}
+                                    productId={productId}
+                                    images={formProps.form.images}
+                                    fieldErrors={formProps.fieldErrors}
+                                    setField={formProps.setField}
+                                    onSetImage={formProps.setImage}
+                                    onAddImageSlot={formProps.addImageSlot}
+                                    onRemoveImageSlot={formProps.removeImageSlot}
+                                    apiImages={formProps.apiImages}
+                                    imagesLoading={formProps.imagesLoading}
+                                    imagesError={formProps.imagesError}
+                                    imgFile={formProps.imgFile}
+                                    setImgFile={formProps.setImgFile}
+                                    imgNewAlt={formProps.imgNewAlt}
+                                    setImgNewAlt={formProps.setImgNewAlt}
+                                    imgError={formProps.imgError}
+                                    showAddImgForm={formProps.showAddImgForm}
+                                    setShowAddImgForm={formProps.setShowAddImgForm}
+                                    deletingImgId={formProps.deletingImgId}
+                                    fileInputRef={formProps.fileInputRef}
+                                    onApiUploadImage={formProps.handleApiUploadImage}
+                                    onApiDeleteImage={formProps.handleApiDeleteImage}
+                                />
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* COLUMNA SECUNDARIA (Derecha - 32%) */}
+                    <div className={styles.sideColumn}>
+                        {/* ── Categorías ── */}
+                        <section id="categorias" className={styles.cardSection}>
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('categorias')}
+                                aria-expanded={accordionsOpen.categorias}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-tags" style={{ color: 'var(--color-primary)' }} />
+                                    <span>Categorías</span>
+                                    {sectionErrors.categorias && (
+                                        <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
+                                    )}
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.categorias ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.categorias ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-tags" /> Categorización
+                                </h2>
+                                <TabCategorias
+                                    form={formProps.form}
+                                    fieldErrors={formProps.fieldErrors}
+                                    isEdit={formProps.isEdit}
+                                    setField={formProps.setField}
+                                    categories={formProps.categories}
+                                    additionalCategoryIds={formProps.additionalCategoryIds}
+                                    onPrimaryCategoryChange={formProps.handlePrimaryCategoryChange}
+                                    onAdditionalCategoriesChange={formProps.handleAdditionalCategoriesChange}
+                                    getCategoryLabel={formProps.getCategoryLabel}
+                                />
+                            </div>
+                        </section>
+
+                        {/* ── Proveedor ── */}
+                        <section id="proveedor" className={styles.cardSection}>
+                            <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                <i className="bi bi-truck" /> Proveedor Principal
                             </h2>
-                            <TabBasico
-                                form={formProps.form}
-                                fieldErrors={formProps.fieldErrors}
-                                isEdit={formProps.isEdit}
-                                setField={formProps.setField}
-                                tagInput={formProps.tagInput}
-                                setTagInput={formProps.setTagInput}
-                                featureInput={formProps.featureInput}
-                                setFeatureInput={formProps.setFeatureInput}
-                                onAddTag={formProps.addTag}
-                                onRemoveTag={formProps.removeTag}
-                                onAddFeature={formProps.addFeature}
-                                onRemoveFeature={formProps.removeFeature}
-                            />
-
                             <ProductSupplierSection
                                 productId={productId}
                                 productName={formProps.form.name}
@@ -522,235 +545,62 @@ export function AdminProductFormPage({
                                 primarySupplierId={formProps.form.primarySupplierId}
                                 onPrimaryChange={(id) => formProps.setField('primarySupplierId', id)}
                             />
-                        </div>
-                    </section>
+                        </section>
 
-                    {/* ── Precios y Stock ── */}
-                    <section id="precios" ref={setSectionRef('precios')} className={`${styles.section} mobileSectionCard`}>
-                        <button
-                            type="button"
-                            className="accordionHeaderButton"
-                            onClick={() => toggleAccordion('precios')}
-                            aria-expanded={accordionsOpen.precios}
-                        >
-                            <div className="accordionHeaderLeft">
-                                <i className="bi bi-currency-dollar" style={{ color: 'var(--color-primary)' }} />
-                                <span>Precio y Stock</span>
-                                {sectionErrors.precios && (
-                                    <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
-                                )}
+                        {/* ── SEO / Publicación ── */}
+                        <section id="seo" className={styles.cardSection}>
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('seo')}
+                                aria-expanded={accordionsOpen.seo}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-globe" style={{ color: 'var(--color-primary)' }} />
+                                    <span>SEO / Publicación</span>
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.seo ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.seo ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-globe" /> SEO y Vista Previa
+                                </h2>
+                                <TabSEOPublicacion
+                                    form={formProps.form}
+                                    fieldErrors={formProps.fieldErrors}
+                                    isEdit={formProps.isEdit}
+                                    setField={formProps.setField}
+                                />
                             </div>
-                            <i className={`bi bi-chevron-${accordionsOpen.precios ? 'up' : 'down'}`} />
-                        </button>
-
-                        <div className={`accordionBodyMobile ${!accordionsOpen.precios ? 'accordionBodyHidden' : ''}`}>
-                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
-                                Precio y stock
-                            </h2>
-                            <TabPreciosInventario
-                                form={formProps.form}
-                                fieldErrors={formProps.fieldErrors}
-                                isEdit={formProps.isEdit}
-                                setField={formProps.setField}
-                            />
-                        </div>
-                    </section>
-
-                    {/* ── Categorías ── */}
-                    <section id="categorias" ref={setSectionRef('categorias')} className={`${styles.section} mobileSectionCard`}>
-                        <button
-                            type="button"
-                            className="accordionHeaderButton"
-                            onClick={() => toggleAccordion('categorias')}
-                            aria-expanded={accordionsOpen.categorias}
-                        >
-                            <div className="accordionHeaderLeft">
-                                <i className="bi bi-tags" style={{ color: 'var(--color-primary)' }} />
-                                <span>Categorías</span>
-                                {sectionErrors.categorias && (
-                                    <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
-                                )}
-                            </div>
-                            <i className={`bi bi-chevron-${accordionsOpen.categorias ? 'up' : 'down'}`} />
-                        </button>
-
-                        <div className={`accordionBodyMobile ${!accordionsOpen.categorias ? 'accordionBodyHidden' : ''}`}>
-                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
-                                Categorías
-                            </h2>
-                            <TabCategorias
-                                form={formProps.form}
-                                fieldErrors={formProps.fieldErrors}
-                                isEdit={formProps.isEdit}
-                                setField={formProps.setField}
-                                categories={formProps.categories}
-                                additionalCategoryIds={formProps.additionalCategoryIds}
-                                onPrimaryCategoryChange={formProps.handlePrimaryCategoryChange}
-                                onAdditionalCategoriesChange={formProps.handleAdditionalCategoriesChange}
-                                getCategoryLabel={formProps.getCategoryLabel}
-                            />
-                        </div>
-                    </section>
-
-                    {/* ── Imágenes ── */}
-                    <section id="imagenes" ref={setSectionRef('imagenes')} className={`${styles.section} mobileSectionCard`}>
-                        <button
-                            type="button"
-                            className="accordionHeaderButton"
-                            onClick={() => toggleAccordion('imagenes')}
-                            aria-expanded={accordionsOpen.imagenes}
-                        >
-                            <div className="accordionHeaderLeft">
-                                <i className="bi bi-image" style={{ color: 'var(--color-primary)' }} />
-                                <span>Imágenes</span>
-                                {sectionErrors.imagenes && (
-                                    <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
-                                )}
-                            </div>
-                            <i className={`bi bi-chevron-${accordionsOpen.imagenes ? 'up' : 'down'}`} />
-                        </button>
-
-                        <div className={`accordionBodyMobile ${!accordionsOpen.imagenes ? 'accordionBodyHidden' : ''}`}>
-                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
-                                Imágenes
-                            </h2>
-                            <TabImagenes
-                                isEdit={formProps.isEdit}
-                                productId={productId}
-                                images={formProps.form.images}
-                                fieldErrors={formProps.fieldErrors}
-                                setField={formProps.setField}
-                                onSetImage={formProps.setImage}
-                                onAddImageSlot={formProps.addImageSlot}
-                                onRemoveImageSlot={formProps.removeImageSlot}
-                                apiImages={formProps.apiImages}
-                                imagesLoading={formProps.imagesLoading}
-                                imagesError={formProps.imagesError}
-                                imgFile={formProps.imgFile}
-                                setImgFile={formProps.setImgFile}
-                                imgNewAlt={formProps.imgNewAlt}
-                                setImgNewAlt={formProps.setImgNewAlt}
-                                imgError={formProps.imgError}
-                                showAddImgForm={formProps.showAddImgForm}
-                                setShowAddImgForm={formProps.setShowAddImgForm}
-                                deletingImgId={formProps.deletingImgId}
-                                fileInputRef={formProps.fileInputRef}
-                                onApiUploadImage={formProps.handleApiUploadImage}
-                                onApiDeleteImage={formProps.handleApiDeleteImage}
-                            />
-                        </div>
-                    </section>
-
-                    {/* ── Variantes ── */}
-                    <section id="variantes" ref={setSectionRef('variantes')} className={`${styles.section} mobileSectionCard`}>
-                        <button
-                            type="button"
-                            className="accordionHeaderButton"
-                            onClick={() => toggleAccordion('variantes')}
-                            aria-expanded={accordionsOpen.variantes}
-                        >
-                            <div className="accordionHeaderLeft">
-                                <i className="bi bi-layers" style={{ color: 'var(--color-primary)' }} />
-                                <span>Variantes</span>
-                            </div>
-                            <i className={`bi bi-chevron-${accordionsOpen.variantes ? 'up' : 'down'}`} />
-                        </button>
-
-                        <div className={`accordionBodyMobile ${!accordionsOpen.variantes ? 'accordionBodyHidden' : ''}`}>
-                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
-                                Variantes
-                            </h2>
-                            <TabVariantes
-                                form={formProps.form}
-                                fieldErrors={formProps.fieldErrors}
-                                isEdit={formProps.isEdit}
-                                productId={productId}
-                                setField={formProps.setField}
-                                newGroupName={formProps.newGroupName}
-                                setNewGroupName={formProps.setNewGroupName}
-                                newGroupValues={formProps.newGroupValues}
-                                setNewGroupValues={formProps.setNewGroupValues}
-                                onAddVariantGroup={formProps.addVariantGroup}
-                                onRemoveVariantGroup={formProps.removeVariantGroup}
-                                onAddVariantValue={formProps.addVariantValue}
-                                onRemoveVariantValue={formProps.removeVariantValue}
-                            />
-                        </div>
-                    </section>
-
-                    {/* ── SEO / Publicación ── */}
-                    <section id="seo" ref={setSectionRef('seo')} className={`${styles.section} mobileSectionCard`}>
-                        <button
-                            type="button"
-                            className="accordionHeaderButton"
-                            onClick={() => toggleAccordion('seo')}
-                            aria-expanded={accordionsOpen.seo}
-                        >
-                            <div className="accordionHeaderLeft">
-                                <i className="bi bi-globe" style={{ color: 'var(--color-primary)' }} />
-                                <span>SEO / Publicación</span>
-                            </div>
-                            <i className={`bi bi-chevron-${accordionsOpen.seo ? 'up' : 'down'}`} />
-                        </button>
-
-                        <div className={`accordionBodyMobile ${!accordionsOpen.seo ? 'accordionBodyHidden' : ''}`}>
-                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
-                                SEO / Publicación
-                            </h2>
-                            <TabSEOPublicacion
-                                form={formProps.form}
-                                fieldErrors={formProps.fieldErrors}
-                                isEdit={formProps.isEdit}
-                                setField={formProps.setField}
-                            />
-                        </div>
-                    </section>
-
-                    {error && (
-                        <div className={styles.globalError} role="alert">
-                            <i className="bi bi-exclamation-triangle-fill" style={{ marginRight: '8px' }}></i>
-                            {error}
-                        </div>
-                    )}
-
-                    {/* Barra de acciones inline para Escritorio */}
-                    <div className={`${styles.bottomBar} desktopBottomBar`}>
-                        <button
-                            type="button"
-                            className={styles.cancelBtn}
-                            onClick={handleCancel}
-                            disabled={saving}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className={styles.submitBtn}
-                            disabled={saving}
-                            onClick={() => formRef.current?.requestSubmit()}
-                        >
-                            {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear producto'}
-                        </button>
+                        </section>
                     </div>
-                </form>
-            </div>
+                </div>
 
-            {/* Barra de acciones fija para Móvil */}
+                {error && (
+                    <div className={styles.globalError} role="alert" style={{ marginTop: '20px' }}>
+                        <i className="bi bi-exclamation-triangle-fill" />
+                        {error}
+                    </div>
+                )}
+            </form>
+
+            {/* Barra fija de acciones para móvil */}
             {renderMobileBottomBar()}
 
             {/* Modal de confirmación de cambios no guardados */}
             <ModalConfirm
                 open={showWarning || blocker.state === 'blocked'}
-                title="Cambios sin guardar"
-                message="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
+                title="¿Abandonar sin guardar?"
+                description="Tenés cambios sin guardar. ¿Estás seguro de que querés abandonar?"
                 confirmText="Sí, abandonar"
                 cancelText="Seguir editando"
                 onConfirm={() => {
-                    if (blocker.state === 'blocked') blocker.proceed();
+                    if (blocker.state === 'blocked') blocker.proceed?.();
                     confirmNavigation();
                 }}
                 onCancel={() => {
-                    if (blocker.state === 'blocked') blocker.reset();
+                    if (blocker.state === 'blocked') blocker.reset?.();
                     cancelNavigation();
                 }}
             />
