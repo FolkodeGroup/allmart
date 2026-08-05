@@ -1,10 +1,16 @@
 /* ── ProductRow ── */
 .productRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    grid-template-areas:
+        "img info"
+        "img actions";
+    column-gap: 10px;
+    row-gap: 6px;
     padding: 8px 12px;
     width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .productRow:hover {
@@ -13,6 +19,7 @@
 }
 
 .productRowImage {
+    grid-area: img;
     width: 40px;
     height: 40px;
     object-fit: cover;
@@ -22,19 +29,18 @@
 }
 
 .productRowInfo {
+    grid-area: info;
     display: flex;
     flex-direction: column;
-    flex: 1;
     min-width: 0;
+    max-width: 100%;
 }
 
 .productRowName {
     font-size: 13px;
     font-weight: 600;
     color: var(--color-text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
 }
 
 .productRowSku {
@@ -43,6 +49,8 @@
 }
 
 .productRowRemove {
+    grid-area: actions;
+    justify-self: end;
     background: #f5d4d4;
     color: #c75050;
     border: none;
@@ -50,8 +58,31 @@
     border-radius: 4px;
     font-size: 12px;
     cursor: pointer;
-    flex-shrink: 0;
+    white-space: nowrap;
     transition: background 0.15s;
+}
+
+/* Pantallas muy angostas: apilar imagen, info y acción en una sola
+   columna para garantizar que nunca compitan por ancho horizontal,
+   sin importar cuán largo sea el nombre o el ID del producto. */
+@media (max-width: 400px) {
+    .productRow {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "img"
+            "info"
+            "actions";
+        row-gap: 4px;
+    }
+
+    .productRowImage {
+        width: 36px;
+        height: 36px;
+    }
+
+    .productRowRemove {
+        text-align: center;
+    }
 }
 
 .productRowRemove:hover {
@@ -149,6 +180,7 @@
     color: #797f89;
     padding: 0px 0 3px;
     border-radius: 4px;
+    overflow-wrap: anywhere;
 }
 
 /* SKU */
@@ -164,4 +196,3 @@
     color: #059669;
     /* verde tipo success */
 }
-

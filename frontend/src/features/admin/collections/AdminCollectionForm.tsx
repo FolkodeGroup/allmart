@@ -152,39 +152,39 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   const [initialFormData] = useState(() =>
     collection
       ? {
-          name: collection.name,
-          slug: collection.slug,
-          displayPosition: collection.displayPosition,
-          displayOrder: collection.displayOrder,
-          imageUrl: collection.imageUrl || '',
-          isActive: collection.isActive,
-          productIds: collection.products?.map((p) => p.id) ?? ([] as string[]),
-          type: collection.type ?? 'manual',
-          params: {
-            categoryId: collection.params?.categoryId ?? '',
-            windowDays: collection.params?.windowDays ?? 30,
-            limit: collection.params?.limit ?? 10,
-            pinnedProductIds: collection.params?.pinnedProductIds ?? [],
-            excludeProductIds: collection.params?.excludeProductIds ?? [],
-          },
-        }
+        name: collection.name,
+        slug: collection.slug,
+        displayPosition: collection.displayPosition,
+        displayOrder: collection.displayOrder,
+        imageUrl: collection.imageUrl || '',
+        isActive: collection.isActive,
+        productIds: collection.products?.map((p) => p.id) ?? ([] as string[]),
+        type: collection.type ?? 'manual',
+        params: {
+          categoryId: collection.params?.categoryId ?? '',
+          windowDays: collection.params?.windowDays ?? 30,
+          limit: collection.params?.limit ?? 10,
+          pinnedProductIds: collection.params?.pinnedProductIds ?? [],
+          excludeProductIds: collection.params?.excludeProductIds ?? [],
+        },
+      }
       : {
-          name: '',
-          slug: '',
-          displayPosition: 'home' as 'home' | 'category',
-          displayOrder: 0,
-          imageUrl: '',
-          isActive: true,
-          productIds: [] as string[],
-          type: 'manual',
-          params: {
-            categoryId: '',
-            windowDays: 30,
-            limit: 10,
-            pinnedProductIds: [] as string[],
-            excludeProductIds: [] as string[],
-          },
-        }
+        name: '',
+        slug: '',
+        displayPosition: 'home' as 'home' | 'category',
+        displayOrder: 0,
+        imageUrl: '',
+        isActive: true,
+        productIds: [] as string[],
+        type: 'manual',
+        params: {
+          categoryId: '',
+          windowDays: 30,
+          limit: 10,
+          pinnedProductIds: [] as string[],
+          excludeProductIds: [] as string[],
+        },
+      }
   );
 
   const isDirty = useMemo(
@@ -293,12 +293,12 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       const paramsPayload =
         formData.type === 'auto_sales'
           ? {
-              categoryId: formData.params.categoryId || undefined,
-              windowDays: formData.params.windowDays,
-              limit: formData.params.limit,
-              pinnedProductIds: formData.params.pinnedProductIds,
-              excludeProductIds: formData.params.excludeProductIds,
-            }
+            categoryId: formData.params.categoryId || undefined,
+            windowDays: formData.params.windowDays,
+            limit: formData.params.limit,
+            pinnedProductIds: formData.params.pinnedProductIds,
+            excludeProductIds: formData.params.excludeProductIds,
+          }
           : {};
 
       const payload = {
@@ -565,14 +565,17 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         )}
 
         <div className={styles.formGroup}>
-          <label>
+          <div className={styles.isActiveBtn}>
+            <label >
+              {' '}Activo
+            </label>
             <input
               type="checkbox"
               checked={formData.isActive}
               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
             />
-            {' '}Activo
-          </label>
+          </div>
+
         </div>
 
         <div className={styles.formActions}>

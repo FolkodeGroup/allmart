@@ -95,7 +95,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className={styles.searchInput}
-          style={{ width: '100%' }}
         />
 
         {showDropdown && (
