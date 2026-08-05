@@ -34,7 +34,7 @@
   flex-wrap: wrap;
 }
 
-.modalActions > button {
+.modalActions>button {
   min-width: 140px;
 }
 
@@ -262,13 +262,23 @@
   pointer-events: none;
 }
 
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+}
+
 .searchInput {
   flex: 1;
   min-width: 180px;
   max-width: 320px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 10px 12px 10px 36px !important; /* espacio para la lupa */
+  padding: 10px 12px 10px 36px !important;
+  /* espacio para la lupa */
   font-size: 0.875rem;
   outline: none;
   background: var(--color-bg-primary);
@@ -280,7 +290,7 @@
 .searchInput:focus,
 .searchInput:hover,
 .filterSelect:focus,
-.filterSelect:hover{
+.filterSelect:hover {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
@@ -305,7 +315,7 @@
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-bg-primary);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .table {
@@ -435,7 +445,7 @@
 .unreadBadgeStatusmodal {
   background: var(--color-error-mode);
   color: #fff;
-  max-width: 17%;
+  max-width: fit-content;
 }
 
 .readBadge {
@@ -446,7 +456,7 @@
 .readBadgemodal {
   background: var(--color-primary);
   color: #fff;
-  max-width: 14%;
+  max-width: fit-content;
 }
 
 /* ── Row actions ───────────────────────────────────────── */
@@ -610,14 +620,224 @@
   margin: 0;
 }
 
-/* ── Responsive ────────────────────────────────────────── */
-@media (max-width: 700px) {
-  .statsBar { gap: 0.5rem; }
-  .statCard { min-width: 90px; }
-  .filtersBar { flex-direction: column; align-items: stretch; }
-  .searchInput { max-width: 100%; }
-  .table th, .table td { padding: 0.6rem 0.5rem; }
-  .messageCellWrapper { max-width: 180px; }
-  .actions { flex-direction: column; }
+.dragHandle {
+  display: none;
 }
 
+@media (max-width: 520px) {
+  .modalOverlay {
+    padding: 0;
+    overflow: hidden;
+    align-items: flex-end;
+  }
+
+  .modalPanel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    border-radius: 16px 16px 0 0;
+    padding-top: 1.75rem;
+  }
+
+  /* Oculta el botón de cerrar (×) — es el único <button> hijo DIRECTO de .modal;
+     los de .actions están un nivel más adentro, así que no los afecta */
+  .modalPanel>button {
+    display: none;
+  }
+
+  .dragHandle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    margin: 0;
+    background: transparent;
+    touch-action: none;
+    cursor: grab;
+    z-index: 3;
+  }
+
+  .dragHandle::after {
+    content: "";
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-border, #d1d5db);
+  }
+
+  .dragHandle:active {
+    cursor: grabbing;
+  }
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .statsBar {
+    gap: 0.5rem;
+  }
+
+  .statCard {
+    min-width: 90px;
+  }
+
+  .filtersBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrapper,
+  .searchInput {
+    max-width: 100%;
+  }
+
+  /* ── Tabla → Cards ─────────────────────────────────────── */
+  .tableWrapper {
+    overflow-x: visible;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody tr {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: var(--color-bg-primary);
+  }
+
+  .table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table tbody tr.unread {
+    border-color: var(--color-error-mode);
+  }
+
+  .table td {
+    padding: 0.55rem 0;
+    border-bottom: 1px dashed var(--color-border);
+  }
+
+  .table td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* Etiquetas por columna (el orden de <th> es fijo, no hace falta data-label) */
+  .table td::before {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.3rem;
+  }
+
+  .table td:nth-child(1)::before {
+    content: "Remitente";
+  }
+
+  .table td:nth-child(2)::before {
+    content: "Mensaje";
+  }
+
+  /* Estado y Fecha: label a la izquierda, valor a la derecha (más compacto) */
+  .table td:nth-child(3),
+  .table td:nth-child(4) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .table td:nth-child(3)::before {
+    content: "Estado";
+    margin-bottom: 0;
+  }
+
+  .table td:nth-child(4)::before {
+    content: "Fecha";
+    margin-bottom: 0;
+  }
+
+  .messageCellWrapper {
+    max-width: none;
+  }
+
+  .messageText {
+    -webkit-line-clamp: 3;
+  }
+
+  .contactEmail {
+    word-break: break-all;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 0.25rem;
+  }
+
+  .actions>button {
+    width: 100%;
+  }
+
+  .detailRow {
+    grid-template-columns: 92px 1fr;
+    gap: 0.4rem;
+  }
+
+  .detailLabel {
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1024px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+
+  .actions>button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.6rem 0.7rem;
+  }
+
+  .messageCellWrapper {
+    max-width: 160px;
+  }
+
+  .cellContact {
+    max-width: 150px;
+  }
+
+  .contactEmail,
+  .contactName {
+    word-break: break-word;
+  }
+}
