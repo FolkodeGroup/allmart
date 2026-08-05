@@ -87,17 +87,32 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     if (!mobileModalOpen) return null;
 
     const modalContent = (
-      <div
-        className={styles.mobileFilterModalOverlay}
-        onClick={() => setMobileModalOpen(false)}
-        role="presentation"
-      >
+      <div className={styles.mobileFilterModalOverlay}>
+        <button
+          type="button"
+          className={styles.mobileFilterModalBackdrop}
+          onClick={() => setMobileModalOpen(false)}
+          aria-label="Cerrar ventana de filtros"
+          tabIndex={-1}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            margin: 0,
+            zIndex: 1,
+          }}
+        />
         <div
           className={styles.mobileFilterModalContent}
-          onClick={e => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-labelledby="mobile-filter-title"
+          style={{ position: 'relative', zIndex: 2 }}
         >
           <div className={styles.mobileFilterModalHeader}>
             <h3 id="mobile-filter-title" className={styles.mobileFilterModalTitle}>
@@ -115,7 +130,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 
           <div className={styles.mobileFilterModalBody}>
             <div className={styles.modalFilterField}>
-              <label className={styles.modalFilterLabel}>Categoría</label>
+              <label htmlFor="category-filter-mobile" className={styles.modalFilterLabel}>Categoría</label>
               <Dropdown
                 id="category-filter-mobile"
                 options={categoryOptions}
@@ -126,7 +141,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             </div>
 
             <div className={styles.modalFilterField}>
-              <label className={styles.modalFilterLabel}>Estado</label>
+              <label htmlFor="status-filter-mobile" className={styles.modalFilterLabel}>Estado</label>
               <Dropdown
                 id="status-filter-mobile"
                 options={statusOptions}
@@ -137,7 +152,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             </div>
 
             <div className={styles.modalFilterField}>
-              <label className={styles.modalFilterLabel}>Disponibilidad de stock</label>
+              <label htmlFor="stock-filter-mobile" className={styles.modalFilterLabel}>Disponibilidad de stock</label>
               <Dropdown
                 id="stock-filter-mobile"
                 options={stockOptions}

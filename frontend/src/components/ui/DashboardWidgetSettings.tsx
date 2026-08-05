@@ -12,7 +12,7 @@
  * - Smooth animations and transitions
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type { WidgetId } from '../../context/DashboardLayoutContext';
 import styles from './DashboardWidgetSettings.module.css';
 import { ConfirmModal } from './ConfirmModal';
@@ -55,7 +55,7 @@ export const DashboardWidgetSettings = React.forwardRef<
         const [showResetConfirm, setShowResetConfirm] = useState(false);
 
         // Update local order when widgets change
-        React.useEffect(() => {
+        useEffect(() => {
             setLocalOrder(widgets);
         }, [widgets]);
 
@@ -84,22 +84,15 @@ export const DashboardWidgetSettings = React.forwardRef<
         }, []);
 
         // Pointer/touch based reordering for mobile devices.
-        const pointerStateRef = React.useRef<{
+        const pointerStateRef = useRef<{
             pointerId: number | null;
             startY: number;
             draggedId: WidgetId | null;
         }>({ pointerId: null, startY: 0, draggedId: null });
 
-        const clearPointerListeners = React.useCallback(() => {
-            pointerStateRef.current.pointerId = null;
-            pointerStateRef.current.startY = 0;
-            pointerStateRef.current.draggedId = null;
-            window.removeEventListener('pointermove', onPointerMove);
-            window.removeEventListener('pointerup', onPointerUp);
-            window.removeEventListener('pointercancel', onPointerUp);
-        }, []);
+        const removePointerListenersRef = useRef<(() => void) | null>(null);
 
-        const onPointerMove = React.useCallback((ev: PointerEvent) => {
+        const onPointerMove = useCallback((ev: PointerEvent) => {
             // Find element under pointer and update dragOverId
             const el = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
             if (!el) return;
@@ -113,7 +106,7 @@ export const DashboardWidgetSettings = React.forwardRef<
             }
         }, []);
 
-        const onPointerUp = React.useCallback(async (ev: PointerEvent) => {
+        const onPointerUp = useCallback(async (ev: PointerEvent) => {
             // perform drop logic if there is an active dragged item
             const draggedIdLocal = pointerStateRef.current.draggedId;
             const targetEl = document.elementFromPoint(ev.clientX, ev.clientY) as HTMLElement | null;
@@ -145,8 +138,28 @@ export const DashboardWidgetSettings = React.forwardRef<
 
             setDraggedId(null);
             setDragOverId(null);
-            clearPointerListeners();
-        }, [localOrder, onReorderWidgets, widgets, clearPointerListeners]);
+            if (removePointerListenersRef.current) {
+                removePointerListenersRef.current();
+            }
+        }, [localOrder, onReorderWidgets, widgets]);
+
+        const attachPointerListeners = useCallback(() => {
+            const moveHandler = (ev: PointerEvent) => onPointerMove(ev);
+            const upHandler = (ev: PointerEvent) => onPointerUp(ev);
+
+            window.addEventListener('pointermove', moveHandler);
+            window.addEventListener('pointerup', upHandler);
+            window.addEventListener('pointercancel', upHandler);
+
+            removePointerListenersRef.current = () => {
+                pointerStateRef.current.pointerId = null;
+                pointerStateRef.current.startY = 0;
+                pointerStateRef.current.draggedId = null;
+                window.removeEventListener('pointermove', moveHandler);
+                window.removeEventListener('pointerup', upHandler);
+                window.removeEventListener('pointercancel', upHandler);
+            };
+        }, [onPointerMove, onPointerUp]);
 
         const handleDragOver = useCallback((e: React.DragEvent, id: WidgetId) => {
             e.preventDefault();
@@ -161,6 +174,8 @@ export const DashboardWidgetSettings = React.forwardRef<
         const handleDrop = useCallback(
             async (e: React.DragEvent, targetId: WidgetId) => {
                 e.preventDefault();
+                e.stopPropagation();
+
                 if (!draggedId || draggedId === targetId || !onReorderWidgets) {
                     setDraggedId(null);
                     setDragOverId(null);
@@ -176,13 +191,11 @@ export const DashboardWidgetSettings = React.forwardRef<
                     newOrder.splice(targetIndex, 0, draggedWidget);
                     setLocalOrder(newOrder);
 
-                    // Persist the new order
                     const widgetOrder = newOrder.map((w) => w.id);
                     try {
                         await onReorderWidgets(widgetOrder);
                     } catch (error) {
                         console.error('Failed to reorder widgets:', error);
-                        // Revert on error
                         setLocalOrder(widgets);
                     }
                 }
@@ -209,7 +222,6 @@ export const DashboardWidgetSettings = React.forwardRef<
             [localOrder],
         );
 
-        // Count active widgets
         const activeCount = localOrder.filter((w) => w.enabled).length;
         const totalCount = localOrder.length;
 
@@ -331,9 +343,7 @@ export const DashboardWidgetSettings = React.forwardRef<
                                                             pointerStateRef.current.startY = e.clientY;
                                                             pointerStateRef.current.draggedId = widget.id;
                                                             setDraggedId(widget.id);
-                                                            window.addEventListener('pointermove', onPointerMove);
-                                                            window.addEventListener('pointerup', onPointerUp);
-                                                            window.addEventListener('pointercancel', onPointerUp);
+                                                            attachPointerListeners();
                                                         }}
                                                     >
                                                         ⋮⋮
