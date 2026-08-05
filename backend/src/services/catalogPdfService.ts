@@ -9,7 +9,8 @@ const ALLMART_LOGO_SVG = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http
 
 const MAX_TITLE_LENGTH = 80;
 const MAX_SHORT_DESCRIPTION_LENGTH = 200;
-const OPTIMIZED_IMAGE_SIZE = 300;
+// 🟢 Aumento de resolución a 400px para imágenes destacadas en WhatsApp
+const OPTIMIZED_IMAGE_SIZE = 400;
 const IMAGE_PREPARATION_CONCURRENCY = 4;
 
 export interface CatalogPdfBranding {
@@ -199,7 +200,6 @@ export function normalizeCatalogProduct(
 }
 
 async function fetchImageBuffer(source: string, baseUrl?: string): Promise<Buffer> {
-  // Validate that source is a string (should always be, but defensive programming)
   if (typeof source !== 'string' || !source.trim()) {
     throw createError('Source de imagen inválido o vacío', 400);
   }
@@ -208,8 +208,6 @@ async function fetchImageBuffer(source: string, baseUrl?: string): Promise<Buffe
     return decodeDataUri(source);
   }
 
-  // Para imágenes locales de productos o categorías, leer directo desde la DB
-  // evitando el overhead (y posibles fallos) de una petición HTTP
   const productImageMatch = source.match(/\/api\/images\/products\/([^/?#]+)/);
   if (productImageMatch) {
     const { data } = await imageStorageService.serveProductImage(productImageMatch[1]);
@@ -260,7 +258,7 @@ async function buildOptimizedImageDataUri(
         withoutEnlargement: true,
       })
       .flatten({ background: branding.surface })
-      .jpeg({ quality: 75, mozjpeg: true })
+      .jpeg({ quality: 80, mozjpeg: true })
       .toBuffer();
 
     return `data:image/jpeg;base64,${optimizedBuffer.toString('base64')}`;
@@ -308,8 +306,6 @@ async function prepareProductsForRender(
 ): Promise<CatalogRenderableProduct[]> {
   const normalizedProducts = products.map((product) => normalizeCatalogProduct(product, locale, defaultCurrency));
 
-  // Evita saturar proveedores externos de imágenes (Unsplash/imgix) cuando el
-  // catálogo exporta muchos productos en una sola corrida.
   return mapWithConcurrency(normalizedProducts, IMAGE_PREPARATION_CONCURRENCY, async (product) => ({
     ...product,
     imageDataUri: await buildOptimizedImageDataUri(product.imageUrl, product.title, branding, baseUrl),
@@ -413,46 +409,47 @@ export function buildCatalogHtml(options: {
             overflow: hidden;
           }
           .catalog-table th, .catalog-table td {
-            padding: 4px 8px;
+            padding: 6px 10px;
             border-bottom: 1px solid var(--brand-border);
             vertical-align: middle;
             text-align: left;
-            font-size: 10pt;
+            font-size: 10.5pt;
           }
           .catalog-table th {
             background: var(--brand-primary);
             color: #fff;
-            font: 700 10.5pt var(--font-heading);
+            font: 700 11pt var(--font-heading);
             letter-spacing: 0.01em;
             border-bottom: 2px solid var(--brand-primary-dark);
-            padding-top: 7px;
-            padding-bottom: 7px;
+            padding-top: 8px;
+            padding-bottom: 8px;
           }
           .catalog-table tr:last-child td { border-bottom: none; }
+          /* 🟢 Tamaño de imagen amplio (32mm x 32mm ~ 120px) para catálogo de WhatsApp */
           .table-image {
-            width: 22mm;
-            min-width: 18mm;
+            width: 36mm;
+            min-width: 32mm;
             text-align: center;
-            padding: 3px 6px;
+            padding: 6px 8px;
           }
           .table-image img {
-            width: 18mm;
-            height: 18mm;
+            width: 32mm;
+            height: 32mm;
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: 8px;
             background: var(--brand-background);
             border: 1px solid var(--brand-border);
             display: block;
           }
           .table-title {
-            font: 700 10pt var(--font-heading);
+            font: 700 10.5pt var(--font-heading);
             color: var(--brand-text);
             max-width: 52mm;
             word-break: break-word;
           }
           .table-price {
             color: var(--brand-accent-dark);
-            font: 700 10pt var(--font-heading);
+            font: 700 11pt var(--font-heading);
             white-space: nowrap;
           }
           .table-description {
@@ -515,7 +512,6 @@ export function buildCatalogFooterTemplate(contactText: string): string {
   `;
 }
 
-
 export async function generateCatalogPdf(options: GenerateCatalogPdfOptions): Promise<{ buffer: Buffer; fileName: string }> {
   if (!options.products.length) {
     throw createError('Debe indicar al menos un producto para exportar', 400);
@@ -549,11 +545,29 @@ export async function generateCatalogPdf(options: GenerateCatalogPdfOptions): Pr
 
   const puppeteerModule = await import('puppeteer');
   const puppeteer = puppeteerModule.default ?? puppeteerModule;
-  
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
-  });
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+      ],
+    });
+  } catch (launchError) {
+    const msg = launchError instanceof Error ? launchError.message : String(launchError);
+    console.error('[catalogPdfService] Error al iniciar Puppeteer/Chromium:', msg);
+    throw createError(
+      `No se pudo iniciar el generador de PDF en el servidor: ${msg}`,
+      500,
+    );
+  }
 
   try {
     const page = await browser.newPage();

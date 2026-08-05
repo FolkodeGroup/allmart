@@ -1,130 +1,126 @@
-/* ============================================
-   ALLMART — PRODUCT DETAIL BASIC TAB
-   ============================================ */
-
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 16px;
 }
 
-/* Fila superior: info general + descripción */
-.topRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-}
-
-/* Fila inferior: características + etiquetas + estado */
-.bottomRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--space-3);
-  align-items: start;
+.topRow, .bottomRow {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .section {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background: var(--color-bg-secondary);
-  border-radius: 10px;
-  border: 1px solid var(--color-border-light);
+  gap: 12px;
 }
 
 .sectionTitle {
-  font-family: var(--font-heading);
-  font-size: 12px;
-  font-weight: var(--font-bold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wider);
-  color: var(--color-text-tertiary);
-  margin: 0 0 var(--space-1) 0;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .infoGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .label {
-  font-size: 10px;
-  font-weight: var(--font-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-widest);
+  font-size: 0.72rem;
+  font-weight: 600;
   color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .value {
-  font-size: 13px;
+  font-size: 0.92rem;
+  font-weight: 500;
   color: var(--color-text-primary);
   margin: 0;
-  word-break: break-word;
-  line-height: 1.4;
-}
-
-.valueText {
-  font-size: 12px;
-  color: var(--color-text-primary);
-  margin: 0;
-  line-height: 1.5;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 
 .mono {
-  font-family: var(--font-mono, monospace);
-  font-size: 12px;
+  font-family: monospace;
 }
 
 .muted {
   color: var(--color-text-secondary);
 }
 
-.empty {
-  font-size: 12px;
-  color: var(--color-text-tertiary);
-  font-style: italic;
+.valueText {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
   margin: 0;
+  white-space: pre-line;
 }
 
-/* Features */
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0 0 0;
+  width: fit-content;
+}
+
+.expandBtn:hover {
+  text-decoration: underline;
+}
+
 .featuresList {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .featureItem {
   display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 12px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
   color: var(--color-text-primary);
-  line-height: 1.4;
 }
 
 .featureDot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--color-primary);
   flex-shrink: 0;
-  margin-top: 5px;
 }
 
-/* Tags */
 .tagsList {
   display: flex;
   flex-wrap: wrap;
@@ -132,85 +128,69 @@
 }
 
 .tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 14px;
-  background: color-mix(in srgb, var(--color-primary) 92%, #183024 8%);
-  color: #fff;
-  border: 1.5px solid color-mix(in srgb, var(--color-primary) 60%, #183024 40%);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  box-shadow: 0 1px 4px 0 rgba(60, 80, 60, 0.06);
-  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
-  user-select: text;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
-.tag:hover, .tag:focus {
-  background: color-mix(in srgb, var(--color-primary) 75%, #183024 25%);
-  color: #fff;
-  border-color: var(--color-primary);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
-  box-shadow: 0 2px 8px 0 rgba(60, 80, 60, 0.13);
-  outline: none;
-}
-
-/* Status */
 .statusRow {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .statusItem {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: 4px;
 }
 
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: var(--font-semibold);
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .active {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
 }
 
 .inactive {
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
 }
 
 .ratingValue {
-  font-size: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
   color: var(--color-text-primary);
+}
+
+.empty {
+  font-size: 0.85rem;
+  color: var(--color-text-tertiary);
+  font-style: italic;
   margin: 0;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .topRow {
-    grid-template-columns: 1fr;
-  }
-}
-
+/* ── Responsive Mobile ── */
 @media (max-width: 640px) {
-  .topRow,
-  .bottomRow {
-    grid-template-columns: 1fr;
-  }
-
   .infoGrid {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .section {
+    padding: 14px;
   }
 }

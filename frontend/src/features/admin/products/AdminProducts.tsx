@@ -1,10 +1,11 @@
+// frontend/src/features/admin/products/AdminProducts.tsx
+
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import type { StatusFilter, StockLevelFilter } from './productsService';
-import { exportCatalogPdf } from './productsService';
-import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
+import { exportProductsToCSV, exportProductsToExcel, exportProductsPDF } from '../../../utils/exportProducts';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
@@ -33,9 +34,14 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
+const PAGE_LIMIT = 8;
+
 export function AdminProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+  // Estado para controlar si el detalle está abierto en móvil
+  const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
 
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
@@ -63,7 +69,7 @@ export function AdminProducts() {
   // Context and hooks
   const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
 
-  const { can, token } = useAdminAuth();
+  const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
 
   // PDF export
@@ -74,13 +80,11 @@ export function AdminProducts() {
   const isFirstRender = useRef(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // ─── Auto-open edit form if 'edit' param is present ───────────────────────
   useEffect(() => {
     const editParam = searchParams.get('edit');
     if (editParam && !editId) {
       setEditId(editParam);
       setViewMode('form');
-      // Clear the edit parameter from URL
       setSearchParams(prev => {
         prev.delete('edit');
         return prev;
@@ -88,44 +92,32 @@ export function AdminProducts() {
     }
   }, [searchParams, editId, setSearchParams]);
 
+  // 🟢 EXPORTACIÓN PDF: Bypassea el backend y usa el generador nativo del cliente
   const handleExportPdf = useCallback(async () => {
-    if (!token) {
-      toast.error('Sesión no iniciada. Por favor, volvé a iniciar sesión.');
-      return;
-    }
     setIsExportingPdf(true);
+    setExportLoadingFormat('pdf');
     try {
-      const { blob, filename } = await exportCatalogPdf(
-        {
-          title: 'Catálogo Allmart',
-          columns: 3,
-          paperFormat: 'A4',
-          filters: {
-            status: statusFilter,
-            q: search || undefined,
-            categoryId: categoryFilter || undefined,
-            stockLevel: stockLevelFilter,
-          },
-        },
-        token,
-      );
-      // Descargar en el navegador
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      const exportable = products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category?.name ?? 'Sin categoría',
+        price: p.price,
+        description: p.shortDescription || p.description || '',
+        imageUrl: p.images?.[0] || undefined,
+        stock: p.stock,
+        inStock: p.inStock,
+        isFeatured: p.isFeatured,
+      }));
+      await exportProductsPDF(exportable);
       toast.success('Catálogo PDF descargado con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al exportar PDF: ${message}`);
     } finally {
       setIsExportingPdf(false);
+      setExportLoadingFormat(null);
     }
-  }, [token, search, categoryFilter, statusFilter, stockLevelFilter]);
+  }, [products]);
 
   const handleExportCSV = useCallback(() => {
     if (!products.length) {
@@ -212,7 +204,7 @@ export function AdminProducts() {
           status: statusFilter,
           stockLevel: stockLevelFilter,
           page: 1,
-          limit: 10,
+          limit: PAGE_LIMIT,
         });
       }
     };
@@ -243,12 +235,11 @@ export function AdminProducts() {
         status: statusFilter,
         stockLevel: stockLevelFilter,
         page: newPage,
-        limit: 10,
+        limit: PAGE_LIMIT,
       });
     }
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
-  // Client-side filtering: only match by name or SKU
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return products;
@@ -263,7 +254,6 @@ export function AdminProducts() {
     { value: 'category', label: 'Categoría' },
   ], []);
 
-  // Sort products based on sort field and direction
   const sortedProducts = useMemo(() => {
     const ordered = [...filteredProducts];
 
@@ -288,8 +278,6 @@ export function AdminProducts() {
     return ordered;
   }, [filteredProducts, sortField, sortDirection]);
 
-  // === FORM/EDIT HANDLERS ===
-
   const handleNew = useCallback(() => {
     if (unsavedChanges) {
       interceptNavigation(() => {
@@ -312,7 +300,6 @@ export function AdminProducts() {
     }
   }, [unsavedChanges, interceptNavigation, apiPage]);
 
-  // Solicitar confirmación de eliminación
   const handleDelete = useCallback((id: string) => {
     const productToDelete = products.find(p => p.id === id);
     if (productToDelete) {
@@ -321,7 +308,6 @@ export function AdminProducts() {
     }
   }, [products]);
 
-  // Ejecutar eliminación directamente sin modal (usado en el panel de detalle)
   const handleDirectDelete = useCallback((id: string) => {
     try {
       deleteProduct(id);
@@ -332,7 +318,6 @@ export function AdminProducts() {
     }
   }, [deleteProduct]);
 
-  // Confirmar y ejecutar eliminación
   const handleConfirmDelete = useCallback(async () => {
     if (!productToDelete) return;
 
@@ -350,7 +335,6 @@ export function AdminProducts() {
     }
   }, [productToDelete, deleteProduct]);
 
-  // Cancelar eliminación
   const handleCancelDelete = useCallback(() => {
     setShowDeleteModal(false);
     setProductToDelete(null);
@@ -359,29 +343,72 @@ export function AdminProducts() {
   return (
     <main
       ref={containerRef}
-      className={`${sectionStyles.page} ${styles.productsPage} dark:bg-gray-900 dark:text-gray-100`}
+      className={`${sectionStyles.page} ${styles.productsPage} ${isMobileDetailOpen ? styles.mobileDetailActive : ''} dark:bg-gray-900 dark:text-gray-100`}
       aria-label="Gestión de productos"
     >
+      <style>{`
+        /* AISLAMIENTO ESTRICTO DE ESCRITORIO */
+        @media (min-width: 768px) {
+          .actionsBarDesktop {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-bottom: 16px !important;
+          }
+          .exportBtnContainerDesktop {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+          .sortContainerDesktop {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+        }
+        @media (max-width: 767px) {
+          .actionsBarDesktop {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            width: 100% !important;
+            gap: 12px !important;
+            margin-bottom: 16px !important;
+          }
+          .exportBtnContainerDesktop {
+            width: 100% !important;
+          }
+          .sortContainerDesktop {
+            width: 100% !important;
+          }
+        }
+      `}</style>
+
       {viewMode === 'list' && (
         <>
-          <ProductHeader
-            canCreate={can('products.create')}
-            onNew={handleNew}
-          />
+          {/* Contenedor de herramientas de lista */}
+          <div className={styles.listToolbarArea}>
+            <ProductHeader
+              canCreate={can('products.create')}
+              onNew={handleNew}
+            />
 
-          <ProductFilters
-            search={search}
-            setSearch={setSearch}
-            inputRef={inputRef as React.RefObject<HTMLInputElement>}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            categories={categories}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            stockLevelFilter={stockLevelFilter}
-            setStockLevelFilter={setStockLevelFilter}
-            total={total}
-          />
+            <ProductFilters
+              search={search}
+              setSearch={setSearch}
+              inputRef={inputRef as React.RefObject<HTMLInputElement>}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              categories={categories}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              stockLevelFilter={stockLevelFilter}
+              setStockLevelFilter={setStockLevelFilter}
+              total={total}
+            />
+          </div>
 
           {isInitialLoad ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
@@ -389,10 +416,9 @@ export function AdminProducts() {
             </div>
           ) : (
             <>
-              {/* Acciones mostradas incluso si está cargando, si hay productos en el render actual */}
               {!error && (products.length > 0 || loading) && (
-                <div className={styles.actionsBar} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
-                  <div className={styles.exportBtnContainer}>
+                <div className={`${styles.actionsBar} ${styles.listToolbarArea} actionsBarDesktop`} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                  <div className={`${styles.exportBtnContainer} exportBtnContainerDesktop`}>
                     <ExportButtons
                       onExportCSV={handleExportCSV}
                       onExportExcel={handleExportExcel}
@@ -401,10 +427,10 @@ export function AdminProducts() {
                     />
                   </div>
 
-                  <div className={styles.sortContainer}>
+                  <div className={`${styles.sortContainer} sortContainerDesktop`}>
                     <div className={styles.sortControls}>
                       <span className={styles.sortLabel}>Ordenar:</span>
-                      <div style={{ width: '130px', display: 'inline-block' }}>
+                      <div className={styles.sortDropdownWrapper}>
                         <Dropdown
                           options={sortOptions}
                           value={sortField}
@@ -463,15 +489,18 @@ export function AdminProducts() {
                     canEdit={can('products.edit')}
                     canDelete={can('products.delete')}
                     defaultSelectedProductId={editId || undefined}
+                    onMobileViewChange={(view) => setIsMobileDetailOpen(view === 'detail')}
                   />
 
-                  {total > 10 && (
-                    <AdminPagination
-                      page={apiPage}
-                      totalPages={apiTotalPages}
-                      onPageChange={handlePageChange}
-                      ariaLabel="Paginación de productos"
-                    />
+                  {total > PAGE_LIMIT && (
+                    <div className={styles.listToolbarArea} style={{ marginTop: '16px' }}>
+                      <AdminPagination
+                        page={apiPage}
+                        totalPages={apiTotalPages}
+                        onPageChange={handlePageChange}
+                        ariaLabel="Paginación de productos"
+                      />
+                    </div>
                   )}
                 </div>
               )}
@@ -520,7 +549,7 @@ export function AdminProducts() {
               status: statusFilter,
               stockLevel: stockLevelFilter,
               page: editPage,
-              limit: 10,
+              limit: PAGE_LIMIT,
             });
           }}
           onUnsavedChanges={setUnsavedChanges}

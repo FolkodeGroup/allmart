@@ -252,17 +252,95 @@ export function ProductSupplierSection({
 
     return (
         <fieldset className={styles.fieldset}>
+            <style>{`
+                /* Mejoras específicas para el dropdown en móvil */
+                @media (max-width: 767px) {
+                    .supplierDropdownMobile {
+                        position: relative;
+                        width: 100%;
+                    }
+                    .supplierDropdownListMobile {
+                        position: absolute;
+                        top: calc(100% + 4px);
+                        left: 0;
+                        right: 0;
+                        z-index: 150;
+                        background: var(--color-bg-primary, #1f2937);
+                        border: 1px solid var(--color-border, #4b5563);
+                        border-radius: 8px;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                        max-height: 280px;
+                        display: flex;
+                        flex-direction: column;
+                        overflow: hidden;
+                    }
+                    .supplierSearchBoxMobile {
+                        padding: 10px;
+                        border-bottom: 1px solid var(--color-border, #374151);
+                        background: var(--color-bg-secondary, #28353d);
+                        position: sticky;
+                        top: 0;
+                        z-index: 2;
+                    }
+                    .supplierSearchInputMobile {
+                        width: 100%;
+                        min-height: 44px;
+                        background: var(--color-bg-primary, #111827);
+                        border: 1px solid var(--color-border, #4b5563);
+                        border-radius: 6px;
+                        padding: 0 12px;
+                        color: var(--color-text-primary, #ffffff);
+                        font-size: 16px;
+                        box-sizing: border-box;
+                    }
+                    .supplierSearchInputMobile:focus {
+                        outline: none;
+                        border-color: var(--color-primary);
+                    }
+                    .supplierOptionsMobile {
+                        overflow-y: auto;
+                        flex: 1;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    .supplierOptionMobile {
+                        min-height: 48px;
+                        padding: 12px 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        border-bottom: 1px solid rgba(255,255,255,0.05);
+                        color: var(--color-text-primary, #f3f4f6);
+                        font-size: 15px;
+                        background: transparent;
+                        border-left: none;
+                        border-right: none;
+                        border-top: none;
+                        width: 100%;
+                        text-align: left;
+                        cursor: pointer;
+                    }
+                    .supplierOptionMobile:active {
+                        background: rgba(255,255,255,0.05);
+                    }
+                    .supplierOptionNoneMobile {
+                        color: var(--color-text-secondary, #9ca3af);
+                        font-style: italic;
+                    }
+                }
+            `}</style>
+
             {/* ── Dropdown de Proveedor Principal ── */}
             <legend className={styles.legend}>
                 Proveedor Principal
             </legend>
-            <div className={styles.dropdown} ref={dropdownRef}>
+            <div className={`${styles.dropdown} supplierDropdownMobile`} ref={dropdownRef}>
                 <button
                     id="primary-supplier-select"
                     type="button"
                     className={styles.dropdownTrigger}
                     onClick={() => setOpen(v => !v)}
                     disabled={suppliersLoading || actionLoading === 'select'}
+                    style={{ minHeight: '44px' }}
                 >
                     <span className={selectedSupplierName ? styles.selectedName : styles.placeholder}>
                         {suppliersLoading ? 'Cargando proveedores...'
@@ -276,6 +354,7 @@ export function ProductSupplierSection({
                             title="Quitar proveedor principal"
                             role="button"
                             tabIndex={0}
+                            style={{ minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
                             <i className="bi bi-x-circle"></i>
                         </div>
@@ -283,32 +362,34 @@ export function ProductSupplierSection({
                     <i className={`bi bi-chevron-down ${styles.chevron} ${open ? styles.chevronOpen : ''}`}></i>
                 </button>
                 {open && (
-                    <div className={styles.dropdownList}>
-                        <div className={styles.searchBox}>
+                    <div className={`${styles.dropdownList} supplierDropdownListMobile`}>
+                        <div className={`${styles.searchBox} supplierSearchBoxMobile`}>
                             <input
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Buscar proveedor..."
-                                className={styles.searchInput}
+                                className={`${styles.searchInput} supplierSearchInputMobile`}
+                                // eslint-disable-next-line jsx-a11y/no-autofocus
+                                autoFocus
                             />
                         </div>
-                        <div className={styles.options}>
-                            <button type="button" className={styles.option} onClick={() => handleSelect(null)}>
-                                <span className={styles.optionNone}>— Sin proveedor —</span>
+                        <div className={`${styles.options} supplierOptionsMobile`}>
+                            <button type="button" className={`${styles.option} supplierOptionMobile`} onClick={() => handleSelect(null)}>
+                                <span className={`${styles.optionNone} supplierOptionNoneMobile`}>— Sin proveedor —</span>
                             </button>
                             {filtered.length === 0 ? (
-                                <div className={styles.noOptions}>Sin resultados</div>
+                                <div className={styles.noOptions} style={{ padding: '16px', textAlign: 'center', color: '#9ca3af' }}>Sin resultados</div>
                             ) : filtered.map(s => (
                                 <button
                                     key={s.id}
                                     type="button"
-                                    className={`${styles.option} ${s.id === primarySupplierId ? styles.optionActive : ''}`}
+                                    className={`${styles.option} supplierOptionMobile ${s.id === primarySupplierId ? styles.optionActive : ''}`}
                                     onClick={() => handleSelect(s.id)}
                                 >
                                     <span className={styles.optionName}>{s.name}</span>
                                     {s.id === primarySupplierId && (
-                                        <i className="bi bi-star-fill" style={{ color: 'var(--color-accent)', fontSize: '0.8rem' }}></i>
+                                        <i className="bi bi-star-fill" style={{ color: 'var(--color-accent)', fontSize: '1rem' }}></i>
                                     )}
                                 </button>
                             ))}

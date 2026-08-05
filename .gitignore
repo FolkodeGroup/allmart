@@ -162,3 +162,6 @@ ENV/
 
 # Ignorar configuración de Puppeteer
 .puppeteerrc.json
+
+estructura.txt
+repomix-output.xml

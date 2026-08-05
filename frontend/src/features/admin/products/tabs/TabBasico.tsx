@@ -115,6 +115,54 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
 
     return (
         <>
+            <style>{`
+                /* Mejoras de ergonomía táctil para móvil */
+                .touchableCheckboxRow {
+                    display: flex;
+                    align-items: center;
+                    min-height: 48px;
+                    cursor: pointer;
+                    padding: 0 8px;
+                    margin: 4px 0;
+                    border-radius: 8px;
+                    transition: background-color 0.2s;
+                }
+                .touchableCheckboxRow:active {
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+                .touchableCheckboxRow input[type="checkbox"] {
+                    width: 22px;
+                    height: 22px;
+                    margin-right: 12px;
+                    accent-color: var(--color-primary);
+                    cursor: pointer;
+                }
+                .touchableCheckboxRow label {
+                    flex: 1;
+                    cursor: pointer;
+                    user-select: none;
+                    font-size: 15px;
+                    color: var(--color-text-primary);
+                }
+                
+                /* Botones de acción primarios (+) */
+                .primaryActionBtn {
+                    min-width: 44px !important;
+                    min-height: 44px !important;
+                    background-color: var(--color-primary) !important;
+                    color: white !important;
+                    border: none !important;
+                    border-radius: 8px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+                }
+                .primaryActionBtn i {
+                    font-size: 1.2rem;
+                }
+            `}</style>
+
             <fieldset className={styles.fieldset}>
                 <div className={styles.row}>
                     <div className={styles.field}>
@@ -127,6 +175,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             onBlur={() => handleBlur('name')}
                             required
                             placeholder='Escriba un producto'
+                            style={{ minHeight: '44px', fontSize: '16px' }}
                         />
                         {touched.name && (
                             <ValidationHelper
@@ -152,6 +201,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             }}
                             onBlur={() => handleBlur('sku')}
                             placeholder={suggestedSku}
+                            style={{ minHeight: '44px', fontSize: '16px' }}
                         />
                         {!form.sku && showSkuSuggestion && form.name.trim() && (
                             <SkuSuggestion
@@ -179,6 +229,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         onChange={e => handleSlugChange(e.target.value)}
                         onBlur={() => handleBlur('slug')}
                         placeholder="Se genera automáticamente a partir del nombre"
+                        style={{ minHeight: '44px', fontSize: '16px' }}
                     />
                     {touched.slug && (
                         <ValidationHelper
@@ -186,7 +237,6 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             success={!!(form.slug && !localErrors.slug)}
                         />
                     )}
-
                 </div>
 
                 <div className={styles.field}>
@@ -197,6 +247,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         value={form.shortDescription}
                         onChange={e => setField('shortDescription', e.target.value)}
                         maxLength={160}
+                        style={{ minHeight: '44px', fontSize: '16px' }}
                     />
                     <span className={styles.fieldHint}>
                         {form.shortDescription.length}/160 caracteres
@@ -213,6 +264,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         value={form.description}
                         onChange={e => setField('description', e.target.value)}
                         placeholder='Descripción del producto (opcional)'
+                        style={{ fontSize: '16px', minHeight: '100px' }}
                     />
                     <span className={styles.fieldHint}>
                         {form.description.length} caracteres
@@ -223,44 +275,35 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
             <fieldset className={styles.fieldset}>
                 <legend className={styles.legend}>Etiquetas</legend>
                 <div className={styles.field}>
-                    <label className={styles.label} htmlFor="product-tags">Agregar etiqueta</label>
-                    <div className={styles.checkRow} style={{ marginTop: '0.25rem' }}>
+                    
+                    <label className="touchableCheckboxRow">
                         <input
                             type="checkbox"
-                            id="product-offer"
                             checked={form.tags.includes('oferta')}
                             onChange={(e) => toggleTag('oferta', e.target.checked)}
-                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                         />
-                        <label htmlFor="product-offer" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                            En Oferta
-                        </label>
-                    </div>
-                    <div className={styles.checkRow} style={{ marginTop: '0.5rem' }}>
+                        <span>En Oferta</span>
+                    </label>
+                    
+                    <label className="touchableCheckboxRow">
                         <input
                             type="checkbox"
-                            id="product-novedad"
                             checked={form.tags.includes('novedad')}
                             onChange={(e) => toggleTag('novedad', e.target.checked)}
-                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                         />
-                        <label htmlFor="product-novedad" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                            Novedad
-                        </label>
-                    </div>
-                    <div className={styles.checkRow} style={{ marginTop: '0.5rem' }}>
+                        <span>Novedad</span>
+                    </label>
+                    
+                    <label className="touchableCheckboxRow">
                         <input
                             type="checkbox"
-                            id="product-featured"
                             checked={form.isFeatured || false}
                             onChange={(e) => handleFeaturedToggle(e.target.checked)}
-                            style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
                         />
-                        <label htmlFor="product-featured" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                            Producto Destacado
-                        </label>
-                    </div>
-                    <div className={styles.tagRow}>
+                        <span>Producto Destacado</span>
+                    </label>
+
+                    <div className={styles.tagRow} style={{ marginTop: '12px' }}>
                         <input
                             className={styles.input}
                             id="product-tags"
@@ -268,8 +311,9 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                             onChange={e => setTagInput(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), onAddTag())}
                             placeholder="Ej: destacado, oferta, nuevo..."
+                            style={{ minHeight: '44px', fontSize: '16px' }}
                         />
-                        <button type="button" className={styles.addBtn} onClick={onAddTag}>
+                        <button type="button" className="primaryActionBtn" onClick={onAddTag} aria-label="Agregar etiqueta">
                             <i className="bi bi-plus-lg"></i>
                         </button>
                     </div>
@@ -302,10 +346,11 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         onChange={e => setFeatureInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), onAddFeature())}
                         placeholder="Ej: Material: acero inoxidable"
+                        style={{ minHeight: '44px', fontSize: '16px' }}
                     />
                     <button
                         type="button"
-                        className={styles.addBtn}
+                        className="primaryActionBtn"
                         onClick={onAddFeature}
                         aria-label="Agregar característica"
                     >

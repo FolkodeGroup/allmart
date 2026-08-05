@@ -10,7 +10,13 @@ interface Props {
     onReject?: (rejected: RejectedFile[]) => void;
 }
 
-export default function ImageUploader({ multiple = true, maxSizeBytes = 5 * 1024 * 1024, accept = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'], onAddFiles, onReject }: Props) {
+export default function ImageUploader({
+    multiple = true,
+    maxSizeBytes = 5 * 1024 * 1024,
+    accept = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+    onAddFiles,
+    onReject
+}: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     function onFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
@@ -36,16 +42,50 @@ export default function ImageUploader({ multiple = true, maxSizeBytes = 5 * 1024
         if (accepted.length) onAddFiles(accepted);
         if (rejected.length && onReject) onReject(rejected);
 
-        // reset
         if (inputRef.current) inputRef.current.value = '';
     }
 
     return (
-        <div style={{ border: '2px dashed #ccc', padding: 12, borderRadius: 6 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column' }}>
-                <div>Arrastra y suelta imágenes aquí o selecciona archivos</div>
-                <div>
-                    <input ref={inputRef} type="file" multiple={multiple} accept={accept.join(',')} onChange={onFilesSelected} />
+        <div style={{
+            border: '2px dashed var(--color-border, #4b5563)',
+            padding: '12px 14px',
+            borderRadius: '10px',
+            backgroundColor: 'var(--color-bg-secondary, #28353d)',
+            boxSizing: 'border-box',
+            maxWidth: '100%',
+            width: '100%',
+            overflow: 'hidden',
+        }}>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                width: '100%',
+                boxSizing: 'border-box',
+            }}>
+                <div style={{
+                    fontSize: '13px',
+                    color: 'var(--color-text-primary, #ffffff)',
+                    wordBreak: 'break-word',
+                    lineHeight: '1.4',
+                }}>
+                    Arrastrá y soltá imágenes aquí o seleccioná archivos
+                </div>
+                <div style={{ width: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+                    <input
+                        ref={inputRef}
+                        type="file"
+                        multiple={multiple}
+                        accept={accept.join(',')}
+                        onChange={onFilesSelected}
+                        style={{
+                            maxWidth: '100%',
+                            width: '100%',
+                            boxSizing: 'border-box',
+                            fontSize: '13px',
+                            color: 'var(--color-text-secondary, #9ca3af)',
+                        }}
+                    />
                 </div>
             </div>
         </div>

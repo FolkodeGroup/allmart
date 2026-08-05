@@ -1,7 +1,7 @@
 // frontend/src/pages/ProductDetail/ProductDetailPage.tsx
 import { useState, useEffect, useMemo } from 'react';
 import type { VariantGroup } from '../../context/AdminProductsContext';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import type { Product } from '../../types';
 import {
@@ -34,6 +34,7 @@ export function ProductDetailPage() {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite, syncFavorite } = useFavorites();
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -60,6 +61,20 @@ export function ProductDetailPage() {
     );
 
     return JSON.stringify(normalizedRecord);
+  }
+
+  function getVariantsFromSearchParams(params: URLSearchParams): Record<string, string> {
+    const parsed: Record<string, string> = {};
+
+    params.forEach((value, key) => {
+      const normalizedKey = String(key).trim().toLowerCase();
+      const normalizedValue = String(value).trim();
+      if (normalizedKey && normalizedValue) {
+        parsed[normalizedKey] = normalizedValue;
+      }
+    });
+
+    return parsed;
   }
 
   const skuImages = useMemo(() => {
@@ -100,6 +115,12 @@ export function ProductDetailPage() {
         const mappedProduct = mapApiProductToProduct(apiProduct, categories);
         setProduct(mappedProduct);
         setSelectedSkuId(null);
+
+        const queryVariantSelection = getVariantsFromSearchParams(searchParams);
+        if (Object.keys(queryVariantSelection).length > 0) {
+          setSelectedVariants(queryVariantSelection);
+        }
+
         setLoading(false);
 
         const primaryCategoryId = apiProduct.categoryId || apiProduct.categoryIds?.[0];
@@ -141,7 +162,7 @@ export function ProductDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, searchParams]);
 
   const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
 
@@ -526,6 +547,8 @@ export function ProductDetailPage() {
                         <button
                           key={val}
                           disabled={!available}
+                          aria-pressed={selected}
+                          aria-label={isColor ? val : undefined}
                           className={[
                             styles.variantOption,
                             selected ? styles.variantOptionSelected : '',

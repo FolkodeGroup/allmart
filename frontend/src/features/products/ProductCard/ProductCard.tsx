@@ -199,7 +199,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
 
         <div className={styles.badges}>
           {isNew && <Badge variant="new">Nuevo</Badge>}
-          {typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
+          {variant !== 'featured' && typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
             <Badge className={`${styles.badge} ${styles.lowStockBadge}`}>
               <AlertTriangle size={16} style={{ marginRight: 4 }} /> Stock bajo
             </Badge>
