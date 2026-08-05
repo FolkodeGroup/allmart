@@ -1,7 +1,7 @@
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.55);
+    background: rgba(0, 0, 0, 0.55);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,7 +14,7 @@
     padding: 0;
     width: 540px;
     max-width: 95vw;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
     overflow: hidden;
 }
 
@@ -26,7 +26,11 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-.header h3 { margin: 0; font-size: 0.95rem; font-weight: 700; }
+.header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
 
 .closeBtn {
     background: none;
@@ -38,7 +42,9 @@
     transition: background 0.12s;
 }
 
-.closeBtn:hover { background: var(--color-bg-secondary); }
+.closeBtn:hover {
+    background: var(--color-bg-secondary);
+}
 
 .loading {
     padding: 40px;
@@ -54,12 +60,31 @@
     gap: 14px;
 }
 
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 520px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal {
+        width: 100%;
+    }
+
+    .form {
+        padding: 16px 16px;
+    }
+}
 
 .field {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    min-width: 0;
 }
 
 .field label {
@@ -70,6 +95,8 @@
 
 .field input,
 .field textarea {
+    width: 100%;
+    box-sizing: border-box;
     padding: 8px 11px;
     border: 1px solid var(--color-border);
     border-radius: 8px;
@@ -81,11 +108,18 @@
 }
 
 .field input:focus,
-.field textarea:focus { border-color: var(--color-accent, #6366f1); }
+.field textarea:focus {
+    border-color: var(--color-accent, #6366f1);
+}
 
-.inputError { border-color: #ef4444 !important; }
+.inputError {
+    border-color: #ef4444 !important;
+}
 
-.errorMsg { font-size: 0.75rem; color: #ef4444; }
+.errorMsg {
+    font-size: 0.75rem;
+    color: #ef4444;
+}
 
 .checkboxRow {
     display: flex;
@@ -126,5 +160,11 @@
     transition: opacity 0.15s;
 }
 
-.btnSave:hover { opacity: 0.88; }
-.btnSave:disabled { opacity: 0.6; cursor: not-allowed; }
+.btnSave:hover {
+    opacity: 0.88;
+}
+
+.btnSave:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

@@ -42,7 +42,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-2xl);
   font-weight: var(--font-bold);
-  color: var(--color-text-instock);
+  color: white;
   text-align: center;
 }
 
@@ -65,7 +65,7 @@
   box-sizing: border-box;
 }
 
-.carouselSlide > * {
+.carouselSlide>* {
   height: 100%;
 }
 
@@ -75,9 +75,50 @@
   margin: 0 auto;
   padding: 0 var(--space-6);
 }
-.butSecundaryAdaptado{
+
+.butSecundaryAdaptado {
   /* background-color: var(--color-warm-gray-light); // para que destaque menos este */
-  background-color: var(--color-accent); 
+  background-color: var(--color-accent);
+}
+
+.ctaButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-) var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: white;
+  /* texto oscuro, buen contraste sobre primary-light */
+  background: none;
+  border: none;
+  text-decoration: none;
+  min-height: 40px;
+}
+
+.ctaButton::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 32px;
+  height: 3px;
+  background-color: var(--color-primary);
+  transform: translateX(-50%);
+  border-radius: 20%;
+  transition: width 0.25s ease-in-out;
+}
+
+.ctaButton:hover:not(:disabled),
+.ctaButton:focus-visible {
+  background: none;
+}
+
+.ctaButton:hover::after,
+.ctaButton:focus-visible::after {
+  width: 100%;
 }
 
 /* ── Responsive ── */

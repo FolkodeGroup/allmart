@@ -1,74 +1,98 @@
 .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-3) 0;
-}
-
-.pageBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    border: 1.5px solid var(--color-border);
-    border-radius: 9px;
-    background: var(--color-bg-primary);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
-    min-height: 36px;
-    min-width: 36px;
-    justify-content: center;
-}
-
-.pageBtn:hover:not(:disabled) {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-primary));
-}
-
-.pageBtn:active:not(:disabled) {
-    transform: scale(0.97);
-}
-
-.pageBtn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.pageBtn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
-.pageActive {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--color-neutral-light);
-    font-weight: var(--font-bold);
-}
-
-.pageActive:hover {
-    background: var(--color-primary-dark, #5a7a6a) !important;
-    border-color: var(--color-primary-dark, #5a7a6a) !important;
-    color: var(--color-neutral-light) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  width: 100%;
 }
 
 .pageNumbers {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pageBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-tertiary);
+}
+
+.pageActive {
+  background: var(--color-primary);
+  color: var(--color-neutral-light, #ffffff);
+  border-color: var(--color-primary);
+}
+
+.pageActive:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  color: var(--color-neutral-light, #ffffff);
+}
+
+.navBtn {
+  gap: 0.25rem;
+  padding: 0 0.75rem;
+}
+
+/* ── Botones Anterior y Siguiente ACTIVOS (con paginas disponibles) ── */
+.navBtn:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-neutral-light, #ffffff);
+  border-color: var(--color-primary);
+}
+
+.navBtn:not(:disabled):hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: var(--color-neutral-light, #ffffff);
 }
 
 .ellipsis {
-    padding: 0 4px;
-    color: var(--color-text-tertiary);
-    align-self: center;
-    font-size: var(--text-sm);
-    user-select: none;
+  color: var(--color-text-tertiary);
+  padding: 0 0.25rem;
+}
+
+/* ── Ajustes Mobile ── */
+@media (max-width: 640px) {
+  .pageNumbers {
+    display: none; /* Ocultar números en móvil para evitar desbordamientos */
+  }
+  
+  .pagination {
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  
+  .navBtn {
+    flex: 1; /* Los botones Anterior/Siguiente ocupan el 50% del ancho */
+    height: 44px; /* Touch target amplio */
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
 }

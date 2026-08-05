@@ -2283,3 +2283,5 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1356: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-25 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-25 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1368: fix en cards de matriz de productos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1405: Homogeneizar hover del botón "Todas las Categorías" en el Navbar del Home | 2026-08-05 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1374: 🔄 Actualización automática de puntajes semanal | 2026-08-05 |

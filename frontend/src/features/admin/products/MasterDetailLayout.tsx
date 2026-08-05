@@ -16,6 +16,7 @@ interface MasterDetailLayoutProps {
   canDelete: boolean;
   children?: React.ReactNode;
   defaultSelectedProductId?: string;
+  onMobileViewChange?: (view: 'list' | 'detail') => void;
 }
 
 function MasterDetailLayoutInner({
@@ -29,29 +30,25 @@ function MasterDetailLayoutInner({
   canDelete,
   children,
   defaultSelectedProductId,
+  onMobileViewChange,
 }: MasterDetailLayoutProps) {
   const [selectedProductId, setSelectedProductId] = useState<string | undefined>(
     defaultSelectedProductId
   );
+  
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
   const isEmpty = !loading && !error && products.length === 0;
 
-  // Auto-select product: prefer defaultSelectedProductId if provided and valid,
-  // otherwise select the first product if none is selected
   React.useEffect(() => {
     if (loading || products.length === 0) return;
 
     setSelectedProductId(prev => {
       const exists = products.some(p => p.id === prev);
-
-      // Si sigue existiendo, NO tocar
       if (exists) return prev;
-
-      // Si no existe (ej: se eliminó), seleccionar primero
       return products[0].id;
     });
   }, [products, loading]);
 
-  // Get selected product
   const selectedProduct = useMemo(
     () => products.find(p => p.id === selectedProductId),
     [products, selectedProductId]
@@ -59,9 +56,15 @@ function MasterDetailLayoutInner({
 
   const handleSelectProduct = useCallback((id: string) => {
     setSelectedProductId(id);
-  }, []);
+    setMobileView('detail');
+    onMobileViewChange?.('detail');
+  }, [onMobileViewChange]);
 
-  // Memoize the detail content to avoid re-rendering when props don't change
+  const handleBackToList = useCallback(() => {
+    setMobileView('list');
+    onMobileViewChange?.('list');
+  }, [onMobileViewChange]);
+
   const detailContent = useMemo(() => {
     if (!selectedProduct) return null;
     return (
@@ -71,46 +74,60 @@ function MasterDetailLayoutInner({
         onDelete={onDeleteDirect || onDelete}
         canEdit={canEdit}
         canDelete={canDelete}
+        onBack={handleBackToList}
+        isMobileActive={mobileView === 'detail'}
       />
     );
-  }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete]);
+  }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete, handleBackToList, mobileView]);
 
   return (
-    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''}`}>
+    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailMobileContainer`}>
+      <style>{`
+        @media (max-width: 1023px) {
+          .masterDetailMobileContainer,
+          .masterDetailMobileContainer .detailWrapper {
+            height: auto !important;
+            max-height: none !important;
+            overflow-y: visible !important;
+          }
+        }
+      `}</style>
+
       {/* List Panel (Left) */}
-      <ProductListPanel
-        products={products}
-        loading={loading}
-        error={error}
-        selectedProductId={selectedProductId}
-        onSelectProduct={handleSelectProduct}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        canEdit={canEdit && !!onEdit}
-        canDelete={canDelete && !!onDelete}
-      />
+      <div className={styles.listPane}>
+        <ProductListPanel
+          products={products}
+          loading={loading}
+          error={error}
+          selectedProductId={selectedProductId}
+          onSelectProduct={handleSelectProduct}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          canEdit={canEdit && !!onEdit}
+          canDelete={canDelete && !!onDelete}
+        />
+      </div>
 
-      {/* Detail Panel (Right) - Keep provider mounted, conditionally render content */}
-      <AdminVariantsProvider>
-        {detailContent}
-        {/* Empty state when no product selected */}
-        {!selectedProduct && !loading && products.length > 0 && (
-          <div className={styles.emptyDetail}>
-            <div className={styles.emptyDetailContent}>
-              <p>Selecciona un producto para ver sus detalles</p>
+      {/* Detail Panel (Right) */}
+      <div className={`${styles.detailWrapper} masterDetailMobileSingleScroll`}>
+        <AdminVariantsProvider>
+          {detailContent}
+          {!selectedProduct && !loading && products.length > 0 && (
+            <div className={styles.emptyDetail}>
+              <div className={styles.emptyDetailContent}>
+                <p>Selecciona un producto para ver sus detalles</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Loading state */}
-        {loading && (
-          <div className={styles.loadingDetail}>
-            <div className={styles.spinner} />
-          </div>
-        )}
-      </AdminVariantsProvider>
+          {loading && (
+            <div className={styles.loadingDetail}>
+              <div className={styles.spinner} />
+            </div>
+          )}
+        </AdminVariantsProvider>
+      </div>
 
-      {/* Children toolbar (if provided) */}
       {children && <div className={styles.toolbarArea}>{children}</div>}
     </div>
   );

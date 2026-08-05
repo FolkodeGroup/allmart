@@ -1,4 +1,3 @@
-// frontend/src/features/admin/products/tabs/TabPreciosinventario.tsx
 import { forwardRef, useImperativeHandle, useState, useCallback } from 'react';
 import type { TabPreciosInventarioProps } from '../components/types';
 import { getInlineFieldError } from '../../../../utils/productFormUtils';
@@ -17,7 +16,6 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-    // 🟢 FIX: Casteo interno seguro para añadir propiedades personalizadas sin romper los tipos de Omit<AdminProduct>
     const formValues = form as unknown as {
         price: number;
         stock: number;
@@ -34,7 +32,6 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                 if (!formValues.price || formValues.price <= 0) errs.price = 'El precio debe ser mayor a 0';
                 if (formValues.stock < 0) errs.stock = 'El stock no puede ser negativo';
                 
-                // 🟢 NUEVO: Validación de valores positivos para el umbral
                 if (formValues.criticalStockThreshold !== undefined && formValues.criticalStockThreshold < 0) {
                     errs.criticalStockThreshold = 'El umbral de stock crítico no puede ser negativo';
                 }
@@ -90,7 +87,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                         <i className="bi bi-currency-dollar" style={iconStyle}></i>
                         <input
                             className={`${styles.input} ${touched.price && localErrors.price ? styles.inputError : ''}`}
-                            style={{ paddingLeft: '36px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
+                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
                             id="product-price"
                             type="number"
                             min={0}
@@ -122,7 +119,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                         <i className="bi bi-box-seam" style={iconStyle}></i>
                         <input
                             className={`${styles.input} ${touched.stock && localErrors.stock ? styles.inputError : ''}`}
-                            style={{ paddingLeft: '36px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
+                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
                             id="product-stock"
                             type="number"
                             min={0}
@@ -154,7 +151,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                         <i className="bi bi-exclamation-triangle" style={iconStyle}></i>
                         <input
                             className={`${styles.input} ${touched.criticalStockThreshold && localErrors.criticalStockThreshold ? styles.inputError : ''}`}
-                            style={{ paddingLeft: '36px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
+                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
                             id="product-critical-threshold"
                             type="number"
                             min={0}
@@ -162,7 +159,6 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             onChange={e => {
                                 const raw = e.target.value;
                                 const val = raw === '' ? 0 : Math.max(0, parseInt(raw) || 0);
-                                // 🟢 FIX: Caseteo seguro usando Parameters para evitar 'any' y pasar ESLint
                                 setField('criticalStockThreshold' as unknown as Parameters<typeof setField>[0], val);
                                 validateField('criticalStockThreshold', val);
                             }}
@@ -183,16 +179,16 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                 </div>
             </div>
 
-            <div className={styles.checkRow} style={{ marginTop: '1rem', opacity: hasVariants ? 0.5 : 1, pointerEvents: hasVariants ? 'none' : 'auto' }}>
+            <div className={styles.checkRow} style={{ marginTop: '1rem', minHeight: '44px', display: 'flex', alignItems: 'center', opacity: hasVariants ? 0.5 : 1, pointerEvents: hasVariants ? 'none' : 'auto' }}>
                 <input
                     type="checkbox"
                     id="inStock"
                     checked={formValues.inStock}
                     onChange={e => setField('inStock', e.target.checked)}
-                    style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                    style={{ cursor: 'pointer', width: '20px', height: '20px', accentColor: 'var(--color-primary)' }}
                     disabled={hasVariants}
                 />
-                <label htmlFor="inStock" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                <label htmlFor="inStock" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}>
                     Disponible en stock
                 </label>
             </div>

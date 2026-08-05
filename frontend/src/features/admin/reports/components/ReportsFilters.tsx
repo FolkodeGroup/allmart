@@ -106,6 +106,17 @@ export const ReportsFilters: React.FC<ReportsFiltersProps> = ({
                         onChange={val => handleDatePickerChange('to', val)}
                     />
                 </div>
+                <div className={styles.clearFiltersMobileWrap}>
+                    <button
+                        type="button"
+                        className={isCustom ? styles.clearBtn : styles.clearBtnDisabled}
+                        onClick={() => onChange({ ...value, type: 'predefined', period: '30d' })}
+                        disabled={!isCustom}
+                        title="Limpiar filtros"
+                    >
+                        Limpiar filtros
+                    </button>
+                </div>
             </div>
         );
     }
