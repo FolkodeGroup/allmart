@@ -34,6 +34,50 @@ function formatShortDate(dateStr: string) {
     return `${day}/${month}/${year}`;
 }
 
+/* 🎨 Estilos de alto contraste para el PDF de impresión */
+function getPrintStatusBadgeStyle(status: string): React.CSSProperties {
+    const map: Record<string, { bg: string; color: string; border: string }> = {
+        pendiente:      { bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' },
+        confirmado:     { bg: '#DBEAFE', color: '#1E40AF', border: '#BFDBFE' },
+        'en-preparacion': { bg: '#EDE9FE', color: '#5B21B6', border: '#DDD6FE' },
+        preparado:      { bg: '#DBEAFE', color: '#1E40AF', border: '#BFDBFE' },
+        enviado:        { bg: '#CFFAFE', color: '#155E75', border: '#A5F3FC' },
+        entregado:      { bg: '#D1FAE5', color: '#065F46', border: '#A7F3D0' },
+        cancelado:      { bg: '#FEE2E2', color: '#991B1B', border: '#FCA5A5' },
+    };
+
+    const style = map[status] ?? { bg: '#F3F4F6', color: '#374151', border: '#E5E7EB' };
+
+    return {
+        display: 'inline-block',
+        padding: '3px 10px',
+        borderRadius: '12px',
+        fontSize: '9px',
+        fontWeight: 700,
+        backgroundColor: style.bg,
+        color: style.color,
+        border: `1px solid ${style.border}`,
+        textAlign: 'center',
+        whiteSpace: 'nowrap',
+    };
+}
+
+function getPrintPaymentBadgeStyle(paymentStatus?: string): React.CSSProperties {
+    const isPaid = paymentStatus === 'abonado';
+    return {
+        display: 'inline-block',
+        padding: '3px 10px',
+        borderRadius: '12px',
+        fontSize: '9px',
+        fontWeight: 700,
+        backgroundColor: isPaid ? '#D1FAE5' : '#F3F4F6',
+        color: isPaid ? '#065F46' : '#4B5563',
+        border: `1px solid ${isPaid ? '#A7F3D0' : '#E5E7EB'}`,
+        textAlign: 'center',
+        whiteSpace: 'nowrap',
+    };
+}
+
 export const OrdersTable: React.FC<OrdersTableProps> = ({
     orders,
     page,
@@ -44,22 +88,9 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
     printMode = false,
 }) => {
     const isMobile = useIsMobile();
-    const badgeStyle: React.CSSProperties = {
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'flex-end',
-        lineHeight: 1.2,
-        minHeight: 24,
-        whiteSpace: 'nowrap',
-        verticalAlign: 'top',
-        boxSizing: 'border-box',
-        textAlign: 'center',
-        width: 'fit-content',
-        maxWidth: '100%',
-    };
 
     // Mobile: selector de cantidad arriba, filtros 100%, paginación touch-friendly, cards con fecha dd/mm/aa
-    if (isMobile) {
+    if (isMobile && !printMode) {
         return (
             <>
                 {onPageSizeChange && pageSize && (
@@ -119,7 +150,6 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
                         );
                     })}
                 </div>
-                {/* Paginación mobile centrada y touch-friendly */}
                 {onPageChange && page && total && pageSize && (
                     <div style={{ margin: '18px 0 0 0', width: '100%' }}>
                         <nav className={styles.pagination} aria-label="Paginación" style={{ justifyContent: 'center', gap: 8 }}>
@@ -147,26 +177,78 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
         );
     }
 
-    // Tabla desktop (sin cambios)
+    // MODO IMPRESIÓN PDF (Alto contraste claro)
+    if (printMode) {
+        return (
+            <div style={{ width: '100%', background: '#FFFFFF', border: '1px solid #E5E2DD', borderRadius: '8px', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', background: '#FFFFFF' }}>
+                    <thead>
+                        <tr style={{ background: '#769282', color: '#FFFFFF' }}>
+                            <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 700, fontSize: '10px' }}>N° Pedido</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 700, fontSize: '10px' }}>Fecha</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 700, fontSize: '10px' }}>Cliente</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, fontSize: '10px' }}>Total</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, fontSize: '10px', width: '110px' }}>Estado</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, fontSize: '10px', width: '100px' }}>Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {orders.map((o, index) => {
+                            const statusLabel =
+                                o.status === 'pendiente' ? 'Pendiente'
+                                    : o.status === 'confirmado' ? 'Confirmado'
+                                        : o.status === 'en-preparacion' ? 'En preparación'
+                                            : o.status === 'enviado' ? 'Enviado'
+                                                : o.status === 'entregado' ? 'Entregado'
+                                                    : 'Cancelado';
+                            const paymentText = o.paymentStatus === 'abonado' ? '✓ Abonado' : '○ Sin abonar';
+                            const bg = index % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
+
+                            return (
+                                <tr key={o.id} style={{ background: bg, borderBottom: '1px solid #E5E2DD' }}>
+                                    <td style={{ padding: '8px 10px', fontWeight: 700, color: '#5D7568', fontFamily: 'monospace' }}>
+                                        #{formatOrderCode(o.id)}
+                                    </td>
+                                    <td style={{ padding: '8px 10px', color: '#475569', whiteSpace: 'nowrap' }}>
+                                        {formatShortDate(o.createdAt)}
+                                    </td>
+                                    <td style={{ padding: '8px 10px', color: '#111827', fontWeight: 600 }}>
+                                        {o.customer.firstName} {o.customer.lastName}
+                                    </td>
+                                    <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: '#111827', whiteSpace: 'nowrap' }}>
+                                        {o.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
+                                    </td>
+                                    <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                        <span style={getPrintStatusBadgeStyle(o.status)}>
+                                            {statusLabel}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                        <span style={getPrintPaymentBadgeStyle(o.paymentStatus)}>
+                                            {paymentText}
+                                        </span>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
+    // Tabla desktop normal
     return (
-        <div
-            className={styles.summaryTableWrap}
-            aria-label="Tabla de pedidos"
-            role="region"
-            style={printMode ? { overflow: 'visible', maxHeight: 'none', margin: 0, border: '1px solid #d0d7de' } : undefined}
-        >
-            <table
-                className={styles.summaryTable}
-                style={printMode ? { fontSize: 11, borderCollapse: 'collapse' } : undefined}
-            >
+        <div className={styles.summaryTableWrap} aria-label="Tabla de pedidos" role="region">
+            <table className={styles.summaryTable}>
                 <thead>
                     <tr>
-                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>N° Pedido</th>
-                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>Fecha</th>
-                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>Cliente</th>
-                        <th className={styles.tdRight} style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' } : undefined}>Total</th>
-                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, textAlign: 'center', width: 140 } : undefined}>Estado</th>
-                        <th style={printMode ? { padding: '0.6rem 0.7rem', fontSize: 11, textAlign: 'center', width: 140 } : undefined}>Pago</th>
+                        <th>N° Pedido</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th className={styles.tdRight}>Total</th>
+                        <th>Estado</th>
+                        <th>Pago</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -179,35 +261,25 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
                                             : o.status === 'entregado' ? 'Entregado'
                                                 : 'Cancelado';
                         const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
-                        const statusClassName = printMode ? undefined : `${styles.stBadge} ${stClass}`;
-                        const paymentClassName = printMode ? undefined : `${styles.payBadge} ${o.paymentStatus === 'abonado' ? styles.payAbonado : styles.payPending}`;
+                        const statusClassName = `${styles.stBadge} ${stClass}`;
+                        const paymentClassName = `${styles.payBadge} ${o.paymentStatus === 'abonado' ? styles.payAbonado : styles.payPending}`;
                         const paymentText = o.paymentStatus === 'abonado' ? '✓ Abonado' : '○ Sin abonar';
 
                         return (
                             <tr key={o.id}>
-                                <td className={styles.tblId} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11 } : undefined}>#{formatOrderCode(o.id)}</td>
-                                <td className={styles.tblDate} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11, whiteSpace: 'nowrap' } : undefined}>
-                                    {formatShortDate(o.createdAt)}
-                                </td>
-                                <td className={styles.tblCustomer} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11 } : undefined}>
-                                    {o.customer.firstName} {o.customer.lastName}
-                                </td>
-                                <td className={`${styles.tblTotal} ${styles.tdRight}`} style={printMode ? { padding: '0.55rem 0.7rem', fontSize: 11, textAlign: 'right', whiteSpace: 'nowrap' } : undefined}>
+                                <td className={styles.tblId}>#{formatOrderCode(o.id)}</td>
+                                <td className={styles.tblDate}>{formatShortDate(o.createdAt)}</td>
+                                <td className={styles.tblCustomer}>{o.customer.firstName} {o.customer.lastName}</td>
+                                <td className={`${styles.tblTotal} ${styles.tdRight}`}>
                                     {o.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
                                 </td>
-                                <td style={printMode ? { padding: '0.55rem 0.7rem', textAlign: 'center', whiteSpace: 'nowrap' } : undefined}>
-                                    <span
-                                        className={statusClassName}
-                                        style={printMode ? { ...badgeStyle, minWidth: 112, padding: '0', background: 'transparent', color: '#111827', fontWeight: 600, letterSpacing: '0.02em', } : undefined}
-                                    >
+                                <td>
+                                    <span className={statusClassName}>
                                         {statusLabel}
                                     </span>
                                 </td>
-                                <td style={printMode ? { padding: '0.55rem 0.7rem', textAlign: 'center', whiteSpace: 'nowrap' } : undefined}>
-                                    <span
-                                        className={paymentClassName}
-                                        style={printMode ? { ...badgeStyle, minWidth: 116, padding: '0', background: 'transparent', color: '#111827', fontWeight: 600, letterSpacing: '0.02em', } : undefined}
-                                    >
+                                <td>
+                                    <span className={paymentClassName}>
                                         {paymentText}
                                     </span>
                                 </td>

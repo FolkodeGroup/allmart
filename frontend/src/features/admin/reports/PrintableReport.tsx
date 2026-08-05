@@ -3,7 +3,6 @@ import type { ReportsFiltersValue } from './components/ReportsFilters';
 import type { OrdersTableProps } from './AdminReports';
 import { OrdersTable } from './components/OrdersTable';
 import { chunkOrdersForPDF } from './components/chunkOrdersForPDF';
-// import { flushSync } from 'react-dom';
 
 export interface PrintableReportProps {
     filters: ReportsFiltersValue;
@@ -36,14 +35,14 @@ const projectPalette = {
     accent: '#DDB08C',
     bgSecondary: '#F2EFEB',
     bgTertiary: '#F9F7F4',
-    textPrimary: '#1A1A1A',
-    textSecondary: '#4A4A4A',
+    textPrimary: '#111827',
+    textSecondary: '#4B5563',
     border: '#E5E2DD',
     borderLight: '#F0EDE8',
 };
 
 function formatCurrency(value: number) {
-    return `$${value.toLocaleString('es-AR')}`;
+    return `$ ${value.toLocaleString('es-AR')}`;
 }
 
 function groupByWeek(data: Array<{ dateKey: string; label: string; value: number }>) {
@@ -67,18 +66,18 @@ function groupByWeek(data: Array<{ dateKey: string; label: string; value: number
 function renderSalesTable(data: Array<{ dateKey: string; label: string; value: number }>) {
     const rows = data.length > 12 ? groupByWeek(data) : data;
     return (
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 12 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
             <thead>
-                <tr>
-                    <th style={tableHeadCell}>Periodo</th>
-                    <th style={tableHeadCell}>Ventas</th>
+                <tr style={{ background: '#5D7568', color: '#FFFFFF' }}>
+                    <th style={tableHeadCell}>Período</th>
+                    <th style={{ ...tableHeadCell, textAlign: 'right' }}>Ventas</th>
                 </tr>
             </thead>
             <tbody>
                 {rows.map((item, index) => (
-                    <tr key={index} style={{ background: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                    <tr key={index} style={{ background: index % 2 === 0 ? '#FFFFFF' : '#F8FAFC', borderBottom: '1px solid #E5E2DD' }}>
                         <td style={tableBodyCell}>{item.label}</td>
-                        <td style={{ ...tableBodyCell, textAlign: 'right' }}>{formatCurrency(item.value)}</td>
+                        <td style={{ ...tableBodyCell, textAlign: 'right', fontWeight: 700, color: '#111827' }}>{formatCurrency(item.value)}</td>
                     </tr>
                 ))}
             </tbody>
@@ -110,8 +109,7 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                     setOrdersChunks([]);
                     return;
                 }
-                // Usa el helper para chunking dinámico
-                const MAX_HEIGHT = 1100; // A4 aprox. 1100px
+                const MAX_HEIGHT = 1100;
                 const chunks = await chunkOrdersForPDF(orders, MAX_HEIGHT, { ...ordersTableProps });
                 if (!cancelled) setOrdersChunks(chunks);
             };
@@ -123,7 +121,7 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
             <div
                 ref={ref}
                 style={{
-                    background: projectPalette.bgTertiary,
+                    background: '#FFFFFF',
                     color: projectPalette.textPrimary,
                     padding: '24px',
                     margin: '0 auto',
@@ -134,16 +132,16 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                     boxSizing: 'border-box',
                 }}
             >
-                {/* 🟢 PÁGINA 1 (RESUMEN) */}
+                {/* 🟢 PÁGINA 1 (RESUMEN EJECUTIVO) */}
                 <div className="pdf-page-1" style={pageFrameStyle}>
-                    {/* HEADER */}
-                    <header style={{ marginBottom: 20, borderBottom: `2px solid ${projectPalette.primary}`, paddingBottom: 10 }}>
+                    {/* HEADER INSTITUCIONAL */}
+                    <header style={{ marginBottom: 16, borderBottom: `2px solid ${projectPalette.primary}`, paddingBottom: 10 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                             <div>
                                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: projectPalette.primary }}>
-                                    Resumen administrativo
+                                    Allmart — Resumen Administrativo
                                 </div>
-                                <h1 style={{ fontSize: 22, margin: '4px 0 0', color: '#111827' }}>
+                                <h1 style={{ fontSize: 22, margin: '4px 0 0', color: '#111827', fontWeight: 800 }}>
                                     REPORTE DE PEDIDOS
                                 </h1>
                             </div>
@@ -153,15 +151,16 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                             </div>
                         </div>
                     </header>
-                    {/* FILTROS */}
-                    <section style={{ marginBottom: 18 }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1' }}>
+
+                    {/* FILTROS APLICADOS */}
+                    <section style={{ marginBottom: 16 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #E5E2DD' }}>
                             <tbody>
                                 {ordersTableFilters?.status && (
                                     <tr>
                                         <td style={cellLabel}>Estados</td>
                                         <td style={cellValue}>
-                                            {ordersTableFilters.status.join(', ') || 'Todos'}
+                                            {ordersTableFilters.status.join(', ') || 'Todos los estados'}
                                         </td>
                                     </tr>
                                 )}
@@ -184,11 +183,12 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                             </tbody>
                         </table>
                     </section>
-                    {/* KPIs */}
-                    <section style={{ marginBottom: 20 }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1' }}>
+
+                    {/* KPIS DE RESUMEN */}
+                    <section style={{ marginBottom: 18 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #E5E2DD' }}>
                             <thead>
-                                <tr>
+                                <tr style={{ background: '#769282', color: '#FFFFFF' }}>
                                     {metrics.map(m => (
                                         <th key={m.key} style={thStyle}>
                                             {m.label}
@@ -197,7 +197,7 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                                <tr style={{ background: '#FFFFFF' }}>
                                     {metrics.map(m => (
                                         <td key={m.key} style={tdStyle}>
                                             {m.value}
@@ -207,42 +207,26 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                             </tbody>
                         </table>
                     </section>
-                    {/* GRÁFICOS */}
-                    <section
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 16,
-                        }}
-                    >
-                        <div style={{ ...box, border: '1px solid #dbe2ea', padding: 14 }}>
-                            <h3 style={title}>Ventas</h3>
-                            <div style={{ fontSize: 10, color: projectPalette.textSecondary, marginBottom: 10 }}>
-                                Se muestra el resumen de ventas de manera tabular para impresión.
+
+                    {/* GRÁFICOS Y TABLA DE VENTAS */}
+                    <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <div style={{ ...box, border: '1px solid #E5E2DD' }}>
+                            <h3 style={title}>Evolución de Ventas</h3>
+                            <div style={{ fontSize: 9.5, color: projectPalette.textSecondary, marginBottom: 8 }}>
+                                Resumen en formato tabular para impresión.
                             </div>
                             {renderSalesTable(barData)}
                         </div>
-                        <div
-                            style={{
-                                ...box,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                border: '1px solid #dbe2ea',
-                                padding: 14,
-                            }}
-                        >
-                            <div>
-                                <h3 style={title}>Pedidos por estado</h3>
-                                <Suspense fallback="Cargando gráfico...">
-                                    <DonutChart slices={statusSlices} />
-                                </Suspense>
-                            </div>
+                        <div style={{ ...box, border: '1px solid #E5E2DD' }}>
+                            <h3 style={title}>Pedidos por Estado</h3>
+                            <Suspense fallback="Cargando gráfico...">
+                                <DonutChart slices={statusSlices} />
+                            </Suspense>
                         </div>
                     </section>
                 </div>
-                {/* 🟢 SALTO VISUAL */}
-                {/* 🟢 PÁGINA 2 (TABLA) */}
+
+                {/* 🟢 PÁGINA 2+ (DETALLE DE PEDIDOS) */}
                 {ordersChunks.map((chunk, index) => (
                     <div
                         key={index}
@@ -254,20 +238,17 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                         }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                            <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>
-                                Detalle de pedidos
+                            <h3 style={{ margin: 0, fontSize: 15, color: '#111827', fontWeight: 700 }}>
+                                Detalle de Pedidos
                             </h3>
-                            <span style={{ fontSize: 10, color: '#475569' }}>
-                                Página {index + 2} · {chunk.length} pedidos
+                            <span style={{ fontSize: 10, color: '#4B5563', fontWeight: 600 }}>
+                                Página {index + 2} · {chunk.length} pedidos ({orders.length} en total)
                             </span>
                         </div>
-                        <div style={{ marginBottom: 10, fontSize: 10, color: '#475569' }}>
-                            <b>Total de pedidos:</b> {orders.length}
-                        </div>
-                        <div style={{ border: '1px solid #dbe2ea', padding: 8, background: '#fff' }}>
+                        <div style={{ border: '1px solid #E5E2DD', padding: 4, background: '#FFFFFF', borderRadius: 8 }}>
                             <OrdersTable orders={chunk} printMode />
                         </div>
-                        <div style={{ fontSize: 9, marginTop: 8, color: '#64748b', textAlign: 'right' }}>
+                        <div style={{ fontSize: 9, marginTop: 10, color: '#64748b', textAlign: 'right' }}>
                             Generado el {now}
                         </div>
                     </div>
@@ -279,7 +260,7 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
 
 PrintableReport.displayName = 'PrintableReport';
 
-/* 🔹 estilos reutilizables */
+/* 🔹 Estilos estáticos de alto contraste para PDF */
 const pageFrameStyle: React.CSSProperties = {
     background: '#ffffff',
     color: projectPalette.textPrimary,
@@ -295,60 +276,63 @@ const pageFrameStyle: React.CSSProperties = {
 const cellLabel: React.CSSProperties = {
     fontWeight: 700,
     border: `1px solid ${projectPalette.border}`,
-    padding: '7px 8px',
+    padding: '6px 10px',
     width: '30%',
     background: projectPalette.bgSecondary,
     color: projectPalette.primaryDark,
+    fontSize: 10,
 };
 
 const cellValue: React.CSSProperties = {
     border: `1px solid ${projectPalette.border}`,
-    padding: '7px 8px',
+    padding: '6px 10px',
     color: projectPalette.textPrimary,
+    fontSize: 10,
 };
 
 const thStyle: React.CSSProperties = {
     border: `1px solid ${projectPalette.border}`,
     padding: '8px 10px',
-    background: projectPalette.bgSecondary,
+    background: projectPalette.primary,
     textAlign: 'center',
-    color: projectPalette.primaryDark,
-    fontSize: 11,
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 700,
 };
 
 const tdStyle: React.CSSProperties = {
     border: `1px solid ${projectPalette.border}`,
-    padding: '8px 10px',
+    padding: '10px',
     textAlign: 'center',
     color: projectPalette.textPrimary,
+    fontSize: 12,
+    fontWeight: 700,
 };
 
 const tableHeadCell: React.CSSProperties = {
-    border: `1px solid ${projectPalette.border}`,
-    padding: '8px 10px',
-    background: projectPalette.bgSecondary,
+    padding: '6px 10px',
+    background: '#5D7568',
     textAlign: 'left',
-    color: projectPalette.primaryDark,
-    fontSize: 11,
+    color: '#FFFFFF',
+    fontSize: 10,
     fontWeight: 700,
 };
 
 const tableBodyCell: React.CSSProperties = {
-    border: `1px solid ${projectPalette.border}`,
-    padding: '8px 10px',
-    fontSize: 11,
+    padding: '6px 10px',
+    fontSize: 10,
     color: projectPalette.textPrimary,
 };
 
 const box: React.CSSProperties = {
     borderRadius: 8,
     padding: 12,
-    background: '#fff',
+    background: '#ffffff',
 };
 
 const title: React.CSSProperties = {
     marginBottom: 8,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 700,
-    color: '#0f172a',
+    color: '#111827',
 };

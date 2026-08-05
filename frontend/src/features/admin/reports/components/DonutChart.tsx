@@ -37,21 +37,12 @@ const STATUS_LABELS: Record<string, string> = {
     cancelado: 'Cancelado',
 };
 
-
-
-
-/**
- * Gráfico de torta/donut para distribución de estados de pedidos.
- *
- * @param slices Array de segmentos con key y count
- */
 const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
     const [hovered, setHovered] = useState<number | null>(null);
     const isMobile = useIsMobile();
 
     const total = slices.reduce((sum, s) => sum + s.count, 0);
 
-    // Ajustar tamaño en mobile
     const R = isMobile ? 44 : 56;
     const r = isMobile ? 28 : 36;
     const cx = isMobile ? 60 : 80;
@@ -112,24 +103,20 @@ const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                 style={isMobile ? { width: 180, height: 180, margin: '0 auto' } : {}}
                 aria-label="Distribución de pedidos"
             >
-                {arcs.map((arc) => {
+                {arcs.map((arc) => (
+                    <path
+                        key={arc.key}
+                        d={arc.path}
+                        fill={arc.color}
+                        stroke="#fff"
+                        strokeWidth={2}
+                        onMouseEnter={() => setHovered(arc.index)}
+                        onMouseLeave={() => setHovered(null)}
+                        opacity={hovered === null || hovered === arc.index ? 1 : 0.4}
+                        style={{ transition: 'all 0.2s ease' }}
+                    />
+                ))}
 
-                    return (
-                        <path
-                            key={arc.key}
-                            d={arc.path}
-                            fill={arc.color}
-                            stroke="#fff"
-                            strokeWidth={2}
-                            onMouseEnter={() => setHovered(arc.index)}
-                            onMouseLeave={() => setHovered(null)}
-                            opacity={hovered === null || hovered === arc.index ? 1 : 0.4}
-                            style={{ transition: 'all 0.2s ease' }}
-                        />
-                    );
-                })}
-
-                {/* 🧠 Centro */}
                 <text
                     className={styles.donutCenterText}
                     x={cx}
@@ -137,6 +124,7 @@ const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                     textAnchor="middle"
                     fontSize={18}
                     fontWeight="700"
+                    fill="#111827"
                 >
                     {total}
                 </text>
@@ -147,11 +135,11 @@ const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                     y={cy + 13}
                     textAnchor="middle"
                     fontSize={9}
+                    fill="#6b7280"
                 >
                     pedidos
                 </text>
 
-                {/* ✅ TOOLTIP DENTRO DEL SVG */}
                 {hovered !== null && (() => {
                     const arc = arcs[hovered];
                     const pct = Math.round((arc.count / total) * 100);
@@ -200,8 +188,7 @@ const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                 })()}
             </svg>
 
-
-            {/* 📊 Leyenda */}
+            {/* 📊 Leyenda de Alto Contraste */}
             <ul className={styles.donutLegend}>
                 {arcs.map((arc) => {
                     const pct = Math.round((arc.count / total) * 100);
@@ -213,23 +200,15 @@ const DonutChart: React.FC<DonutChartProps> = ({ slices }) => {
                                 style={{ background: arc.color }}
                             />
 
-                            <span className={styles.donutLegendLabel}>
+                            <span className={styles.donutLegendLabel} style={{ color: '#111827', fontWeight: 600 }}>
                                 {STATUS_LABELS[arc.key]}
                             </span>
 
-                            {/* 🔢 número con color */}
-                            <span
-                                className={styles.donutLegendCount}
-                                style={{ color: arc.color, fontWeight: 600 }}
-                            >
+                            <span className={styles.donutLegendCount} style={{ color: '#111827', fontWeight: 700, marginLeft: 'auto' }}>
                                 {arc.count}
                             </span>
 
-                            {/* 📊 porcentaje con color */}
-                            <span
-                                className={styles.donutLegendPct}
-                                style={{ color: arc.color }}
-                            >
+                            <span className={styles.donutLegendPct} style={{ color: '#4b5563', fontWeight: 500 }}>
                                 ({pct}%)
                             </span>
                         </li>
