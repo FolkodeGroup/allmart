@@ -91,18 +91,26 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
                                             : o.status === 'entregado' ? 'Entregado'
                                                 : 'Cancelado';
                         const stClass = styles[`st_${o.status.replace('-', '_')}`] ?? '';
+                        const paymentLabel = o.paymentStatus === 'abonado' ? 'Abonado' : 'Sin abonar';
+
                         return (
                             <div key={o.id} className={styles.orderCard}>
                                 <div className={styles.orderCardHeader}>
-                                    <span className={styles.orderCardClient}>{o.customer.firstName} {o.customer.lastName}</span>
+                                    <div className={styles.orderCardHeaderLeft}>
+                                        <span className={styles.orderCardClient}>{o.customer.firstName} {o.customer.lastName}</span>
+                                        <span className={styles.orderCardId}>Pedido #{formatOrderCode(o.id)}</span>
+                                    </div>
                                     <span className={styles.orderCardTotal}>
                                         {o.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 })}
                                     </span>
                                 </div>
                                 <div className={styles.orderCardBody}>
-                                    <span className={styles.orderCardDate}>
-                                        {formatShortDate(o.createdAt)}
-                                    </span>
+                                    <div className={styles.orderCardMeta}>
+                                        <span className={styles.orderCardDate}>
+                                            {formatShortDate(o.createdAt)}
+                                        </span>
+                                        <span className={styles.orderCardPayment}>{paymentLabel}</span>
+                                    </div>
                                     <span className={styles.orderCardStatus + ' ' + stClass}>
                                         {statusLabel}
                                     </span>

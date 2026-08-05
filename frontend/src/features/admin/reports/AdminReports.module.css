@@ -35,56 +35,119 @@
     flex-direction: column;
     gap: 1rem;
     width: 100%;
-    align-items: center;
+    align-items: stretch;
+    margin-top: 1rem;
   }
 
   .orderCard {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px #0001;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     padding: 1rem 1.2rem;
     width: 100%;
-    max-width: 420px;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .orderCard:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
   }
 
   .orderCardHeader {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    font-size: 1rem;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .orderCardHeaderLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
   }
 
   .orderCardClient {
-    color: #222;
+    color: var(--color-text-primary);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .orderCardId {
+    color: var(--color-text-tertiary);
+    font-size: 0.85rem;
   }
 
   .orderCardTotal {
-    color: #059669;
+    color: var(--color-success);
     font-weight: 700;
+    white-space: nowrap;
+    font-size: 1rem;
   }
 
   .orderCardBody {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
     align-items: center;
-    font-size: 0.95rem;
-    gap: 1rem;
   }
 
-  .orderCardDate {
-    color: #888;
+  .orderCardMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    color: var(--color-text-tertiary);
     font-size: 0.92rem;
+    min-width: 0;
+  }
+
+  .orderCardDate,
+  .orderCardItems {
+    color: var(--color-text-tertiary);
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .orderCardItems {
+    font-weight: 500;
+    max-width: 100%;
   }
 
   .orderCardStatus {
-    font-size: 0.92rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
     font-weight: 600;
-    border-radius: 8px;
-    padding: 2px 10px;
+    border-radius: 999px;
+    padding: 0.45rem 0.95rem;
+    white-space: nowrap;
+  }
+
+  .orderCardPayment {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    white-space: nowrap;
   }
 
   .filtersBarMobile {
@@ -119,6 +182,19 @@
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
+  }
+
+  .clearFiltersMobileWrap {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+  .clearFiltersMobileWrap .clearBtn,
+  .clearFiltersMobileWrap .clearBtnDisabled {
+    width: 100%;
+    display: block;
+    margin-left: 0;
   }
 
   .dateInputMobile {
@@ -1391,15 +1467,87 @@
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-/* ============================================
-ALLMART — ADMIN REPORTS
-============================================ */
-
-.reportsPage {
-  margin: 0;
+.reportActionsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--color-border);
 }
 
-/* ── Toolbar ── */
+.reportExportBtnContainer {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.reportSortContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 220px;
+}
+
+.reportSortControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.reportSortLabel {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.sortButton:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+@media (max-width: 639px) {
+  .reportActionsBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reportSortContainer {
+    justify-content: stretch;
+  }
+
+  .reportSortControls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 .toolbar {
   display: flex;
   align-items: center;
@@ -1451,11 +1599,24 @@ ALLMART — ADMIN REPORTS
 
 .exportWrap {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  color: var(--color-text-secondary)
-}
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    color: var(--color-text-secondary);
+  }
+
+  .exportWrapInner {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0.5rem 0;
+  }
+
+  .exportWrap .exportGroup {
+    min-width: 100%;
+    max-width: 100%;
+  }
 
 .exportSelectWrap {
   position: relative;
@@ -1534,8 +1695,64 @@ ALLMART — ADMIN REPORTS
     flex-wrap: wrap;
   }
 
-  .exportBtn .exportResumeBtn {
+  .exportWrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .exportWrapInner {
+    width: 100%;
+  }
+
+  .exportWrap .exportGroup {
+    width: 100%;
+  }
+
+  .exportLabel {
+    margin-right: 0;
+    display: block;
+  }
+
+  .exportResumeBtn,
+  .exportBtn {
+    width: 100%;
     text-align: center;
+    margin-left: 0 !important;
+  }
+
+  /* Asegura separación visible entre botones apilados */
+  .exportWrap button + button {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Mobile-only export filters shown under export buttons to match categories layout */
+.mobileExportFilters {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .mobileExportFilters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+    margin-top: 0.6rem;
+    align-items: stretch;
+  }
+
+  .mobileExportFilters .advancedLabel {
+    min-width: 0;
+  }
+
+  .mobileExportFilters .searchWrap {
+    min-width: 0;
+  }
+
+  .mobileOrdersFilters {
+    width: 100%;
   }
 }
 
@@ -1643,7 +1860,7 @@ ALLMART — ADMIN REPORTS
 
 .panelHeader {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
   flex-wrap: wrap;
@@ -1651,9 +1868,10 @@ ALLMART — ADMIN REPORTS
 
 .panelHeaderLeft {
   display: flex;
+  flex-direction: column;
   gap: 0.2em;
+  align-items: flex-start;
 }
-
 
 .panelTitle {
   font-family: var(--font-heading);
@@ -1942,6 +2160,139 @@ ALLMART — ADMIN REPORTS
   }
 }
 
+/* Improve responsive behavior for medium and small screens */
+@media (max-width: 900px) {
+  /* Allow tables to shrink and avoid wide min-width causing horizontal scrolling */
+  .table {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+    font-size: 13px;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    padding: 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-bg-primary);
+  }
+
+  .table td {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    border: none;
+    font-size: 0.88rem;
+    white-space: normal;
+    min-width: 0;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-right: 0.75rem;
+    flex: 0 0 auto;
+    white-space: normal;
+    max-width: 40%;
+  }
+
+  .table td span {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .table td:nth-child(2) {
+    justify-content: flex-start;
+  }
+
+  .table td:nth-child(3),
+  .table td:nth-child(5) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table th,
+  .table td {
+    word-break: break-word;
+  }
+
+  /* Reduce donut size on medium screens to avoid overflow */
+  .donutWrap {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .donutSvg {
+    width: min(220px, 100%);
+    height: auto;
+  }
+
+  .donutLegend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    padding-left: 0;
+    min-width: 0;
+  }
+
+  .donutLegendItem {
+    flex: 1 1 45%;
+    min-width: 0;
+    gap: 0.5rem;
+  }
+
+  .donutLegendLabel {
+    white-space: normal;
+  }
+
+  /* Ensure product ranking grid adapts to narrower columns */
+  .productRankingGrid,
+  .productRankingCardsContainer {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  /* Let stats wrap inside reportCardModern to avoid overflow */
+  .reportCardModernStats {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .statModernBlock {
+    flex: 1 1 120px;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .summaryTable {
+    min-width: 420px;
+    font-size: 12px;
+  }
+}
 
 /* ── Donut chart ── */
 .donutWrap {
@@ -2123,6 +2474,53 @@ ALLMART — ADMIN REPORTS
 
   .summaryTableWrap {
     max-height: 220px;
+  }
+
+  .donutWrap {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .donutSvg {
+    width: min(240px, 100%);
+    height: auto;
+  }
+
+  .donutLegend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    padding-left: 0;
+    min-width: 0;
+  }
+
+  .donutLegendItem {
+    flex: 1 1 45%;
+    min-width: 0;
+  }
+
+  .donutLegendLabel {
+    white-space: normal;
+  }
+
+  .table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed;
+  }
+
+  .table th,
+  .table td {
+    min-width: 0;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .tableResponsive {
+    overflow-x: hidden;
   }
 }
 
@@ -2397,4 +2795,63 @@ ALLMART — ADMIN REPORTS
   composes: skeletonBase;
   height: 44px;
   width: 100%;
+}
+
+/* Extra small screens: avoid cut containers and ensure content reflows */
+@media (max-width: 420px) {
+  .panel {
+    padding: 0.8rem;
+    border-radius: 12px;
+  }
+
+  /* Make table fully fluid and readable */
+  .tableResponsive {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .table {
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 6px 8px;
+  }
+
+  /* Column width hints to avoid overflow and improve wrapping */
+  .table td:first-child { width: 8%; }
+  .table td:nth-child(2) { width: 12%; }
+  .table td:nth-child(3) { width: 50%; }
+  .table td:nth-child(4) { width: 12%; }
+  .table td:nth-child(5) { width: 18%; }
+
+  .productNameModern {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+  }
+
+  .donutSvg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .donutLegend {
+    min-width: 90px;
+    gap: 0.4rem;
+  }
+
+  .reportCardModernStats {
+    gap: 0.6rem;
+  }
+
+  .statModernBlock {
+    flex: 1 1 100px;
+  }
 }

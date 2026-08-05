@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -15,9 +15,48 @@ interface PriceHistoryModalProps {
     variant?: 'default' | 'reports';
 }
 
+// Umbral en px de arrastre hacia abajo para cerrar el modal (drag-to-dismiss)
+const DISMISS_THRESHOLD = 100;
+
 export function PriceHistoryModal({ supplierId, productId, productName, onClose, variant = 'default' }: PriceHistoryModalProps) {
     const [history, setHistory] = useState<ProductPriceHistoryDetailEntry[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // ── Drag-to-dismiss (mobile bottom sheet) ───────────────────────────────
+    // Todo el movimiento se hace por ref + DOM directo, SIN pasar por setState,
+    // para no re-renderizar (y no recalcular) el gráfico de Recharts en cada frame.
+    const modalRef = useRef<HTMLDivElement | null>(null);
+    const startYRef = useRef<number | null>(null);
+    const offsetRef = useRef(0);
+    const [isDragActive, setIsDragActive] = useState(false); // solo para toggle de clase (sin transición)
+
+    function handlePointerDown(e: React.PointerEvent) {
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+        startYRef.current = e.clientY;
+        setIsDragActive(true);
+    }
+
+    function handlePointerMove(e: React.PointerEvent) {
+        if (startYRef.current === null || !modalRef.current) return;
+        const delta = Math.max(0, e.clientY - startYRef.current); // solo hacia abajo
+        offsetRef.current = delta;
+        modalRef.current.style.transform = `translateY(${delta}px)`;
+    }
+
+    function handlePointerUp() {
+        if (startYRef.current === null) return;
+        const finalOffset = offsetRef.current;
+        startYRef.current = null;
+        offsetRef.current = 0;
+        setIsDragActive(false);
+
+        if (modalRef.current) {
+            modalRef.current.style.transform = '';
+        }
+        if (finalOffset > DISMISS_THRESHOLD) {
+            onClose();
+        }
+    }
 
     useEffect(() => {
         setLoading(true);
@@ -40,7 +79,11 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose,
         market_adjustment: 'Ajuste de mercado',
     };
 
-    const modalClassName = variant === 'reports' ? `${styles.modal} ${styles.modalReports}` : styles.modal;
+    const modalClassName = [
+        styles.modal,
+        variant === 'reports' ? styles.modalReports : '',
+        isDragActive ? styles.dragging : '',
+    ].filter(Boolean).join(' ');
     const headerTitleClassName = variant === 'reports' ? `${styles.headerTitle} ${styles.headerTitleReports}` : styles.headerTitle;
     const bodyClassName = variant === 'reports' ? `${styles.body} ${styles.bodyReports}` : styles.body;
     const chartSectionClassName = variant === 'reports' ? `${styles.chartSection} ${styles.chartSectionReports}` : styles.chartSection;
@@ -49,7 +92,26 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose,
     return createPortal(
         <div className={styles.overlay} onClick={onClose} role="presentation" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-            <div className={modalClassName} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} role="dialog" aria-labelledby="price-history-title">
+            <div
+                ref={modalRef}
+                className={modalClassName}
+                onClick={e => e.stopPropagation()}
+                onKeyDown={e => e.stopPropagation()}
+                role="dialog"
+                aria-labelledby="price-history-title"
+            >
+                {/* Handle arrastrable — deslizar hacia abajo cierra el modal */}
+                <div
+                    className={styles.dragHandle}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handlePointerUp}
+                    role="button"
+                    aria-label="Deslizar hacia abajo para cerrar"
+                    tabIndex={-1}
+                />
+
                 <div className={styles.header}>
                     <div id="price-history-title" className={headerTitleClassName}>
                         <TrendingUp size={16} />

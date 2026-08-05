@@ -33,13 +33,16 @@
 }
 
 @keyframes shake {
+
   0%,
   100% {
     transform: translateX(0);
   }
+
   25% {
     transform: translateX(-4px);
   }
+
   75% {
     transform: translateX(4px);
   }
@@ -134,6 +137,7 @@
 
 .formActions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: flex-end;
   margin-top: 12px;
@@ -159,8 +163,22 @@
 
 .btnPrimary,
 .btnSecondary {
-  width: auto;
+  min-width: 0;
+  flex: 0 1 auto;
   padding: 10px 16px;
+}
+
+@media (max-width: 480px) {
+  .formActions {
+    flex-direction: column-reverse;
+    /* CTA principal arriba en mobile chico */
+  }
+
+  .formActions .btnPrimary,
+  .formActions .btnSecondary {
+    flex: 1 1 auto;
+    width: 100%;
+  }
 }
 
 .btnPrimary {

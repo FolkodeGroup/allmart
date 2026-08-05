@@ -29,6 +29,98 @@ type StatusFilter = '' | 'unread' | 'read';
 
 const LIMIT = 20;
 
+
+function useIsMobile(breakpoint = 520) {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= breakpoint
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
+function useDragToClose(
+  handleRef: React.RefObject<HTMLDivElement | null>,
+  isMobile: boolean,
+  enabled: boolean,
+  onDismiss: () => void,
+) {
+  useEffect(() => {
+    const handle = handleRef.current;
+    if (!handle || !isMobile || !enabled) return;
+
+    const panel = handle.closest('[role="dialog"]') as HTMLElement | null;
+    if (!panel) return;
+
+    const THRESHOLD = 120;
+    const VELOCITY_THRESHOLD = 0.6;
+    const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)'; // curva tipo sheet de iOS
+    const DURATION = 280;
+
+    let dragging = false;
+    let dismissed = false; // ← clave del fix
+    let startY = 0;
+    let startTime = 0;
+    let currentY = 0;
+
+    const onPointerDown = (e: PointerEvent) => {
+      dragging = true;
+      startY = e.clientY;
+      startTime = performance.now();
+      currentY = 0;
+      panel.style.transition = 'none';
+      handle.setPointerCapture(e.pointerId);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      currentY = Math.max(0, e.clientY - startY);
+      panel.style.transform = `translateY(${currentY}px)`;
+    };
+
+    const onPointerUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      const elapsed = performance.now() - startTime;
+      const velocity = currentY / Math.max(elapsed, 1);
+
+      panel.style.transition = `transform ${DURATION}ms ${EASE}`;
+
+      if (currentY > THRESHOLD || velocity > VELOCITY_THRESHOLD) {
+        dismissed = true;
+        panel.style.transform = 'translateY(100%)';
+        window.setTimeout(onDismiss, DURATION - 40); // dispara el cierre justo antes de que termine la animación
+      } else {
+        panel.style.transform = 'translateY(0)';
+      }
+    };
+
+    handle.addEventListener('pointerdown', onPointerDown);
+    handle.addEventListener('pointermove', onPointerMove);
+    handle.addEventListener('pointerup', onPointerUp);
+    handle.addEventListener('pointercancel', onPointerUp);
+
+    return () => {
+      handle.removeEventListener('pointerdown', onPointerDown);
+      handle.removeEventListener('pointermove', onPointerMove);
+      handle.removeEventListener('pointerup', onPointerUp);
+      handle.removeEventListener('pointercancel', onPointerUp);
+      // Si el cierre fue por swipe, el panel ya está fuera de pantalla —
+      // no lo reseteamos, para no hacerlo "saltar" de vuelta antes de desmontar.
+      if (!dismissed) {
+        panel.style.transform = '';
+        panel.style.transition = '';
+      }
+    };
+  }, [handleRef, isMobile, enabled, onDismiss]);
+}
+
 export function AdminContacts() {
   const { showNotification } = useNotification();
   const { can } = useAdminAuth();
@@ -58,6 +150,25 @@ export function AdminContacts() {
   // Debounce search
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const isMobile = useIsMobile();
+
+  const detailDragHandleRef = useRef<HTMLDivElement>(null);
+  const deleteDragHandleRef = useRef<HTMLDivElement>(null);
+
+  useDragToClose(
+    detailDragHandleRef,
+    isMobile,
+    !!detailContact && !savingNotes,
+    () => setDetailContact(null),
+  );
+
+  useDragToClose(
+    deleteDragHandleRef,
+    isMobile,
+    !!deleteConfirmId && !deleting,
+    () => setDeleteConfirmId(null),
+  );
 
   // Mapeo de opciones de estado para el Dropdown unificado
   const statusOptions = useMemo(() => [
@@ -204,20 +315,23 @@ export function AdminContacts() {
 
       {/* ── Filters ─────────────────────────────────────────────── */}
       <div className={styles.filtersBar}>
-        <Search size={16} className={styles.searchIcon} />
-        <input
-          type="search"
-          placeholder="Buscar por nombre, email o mensaje..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className={styles.searchInput}
-          aria-label="Buscar consultas"
-          autoComplete="off"
-          spellCheck="false"
-          autoCorrect="off"
-          autoCapitalize="off"
-        />
-        
+        <label htmlFor="search-input" className={styles.searchWrapper}>
+          <Search size={16} className={styles.searchIcon} />
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Buscar por nombre, email o mensaje..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+            aria-label="Buscar consultas"
+            autoComplete="off"
+            spellCheck="false"
+            autoCorrect="off"
+            autoCapitalize="off"
+          />
+        </label>
+
         {/* Dropdown de Estado Unificado */}
         <div style={{ width: '180px', display: 'inline-block' }}>
           <Dropdown
@@ -442,6 +556,7 @@ export function AdminContacts() {
         }
         disableClose={savingNotes}
       >
+        {isMobile && <div ref={detailDragHandleRef} className={styles.dragHandle} aria-hidden="true" />}
         {detailContact && (
           <div className={styles.detailGrid}>
             <div className={styles.detailRow}>

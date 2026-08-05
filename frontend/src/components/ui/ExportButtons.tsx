@@ -43,23 +43,23 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({
   className,
 }) => {
   const formats: FormatConfig[] = [
-    { 
-      format: 'csv',  
-      label: 'CSV',   
-      ariaLabel: 'Exportar como CSV',   
-      icon: <i className="bi bi-filetype-csv" aria-hidden="true" /> 
+    {
+      format: 'csv',
+      label: 'CSV',
+      ariaLabel: 'Exportar como CSV',
+      icon: <i className="bi bi-filetype-csv" aria-hidden="true" />
     },
-    { 
-      format: 'xlsx', 
-      label: 'Excel', 
-      ariaLabel: 'Exportar como Excel', 
-      icon: <i className="bi bi-filetype-xlsx" aria-hidden="true" /> 
+    {
+      format: 'xlsx',
+      label: 'Excel',
+      ariaLabel: 'Exportar como Excel',
+      icon: <i className="bi bi-filetype-xlsx" aria-hidden="true" />
     },
-    { 
-      format: 'pdf',  
-      label: 'PDF',   
-      ariaLabel: 'Exportar como PDF',   
-      icon: <i className="bi bi-file-earmark-pdf-fill" aria-hidden="true" /> 
+    {
+      format: 'pdf',
+      label: 'PDF',
+      ariaLabel: 'Exportar como PDF',
+      icon: <i className="bi bi-file-earmark-pdf-fill" aria-hidden="true" />
     },
   ];
 
