@@ -156,11 +156,11 @@
   background: var(--color-bg-secondary, #28353d);
   border: 1px solid var(--color-border, #374151);
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 22px 24px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   box-sizing: border-box;
   width: 100%;
 }
@@ -183,7 +183,7 @@
 }
 
 /* ==========================================================================
-   4. FORMULARIOS, CAMPOS E INPUTS
+   4. FORMULARIOS, CAMPOS E INPUTS CON ESPACIADO MEJORADO
    ========================================================================== */
 
 .fieldset {
@@ -192,20 +192,21 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .legend {
   font-size: 14px;
   font-weight: 700;
   color: var(--color-text-primary, #ffffff);
+  margin-top: 10px;
   margin-bottom: 8px;
 }
 
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 18px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -217,12 +218,17 @@
   width: 100%;
   box-sizing: border-box;
   position: relative;
+  margin-top: 2px;
 }
 
 .label {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-primary, #ffffff);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px; /* Respiro superior para etiquetas */
 }
 
 .input,
@@ -281,6 +287,7 @@
   align-items: center;
   gap: 10px;
   min-height: 38px;
+  margin-top: 4px;
 }
 
 .checkLabel {
@@ -298,13 +305,14 @@
   gap: 8px;
   align-items: center;
   width: 100%;
+  margin-top: 4px;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .tag,
@@ -390,14 +398,18 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  margin-top: 4px;
 }
 
 .attributesList {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* ── Fila de Grupo de Variante ── */
 .variantRow {
   display: flex;
   align-items: center;
@@ -406,12 +418,15 @@
   border-radius: 10px;
   background-color: var(--color-bg-primary, #111827);
   border: 1px solid var(--color-border, #374151);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .variantLabelBlock {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: space-between;
 }
 
 .variantGroupName {
@@ -446,6 +461,7 @@
   flex-wrap: wrap;
   gap: 6px;
   flex: 1;
+  width: 100%;
 }
 
 .addValueInputBlock {
@@ -470,12 +486,16 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .combinationsToolbar {
   display: flex;
   gap: 12px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .addCombinationBtn,
@@ -487,6 +507,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .addCombinationBtn {
@@ -602,6 +626,7 @@
   flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
+  margin-top: 6px;
 }
 
 .uploadLabel {
@@ -731,7 +756,6 @@
     padding-bottom: 120px;
   }
 
-  /* Desactivar grid de 2 columnas y pasar a un solo flujo vertical con display: contents */
   .layout {
     display: flex !important;
     flex-direction: column !important;
@@ -744,7 +768,6 @@
     display: contents !important;
   }
 
-  /* Orden explícito de acordeones en móvil */
   #basico { order: 1 !important; }
   #precios { order: 2 !important; }
   #categorias { order: 3 !important; }
@@ -753,7 +776,6 @@
   #proveedor { order: 6 !important; }
   #seo { order: 7 !important; }
 
-  /* Tarjetas Acordeón individuales */
   .cardSection {
     background: var(--color-bg-secondary, #28353d) !important;
     border: 1px solid var(--color-border, #374151) !important;
@@ -781,5 +803,31 @@
   .comboModalRowFields {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
+  }
+
+  .variantRow {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  .addBtn,
+  .compactAddBtn {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  .combinationsToolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .addCombinationBtn,
+  .bulkGenerateBtn {
+    width: 100% !important;
+    min-height: 44px !important;
+    font-size: 14px !important;
   }
 }
