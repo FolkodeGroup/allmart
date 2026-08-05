@@ -1,6 +1,5 @@
 // frontend/src/utils/exportHelpers.ts
 import type { Order } from '../context/AdminOrdersContext';
-// 🟢 SOLUCIÓN TS: Importación exclusiva de tipos (se elimina al compilar, cero peso de red)
 import type * as ExcelJSTypes from 'exceljs';
 
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
@@ -13,7 +12,6 @@ export function getExportFileName(base: string, periodLabel: string, ext: string
     return `${base}-${periodLabel}-${y}-${m}-${d}.${ext}`;
 }
 
-// Helper puro para transformar pedidos a filas exportables
 export function mapOrdersToRows(orders: Order[]): (string | number)[][] {
     return orders.map(o => [
         o.id.slice(0, 8).toUpperCase(),
@@ -37,7 +35,6 @@ export function exportOrdersCSV(orders: Order[], fileName: string): void {
     triggerDownload(blob, fileName);
 }
 
-// 🟢 OPTIMIZACIÓN: Importación dinámica de XLSX para excluirlo del bundle inicial
 export async function exportOrdersXLSX(orders: Order[], fileName: string) {
     const XLSX = await import('xlsx');
     const wsData = [
@@ -52,50 +49,60 @@ export async function exportOrdersXLSX(orders: Order[], fileName: string) {
     triggerDownload(blob, fileName);
 }
 
-// 🟢 OPTIMIZACIÓN EXTREMA: Carga asíncrona bajo demanda de jsPDF y autoTable
+// 🟢 EXPORTACIÓN PDF DE PEDIDOS CON PALETA E IDENTIDAD INSTITUCIONAL ALLMART (#769282)
 export async function exportOrdersPDF(orders: Order[], fileName: string) {
     const { jsPDF } = await import('jspdf');
     const { default: autoTable } = await import('jspdf-autotable');
 
     const doc = new jsPDF({ orientation: 'landscape' });
 
-    doc.setFontSize(14);
-    doc.setTextColor(38, 166, 154);
-    doc.text('Reporte de Pedidos', 14, 12);
-    doc.setFontSize(9);
-    doc.setTextColor(100);
-    doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 14, 18);
+    // 🟢 1. BANNER DE ENCABEZADO INSTITUCIONAL ALLMART (#769282)
+    doc.setFillColor(118, 146, 130);
+    doc.roundedRect(10, 8, 277, 22, 3, 3, 'F');
 
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text('ALLMART', 18, 16);
+
+    doc.setFontSize(14);
+    doc.text('Reporte de Pedidos', 18, 24);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 240, 20);
+
+    // 🟢 2. TABLA CON COLORES DE MARCA ALLMART
     autoTable(doc, {
         head: [['N° Pedido', 'Fecha', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Pago']],
         body: mapOrdersToRows(orders),
-        startY: 24,
+        startY: 34,
         styles: {
-            fontSize: 7,
+            fontSize: 8,
             cellPadding: 3,
             overflow: 'linebreak',
             valign: 'top',
         },
         headStyles: {
-            fillColor: [38, 166, 154],
+            fillColor: [118, 146, 130], // Verde primario Allmart #769282
             textColor: 255,
             fontStyle: 'bold',
-            fontSize: 8,
+            fontSize: 8.5,
         },
         columnStyles: {
             0: { cellWidth: 22 },
             1: { cellWidth: 20 },
-            2: { cellWidth: 30 },
+            2: { cellWidth: 32 },
             3: { cellWidth: 45 },
-            4: { cellWidth: 70 },
-            5: { cellWidth: 22 },
-            6: { cellWidth: 24 },
-            7: { cellWidth: 20 },
+            4: { cellWidth: 80 },
+            5: { cellWidth: 24, fontStyle: 'bold' },
+            6: { cellWidth: 28 },
+            7: { cellWidth: 24 },
         },
         alternateRowStyles: {
-            fillColor: [245, 250, 249],
+            fillColor: [242, 239, 235], // Fondo cálido Allmart #f2efeb
         },
-        margin: { top: 24, left: 10, right: 10 },
+        margin: { top: 34, left: 10, right: 10 },
     });
 
     doc.save(fileName);
@@ -110,7 +117,6 @@ function triggerDownload(blob: Blob, fileName: string) {
     URL.revokeObjectURL(url);
 }
 
-// 🟢 OPTIMIZACIÓN EXTREMA: Carga dinámica de html2canvas para reportes visuales
 async function captureElementAsBase64(el: HTMLElement | null): Promise<string | null> {
     if (!el) return null;
     const { default: html2canvas } = await import('html2canvas');
@@ -133,7 +139,6 @@ const STATUS_LABELS_EXPORT: Record<string, string> = {
     cancelado: 'Cancelado',
 };
 
-// 🟢 OPTIMIZACIÓN EXTREMA: Carga dinámica de ExcelJS para evitar fugar más de 400 KB de dependencias
 export async function exportReportsSummaryXLSX(params: {
     metrics: Array<{ key: string; label: string; value: string | number }>;
     barData: Array<{ dateKey: string; label: string; value: number }>;
@@ -175,7 +180,6 @@ export async function exportReportsSummaryXLSX(params: {
     const WHITE = 'FFFFFFFF';         
     const GRAY = 'FF767676';          
 
-    // 🟢 SOLUCIÓN TS: Usamos la firma del tipo importada desde ExcelJSTypes
     const solidFill = (argb: string): ExcelJSTypes.Fill => ({
         type: 'pattern', pattern: 'solid', fgColor: { argb },
     });

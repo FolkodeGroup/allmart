@@ -317,10 +317,27 @@ export async function generateOrdersPdf(
   const puppeteerModule = await import('puppeteer');
   const puppeteer = puppeteerModule.default ?? puppeteerModule;
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
-  });
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+      ],
+    });
+  } catch (launchError) {
+    const msg = launchError instanceof Error ? launchError.message : String(launchError);
+    console.error('[ordersPdfService] Error al iniciar Puppeteer/Chromium:', msg);
+    const err = new Error(`No se pudo iniciar el generador de PDF en el servidor: ${msg}`);
+    Object.assign(err, { cause: launchError });
+    throw err;
+  }
 
   try {
     const page = await browser.newPage();

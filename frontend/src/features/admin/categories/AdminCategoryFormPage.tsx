@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { ArrowLeft, AlertCircle, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X } from 'lucide-react';
 import { useBlocker } from 'react-router-dom';
+import type { Category } from '../../../types';
 import { useCategoryForm } from '../../../hooks/useCategoryFormPage';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { CategoryTabBasico } from './tabs/CategoryTabBasico';
@@ -15,15 +16,16 @@ interface Props {
     onUnsavedChanges?: (unsaved: boolean) => void;
 }
 
-// ── Section definitions ────────────────────────────────────────────────────
+// ── Definiciones de secciones ──────────────────────────────────────────────
 const SECTIONS = [
     { id: 'basico', label: 'Básico', Icon: 'bi bi-file-earmark-text' },
     { id: 'imagenes', label: 'Imágenes', Icon: 'bi bi-image' },
 ] as const;
 
 type SectionId = typeof SECTIONS[number]['id'];
+type CategoryFormState = Omit<Category, 'id'>;
 
-// ── Component ──────────────────────────────────────────────────────────────
+// ── Componente principal ───────────────────────────────────────────────────
 export function AdminCategoryFormPage({
     categoryId,
     onBack,
@@ -33,22 +35,28 @@ export function AdminCategoryFormPage({
     const formRef = React.useRef<HTMLFormElement | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-    // Track which section is visible
+    // Estado para controlar qué sección está activa en la barra lateral de Escritorio
     const [activeSection, setActiveSection] = React.useState<SectionId>('basico');
+
+    // MOBILE-FIRST: Acordeones para pantalla táctil
+    const [accordionsOpen, setAccordionsOpen] = React.useState<Record<SectionId, boolean>>({
+        basico: true,
+        imagenes: true,
+    });
+
     const sectionRefs = useRef<Record<SectionId, HTMLElement | null>>({
         basico: null,
         imagenes: null,
     });
     const observerRef = useRef<IntersectionObserver | null>(null);
 
-    // All form state + handlers from hook
+    // Hooks y estado del formulario
     const formProps = useCategoryForm({
         categoryId,
         onSuccess,
         onUnsavedChanges,
     });
 
-    // Get parent categories (all categories except self and descendants)
     const { categories } = useAdminCategories();
     const parentCategories = useMemo(
         () => categories.filter(c => c.id !== categoryId),
@@ -57,13 +65,9 @@ export function AdminCategoryFormPage({
 
     const isActive = (sectionId: SectionId) => activeSection === sectionId;
 
-    // Optimized isDirty comparison
-    const shallowCompareRelevantFields = React.useCallback(
-        (
-            a: typeof formProps.form,
-            b: typeof formProps.form
-        ): boolean => {
-            const keys: (keyof typeof formProps.form)[] = [
+    const shallowCompareRelevantFields = useCallback(
+        (a: CategoryFormState, b: CategoryFormState): boolean => {
+            const keys: (keyof CategoryFormState)[] = [
                 'name',
                 'slug',
                 'description',
@@ -82,7 +86,7 @@ export function AdminCategoryFormPage({
             }
             return true;
         },
-        [formProps]
+        []
     );
 
     const isDirty = useMemo(
@@ -92,14 +96,18 @@ export function AdminCategoryFormPage({
         [formProps.form, formProps.initialForm, formProps.imgFile, shallowCompareRelevantFields]
     );
 
-    // Block in-app SPA navigation when there are unsaved changes
+    // Bloqueo de navegación SPA en caso de cambios no guardados
     const blocker = useBlocker(isDirty);
 
     const handleCancel = useCallback(() => {
         onBack();
     }, [onBack]);
 
-    // ── Scroll spy via IntersectionObserver ───────────────────────────────
+    const toggleAccordion = useCallback((id: SectionId) => {
+        setAccordionsOpen(prev => ({ ...prev, [id]: !prev[id] }));
+    }, []);
+
+    // ── Scroll spy para escritorio ──────────────────────────────────────────
     useEffect(() => {
         observerRef.current?.disconnect();
         observerRef.current = new IntersectionObserver(
@@ -123,7 +131,8 @@ export function AdminCategoryFormPage({
     }, []);
 
     const scrollToSection = useCallback((id: SectionId) => {
-        setActiveSection(id); // Resalta la tab al hacer click
+        setActiveSection(id);
+        setAccordionsOpen(prev => ({ ...prev, [id]: true }));
         sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, []);
 
@@ -147,8 +156,93 @@ export function AdminCategoryFormPage({
 
     return (
         <div className={styles.page}>
-            {/* ── Page header ──────────────────────────────────────────────── */}
-            <header className={styles.pageHeader}>
+            <style>{`
+                @media (max-width: 767px) {
+                    .desktopSidebarOnly {
+                        display: none !important;
+                    }
+                    .stickyFormHeaderMobile {
+                        position: relative !important;
+                        top: auto !important;
+                        z-index: 10 !important;
+                        background: transparent !important;
+                        border-bottom: 1px solid var(--color-border, rgba(229, 226, 221, 0.15)) !important;
+                        padding: 8px 4px 12px 4px !important;
+                        margin: 0 0 12px 0 !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    .mobileSectionCard {
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                        border-radius: 12px !important;
+                        border: 1px solid var(--color-border, #374151) !important;
+                        background: var(--color-bg-secondary, #28353d) !important;
+                        overflow: hidden !important;
+                        margin-bottom: 12px !important;
+                    }
+                    .accordionHeaderButton {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                        padding: 14px 16px !important;
+                        background: var(--color-bg-secondary, #28353d) !important;
+                        border: none !important;
+                        color: var(--color-text-primary, #ffffff) !important;
+                        font-size: 15px !important;
+                        font-weight: 700 !important;
+                        cursor: pointer !important;
+                        min-height: 48px !important;
+                        text-align: left !important;
+                    }
+                    .accordionBodyMobile {
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                        padding: 12px 14px 16px 14px !important;
+                        border-top: 1px solid var(--color-border, #374151) !important;
+                    }
+                    .accordionBodyHidden {
+                        display: none !important;
+                    }
+                    .fixedBottomBarMobile {
+                        position: fixed !important;
+                        bottom: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        z-index: 99999 !important;
+                        background: var(--color-bg-primary, #111827) !important;
+                        border-top: 1px solid var(--color-border, #374151) !important;
+                        padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) 16px !important;
+                        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3) !important;
+                        display: flex !important;
+                        gap: 10px !important;
+                    }
+                    .fixedBottomBarMobile button {
+                        flex: 1 !important;
+                        min-height: 48px !important;
+                        font-size: 15px !important;
+                        font-weight: 700 !important;
+                        border-radius: 10px !important;
+                    }
+                }
+
+                @media (min-width: 768px) {
+                    .accordionHeaderButton {
+                        display: none !important;
+                    }
+                    .accordionBodyHidden {
+                        display: block !important;
+                    }
+                    .fixedBottomBarMobile {
+                        display: none !important;
+                    }
+                }
+            `}</style>
+
+            {/* Header de la página */}
+            <header className={`${styles.pageHeader} stickyFormHeaderMobile`}>
                 <div className={styles.pageHeaderInner}>
                     <button
                         type="button"
@@ -184,150 +278,175 @@ export function AdminCategoryFormPage({
             </header>
 
             <div className={styles.layout}>
-                {/* ── Sticky sidebar nav ───────────────────────────────────── */}
-                <nav className={styles.sidebar} aria-label="Secciones del formulario">
+                {/* Navegación lateral activa SOLO en Escritorio */}
+                <nav className={`${styles.sidebar} desktopSidebarOnly`} aria-label="Secciones del formulario">
                     <ul className={styles.sidebarList}>
                         {SECTIONS.map(section => {
-                            const hasError = false; // TODO: Add error tracking if needed
                             return (
                                 <li key={section.id}>
                                     <button
                                         type="button"
-                                        className={`${styles.sidebarItem} ${activeSection === section.id ? styles.sidebarItemActive : ''
-                                            }`}
+                                        className={`${styles.sidebarItem} ${
+                                            activeSection === section.id ? styles.sidebarItemActive : ''
+                                        }`}
                                         onClick={() => scrollToSection(section.id)}
                                     >
-                                        <i className={section.Icon}
+                                        <i
+                                            className={section.Icon}
                                             style={{
                                                 color: isActive(section.id) ? 'white' : 'var(--color-primary)',
-                                                fontSize: '1.1rem'
-                                            }} />
+                                                fontSize: '1.1rem',
+                                            }}
+                                        />
                                         <span className={styles.sidebarLabel}>{section.label}</span>
-                                        {hasError && (
-                                            <AlertCircle
-                                                size={13}
-                                                className={styles.errorDotIcon}
-                                                aria-label="Sección con errores"
-                                            />
-                                        )}
                                     </button>
                                 </li>
                             );
                         })}
                     </ul>
 
-                    {/* Progress indicator */}
                     <div className={styles.sidebarProgress}>
                         <div
                             className={styles.sidebarProgressBar}
                             style={{
-                                height: `${((SECTIONS.findIndex(s => s.id === activeSection) + 1) /
-                                    SECTIONS.length) *
+                                height: `${
+                                    ((SECTIONS.findIndex(s => s.id === activeSection) + 1) /
+                                        SECTIONS.length) *
                                     100
-                                    }%`,
+                                }%`,
                             }}
                         />
                     </div>
                 </nav>
 
-                {/* ── Scrollable form content ──────────────────────────────── */}
+                {/* Formulario principal */}
                 <form
                     ref={formRef}
                     className={styles.content}
                     onSubmit={formProps.handleSubmit}
                     noValidate
                 >
-                    {/* ── Básico ─────────────────────────────────────────────── */}
-                    <section id="basico" ref={setSectionRef('basico')} className={styles.section}>
-                        <h2 className={styles.sectionTitle}>
-                            Información Básica
-                        </h2>
-                        <CategoryTabBasico
-                            form={formProps.form}
-                            errors={formProps.fieldErrors}
-                            setField={formProps.setField}
-                            parentCategories={parentCategories}
-                        />
+                    {/* ── Básico ── */}
+                    <section id="basico" ref={setSectionRef('basico')} className={`${styles.section} mobileSectionCard`}>
+                        <button
+                            type="button"
+                            className="accordionHeaderButton"
+                            onClick={() => toggleAccordion('basico')}
+                            aria-expanded={accordionsOpen.basico}
+                        >
+                            <div className="accordionHeaderLeft">
+                                <i className="bi bi-file-earmark-text" style={{ color: 'var(--color-primary)' }} />
+                                <span>Información Básica</span>
+                            </div>
+                            <i className={`bi bi-chevron-${accordionsOpen.basico ? 'up' : 'down'}`} />
+                        </button>
+
+                        <div className={`accordionBodyMobile ${!accordionsOpen.basico ? 'accordionBodyHidden' : ''}`}>
+                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
+                                Información Básica
+                            </h2>
+                            <CategoryTabBasico
+                                form={formProps.form}
+                                errors={formProps.fieldErrors}
+                                setField={formProps.setField}
+                                parentCategories={parentCategories}
+                            />
+                        </div>
                     </section>
 
-                    {/* ── Imágenes ───────────────────────────────────────────── */}
+                    {/* ── Imágenes ── */}
                     <section
                         id="imagenes"
                         ref={setSectionRef('imagenes')}
-                        className={styles.section}
+                        className={`${styles.section} mobileSectionCard`}
                     >
-                        <h2 className={styles.sectionTitle}>
-                            Imagen
-                        </h2>
-                        <fieldset className={styles.fieldset}>
-                            <p className={styles.fieldHint}>
-                                Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
-                            </p>
-                            {(formProps.fieldErrors.image || formProps.imgError) && (
-                                <div className={styles.imgError}>
-                                    {formProps.fieldErrors.image || formProps.imgError}
-                                </div>
-                            )}
+                        <button
+                            type="button"
+                            className="accordionHeaderButton"
+                            onClick={() => toggleAccordion('imagenes')}
+                            aria-expanded={accordionsOpen.imagenes}
+                        >
+                            <div className="accordionHeaderLeft">
+                                <i className="bi bi-image" style={{ color: 'var(--color-primary)' }} />
+                                <span>Imagen de Categoría</span>
+                            </div>
+                            <i className={`bi bi-chevron-${accordionsOpen.imagenes ? 'up' : 'down'}`} />
+                        </button>
 
-                            {formProps.form.image && !formProps.imgFile && (
-                                <div className={styles.imagePreview}>
-                                    <img
-                                        src={formProps.form.image}
-                                        alt="Preview"
-                                        className={styles.imagePreviewImg}
-                                    />
-                                    <span className={styles.fieldHint}>Imagen actual</span>
-                                    <button
-                                        type="button"
-                                        onClick={formProps.handleDeleteImage}
-                                        className={styles.deleteImageBtn}
-                                        title="Eliminar imagen"
-                                        aria-label="Eliminar imagen actual"
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            )}
+                        <div className={`accordionBodyMobile ${!accordionsOpen.imagenes ? 'accordionBodyHidden' : ''}`}>
+                            <h2 className={`${styles.sectionTitle} desktopSectionTitle`}>
+                                Imagen de Categoría
+                            </h2>
+                            <fieldset className={styles.fieldset}>
+                                <p className={styles.fieldHint}>
+                                    Subí una imagen representativa para la categoría.
+                                </p>
+                                {(formProps.fieldErrors.image || formProps.imgError) && (
+                                    <div className={styles.imgError}>
+                                        {formProps.fieldErrors.image || formProps.imgError}
+                                    </div>
+                                )}
 
-                            {formProps.imgFile && (
-                                <div className={styles.imagePreview}>
-                                    <img
-                                        src={URL.createObjectURL(formProps.imgFile)}
-                                        alt="Preview"
-                                        className={styles.imagePreviewImg}
-                                    />
-                                    <span className={styles.fieldHint}>Nueva imagen a cargar</span>
-                                    <button
-                                        type="button"
-                                        onClick={formProps.handleDeleteImage}
-                                        className={styles.deleteImageBtn}
-                                        title="Eliminar imagen"
-                                        aria-label="Eliminar nueva imagen"
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            )}
-
-                            {!formProps.form.image && !formProps.imgFile && (
-                                <div className={styles.imageUploadSection}>
-                                    <label className={styles.imageUploadTrigger}>
-                                        <Upload size={24} />
-                                        <span>Click para seleccionar o arrastra una imagen</span>
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={formProps.handleImageChange}
-                                            style={{ display: 'none' }}
+                                {formProps.form.image && !formProps.imgFile && (
+                                    <div className={styles.imagePreview}>
+                                        <img
+                                            src={formProps.form.image}
+                                            alt="Preview"
+                                            className={styles.imagePreviewImg}
                                         />
-                                    </label>
-                                </div>
-                            )}
-                        </fieldset>
+                                        <span className={styles.fieldHint}>Imagen actual</span>
+                                        <button
+                                            type="button"
+                                            onClick={formProps.handleDeleteImage}
+                                            className={styles.deleteImageBtn}
+                                            title="Eliminar imagen"
+                                            aria-label="Eliminar imagen actual"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                )}
+
+                                {formProps.imgFile && (
+                                    <div className={styles.imagePreview}>
+                                        <img
+                                            src={URL.createObjectURL(formProps.imgFile)}
+                                            alt="Preview"
+                                            className={styles.imagePreviewImg}
+                                        />
+                                        <span className={styles.fieldHint}>Nueva imagen a cargar</span>
+                                        <button
+                                            type="button"
+                                            onClick={formProps.handleDeleteImage}
+                                            className={styles.deleteImageBtn}
+                                            title="Eliminar imagen"
+                                            aria-label="Eliminar nueva imagen"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                )}
+
+                                {!formProps.form.image && !formProps.imgFile && (
+                                    <div className={styles.imageUploadSection}>
+                                        <label className={styles.imageUploadTrigger}>
+                                            <Upload size={24} />
+                                            <span>Tocá para seleccionar una imagen</span>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={formProps.handleImageChange}
+                                                style={{ display: 'none' }}
+                                            />
+                                        </label>
+                                    </div>
+                                )}
+                            </fieldset>
+                        </div>
                     </section>
 
-                    {/* ── Global error ───────────────────────────────────────── */}
+                    {/* Mensaje de error global */}
                     {error && (
                         <div className={styles.globalError} role="alert">
                             {error}
@@ -336,16 +455,8 @@ export function AdminCategoryFormPage({
                 </form>
             </div>
 
-            {/* ── Footer fijo de acciones (solo mobile, ver CSS) ───────────── */}
-            <div className={styles.mobileFooter}>
-                <button
-                    type="button"
-                    className={styles.cancelBtn}
-                    onClick={handleCancel}
-                    disabled={saving}
-                >
-                    Cancelar
-                </button>
+            {/* Barra fija de acciones para móvil */}
+            <div className="fixedBottomBarMobile">
                 <button
                     type="button"
                     className={styles.submitBtn}
@@ -354,9 +465,17 @@ export function AdminCategoryFormPage({
                 >
                     {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear categoría'}
                 </button>
+                <button
+                    type="button"
+                    className={styles.cancelBtn}
+                    onClick={handleCancel}
+                    disabled={saving}
+                >
+                    Cancelar
+                </button>
             </div>
 
-            {/* ── Unsaved changes warning (cancel button or SPA navigation) ─── */}
+            {/* Modal de confirmación de cambios no guardados */}
             <ModalConfirm
                 open={blocker.state === 'blocked'}
                 title="¿Abandonar sin guardar?"

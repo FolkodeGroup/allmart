@@ -72,7 +72,36 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({
   const visibleFormats = formats.filter(f => !hide.includes(f.format));
 
   return (
-    <div className={[styles.exportGroup, className].filter(Boolean).join(' ')} role="group" aria-label="Opciones de exportación">
+    <div className={[styles.exportGroup, 'exportGroupResponsive', className].filter(Boolean).join(' ')} role="group" aria-label="Opciones de exportación">
+      <style>{`
+        @media (min-width: 768px) {
+          .exportGroupResponsive {
+            display: inline-flex !important;
+            flex-direction: row !important;
+            gap: 8px !important;
+            width: auto !important;
+          }
+          .exportGroupResponsive button {
+            width: auto !important;
+            flex: 0 0 auto !important;
+          }
+        }
+        @media (max-width: 767px) {
+          .exportGroupResponsive {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            gap: 8px !important;
+          }
+          .exportGroupResponsive button {
+            flex: 1 !important;
+            min-height: 44px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
       {visibleFormats.map(({ format, label, ariaLabel, icon }) => {
         const isLoading = loading === format;
         const cb = callbacks[format];
@@ -88,6 +117,7 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({
             aria-label={ariaLabel}
             aria-busy={isLoading}
             title={ariaLabel}
+            style={{ fontSize: '1rem' }}
           >
             {isLoading ? (
               <Loader2 size={13} strokeWidth={2.5} className={styles.spinner} aria-hidden="true" />

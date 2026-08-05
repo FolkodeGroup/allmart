@@ -4,9 +4,6 @@ import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName }
 import { exportOrdersPdfFromBackend } from '../../orders/ordersService';
 import type { Order } from '../../../../context/AdminOrdersContext';
 
-/**
- * Maneja exportación, loading y feedback de usuario.
- */
 type Filters =
     | { type: 'predefined'; period: string }
     | { type: 'custom' };
@@ -49,16 +46,22 @@ export function useReportsExport(
         const fileName = getExportFileName('pedidos', periodLabel, exportFormat);
 
         try {
-            if (exportFormat === 'csv') await exportOrdersCSV(periodOrders, fileName);
-            else if (exportFormat === 'xlsx') await exportOrdersXLSX(periodOrders, fileName);
-            else if (exportFormat === 'pdf') {
+            if (exportFormat === 'csv') {
+                await exportOrdersCSV(periodOrders, fileName);
+            } else if (exportFormat === 'xlsx') {
+                await exportOrdersXLSX(periodOrders, fileName);
+            } else if (exportFormat === 'pdf') {
                 if (token) {
-                    // Use backend-generated PDF with Allmart catalog style
-                    const params: Record<string, string> = {};
-                    if (filters.type === 'predefined' && filters.period && filters.period !== 'todos') {
-                        params.status = filters.period;
+                    try {
+                        const params: Record<string, string> = {};
+                        if (filters.type === 'predefined' && filters.period && filters.period !== 'todos') {
+                            params.status = filters.period;
+                        }
+                        await exportOrdersPdfFromBackend(token, params);
+                    } catch (backendErr) {
+                        console.warn('[PDF Export] Falló el motor PDF del servidor, utilizando generador de respaldo en cliente:', backendErr);
+                        await exportOrdersPDF(periodOrders, fileName);
                     }
-                    await exportOrdersPdfFromBackend(token, params);
                 } else {
                     await exportOrdersPDF(periodOrders, fileName);
                 }
