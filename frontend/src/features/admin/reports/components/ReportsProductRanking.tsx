@@ -56,10 +56,10 @@ export function ProductRanking({
                             role={onProductSelect ? 'button' : undefined}
                             aria-label={onProductSelect ? `Ver historial de precios de ${product.name}` : undefined}
                         >
-                            <td>
+                            <td data-label="#">
                                 <span className={styles.rankBadgeModern}>#{i + 1}</span>
                             </td>
-                            <td>
+                            <td data-label="Imagen">
                                 {product.productImage ? (
                                     <img
                                         src={product.productImage}
@@ -71,13 +71,13 @@ export function ProductRanking({
                                     <div className={styles.productImagePlaceholder} aria-hidden="true">📦</div>
                                 )}
                             </td>
-                            <td>
+                            <td data-label="Producto">
                                 <span className={styles.productNameModern}>{product.name}</span>
                             </td>
-                            <td>
+                            <td data-label="Ventas">
                                 <span className={styles.statModernUnit}>{product.qty} und.</span>
                             </td>
-                            <td>
+                            <td data-label="Ingresos">
                                 <span className={styles.statModernValue}>{formatPrice(product.revenue)}</span>
                                 <div
                                     className={styles.progressBarModern}
