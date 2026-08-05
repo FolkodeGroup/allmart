@@ -22,7 +22,7 @@ interface Props {
     onUnsavedChanges?: (unsaved: boolean) => void;
 }
 
-type SectionId = 'basico' | 'precios' | 'categorias' | 'imagenes' | 'variantes' | 'seo';
+type SectionId = 'basico' | 'precios' | 'categorias' | 'imagenes' | 'variantes' | 'proveedor' | 'seo';
 
 export function AdminProductFormPage({
     productId,
@@ -32,14 +32,15 @@ export function AdminProductFormPage({
 }: Props) {
     const formRef = React.useRef<HTMLFormElement | null>(null);
 
-    // MOBILE-FIRST: Acordeones para pantalla táctil (< 768px)
+    // MOBILE-FIRST: Acordeones colapsados por defecto en móvil para navegación limpia
     const [accordionsOpen, setAccordionsOpen] = useState<Record<SectionId, boolean>>({
-        basico: true,
-        precios: true,
-        categorias: true,
-        imagenes: true,
-        variantes: true,
-        seo: true,
+        basico: false,
+        precios: false,
+        categorias: false,
+        imagenes: false,
+        variantes: false,
+        proveedor: false,
+        seo: false,
     });
 
     const formProps = useProductForm({
@@ -110,6 +111,7 @@ export function AdminProductFormPage({
             categorias: open,
             imagenes: open,
             variantes: open,
+            proveedor: open,
             seo: open,
         });
     }, []);
@@ -186,7 +188,7 @@ export function AdminProductFormPage({
                         font-size: 15px !important;
                         font-weight: 700 !important;
                         cursor: pointer !important;
-                        min-height: 48px !important;
+                        min-height: 52px !important;
                         text-align: left !important;
                     }
 
@@ -199,8 +201,9 @@ export function AdminProductFormPage({
                     .accordionBodyMobile {
                         width: 100% !important;
                         box-sizing: border-box !important;
-                        padding: 12px 14px 16px 14px !important;
+                        padding: 14px 16px 18px 16px !important;
                         border-top: 1px solid var(--color-border, #374151) !important;
+                        background: var(--color-bg-secondary, #28353d) !important;
                     }
 
                     .accordionBodyHidden {
@@ -269,9 +272,6 @@ export function AdminProductFormPage({
                     .accordionToggleBarMobile {
                         display: none !important;
                     }
-                    .fixedBottomBarMobile {
-                        display: none !important;
-                    }
                 }
             `}</style>
 
@@ -336,7 +336,7 @@ export function AdminProductFormPage({
                 noValidate
             >
                 <div className={styles.layout}>
-                    {/* COLUMNA PRINCIPAL (Izquierda - 68%) */}
+                    {/* COLUMNA PRINCIPAL (Izquierda - 68% en Desktop) */}
                     <div className={styles.mainColumn}>
                         {/* ── Básico ── */}
                         <section id="basico" className={styles.cardSection}>
@@ -347,7 +347,7 @@ export function AdminProductFormPage({
                                 aria-expanded={accordionsOpen.basico}
                             >
                                 <div className="accordionHeaderLeft">
-                                    <i className="bi bi-file-earmark-text" style={{ color: 'var(--color-primary)' }} />
+                                    <i className="bi bi-file-earmark-text" />
                                     <span>Información Básica</span>
                                     {sectionErrors.basico && (
                                         <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
@@ -386,7 +386,7 @@ export function AdminProductFormPage({
                                 aria-expanded={accordionsOpen.precios}
                             >
                                 <div className="accordionHeaderLeft">
-                                    <i className="bi bi-currency-dollar" style={{ color: 'var(--color-primary)' }} />
+                                    <i className="bi bi-currency-dollar" />
                                     <span>Precio y Stock</span>
                                     {sectionErrors.precios && (
                                         <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
@@ -408,43 +408,6 @@ export function AdminProductFormPage({
                             </div>
                         </section>
 
-                        {/* ── Variantes y Combinaciones ── */}
-                        <section id="variantes" className={styles.cardSection}>
-                            <button
-                                type="button"
-                                className="accordionHeaderButton"
-                                onClick={() => toggleAccordion('variantes')}
-                                aria-expanded={accordionsOpen.variantes}
-                            >
-                                <div className="accordionHeaderLeft">
-                                    <i className="bi bi-layers" style={{ color: 'var(--color-primary)' }} />
-                                    <span>Variantes</span>
-                                </div>
-                                <i className={`bi bi-chevron-${accordionsOpen.variantes ? 'up' : 'down'}`} />
-                            </button>
-
-                            <div className={`accordionBodyMobile ${!accordionsOpen.variantes ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-layers" /> Variantes y Combinaciones
-                                </h2>
-                                <TabVariantes
-                                    form={formProps.form}
-                                    fieldErrors={formProps.fieldErrors}
-                                    isEdit={formProps.isEdit}
-                                    productId={productId}
-                                    setField={formProps.setField}
-                                    newGroupName={formProps.newGroupName}
-                                    setNewGroupName={formProps.setNewGroupName}
-                                    newGroupValues={formProps.newGroupValues}
-                                    setNewGroupValues={formProps.setNewGroupValues}
-                                    onAddVariantGroup={formProps.addVariantGroup}
-                                    onRemoveVariantGroup={formProps.removeVariantGroup}
-                                    onAddVariantValue={formProps.addVariantValue}
-                                    onRemoveVariantValue={formProps.removeVariantValue}
-                                />
-                            </div>
-                        </section>
-
                         {/* ── Imágenes ── */}
                         <section id="imagenes" className={styles.cardSection}>
                             <button
@@ -454,8 +417,8 @@ export function AdminProductFormPage({
                                 aria-expanded={accordionsOpen.imagenes}
                             >
                                 <div className="accordionHeaderLeft">
-                                    <i className="bi bi-image" style={{ color: 'var(--color-primary)' }} />
-                                    <span>Imágenes</span>
+                                    <i className="bi bi-image" />
+                                    <span>Galería de Imágenes</span>
                                     {sectionErrors.imagenes && (
                                         <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
                                     )}
@@ -493,9 +456,46 @@ export function AdminProductFormPage({
                                 />
                             </div>
                         </section>
+
+                        {/* ── Variantes y Combinaciones ── */}
+                        <section id="variantes" className={styles.cardSection}>
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('variantes')}
+                                aria-expanded={accordionsOpen.variantes}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-layers" />
+                                    <span>Variantes y Combinaciones</span>
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.variantes ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.variantes ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-layers" /> Variantes y Combinaciones
+                                </h2>
+                                <TabVariantes
+                                    form={formProps.form}
+                                    fieldErrors={formProps.fieldErrors}
+                                    isEdit={formProps.isEdit}
+                                    productId={productId}
+                                    setField={formProps.setField}
+                                    newGroupName={formProps.newGroupName}
+                                    setNewGroupName={formProps.setNewGroupName}
+                                    newGroupValues={formProps.newGroupValues}
+                                    setNewGroupValues={formProps.setNewGroupValues}
+                                    onAddVariantGroup={formProps.addVariantGroup}
+                                    onRemoveVariantGroup={formProps.removeVariantGroup}
+                                    onAddVariantValue={formProps.addVariantValue}
+                                    onRemoveVariantValue={formProps.removeVariantValue}
+                                />
+                            </div>
+                        </section>
                     </div>
 
-                    {/* COLUMNA SECUNDARIA (Derecha - 32%) */}
+                    {/* COLUMNA SECUNDARIA (Derecha - 32% en Desktop) */}
                     <div className={styles.sideColumn}>
                         {/* ── Categorías ── */}
                         <section id="categorias" className={styles.cardSection}>
@@ -506,7 +506,7 @@ export function AdminProductFormPage({
                                 aria-expanded={accordionsOpen.categorias}
                             >
                                 <div className="accordionHeaderLeft">
-                                    <i className="bi bi-tags" style={{ color: 'var(--color-primary)' }} />
+                                    <i className="bi bi-tags" />
                                     <span>Categorías</span>
                                     {sectionErrors.categorias && (
                                         <i className="bi bi-exclamation-circle-fill" style={{ color: 'var(--color-error)' }} />
@@ -535,16 +535,31 @@ export function AdminProductFormPage({
 
                         {/* ── Proveedor ── */}
                         <section id="proveedor" className={styles.cardSection}>
-                            <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                <i className="bi bi-truck" /> Proveedor Principal
-                            </h2>
-                            <ProductSupplierSection
-                                productId={productId}
-                                productName={formProps.form.name}
-                                currentProductPrice={formProps.form.price}
-                                primarySupplierId={formProps.form.primarySupplierId}
-                                onPrimaryChange={(id) => formProps.setField('primarySupplierId', id)}
-                            />
+                            <button
+                                type="button"
+                                className="accordionHeaderButton"
+                                onClick={() => toggleAccordion('proveedor')}
+                                aria-expanded={accordionsOpen.proveedor}
+                            >
+                                <div className="accordionHeaderLeft">
+                                    <i className="bi bi-truck" />
+                                    <span>Proveedor Principal</span>
+                                </div>
+                                <i className={`bi bi-chevron-${accordionsOpen.proveedor ? 'up' : 'down'}`} />
+                            </button>
+
+                            <div className={`accordionBodyMobile ${!accordionsOpen.proveedor ? 'accordionBodyHidden' : ''}`}>
+                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                    <i className="bi bi-truck" /> Proveedor Principal
+                                </h2>
+                                <ProductSupplierSection
+                                    productId={productId}
+                                    productName={formProps.form.name}
+                                    currentProductPrice={formProps.form.price}
+                                    primarySupplierId={formProps.form.primarySupplierId}
+                                    onPrimaryChange={(id) => formProps.setField('primarySupplierId', id)}
+                                />
+                            </div>
                         </section>
 
                         {/* ── SEO / Publicación ── */}
@@ -556,8 +571,8 @@ export function AdminProductFormPage({
                                 aria-expanded={accordionsOpen.seo}
                             >
                                 <div className="accordionHeaderLeft">
-                                    <i className="bi bi-globe" style={{ color: 'var(--color-primary)' }} />
-                                    <span>SEO / Publicación</span>
+                                    <i className="bi bi-globe" />
+                                    <span>SEO y Vista Previa</span>
                                 </div>
                                 <i className={`bi bi-chevron-${accordionsOpen.seo ? 'up' : 'down'}`} />
                             </button>

@@ -54,22 +54,37 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .variantRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
   background-color: var(--color-bg-primary, #111827);
   border: 1px solid var(--color-border, #374151);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .variantRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
 }
 
 .variantLabelBlock {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .variantGroupName {
@@ -85,7 +100,7 @@
   color: var(--color-text-secondary, #9ca3af);
   font-size: 14px;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 4px;
 }
 
 .deleteGroupBtn {
@@ -97,6 +112,7 @@
   flex-wrap: wrap;
   gap: 6px;
   flex: 1;
+  width: 100%;
 }
 
 .tagChip {
@@ -124,29 +140,50 @@
   display: flex;
   gap: 6px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .compactInput {
-  min-height: 36px;
-  padding: 4px 10px;
-  font-size: 13px;
+  flex: 1;
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 14px;
   border-radius: 6px;
   border: 1px solid var(--color-border, #374151);
   background-color: var(--color-bg-secondary, #28353d);
   color: var(--color-text-primary, #ffffff);
   outline: none;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .compactInput {
+    min-height: 44px;
+  }
 }
 
 .compactAddBtn {
-  min-height: 36px;
-  padding: 0 12px;
+  min-height: 38px;
+  min-width: 38px;
+  padding: 0 14px;
   border-radius: 6px;
   border: none;
   background-color: var(--color-primary, #769282);
   color: #ffffff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .compactAddBtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .emptyPlaceholder {
@@ -160,6 +197,16 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .combinationsToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }
 
 .addCombinationBtn,
@@ -171,6 +218,19 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+@media (max-width: 767px) {
+  .addCombinationBtn,
+  .bulkGenerateBtn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+  }
 }
 
 .addCombinationBtn {
@@ -249,6 +309,14 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+@media (max-width: 767px) {
+  .comboModalInput,
+  .input {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+
 .comboModalInput:focus,
 .input:focus {
   border-color: var(--color-primary, #769282);
@@ -283,6 +351,13 @@
   justify-content: center;
   transition: all 0.2s ease;
   user-select: none;
+}
+
+@media (max-width: 767px) {
+  .comboAttrChip {
+    min-height: 44px;
+    font-size: 14px;
+  }
 }
 
 .comboAttrChip:hover {

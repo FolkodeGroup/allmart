@@ -13,12 +13,24 @@
   font-size: 13px;
   color: var(--color-text-secondary, #9ca3af);
   margin: 0;
+  line-height: 1.4;
 }
 
+/* ── Fila de Nuevo Grupo ── */
 .newGroupRow {
   display: flex;
   gap: 10px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .newGroupRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }
 
 .input {
@@ -32,6 +44,7 @@
   color: var(--color-text-primary, #ffffff);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
 }
 
 .input:focus {
@@ -51,8 +64,17 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .addBtn {
+    width: 100%;
+    min-height: 44px;
+  }
 }
 
 .addBtn:hover {
@@ -73,8 +95,11 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* ── Fila de Grupo de Variante ── */
 .variantRow {
   display: flex;
   align-items: center;
@@ -83,12 +108,25 @@
   border-radius: 10px;
   background-color: var(--color-bg-secondary, #28353d);
   border: 1px solid var(--color-border, #374151);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .variantRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
 }
 
 .variantLabelBlock {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .variantGroupName {
@@ -117,6 +155,7 @@
   flex-wrap: wrap;
   gap: 6px;
   flex: 1;
+  width: 100%;
 }
 
 .tagChip {
@@ -145,29 +184,50 @@
   display: flex;
   gap: 6px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .compactInput {
-  min-height: 36px;
-  padding: 4px 10px;
-  font-size: 13px;
+  flex: 1;
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 14px;
   border-radius: 6px;
   border: 1px solid var(--color-border, #374151);
   background-color: var(--color-bg-primary, #111827);
   color: var(--color-text-primary, #ffffff);
   outline: none;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .compactInput {
+    min-height: 44px;
+  }
 }
 
 .compactAddBtn {
-  min-height: 36px;
-  padding: 0 12px;
+  min-height: 38px;
+  min-width: 38px;
+  padding: 0 14px;
   border-radius: 6px;
   border: none;
   background-color: var(--color-primary, #769282);
   color: #ffffff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .compactAddBtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .emptyPlaceholder {
@@ -182,12 +242,25 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* ── Toolbar de Combinaciones ── */
 .combinationsToolbar {
   display: flex;
   gap: 12px;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .combinationsToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }
 
 .addCombinationBtn,
@@ -199,6 +272,19 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+@media (max-width: 767px) {
+  .addCombinationBtn,
+  .bulkGenerateBtn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+  }
 }
 
 .addCombinationBtn {
@@ -282,17 +368,18 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+@media (max-width: 767px) {
+  .comboModalInput {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+
 .comboModalInput:focus {
   border-color: var(--color-primary, #769282);
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.25);
 }
 
-.comboModalInput.inputError,
-.inputError {
-  border-color: #ef4444 !important;
-}
-
-/* Attribute Chips Selection */
 .comboAttrChipsRow {
   display: flex;
   flex-wrap: wrap;
@@ -317,6 +404,13 @@
   justify-content: center;
   transition: all 0.2s ease;
   user-select: none;
+}
+
+@media (max-width: 767px) {
+  .comboAttrChip {
+    min-height: 44px;
+    font-size: 14px;
+  }
 }
 
 .comboAttrChip:hover {

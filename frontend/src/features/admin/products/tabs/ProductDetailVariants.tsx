@@ -507,7 +507,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const visibleSkus = (skus || []).filter((s) => !deletedSkuIds.has(s.id));
 
   return (
-    <div className={`${styles.container} pdVariantsContainer`}>
+    <div className={styles.container}>
       {/* ── 1. OPCIONES DEL PRODUCTO ── */}
       <section className={styles.section}>
         <div className={styles.sectionHeading}>
@@ -531,20 +531,18 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         <div className={styles.attributesList}>
           {variants.map((group) => (
             <div key={group.id} className={styles.variantRow}>
-              <div>
-                <div className={styles.variantLabelBlock}>
-                  <span className={styles.variantGroupName}>
-                    {group.name}
-                  </span>
-                  <button
-                    type="button"
-                    className={styles.compactEditBtn}
-                    onClick={() => handleOpenEditModal(group.id)}
-                    title={`Editar grupo ${group.name}`}
-                  >
-                    📝
-                  </button>
-                </div>
+              <div className={styles.variantLabelBlock}>
+                <span className={styles.variantGroupName}>
+                  {group.name}
+                </span>
+                <button
+                  type="button"
+                  className={styles.compactEditBtn}
+                  onClick={() => handleOpenEditModal(group.id)}
+                  title={`Editar grupo ${group.name}`}
+                >
+                  📝
+                </button>
                 <button
                   type="button"
                   className={styles.deleteGroupBtn}

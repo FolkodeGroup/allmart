@@ -140,12 +140,6 @@
   }
 }
 
-@media (max-width: 899px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-}
-
 .mainColumn,
 .sideColumn {
   display: flex;
@@ -155,7 +149,7 @@
 }
 
 /* ==========================================================================
-   3. TARJETAS DE SECCIÓN PLANAS (SINO MATRIOSHKA)
+   3. TARJETAS DE SECCIÓN PLANAS
    ========================================================================== */
 
 .cardSection {
@@ -216,13 +210,6 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 640px) {
-  .row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-
 .field {
   display: flex;
   flex-direction: column;
@@ -236,9 +223,6 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-primary, #ffffff);
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .input,
@@ -551,13 +535,6 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 640px) {
-  .comboModalRowFields {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-
 .comboModalInput {
   min-height: 42px;
   font-size: 14px;
@@ -746,12 +723,45 @@
 }
 
 /* ==========================================================================
-   10. ADAPTATIVIDAD MÓVIL (<768px)
+   10. ADAPTATIVIDAD MÓVIL Y ACORDEONES (<767px)
    ========================================================================== */
 
 @media (max-width: 767px) {
   .page {
     padding-bottom: 120px;
+  }
+
+  /* Desactivar grid de 2 columnas y pasar a un solo flujo vertical con display: contents */
+  .layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .mainColumn,
+  .sideColumn {
+    display: contents !important;
+  }
+
+  /* Orden explícito de acordeones en móvil */
+  #basico { order: 1 !important; }
+  #precios { order: 2 !important; }
+  #categorias { order: 3 !important; }
+  #imagenes { order: 4 !important; }
+  #variantes { order: 5 !important; }
+  #proveedor { order: 6 !important; }
+  #seo { order: 7 !important; }
+
+  /* Tarjetas Acordeón individuales */
+  .cardSection {
+    background: var(--color-bg-secondary, #28353d) !important;
+    border: 1px solid var(--color-border, #374151) !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    margin-bottom: 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
   }
 
   .pageHeader {
@@ -768,23 +778,8 @@
     display: none;
   }
 
-  .layout {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .cardSection {
-    padding: 0;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-  }
-
-  .cardSectionTitle {
-    display: none;
-  }
-
-  .bottomBar {
-    display: none;
+  .comboModalRowFields {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
 }

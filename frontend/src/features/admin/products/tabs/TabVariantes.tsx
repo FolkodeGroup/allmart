@@ -503,12 +503,10 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             <div className={styles.attributesList}>
                 {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
                     <div key={group.id} className={styles.variantRow}>
-                        <div>
-                            <div className={styles.variantLabelBlock}>
-                                <span className={styles.variantGroupName}>
-                                    {group.name}
-                                </span>
-                            </div>
+                        <div className={styles.variantLabelBlock}>
+                            <span className={styles.variantGroupName}>
+                                {group.name}
+                            </span>
                             <button
                                 type="button"
                                 className={styles.deleteGroupBtn}
