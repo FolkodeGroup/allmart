@@ -274,14 +274,11 @@ export async function exportProductsPDF(products: ExportableProduct[], fileName?
     doc.text('ALLMART', 18, 28);
   }
 
-  // Textos del banner
+  // Título del banner (centrado verticalmente junto al logo)
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(255, 255, 255);
-  doc.text('ALLMART', 50, 22);
-
   doc.setFontSize(16);
-  doc.text('Catálogo Allmart', 50, 30);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Catálogo Allmart', 50, 29);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
