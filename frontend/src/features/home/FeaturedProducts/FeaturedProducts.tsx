@@ -69,10 +69,10 @@ export function FeaturedProducts({
   const canSlide = filtered.length > cardsPerView;
   const clonedSlides = canSlide
     ? [
-        ...filtered.slice(-cardsPerView),
-        ...filtered,
-        ...filtered.slice(0, cardsPerView),
-      ]
+      ...filtered.slice(-cardsPerView),
+      ...filtered,
+      ...filtered.slice(0, cardsPerView),
+    ]
     : filtered;
   const normalizedStart = canSlide ? cardsPerView : 0;
 
@@ -157,11 +157,11 @@ export function FeaturedProducts({
                 className={styles.carouselSlide}
                 style={{ width: `${100 / Math.max(cardsPerView, 1)}%` }}
               >
-                <div 
-                  style={{ 
-                    height: '420px', 
-                    background: '#f2efeb', 
-                    borderRadius: '20px', 
+                <div
+                  style={{
+                    height: '420px',
+                    background: '#f2efeb',
+                    borderRadius: '20px',
                     display: 'flex',
                     flexDirection: 'column',
                     padding: '18px',
