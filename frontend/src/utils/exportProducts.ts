@@ -298,7 +298,7 @@ export async function exportProductsPDF(products: ExportableProduct[], fileName?
     imagesDataUris.push(...batchResults);
   }
 
-  // 🟢 2. TABLA LIMPIA (Landscape: Imagen, Nombre, Categoría, Precio, Descripción)
+  // 🟢 2. TABLA LIMPIA Y ESTILIZADA (Landscape: Imagen, Nombre, Categoría, Precio, Descripción)
   autoTable(doc, {
     head: [['Imagen', 'Nombre', 'Categoría', 'Precio', 'Descripción']],
     body: products.map((p) => [
@@ -311,16 +311,22 @@ export async function exportProductsPDF(products: ExportableProduct[], fileName?
     startY: 46,
     styles: {
       fontSize: 9,
-      cellPadding: 4,
+      cellPadding: 3,
       overflow: 'linebreak',
       valign: 'middle',
-      minCellHeight: 28, // 🟢 Altura amplia para destacar la imagen
     },
+    // 🟢 ENCABEZADO COMPACTO Y ELEGANTE
     headStyles: {
       fillColor: [118, 146, 130], // Verde primario Allmart #769282
       textColor: 255,
       fontStyle: 'bold',
-      fontSize: 10,
+      fontSize: 9.5,
+      cellPadding: { top: 2.5, bottom: 2.5, left: 4, right: 4 },
+      minCellHeight: 8, // Altura reducida para el header
+    },
+    // 🟢 CUERPO CON ALTURA ADECUADA PARA LAS MINIATURAS DE IMAGEN
+    bodyStyles: {
+      minCellHeight: 26, // Mantiene espacio adecuado para la imagen
     },
     alternateRowStyles: {
       fillColor: [242, 239, 235], // Fondo cálido Allmart #f2efeb
@@ -330,7 +336,7 @@ export async function exportProductsPDF(products: ExportableProduct[], fileName?
       1: { cellWidth: 60, fontStyle: 'bold', textColor: [26, 26, 26] },
       2: { cellWidth: 35 },
       3: { cellWidth: 25, fontStyle: 'bold', textColor: [200, 154, 112] }, // accentDark #c89a70
-      4: { cellWidth: 120, textColor: [118, 118, 118] }, // 🟢 Ancho fijo para forzar el salto de línea
+      4: { cellWidth: 120, textColor: [118, 118, 118] }, // Ancho fijo para forzar el salto de línea
     },
     didDrawCell: (data) => {
       if (data.section === 'body' && data.column.index === 0) {
