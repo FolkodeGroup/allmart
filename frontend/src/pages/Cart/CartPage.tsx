@@ -5,6 +5,15 @@ import { useCart } from '../../components/layout/context/CartContextUtils';
 import { CartPriceDisplay } from '../../components/ui/CartPriceDisplay/CartPriceDisplay';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
 import styles from './CartPage.module.css';
+import type { Product } from '../../types';
+
+function buildProductDetailUrl(product: Product) {
+  if (product.selectedAttributes && Object.keys(product.selectedAttributes).length > 0) {
+    const params = new URLSearchParams(product.selectedAttributes);
+    return `/producto/${product.slug}?${params.toString()}`;
+  }
+  return `/producto/${product.slug}`;
+}
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('es-AR', {
@@ -64,23 +73,25 @@ export function CartPage() {
       <div className={styles.layout}>
         {/* ── Lista de ítems ── */}
         <ul className={styles.itemList} aria-label="Productos en el carrito">
-          {items.map(({ product, quantity, discount }) => (
-            <li key={product.id} className={styles.item}>
-              <Link to={`/producto/${product.slug}`}>
-                <ProductImage
-                  src={product.images[0]}
-                  alt={product.name}
-                  className={styles.itemImage}
-                  width={64}
-                  height={64}
-                  placeholder={'data:image/svg+xml,%3Csvg width="64" height="64" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="64" height="64" fill="%23f3f3f3"/%3E%3C/svg%3E'}
-                />
-              </Link>
-
-              <div className={styles.itemInfo}>
-                <Link to={`/producto/${product.slug}`} className={styles.itemName}>
-                  {product.name}
+          {items.map(({ product, quantity, discount }) => {
+            const detailUrl = buildProductDetailUrl(product);
+            return (
+              <li key={product.id} className={styles.item}>
+                <Link to={detailUrl}>
+                  <ProductImage
+                    src={product.images[0]}
+                    alt={product.name}
+                    className={styles.itemImage}
+                    width={64}
+                    height={64}
+                    placeholder={'data:image/svg+xml,%3Csvg width="64" height="64" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="64" height="64" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                  />
                 </Link>
+
+                <div className={styles.itemInfo}>
+                  <Link to={detailUrl} className={styles.itemName}>
+                    {product.name}
+                  </Link>
                 {/* Variantes seleccionadas estilo Mercado Libre */}
                 {product.selectedAttributes && Object.keys(product.selectedAttributes).length > 0 ? (
                   <div className={styles.itemVariants}>
@@ -158,7 +169,8 @@ export function CartPage() {
                 </button>
               </div>
             </li>
-          ))}
+          );
+        })}
         </ul>
 
         {/* ── Resumen ── */}
