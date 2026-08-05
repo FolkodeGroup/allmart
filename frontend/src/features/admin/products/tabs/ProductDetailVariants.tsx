@@ -197,11 +197,18 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       initial[v.name] = '';
     });
     setCombinationAttrs(initial);
-    setCombinationStock('');
+
+    // 🟢 HERENCIA INTELIGENTE DE INVENTARIO BASE
+    const hasExistingSkus = (skus && skus.length > 0) || (createdCombinations && createdCombinations.length > 0);
+    const initialStock = (!hasExistingSkus && typeof product?.stock === 'number' && product.stock > 0)
+      ? product.stock
+      : '';
+
+    setCombinationStock(initialStock);
     setCombinationImages('');
 
     setCombinationPrice(product?.price && product.price > 0 ? product.price : '');
-    setCombinationCriticalThreshold('');
+    setCombinationCriticalThreshold(product?.criticalStockThreshold ?? '');
     setCombinationSku(product?.sku ? `${product.sku}-` : '');
 
     setEditingSkuId(null);
@@ -240,7 +247,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     const allCombos = cartesian(variantValuesLists);
     const newCombosToCreate: { sku?: string; attributes: Record<string, string>; price?: number; stock?: number }[] = [];
 
-    for (const combo of allCombos) {
+    const hasExistingSkus = (skus && skus.length > 0) || (createdCombinations && createdCombinations.length > 0);
+    const baseStock = typeof product?.stock === 'number' && product.stock > 0 ? product.stock : 0;
+
+    for (let i = 0; i < allCombos.length; i++) {
+      const combo = allCombos[i];
       const attrs: Record<string, string> = {};
       combo.forEach((val, idx) => {
         attrs[variantNames[idx]] = val;
@@ -258,11 +269,14 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         const suffix = combo.map(v => v.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()).join('-');
         const sku = product?.sku ? `${product.sku}-${suffix}` : suffix;
 
+        // 🟢 MIGRACIÓN TRANSPARENTE: Asignar el stock base acumulado a la primera combinación generada
+        const assignedStock = (!hasExistingSkus && i === 0 && baseStock > 0) ? baseStock : 0;
+
         newCombosToCreate.push({
           sku,
           attributes: attrs,
           price: product?.price && product.price > 0 ? product.price : undefined,
-          stock: 0,
+          stock: assignedStock,
         });
       }
     }
@@ -960,7 +974,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       <ModalConfirm
         open={bulkConfirmOpen}
         title="Generar combinaciones"
-        description={`Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0. ¿Continuar?`}
+        description={
+          !skus || skus.length === 0
+            ? `Se generarán ${combosToCreate.length} combinaciones. Se migrarán las ${product?.stock ?? 0} unidades de stock del producto base a la primera variante.`
+            : `Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0.`
+        }
         confirmText="Aceptar"
         cancelText="Cancelar"
         onConfirm={executeBulkGenerate}

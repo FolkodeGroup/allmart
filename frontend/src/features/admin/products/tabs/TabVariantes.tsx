@@ -154,7 +154,14 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             initial[v.name] = '';
         });
         setCombinationAttrs(initial);
-        setCombinationStock('');
+
+        // 🟢 HERENCIA INTELIGENTE: Si es la primera combinación del producto, heredar el stock del producto base
+        const hasExistingSkus = (skus && skus.length > 0) || (createdCombinations && createdCombinations.length > 0);
+        const initialStock = (!hasExistingSkus && typeof form.stock === 'number' && form.stock > 0)
+            ? form.stock
+            : '';
+
+        setCombinationStock(initialStock);
         setCombinationImages('');
 
         setCombinationPrice(form.price > 0 ? form.price : '');
@@ -196,7 +203,11 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         const allCombos = cartesian(variantValuesLists);
         const newCombosToCreate: CreatedCombination[] = [];
 
-        for (const combo of allCombos) {
+        const hasExistingSkus = (skus && skus.length > 0) || (createdCombinations && createdCombinations.length > 0);
+        const baseStock = typeof form.stock === 'number' && form.stock > 0 ? form.stock : 0;
+
+        for (let i = 0; i < allCombos.length; i++) {
+            const combo = allCombos[i];
             const attrs: Record<string, string> = {};
             combo.forEach((val, idx) => {
                 attrs[variantNames[idx]] = val;
@@ -214,11 +225,14 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 const suffix = combo.map(v => v.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()).join('-');
                 const sku = form.sku ? `${form.sku}-${suffix}` : suffix;
 
+                // 🟢 HERENCIA INTELIGENTE: Transferir el stock base a la primera combinación generada
+                const assignedStock = (!hasExistingSkus && i === 0 && baseStock > 0) ? baseStock : 0;
+
                 newCombosToCreate.push({
                     sku,
                     attributes: attrs,
                     price: form.price > 0 ? form.price : undefined,
-                    stock: 0,
+                    stock: assignedStock,
                 });
             }
         }
@@ -897,7 +911,11 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             <ModalConfirm
                 open={bulkConfirmOpen}
                 title="Generar combinaciones"
-                description={`Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0. ¿Continuar?`}
+                description={
+                    !skus || skus.length === 0
+                        ? `Se generarán ${combosToCreate.length} combinaciones. Se migrarán las ${form.stock ?? 0} unidades de stock del producto base a la primera variante.`
+                        : `Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0.`
+                }
                 confirmText="Aceptar"
                 cancelText="Cancelar"
                 onConfirm={executeBulkGenerate}
