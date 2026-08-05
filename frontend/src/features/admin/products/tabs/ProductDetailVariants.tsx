@@ -42,10 +42,8 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const [newValues, setNewValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Estado de carga para UX del Modal
   const [isSubmittingCombo, setIsSubmittingCombo] = useState(false);
 
-  // Modal avanzado de nombres/valores
   const [editModal, setEditModal] = useState<{ open: boolean; groupId: string | null }>({ open: false, groupId: null });
   const [editModalData, setEditModalData] = useState<{ name: string; values: string[] }>({ name: '', values: [] });
 
@@ -113,17 +111,14 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
   const [submitComboAttempted, setSubmitComboAttempted] = useState(false);
 
-  // --- Modal de confirmación de generación masiva ---
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [combosToCreate, setCombosToCreate] = useState<
     { sku?: string; attributes: Record<string, string>; price?: number; stock?: number }[]
   >([]);
 
-  // Estados para el Modal de Confirmación de Eliminación Individual
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [skuToDeleteId, setSkuToDeleteId] = useState<string | null>(null);
 
-  // Estado optimista para eliminación inmediata
   const [deletedSkuIds, setDeletedSkuIds] = useState<Set<string>>(new Set());
 
   type CreatedCombination = {
@@ -150,7 +145,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     }
   }, [uploadedFiles, setPrimary]);
 
-  // SKU Automático Reactivo
   useEffect(() => {
     if (combinationModalOpen && !editingSkuId && product?.sku) {
       const attrValues = Object.values(combinationAttrs).filter(Boolean);
@@ -197,7 +191,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       initial[v.name] = '';
     });
     setCombinationAttrs(initial);
-    setCombinationStock('');
+
+    const hasExistingSkus = (skus && skus.length > 0) || (createdCombinations && createdCombinations.length > 0);
+    const initialStock = (!hasExistingSkus && typeof product?.stock === 'number' && product.stock > 0)
+      ? product.stock
+      : '';
+
+    setCombinationStock(initialStock);
     setCombinationImages('');
 
     setCombinationPrice(product?.price && product.price > 0 ? product.price : '');
@@ -240,7 +240,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
     const allCombos = cartesian(variantValuesLists);
     const newCombosToCreate: { sku?: string; attributes: Record<string, string>; price?: number; stock?: number }[] = [];
 
-    for (const combo of allCombos) {
+    const hasExistingSkus = (skus && skus.length > 0) || (createdCombinations && createdCombinations.length > 0);
+    const baseStock = typeof product?.stock === 'number' && product.stock > 0 ? product.stock : 0;
+
+    for (let i = 0; i < allCombos.length; i++) {
+      const combo = allCombos[i];
       const attrs: Record<string, string> = {};
       combo.forEach((val, idx) => {
         attrs[variantNames[idx]] = val;
@@ -258,11 +262,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         const suffix = combo.map(v => v.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()).join('-');
         const sku = product?.sku ? `${product.sku}-${suffix}` : suffix;
 
+        const assignedStock = (!hasExistingSkus && i === 0 && baseStock > 0) ? baseStock : 0;
+
         newCombosToCreate.push({
           sku,
           attributes: attrs,
           price: product?.price && product.price > 0 ? product.price : undefined,
-          stock: 0,
+          stock: assignedStock,
         });
       }
     }
@@ -431,7 +437,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           await loadSkus(productId);
           return;
         } catch {
-          // fallthrough to rollback
+          // fallthrough
         }
       }
 
@@ -501,168 +507,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   const visibleSkus = (skus || []).filter((s) => !deletedSkuIds.has(s.id));
 
   return (
-    <div className={`${styles.container} pdVariantsContainer`}>
-      <style>{`
-        /* 🟢 APLANAMIENTO Y ELIMINACIÓN DE OVERFLOW EN MÓVIL (<768px) */
-        @media (max-width: 767px) {
-          .pdVariantsContainer {
-            padding: 0 !important;
-            background: transparent !important;
-          }
-
-          .pdVariantsContainer section {
-            background: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            margin-bottom: 16px !important;
-          }
-
-          .pdToolbarResponsive {
-            flex-direction: column-reverse !important;
-            align-items: stretch !important;
-            gap: 10px !important;
-          }
-
-          .pdToolbarResponsive button {
-            width: 100% !important;
-            min-height: 44px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-          }
-
-          .pdVariantRowResponsive {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            gap: 10px !important;
-            padding: 12px !important;
-            border-radius: 10px !important;
-            background: var(--color-bg-secondary, #28353d) !important;
-            border: 1px solid var(--color-border, #374151) !important;
-          }
-
-          .pdVariantRowHeader {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            width: 100% !important;
-          }
-
-          .pdAddValueInputBlock {
-            width: 100% !important;
-            display: flex !important;
-            gap: 8px !important;
-          }
-
-          .pdAddValueInputBlock input {
-            flex: 1 !important;
-            min-height: 44px !important;
-          }
-
-          .pdAddValueInputBlock button {
-            min-width: 44px !important;
-            min-height: 44px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-          }
-
-          /* ESTILIZADO DE INPUTS Y CONTENEDOR EN MODAL MÓVIL */
-          .comboModalFieldsContainerMobile {
-            width: 100% !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-            overflow-x: hidden !important;
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 14px !important;
-          }
-
-          .comboModalFieldsContainerMobile * {
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-          }
-
-          .comboModalRowFieldsMobile {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 10px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-          }
-
-          .comboModalRowFieldsMobile > * {
-            min-width: 0 !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-          }
-
-          .comboModalInputMobile {
-            min-height: 44px !important;
-            font-size: 16px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-            background-color: var(--color-bg-primary, #111827) !important;
-            border: 1px solid var(--color-border, #374151) !important;
-            border-radius: 8px !important;
-            padding: 10px 14px !important;
-            color: var(--color-text-primary, #ffffff) !important;
-            outline: none !important;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
-          }
-
-          .comboModalInputMobile:focus {
-            border-color: var(--color-primary, #769282) !important;
-            box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.25) !important;
-          }
-
-          .comboModalInputMobile.inputError {
-            border-color: #ef4444 !important;
-          }
-
-          /* CHIPS TÁCTILES PARA OPCIONES DE ATRIBUTOS */
-          .comboAttrChipsRowMobile {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            gap: 8px !important;
-            margin-top: 6px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-          }
-
-          .comboAttrChipMobile {
-            min-height: 44px !important;
-            padding: 8px 16px !important;
-            border-radius: 22px !important;
-            border: 1px solid var(--color-border, #374151) !important;
-            background: var(--color-bg-secondary, #28353d) !important;
-            color: var(--color-text-primary, #ffffff) !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            transition: all 0.15s ease !important;
-            user-select: none !important;
-          }
-
-          .comboAttrChipSelectedMobile {
-            background: var(--color-primary, #769282) !important;
-            border-color: var(--color-primary, #769282) !important;
-            color: #ffffff !important;
-            box-shadow: 0 2px 8px rgba(118, 146, 130, 0.4) !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .comboModalRowFieldsMobile {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
-
+    <div className={styles.container}>
       {/* ── 1. OPCIONES DEL PRODUCTO ── */}
       <section className={styles.section}>
         <div className={styles.sectionHeading}>
@@ -685,21 +530,19 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
 
         <div className={styles.attributesList}>
           {variants.map((group) => (
-            <div key={group.id} className={`${styles.variantRow} pdVariantRowResponsive`}>
-              <div className="pdVariantRowHeader">
-                <div className={styles.variantLabelBlock}>
-                  <span className={styles.variantGroupName}>
-                    {group.name}
-                  </span>
-                  <button
-                    type="button"
-                    className={styles.compactEditBtn}
-                    onClick={() => handleOpenEditModal(group.id)}
-                    title={`Editar grupo ${group.name}`}
-                  >
-                    📝
-                  </button>
-                </div>
+            <div key={group.id} className={styles.variantRow}>
+              <div className={styles.variantLabelBlock}>
+                <span className={styles.variantGroupName}>
+                  {group.name}
+                </span>
+                <button
+                  type="button"
+                  className={styles.compactEditBtn}
+                  onClick={() => handleOpenEditModal(group.id)}
+                  title={`Editar grupo ${group.name}`}
+                >
+                  📝
+                </button>
                 <button
                   type="button"
                   className={styles.deleteGroupBtn}
@@ -726,7 +569,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 ))}
               </div>
 
-              <div className={`${styles.addValueInputBlock} pdAddValueInputBlock`}>
+              <div className={styles.addValueInputBlock}>
                 <input
                   className={styles.compactInput}
                   value={newValues[group.id] ?? ''}
@@ -774,7 +617,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           </div>
         </div>
 
-        <div className={`${styles.combinationsToolbar} pdToolbarResponsive`}>
+        <div className={styles.combinationsToolbar}>
           <button
             type="button"
             onClick={openCombinationModal}
@@ -835,30 +678,30 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           </>
         }
       >
-        <div className={`${styles.modalFieldsContainer} comboModalFieldsContainerMobile`}>
+        <div className={styles.modalFieldsContainer}>
           {(!variants || variants.length === 0) && (
             <p className={commonStyles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
           )}
 
-          {/* SELECTORES DE ATRIBUTOS (FICHAS TÁCTILES SI <= 6 OPCIONES, DROPDOWN SI > 6) */}
+          {/* SELECTORES DE ATRIBUTOS */}
           {variants.map((group) => {
             const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
             const selectedVal = combinationAttrs[group.name] ?? '';
             const useChips = group.values.length <= 6;
 
             return (
-              <div key={group.id} className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
+              <div key={group.id} className={styles.field}>
                 <label className={styles.label}>{group.name} *</label>
 
                 {useChips ? (
-                  <div className="comboAttrChipsRowMobile">
+                  <div className={styles.comboAttrChipsRow}>
                     {group.values.map((value) => {
                       const isSelected = selectedVal === value;
                       return (
                         <button
                           key={value}
                           type="button"
-                          className={`comboAttrChipMobile ${isSelected ? 'comboAttrChipSelectedMobile' : ''}`}
+                          className={`${styles.comboAttrChip} ${isSelected ? styles.comboAttrChipSelected : ''}`}
                           onClick={() => setCombinationAttrs(prev => ({ ...prev, [group.name]: value }))}
                         >
                           {value}
@@ -882,23 +725,67 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             );
           })}
 
-          {/* SKU */}
-          <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
-            <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
-            <input
-              id="combination-sku"
-              className={`${styles.input} comboModalInputMobile ${(submitComboAttempted && combinationErrors.sku) ? styles.inputError : ''}`}
-              value={combinationSku}
-              onChange={e => { setCombinationSku(e.target.value); if (submitComboAttempted) runCombinationValidation(); }}
-              onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
-            />
-            {submitComboAttempted && combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
+          <div className={styles.comboModalRowFields}>
+            <div className={styles.field}>
+              <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
+              <input
+                id="combination-sku"
+                className={`${styles.input} ${styles.comboModalInput} ${(submitComboAttempted && combinationErrors.sku) ? styles.inputError : ''}`}
+                value={combinationSku}
+                onChange={e => { setCombinationSku(e.target.value); if (submitComboAttempted) runCombinationValidation(); }}
+                onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
+              />
+              {submitComboAttempted && combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="combination-price" className={styles.label}>Precio ($)</label>
+              <input
+                id="combination-price"
+                type="number"
+                step="0.01"
+                className={`${styles.input} ${styles.comboModalInput} ${(submitComboAttempted && combinationErrors.price) ? styles.inputError : ''}`}
+                value={combinationPrice === '' ? '' : String(combinationPrice)}
+                onChange={e => {
+                  setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
+                  if (submitComboAttempted) runCombinationValidation();
+                }}
+                onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
+              />
+              {submitComboAttempted && combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
+            </div>
           </div>
 
-          {/* Imágenes */}
-          <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <label htmlFor="combination-images" className={styles.label}>Imágenes</label>
-            <div style={{ marginTop: '8px', width: '100%', boxSizing: 'border-box' }}>
+          <div className={styles.comboModalRowFields}>
+            <div className={styles.field}>
+              <label htmlFor="combination-stock" className={styles.label}>Stock (unid.)</label>
+              <input
+                id="combination-stock"
+                type="number"
+                className={`${styles.input} ${styles.comboModalInput}`}
+                value={combinationStock === '' ? '' : String(combinationStock)}
+                onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="combination-critical" className={styles.label}>Umbral stock crítico</label>
+              <input
+                id="combination-critical"
+                type="number"
+                className={`${styles.input} ${styles.comboModalInput} ${submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
+                value={combinationCriticalThreshold === '' ? '' : String(combinationCriticalThreshold)}
+                onChange={e => setCombinationCriticalThreshold(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+              {submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
+                <div className={styles.errorText}>El umbral no puede ser negativo.</div>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="combination-images" className={styles.label}>Imágenes de la variante</label>
+            <div id="combination-images" style={{ marginTop: '4px', width: '100%', boxSizing: 'border-box' }}>
               <ImageUploader onAddFiles={addFiles} onReject={(rej) => rej.forEach(r => toast.error(`${r.file.name}: ${r.reason}`))} />
               <ImagePreviewList
                 items={uploadedFiles}
@@ -909,50 +796,6 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             </div>
             {submitComboAttempted && combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
           </div>
-
-          <div className="comboModalRowFieldsMobile">
-            <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
-              <label htmlFor="combination-price" className={styles.label}>Precio</label>
-              <input
-                id="combination-price"
-                type="number"
-                step="0.01"
-                className={`${styles.input} comboModalInputMobile ${(submitComboAttempted && combinationErrors.price) ? styles.inputError : ''}`}
-                value={combinationPrice === '' ? '' : String(combinationPrice)}
-                onChange={e => {
-                  setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
-                  if (submitComboAttempted) runCombinationValidation();
-                }}
-                onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
-              />
-              {submitComboAttempted && combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
-            </div>
-
-            <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
-              <label htmlFor="combination-stock" className={styles.label}>Stock</label>
-              <input
-                id="combination-stock"
-                type="number"
-                className={`${styles.input} comboModalInputMobile`}
-                value={combinationStock === '' ? '' : String(combinationStock)}
-                onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
-              />
-            </div>
-          </div>
-
-          <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
-            <label htmlFor="combination-critical" className={styles.label}>Umbral stock crítico</label>
-            <input
-              id="combination-critical"
-              type="number"
-              className={`${styles.input} comboModalInputMobile ${submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
-              value={combinationCriticalThreshold === '' ? '' : String(combinationCriticalThreshold)}
-              onChange={e => setCombinationCriticalThreshold(e.target.value === '' ? '' : Number(e.target.value))}
-            />
-            {submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
-              <div className={styles.errorText}>El umbral no puede ser negativo.</div>
-            )}
-          </div>
         </div>
       </Modal>
 
@@ -960,7 +803,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
       <ModalConfirm
         open={bulkConfirmOpen}
         title="Generar combinaciones"
-        description={`Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0. ¿Continuar?`}
+        description={
+          !skus || skus.length === 0
+            ? `Se generarán ${combosToCreate.length} combinaciones. Se migrarán las ${product?.stock ?? 0} unidades de stock del producto base a la primera variante.`
+            : `Se generarán ${combosToCreate.length} combinaciones nuevas. El precio se hereda del producto principal y el stock inicial será 0.`
+        }
         confirmText="Aceptar"
         cancelText="Cancelar"
         onConfirm={executeBulkGenerate}

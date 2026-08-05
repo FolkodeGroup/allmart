@@ -116,7 +116,6 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
     return (
         <>
             <style>{`
-                /* Mejoras de ergonomía táctil para móvil */
                 .touchableCheckboxRow {
                     display: flex;
                     align-items: center;
@@ -134,7 +133,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                     width: 22px;
                     height: 22px;
                     margin-right: 12px;
-                    accent-color: var(--color-primary);
+                    accent-color: var(--color-primary, #769282);
                     cursor: pointer;
                 }
                 .touchableCheckboxRow label {
@@ -142,14 +141,13 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                     cursor: pointer;
                     user-select: none;
                     font-size: 15px;
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #ffffff);
                 }
                 
-                /* Botones de acción primarios (+) */
                 .primaryActionBtn {
                     min-width: 44px !important;
                     min-height: 44px !important;
-                    background-color: var(--color-primary) !important;
+                    background-color: var(--color-primary, #769282) !important;
                     color: white !important;
                     border: none !important;
                     border-radius: 8px !important;
@@ -157,6 +155,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                     align-items: center !important;
                     justify-content: center !important;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+                    cursor: pointer !important;
                 }
                 .primaryActionBtn i {
                     font-size: 1.2rem;
@@ -275,7 +274,6 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
             <fieldset className={styles.fieldset}>
                 <legend className={styles.legend}>Etiquetas</legend>
                 <div className={styles.field}>
-                    
                     <label className="touchableCheckboxRow">
                         <input
                             type="checkbox"

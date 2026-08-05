@@ -2,6 +2,7 @@ import { forwardRef, useImperativeHandle, useState, useCallback } from 'react';
 import type { TabPreciosInventarioProps } from '../components/types';
 import { getInlineFieldError } from '../../../../utils/productFormUtils';
 import { ValidationHelper } from '../components/ValidationHelper';
+import { useAdminVariants } from '../../../../hooks/useAdminVariants';
 import styles from '../AdminProductFormPage.module.css';
 
 export type TabPreciosInventarioRef = {
@@ -15,6 +16,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
 }, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
     const [touched, setTouched] = useState<Record<string, boolean>>({});
+    const { skus } = useAdminVariants();
 
     const formValues = form as unknown as {
         price: number;
@@ -23,12 +25,13 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
         criticalStockThreshold?: number;
     };
 
-    const hasVariants = form.variants && form.variants.length > 0;
+    // 🟢 FIX UX: Solo considerar que hay variantes activas si existen combinaciones/SKUs reales creadas
+    const hasActiveSkus = (skus && skus.length > 0) || (Array.isArray((form as unknown as { skus?: unknown[] }).skus) && (form as unknown as { skus: unknown[] }).skus.length > 0);
 
     useImperativeHandle(ref, () => ({
         validate: () => {
             const errs: Record<string, string> = {};
-            if (!hasVariants) {
+            if (!hasActiveSkus) {
                 if (!formValues.price || formValues.price <= 0) errs.price = 'El precio debe ser mayor a 0';
                 if (formValues.stock < 0) errs.stock = 'El stock no puede ser negativo';
                 
@@ -39,7 +42,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
             setLocalErrors(errs);
             return errs;
         }
-    }), [formValues, hasVariants]);
+    }), [formValues, hasActiveSkus]);
 
     const validateField = useCallback((fieldName: string, value: unknown) => {
         const error = getInlineFieldError(value, fieldName);
@@ -62,7 +65,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
         left: '12px',
         top: '50%',
         transform: 'translateY(-50%)',
-        color: hasVariants ? 'var(--color-text-muted)' : 'var(--color-primary)',
+        color: hasActiveSkus ? 'var(--color-text-muted)' : 'var(--color-primary)',
         fontSize: '1.1rem',
         pointerEvents: 'none',
         zIndex: 5,
@@ -73,21 +76,21 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
 
     return (
         <fieldset className={styles.fieldset}>
-            {hasVariants && (
-                <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', color: 'var(--color-text-primary)' }}>
-                    <i className="bi bi-info-circle-fill" style={{ marginRight: '8px', color: '#3b82f6' }}></i>
-                    <strong>Este producto tiene variantes.</strong> El precio base y el stock general están deshabilitados porque ahora se gestionan individualmente desde la pestaña <strong>Variantes</strong>.
+            {hasActiveSkus && (
+                <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(118, 146, 130, 0.12)', border: '1px solid var(--color-primary)', borderRadius: '10px', color: 'var(--color-text-primary)' }}>
+                    <i className="bi bi-info-circle-fill" style={{ marginRight: '8px', color: 'var(--color-primary)' }}></i>
+                    <strong>Gestión de inventario por variantes activa.</strong> El precio base y el stock general se calculan automáticamente consolidando las combinaciones activas en la pestaña <strong>Variantes</strong>.
                 </div>
             )}
 
             <div className={styles.row}>
                 <div className={styles.field}>
-                    <label className={styles.label} htmlFor="product-price">Precio {hasVariants ? '' : '*'}</label>
+                    <label className={styles.label} htmlFor="product-price">Precio {hasActiveSkus ? '' : '*'}</label>
                     <div className={styles.inputWithIcon} style={{ position: 'relative' }}>
                         <i className="bi bi-currency-dollar" style={iconStyle}></i>
                         <input
                             className={`${styles.input} ${touched.price && localErrors.price ? styles.inputError : ''}`}
-                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
+                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasActiveSkus ? 'var(--color-bg-secondary)' : undefined }}
                             id="product-price"
                             type="number"
                             min={0}
@@ -101,11 +104,11 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             }}
                             placeholder="0"
                             onBlur={() => handleBlur('price')}
-                            required={!hasVariants}
-                            disabled={hasVariants}
+                            required={!hasActiveSkus}
+                            disabled={hasActiveSkus}
                         />
                     </div>
-                    {!hasVariants && touched.price && (
+                    {!hasActiveSkus && touched.price && (
                         <ValidationHelper
                             error={localErrors.price}
                             success={!!(formValues.price > 0 && !localErrors.price)}
@@ -119,7 +122,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                         <i className="bi bi-box-seam" style={iconStyle}></i>
                         <input
                             className={`${styles.input} ${touched.stock && localErrors.stock ? styles.inputError : ''}`}
-                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
+                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasActiveSkus ? 'var(--color-bg-secondary)' : undefined }}
                             id="product-stock"
                             type="number"
                             min={0}
@@ -132,10 +135,10 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             }}
                             placeholder="0"
                             onBlur={() => handleBlur('stock')}
-                            disabled={hasVariants}
+                            disabled={hasActiveSkus}
                         />
                     </div>
-                    {!hasVariants && touched.stock && (
+                    {!hasActiveSkus && touched.stock && (
                         <ValidationHelper
                             error={localErrors.stock}
                             success={!!(formValues.stock >= 0 && !localErrors.stock)}
@@ -151,7 +154,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                         <i className="bi bi-exclamation-triangle" style={iconStyle}></i>
                         <input
                             className={`${styles.input} ${touched.criticalStockThreshold && localErrors.criticalStockThreshold ? styles.inputError : ''}`}
-                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasVariants ? 'var(--color-bg-secondary)' : undefined }}
+                            style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasActiveSkus ? 'var(--color-bg-secondary)' : undefined }}
                             id="product-critical-threshold"
                             type="number"
                             min={0}
@@ -164,13 +167,13 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             }}
                             placeholder="5"
                             onBlur={() => handleBlur('criticalStockThreshold')}
-                            disabled={hasVariants}
+                            disabled={hasActiveSkus}
                         />
                     </div>
                     <p className={styles.fieldHint} style={{ marginTop: '4px' }}>
                         Se generarán alertas automáticas en el panel si el stock desciende por debajo de este valor.
                     </p>
-                    {!hasVariants && touched.criticalStockThreshold && (
+                    {!hasActiveSkus && touched.criticalStockThreshold && (
                         <ValidationHelper
                             error={localErrors.criticalStockThreshold}
                             success={!!(formValues.criticalStockThreshold !== undefined && formValues.criticalStockThreshold >= 0 && !localErrors.criticalStockThreshold)}
@@ -179,14 +182,14 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                 </div>
             </div>
 
-            <div className={styles.checkRow} style={{ marginTop: '1rem', minHeight: '44px', display: 'flex', alignItems: 'center', opacity: hasVariants ? 0.5 : 1, pointerEvents: hasVariants ? 'none' : 'auto' }}>
+            <div className={styles.checkRow} style={{ marginTop: '1rem', minHeight: '44px', display: 'flex', alignItems: 'center', opacity: hasActiveSkus ? 0.5 : 1, pointerEvents: hasActiveSkus ? 'none' : 'auto' }}>
                 <input
                     type="checkbox"
                     id="inStock"
                     checked={formValues.inStock}
                     onChange={e => setField('inStock', e.target.checked)}
                     style={{ cursor: 'pointer', width: '20px', height: '20px', accentColor: 'var(--color-primary)' }}
-                    disabled={hasVariants}
+                    disabled={hasActiveSkus}
                 />
                 <label htmlFor="inStock" className={styles.checkLabel} style={{ cursor: 'pointer', userSelect: 'none', marginLeft: '8px' }}>
                     Disponible en stock

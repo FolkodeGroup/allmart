@@ -1,389 +1,423 @@
-/* ============================================================================
-   ALLMART — PRODUCT DETAIL VARIANTS MODERNISED HORIZONTAL STYLE (Brand Guarded)
-   ============================================================================ */
+/* ProductDetailVariants.module.css */
 
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: 20px;
   width: 100%;
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  gap: 12px;
+  background: var(--color-bg-secondary, #28353d);
+  padding: 16px 20px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: var(--color-bg-tertiary);
-  /* 🟢 CORREGIDO: Identidad Allmart */
+  border: 1px solid var(--color-border, #374151);
 }
 
 .sectionHeading {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  margin-bottom: var(--space-2);
+  align-items: center;
+  gap: 12px;
 }
 
 .sectionStep {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--color-primary, #ddb08c);
-  /* 🟢 CORREGIDO: Identidad Allmart */
-  color: var(--color-neutral-light);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: var(--font-bold);
+  background: var(--color-primary, #769282);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
   flex-shrink: 0;
-  margin-top: 2px;
 }
 
 .sectionTitle {
-  font-family: var(--font-heading);
-  font-size: var(--text-base);
-  font-weight: var(--font-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-1);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+  margin: 0;
 }
 
 .sectionDesc {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--color-text-tertiary);
-  margin: 0;
-  line-height: 1.5;
+  font-size: 13px;
+  color: var(--color-text-secondary, #9ca3af);
+  margin: 2px 0 0 0;
 }
 
-/* ── Atributos List (Filas Horizontales Compactas) ── */
 .attributesList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
+  box-sizing: border-box;
 }
 
-/* Fila principal flexible */
 .variantRow {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 8px 16px;
-  background: var(--color-bg-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 12px;
+  padding: 12px 16px;
   border-radius: 10px;
-  width: 100%;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
   box-sizing: border-box;
-  transition: background 0.15s ease;
+  width: 100%;
 }
 
-.variantRow:hover {
-  background: var(--color-bg-hover);
+@media (max-width: 767px) {
+  .variantRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
 }
 
 .variantLabelBlock {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 100px;
-  max-width: 130px;
-  flex-shrink: 0;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .variantGroupName {
-  font-family: var(--font-heading);
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-primary);
-  text-transform: capitalize;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--color-text-primary, #ffffff);
 }
 
-.compactEditBtn {
+.compactEditBtn,
+.deleteGroupBtn {
   background: transparent;
   border: none;
-  font-size: 0.8rem;
+  color: var(--color-text-secondary, #9ca3af);
+  font-size: 14px;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.15s ease;
-  padding: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 4px;
 }
 
-.compactEditBtn:hover {
-  opacity: 1;
+.deleteGroupBtn {
+  color: #ef4444;
 }
 
-/* Chips de valores */
 .tagsContainer {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .tagChip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--color-bg-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--color-text-primary);
+  gap: 4px;
   padding: 4px 10px;
-  border-radius: 999px;
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 500;
+  border-radius: 16px;
+  background-color: var(--color-primary, #769282);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .tagRemoveBtn {
   background: transparent;
   border: none;
-  color: #9ca3af;
-  font-size: 0.9rem;
+  color: #ffffff;
+  font-size: 14px;
   cursor: pointer;
   padding: 0;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.tagRemoveBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ef4444;
-}
-
-/* Input compacto integrado */
 .addValueInputBlock {
   display: flex;
-  align-items: center;
   gap: 6px;
-  width: 150px;
-  flex-shrink: 0;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .compactInput {
-  width: 100%;
-  background: var(--color-bg-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex: 1;
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 14px;
   border-radius: 6px;
-  padding: 6px 10px;
-  color: var(--color-text-primary);
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  transition: border-color 0.15s ease;
+  border: 1px solid var(--color-border, #374151);
+  background-color: var(--color-bg-secondary, #28353d);
+  color: var(--color-text-primary, #ffffff);
+  outline: none;
+  box-sizing: border-box;
 }
 
-.compactInput:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  /* 🟢 CORREGIDO: Identidad Allmart */
+@media (max-width: 767px) {
+  .compactInput {
+    min-height: 44px;
+  }
 }
 
 .compactAddBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: var(--color-bg-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--color-text-primary);
+  min-height: 38px;
+  min-width: 38px;
+  padding: 0 14px;
   border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.15s ease;
-}
-
-.compactAddBtn:hover {
-  background: var(--color-bg-hover);
-  /* 🟢 CORREGIDO: Identidad Allmart */
-  color: #111823;
-  border-color: var(--color-primary);
-}
-
-/* Botón de borrado de grupo */
-.deleteGroupBtn {
-  background: transparent;
   border: none;
-  color: #9ca3af;
-  font-size: 1.15rem;
+  background-color: var(--color-primary, #769282);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease, color 0.15s ease;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
 }
 
-.deleteGroupBtn:hover {
-  background: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
+@media (max-width: 767px) {
+  .compactAddBtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .emptyPlaceholder {
-  text-align: center;
-  padding: 24px;
-  border: 1px dashed rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  color: var(--color-text-muted, #9ca3af);
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
+  font-size: 13px;
+  color: var(--color-text-secondary, #9ca3af);
   font-style: italic;
-  margin: 0;
-}
-
-/* ── Combinaciones & Toolbar ── */
-.combinationsSection {
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  margin: 8px 0;
 }
 
 .combinationsToolbar {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .combinationsToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }
 
 .addCombinationBtn,
 .bulkGenerateBtn {
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 600;
+  min-height: 42px;
+  padding: 0 16px;
   border-radius: 8px;
-  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+@media (max-width: 767px) {
+  .addCombinationBtn,
+  .bulkGenerateBtn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+  }
 }
 
 .addCombinationBtn {
-  background: var(--color-primary);
-  /* 🟢 CORREGIDO: Identidad Allmart */
-  color: var(--color-neutral-light);
+  background-color: var(--color-primary, #769282);
+  color: #ffffff;
   border: none;
 }
 
 .addCombinationBtn:hover:not(:disabled) {
-  background: var(--color-primary);
-  /* 🟢 CORREGIDO: Tono arena oscuro elegante */
+  background-color: var(--color-primary-dark, #5d7568);
 }
 
 .bulkGenerateBtn {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: transparent;
+  color: var(--color-text-primary, #ffffff);
+  border: 1px solid var(--color-border, #374151);
 }
 
 .bulkGenerateBtn:hover:not(:disabled) {
-  background: var(--color-bg-secondary);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
-.addCombinationBtn:disabled,
-.bulkGenerateBtn:disabled {
-  background: var(--color-bg-tertiary) !important;
-  color: var(--color-text-muted) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
-  cursor: not-allowed;
-}
-
-/* Estilos de Modal */
+/* Modal Form Styles */
 .modalFieldsContainer {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 8px 0;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comboModalRowFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .comboModalRowFields {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .label {
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text-primary, #ffffff);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.modalRowFields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+.comboModalInput,
+.input {
+  min-height: 42px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--color-text-primary, #ffffff);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.cancelBtn,
-.submitBtn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 100px;
-  transition: all 0.15s ease;
+@media (max-width: 767px) {
+  .comboModalInput,
+  .input {
+    font-size: 16px;
+    min-height: 44px;
+  }
 }
 
-.cancelBtn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--color-text-primary);
-}
-
-.cancelBtn:hover {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-}
-
-.submitBtn {
-  background: var(--color-primary);
-  /* 🟢 CORREGIDO: Identidad Allmart */
-  color: var(--color-neutral-light);
-  border: none;
-}
-
-.submitBtn:hover:not(:disabled) {
-  background: var(--color-primary-dark);
-  /* 🟢 CORREGIDO: Tono arena oscuro elegante */
-}
-
-
-.submitBtn:disabled {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-muted);
-  cursor: not-allowed;
+.comboModalInput:focus,
+.input:focus {
+  border-color: var(--color-primary, #769282);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.25);
 }
 
 .inputError {
-  border-color: #dc2626 !important;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+  border-color: #ef4444 !important;
+}
+
+.comboAttrChipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.comboAttrChip {
+  min-height: 38px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border, #374151);
+  background: var(--color-bg-secondary, #28353d);
+  color: var(--color-text-primary, #ffffff);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+@media (max-width: 767px) {
+  .comboAttrChip {
+    min-height: 44px;
+    font-size: 14px;
+  }
+}
+
+.comboAttrChip:hover {
+  background: rgba(118, 146, 130, 0.18);
+  border-color: var(--color-primary, #769282);
+}
+
+.comboAttrChipSelected {
+  background: var(--color-primary, #769282) !important;
+  border-color: var(--color-primary, #769282) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(118, 146, 130, 0.35);
+}
+
+.cancelBtn {
+  padding: 10px 18px;
+  min-height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #374151);
+  background: transparent;
+  color: var(--color-text-primary, #ffffff);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-text-secondary, #9ca3af);
+}
+
+.submitBtn {
+  padding: 10px 22px;
+  min-height: 42px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-primary, #769282);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-primary-dark, #5d7568);
+  box-shadow: 0 4px 12px rgba(118, 146, 130, 0.4);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .errorText {
   color: #ef4444;
-  font-size: 0.75rem;
-  font-family: var(--font-ui);
-  margin-top: 2px;
+  font-size: 12px;
+  margin-top: 4px;
 }
