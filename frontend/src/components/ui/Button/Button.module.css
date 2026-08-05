@@ -32,10 +32,10 @@
   text-transform: uppercase;
   border-radius: var(--radius-md);
   transition: all var(--transition-base);
-  white-space: nowrap;
+  white-space: normal;
   cursor: pointer;
   border: 2px solid transparent;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .btn:disabled {
