@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import type { StatusFilter, StockLevelFilter } from './productsService';
 import { exportCatalogPdf } from './productsService';
-import { exportProductsToCSV, exportProductsToExcel } from '../../../utils/exportProducts';
+import { exportProductsToCSV, exportProductsToExcel, exportProductsPDF } from '../../../utils/exportProducts';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
@@ -92,42 +92,60 @@ export function AdminProducts() {
   }, [searchParams, editId, setSearchParams]);
 
   const handleExportPdf = useCallback(async () => {
-    if (!token) {
-      toast.error('Sesión no iniciada. Por favor, volvé a iniciar sesión.');
-      return;
-    }
     setIsExportingPdf(true);
+    setExportLoadingFormat('pdf');
     try {
-      const { blob, filename } = await exportCatalogPdf(
-        {
-          title: 'Catálogo Allmart',
-          columns: 3,
-          paperFormat: 'A4',
-          filters: {
-            status: statusFilter,
-            q: search || undefined,
-            categoryId: categoryFilter || undefined,
-            stockLevel: stockLevelFilter,
-          },
-        },
-        token,
-      );
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      if (token) {
+        try {
+          const { blob, filename } = await exportCatalogPdf(
+            {
+              title: 'Catálogo Allmart',
+              columns: 3,
+              paperFormat: 'A4',
+              filters: {
+                status: statusFilter,
+                q: search || undefined,
+                categoryId: categoryFilter || undefined,
+                stockLevel: stockLevelFilter,
+              },
+            },
+            token,
+          );
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+          toast.success('Catálogo PDF descargado con éxito');
+          return;
+        } catch (backendErr) {
+          console.warn('[Catalog PDF] Falló el motor PDF del servidor, utilizando generador de respaldo en cliente:', backendErr);
+        }
+      }
+
+      // Fallback a exportación cliente en PDF
+      const exportable = products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category?.name ?? 'Sin categoría',
+        price: p.price,
+        stock: p.stock,
+        inStock: p.inStock,
+        isFeatured: p.isFeatured,
+      }));
+      await exportProductsPDF(exportable);
       toast.success('Catálogo PDF descargado con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`Error al exportar PDF: ${message}`);
     } finally {
       setIsExportingPdf(false);
+      setExportLoadingFormat(null);
     }
-  }, [token, search, categoryFilter, statusFilter, stockLevelFilter]);
+  }, [token, search, categoryFilter, statusFilter, stockLevelFilter, products]);
 
   const handleExportCSV = useCallback(() => {
     if (!products.length) {
@@ -357,7 +375,7 @@ export function AdminProducts() {
       aria-label="Gestión de productos"
     >
       <style>{`
-        /* 🟢 AISLAMIENTO ESTRICTO DE ESCRITORIO */
+        /* AISLAMIENTO ESTRICTO DE ESCRITORIO */
         @media (min-width: 768px) {
           .actionsBarDesktop {
             display: flex !important;
