@@ -191,22 +191,60 @@ describe('ProductDetailPage', () => {
     if (negroButton) {
       fireEvent.click(negroButton);
 
-      // After selecting Negro, the first compatible size should be auto-selected
-      // Based on the SKUs, Negro is compatible with both Grande and Pequeño
-      // So the system should auto-select "Grande" (first alphabetically... wait, actually we need to check the order in the SKUs)
-      // In our case, Negro is in sku1 (Grande) and sku2 (Pequeño), so we should get one of them auto-selected
-
-      // Since we sort alphabetically, "Grande" comes before "Pequeño", so it should auto-select "Grande"
-      // But let's be more careful - we're testing that SOME size gets auto-selected
-
       await waitFor(() => {
-        // The system should have made a selection - we can verify this by checking if all variants are selected
-        // Or by checking if the "Add to cart" button becomes enabled
         const addToCartBtn = screen.getByRole('button', { name: /agregar al carrito/i });
-        // The button text might change if some variants aren't selected
         expect(addToCartBtn).toBeInTheDocument();
       });
     }
+  });
+
+  it('loads selected variants from the cart URL query when opening product detail', async () => {
+    const mockProduct = {
+      id: 'p1',
+      slug: 'bateria-hudson',
+      name: 'Batería Hudson',
+      description: 'Desc',
+      price: 12800,
+      categoryId: 'cat-1',
+      categoryIds: ['cat-1'],
+      tags: [],
+      rating: 4,
+      reviewCount: 1,
+      inStock: true,
+      sku: 'BAT-001',
+      images: ['img-1.jpg'],
+      skus: [
+        { id: 'sku1', sku: 'BAT-001-N-G', attributes: { Color: 'Negro', Tamaño: 'Grande' }, stock: 10, price: 12800, images: ['img-1.jpg'] },
+        { id: 'sku2', sku: 'BAT-001-V-G', attributes: { Color: 'Verde', Tamaño: 'Grande' }, stock: 8, price: 12800, images: ['img-3.jpg'] },
+      ],
+    };
+
+    mocks.fetchPublicProductBySlugMock.mockResolvedValue(mockProduct);
+
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/producto/:slug',
+          element: <ProductDetailPage />,
+        },
+      ],
+      { initialEntries: ['/producto/bateria-hudson?Color=Verde&Tamaño=Grande'] }
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByRole('heading', { name: 'Batería Hudson' })).toBeInTheDocument();
+
+    const buttons = screen.getAllByRole('button');
+    buttons.forEach((btn, index) => {
+      console.log('button', index, btn.textContent, btn.getAttribute('aria-label'), btn.getAttribute('aria-pressed'));
+    });
+
+    const addToCartBtn = await screen.findByRole('button', { name: /agregar al carrito/i });
+    expect(addToCartBtn).toBeEnabled();
+
+    const selectedColor = await screen.findByRole('button', { name: 'Verde' });
+    expect(selectedColor).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('adds separate cart lines for different variant combinations', async () => {
