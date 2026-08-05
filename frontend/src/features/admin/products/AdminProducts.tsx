@@ -1,9 +1,10 @@
+// frontend/src/features/admin/products/AdminProducts.tsx
+
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import type { StatusFilter, StockLevelFilter } from './productsService';
-import { exportCatalogPdf } from './productsService';
 import { exportProductsToCSV, exportProductsToExcel, exportProductsPDF } from '../../../utils/exportProducts';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
@@ -68,7 +69,7 @@ export function AdminProducts() {
   // Context and hooks
   const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
 
-  const { can, token } = useAdminAuth();
+  const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
 
   // PDF export
@@ -91,47 +92,18 @@ export function AdminProducts() {
     }
   }, [searchParams, editId, setSearchParams]);
 
+  // 🟢 EXPORTACIÓN PDF: Bypassea el backend y usa el generador nativo del cliente
   const handleExportPdf = useCallback(async () => {
     setIsExportingPdf(true);
     setExportLoadingFormat('pdf');
     try {
-      if (token) {
-        try {
-          const { blob, filename } = await exportCatalogPdf(
-            {
-              title: 'Catálogo Allmart',
-              columns: 3,
-              paperFormat: 'A4',
-              filters: {
-                status: statusFilter,
-                q: search || undefined,
-                categoryId: categoryFilter || undefined,
-                stockLevel: stockLevelFilter,
-              },
-            },
-            token,
-          );
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          URL.revokeObjectURL(url);
-          toast.success('Catálogo PDF descargado con éxito');
-          return;
-        } catch (backendErr) {
-          console.warn('[Catalog PDF] Falló el motor PDF del servidor, utilizando generador de respaldo en cliente:', backendErr);
-        }
-      }
-
-      // Fallback a exportación cliente en PDF
       const exportable = products.map((p) => ({
         id: p.id,
         name: p.name,
         category: p.category?.name ?? 'Sin categoría',
         price: p.price,
+        description: p.shortDescription || p.description || '',
+        imageUrl: p.images?.[0] || undefined,
         stock: p.stock,
         inStock: p.inStock,
         isFeatured: p.isFeatured,
@@ -145,7 +117,7 @@ export function AdminProducts() {
       setIsExportingPdf(false);
       setExportLoadingFormat(null);
     }
-  }, [token, search, categoryFilter, statusFilter, stockLevelFilter, products]);
+  }, [products]);
 
   const handleExportCSV = useCallback(() => {
     if (!products.length) {
