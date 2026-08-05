@@ -26,14 +26,23 @@ import {
   createVariant,
   updateVariant,
   deleteVariant,
+  createVariantChild,
 } from '../features/admin/variants/variantsService';
 
 // ─── Tipos exportados ─────────────────────────────────────────────────────────
 
-export interface AdminProduct extends Omit<Product, 'category'> {
+export interface AdminProduct extends Omit<Product, 'category' | 'skus'> {
   category: Category;
   stock: number;
   variants?: VariantGroup[];
+  skus?: Array<{
+    id?: string;
+    sku?: string;
+    attributes: Record<string, string>;
+    stock?: number;
+    price?: number;
+    images?: string[];
+  }>;
 }
 
 /** Grupo de variante: ej. { id, name: "Color", values: ["Rojo","Azul"] } */
@@ -76,12 +85,11 @@ export interface AdminProductsContextType {
   lowStockTotal: number;
 }
 
-
-
 // ─── Contexto ─────────────────────────────────────────────────────────────────
 
 const AdminProductsContext = createContext<AdminProductsContextType | undefined>(undefined);
-export default AdminProductsContext
+export default AdminProductsContext;
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AdminProductsProvider({ children }: { children: ReactNode }) {
@@ -91,7 +99,6 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
 
   const lastParamsRef = useRef<AdminProductsParams | undefined>(undefined);
 
-  // Refs to stabilize refreshProducts identity and avoid double-fetch
   const categoriesRef = useRef(categories);
   categoriesRef.current = categories;
   const tokenRef = useRef(token);
@@ -112,7 +119,6 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   /** Carga (o recarga) los productos desde el backend con paginación y búsqueda */
   const refreshProducts = useCallback(async (params?: AdminProductsParams) => {
     if (!tokenRef.current) return;
-    // Persist last used params so refreshCurrentPage can reuse them
     if (params !== undefined) lastParamsRef.current = params;
     setLoading(true);
     setError(null);
@@ -133,25 +139,22 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  /** Recarga usando los últimos parámetros (página, filtros, búsqueda) */
+  /** Recarga usando los últimos parámetros */
   const refreshCurrentPage = useCallback(async () => {
     await refreshProducts(lastParamsRef.current);
   }, [refreshProducts]);
 
-  /** Obtiene el conteo total de productos con stock < 5 desde el backend (ignora paginación). */
+  /** Obtiene el conteo total de productos con stock < 5 desde el backend */
   const refreshLowStockCount = useCallback(async () => {
     if (!tokenRef.current) return;
     try {
       const count = await fetchAdminLowStockCount(tokenRef.current);
       setLowStockTotal(count);
     } catch {
-      // silencioso: el badge simplemente mantiene el último valor conocido
+      // silencioso
     }
   }, []);
 
-  // Carga inicial: se ejecuta automáticamente al montar el contexto (cuando hay token disponible).
-  // Esto garantiza que el Dashboard y cualquier componente vean los datos correctos sin necesidad
-  // de visitar primero la página de productos.
   useEffect(() => {
     if (token) {
       refreshProducts({ page: 1, limit: 500 });
@@ -164,19 +167,32 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
   const addProduct = async (p: Omit<AdminProduct, 'id'>) => {
     if (!token) throw new Error('No autenticado');
     try {
-      const { variants, ...productBase } = p;
+      const { variants, skus, ...productBase } = p;
       const payload = mapAdminProductToPayload(productBase);
       const created = await createAdminProduct(payload, token);
 
-      // Si tiene variantes, las creamos una por una (el backend actual parece crearlas por producto)
+      // 1. Crear grupos de variantes si existen
       if (variants && variants.length > 0) {
         for (const v of variants) {
           await createVariant(token, created.id, { name: v.name, values: v.values });
         }
       }
 
+      // 2. Crear combinaciones/SKUs de variantes si fueron generadas durante el alta inicial
+      if (skus && skus.length > 0) {
+        for (const s of skus) {
+          await createVariantChild(token, created.id, {
+            sku: s.sku,
+            attributes: s.attributes || {},
+            stock: typeof s.stock === 'number' ? s.stock : Number(s.stock ?? 0),
+            price: typeof s.price === 'number' ? s.price : s.price ? Number(s.price) : undefined,
+            images: s.images,
+          });
+        }
+      }
+
       const newProduct = apiToAdminProduct(created, categoriesRef.current);
-      showNotificationRef.current('success', 'Producto creado exitosamente');
+      showNotificationRef.current('success', 'Producto creado exitosamente con sus variantes');
       await Promise.all([refreshCurrentPage(), refreshLowStockCount()]);
       return newProduct;
     } catch (err) {
@@ -198,16 +214,9 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       const payload = mapAdminProductToPayload(merged);
       await updateAdminProduct(id, payload, token);
 
-      // Gestión de variantes si se proporcionan
       if (variants) {
-        // En un enfoque simple, borramos las anteriores y creamos las nuevas
-        // O si el backend soporta update, lo usamos.
-        // fetch actual para saber qué borrar
         const existingVariants = await fetchVariantsByProduct(token, id);
 
-        // 1. Identificar variantes a eliminar (las que están en DB pero no en el nuevo set)
-        // Nota: El form actual genera IDs temporales 'g-...' para nuevas,
-        // y mantiene las existentes si vinieran de la DB.
         for (const ev of existingVariants) {
           const stillExists = variants.find(v => v.id === ev.id);
           if (!stillExists) {
@@ -215,13 +224,10 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // 2. Crear o Actualizar
         for (const v of variants) {
           if (v.id.startsWith('g-')) {
-            // Es nueva
             await createVariant(token, id, { name: v.name, values: v.values });
           } else {
-            // Ya existe, actualizar
             await updateVariant(token, id, v.id, { name: v.name, values: v.values });
           }
         }
@@ -259,7 +265,6 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
         values: v.values,
       }));
 
-      // Actualizamos el producto en el estado local con sus variantes
       setProducts(prev => prev.map(p =>
         p.id === productId ? { ...p, variants } : p
       ));

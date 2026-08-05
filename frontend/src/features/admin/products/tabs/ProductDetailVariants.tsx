@@ -622,7 +622,7 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             type="button"
             onClick={openCombinationModal}
             className={styles.addCombinationBtn}
-            disabled={!productId}
+            disabled={variants.length === 0}
           >
             + Agregar a mano
           </button>
@@ -630,17 +630,11 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             type="button"
             className={styles.bulkGenerateBtn}
             onClick={handleBulkGenerate}
-            disabled={!productId || variants.length === 0}
+            disabled={variants.length === 0}
           >
             ⚡ Generar matriz de combinaciones
           </button>
         </div>
-
-        {(!productId) && (
-          <p className={commonStyles.fieldHint} style={{ marginTop: '4px' }}>
-            Guardá el producto primero para poder crear combinaciones.
-          </p>
-        )}
 
         <CombinationsTable
           skus={visibleSkus}

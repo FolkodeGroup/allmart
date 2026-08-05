@@ -1,5 +1,6 @@
 import { forwardRef, useImperativeHandle, useState, useEffect, useCallback } from 'react';
 import type { TabVariantesProps } from '../components/types';
+import type { AdminProduct } from '../../../../context/AdminProductsContext';
 import { useAdminVariants } from '../../../../hooks/useAdminVariants';
 import { validateCombination } from '../../../../utils/productFormUtils';
 import type { CombinationValidationErrors } from '../../../../utils/productFormUtils';
@@ -40,6 +41,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     onRemoveVariantGroup,
     onAddVariantValue,
     onRemoveVariantValue,
+    setField,
     errors = {},
 }, ref) {
     const [localErrors, setLocalErrors] = useState<Record<string, string>>(errors);
@@ -178,7 +180,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     };
 
     const handleBulkGenerate = () => {
-        if (!productId) return;
         if (!form.variants || form.variants.length === 0) {
             toast.error('Agregá al menos un grupo de variantes con valores.');
             return;
@@ -245,9 +246,21 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     };
 
     const executeBulkGenerate = async () => {
-        if (!productId) return;
         setBulkConfirmOpen(false);
 
+        if (!isEdit || !productId) {
+            // Modo creación sin guardado intermedio: actualizamos el estado en memoria
+            setCreatedCombinations(prev => {
+                const next = [...combosToCreate, ...prev];
+                setField('skus', next as Omit<AdminProduct, 'id'>['skus']);
+                return next;
+            });
+            toast.success(`Se generaron ${combosToCreate.length} combinaciones en memoria para el nuevo producto`);
+            setCombosToCreate([]);
+            return;
+        }
+
+        // Modo edición: guardamos vía API
         setCreatedCombinations(prev => [...combosToCreate, ...prev]);
         const loadingToast = toast.loading(`Generando ${combosToCreate.length} combinaciones...`);
 
@@ -279,8 +292,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         (combinationCriticalThreshold !== '' && (Number.isNaN(Number(combinationCriticalThreshold)) || Number(combinationCriticalThreshold) < 0));
 
     const handleCreateCombination = async () => {
-        if (!productId) return;
-
         setSubmitComboAttempted(true);
 
         const validation = runCombinationValidation();
@@ -319,8 +330,24 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             attributes: attrs,
             stock,
             images: uploadedFiles.map(f => f.remoteUrl || f.previewUrl).filter(Boolean) as string[],
-            price
+            price,
+            criticalStockThreshold: critical
         };
+
+        if (!isEdit || !productId) {
+            // Modo creación sin guardado intermedio
+            setCreatedCombinations(prev => {
+                const next = [optimisticCombo, ...prev];
+                setField('skus', next as Omit<AdminProduct, 'id'>['skus']);
+                return next;
+            });
+            setFiles([]);
+            toast.success('Combinación añadida al nuevo producto');
+            setIsSubmittingCombo(false);
+            return;
+        }
+
+        // Modo edición existente con API
         setCreatedCombinations(prev => [optimisticCombo, ...prev]);
 
         try {
@@ -438,7 +465,15 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
     };
 
     const handleDeleteCombination = (id: string) => {
-        if (!productId) return;
+        if (!isEdit || !productId) {
+            setCreatedCombinations(prev => {
+                const next = prev.filter((_, idx) => `local-${idx}` !== id && _.sku !== id);
+                setField('skus', next as Omit<AdminProduct, 'id'>['skus']);
+                return next;
+            });
+            toast.success('Combinación eliminada');
+            return;
+        }
         setSkuToDeleteId(id);
         setDeleteConfirmOpen(true);
     };
@@ -570,7 +605,7 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         type="button"
                         className={styles.addCombinationBtn}
                         onClick={openCombinationModal}
-                        disabled={!isEdit || !productId}
+                        disabled={(form.variants ?? []).length === 0}
                     >
                         + Agregar a mano
                     </button>
@@ -578,17 +613,11 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         type="button"
                         className={styles.bulkGenerateBtn}
                         onClick={handleBulkGenerate}
-                        disabled={!isEdit || !productId || (form.variants ?? []).length === 0}
+                        disabled={(form.variants ?? []).length === 0}
                     >
                         ⚡ Generar matriz de combinaciones
                     </button>
                 </div>
-
-                {(!isEdit || !productId) && (
-                    <p className={styles.fieldHint} style={{ marginTop: '4px', fontStyle: 'italic' }}>
-                        Guarda el producto primero para poder crear combinaciones.
-                    </p>
-                )}
 
                 <CombinationsTable
                     skus={visibleSkus}
