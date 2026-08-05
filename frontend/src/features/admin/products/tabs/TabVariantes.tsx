@@ -9,6 +9,7 @@ import * as skuImagesService from '../../images/skuImagesService';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 import { Modal } from '../../../../components/ui/Modal';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 import type { UploadFileState } from '../../images';
 import styles from './TabVariantes.module.css';
 import toast from 'react-hot-toast';
@@ -527,39 +528,96 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                         justify-content: center !important;
                         font-size: 15px !important;
                     }
-                    /* Z-INDEX OVERRIDE Y RESTRICCIÓN DE DESBORDAMIENTO EN MODAL */
-                    .comboModalHighZIndex {
-                        z-index: 100005 !important;
-                        overflow-x: hidden !important;
-                        max-width: 100vw !important;
-                        box-sizing: border-box !important;
-                        padding: 12px !important;
-                    }
-                    .modalFieldsContainerResponsive {
+                    /* ESTILIZADO DE INPUTS Y CONTENEDOR EN MODAL MÓVIL */
+                    .comboModalFieldsContainerMobile {
                         width: 100% !important;
                         max-width: 100% !important;
                         box-sizing: border-box !important;
                         overflow-x: hidden !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        gap: 12px !important;
+                        gap: 14px !important;
                     }
-                    .modalFieldsContainerResponsive * {
+
+                    .comboModalFieldsContainerMobile * {
                         max-width: 100% !important;
                         box-sizing: border-box !important;
                     }
-                    .modalRowFieldsResponsive {
+
+                    .comboModalRowFieldsMobile {
                         display: grid !important;
                         grid-template-columns: 1fr 1fr !important;
                         gap: 10px !important;
                         width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+
+                    .comboModalRowFieldsMobile > * {
+                        min-width: 0 !important;
                         max-width: 100% !important;
                         box-sizing: border-box !important;
+                    }
+
+                    .comboModalInputMobile {
+                        min-height: 44px !important;
+                        font-size: 16px !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                        background-color: var(--color-bg-primary, #111827) !important;
+                        border: 1px solid var(--color-border, #374151) !important;
+                        border-radius: 8px !important;
+                        padding: 10px 14px !important;
+                        color: var(--color-text-primary, #ffffff) !important;
+                        outline: none !important;
+                        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+                    }
+
+                    .comboModalInputMobile:focus {
+                        border-color: var(--color-primary, #769282) !important;
+                        box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.25) !important;
+                    }
+
+                    .comboModalInputMobile.inputError {
+                        border-color: #ef4444 !important;
+                    }
+
+                    /* CHIPS TÁCTILES PARA OPCIONES DE ATRIBUTOS */
+                    .comboAttrChipsRowMobile {
+                        display: flex !important;
+                        flex-wrap: wrap !important;
+                        gap: 8px !important;
+                        margin-top: 6px !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+
+                    .comboAttrChipMobile {
+                        min-height: 44px !important;
+                        padding: 8px 16px !important;
+                        border-radius: 22px !important;
+                        border: 1px solid var(--color-border, #374151) !important;
+                        background: var(--color-bg-secondary, #28353d) !important;
+                        color: var(--color-text-primary, #ffffff) !important;
+                        font-size: 14px !important;
+                        font-weight: 600 !important;
+                        cursor: pointer !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        transition: all 0.15s ease !important;
+                        user-select: none !important;
+                    }
+
+                    .comboAttrChipSelectedMobile {
+                        background: var(--color-primary, #769282) !important;
+                        border-color: var(--color-primary, #769282) !important;
+                        color: #ffffff !important;
+                        box-shadow: 0 2px 8px rgba(118, 146, 130, 0.4) !important;
                     }
                 }
 
                 @media (max-width: 480px) {
-                    .modalRowFieldsResponsive {
+                    .comboModalRowFieldsMobile {
                         grid-template-columns: 1fr !important;
                     }
                 }
@@ -658,19 +716,19 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 <div className={`${styles.combinationsToolbar} tabVariantsToolbarResponsive`}>
                     <button
                         type="button"
-                        className={styles.bulkGenerateBtn}
-                        onClick={handleBulkGenerate}
-                        disabled={!isEdit || !productId || (form.variants ?? []).length === 0}
-                    >
-                        ⚡ Generar matriz de combinaciones
-                    </button>
-                    <button
-                        type="button"
                         className={styles.addCombinationBtn}
                         onClick={openCombinationModal}
                         disabled={!isEdit || !productId}
                     >
                         + Agregar a mano
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.bulkGenerateBtn}
+                        onClick={handleBulkGenerate}
+                        disabled={!isEdit || !productId || (form.variants ?? []).length === 0}
+                    >
+                        ⚡ Generar matriz de combinaciones
                     </button>
                 </div>
 
@@ -688,14 +746,13 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                 />
             </div>
 
-            {/* MODAL DE COMBINACIÓN PORTALEADO CON Z-INDEX SUPERIOR Y SIN OVERFLOW HORIZONTAL */}
+            {/* MODAL DE COMBINACIÓN */}
             <Modal
                 open={combinationModalOpen}
                 onClose={() => setCombinationModalOpen(false)}
                 title={editingSkuId ? 'Editar combinación' : 'Añadir combinación'}
                 disableClose={isSubmittingCombo}
                 size="md"
-                overlayClassName="comboModalHighZIndex"
                 actions={
                     <>
                         <button
@@ -703,7 +760,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             className={styles.cancelBtn}
                             disabled={isSubmittingCombo}
                             onClick={() => setCombinationModalOpen(false)}
-                            style={{ minHeight: '48px', fontSize: '15px' }}
                         >
                             Cancelar
                         </button>
@@ -712,35 +768,52 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                             className={styles.submitBtn}
                             onClick={handleCreateCombination}
                             disabled={isSubmittingCombo || isComboFormInvalid}
-                            style={{ minHeight: '48px', fontSize: '15px' }}
                         >
                             {isSubmittingCombo ? 'Guardando...' : (editingSkuId ? 'Guardar cambios' : 'Crear')}
                         </button>
                     </>
                 }
             >
-                <div className={`${styles.modalFieldsContainer} modalFieldsContainerResponsive`}>
+                <div className={`${styles.modalFieldsContainer} comboModalFieldsContainerMobile`}>
                     {(!form.variants || form.variants.length === 0) && (
                         <p className={styles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
                     )}
 
+                    {/* SELECTORES DE ATRIBUTOS (FICHAS TÁCTILES SI <= 6 OPCIONES, DROPDOWN SI > 6) */}
                     {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => {
                         const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
+                        const selectedVal = combinationAttrs[group.name] ?? '';
+                        const useChips = group.values.length <= 6;
+
                         return (
                             <div key={group.id} className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
-                                <label className={styles.label} htmlFor={`modal-select-${group.id}`}>{group.name} *</label>
-                                <select
-                                    id={`modal-select-${group.id}`}
-                                    className={`${styles.input} ${isAttrMissing ? styles.inputError : ''}`}
-                                    value={combinationAttrs[group.name] ?? ''}
-                                    onChange={e => setCombinationAttrs((prev: Record<string, string>) => ({ ...prev, [group.name]: e.target.value }))}
-                                    style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
-                                >
-                                    <option value="">-- Seleccionar --</option>
-                                    {group.values.map((value: string) => (
-                                        <option key={value} value={value}>{value}</option>
-                                    ))}
-                                </select>
+                                <label className={styles.label}>{group.name} *</label>
+
+                                {useChips ? (
+                                    <div className="comboAttrChipsRowMobile">
+                                        {group.values.map((value: string) => {
+                                            const isSelected = selectedVal === value;
+                                            return (
+                                                <button
+                                                    key={value}
+                                                    type="button"
+                                                    className={`comboAttrChipMobile ${isSelected ? 'comboAttrChipSelectedMobile' : ''}`}
+                                                    onClick={() => setCombinationAttrs((prev: Record<string, string>) => ({ ...prev, [group.name]: value }))}
+                                                >
+                                                    {value}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <Dropdown
+                                        options={group.values.map(v => ({ value: v, label: v }))}
+                                        value={selectedVal}
+                                        onChange={(val) => setCombinationAttrs((prev: Record<string, string>) => ({ ...prev, [group.name]: val }))}
+                                        placeholder="-- Seleccionar --"
+                                    />
+                                )}
+
                                 {isAttrMissing && (
                                     <span className={styles.errorText}>Tenés que seleccionar un valor para {group.name}.</span>
                                 )}
@@ -749,24 +822,20 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     })}
 
                     <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
-                        <label htmlFor="combination-sku-tab" className={styles.label}>SKU *</label>
+                        <label htmlFor="modal-sku-tab-input" className={styles.label}>SKU *</label>
                         <input
-                            id="combination-sku-tab"
-                            className={`${styles.input} ${(combinationErrors.sku || (submitComboAttempted && !combinationSku.trim())) ? styles.inputError : ''}`}
+                            id="modal-sku-tab-input"
+                            className={`${styles.input} comboModalInputMobile ${(submitComboAttempted && combinationErrors.sku) ? styles.inputError : ''}`}
                             value={combinationSku}
-                            onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
-                            onBlur={() => runCombinationValidation()}
-                            style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
+                            onChange={e => { setCombinationSku(e.target.value); if (submitComboAttempted) runCombinationValidation(); }}
+                            onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
                         />
-                        {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
-                        {!combinationErrors.sku && submitComboAttempted && !combinationSku.trim() && (
-                            <div className={styles.errorText}>El campo SKU es obligatorio.</div>
-                        )}
+                        {submitComboAttempted && combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
                     </div>
 
                     <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
-                        <label htmlFor="combination-images-tab" className={styles.label}>Imágenes</label>
-                        <div style={{ marginTop: '8px', width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                        <label htmlFor="modal-images-uploader" className={styles.label}>Imágenes</label>
+                        <div id="modal-images-uploader" style={{ marginTop: '8px', width: '100%', boxSizing: 'border-box' }}>
                             <ImageUploader onAddFiles={addFiles} onReject={(rej) => rej.forEach(r => toast.error(`${r.file.name}: ${r.reason}`))} />
                             <ImagePreviewList
                                 items={uploadedFiles}
@@ -775,51 +844,49 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                 onSetPrimary={setPrimary}
                             />
                         </div>
-                        {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
+                        {submitComboAttempted && combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
                     </div>
 
-                    <div className={`modalRowFieldsResponsive`}>
-                        <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
-                            <label htmlFor="combination-price-tab" className={styles.label}>Precio</label>
+                    <div className="comboModalRowFieldsMobile">
+                        <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
+                            <label htmlFor="modal-price-tab-input" className={styles.label}>Precio</label>
                             <input
-                                id="combination-price-tab"
+                                id="modal-price-tab-input"
                                 type="number"
                                 step="0.01"
-                                className={`${styles.input} ${combinationErrors.price ? styles.inputError : ''}`}
+                                className={`${styles.input} comboModalInputMobile ${submitComboAttempted && combinationErrors.price ? styles.inputError : ''}`}
                                 value={combinationPrice === '' ? '' : String(combinationPrice)}
                                 onChange={e => {
                                     setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
-                                    runCombinationValidation();
+                                    if (submitComboAttempted) runCombinationValidation();
                                 }}
-                                onBlur={() => runCombinationValidation()}
-                                style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
+                                onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
                             />
-                            {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
+                            {submitComboAttempted && combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
                         </div>
 
-                        <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
-                            <label htmlFor="combination-stock-tab" className={styles.label}>Stock</label>
+                        <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
+                            <label htmlFor="modal-stock-tab-input" className={styles.label}>Stock</label>
                             <input
-                                id="combination-stock-tab"
+                                id="modal-stock-tab-input"
                                 type="number"
-                                className={styles.input}
+                                className={`${styles.input} comboModalInputMobile`}
                                 value={combinationStock === '' ? '' : String(combinationStock)}
                                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
-                                style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
                             />
                         </div>
                     </div>
+
                     <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
-                        <label htmlFor="combination-critical-tab" className={styles.label}>Umbral stock crítico</label>
+                        <label htmlFor="modal-threshold-tab-input" className={styles.label}>Umbral stock crítico</label>
                         <input
-                            id="combination-critical-tab"
+                            id="modal-threshold-tab-input"
                             type="number"
-                            className={`${styles.input} ${combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
+                            className={`${styles.input} comboModalInputMobile ${submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
                             value={combinationCriticalThreshold === '' ? '' : String(combinationCriticalThreshold)}
                             onChange={e => setCombinationCriticalThreshold(e.target.value === '' ? '' : Number(e.target.value))}
-                            style={{ minHeight: '44px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
                         />
-                        {combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
+                        {submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
                             <div className={styles.errorText}>El umbral no puede ser negativo.</div>
                         )}
                     </div>

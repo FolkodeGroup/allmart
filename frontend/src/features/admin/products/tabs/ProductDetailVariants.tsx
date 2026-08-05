@@ -15,6 +15,7 @@ import { VariantEditModal } from '../../variants/components/VariantEditModal';
 import { CombinationsTable } from '../../variants/components/CombinationTable';
 import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 import { Modal } from '../../../../components/ui/Modal';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 interface ProductDetailVariantsProps {
   productId: string;
@@ -502,14 +503,13 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   return (
     <div className={`${styles.container} pdVariantsContainer`}>
       <style>{`
-        /* 🟢 APLANAMIENTO DE CONTENEDORES EN MÓVIL (<768px) */
+        /* 🟢 APLANAMIENTO Y ELIMINACIÓN DE OVERFLOW EN MÓVIL (<768px) */
         @media (max-width: 767px) {
           .pdVariantsContainer {
             padding: 0 !important;
             background: transparent !important;
           }
 
-          /* Elimina bordes y fondos de las secciones para evitar cajas nidadas */
           .pdVariantsContainer section {
             background: transparent !important;
             border: none !important;
@@ -566,6 +566,99 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
+          }
+
+          /* ESTILIZADO DE INPUTS Y CONTENEDOR EN MODAL MÓVIL */
+          .comboModalFieldsContainerMobile {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow-x: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 14px !important;
+          }
+
+          .comboModalFieldsContainerMobile * {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .comboModalRowFieldsMobile {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .comboModalRowFieldsMobile > * {
+            min-width: 0 !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .comboModalInputMobile {
+            min-height: 44px !important;
+            font-size: 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            background-color: var(--color-bg-primary, #111827) !important;
+            border: 1px solid var(--color-border, #374151) !important;
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            color: var(--color-text-primary, #ffffff) !important;
+            outline: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+          }
+
+          .comboModalInputMobile:focus {
+            border-color: var(--color-primary, #769282) !important;
+            box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.25) !important;
+          }
+
+          .comboModalInputMobile.inputError {
+            border-color: #ef4444 !important;
+          }
+
+          /* CHIPS TÁCTILES PARA OPCIONES DE ATRIBUTOS */
+          .comboAttrChipsRowMobile {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+            margin-top: 6px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .comboAttrChipMobile {
+            min-height: 44px !important;
+            padding: 8px 16px !important;
+            border-radius: 22px !important;
+            border: 1px solid var(--color-border, #374151) !important;
+            background: var(--color-bg-secondary, #28353d) !important;
+            color: var(--color-text-primary, #ffffff) !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.15s ease !important;
+            user-select: none !important;
+          }
+
+          .comboAttrChipSelectedMobile {
+            background: var(--color-primary, #769282) !important;
+            border-color: var(--color-primary, #769282) !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(118, 146, 130, 0.4) !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .comboModalRowFieldsMobile {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
@@ -742,27 +835,46 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           </>
         }
       >
-        <div className={styles.modalFieldsContainer}>
+        <div className={`${styles.modalFieldsContainer} comboModalFieldsContainerMobile`}>
           {(!variants || variants.length === 0) && (
             <p className={commonStyles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
           )}
 
-          {/* SELECTS DE ATRIBUTOS */}
+          {/* SELECTORES DE ATRIBUTOS (FICHAS TÁCTILES SI <= 6 OPCIONES, DROPDOWN SI > 6) */}
           {variants.map((group) => {
             const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
+            const selectedVal = combinationAttrs[group.name] ?? '';
+            const useChips = group.values.length <= 6;
+
             return (
-              <div key={group.id} className={styles.field}>
+              <div key={group.id} className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
                 <label className={styles.label}>{group.name} *</label>
-                <select
-                  className={`${styles.input} ${isAttrMissing ? styles.inputError : ''}`}
-                  value={combinationAttrs[group.name] ?? ''}
-                  onChange={e => setCombinationAttrs(prev => ({ ...prev, [group.name]: e.target.value }))}
-                >
-                  <option value="">-- Seleccionar --</option>
-                  {group.values.map(value => (
-                    <option key={value} value={value}>{value}</option>
-                  ))}
-                </select>
+
+                {useChips ? (
+                  <div className="comboAttrChipsRowMobile">
+                    {group.values.map((value) => {
+                      const isSelected = selectedVal === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          className={`comboAttrChipMobile ${isSelected ? 'comboAttrChipSelectedMobile' : ''}`}
+                          onClick={() => setCombinationAttrs(prev => ({ ...prev, [group.name]: value }))}
+                        >
+                          {value}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <Dropdown
+                    options={group.values.map(v => ({ value: v, label: v }))}
+                    value={selectedVal}
+                    onChange={(val) => setCombinationAttrs(prev => ({ ...prev, [group.name]: val }))}
+                    placeholder="-- Seleccionar --"
+                  />
+                )}
+
                 {isAttrMissing && (
                   <span className={styles.errorText}>Tenés que seleccionar un valor para {group.name}.</span>
                 )}
@@ -771,25 +883,22 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
           })}
 
           {/* SKU */}
-          <div className={styles.field}>
+          <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
             <label htmlFor="combination-sku" className={styles.label}>SKU *</label>
             <input
               id="combination-sku"
-              className={`${styles.input} ${(combinationErrors.sku || (submitComboAttempted && !combinationSku.trim())) ? styles.inputError : ''}`}
+              className={`${styles.input} comboModalInputMobile ${(submitComboAttempted && combinationErrors.sku) ? styles.inputError : ''}`}
               value={combinationSku}
-              onChange={e => { setCombinationSku(e.target.value); runCombinationValidation(); }}
-              onBlur={() => runCombinationValidation()}
+              onChange={e => { setCombinationSku(e.target.value); if (submitComboAttempted) runCombinationValidation(); }}
+              onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
             />
-            {combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
-            {!combinationErrors.sku && submitComboAttempted && !combinationSku.trim() && (
-              <div className={styles.errorText}>El campo SKU es obligatorio.</div>
-            )}
+            {submitComboAttempted && combinationErrors.sku && <div className={styles.errorText}>{combinationErrors.sku}</div>}
           </div>
 
           {/* Imágenes */}
-          <div className={styles.field}>
+          <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
             <label htmlFor="combination-images" className={styles.label}>Imágenes</label>
-            <div style={{ marginTop: '8px' }}>
+            <div style={{ marginTop: '8px', width: '100%', boxSizing: 'border-box' }}>
               <ImageUploader onAddFiles={addFiles} onReject={(rej) => rej.forEach(r => toast.error(`${r.file.name}: ${r.reason}`))} />
               <ImagePreviewList
                 items={uploadedFiles}
@@ -798,49 +907,49 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 onSetPrimary={setPrimary}
               />
             </div>
-            {combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
+            {submitComboAttempted && combinationErrors.images && <div className={styles.errorText}>{combinationErrors.images}</div>}
           </div>
 
-          <div className={styles.modalRowFields}>
-            <div className={styles.field}>
+          <div className="comboModalRowFieldsMobile">
+            <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
               <label htmlFor="combination-price" className={styles.label}>Precio</label>
               <input
                 id="combination-price"
                 type="number"
                 step="0.01"
-                className={`${styles.input} ${combinationErrors.price ? styles.inputError : ''}`}
+                className={`${styles.input} comboModalInputMobile ${(submitComboAttempted && combinationErrors.price) ? styles.inputError : ''}`}
                 value={combinationPrice === '' ? '' : String(combinationPrice)}
                 onChange={e => {
                   setCombinationPrice(e.target.value === '' ? '' : Number(e.target.value));
-                  runCombinationValidation();
+                  if (submitComboAttempted) runCombinationValidation();
                 }}
-                onBlur={() => runCombinationValidation()}
+                onBlur={() => { if (submitComboAttempted) runCombinationValidation(); }}
               />
-              {combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
+              {submitComboAttempted && combinationErrors.price && <div className={styles.errorText}>{combinationErrors.price}</div>}
             </div>
 
-            <div className={styles.field}>
+            <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
               <label htmlFor="combination-stock" className={styles.label}>Stock</label>
               <input
                 id="combination-stock"
                 type="number"
-                className={styles.input}
+                className={`${styles.input} comboModalInputMobile`}
                 value={combinationStock === '' ? '' : String(combinationStock)}
                 onChange={e => setCombinationStock(e.target.value === '' ? '' : Number(e.target.value))}
               />
             </div>
           </div>
 
-          <div className={styles.field}>
+          <div className={styles.field} style={{ width: '100%', boxSizing: 'border-box' }}>
             <label htmlFor="combination-critical" className={styles.label}>Umbral stock crítico</label>
             <input
               id="combination-critical"
               type="number"
-              className={`${styles.input} ${combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
+              className={`${styles.input} comboModalInputMobile ${submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 ? styles.inputError : ''}`}
               value={combinationCriticalThreshold === '' ? '' : String(combinationCriticalThreshold)}
               onChange={e => setCombinationCriticalThreshold(e.target.value === '' ? '' : Number(e.target.value))}
             />
-            {combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
+            {submitComboAttempted && combinationCriticalThreshold !== '' && Number(combinationCriticalThreshold) < 0 && (
               <div className={styles.errorText}>El umbral no puede ser negativo.</div>
             )}
           </div>
