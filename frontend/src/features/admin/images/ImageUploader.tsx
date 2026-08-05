@@ -46,47 +46,65 @@ export default function ImageUploader({
     }
 
     return (
-        <div style={{
-            border: '2px dashed var(--color-border, #4b5563)',
-            padding: '12px 14px',
-            borderRadius: '10px',
-            backgroundColor: 'var(--color-bg-secondary, #28353d)',
-            boxSizing: 'border-box',
-            maxWidth: '100%',
-            width: '100%',
-            overflow: 'hidden',
-        }}>
+        <div
+            style={{
+                border: '2px dashed var(--color-border, #374151)',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                backgroundColor: 'var(--color-bg-secondary, #28353d)',
+                boxSizing: 'border-box',
+                maxWidth: '100%',
+                width: '100%',
+                overflow: 'hidden',
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s ease, background-color 0.2s ease',
+            }}
+            onClick={() => inputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && inputRef.current?.click()}
+        >
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
+                alignItems: 'center',
                 gap: '8px',
                 width: '100%',
                 boxSizing: 'border-box',
             }}>
                 <div style={{
+                    fontSize: '22px',
+                    color: 'var(--color-primary, #769282)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}>
+                    <i className="bi bi-cloud-arrow-up-fill" />
+                </div>
+                <div style={{
                     fontSize: '13px',
+                    fontWeight: 600,
                     color: 'var(--color-text-primary, #ffffff)',
                     wordBreak: 'break-word',
                     lineHeight: '1.4',
                 }}>
-                    Arrastrá y soltá imágenes aquí o seleccioná archivos
+                    Arrastrá y soltá imágenes aquí o hacé clic para explorar
                 </div>
-                <div style={{ width: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
-                    <input
-                        ref={inputRef}
-                        type="file"
-                        multiple={multiple}
-                        accept={accept.join(',')}
-                        onChange={onFilesSelected}
-                        style={{
-                            maxWidth: '100%',
-                            width: '100%',
-                            boxSizing: 'border-box',
-                            fontSize: '13px',
-                            color: 'var(--color-text-secondary, #9ca3af)',
-                        }}
-                    />
+                <div style={{
+                    fontSize: '12px',
+                    color: 'var(--color-text-secondary, #9ca3af)',
+                }}>
+                    JPG, PNG, WebP (máx. 5 MB)
                 </div>
+                <input
+                    ref={inputRef}
+                    type="file"
+                    multiple={multiple}
+                    accept={accept.join(',')}
+                    onChange={onFilesSelected}
+                    style={{ display: 'none' }}
+                />
             </div>
         </div>
     );
