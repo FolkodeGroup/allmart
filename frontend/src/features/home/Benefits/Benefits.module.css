@@ -31,7 +31,7 @@
   align-items: center;
   justify-content: center;
   font-size: var(--text-2xl);
-  color: var(--color-primary);
+  color: #2c4135; /* same color as navbar text */
   transition: all var(--transition-base);
 }
 
