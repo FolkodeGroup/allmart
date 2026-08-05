@@ -33,7 +33,7 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
-const PAGE_LIMIT = 8; // Límite optimizado para vista móvil y tarjetas más amplias
+const PAGE_LIMIT = 8;
 
 export function AdminProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,6 +44,7 @@ export function AdminProducts() {
 
   // Form management
   const [editId, setEditId] = useState<string | null>(null);
+  const [editPage, setEditPage] = useState<number>(1);
 
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const resetUnsavedChangesFn = () => { };
@@ -78,27 +79,6 @@ export function AdminProducts() {
   const isFirstRender = useRef(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // ─── Resetear de forma limpia la vista y solicitar el listado completo de productos ───
-  const handleResetToListWithAllProducts = useCallback(() => {
-    setSearch('');
-    setCategoryFilter('');
-    setStatusFilter('all');
-    setStockLevelFilter('all');
-    setEditId(null);
-    setViewMode('list');
-
-    // Cargar todos los productos de forma limpia
-    refreshProducts({
-      q: '',
-      categoryId: '',
-      status: 'all',
-      stockLevel: 'all',
-      page: 1,
-      limit: PAGE_LIMIT,
-    });
-  }, [refreshProducts]);
-
-  // Auto-abrir formulario si existe el parámetro 'edit' en la URL
   useEffect(() => {
     const editParam = searchParams.get('edit');
     if (editParam && !editId) {
@@ -197,11 +177,11 @@ export function AdminProducts() {
     }
   }, [products]);
 
-  // Preservación del scroll
+  // Scroll preservation
   const containerRef = useRef<HTMLElement>(null);
   useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'products-master-detail', [apiPage, search, categoryFilter, statusFilter, stockLevelFilter, sortField, sortDirection]);
 
-  // Modal de advertencia por cambios sin guardar
+  // Unsaved changes warning
   const {
     showWarning,
     interceptNavigation,
@@ -212,11 +192,11 @@ export function AdminProducts() {
     onConfirmExit: () => {
       resetUnsavedChangesFn();
       setUnsavedChanges(false);
-      handleResetToListWithAllProducts();
+      setEditId(null);
     },
   });
 
-  // Búsqueda y filtrado
+  // Search & filter
   useEffect(() => {
     const executeFetch = async () => {
       if (search && search.trim().length > 0) {
@@ -270,7 +250,6 @@ export function AdminProducts() {
     }
   }, [search, categoryFilter, statusFilter, stockLevelFilter, refreshProducts]);
 
-  // Filtrado del lado del cliente por nombre o SKU
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return products;
@@ -285,7 +264,6 @@ export function AdminProducts() {
     { value: 'category', label: 'Categoría' },
   ], []);
 
-  // Ordenamiento
   const sortedProducts = useMemo(() => {
     const ordered = [...filteredProducts];
 
@@ -310,8 +288,6 @@ export function AdminProducts() {
     return ordered;
   }, [filteredProducts, sortField, sortDirection]);
 
-  // === HANDLERS DE EDICIÓN Y CREACIÓN ===
-
   const handleNew = useCallback(() => {
     if (unsavedChanges) {
       interceptNavigation(() => {
@@ -326,12 +302,13 @@ export function AdminProducts() {
 
   const handleEdit = useCallback((id: string) => {
     if (unsavedChanges) {
-      interceptNavigation(() => { setEditId(id); setViewMode('form'); });
+      interceptNavigation(() => { setEditId(id); setEditPage(apiPage); setViewMode('form'); });
     } else {
       setEditId(id);
+      setEditPage(apiPage);
       setViewMode('form');
     }
-  }, [unsavedChanges, interceptNavigation]);
+  }, [unsavedChanges, interceptNavigation, apiPage]);
 
   const handleDelete = useCallback((id: string) => {
     const productToDelete = products.find(p => p.id === id);
@@ -379,6 +356,46 @@ export function AdminProducts() {
       className={`${sectionStyles.page} ${styles.productsPage} ${isMobileDetailOpen ? styles.mobileDetailActive : ''} dark:bg-gray-900 dark:text-gray-100`}
       aria-label="Gestión de productos"
     >
+      <style>{`
+        /* 🟢 AISLAMIENTO ESTRICTO DE ESCRITORIO */
+        @media (min-width: 768px) {
+          .actionsBarDesktop {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            width: 100% !important;
+            margin-bottom: 16px !important;
+          }
+          .exportBtnContainerDesktop {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+          .sortContainerDesktop {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+        }
+        @media (max-width: 767px) {
+          .actionsBarDesktop {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            width: 100% !important;
+            gap: 12px !important;
+            margin-bottom: 16px !important;
+          }
+          .exportBtnContainerDesktop {
+            width: 100% !important;
+          }
+          .sortContainerDesktop {
+            width: 100% !important;
+          }
+        }
+      `}</style>
+
       {viewMode === 'list' && (
         <>
           {/* Contenedor de herramientas de lista */}
@@ -410,8 +427,8 @@ export function AdminProducts() {
           ) : (
             <>
               {!error && (products.length > 0 || loading) && (
-                <div className={`${styles.actionsBar} ${styles.listToolbarArea}`} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
-                  <div className={styles.exportBtnContainer}>
+                <div className={`${styles.actionsBar} ${styles.listToolbarArea} actionsBarDesktop`} style={{ opacity: loading && products.length > 0 ? 0.6 : 1, pointerEvents: loading ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                  <div className={`${styles.exportBtnContainer} exportBtnContainerDesktop`}>
                     <ExportButtons
                       onExportCSV={handleExportCSV}
                       onExportExcel={handleExportExcel}
@@ -420,7 +437,7 @@ export function AdminProducts() {
                     />
                   </div>
 
-                  <div className={styles.sortContainer}>
+                  <div className={`${styles.sortContainer} sortContainerDesktop`}>
                     <div className={styles.sortControls}>
                       <span className={styles.sortLabel}>Ordenar:</span>
                       <div className={styles.sortDropdownWrapper}>
@@ -486,7 +503,7 @@ export function AdminProducts() {
                   />
 
                   {total > PAGE_LIMIT && (
-                    <div className={styles.listToolbarArea}>
+                    <div className={styles.listToolbarArea} style={{ marginTop: '16px' }}>
                       <AdminPagination
                         page={apiPage}
                         totalPages={apiTotalPages}
@@ -529,11 +546,21 @@ export function AdminProducts() {
       {viewMode === 'form' && (
         <AdminProductFormPage
           productId={editId}
-          onBack={handleResetToListWithAllProducts}
+          onBack={() => {
+            setViewMode('list');
+            setEditId(null);
+          }}
           onSuccess={() => {
+            setViewMode('list');
             setUnsavedChanges(false);
-            handleResetToListWithAllProducts();
-            toast.success('Producto guardado con éxito');
+            refreshProducts({
+              q: search,
+              categoryId: categoryFilter,
+              status: statusFilter,
+              stockLevel: stockLevelFilter,
+              page: editPage,
+              limit: PAGE_LIMIT,
+            });
           }}
           onUnsavedChanges={setUnsavedChanges}
         />

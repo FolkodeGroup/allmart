@@ -29,6 +29,7 @@ interface ProductDetailPanelProps {
   canEdit?: boolean;
   canDelete?: boolean;
   onBack?: () => void;
+  isMobileActive?: boolean;
 }
 
 const TAB_LABELS: Record<Exclude<TabName, 'seo'>, string> = {
@@ -47,6 +48,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   canEdit = true,
   canDelete = true,
   onBack,
+  isMobileActive = true,
 }: ProductDetailPanelProps) {
   const { updateProduct } = useAdminProducts();
   const [activeTab, setActiveTab] = useState<TabName>('basic');
@@ -58,7 +60,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   });
   const [isSavingStatus, setIsSavingStatus] = useState(false);
 
-  // Refs para gestos táctiles (Swipe)
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -70,7 +71,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     });
   }, [product.inStock, product.isFeatured]);
 
-  // Centrar automáticamente el botón de la pestaña activa en la cabecera
   useEffect(() => {
     const activeBtn = tabButtonRefs.current[activeTab];
     if (activeBtn && typeof activeBtn.scrollIntoView === 'function') {
@@ -119,7 +119,6 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     setShowDeleteModal(false);
   }, []);
 
-  // ── Gestos de deslizamiento horizontal (Swipe Tabs) ──────────────────
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -178,8 +177,10 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
 
   const currentTabIndex = TAB_ORDER.indexOf(activeTab as Exclude<TabName, 'seo'>);
 
+  // 🟢 RENDERIZADO CONDICIONAL DE ACCIONES MÓVILES: Solo cuando la vista de detalle está realmente activa en móvil
   const renderMobileActions = () => {
     if (!canEdit && !canDelete) return null;
+    if (!isMobileActive) return null;
 
     const actionsMarkup = (
       <div className={styles.mobileActionsOverlay}>
@@ -214,19 +215,15 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     <div className={`${styles.panel} pdPanelMobileSingleScroll`}>
       <style>{`
         @media (max-width: 1023px) {
-          /* Eliminación del espacio gris excesivo al final de la tarjeta */
           .pdPanelMobileSingleScroll {
             height: auto !important;
-            min-height: 0 !important;
             max-height: none !important;
             overflow-y: visible !important;
             padding-left: 6px !important;
             padding-right: 6px !important;
-            padding-bottom: 16px !important; /* Padding compacto interno */
-            margin-bottom: 84px !important;  /* Margen externo para dejar espacio a la barra fija */
+            padding-bottom: 110px !important;
           }
 
-          /* Barra 'Volver' pegajosa en móvil */
           .stickyMobileBackBar {
             position: sticky;
             top: 0;
@@ -285,7 +282,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       )}
 
-      {/* Tarjeta de Cabecera Unificada (Info + Pestañas) */}
+      {/* Tarjeta de Cabecera Unificada */}
       <div className={`${styles.headerCard} pdHeaderCardMobile`}>
         <div className={styles.panelHeader}>
           <div className={styles.headerContent}>

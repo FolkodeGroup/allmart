@@ -75,9 +75,10 @@ function MasterDetailLayoutInner({
         canEdit={canEdit}
         canDelete={canDelete}
         onBack={handleBackToList}
+        isMobileActive={mobileView === 'detail'}
       />
     );
-  }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete, handleBackToList]);
+  }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete, handleBackToList, mobileView]);
 
   return (
     <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailMobileContainer`}>
@@ -86,7 +87,6 @@ function MasterDetailLayoutInner({
           .masterDetailMobileContainer,
           .masterDetailMobileContainer .detailWrapper {
             height: auto !important;
-            min-height: 0 !important;
             max-height: none !important;
             overflow-y: visible !important;
           }
