@@ -26,11 +26,9 @@
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: var(--space-5, 20px);
-  background: linear-gradient(
-    135deg,
-    var(--color-primary, #769282) 0%,
-    var(--color-accent, #ddb08c) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-primary, #769282) 0%,
+      var(--color-accent, #ddb08c) 100%);
 }
 
 .banner img {
@@ -98,14 +96,32 @@
 }
 
 .viewAll:hover {
-  color: var(--color-primary-dark, #5d7568);
   gap: 8px;
 }
 
 .viewAll:focus-visible {
-  outline: 2px solid var(--color-primary, #769282);
+  outline: 2px solid currentColor;
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/* ── Sobre fondo verde: texto blanco ── */
+:global(.collection-section--primary) .viewAll {
+  color: var(--color-text-inverse, #ffffff);
+}
+
+:global(.collection-section--primary) .viewAll:hover {
+  color: var(--color-text-inverse, #ffffff);
+  opacity: 0.85;
+}
+
+/* ── Sobre fondo blanco: texto verde oscuro ── */
+:global(.collection-section--inverse) .viewAll {
+  color: var(--color-primary, #769282);
+}
+
+:global(.collection-section--inverse) .viewAll:hover {
+  color: var(--color-primary-dark, #5d7568);
 }
 
 /* ── Wrapper del carrusel: flechas + viewport en línea ── */
@@ -321,6 +337,7 @@
 }
 
 @media (max-width: 767px) {
+
   /* En mobile: el wrapper no necesita flechas */
   .carouselWrapper {
     gap: 0;
@@ -414,7 +431,7 @@
 .carousel {
   position: relative;
   padding: 0 56px;
-  
+
 }
 
 .carouselStatic {
