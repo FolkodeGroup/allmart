@@ -108,7 +108,7 @@ const RowMenu: React.FC<RowMenuProps> = ({ onEdit, onDelete }) => {
                 aria-haspopup="true"
                 aria-expanded={open}
                 aria-label="Acciones de la combinación"
-                style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ minWidth: '40px', minHeight: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
             >
                 <MoreVertical size={18} />
             </button>
@@ -168,6 +168,7 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
     return (
         <>
             <style>{`
+                /* AISLAMIENTO ESTRICTO: Vistas según breakpoint */
                 .combTableDesktopView {
                     display: block;
                 }
@@ -181,143 +182,114 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                     .combCardsMobileView {
                         display: flex !important;
                         flex-direction: column;
-                        gap: 12px;
-                        margin-top: 12px;
+                        gap: 8px;
+                        margin-top: 10px;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
                     }
                 }
+
+                /* ESTILOS EXCLUSIVOS MÓVIL (APLANADO DE CONTENEDORES Y MATRIZ 2x2) */
                 .combMobileCard {
                     background: var(--color-bg-secondary, #28353d);
                     border: 1px solid var(--color-border, #374151);
-                    border-radius: 12px;
-                    padding: 14px 16px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                }
-                .combMobileCardHeader {
+                    border-radius: 10px;
+                    padding: 10px 12px;
                     display: flex;
                     align-items: center;
-                    justify-content: space-between;
                     gap: 12px;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+                    box-sizing: border-box;
+                    width: 100%;
                 }
                 .combMobileMedia {
                     flex-shrink: 0;
                 }
                 .combMobileThumb {
-                    width: 52px;
-                    height: 52px;
-                    border-radius: 10px;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 8px;
                     object-fit: cover;
                     background: var(--color-bg-primary, #111827);
                     border: 1px solid var(--color-border, #374151);
                     display: block;
                 }
                 .combMobileNoThumb {
-                    width: 52px;
-                    height: 52px;
-                    border-radius: 10px;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 8px;
                     background: var(--color-bg-primary, #111827);
                     border: 1px solid var(--color-border, #374151);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 16px;
+                    font-size: 14px;
                     color: var(--color-text-secondary, #9ca3af);
                 }
-                .combMobileMainInfo {
+                .combMobileMain {
                     flex: 1;
                     min-width: 0;
                     display: flex;
                     flex-direction: column;
-                    gap: 4px;
+                    gap: 3px;
                 }
-                .combMobileAttrChips {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 6px;
-                }
-                .combMobileChip {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 4px;
-                    padding: 4px 10px;
-                    background: rgba(118, 146, 130, 0.18);
-                    border: 1px solid rgba(118, 146, 130, 0.3);
-                    border-radius: 16px;
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: var(--color-text-primary, #ffffff);
-                }
-                .combMobileSkuLine {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-size: 12px;
-                }
-                .combMobileSkuLabel {
-                    color: var(--color-text-secondary, #9ca3af);
-                    font-weight: 500;
-                }
-                .combMobileSkuCode {
-                    font-family: monospace;
-                    font-weight: 700;
-                    color: var(--color-text-primary, #ffffff);
-                    font-size: 12px;
-                    word-break: break-all;
-                }
-                .combMobileActionArea {
-                    flex-shrink: 0;
-                }
-                .combMobileCardFooter {
+                .combMobileTopRow {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    padding-top: 10px;
-                    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+                    gap: 8px;
                 }
-                .combMobilePrice {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2px;
-                }
-                .combMobilePriceLabel {
-                    font-size: 10px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    color: var(--color-text-secondary, #9ca3af);
-                }
-                .combMobilePriceVal {
-                    font-size: 16px;
+                .combMobileAttrTitle {
+                    font-size: 14px;
                     font-weight: 700;
                     color: var(--color-text-primary, #ffffff);
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
-                .combStockBadgeOk {
-                    display: inline-flex;
-                    align-items: center;
-                    padding: 4px 10px;
-                    border-radius: 12px;
-                    font-size: 12px;
+                .combMobilePrice {
+                    font-size: 15px;
                     font-weight: 700;
-                    background: rgba(16, 185, 129, 0.15);
+                    color: var(--color-text-primary, #ffffff);
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+                .combMobileBottomRow {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                }
+                .combMobileSku {
+                    font-family: monospace;
+                    font-size: 12px;
+                    color: var(--color-text-secondary, #9ca3af);
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .combMobileStockBadge {
+                    font-size: 12px;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+                .combMobileStockOk {
                     color: #10b981;
-                    border: 1px solid rgba(16, 185, 129, 0.3);
                 }
-                .combStockBadgeZero {
-                    display: inline-flex;
-                    align-items: center;
-                    padding: 4px 10px;
-                    border-radius: 12px;
-                    font-size: 12px;
-                    font-weight: 700;
-                    background: rgba(239, 68, 68, 0.15);
+                .combMobileStockLow {
+                    color: #f59e0b;
+                }
+                .combMobileStockOut {
                     color: #ef4444;
-                    border: 1px solid rgba(239, 68, 68, 0.3);
+                }
+                .combMobileActionWrap {
+                    flex-shrink: 0;
+                    margin-left: -4px;
                 }
             `}</style>
 
-            {/* VISTA DESKTOP: TABLA TRADICIONAL */}
+            {/* VISTA DESKTOP: TABLA TRADICIONAL INALTERADA */}
             <div className={`${styles.tableWrapper} combTableDesktopView`}>
                 <table className={styles.table}>
                     <thead>
@@ -432,11 +404,15 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                 </table>
             </div>
 
-            {/* VISTA MÓVIL: TARJETAS FLUIDAS Y LIMPIAS (SIN MATRIOSHKA) */}
+            {/* VISTA MÓVIL EXCLUSIVA (<768px): ESTRUCTURA APLANADA Y MATRIZ 2x2 */}
             <div className="combCardsMobileView">
-                {skus.map(s => (
-                    <div key={s.id} className="combMobileCard">
-                        <div className="combMobileCardHeader">
+                {skus.map(s => {
+                    const attrSummary = Object.entries(s.attributes || {})
+                        .map(([k, v]) => `${k.replace(/[:\s]+$/, '')}: ${v}`)
+                        .join(' · ') || 'Variante';
+
+                    return (
+                        <div key={s.id} className="combMobileCard">
                             <div className="combMobileMedia">
                                 {Array.isArray(s.images) && s.images.length > 0 ? (
                                     <img src={s.images[0]} alt={s.sku ?? 'imagen'} className="combMobileThumb" />
@@ -445,47 +421,44 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                 )}
                             </div>
 
-                            <div className="combMobileMainInfo">
-                                <div className="combMobileAttrChips">
-                                    {Object.entries(s.attributes || {}).map(([k, v]) => {
-                                        const cleanKey = k.replace(/[:\s]+$/, '').trim();
-                                        return (
-                                            <span key={k} className="combMobileChip">
-                                                <strong style={{ color: 'var(--color-text-secondary, #9ca3af)' }}>{cleanKey}:</strong> {v}
-                                            </span>
-                                        );
-                                    })}
+                            <div className="combMobileMain">
+                                <div className="combMobileTopRow">
+                                    <span className="combMobileAttrTitle" title={attrSummary}>
+                                        {attrSummary}
+                                    </span>
+                                    <span className="combMobilePrice">
+                                        {typeof s.price === 'number' ? `$${s.price.toLocaleString('es-AR')}` : '—'}
+                                    </span>
                                 </div>
-                                <div className="combMobileSkuLine">
-                                    <span className="combMobileSkuLabel">SKU:</span>
-                                    <code className="combMobileSkuCode">{s.sku ?? '—'}</code>
+
+                                <div className="combMobileBottomRow">
+                                    <span className="combMobileSku">{s.sku ?? 'Sin SKU'}</span>
+                                    <span className={`combMobileStockBadge ${
+                                        typeof s.stock === 'number'
+                                            ? (s.stock === 0 ? "combMobileStockOut" : s.stock <= 5 ? "combMobileStockLow" : "combMobileStockOk")
+                                            : "combMobileStockOut"
+                                    }`}>
+                                        {typeof s.stock === 'number'
+                                            ? (s.stock === 0 ? 'Agotado' : `${s.stock} un.`)
+                                            : '—'}
+                                    </span>
                                 </div>
                             </div>
 
-                            <div className="combMobileActionArea">
+                            <div className="combMobileActionWrap">
                                 <RowMenu onEdit={() => onEdit(s.id)} onDelete={() => onDelete(s.id)} />
                             </div>
                         </div>
+                    );
+                })}
 
-                        <div className="combMobileCardFooter">
-                            <div className="combMobilePrice">
-                                <span className="combMobilePriceLabel">PRECIO</span>
-                                <span className="combMobilePriceVal">
-                                    {typeof s.price === 'number' ? `$${s.price.toLocaleString('es-AR')}` : '—'}
-                                </span>
-                            </div>
-                            <div className="combMobileStock">
-                                <span className={s.stock === 0 ? "combStockBadgeZero" : "combStockBadgeOk"}>
-                                    {typeof s.stock === 'number' ? `${s.stock} un. en stock` : 'Sin stock'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                {localCombinations.map((c, idx) => {
+                    const attrSummary = Object.entries(c.attributes || {})
+                        .map(([k, v]) => `${k.replace(/[:\s]+$/, '')}: ${v}`)
+                        .join(' · ') || 'Variante';
 
-                {localCombinations.map((c, idx) => (
-                    <div key={c.id ?? `local-${idx}`} className={`combMobileCard ${styles.rowOptimistic}`}>
-                        <div className="combMobileCardHeader">
+                    return (
+                        <div key={c.id ?? `local-${idx}`} className={`combMobileCard ${styles.rowOptimistic}`}>
                             <div className="combMobileMedia">
                                 {Array.isArray(c.images) && c.images.length > 0 ? (
                                     <img src={c.images[0]} alt={c.sku ?? 'imagen'} className="combMobileThumb" />
@@ -494,43 +467,24 @@ export const CombinationsTable: React.FC<CombinationsTableProps> = ({
                                 )}
                             </div>
 
-                            <div className="combMobileMainInfo">
-                                <div className="combMobileAttrChips">
-                                    {Object.entries(c.attributes || {}).map(([k, v]) => {
-                                        const cleanKey = k.replace(/[:\s]+$/, '').trim();
-                                        return (
-                                            <span key={k} className="combMobileChip">
-                                                <strong style={{ color: 'var(--color-text-secondary, #9ca3af)' }}>{cleanKey}:</strong> {v}
-                                            </span>
-                                        );
-                                    })}
+                            <div className="combMobileMain">
+                                <div className="combMobileTopRow">
+                                    <span className="combMobileAttrTitle" title={attrSummary}>
+                                        {attrSummary}
+                                    </span>
+                                    <span className="combMobilePrice">
+                                        {typeof c.price === 'number' ? `$${c.price.toLocaleString('es-AR')}` : '—'}
+                                    </span>
                                 </div>
-                                <div className="combMobileSkuLine">
-                                    <span className="combMobileSkuLabel">SKU:</span>
-                                    <code className="combMobileSkuCode">{c.sku ?? '—'}</code>
-                                </div>
-                            </div>
 
-                            <div className="combMobileActionArea">
-                                <span className={styles.savingBadge}>Guardando…</span>
+                                <div className="combMobileBottomRow">
+                                    <span className="combMobileSku">{c.sku ?? 'Sin SKU'}</span>
+                                    <span className={styles.savingBadge}>Guardando…</span>
+                                </div>
                             </div>
                         </div>
-
-                        <div className="combMobileCardFooter">
-                            <div className="combMobilePrice">
-                                <span className="combMobilePriceLabel">PRECIO</span>
-                                <span className="combMobilePriceVal">
-                                    {typeof c.price === 'number' ? `$${c.price.toLocaleString('es-AR')}` : '—'}
-                                </span>
-                            </div>
-                            <div className="combMobileStock">
-                                <span className={c.stock === 0 ? "combStockBadgeZero" : "combStockBadgeOk"}>
-                                    {typeof c.stock === 'number' ? `${c.stock} un. en stock` : 'Sin stock'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </>
     );

@@ -502,15 +502,28 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
   return (
     <div className={`${styles.container} pdVariantsContainer`}>
       <style>{`
+        /* 🟢 APLANAMIENTO DE CONTENEDORES EN MÓVIL (<768px) */
         @media (max-width: 767px) {
           .pdVariantsContainer {
-            padding: 4px 0 16px 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
           }
+
+          /* Elimina bordes y fondos de las secciones para evitar cajas nidadas */
+          .pdVariantsContainer section {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            margin-bottom: 16px !important;
+          }
+
           .pdToolbarResponsive {
-            flex-direction: column !important;
+            flex-direction: column-reverse !important;
             align-items: stretch !important;
             gap: 10px !important;
           }
+
           .pdToolbarResponsive button {
             width: 100% !important;
             min-height: 44px !important;
@@ -518,30 +531,35 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
             align-items: center !important;
             justify-content: center !important;
           }
+
           .pdVariantRowResponsive {
             flex-direction: column !important;
             align-items: stretch !important;
             gap: 10px !important;
             padding: 12px !important;
-            border-radius: 12px !important;
-            background: var(--color-bg-secondary, #f8f9fa) !important;
-            border: 1px solid var(--color-border, #e5e2dd) !important;
+            border-radius: 10px !important;
+            background: var(--color-bg-secondary, #28353d) !important;
+            border: 1px solid var(--color-border, #374151) !important;
           }
+
           .pdVariantRowHeader {
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
             width: 100% !important;
           }
+
           .pdAddValueInputBlock {
             width: 100% !important;
             display: flex !important;
             gap: 8px !important;
           }
+
           .pdAddValueInputBlock input {
             flex: 1 !important;
             min-height: 44px !important;
           }
+
           .pdAddValueInputBlock button {
             min-width: 44px !important;
             min-height: 44px !important;
@@ -666,19 +684,19 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
         <div className={`${styles.combinationsToolbar} pdToolbarResponsive`}>
           <button
             type="button"
-            className={styles.bulkGenerateBtn}
-            onClick={handleBulkGenerate}
-            disabled={!productId || variants.length === 0}
-          >
-            ⚡ Generar matriz de combinaciones
-          </button>
-          <button
-            type="button"
             onClick={openCombinationModal}
             className={styles.addCombinationBtn}
             disabled={!productId}
           >
             + Agregar a mano
+          </button>
+          <button
+            type="button"
+            className={styles.bulkGenerateBtn}
+            onClick={handleBulkGenerate}
+            disabled={!productId || variants.length === 0}
+          >
+            ⚡ Generar matriz de combinaciones
           </button>
         </div>
 
