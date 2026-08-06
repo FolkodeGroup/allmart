@@ -129,8 +129,6 @@ export function ProductSupplierSection({
             return;
         }
 
-        const alreadyPrimary = supplierId === primarySupplierId;
-
         if (!productId) {
             setProductLinks(prev => {
                 if (prev.some(link => link.supplierId === supplierId)) return prev;

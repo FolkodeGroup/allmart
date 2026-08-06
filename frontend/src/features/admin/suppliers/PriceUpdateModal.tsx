@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { DollarSign } from 'lucide-react';
 import { Modal } from '../../../components/ui/Modal';
 import styles from './PriceUpdateModal.module.css';
 
