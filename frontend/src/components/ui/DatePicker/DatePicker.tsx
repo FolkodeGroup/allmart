@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { formatDateLocal } from '../../../utils/date';
 import styles from './DatePicker.module.css';
 
 interface DatePickerProps {
@@ -18,14 +19,13 @@ const MONTHS = [
 
 export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha', disabled = false, id }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // Establecer fecha de referencia para navegación (local)
+  const todayStr = useMemo(() => formatDateLocal(new Date()), []);
+
+  // Establecer fecha de referencia para navegación (local, por defecto hoy)
   const [currentDate, setCurrentDate] = useState(() => {
-    if (value) {
-      const [y, m, d] = value.split('-').map(Number);
-      return new Date(y, m - 1, d);
-    }
-    return new Date();
+    const activeVal = value || todayStr;
+    const [y, m, d] = activeVal.split('-').map(Number);
+    return new Date(y, m - 1, d);
   });
 
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -33,11 +33,10 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
 
   // Sincronizar navegación al cambiar la fecha externa
   useEffect(() => {
-    if (value) {
-      const [y, m, d] = value.split('-').map(Number);
-      setCurrentDate(new Date(y, m - 1, d));
-    }
-  }, [value]);
+    const activeVal = value || todayStr;
+    const [y, m, d] = activeVal.split('-').map(Number);
+    setCurrentDate(new Date(y, m - 1, d));
+  }, [value, todayStr]);
 
   // Cerrar al hacer clic afuera
   useEffect(() => {
@@ -60,17 +59,14 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // Generar matriz de días para el mes actual
   const daysInMonth = useMemo(() => {
     const totalDays = new Date(year, month + 1, 0).getDate();
     const firstDayIndex = new Date(year, month, 1).getDay();
     
     const arr = [];
-    // Espacios vacíos de días del mes anterior
     for (let i = 0; i < firstDayIndex; i++) {
       arr.push(null);
     }
-    // Días del mes actual
     for (let day = 1; day <= totalDays; day++) {
       arr.push(day);
     }
@@ -101,7 +97,6 @@ export function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha',
     setIsOpen(false);
   }, [onChange]);
 
-  // Formatear visualmente en input (dd/mm/aaaa)
   const displayValue = useMemo(() => {
     if (!value) return '';
     const [y, m, d] = value.split('-');

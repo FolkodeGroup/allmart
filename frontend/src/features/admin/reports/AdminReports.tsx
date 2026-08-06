@@ -27,11 +27,10 @@ import { ExportButtons } from '../../../components/ui/ExportButtons';
 import { Dropdown, type DropdownOption } from '../../../components/ui/Dropdown/Dropdown';
 import { Search } from 'lucide-react';
 import { PriceHistoryModal } from '../suppliers/PriceHistoryModal';
+import toast from 'react-hot-toast';
 
-/* ── Importación Dinámica (Lazy Load) corregida al principio ── */
 const DonutChart = lazy(() => import('./components/DonutChart'));
 
-/* ── Helpers ──────────────────────────────────────────────────── */
 function formatPrice(n: number) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency', currency: 'ARS', minimumFractionDigits: 0,
@@ -43,7 +42,6 @@ function isoDateLabel(iso: string) {
   return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
 }
 
-/* Genera array de fechas [YYYY-MM-DD] de los últimos N días */
 function lastNDayKeys(n: number): string[] {
   const keys: string[] = [];
   const today = new Date();
@@ -61,7 +59,6 @@ function orderDateKey(createdAt: string): string {
   return getDayKeyLocalFromMs(ms);
 }
 
-/* ── Tipos internos ─────────────────────────────────────────────── */
 type Period = PredefinedPeriod | 'custom';
 
 const PERIOD_LABELS: Record<Period, string> = {
@@ -76,29 +73,16 @@ export interface OrdersTableProps {
   orders: Order[];
 }
 
-/* ── Componente principal ─────────────────────────────────────── */
-/**
- * Vista principal de reportes administrativos.
- *
- * Orquesta filtros, métricas, gráficos y tabla de pedidos.
- * - Maneja estado de filtros, paginación y exportación.
- * - Conecta los datos filtrados con los componentes visuales.
- * - Implementa protección ante cambios no guardados.
- *
- * @module AdminReports
- */
 export function AdminReports() {
   const { orders } = useAdminOrders();
   const [isLoading] = useState(false);
   const [filters, setFilters] = useState<ReportsFiltersValue>({ type: 'predefined', period: '30d' });
 
-  // Unsaved changes detection
   const {
-    setIsDirty,
     showWarning,
     confirmNavigation,
     cancelNavigation,
-  } = useUnsavedChangesWarning({ active: true });
+  } = useUnsavedChangesWarning({ active: false });
 
   const [ordersTableFilters, setOrdersTableFilters] = useState<{ status: string[]; clientQuery: string; productQuery: string }>({ status: [], clientQuery: '', productQuery: '' });
   const [orderSortField, setOrderSortField] = useState<'date' | 'customer' | 'total' | 'status'>('date');
@@ -107,11 +91,8 @@ export function AdminReports() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Feedback de exportación
-  const [, setNotif] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({ open: false, type: 'success', message: '' });
   const [exportLoading, setExportLoading] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
 
-  // PDF export
   const pdfRootRef = useRef<HTMLDivElement>(null);
   const hiddenPdfRef = useRef<HTMLDivElement>(null);
   const { generatePdf, loading: pdfLoading } = useReportsPdfExport();
@@ -132,32 +113,17 @@ export function AdminReports() {
 
     const run = async () => {
       try {
-        await new Promise(requestAnimationFrame);
-
-        if (!hiddenPdfRef.current) {
-          await new Promise(res => setTimeout(res, 100));
-        }
-
-        await new Promise(res => setTimeout(res, 1000));
+        await new Promise(res => setTimeout(res, 400));
 
         await generatePdf({
           rootRef: hiddenPdfRef,
-          fileName: 'reporte-resumen.pdf'
+          fileName: getExportFileName('reporte-resumen', filters.type === 'predefined' ? filters.period : 'custom', 'pdf')
         });
 
-        setNotif({
-          open: true,
-          type: 'success',
-          message: 'PDF generado.'
-        });
-
-      } catch {
-        setNotif({
-          open: true,
-          type: 'error',
-          message: 'Error generando PDF.'
-        });
-
+        toast.success('Reporte PDF descargado con éxito.');
+      } catch (err) {
+        console.error(err);
+        toast.error('Error al generar el PDF.');
       } finally {
         isGeneratingRef.current = false;
         setShowHiddenPdf(false);
@@ -165,7 +131,7 @@ export function AdminReports() {
     };
 
     run();
-  }, [showHiddenPdf, pdfLoading, generatePdf]);
+  }, [showHiddenPdf, pdfLoading, generatePdf, filters]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60000);
@@ -175,10 +141,6 @@ export function AdminReports() {
   useEffect(() => {
     setPage(1);
   }, [pageSize, filters]);
-
-  useEffect(() => {
-    setIsDirty(true);
-  }, [filters, setIsDirty]);
 
   const allDates = orders.map(o => {
     const ms = createdAtToMs(o.createdAt);
@@ -392,6 +354,22 @@ export function AdminReports() {
     return [...map.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 10);
   }, [activeOrders]);
 
+  const topClients = useMemo(() => {
+    const map = new Map<string, { name: string; email: string; total: number; orders: number }>();
+    activeOrders.forEach(o => {
+      const email = o.customer.email || 'sin-email@allmart.com';
+      const name = `${o.customer.firstName || ''} ${o.customer.lastName || ''}`.trim() || 'Cliente sin nombre';
+      const prev = map.get(email) ?? { name, email, total: 0, orders: 0 };
+      map.set(email, {
+        name,
+        email,
+        total: prev.total + o.total,
+        orders: prev.orders + 1,
+      });
+    });
+    return [...map.values()].sort((a, b) => b.total - a.total).slice(0, 5);
+  }, [activeOrders]);
+
   const maxProductRevenue = topProducts[0]?.revenue ?? 1;
 
   const statusSlices = useMemo(() => {
@@ -525,7 +503,6 @@ export function AdminReports() {
         />
       )}
 
-      {/* Modal de confirmación de cambios no guardados */}
       <ModalConfirm
         open={showWarning}
         title="Tienes cambios sin guardar"
@@ -536,7 +513,7 @@ export function AdminReports() {
         onCancel={cancelNavigation}
       />
 
-      {/* Toolbar: filtro periodo + exportar */}
+      {/* Toolbar */}
       <div className={styles.toolbar}>
         <ReportsFilters
           value={filters}
@@ -545,13 +522,9 @@ export function AdminReports() {
           maxDate={maxDate}
         />
         <div className={styles.exportWrap}>
-          <span className={styles.exportLabel}>Descargar resumen:</span>
-          <button
-            type="button"
-            className={styles.exportResumeBtn}
-            style={{ marginLeft: 8 }}
-            disabled={exportingExcel}
-            onClick={async () => {
+          <span className={styles.exportLabel}>Exportar resumen:</span>
+          <ExportButtons
+            onExportExcel={async () => {
               setExportingExcel(true);
               try {
                 if (salesViewMode !== 'chart') {
@@ -571,24 +544,15 @@ export function AdminReports() {
                   barChartEl: barChartCaptureRef.current,
                   donutChartEl: donutChartCaptureRef.current,
                 });
-                setNotif({ open: true, type: 'success', message: 'Excel descargado.' });
+                toast.success('Excel descargado.');
               } catch (err) {
                 console.error(err);
-                setNotif({ open: true, type: 'error', message: 'Error al generar el Excel.' });
+                toast.error('Error al generar el Excel.');
               } finally {
                 setExportingExcel(false);
               }
             }}
-          >
-            {exportingExcel ? 'Generando Excel…' : 'Descargar Excel'}
-          </button>
-
-          <button
-            type="button"
-            className={styles.exportResumeBtn}
-            style={{ marginLeft: 8 }}
-            disabled={pdfLoading}
-            onClick={async () => {
+            onExportPDF={async () => {
               try {
                 if (salesViewMode !== 'chart') {
                   setSalesViewMode('chart');
@@ -597,19 +561,14 @@ export function AdminReports() {
                 setShowHiddenPdf(true);
               } catch (err) {
                 console.error(err);
-                setNotif({
-                  open: true,
-                  type: 'error',
-                  message: 'Error al iniciar exportación PDF.'
-                });
+                toast.error('Error al iniciar exportación PDF.');
               }
             }}
-          >
-            {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
-          </button>
+            loading={exportingExcel ? 'xlsx' : pdfLoading ? 'pdf' : null}
+            hide={['csv']}
+          />
         </div>
 
-        {/* Mobile-only: show quick filters (client/product/status) next to export buttons */}
         <div className={styles.mobileExportFilters}>
           <label className={styles.advancedLabel}>
             <strong>Cliente</strong>
@@ -661,7 +620,6 @@ export function AdminReports() {
           </div>
         </div>
 
-        {/* Contenedor invisible para exportación PDF fiel */}
         {showHiddenPdf && (
           <div style={{ position: 'absolute', left: -9999, top: 0, width: 900, pointerEvents: 'none', zIndex: -1 }}>
             <PrintableReport
@@ -672,6 +630,8 @@ export function AdminReports() {
               statusSlices={statusSlices}
               periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
               ordersTableProps={{ orders: filteredOrdersTable }}
+              topProducts={topProducts}
+              topClients={topClients}
             />
           </div>
         )}
@@ -804,33 +764,33 @@ export function AdminReports() {
                   <ExportButtons
                     className={styles.reportExportButtons}
                     onExportCSV={async () => {
-                      if (!sortedFilteredOrdersTable.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      if (!sortedFilteredOrdersTable.length) { toast.error('No hay datos para exportar.'); return; }
                       setExportLoading('csv');
                       try {
                         const lbl = filters.type === 'predefined' ? filters.period : 'custom';
                         exportOrdersCSV(sortedFilteredOrdersTable, getExportFileName('pedidos', lbl, 'csv'));
-                        setNotif({ open: true, type: 'success', message: 'CSV descargado.' });
-                      } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar CSV.' }); }
+                        toast.success('CSV descargado.');
+                      } catch { toast.error('Error al exportar CSV.'); }
                       finally { setExportLoading(null); }
                     }}
                     onExportExcel={async () => {
-                      if (!sortedFilteredOrdersTable.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      if (!sortedFilteredOrdersTable.length) { toast.error('No hay datos para exportar.'); return; }
                       setExportLoading('xlsx');
                       try {
                         const lbl = filters.type === 'predefined' ? filters.period : 'custom';
                         exportOrdersXLSX(sortedFilteredOrdersTable, getExportFileName('pedidos', lbl, 'xlsx'));
-                        setNotif({ open: true, type: 'success', message: 'Excel descargado.' });
-                      } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar Excel.' }); }
+                        toast.success('Excel descargado.');
+                      } catch { toast.error('Error al exportar Excel.'); }
                       finally { setExportLoading(null); }
                     }}
                     onExportPDF={async () => {
-                      if (!sortedFilteredOrdersTable.length) { setNotif({ open: true, type: 'error', message: 'No hay datos para exportar.' }); return; }
+                      if (!sortedFilteredOrdersTable.length) { toast.error('No hay datos para exportar.'); return; }
                       setExportLoading('pdf');
                       try {
                         const lbl = filters.type === 'predefined' ? filters.period : 'custom';
                         await exportOrdersPDF(sortedFilteredOrdersTable, getExportFileName('pedidos', lbl, 'pdf'));
-                        setNotif({ open: true, type: 'success', message: 'PDF descargado.' });
-                      } catch { setNotif({ open: true, type: 'error', message: 'Error al exportar PDF.' }); }
+                        toast.success('PDF descargado.');
+                      } catch { toast.error('Error al exportar PDF.'); }
                       finally { setExportLoading(null); }
                     }}
                     loading={exportLoading}
