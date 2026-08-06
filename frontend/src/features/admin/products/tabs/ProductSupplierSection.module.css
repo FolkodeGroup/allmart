@@ -316,10 +316,11 @@
 .otherTable {
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .table {
+    min-width: 620px;
     width: 100%;
     border-collapse: collapse;
     font-size: 0.81rem;
@@ -354,6 +355,38 @@
     gap: 6px;
 }
 
+.iconBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 36px;
+    height: 32px;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, transform 0.12s;
+}
+
+.iconBtn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.iconBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.iconBtnActive {
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.06);
+}
+
 .miniBtn {
     display: flex;
     align-items: center;
@@ -385,4 +418,105 @@
 .miniBtnDanger:hover {
     background: #fee2e2;
     color: #dc2626;
+}
+
+/* ── Assigned suppliers cards ── */
+.assignedSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 100%;
+}
+
+.assignedHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.assignedTitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-top: 1rem;
+}
+
+.assignedDescription {
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+}
+
+.loadingLabel {
+    font-size: 0.82rem;
+    color: var(--color-text-tertiary);
+}
+
+.cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.supplierCardButton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 18px;
+    text-align: left;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.supplierCardButton:hover,
+.supplierCardButton:focus-visible {
+    transform: translateY(-1px);
+    border-color: var(--color-accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    outline: none;
+}
+
+.supplierCardPrimary {
+    border-color: var(--color-accent);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cardTitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.cardBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--color-accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.modalAssignedSection {
+    margin-top: 20px;
+}
+
+.emptyState {
+    font-size: 0.9rem;
+    color: var(--color-text-tertiary);
 }

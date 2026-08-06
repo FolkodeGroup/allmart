@@ -242,16 +242,78 @@ export function ProductSupplierSection({
                 cost: data.cost,
                 changeReason: data.changeReason,
             });
+            setProductLinks(prev => prev.map(link => (
+                link.supplierId === updatingSupplier.supplierId
+                    ? { ...link, cost: data.cost }
+                    : link
+            )));
             loadLinks();
         } catch (e) {
             console.error('Error al actualizar costo:', e);
-        } finally {
-            setUpdatingSupplier(null);
         }
     }
 
+    function renderAssignedSuppliersTable() {
+        return (
+            <div className={styles.modalAssignedSection}>
+                <div className={styles.otherTitle}>Proveedores Asignados</div>
+                <div className={styles.otherTable}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Proveedor</th>
+                                <th>Precio</th>
+                                <th>Costo</th>
+                                <th>Margen</th>
+                                <th>Principal</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {productLinks.map(link => (
+                                <tr key={link.supplierId}>
+                                    <td>{link.supplierName}</td>
+                                    <td>{fmt.format(link.currentPrice)}</td>
+                                    <td>{link.cost != null ? fmt.format(link.cost) : '—'}</td>
+                                    <td>
+                                        {link.cost != null && link.currentPrice > 0
+                                            ? `${(((link.currentPrice - link.cost) / link.cost) * 100).toFixed(1)}%`
+                                            : '—'}
+                                    </td>
+                                    <td>{link.isPrimary ? 'Sí' : '—'}</td>
+                                    <td>
+                                        <div className={styles.rowActions}>
+                                            <button
+                                                type="button"
+                                                className={`${styles.iconBtn} ${link.isPrimary ? styles.iconBtnActive : ''}`}
+                                                onClick={() => handleSetPrimary(link.supplierId)}
+                                                aria-label={`Marcar ${link.supplierName} como principal`}
+                                                disabled={!!actionLoading}
+                                            >
+                                                <i className={`bi ${link.isPrimary ? 'bi-star-fill' : 'bi-star'}`} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={styles.iconBtn}
+                                                onClick={() => handleRemove(link.supplierId)}
+                                                aria-label={`Remover proveedor ${link.supplierName}`}
+                                                disabled={!!actionLoading}
+                                            >
+                                                <i className="bi bi-trash" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <fieldset className={styles.fieldset}>
+        <div>
             <style>{`
                 /* Mejoras específicas para el dropdown en móvil */
                 @media (max-width: 767px) {
@@ -329,10 +391,6 @@ export function ProductSupplierSection({
                 }
             `}</style>
 
-            {/* ── Dropdown de Proveedor Principal ── */}
-            <legend className={styles.legend}>
-                Proveedor Principal
-            </legend>
             <div className={`${styles.dropdown} supplierDropdownMobile`} ref={dropdownRef}>
                 <button
                     id="primary-supplier-select"
@@ -398,129 +456,60 @@ export function ProductSupplierSection({
                 )}
             </div>
 
-            {/* ── Card del Proveedor Principal ── */}
-            {primaryLink && (
-                <div className={styles.supplierCard}>
-                    {linksLoading ? (
-                        <div className={styles.cardLoading}>
-                            <div className={styles.spinner}></div>
-                            <span>Cargando datos del proveedor...</span>
-                        </div>
-                    ) : primaryLink ? (
-                        <>
-                            <div className={styles.cardStats}>
-                                <div className={styles.stat}>
-                                    <span className={styles.statLabel}>Precio actual</span>
-                                    <span className={styles.statValue}>{fmt.format(primaryLink.currentPrice)}</span>
-                                </div>
-                                <div className={styles.stat}>
-                                    <span className={styles.statLabel}>Costo</span>
-                                    <span className={styles.statValue}>
-                                        {primaryLink.cost != null ? fmt.format(primaryLink.cost) : '—'}
-                                    </span>
-                                </div>
-                                <div className={styles.stat}>
-                                    <span className={styles.statLabel}>Margen</span>
-                                    <span className={`${styles.statValue} ${primaryLink.cost && primaryLink.currentPrice
-                                        ? (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 10
-                                            ? styles.statDanger
-                                            : (((primaryLink.currentPrice - primaryLink.cost) / (primaryLink.cost || 1)) * 100) < 15
-                                                ? styles.statWarn
-                                                : styles.statOk
-                                        : ''
-                                        }`}>
-                                        {primaryLink.cost != null && primaryLink.currentPrice > 0
-                                            ? `${(((primaryLink.currentPrice - primaryLink.cost) / primaryLink.cost) * 100).toFixed(1)}%`
-                                            : '—'}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className={styles.cardActions}>
-                                <button
-                                    type="button"
-                                    className={styles.actionBtn}
-                                    onClick={() => setUpdatingSupplier(primaryLink)}
-                                >
-                                    <i className="bi bi-currency-dollar"></i> Actualizar Costo
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`${styles.actionBtn} ${styles.actionBtnGhost}`}
-                                    onClick={() => setViewingHistory(primaryLink)}
-                                >
-                                    <i className="bi bi-graph-up-arrow"></i> Ver Histórico
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <div className={styles.cardLoading}>Proveedor asignado — sin datos de precio aún</div>
-                    )}
-                </div>
-            )}
-
-            {/* ── Tabla de Otros Proveedores ── */}
-            {otherLinks.length > 0 && (
-                <div className={styles.otherSection}>
-                    <div className={styles.otherTitle}>Otros proveedores asignados</div>
-                    <div className={styles.otherTable}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>Proveedor</th>
-                                    <th>Precio</th>
-                                    <th>Costo</th>
-                                    <th>Margen</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {otherLinks.map(link => (
-                                    <tr key={link.supplierId}>
-                                        <td>{link.supplierName}</td>
-                                        <td>{fmt.format(link.currentPrice)}</td>
-                                        <td>{link.cost != null ? fmt.format(link.cost) : '—'}</td>
-                                        <td>
-                                            {link.cost != null && link.currentPrice > 0
-                                                ? `${(((link.currentPrice - link.cost) / link.cost) * 100).toFixed(1)}%`
-                                                : '—'}
-                                        </td>
-                                        <td>
-                                            <div className={styles.rowActions}>
-                                                <button
-                                                    type="button"
-                                                    className={styles.miniBtn}
-                                                    onClick={() => setUpdatingSupplier(link)}
-                                                    title="Actualizar costo"
-                                                >
-                                                    <i className="bi bi-currency-dollar" style={{ color: 'var(--color-primary)' }}></i>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className={styles.miniBtn}
-                                                    disabled={actionLoading === `primary-${link.supplierId}`}
-                                                    onClick={() => handleSetPrimary(link.supplierId)}
-                                                    title="Establecer como principal"
-                                                >
-                                                    <i className="bi bi-star" style={{ color: 'var(--color-accent)' }}></i>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className={`${styles.miniBtn} ${styles.miniBtnDanger}`}
-                                                    disabled={actionLoading === `remove-${link.supplierId}`}
-                                                    onClick={() => handleRemove(link.supplierId)}
-                                                    title="Remover proveedor"
-                                                >
-                                                    <i className="bi bi-trash" style={{ color: 'var(--color-error)' }}></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            <div className={styles.assignedSection}>
+                <div className={styles.assignedHeader}>
+                    <div>
+                        <div className={styles.assignedTitle}>Proveedores asignados</div>
+                        <div className={styles.assignedDescription}>Haz click en un proveedor para actualizar su costo.</div>
                     </div>
+                    {linksLoading && <span className={styles.loadingLabel}>Cargando...</span>}
                 </div>
-            )}
+
+                {linksLoading && productLinks.length === 0 ? (
+                    <div className={styles.cardLoading}>
+                        <div className={styles.spinner}></div>
+                        <span>Cargando proveedores asignados...</span>
+                    </div>
+                ) : productLinks.length > 0 ? (
+                    <div className={styles.cardsGrid}>
+                        {productLinks.map(link => {
+                            const marginValue = link.cost != null && link.currentPrice > 0
+                                ? `${(((link.currentPrice - link.cost) / link.cost) * 100).toFixed(1)}%`
+                                : '—';
+                            return (
+                                <button
+                                    key={link.supplierId}
+                                    type="button"
+                                    className={`${styles.supplierCardButton} ${link.isPrimary ? styles.supplierCardPrimary : ''}`}
+                                    onClick={() => setUpdatingSupplier(link)}
+                                    aria-label={`Abrir modal de actualización de costo para ${link.supplierName}`}
+                                >
+                                    <div className={styles.cardHeader}>
+                                        <span className={styles.cardTitle}>{link.supplierName}</span>
+                                        {link.isPrimary && <span className={styles.cardBadge}>Principal</span>}
+                                    </div>
+                                    <div className={styles.cardStats}>
+                                        <div className={styles.stat}>
+                                            <span className={styles.statLabel}>Precio actual</span>
+                                            <span className={styles.statValue}>{fmt.format(link.currentPrice)}</span>
+                                        </div>
+                                        <div className={styles.stat}>
+                                            <span className={styles.statLabel}>Costo</span>
+                                            <span className={styles.statValue}>{link.cost != null ? fmt.format(link.cost) : '—'}</span>
+                                        </div>
+                                        <div className={styles.stat}>
+                                            <span className={styles.statLabel}>Margen</span>
+                                            <span className={styles.statValue}>{marginValue}</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className={styles.emptyState}>No hay proveedores asignados para este producto.</div>
+                )}
+            </div>
 
             {/* ── Modales ── */}
             {updatingSupplier && (
@@ -531,7 +520,10 @@ export function ProductSupplierSection({
                     currentCost={updatingSupplier.cost}
                     onClose={() => setUpdatingSupplier(null)}
                     onSave={handlePriceSave}
-                />
+                    closeOnSave={false}
+                >
+                    {renderAssignedSuppliersTable()}
+                </PriceUpdateModal>
             )}
             {viewingHistory && productId && (
                 <PriceHistoryModal
@@ -541,6 +533,6 @@ export function ProductSupplierSection({
                     onClose={() => setViewingHistory(null)}
                 />
             )}
-        </fieldset>
+        </div>
     );
 }
