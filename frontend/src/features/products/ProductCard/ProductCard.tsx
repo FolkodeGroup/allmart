@@ -1,5 +1,3 @@
-// frontend/src/features/products/ProductCard/ProductCard.tsx
-
 import { useEffect, useState } from "react";
 import { ProductImage } from '../../../components/ui/ProductImage';
 import { Link } from "react-router-dom";
@@ -17,7 +15,6 @@ import { useFavorites } from '../../../components/layout/context/FavoritesContex
 import { toThumbnailImageUrl } from '../../../utils/imageUrl';
 
 interface ProductCardProps {
-  // 🟢 SOLUCIÓN TS: Tipado alineado de forma segura usando la firma nativa del descuento del servicio
   product: Product & { stock?: number; appliedDiscount?: ProductDiscount | null };
   variant?: 'default' | 'featured';
 }
@@ -39,9 +36,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
   const { isFavorite, toggleFavorite, syncFavorite } = useFavorites();
   const isFavorito = isFavorite(product.id);
 
-  // Cargar descuento dinámico desde API o Memoria
   useEffect(() => {
-    // 🟢 OPTIMIZACIÓN EXTREMA: Si el backend ya calculó el descuento, lo aplicamos directamente y evitamos la llamada de red
     if (product.appliedDiscount) {
       setDynamicDiscount(product.appliedDiscount);
       return;
@@ -151,6 +146,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                   placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                   style={{ position: 'absolute', inset: 0 }}
                   loading="eager"
+                  objectFit="cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
                 />
               ))}
@@ -165,6 +161,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
               placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
               loading={isFeatured ? 'eager' : 'lazy'}
               fetchPriority={isFeatured ? 'high' : 'auto'}
+              objectFit="cover"
               sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 240px'}
             />
           )}
