@@ -6,7 +6,7 @@ import {
 } from '../../suppliers/suppliersAdminService';
 import { PriceUpdateModal } from '../../suppliers/PriceUpdateModal';
 import { PriceHistoryModal } from '../../suppliers/PriceHistoryModal';
-import { Award, Zap, Star, Clock, DollarSign, Plus, Trash2, Edit3, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Award, Zap, Star, Clock, DollarSign, Plus, Trash2, Edit3, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import styles from './ProductSupplierSection.module.css';
 
 const fmt = new Intl.NumberFormat('es-AR', {
@@ -46,6 +46,9 @@ export function ProductSupplierSection({
     const [productLinks, setProductLinks] = useState<ProductSupplierEntry[]>([]);
     const [linksLoading, setLinksLoading] = useState(false);
 
+    // ── Estado del Acordeón ──
+    const [expandedSupplierId, setExpandedSupplierId] = useState<string | null>(null);
+
     // ── Estado del Dropdown de asignación ──
     const [search, setSearch] = useState('');
     const [open, setOpen] = useState(false);
@@ -84,6 +87,14 @@ export function ProductSupplierSection({
             setProductLinks([]);
         }
     }, [productId]);
+
+    // Desplegar por defecto el Proveedor Principal o el primero
+    useEffect(() => {
+        if (productLinks.length > 0 && !expandedSupplierId) {
+            const primary = productLinks.find(l => l.isPrimary || l.supplierId === primarySupplierId);
+            setExpandedSupplierId(primary?.supplierId ?? productLinks[0].supplierId);
+        }
+    }, [productLinks, primarySupplierId, expandedSupplierId]);
 
     // Cerrar dropdown al hacer clic fuera
     useEffect(() => {
@@ -165,6 +176,7 @@ export function ProductSupplierSection({
                 if (isFirst) onPrimaryChange(supplierId);
                 return [...prev, newLink];
             });
+            setExpandedSupplierId(supplierId);
             return;
         }
 
@@ -181,6 +193,7 @@ export function ProductSupplierSection({
                 await suppliersAdminService.setPrimarySupplier(productId, supplierId);
                 onPrimaryChange(supplierId);
             }
+            setExpandedSupplierId(supplierId);
             loadLinks();
         } finally {
             setActionLoading(null);
@@ -275,7 +288,7 @@ export function ProductSupplierSection({
             </legend>
 
             <p className={styles.sectionHint}>
-                Administrá los proveedores vinculados a este producto. El sistema analiza automáticamente el costo y tiempo de entrega para recomendar la mejor opción de compra.
+                Administrá los proveedores vinculados. Hacé clic en cualquier tarjeta para desplegar sus métricas y acciones.
             </p>
 
             {/* ── Buscador/Selector para agregar proveedores ── */}
@@ -325,7 +338,7 @@ export function ProductSupplierSection({
                 )}
             </div>
 
-            {/* ── Matriz Comparativa de Proveedores ── */}
+            {/* ── Lista Acordeón de Tarjetas de Proveedores ── */}
             {linksLoading ? (
                 <div className={styles.loadingContainer}>
                     <div className={styles.spinner} />
@@ -341,6 +354,7 @@ export function ProductSupplierSection({
                         const isPrimary = link.isPrimary || link.supplierId === primarySupplierId;
                         const isBestCost = link.supplierId === minCostSupplierId && link.cost !== null;
                         const isFastest = link.supplierId === fastestSupplierId;
+                        const isExpanded = expandedSupplierId === link.supplierId;
 
                         const marginVal = link.cost && currentProductPrice > 0
                             ? ((currentProductPrice - link.cost) / link.cost) * 100
@@ -349,105 +363,124 @@ export function ProductSupplierSection({
                         return (
                             <div
                                 key={link.supplierId}
-                                className={`${styles.supplierCard} ${isPrimary ? styles.cardPrimary : ''}`}
+                                className={`${styles.supplierCard} ${isPrimary ? styles.cardPrimary : ''} ${isExpanded ? styles.cardExpanded : ''}`}
                             >
-                                {/* Header de la tarjeta con badges estratégicos */}
-                                <div className={styles.cardHeader}>
+                                {/* Cabecera Clickeable del Acordeón */}
+                                <div
+                                    className={styles.cardHeader}
+                                    onClick={() => setExpandedSupplierId(isExpanded ? null : link.supplierId)}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={isExpanded}
+                                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setExpandedSupplierId(isExpanded ? null : link.supplierId)}
+                                >
                                     <div className={styles.supplierTitleGroup}>
                                         <span className={styles.supplierAvatar}>{link.supplierName.charAt(0).toUpperCase()}</span>
-                                        <div>
-                                            <h4 className={styles.supplierName}>{link.supplierName}</h4>
-                                            <span className={styles.supplierPhone}>{link.supplierPhone || link.supplierEmail || 'Sin contacto'}</span>
+                                        <div className={styles.titleTextWrapper}>
+                                            <div className={styles.nameAndBadges}>
+                                                <h4 className={styles.supplierName}>{link.supplierName}</h4>
+                                                <div className={styles.badgesGroup}>
+                                                    {isPrimary && (
+                                                        <span className={`${styles.badge} ${styles.badgePrimary}`} title="Proveedor predeterminado">
+                                                            <Star size={11} /> Principal
+                                                        </span>
+                                                    )}
+                                                    {isBestCost && (
+                                                        <span className={`${styles.badge} ${styles.badgeCost}`} title="Menor costo de compra">
+                                                            <Award size={11} /> Mejor Costo
+                                                        </span>
+                                                    )}
+                                                    {isFastest && (
+                                                        <span className={`${styles.badge} ${styles.badgeSpeed}`} title="Tiempo de entrega más rápido">
+                                                            <Zap size={11} /> Más Rápido
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <span className={styles.supplierPhone}>
+                                                {link.supplierPhone || link.supplierEmail || 'Sin contacto'}
+                                                {!isExpanded && link.cost && ` · Costo: $${link.cost.toLocaleString('es-AR')}`}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    {/* Insignias tácticas de decisión */}
-                                    <div className={styles.badgesGroup}>
-                                        {isPrimary && (
-                                            <span className={`${styles.badge} ${styles.badgePrimary}`} title="Proveedor predeterminado para reabastecimiento">
-                                                <Star size={11} /> Principal
-                                            </span>
-                                        )}
-                                        {isBestCost && (
-                                            <span className={`${styles.badge} ${styles.badgeCost}`} title="Menor costo de compra para maximizar el margen">
-                                                <Award size={11} /> Mejor Costo
-                                            </span>
-                                        )}
-                                        {isFastest && (
-                                            <span className={`${styles.badge} ${styles.badgeSpeed}`} title="Menor tiempo de entrega para despachos urgentes sin stock">
-                                                <Zap size={11} /> Más Rápido
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* KPIs clave de la relación comercial */}
-                                <div className={styles.cardKpiGrid}>
-                                    <div className={styles.kpiBox}>
-                                        <span className={styles.kpiLabel}><DollarSign size={11} /> Costo Reposición</span>
-                                        <span className={`${styles.kpiValue} ${styles.costText}`}>
-                                            {link.cost ? fmt.format(link.cost) : '—'}
-                                        </span>
-                                    </div>
-
-                                    <div className={styles.kpiBox}>
-                                        <span className={styles.kpiLabel}><Clock size={11} /> Lead Time</span>
-                                        <span className={styles.kpiValue}>
-                                            {link.leadTimeValue ? `${link.leadTimeValue} ${link.leadTimeUnit ?? 'días'}` : '3 días'}
-                                        </span>
-                                    </div>
-
-                                    <div className={styles.kpiBox}>
-                                        <span className={styles.kpiLabel}>Margen Est.</span>
-                                        <span className={`${styles.kpiValue} ${marginVal && marginVal < 15 ? styles.marginLow : styles.marginOk}`}>
-                                            {marginVal !== null && marginVal !== undefined ? `${marginVal.toFixed(1)}%` : '—'}
+                                    <div className={styles.headerRight}>
+                                        <span className={styles.expandChevron}>
+                                            {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* Botones de acción individual */}
-                                <div className={styles.cardActions}>
-                                    <button
-                                        type="button"
-                                        className={styles.btnAction}
-                                        onClick={() => setUpdatingSupplier(link)}
-                                        title="Actualizar costo y tiempo de entrega"
-                                    >
-                                        <Edit3 size={13} /> Condiciones
-                                    </button>
+                                {/* Cuerpo Expandible con KPIs y Botones */}
+                                {isExpanded && (
+                                    <div className={styles.cardBody}>
+                                        <div className={styles.cardKpiGrid}>
+                                            <div className={styles.kpiBox}>
+                                                <span className={styles.kpiLabel}><DollarSign size={11} /> Costo Reposición</span>
+                                                <span className={`${styles.kpiValue} ${styles.costText}`}>
+                                                    {link.cost ? fmt.format(link.cost) : '—'}
+                                                </span>
+                                            </div>
 
-                                    {productId && (
-                                        <button
-                                            type="button"
-                                            className={`${styles.btnAction} ${styles.btnGhost}`}
-                                            onClick={() => setViewingHistory(link)}
-                                            title="Ver historial de cambios"
-                                        >
-                                            <Clock size={13} /> Historial
-                                        </button>
-                                    )}
+                                            <div className={styles.kpiBox}>
+                                                <span className={styles.kpiLabel}><Clock size={11} /> Lead Time</span>
+                                                <span className={styles.kpiValue}>
+                                                    {link.leadTimeValue ? `${link.leadTimeValue} ${link.leadTimeUnit ?? 'días'}` : '3 días'}
+                                                </span>
+                                            </div>
 
-                                    {!isPrimary && (
-                                        <button
-                                            type="button"
-                                            className={`${styles.btnAction} ${styles.btnPrimary}`}
-                                            onClick={() => handleSetPrimary(link.supplierId)}
-                                            disabled={actionLoading === `primary-${link.supplierId}`}
-                                        >
-                                            <CheckCircle2 size={13} /> Asignar Principal
-                                        </button>
-                                    )}
+                                            <div className={styles.kpiBox}>
+                                                <span className={styles.kpiLabel}>Margen Est.</span>
+                                                <span className={`${styles.kpiValue} ${marginVal && marginVal < 15 ? styles.marginLow : styles.marginOk}`}>
+                                                    {marginVal !== null && marginVal !== undefined ? `${marginVal.toFixed(1)}%` : '—'}
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                    <button
-                                        type="button"
-                                        className={`${styles.btnAction} ${styles.btnDanger}`}
-                                        onClick={() => handleRemove(link.supplierId)}
-                                        disabled={actionLoading === `remove-${link.supplierId}`}
-                                        title="Desvincular del producto"
-                                    >
-                                        <Trash2 size={13} />
-                                    </button>
-                                </div>
+                                        <div className={styles.cardActions}>
+                                            <button
+                                                type="button"
+                                                className={styles.btnAction}
+                                                onClick={(e) => { e.stopPropagation(); setUpdatingSupplier(link); }}
+                                                title="Actualizar costo y tiempo de entrega"
+                                            >
+                                                <Edit3 size={13} /> Condiciones
+                                            </button>
+
+                                            {productId && (
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.btnAction} ${styles.btnGhost}`}
+                                                    onClick={(e) => { e.stopPropagation(); setViewingHistory(link); }}
+                                                    title="Ver historial de cambios"
+                                                >
+                                                    <Clock size={13} /> Historial
+                                                </button>
+                                            )}
+
+                                            {!isPrimary && (
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.btnAction} ${styles.btnPrimary}`}
+                                                    onClick={(e) => { e.stopPropagation(); handleSetPrimary(link.supplierId); }}
+                                                    disabled={actionLoading === `primary-${link.supplierId}`}
+                                                >
+                                                    <CheckCircle2 size={13} /> Asignar Principal
+                                                </button>
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                className={`${styles.btnAction} ${styles.btnDanger}`}
+                                                onClick={(e) => { e.stopPropagation(); handleRemove(link.supplierId); }}
+                                                disabled={actionLoading === `remove-${link.supplierId}`}
+                                                title="Desvincular del producto"
+                                            >
+                                                <Trash2 size={13} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
