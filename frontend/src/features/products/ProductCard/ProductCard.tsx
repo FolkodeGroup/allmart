@@ -146,7 +146,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                   placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                   style={{ position: 'absolute', inset: 0 }}
                   loading="eager"
-                  objectFit="cover"
+                  objectFit="contain"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
                 />
               ))}
@@ -161,7 +161,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
               placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
               loading={isFeatured ? 'eager' : 'lazy'}
               fetchPriority={isFeatured ? 'high' : 'auto'}
-              objectFit="cover"
+              objectFit="contain"
               sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 240px'}
             />
           )}
