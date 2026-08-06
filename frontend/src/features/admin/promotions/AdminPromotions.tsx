@@ -32,7 +32,6 @@ const AdminPromotions: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Confirmation modals
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [duplicateConfirmOpen, setDuplicateConfirmOpen] = useState(false);
   const [deleteConfirmLoading, setDeleteConfirmLoading] = useState(false);
@@ -113,11 +112,9 @@ const AdminPromotions: React.FC = () => {
 
   async function handleEdit(promo: Promotion) {
     try {
-      // Cargar detalle completo con rules incluidas
       const fullPromotion = await promotionsService.getById(promo.id);
       setSelectedPromotion(fullPromotion);
     } catch {
-      // Fallback al objeto parcial si falla
       setSelectedPromotion(promo);
     }
     setViewMode('form');
@@ -137,7 +134,6 @@ const AdminPromotions: React.FC = () => {
     setViewMode('list');
   }
 
-  // Opciones de filtrado por estado de promoción para el Dropdown
   const filterActiveOptions = useMemo(() => [
     { value: '', label: 'Todas' },
     { value: 'true', label: 'Activas' },
@@ -168,13 +164,12 @@ const AdminPromotions: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>Gestionar Promociones</h1>
+        <div style={{ flex: 1 }} />
         <button className={styles.btnPrimary} onClick={handleNew}>
           + Nueva Promoción
         </button>
       </div>
 
-      {/* ─── Main Tabs ─────────────────────────────────────────────── */}
       <div className={styles.mainTabs}>
         <button
           className={mainTab === 'campaigns' ? styles.mainTabActive : styles.mainTab}
@@ -190,7 +185,6 @@ const AdminPromotions: React.FC = () => {
         </button>
       </div>
 
-      {/* ─── Tab: Campaigns ────────────────────────────────────────── */}
       {mainTab === 'campaigns' && (
         <>
           <div className={styles.filters} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -211,7 +205,6 @@ const AdminPromotions: React.FC = () => {
                 autoCapitalize="off"
               />
             </div>
-            {/* Custom Dropdown de Estado unificado */}
             <div style={{ flex: '0 0 160px', minWidth: '160px' }}>
               <Dropdown
                 options={filterActiveOptions}
@@ -315,10 +308,8 @@ const AdminPromotions: React.FC = () => {
         </>
       )}
 
-      {/* ─── Tab: Matrix ───────────────────────────────────────────── */}
       {mainTab === 'matrix' && <AdminPromotionMatrix />}
 
-      {/* ─── Delete Confirmation Modal ─────────────────────────────── */}
       <ConfirmModal
         open={deleteConfirmOpen}
         title="Eliminar Promoción"
@@ -330,7 +321,6 @@ const AdminPromotions: React.FC = () => {
         loading={deleteConfirmLoading}
       />
 
-      {/* ─── Duplicate Confirmation Modal ───────────────────────────── */}
       <ConfirmModal
         open={duplicateConfirmOpen}
         title="Duplicar Promoción"

@@ -62,7 +62,6 @@ export function BannersAdmin() {
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  // Unsaved changes detection
   const initialFormDataRef = useRef<{ title: string; isPinned: boolean; isActive: boolean; altText: string; filterConfig: BannerFilterConfig; }>({
     title: '',
     isPinned: false,
@@ -309,7 +308,6 @@ export function BannersAdmin() {
     <div className={sectionStyles.container}>
       <div className={sectionStyles.header}>
         <div>
-          <h1 className={sectionStyles.title}>Gestionar Banners</h1>
           <p className={sectionStyles.subtitle}>Crea y organiza los banners de la homepage</p>
         </div>
         <Button
@@ -520,7 +518,6 @@ export function BannersAdmin() {
         </div>
       )}
 
-      {/* Unsaved changes warning */}
       <ModalConfirm
         open={showWarning || blocker.state === 'blocked'}
         title="¿Abandonar sin guardar?"

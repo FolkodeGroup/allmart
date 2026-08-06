@@ -29,7 +29,6 @@ type StatusFilter = '' | 'unread' | 'read';
 
 const LIMIT = 20;
 
-
 function useIsMobile(breakpoint = 520) {
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.innerWidth <= breakpoint
@@ -60,11 +59,11 @@ function useDragToClose(
 
     const THRESHOLD = 120;
     const VELOCITY_THRESHOLD = 0.6;
-    const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)'; // curva tipo sheet de iOS
+    const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
     const DURATION = 280;
 
     let dragging = false;
-    let dismissed = false; // ← clave del fix
+    let dismissed = false;
     let startY = 0;
     let startTime = 0;
     let currentY = 0;
@@ -95,7 +94,7 @@ function useDragToClose(
       if (currentY > THRESHOLD || velocity > VELOCITY_THRESHOLD) {
         dismissed = true;
         panel.style.transform = 'translateY(100%)';
-        window.setTimeout(onDismiss, DURATION - 40); // dispara el cierre justo antes de que termine la animación
+        window.setTimeout(onDismiss, DURATION - 40);
       } else {
         panel.style.transform = 'translateY(0)';
       }
@@ -111,8 +110,6 @@ function useDragToClose(
       handle.removeEventListener('pointermove', onPointerMove);
       handle.removeEventListener('pointerup', onPointerUp);
       handle.removeEventListener('pointercancel', onPointerUp);
-      // Si el cierre fue por swipe, el panel ya está fuera de pantalla —
-      // no lo reseteamos, para no hacerlo "saltar" de vuelta antes de desmontar.
       if (!dismissed) {
         panel.style.transform = '';
         panel.style.transition = '';
@@ -131,23 +128,19 @@ export function AdminContacts() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  // Filters
+
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Detail / notes modal
   const [detailContact, setDetailContact] = useState<Contact | null>(null);
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesText, setNotesText] = useState('');
 
-  // Delete confirm modal
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Track in-flight status toggle per row
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
-  // Debounce search
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -170,7 +163,6 @@ export function AdminContacts() {
     () => setDeleteConfirmId(null),
   );
 
-  // Mapeo de opciones de estado para el Dropdown unificado
   const statusOptions = useMemo(() => [
     { value: '', label: 'Todos los estados' },
     { value: 'unread', label: 'No leídas' },
@@ -215,14 +207,12 @@ export function AdminContacts() {
   const handleToggleReadStatus = async (contact: Contact) => {
     const newStatus = contact.status === 'unread' ? 'read' : 'unread';
     setTogglingIds(prev => new Set(prev).add(contact.id));
-    // Optimistic update
     setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, status: newStatus } : c));
     try {
       await contactsService.updateContact(contact.id, { status: newStatus });
       showNotification('success', newStatus === 'read' ? 'Marcado como leído' : 'Marcado como no leído');
       refreshUnreadCount();
     } catch (err: unknown) {
-      // Revert optimistic update
       setContacts(prev => prev.map(c => c.id === contact.id ? { ...c, status: contact.status } : c));
       showNotification('error', err instanceof Error ? err.message : 'Error al actualizar estado');
     } finally {
@@ -233,7 +223,6 @@ export function AdminContacts() {
   const handleOpenDetail = (contact: Contact) => {
     setDetailContact(contact);
     setNotesText(contact.adminNotes ?? '');
-    // Auto-mark as read when opening detail
     if (contact.status === 'unread') {
       handleToggleReadStatus(contact);
     }
@@ -283,22 +272,6 @@ export function AdminContacts() {
 
   return (
     <div className={`${sectionStyles.page} ${styles.container}`}>
-
-      {/* ── Header ─────────────────────────────────────────────── */}
-      <div className={styles.header}>
-        <div className={styles.headerText}>
-          <h1 className={styles.title}>
-            Consultas recibidas
-            {unreadTotal > 0 && (
-              <span className={styles.unreadBadge}>{unreadTotal}</span>
-            )}
-          </h1>
-          <p className={styles.subtitle}>
-            Mensajes enviados desde el formulario de Contacto del sitio
-          </p>
-        </div>
-      </div>
-
       {/* ── Stats ───────────────────────────────────────────────── */}
       <div className={styles.statsBar}>
         <div className={styles.statCard}>
@@ -332,7 +305,6 @@ export function AdminContacts() {
           />
         </label>
 
-        {/* Dropdown de Estado Unificado */}
         <div style={{ width: '180px', display: 'inline-block' }}>
           <Dropdown
             options={statusOptions}
@@ -392,7 +364,6 @@ export function AdminContacts() {
                     key={contact.id}
                     className={contact.status === 'unread' ? styles.unread : ''}
                   >
-                    {/* Remitente */}
                     <td>
                       <div className={styles.cellContact}>
                         <span className={styles.contactName}>{contact.name}</span>
@@ -410,7 +381,6 @@ export function AdminContacts() {
                       </div>
                     </td>
 
-                    {/* Mensaje (truncado, expandible) */}
                     <td className={styles.messageCellWrapper}>
                       <button
                         type="button"
@@ -424,19 +394,16 @@ export function AdminContacts() {
                       </button>
                     </td>
 
-                    {/* Estado */}
                     <td>
                       <span className={`${styles.statusBadge} ${contact.status === 'unread' ? styles.unreadBadgeStatus : styles.readBadge}`}>
                         {contact.status === 'unread' ? '● No leída' : '✓ Leída'}
                       </span>
                     </td>
 
-                    {/* Fecha */}
                     <td className={styles.dateCell}>
                       {formatDate(contact.createdAt)}
                     </td>
 
-                    {/* Acciones */}
                     <td>
                       <div className={styles.actions}>
                         <button
@@ -478,7 +445,6 @@ export function AdminContacts() {
             </table>
           </div>
 
-          {/* ── Pagination ─────────────────────────────────────── */}
           {totalPages > 1 && (
             <div className={styles.pagination}>
               <button
@@ -503,7 +469,7 @@ export function AdminContacts() {
                       <button
                         key={item}
                         type="button"
-                        className={`${styles.pageBtn} ${page === item ? styles.active : ''}`}
+                        className={`${styles.pageBtn} ${page === item ? styles.pageActive : ''}`}
                         onClick={() => setPage(item as number)}
                       >
                         {item}
@@ -523,7 +489,6 @@ export function AdminContacts() {
         </>
       )}
 
-      {/* ── Detail / Notes Modal ────────────────────────────────── */}
       <Modal
         open={!!detailContact}
         onClose={() => !savingNotes && setDetailContact(null)}
@@ -607,7 +572,6 @@ export function AdminContacts() {
         )}
       </Modal>
 
-      {/* ── Delete Confirm Modal ────────────────────────────────── */}
       <Modal
         open={!!deleteConfirmId}
         onClose={() => !deleting && setDeleteConfirmId(null)}

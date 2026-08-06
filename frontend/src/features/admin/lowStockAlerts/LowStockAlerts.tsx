@@ -60,7 +60,6 @@ export const LowStockAlerts: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>⚠️ Alertas de Stock Bajo</h2>
         <div className={styles.badge}>
           {noStockCount} sin stock · {lowStockCount} bajo stock
         </div>
@@ -101,10 +100,10 @@ export const LowStockAlerts: React.FC = () => {
             </tbody>
           </table>
 
-          {/* Paginación */}
           {stockSnapshot.pages > 1 && (
             <div className={styles.pagination}>
               <button
+                type="button"
                 className={styles.pageBtn}
                 onClick={() => loadCurrentStock(1)}
                 disabled={currentPage === 1 || loading}
@@ -112,6 +111,7 @@ export const LowStockAlerts: React.FC = () => {
                 Primera
               </button>
               <button
+                type="button"
                 className={styles.pageBtn}
                 onClick={() => loadCurrentStock(currentPage - 1)}
                 disabled={currentPage === 1 || loading}
@@ -124,6 +124,7 @@ export const LowStockAlerts: React.FC = () => {
               </span>
 
               <button
+                type="button"
                 className={styles.pageBtn}
                 onClick={() => loadCurrentStock(currentPage + 1)}
                 disabled={currentPage === stockSnapshot.pages || loading}
@@ -131,6 +132,7 @@ export const LowStockAlerts: React.FC = () => {
                 Siguiente
               </button>
               <button
+                type="button"
                 className={styles.pageBtn}
                 onClick={() => loadCurrentStock(stockSnapshot.pages)}
                 disabled={currentPage === stockSnapshot.pages || loading}
@@ -142,7 +144,7 @@ export const LowStockAlerts: React.FC = () => {
         </>
       )}
 
-      <button className={styles.refreshBtn} onClick={() => loadCurrentStock(1)} disabled={loading}>
+      <button type="button" className={styles.refreshBtn} onClick={() => loadCurrentStock(1)} disabled={loading}>
         {loading ? '🔄 Actualizando...' : '🔄 Actualizar'}
       </button>
     </div>

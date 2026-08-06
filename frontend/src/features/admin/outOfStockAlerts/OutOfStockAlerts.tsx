@@ -64,9 +64,6 @@ export const OutOfStockAlerts: React.FC = () => {
   if (alertsData.length === 0) {
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h2>Productos sin stock con pedidos pendientes</h2>
-        </div>
         <div className={styles.empty}>
           <p>¡Excelente! No hay productos sin stock con pedidos pendientes.</p>
         </div>
@@ -77,7 +74,6 @@ export const OutOfStockAlerts: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Productos sin stock con pedidos pendientes</h2>
         <div className={styles.badge}>{alertsData.length} producto(s)</div>
       </div>
 
@@ -152,10 +148,10 @@ export const OutOfStockAlerts: React.FC = () => {
         ))}
       </div>
 
-      {/* Paginación */}
       {alerts.pages > 1 && (
         <div className={styles.pagination}>
           <button
+            type="button"
             className={styles.pageBtn}
             onClick={() => loadAlerts(1)}
             disabled={currentPage === 1 || loading}
@@ -163,6 +159,7 @@ export const OutOfStockAlerts: React.FC = () => {
             Primera
           </button>
           <button
+            type="button"
             className={styles.pageBtn}
             onClick={() => loadAlerts(currentPage - 1)}
             disabled={currentPage === 1 || loading}
@@ -175,6 +172,7 @@ export const OutOfStockAlerts: React.FC = () => {
           </span>
 
           <button
+            type="button"
             className={styles.pageBtn}
             onClick={() => loadAlerts(currentPage + 1)}
             disabled={currentPage === alerts.pages || loading}
@@ -182,6 +180,7 @@ export const OutOfStockAlerts: React.FC = () => {
             Siguiente
           </button>
           <button
+            type="button"
             className={styles.pageBtn}
             onClick={() => loadAlerts(alerts.pages)}
             disabled={currentPage === alerts.pages || loading}
@@ -191,9 +190,11 @@ export const OutOfStockAlerts: React.FC = () => {
         </div>
       )}
 
-      <button className={styles.refreshBtn} onClick={() => loadAlerts(1)} disabled={loading}>
+      <button type="button" className={styles.refreshBtn} onClick={() => loadAlerts(1)} disabled={loading}>
         {loading ? 'Actualizando...' : 'Actualizar'}
       </button>
     </div>
   );
 };
+
+export default OutOfStockAlerts;
