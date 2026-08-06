@@ -2,7 +2,7 @@
 
 /**
  * config/prisma.ts
- * Singleton de Prisma Client para PostgreSQL.
+ * Singleton de Prisma Client y pg.Pool para PostgreSQL.
  * Utiliza @prisma/adapter-pg (driver adapter) y gestiona un pool nativo para rendimiento óptimo.
  */
 
@@ -13,20 +13,28 @@ import { env } from './env';
 
 const connectionString = `postgresql://${env.DB_USER}:${env.DB_PASSWORD}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}?schema=public`;
 
-// Crear un pool de conexiones optimizado para limitar recursos en la VPS
-const pool = new Pool({
-  connectionString,
-  max: 10,                       // Máximo de conexiones simultáneas en el pool
-  idleTimeoutMillis: 30000,      // Cierra conexiones inactivas tras 30 segundos
-  connectionTimeoutMillis: 15000, // Timeout para obtener conexión del pool
-});
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+  pool?: Pool;
+};
+
+// 🟢 SOLUCIÓN TIMEOUT & LEAKS: Singleton absoluto del Pool en globalThis
+// Evita que ts-node-dev cree un nuevo Pool de conexiones en cada reinicio/guardado de archivo
+export const pool =
+  globalForPrisma.pool ??
+  new Pool({
+    connectionString,
+    max: 20,                        // Aumentado a 20 para soportar ráfagas paralelas del frontend
+    idleTimeoutMillis: 30000,       // Libera conexiones inactivas a los 30s
+    connectionTimeoutMillis: 10000, // Timeout para obtener conexión del pool
+    keepAlive: true,                // Mantiene activos los sockets TCP previniendo cierres abruptos
+  });
+
+globalForPrisma.pool = pool;
 
 const adapter = new PrismaPg(pool);
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-
-// 🟢 SOLUCIÓN API LENTA: Enforzamos un Singleton absoluto tanto en desarrollo como en producción
-// Esto evita que Node.js recree el cliente en cada petición o recarga, previniendo latencias de red
+// 🟢 Enforzamos Singleton absoluto del PrismaClient
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
@@ -34,5 +42,4 @@ export const prisma =
     log: env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   });
 
-// Guardamos la instancia de forma global de manera incondicional
 globalForPrisma.prisma = prisma;

@@ -1,470 +1,379 @@
-/* TabVariantes.module.css */
-
 .fieldset {
-  border: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .fieldHint {
-  font-size: 13px;
-  color: var(--color-text-secondary, #9ca3af);
-  margin: 0;
-  line-height: 1.4;
+    font-size: 13px;
+    color: var(--color-text-secondary, #9ca3af);
+    margin: 0;
+    line-height: 1.5;
 }
 
-/* ── Fila de Nuevo Grupo ── */
+/* Fila para crear nuevo grupo */
 .newGroupRow {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-@media (max-width: 767px) {
-  .newGroupRow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .input {
-  flex: 1;
-  min-height: 42px;
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border, #374151);
-  background-color: var(--color-bg-primary, #111827);
-  color: var(--color-text-primary, #ffffff);
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  box-sizing: border-box;
+    flex: 1;
+    min-height: 44px;
+    padding: 0 14px;
+    background: var(--color-bg-secondary, #1f2937);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 8px;
+    color: var(--color-text-primary, #ffffff);
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
 .input:focus {
-  border-color: var(--color-primary, #769282);
-  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.25);
+    outline: none;
+    border-color: var(--color-primary, #769282);
 }
 
 .addBtn {
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 8px;
-  border: none;
-  background-color: var(--color-primary, #769282);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: background-color 0.2s ease;
-  white-space: nowrap;
-}
-
-@media (max-width: 767px) {
-  .addBtn {
-    width: 100%;
     min-height: 44px;
-  }
+    padding: 0 16px;
+    background: var(--color-primary, #769282);
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
 }
 
 .addBtn:hover {
-  background-color: var(--color-primary-dark, #5d7568);
+    background: var(--color-primary-dark, #5d7568);
 }
 
 .btnIcon {
-  font-size: 16px;
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .errorText {
-  color: #ef4444;
-  font-size: 12px;
-  margin-top: 4px;
+    font-size: 12px;
+    color: var(--color-error, #ef4444);
+    margin-top: 4px;
 }
 
+/* LISTA DE GRUPOS (TARJETAS INDEPENDIENTES) */
 .attributesList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* ── Fila de Grupo de Variante ── */
-.variantRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background-color: var(--color-bg-secondary, #28353d);
-  border: 1px solid var(--color-border, #374151);
-  box-sizing: border-box;
-  width: 100%;
-}
-
-@media (max-width: 767px) {
-  .variantRow {
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    padding: 12px;
-  }
+    gap: 14px;
+}
+
+.variantRow {
+    background: var(--color-bg-secondary, #1f2937);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .variantLabelBlock {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: space-between;
-  width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .variantGroupName {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text-primary, #ffffff);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
 }
 
 .deleteGroupBtn {
-  background: transparent;
-  border: none;
-  color: #ef4444;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
-  border-radius: 4px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: var(--color-error, #ef4444);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    min-height: 36px;
+    transition: all 0.2s ease;
 }
 
 .deleteGroupBtn:hover {
-  background-color: rgba(239, 68, 68, 0.15);
+    background: var(--color-error, #ef4444);
+    border-color: var(--color-error, #ef4444);
+    color: #ffffff;
 }
 
+/* CHIPS DE VALORES (FLUJO HORIZONTAL FLUIDO) */
 .tagsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  flex: 1;
-  width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
 }
 
 .tagChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 16px;
-  background-color: var(--color-primary, #769282);
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(118, 146, 130, 0.2);
+    border: 1px solid rgba(118, 146, 130, 0.4);
+    color: var(--color-text-primary, #ffffff);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .tagRemoveBtn {
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary, #9ca3af);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 50%;
+    transition: color 0.15s ease, background-color 0.15s ease;
 }
 
+.tagRemoveBtn:hover {
+    color: var(--color-error, #ef4444);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* FILA PARA AGREGAR NUEVOS VALORES */
 .addValueInputBlock {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    margin-top: 4px;
 }
 
 .compactInput {
-  flex: 1;
-  min-height: 38px;
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid var(--color-border, #374151);
-  background-color: var(--color-bg-primary, #111827);
-  color: var(--color-text-primary, #ffffff);
-  outline: none;
-  box-sizing: border-box;
+    flex: 1;
+    min-height: 40px;
+    padding: 0 12px;
+    background: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 8px;
+    color: var(--color-text-primary, #ffffff);
+    font-size: 13px;
+    box-sizing: border-box;
 }
 
-@media (max-width: 767px) {
-  .compactInput {
-    min-height: 44px;
-  }
+.compactInput:focus {
+    outline: none;
+    border-color: var(--color-primary, #769282);
 }
 
 .compactAddBtn {
-  min-height: 38px;
-  min-width: 38px;
-  padding: 0 14px;
-  border-radius: 6px;
-  border: none;
-  background-color: var(--color-primary, #769282);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    min-height: 40px;
+    padding: 0 16px;
+    background: var(--color-primary, #769282);
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
 }
 
-@media (max-width: 767px) {
-  .compactAddBtn {
-    min-height: 44px;
-    min-width: 44px;
-  }
+.compactAddBtn:hover {
+    background: var(--color-primary-dark, #5d7568);
 }
 
 .emptyPlaceholder {
-  font-size: 13px;
-  color: var(--color-text-secondary, #9ca3af);
-  font-style: italic;
-  margin: 8px 0;
+    font-size: 13px;
+    color: var(--color-text-secondary, #9ca3af);
+    text-align: center;
+    padding: 20px;
+    background: var(--color-bg-secondary, #1f2937);
+    border: 1px dashed var(--color-border, #374151);
+    border-radius: 10px;
 }
 
+/* SECCIÓN COMBINACIONES */
 .combinationsSection {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* ── Toolbar de Combinaciones ── */
-.combinationsToolbar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-@media (max-width: 767px) {
-  .combinationsToolbar {
+    margin-top: 16px;
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
+    gap: 12px;
+}
+
+.combinationsToolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .addCombinationBtn,
 .bulkGenerateBtn {
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--color-border, #374151);
+    background: var(--color-bg-secondary, #1f2937);
+    color: var(--color-text-primary, #ffffff);
+    transition: all 0.15s ease;
 }
 
-@media (max-width: 767px) {
-  .addCombinationBtn,
-  .bulkGenerateBtn {
-    width: 100%;
-    min-height: 44px;
-    font-size: 14px;
-  }
-}
-
-.addCombinationBtn {
-  background-color: var(--color-primary, #769282);
-  color: #ffffff;
-  border: none;
-}
-
-.addCombinationBtn:hover:not(:disabled) {
-  background-color: var(--color-primary-dark, #5d7568);
-}
-
-.bulkGenerateBtn {
-  background-color: transparent;
-  color: var(--color-text-primary, #ffffff);
-  border: 1px solid var(--color-border, #374151);
-}
-
-.bulkGenerateBtn:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.08);
+.addCombinationBtn:hover,
+.bulkGenerateBtn:hover {
+    border-color: var(--color-primary, #769282);
+    background: rgba(118, 146, 130, 0.1);
 }
 
 .addCombinationBtn:disabled,
 .bulkGenerateBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-/* Modal Form Styles */
+/* MODAL DE COMBINACIÓN */
 .modalFieldsContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.comboModalRowFields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-@media (max-width: 640px) {
-  .comboModalRowFields {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-primary, #ffffff);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.comboModalInput {
-  min-height: 42px;
-  font-size: 14px;
-  width: 100%;
-  box-sizing: border-box;
-  background-color: var(--color-bg-primary, #111827);
-  border: 1px solid var(--color-border, #374151);
-  border-radius: 8px;
-  padding: 8px 12px;
-  color: var(--color-text-primary, #ffffff);
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-@media (max-width: 767px) {
-  .comboModalInput {
-    font-size: 16px;
-    min-height: 44px;
-  }
-}
-
-.comboModalInput:focus {
-  border-color: var(--color-primary, #769282);
-  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .comboAttrChipsRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
-  width: 100%;
-  box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .comboAttrChip {
-  min-height: 38px;
-  padding: 6px 16px;
-  border-radius: 20px;
-  border: 1px solid var(--color-border, #374151);
-  background: var(--color-bg-secondary, #28353d);
-  color: var(--color-text-primary, #ffffff);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-@media (max-width: 767px) {
-  .comboAttrChip {
-    min-height: 44px;
-    font-size: 14px;
-  }
-}
-
-.comboAttrChip:hover {
-  background: rgba(118, 146, 130, 0.18);
-  border-color: var(--color-primary, #769282);
+    padding: 6px 12px;
+    border-radius: 16px;
+    background: var(--color-bg-secondary, #1f2937);
+    border: 1px solid var(--color-border, #374151);
+    color: var(--color-text-secondary, #9ca3af);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .comboAttrChipSelected {
-  background: var(--color-primary, #769282) !important;
-  border-color: var(--color-primary, #769282) !important;
-  color: #ffffff !important;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(118, 146, 130, 0.35);
+    background: var(--color-primary, #769282);
+    border-color: var(--color-primary, #769282);
+    color: #ffffff;
+}
+
+.comboModalRowFields {
+    display: flex;
+    gap: 12px;
+}
+
+.comboModalInput {
+    width: 100%;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary, #ffffff);
 }
 
 .cancelBtn {
-  padding: 10px 18px;
-  min-height: 42px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border, #374151);
-  background: transparent;
-  color: var(--color-text-primary, #ffffff);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancelBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--color-text-secondary, #9ca3af);
+    min-height: 44px;
+    padding: 0 16px;
+    background: transparent;
+    border: 1px solid var(--color-border, #374151);
+    color: var(--color-text-primary, #ffffff);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .submitBtn {
-  padding: 10px 22px;
-  min-height: 42px;
-  border-radius: 8px;
-  border: none;
-  background: var(--color-primary, #769282);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.submitBtn:hover:not(:disabled) {
-  background: var(--color-primary-dark, #5d7568);
-  box-shadow: 0 4px 12px rgba(118, 146, 130, 0.4);
+    min-height: 44px;
+    padding: 0 20px;
+    background: var(--color-primary, #769282);
+    border: none;
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .submitBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* RESPONSIVO PARA MÓVILES (<767px) */
+@media (max-width: 767px) {
+    .newGroupRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .addBtn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .deleteGroupBtn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 8px 12px;
+    }
+
+    .addValueInputBlock {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .compactAddBtn {
+        justify-content: center;
+        min-height: 44px;
+        width: 100%;
+    }
+
+    .comboModalRowFields {
+        flex-direction: column;
+        gap: 10px;
+    }
 }

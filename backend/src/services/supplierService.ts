@@ -146,7 +146,7 @@ export const supplierService = {
     });
   },
 
-  // ── Products with current price ──────────────────────────────────────────────
+  // ── Products with current price & lead time ──────────────────────────────────
   async getProducts(supplierId: string) {
     await supplierService.getById(supplierId);
 
@@ -190,6 +190,8 @@ export const supplierService = {
           sku: row.product.sku,
           currentPrice,
           cost,
+          leadTimeValue: row.leadTimeValue ?? 3,
+          leadTimeUnit: row.leadTimeUnit ?? 'dias',
           margin: margin !== null ? Math.round(margin * 100) / 100 : null,
           lastPriceChange: lastChange?.createdAt ?? null,
           priceChangePercent:
@@ -234,6 +236,8 @@ export const supplierService = {
       sku: r.product.sku,
       price: Number(r.price),
       cost: r.cost ? Number(r.cost) : null,
+      leadTimeValue: r.leadTimeValue ?? 3,
+      leadTimeUnit: r.leadTimeUnit ?? 'dias',
       changeReason: r.changeReason,
       changedBy: r.changedByUser
         ? `${r.changedByUser.firstName} ${r.changedByUser.lastName}`

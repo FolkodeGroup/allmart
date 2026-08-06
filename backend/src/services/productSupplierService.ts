@@ -1,6 +1,6 @@
 /**
  * services/productSupplierService.ts
- * Manages product-supplier relationships and price updates.
+ * Manages product-supplier relationships and price updates with lead time support.
  */
 
 import { prisma } from '../config/prisma';
@@ -10,6 +10,8 @@ export interface AssignSupplierInput {
   supplierId: string;
   currentPrice: number;
   cost?: number;
+  leadTimeValue?: number;
+  leadTimeUnit?: string;
   changeReason?: string;
   changedBy?: string;
 }
@@ -17,6 +19,8 @@ export interface AssignSupplierInput {
 export interface UpdatePriceInput {
   price?: number;
   cost?: number;
+  leadTimeValue?: number;
+  leadTimeUnit?: string;
   changeReason?: string;
   changedBy?: string;
 }
@@ -46,6 +50,8 @@ export const productSupplierService = {
       supplierIsActive: r.supplier.isActive,
       currentPrice: Number(r.currentPrice),
       cost: r.cost ? Number(r.cost) : null,
+      leadTimeValue: r.leadTimeValue ?? 3,
+      leadTimeUnit: r.leadTimeUnit ?? 'dias',
       isActive: r.isActive,
       isPrimary: product?.primarySupplierId === r.supplierId,
       createdAt: r.createdAt,
@@ -69,6 +75,9 @@ export const productSupplierService = {
     if (!product) throw createError('Producto no encontrado', 404);
     if (!supplier) throw createError('Proveedor no encontrado', 404);
 
+    const leadTimeVal = input.leadTimeValue !== undefined ? Math.max(0, input.leadTimeValue) : 3;
+    const leadTimeUn = input.leadTimeUnit ?? 'dias';
+
     // Upsert the link
     const ps = await prisma.productSupplier.upsert({
       where: {
@@ -79,11 +88,15 @@ export const productSupplierService = {
         supplierId: input.supplierId,
         currentPrice: input.currentPrice,
         cost: input.cost ?? null,
+        leadTimeValue: leadTimeVal,
+        leadTimeUnit: leadTimeUn,
         isActive: true,
       },
       update: {
         currentPrice: input.currentPrice,
         cost: input.cost ?? null,
+        leadTimeValue: leadTimeVal,
+        leadTimeUnit: leadTimeUn,
         isActive: true,
       },
     });
@@ -95,6 +108,8 @@ export const productSupplierService = {
         supplierId: input.supplierId,
         price: input.currentPrice,
         cost: input.cost ?? null,
+        leadTimeValue: leadTimeVal,
+        leadTimeUnit: leadTimeUn,
         changeReason: input.changeReason ?? 'regular',
         changedBy: input.changedBy ?? null,
       },
@@ -103,13 +118,11 @@ export const productSupplierService = {
     return ps;
   },
 
-  // ── Update price ─────────────────────────────────────────────────────────────
+  // ── Update price & conditions ───────────────────────────────────────────────
   async updatePrice(productId: string, supplierId: string, input: UpdatePriceInput) {
     if (input.price !== undefined && input.price <= 0) throw createError('El precio debe ser mayor a 0', 400);
     if (input.cost !== undefined && input.cost < 0)
       throw createError('El costo no puede ser negativo', 400);
-    
-    // If both price and cost are provided, validate relationship
     if (input.price !== undefined && input.cost !== undefined && input.cost > input.price)
       throw createError('El costo no puede ser mayor al precio', 400);
 
@@ -118,14 +131,16 @@ export const productSupplierService = {
     });
     if (!existing) throw createError('Relación producto-proveedor no encontrada', 404);
 
-    // Only validate if both are provided
-    if (input.price !== undefined && input.cost !== undefined && input.cost > input.price) {
-      throw createError('El costo no puede ser mayor al precio de venta', 400);
-    }
-
     const updateData: Record<string, unknown> = {};
     if (input.price !== undefined) updateData['currentPrice'] = input.price;
     if (input.cost !== undefined) updateData['cost'] = input.cost;
+    if (input.leadTimeValue !== undefined) updateData['leadTimeValue'] = Math.max(0, input.leadTimeValue);
+    if (input.leadTimeUnit !== undefined) updateData['leadTimeUnit'] = input.leadTimeUnit;
+
+    const targetPrice = input.price ?? existing.currentPrice;
+    const targetCost = input.cost ?? existing.cost;
+    const targetLeadValue = input.leadTimeValue ?? existing.leadTimeValue ?? 3;
+    const targetLeadUnit = input.leadTimeUnit ?? existing.leadTimeUnit ?? 'dias';
 
     const [updated] = await prisma.$transaction([
       prisma.productSupplier.update({
@@ -136,8 +151,10 @@ export const productSupplierService = {
         data: {
           productId,
           supplierId,
-          price: input.price ?? existing.currentPrice,
-          cost: input.cost ?? existing.cost,
+          price: targetPrice,
+          cost: targetCost,
+          leadTimeValue: targetLeadValue,
+          leadTimeUnit: targetLeadUnit,
           changeReason: input.changeReason ?? 'adjustment',
           changedBy: input.changedBy ?? null,
         },
@@ -221,6 +238,8 @@ export const productSupplierService = {
       supplierName: r.supplier.name,
       price: Number(r.price),
       cost: r.cost ? Number(r.cost) : null,
+      leadTimeValue: r.leadTimeValue ?? 3,
+      leadTimeUnit: r.leadTimeUnit ?? 'dias',
       margin:
         r.cost && Number(r.cost) > 0
           ? Math.round(((Number(r.price) - Number(r.cost)) / Number(r.cost)) * 10000) / 100

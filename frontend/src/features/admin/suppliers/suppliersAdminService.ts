@@ -73,6 +73,8 @@ export interface SupplierProductEntry {
     sku: string | null;
     currentPrice: number;
     cost: number | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
     margin: number | null;
     lastPriceChange: string | null;
     priceChangePercent: number | null;
@@ -85,6 +87,8 @@ export interface PriceHistoryEntry {
     sku: string | null;
     price: number;
     cost: number | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
     changeReason: string;
     changedBy: string | null;
     createdAt: string;
@@ -99,6 +103,9 @@ export interface ProductSupplierEntry {
     supplierIsActive: boolean;
     currentPrice: number;
     cost: number | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
+    margin?: number | null;
     isActive: boolean;
     isPrimary: boolean;
     createdAt: string;
@@ -111,6 +118,8 @@ export interface ProductPriceHistoryDetailEntry {
     supplierName: string;
     price: number;
     cost: number | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
     margin: number | null;
     changeReason: string;
     changedBy: string | null;
@@ -196,14 +205,14 @@ export const suppliersAdminService = {
         return body.data ?? [];
     },
 
-    async assignSupplier(productId: string, data: { supplierId: string; currentPrice: number; cost?: number; changeReason?: string }): Promise<void> {
+    async assignSupplier(productId: string, data: { supplierId: string; currentPrice: number; cost?: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason?: string }): Promise<void> {
         await apiFetch(`/api/admin/products/${productId}/suppliers`, {
             method: 'POST',
             body: JSON.stringify(data),
         });
     },
 
-    async updateProductSupplierPrice(productId: string, supplierId: string, data: { price?: number; cost?: number; changeReason?: string }): Promise<void> {
+    async updateProductSupplierPrice(productId: string, supplierId: string, data: { price?: number; cost?: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason?: string }): Promise<void> {
         await apiFetch(`/api/admin/products/${productId}/suppliers/${supplierId}`, {
             method: 'PUT',
             body: JSON.stringify(data),
@@ -252,7 +261,7 @@ export const suppliersAdminService = {
         const result = await suppliersAdminService.listSuppliers({ limit: 200 });
         return (result?.data ?? []).map(s => ({
             id: s.id, name: s.name, url: s.url, phone: s.phone,
-            address: s.address, products: '', // Se hardcodea vacío ya que V2 no posee 'products'
+            address: s.address, products: '',
             createdAt: s.createdAt, updatedAt: s.updatedAt,
         }));
     },

@@ -24,6 +24,21 @@ interface Props {
 
 type SectionId = 'basico' | 'precios' | 'categorias' | 'imagenes' | 'variantes' | 'proveedor' | 'seo';
 
+function useIsMobile(breakpoint = 767) {
+    const [isMobile, setIsMobile] = useState(
+        () => typeof window !== 'undefined' && window.innerWidth <= breakpoint
+    );
+
+    useEffect(() => {
+        const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, [breakpoint]);
+
+    return isMobile;
+}
+
 export function AdminProductFormPage({
     productId,
     onBack,
@@ -31,6 +46,7 @@ export function AdminProductFormPage({
     onUnsavedChanges,
 }: Props) {
     const formRef = React.useRef<HTMLFormElement | null>(null);
+    const isMobile = useIsMobile(767);
 
     // MOBILE-FIRST: Acordeones colapsados por defecto en móvil para navegación limpia
     const [accordionsOpen, setAccordionsOpen] = useState<Record<SectionId, boolean>>({
@@ -119,8 +135,10 @@ export function AdminProductFormPage({
     const { sectionErrors, saving, error, isEdit, loading } = formProps;
 
     const renderMobileBottomBar = () => {
+        if (!isMobile) return null; // 🟢 AISLAMIENTO ESTRICTO: No renderizar en escritorio bajo ninguna circunstancia
+
         const barMarkup = (
-            <div className="fixedBottomBarMobile">
+            <div className={`${styles.fixedBottomBarMobile} fixedBottomBarMobile`}>
                 <button
                     type="button"
                     className={styles.submitBtn}
@@ -156,6 +174,10 @@ export function AdminProductFormPage({
     return (
         <div className={`${styles.page} formPageMobileResponsive`}>
             <style>{`
+                .fixedBottomBarMobile {
+                    display: none !important;
+                }
+
                 @media (max-width: 767px) {
                     .stickyFormHeaderMobile {
                         position: relative !important;
@@ -270,6 +292,9 @@ export function AdminProductFormPage({
                         display: block !important;
                     }
                     .accordionToggleBarMobile {
+                        display: none !important;
+                    }
+                    .fixedBottomBarMobile {
                         display: none !important;
                     }
                 }
@@ -615,7 +640,7 @@ export function AdminProductFormPage({
                     confirmNavigation();
                 }}
                 onCancel={() => {
-                    if (blocker.state === 'blocked') blocker.reset?.();
+                    if (blocker.state === 'blocked') blocker.reset();
                     cancelNavigation();
                 }}
             />
