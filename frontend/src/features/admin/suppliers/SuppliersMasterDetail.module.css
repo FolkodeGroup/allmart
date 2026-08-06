@@ -463,6 +463,19 @@
     color: var(--color-text-secondary, #9ca3af);
 }
 
+.chartLeadTimeBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: rgba(118, 146, 130, 0.15);
+    color: var(--color-primary, #769282);
+    border: 1px solid rgba(118, 146, 130, 0.3);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
 .chartFilterBar {
     display: flex;
     align-items: center;
@@ -532,7 +545,7 @@
 
 .metricCards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 12px;
 }
 
@@ -620,10 +633,19 @@
     to { transform: rotate(360deg); }
 }
 
+@media (max-width: 1100px) {
+    .metricCards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (max-width: 900px) {
     .layout {
         grid-template-columns: 1fr;
     }
+}
+
+@media (max-width: 639px) {
     .metricCards {
         grid-template-columns: repeat(2, 1fr);
     }
