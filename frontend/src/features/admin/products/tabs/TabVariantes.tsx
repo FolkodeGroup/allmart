@@ -12,7 +12,9 @@ import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfir
 import { Modal } from '../../../../components/ui/Modal';
 import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 import type { UploadFileState } from '../../images';
+import { Trash2, Plus, X } from 'lucide-react';
 import styles from './TabVariantes.module.css';
+import commonStyles from '../AdminProductFormPage.module.css';
 import toast from 'react-hot-toast';
 
 export type TabVariantesRef = {
@@ -249,7 +251,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         setBulkConfirmOpen(false);
 
         if (!isEdit || !productId) {
-            // Modo creación sin guardado intermedio: actualizamos el estado en memoria
             setCreatedCombinations(prev => {
                 const next = [...combosToCreate, ...prev];
                 setField('skus', next as Omit<AdminProduct, 'id'>['skus']);
@@ -260,7 +261,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             return;
         }
 
-        // Modo edición: guardamos vía API
         setCreatedCombinations(prev => [...combosToCreate, ...prev]);
         const loadingToast = toast.loading(`Generando ${combosToCreate.length} combinaciones...`);
 
@@ -335,7 +335,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
         };
 
         if (!isEdit || !productId) {
-            // Modo creación sin guardado intermedio
             setCreatedCombinations(prev => {
                 const next = [optimisticCombo, ...prev];
                 setField('skus', next as Omit<AdminProduct, 'id'>['skus']);
@@ -347,7 +346,6 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             return;
         }
 
-        // Modo edición existente con API
         setCreatedCombinations(prev => [optimisticCombo, ...prev]);
 
         try {
@@ -530,14 +528,17 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                     onClick={onAddVariantGroup}
                     aria-label="Agregar grupo de variantes"
                 >
-                    <span className={styles.btnIcon}>+</span> Grupo
+                    <Plus size={16} />
+                    <span>Grupo</span>
                 </button>
             </div>
             {localErrors.variants && <span className={styles.errorText}>{localErrors.variants}</span>}
 
+            {/* LISTA DE GRUPOS EN TARJETAS LIMPIAS */}
             <div className={styles.attributesList}>
                 {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => (
                     <div key={group.id} className={styles.variantRow}>
+                        {/* Cabecera del grupo con icono de Tacho de Basura */}
                         <div className={styles.variantLabelBlock}>
                             <span className={styles.variantGroupName}>
                                 {group.name}
@@ -547,27 +548,34 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                 className={styles.deleteGroupBtn}
                                 onClick={() => onRemoveVariantGroup(group.id)}
                                 aria-label={`Eliminar grupo ${group.name}`}
+                                title={`Eliminar grupo ${group.name}`}
                             >
-                                ×
+                                <Trash2 size={15} />
+                                <span>Eliminar</span>
                             </button>
                         </div>
 
-                        <div className={styles.tagsContainer}>
-                            {group.values.map((val: string) => (
-                                <span key={val} className={styles.tagChip}>
-                                    {val}
-                                    <button
-                                        type="button"
-                                        className={styles.tagRemoveBtn}
-                                        onClick={() => onRemoveVariantValue(group.id, val)}
-                                        aria-label={`Eliminar variante ${val}`}
-                                    >
-                                        ×
-                                    </button>
-                                </span>
-                            ))}
-                        </div>
+                        {/* Chips de valores con flujo horizontal fluido */}
+                        {group.values.length > 0 && (
+                            <div className={styles.tagsContainer}>
+                                {group.values.map((val: string) => (
+                                    <span key={val} className={styles.tagChip}>
+                                        {val}
+                                        <button
+                                            type="button"
+                                            className={styles.tagRemoveBtn}
+                                            onClick={() => onRemoveVariantValue(group.id, val)}
+                                            aria-label={`Eliminar variante ${val}`}
+                                            title={`Eliminar variante ${val}`}
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
 
+                        {/* Fila para añadir nuevos valores */}
                         <div className={styles.addValueInputBlock}>
                             <input
                                 className={styles.compactInput}
@@ -586,7 +594,8 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
                                 onClick={() => onAddVariantValue(group.id)}
                                 aria-label={`Agregar valor a ${group.name}`}
                             >
-                                +
+                                <Plus size={14} />
+                                <span>Agregar</span>
                             </button>
                         </div>
                     </div>
@@ -657,10 +666,10 @@ export const TabVariantes = forwardRef<TabVariantesRef, TabVariantesProps>(funct
             >
                 <div className={styles.modalFieldsContainer}>
                     {(!form.variants || form.variants.length === 0) && (
-                        <p className={styles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
+                        <p className={commonStyles.fieldHint}>No hay grupos de variantes para seleccionar.</p>
                     )}
 
-                    {/* SELECTORES DE ATRIBUTOS (FICHAS TÁCTILES O DROPDOWN) */}
+                    {/* SELECTORES DE ATRIBUTOS */}
                     {(form.variants ?? []).map((group: { id: string; name: string; values: string[] }) => {
                         const isAttrMissing = submitComboAttempted && (!combinationAttrs[group.name] || !combinationAttrs[group.name].trim());
                         const selectedVal = combinationAttrs[group.name] ?? '';
