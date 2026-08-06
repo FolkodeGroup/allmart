@@ -73,6 +73,8 @@ export interface SupplierProductEntry {
     sku: string | null;
     currentPrice: number;
     cost: number | null;
+    leadTimeValue: number | null;
+    leadTimeUnit: string | null;
     margin: number | null;
     lastPriceChange: string | null;
     priceChangePercent: number | null;
@@ -99,6 +101,8 @@ export interface ProductSupplierEntry {
     supplierIsActive: boolean;
     currentPrice: number;
     cost: number | null;
+    leadTimeValue: number | null;
+    leadTimeUnit: string | null;
     isActive: boolean;
     isPrimary: boolean;
     createdAt: string;
@@ -196,14 +200,14 @@ export const suppliersAdminService = {
         return body.data ?? [];
     },
 
-    async assignSupplier(productId: string, data: { supplierId: string; currentPrice: number; cost?: number; changeReason?: string }): Promise<void> {
+    async assignSupplier(productId: string, data: { supplierId: string; currentPrice: number; cost?: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason?: string }): Promise<void> {
         await apiFetch(`/api/admin/products/${productId}/suppliers`, {
             method: 'POST',
             body: JSON.stringify(data),
         });
     },
 
-    async updateProductSupplierPrice(productId: string, supplierId: string, data: { price?: number; cost?: number; changeReason?: string }): Promise<void> {
+    async updateProductSupplierPrice(productId: string, supplierId: string, data: { price?: number; cost?: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason?: string }): Promise<void> {
         await apiFetch(`/api/admin/products/${productId}/suppliers/${supplierId}`, {
             method: 'PUT',
             body: JSON.stringify(data),

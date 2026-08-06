@@ -12,6 +12,7 @@ import {
     type PriceHistoryEntry,
 } from './suppliersAdminService';
 import { PriceHistoryModal } from './PriceHistoryModal';
+import { PriceUpdateModal } from './PriceUpdateModal';
 import styles from './SuppliersMasterDetail.module.css';
 
 const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
@@ -77,6 +78,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     // Modals
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [historyProduct, setHistoryProduct] = useState<{ productId: string; productName: string } | null>(null);
+    const [updatingSupplier, setUpdatingSupplier] = useState<SupplierProductEntry | null>(null);
 
     // Sort
     const [sortKey, setSortKey] = useState<keyof SupplierProductEntry>('productName');
@@ -103,7 +105,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     }, [suppliers, selectedId]);
 
     // ── Load right panel data when supplier/tab changes ─────────────────────
-    useEffect(() => {
+    const loadRightPanelData = useCallback(() => {
         if (!selectedId) return;
         setRightLoading(true);
         const startDate = daysAgoISO(rangedays);
@@ -118,6 +120,10 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             setHistory([]);
         }).finally(() => setRightLoading(false));
     }, [selectedId, rangedays]);
+
+    useEffect(() => {
+        loadRightPanelData();
+    }, [loadRightPanelData]);
 
     useEffect(() => {
         if (!selectedId) {
@@ -247,9 +253,10 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
     // ── CSV Export ──────────────────────────────────────────────────────────
     function exportCsv() {
-        const header = ['SKU', 'Producto', 'Precio', 'Costo', 'Margen %', 'Cambio 7d %', 'Última actualización'];
+        const header = ['SKU', 'Producto', 'Precio', 'Costo', 'Margen %', 'Entrega', 'Cambio 7d %', 'Última actualización'];
         const rows = products.map(p => [
             p.sku ?? '', p.productName, p.currentPrice, p.cost ?? '', p.margin ?? '',
+            p.leadTimeValue != null ? `${p.leadTimeValue} ${p.leadTimeUnit === 'hours' ? 'hs' : 'días'}` : '',
             p.priceChangePercent ?? '', p.lastPriceChange ? new Date(p.lastPriceChange).toLocaleDateString('es-AR') : '',
         ]);
         const csv = [header, ...rows].map(r => r.join(',')).join('\n');
@@ -277,6 +284,24 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             await loadSuppliers();
         } finally {
             setDeleteId(null);
+        }
+    }
+
+    // ── Price Update ────────────────────────────────────────────────────────
+    async function handlePriceSave(data: { cost: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason: string }) {
+        if (!selectedId || !updatingSupplier) return;
+        try {
+            await suppliersAdminService.updateProductSupplierPrice(updatingSupplier.productId, selectedId, {
+                cost: data.cost,
+                leadTimeValue: data.leadTimeValue,
+                leadTimeUnit: data.leadTimeUnit,
+                changeReason: data.changeReason,
+            });
+            loadRightPanelData();
+        } catch (e) {
+            console.error('Error al actualizar condiciones:', e);
+        } finally {
+            setUpdatingSupplier(null);
         }
     }
 
@@ -605,6 +630,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                 ['currentPrice', 'Precio'],
                                                                 ['cost', 'Costo'],
                                                                 ['margin', 'Margen %'],
+                                                                ['leadTimeValue', 'Entrega'],
                                                                 ['priceChangePercent', 'Cambio 7d'],
                                                                 ['lastPriceChange', 'Última actualización'],
                                                             ] as [keyof SupplierProductEntry, string][]).map(([key, label]) => (
@@ -642,6 +668,11 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                 <td>{fmtN(p.currentPrice)}</td>
                                                                 <td>{fmtN(p.cost)}</td>
                                                                 <td>{getMarginBadge(p.margin)}</td>
+                                                                <td>
+                                                                    {p.leadTimeValue != null 
+                                                                        ? `${p.leadTimeValue} ${p.leadTimeUnit === 'hours' ? 'hs' : 'días'}` 
+                                                                        : '—'}
+                                                                </td>
                                                                 <td className={p.priceChangePercent && p.priceChangePercent > 15 ? styles.tdWarn : ''}>
                                                                     {fmtPct(p.priceChangePercent)}
                                                                 </td>
@@ -649,16 +680,30 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                     {p.lastPriceChange ? new Date(p.lastPriceChange).toLocaleDateString('es-AR') : '—'}
                                                                 </td>
                                                                 <td>
-                                                                    <button
-                                                                        type="button"
-                                                                        className={styles.historyBtn}
-                                                                        onClick={e => {
-                                                                            e.stopPropagation();
-                                                                            setHistoryProduct({ productId: p.productId, productName: p.productName });
-                                                                        }}
-                                                                    >
-                                                                        Ver historial
-                                                                    </button>
+                                                                    <div className={styles.rowActions}>
+                                                                        <button
+                                                                            type="button"
+                                                                            className={styles.historyBtn}
+                                                                            onClick={e => {
+                                                                                e.stopPropagation();
+                                                                                setUpdatingSupplier(p);
+                                                                            }}
+                                                                            title="Editar condiciones"
+                                                                        >
+                                                                            <i className="bi bi-pencil-square"></i>
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className={styles.historyBtn}
+                                                                            onClick={e => {
+                                                                                e.stopPropagation();
+                                                                                setHistoryProduct({ productId: p.productId, productName: p.productName });
+                                                                            }}
+                                                                            title="Ver historial"
+                                                                        >
+                                                                            <i className="bi bi-clock-history"></i>
+                                                                        </button>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                         ))}
@@ -768,6 +813,19 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                     </div>
                 );
             })()}
+
+            {updatingSupplier && (
+                <PriceUpdateModal
+                    key={updatingSupplier.productId}
+                    productName={updatingSupplier.productName}
+                    currentPrice={updatingSupplier.currentPrice}
+                    currentCost={updatingSupplier.cost}
+                    currentLeadTimeValue={updatingSupplier.leadTimeValue}
+                    currentLeadTimeUnit={updatingSupplier.leadTimeUnit}
+                    onClose={() => setUpdatingSupplier(null)}
+                    onSave={handlePriceSave}
+                />
+            )}
 
             {historyProduct && (
                 <PriceHistoryModal

@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, DollarSign } from 'lucide-react';
 import styles from './PriceUpdateModal.module.css';
+
 interface PriceUpdateModalProps {
     productName: string;
     currentPrice: number;
     currentCost?: number | null;
+    currentLeadTimeValue?: number | null;
+    currentLeadTimeUnit?: string | null;
     onClose: () => void;
-    onSave: (data: { cost: number; changeReason: string }) => Promise<void>;
+    onSave: (data: { cost: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason: string }) => Promise<void>;
 }
+
 const REASON_OPTIONS = [
     { value: 'regular', label: 'Regular' },
     { value: 'market_adjustment', label: 'Ajuste de mercado' },
@@ -16,39 +20,64 @@ const REASON_OPTIONS = [
     { value: 'negotiation', label: 'Negociación' },
     { value: 'adjustment', label: 'Ajuste' },
 ];
+
 const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
-export function PriceUpdateModal({ productName, currentPrice, currentCost, onClose, onSave }: PriceUpdateModalProps) {
+
+export function PriceUpdateModal({ 
+    productName, 
+    currentPrice, 
+    currentCost, 
+    currentLeadTimeValue,
+    currentLeadTimeUnit,
+    onClose, 
+    onSave 
+}: PriceUpdateModalProps) {
     const [cost, setCost] = useState(currentCost != null ? String(currentCost) : '');
+    const [leadTimeValue, setLeadTimeValue] = useState(currentLeadTimeValue != null ? String(currentLeadTimeValue) : '');
+    const [leadTimeUnit, setLeadTimeUnit] = useState(currentLeadTimeUnit ?? 'days');
     const [reason, setReason] = useState('market_adjustment');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
+    
     const costNum = cost ? parseFloat(cost) : 0;
+    const leadTimeNum = leadTimeValue ? parseInt(leadTimeValue, 10) : undefined;
 
     useEffect(() => {
         setCost(currentCost != null ? String(currentCost) : '');
+        setLeadTimeValue(currentLeadTimeValue != null ? String(currentLeadTimeValue) : '');
+        setLeadTimeUnit(currentLeadTimeUnit ?? 'days');
         setReason('market_adjustment');
         setErrors({});
-    }, [currentCost, currentPrice, productName]);
+    }, [currentCost, currentPrice, productName, currentLeadTimeValue, currentLeadTimeUnit]);
+
     const priceNum = currentPrice;
     const margin = priceNum > 0 && costNum > 0
         ? ((priceNum - costNum) / costNum) * 100
         : null;
+
     function validate(): boolean {
         const errs: Record<string, string> = {};
         if (!cost || isNaN(costNum) || costNum <= 0) errs.cost = 'El costo debe ser mayor a 0';
         if (costNum > priceNum) errs.cost = 'El costo no puede ser mayor al precio de venta';
+        if (leadTimeValue && (isNaN(leadTimeNum!) || leadTimeNum! < 0)) errs.leadTime = 'El tiempo debe ser válido';
         setErrors(errs);
         return Object.keys(errs).length === 0;
     }
+
     async function handleSubmit(e?: React.FormEvent | React.MouseEvent) {
         e?.preventDefault();
         if (!validate()) return;
         setSaving(true);
         try {
-            await onSave({ cost: costNum, changeReason: reason });
+            await onSave({ 
+                cost: costNum, 
+                leadTimeValue: leadTimeNum, 
+                leadTimeUnit, 
+                changeReason: reason 
+            });
             onClose();
         } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Error al actualizar costo';
+            const message = err instanceof Error ? err.message : 'Error al actualizar condiciones';
             setErrors({ cost: message });
         } finally {
             setSaving(false);
@@ -66,7 +95,7 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
             />
             <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="price-update-modal-title">
                 <div className={styles.header}>
-                    <div id="price-update-modal-title" className={styles.headerTitle}><DollarSign size={16} /> Actualizar Costo</div>
+                    <div id="price-update-modal-title" className={styles.headerTitle}><DollarSign size={16} /> Condiciones Comerciales</div>
                     <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
                 </div>
                 <div className={styles.productName}>{productName}</div>
@@ -77,6 +106,7 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                             <div className={styles.infoValue}>{fmt.format(currentPrice)}</div>
                         </div>
                     </div>
+                    
                     <div className={styles.row}>
                         <div className={styles.field}>
                             <label htmlFor="price-update-cost-input">Costo *</label>
@@ -98,17 +128,47 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                             )}
                         </div>
                     </div>
+
                     {margin !== null && (
                         <div className={`${styles.marginBadge} ${margin < 10 ? styles.low : margin < 15 ? styles.mid : styles.ok}`}>
                             Margen estimado: {margin.toFixed(1)}%
                         </div>
                     )}
+
+                    <div className={styles.row}>
+                        <div className={styles.field}>
+                            <label htmlFor="price-update-leadtime-input">Tiempo de entrega (Lead Time)</label>
+                            <div className={styles.compositeInput}>
+                                <input
+                                    id="price-update-leadtime-input"
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    placeholder="Ej: 3"
+                                    value={leadTimeValue}
+                                    onChange={e => setLeadTimeValue(e.target.value)}
+                                    className={errors.leadTime ? styles.inputError : ''}
+                                />
+                                <select 
+                                    value={leadTimeUnit} 
+                                    onChange={e => setLeadTimeUnit(e.target.value)}
+                                    aria-label="Unidad de tiempo"
+                                >
+                                    <option value="days">Días</option>
+                                    <option value="hours">Horas</option>
+                                </select>
+                            </div>
+                            {errors.leadTime && <span className={styles.errorMsg}>{errors.leadTime}</span>}
+                        </div>
+                    </div>
+
                     <div className={styles.field}>
                         <label htmlFor="price-update-reason-select">Razón del cambio</label>
                         <select id="price-update-reason-select" value={reason} onChange={e => setReason(e.target.value)}>
                             {REASON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
+                    
                     <div className={styles.actions}>
                         <button type="button" className={styles.btnCancel} onClick={onClose}>Cancelar</button>
                         <button
@@ -117,7 +177,7 @@ export function PriceUpdateModal({ productName, currentPrice, currentCost, onClo
                             disabled={saving}
                             onClick={handleSubmit}
                         >
-                            {saving ? 'Guardando...' : 'Actualizar Costo'}
+                            {saving ? 'Guardando...' : 'Actualizar Condiciones'}
                         </button>
                     </div>
                 </div>

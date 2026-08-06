@@ -10,6 +10,8 @@ export interface AssignSupplierInput {
   supplierId: string;
   currentPrice: number;
   cost?: number;
+  leadTimeValue?: number;
+  leadTimeUnit?: string;
   changeReason?: string;
   changedBy?: string;
 }
@@ -17,6 +19,8 @@ export interface AssignSupplierInput {
 export interface UpdatePriceInput {
   price?: number;
   cost?: number;
+  leadTimeValue?: number;
+  leadTimeUnit?: string;
   changeReason?: string;
   changedBy?: string;
 }
@@ -46,6 +50,8 @@ export const productSupplierService = {
       supplierIsActive: r.supplier.isActive,
       currentPrice: Number(r.currentPrice),
       cost: r.cost ? Number(r.cost) : null,
+      leadTimeValue: r.leadTimeValue,
+      leadTimeUnit: r.leadTimeUnit,
       isActive: r.isActive,
       isPrimary: product?.primarySupplierId === r.supplierId,
       createdAt: r.createdAt,
@@ -60,6 +66,8 @@ export const productSupplierService = {
       throw createError('El costo no puede ser negativo', 400);
     if (input.cost !== undefined && input.cost > input.currentPrice)
       throw createError('El costo no puede ser mayor al precio', 400);
+    if (input.leadTimeValue !== undefined && input.leadTimeValue < 0)
+      throw createError('El tiempo de entrega no puede ser negativo', 400);
 
     // Verify both exist
     const [product, supplier] = await Promise.all([
@@ -79,11 +87,15 @@ export const productSupplierService = {
         supplierId: input.supplierId,
         currentPrice: input.currentPrice,
         cost: input.cost ?? null,
+        leadTimeValue: input.leadTimeValue ?? null,
+        leadTimeUnit: input.leadTimeUnit ?? 'days',
         isActive: true,
       },
       update: {
         currentPrice: input.currentPrice,
         cost: input.cost ?? null,
+        leadTimeValue: input.leadTimeValue ?? null,
+        leadTimeUnit: input.leadTimeUnit ?? 'days',
         isActive: true,
       },
     });
@@ -108,7 +120,9 @@ export const productSupplierService = {
     if (input.price !== undefined && input.price <= 0) throw createError('El precio debe ser mayor a 0', 400);
     if (input.cost !== undefined && input.cost < 0)
       throw createError('El costo no puede ser negativo', 400);
-    
+    if (input.leadTimeValue !== undefined && input.leadTimeValue < 0)
+      throw createError('El tiempo de entrega no puede ser negativo', 400);
+
     // If both price and cost are provided, validate relationship
     if (input.price !== undefined && input.cost !== undefined && input.cost > input.price)
       throw createError('El costo no puede ser mayor al precio', 400);
@@ -126,6 +140,8 @@ export const productSupplierService = {
     const updateData: Record<string, unknown> = {};
     if (input.price !== undefined) updateData['currentPrice'] = input.price;
     if (input.cost !== undefined) updateData['cost'] = input.cost;
+    if (input.leadTimeValue !== undefined) updateData['leadTimeValue'] = input.leadTimeValue;
+    if (input.leadTimeUnit !== undefined) updateData['leadTimeUnit'] = input.leadTimeUnit;
 
     const [updated] = await prisma.$transaction([
       prisma.productSupplier.update({

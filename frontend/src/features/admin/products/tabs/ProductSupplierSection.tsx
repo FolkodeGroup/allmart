@@ -88,6 +88,8 @@ export function ProductSupplierSection({
             supplierIsActive: supplier?.isActive ?? true,
             currentPrice: currentProductPrice || 1,
             cost: null,
+            leadTimeValue: null,
+            leadTimeUnit: null,
             isActive: true,
             isPrimary: false,
             createdAt: new Date().toISOString(),
@@ -235,16 +237,18 @@ export function ProductSupplierSection({
         }
     }
 
-    async function handlePriceSave(data: { cost: number; changeReason: string }) {
+    async function handlePriceSave(data: { cost: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason: string }) {
         if (!productId || !updatingSupplier) return;
         try {
             await suppliersAdminService.updateProductSupplierPrice(productId, updatingSupplier.supplierId, {
                 cost: data.cost,
+                leadTimeValue: data.leadTimeValue,
+                leadTimeUnit: data.leadTimeUnit,
                 changeReason: data.changeReason,
             });
             loadLinks();
         } catch (e) {
-            console.error('Error al actualizar costo:', e);
+            console.error('Error al actualizar condiciones:', e);
         } finally {
             setUpdatingSupplier(null);
         }
@@ -434,6 +438,14 @@ export function ProductSupplierSection({
                                             : '—'}
                                     </span>
                                 </div>
+                                <div className={styles.stat}>
+                                    <span className={styles.statLabel}>Entrega</span>
+                                    <span className={styles.statValue}>
+                                        {primaryLink.leadTimeValue != null 
+                                            ? `${primaryLink.leadTimeValue} ${primaryLink.leadTimeUnit === 'hours' ? 'hs' : 'días'}` 
+                                            : '—'}
+                                    </span>
+                                </div>
                             </div>
                             <div className={styles.cardActions}>
                                 <button
@@ -441,7 +453,7 @@ export function ProductSupplierSection({
                                     className={styles.actionBtn}
                                     onClick={() => setUpdatingSupplier(primaryLink)}
                                 >
-                                    <i className="bi bi-currency-dollar"></i> Actualizar Costo
+                                    <i className="bi bi-pencil-square"></i> Editar Condiciones
                                 </button>
                                 <button
                                     type="button"
@@ -470,6 +482,7 @@ export function ProductSupplierSection({
                                     <th>Precio</th>
                                     <th>Costo</th>
                                     <th>Margen</th>
+                                    <th>Entrega</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -485,14 +498,19 @@ export function ProductSupplierSection({
                                                 : '—'}
                                         </td>
                                         <td>
+                                            {link.leadTimeValue != null 
+                                                ? `${link.leadTimeValue} ${link.leadTimeUnit === 'hours' ? 'hs' : 'días'}` 
+                                                : '—'}
+                                        </td>
+                                        <td>
                                             <div className={styles.rowActions}>
                                                 <button
                                                     type="button"
                                                     className={styles.miniBtn}
                                                     onClick={() => setUpdatingSupplier(link)}
-                                                    title="Actualizar costo"
+                                                    title="Editar condiciones"
                                                 >
-                                                    <i className="bi bi-currency-dollar" style={{ color: 'var(--color-primary)' }}></i>
+                                                    <i className="bi bi-pencil-square" style={{ color: 'var(--color-primary)' }}></i>
                                                 </button>
                                                 <button
                                                     type="button"
@@ -529,6 +547,8 @@ export function ProductSupplierSection({
                     productName={productName || updatingSupplier.supplierName}
                     currentPrice={updatingSupplier.currentPrice}
                     currentCost={updatingSupplier.cost}
+                    currentLeadTimeValue={updatingSupplier.leadTimeValue}
+                    currentLeadTimeUnit={updatingSupplier.leadTimeUnit}
                     onClose={() => setUpdatingSupplier(null)}
                     onSave={handlePriceSave}
                 />
