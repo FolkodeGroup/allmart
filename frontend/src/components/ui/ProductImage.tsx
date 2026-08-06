@@ -11,12 +11,11 @@ interface ProductImageProps {
   loading?: 'lazy' | 'eager';
   fetchPriority?: 'high' | 'low' | 'auto';
   sizes?: string;
-  /** 🟢 FIX: Agregamos objectFit param, por defecto 'contain' en ecommerce */
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
 }
 
 /**
- * Imagen de producto optimizada: lazy, progresiva, WebP, placeholder, layout shift safe
+ * Imagen de producto optimizada: lazy, progresiva, WebP, placeholder, layout shift safe.
  */
 export const ProductImage: React.FC<ProductImageProps> = ({
   src,
@@ -29,7 +28,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   loading = 'lazy',
   fetchPriority = 'auto',
   sizes,
-  objectFit = 'contain', // 🟢 Por defecto 'contain' para que no se recorten los productos
+  objectFit = 'cover', // 🟢 Por defecto 'cover' para llenar el contenedor sin espacios vacíos
 }) => {
   const [loaded, setLoaded] = useState(false);
   const safeSrc = typeof src === 'string' ? src : '';
@@ -43,9 +42,9 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         width={width}
         height={height}
         style={{ 
-          width: width ? width : '100%', 
-          height: height ? height : '100%', 
-          objectFit: objectFit, // 🟢 Aplicamos el objectFit
+          width: '100%', 
+          height: '100%', 
+          objectFit: objectFit,
           ...style 
         }}
         aria-label={alt}
@@ -60,7 +59,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
       : undefined;
 
   return (
-    <div style={{ position: 'relative', width: width || '100%', height: height || '100%', ...style }} className={className}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', ...style }} className={className}>
       <img
         src={placeholder}
         alt=""
@@ -72,14 +71,14 @@ export const ProductImage: React.FC<ProductImageProps> = ({
           inset: 0,
           width: '100%',
           height: '100%',
-          objectFit: objectFit, // 🟢
+          objectFit: objectFit,
           filter: loaded ? 'none' : 'blur(8px)',
           opacity: loaded ? 0 : 1,
           transition: 'opacity 0.4s',
           zIndex: 1,
         }}
       />
-      <picture>
+      <picture style={{ width: '100%', height: '100%', display: 'block' }}>
         {webpSrc && (
           <source srcSet={webpSrc} type="image/webp" />
         )}
@@ -96,7 +95,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
             display: 'block',
             width: '100%',
             height: '100%',
-            objectFit: objectFit, // 🟢 Fix fundamental
+            objectFit: objectFit,
             opacity: loaded ? 1 : 0,
             transition: 'opacity 0.4s',
             zIndex: 1,
@@ -105,7 +104,6 @@ export const ProductImage: React.FC<ProductImageProps> = ({
           onLoad={() => setLoaded(true)}
           onError={e => {
             const target = e.currentTarget as HTMLImageElement;
-            // Disyuntor para evitar bucle si el marcador de posición también falla
             if (target.src === placeholder || target.src.startsWith('data:image/')) {
               return;
             }
