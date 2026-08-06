@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, TrendingUp, Clock, DollarSign, Percent } from 'lucide-react';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { suppliersAdminService, type ProductPriceHistoryDetailEntry } from './suppliersAdminService';
 import styles from './PriceHistoryModal.module.css';
@@ -151,31 +151,24 @@ export function PriceHistoryModal({ supplierId, productId, productName, onClose,
                             </div>
                         </div>
 
-                        {/* Gráfico comparativo de Área Rellenada */}
+                        {/* Gráfico comparativo de Líneas Limpias */}
                         <div className={styles.chartSection}>
                             <ResponsiveContainer width="100%" height={220}>
-                                <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorCosto" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
-                                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.05} />
-                                        </linearGradient>
-                                        <linearGradient id="colorPrecio" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#769282" stopOpacity={0.4} />
-                                            <stop offset="95%" stopColor="#769282" stopOpacity={0.02} />
-                                        </linearGradient>
-                                    </defs>
+                                <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #374151)" />
                                     <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} />
                                     <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={(v: number) => fmt.format(v)} width={70} />
                                     <Tooltip
-                                        formatter={(v: number) => [fmt.format(v), '']}
+                                        formatter={(value: unknown, name: unknown) => [
+                                            fmt.format(Number(value ?? 0)),
+                                            String(name) === 'Costo' ? 'Costo Proveedor' : 'Precio Venta Público'
+                                        ]}
                                         contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: 8, color: '#fff' }}
                                     />
                                     <Legend wrapperStyle={{ fontSize: 12, paddingTop: 6 }} />
-                                    <Area type="monotone" dataKey="Costo" stroke="#f59e0b" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCosto)" name="Costo Proveedor" />
-                                    <Area type="monotone" dataKey="PrecioVenta" stroke="#769282" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorPrecio)" name="Precio Venta Público" />
-                                </AreaChart>
+                                    <Line type="monotone" dataKey="Costo" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b' }} name="Costo Proveedor" />
+                                    <Line type="monotone" dataKey="PrecioVenta" stroke="#769282" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3, fill: '#769282' }} name="Precio Venta Público" />
+                                </LineChart>
                             </ResponsiveContainer>
                         </div>
 

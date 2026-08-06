@@ -342,15 +342,6 @@
     color: var(--color-text-secondary, #9ca3af);
 }
 
-.inlineCheckbox {
-    font-size: 12px;
-    color: var(--color-text-secondary, #9ca3af);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-}
-
 .exportBtn {
     min-height: 36px;
     padding: 0 12px;
@@ -472,6 +463,17 @@
     color: var(--color-text-secondary, #9ca3af);
 }
 
+.chartFilterBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--color-bg-secondary, #1f2937);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #374151);
+}
+
 .rangeBtn {
     padding: 4px 10px;
     background: var(--color-bg-secondary, #1f2937);
@@ -488,26 +490,6 @@
     border-color: var(--color-primary, #769282);
 }
 
-.chartSummary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.chartSummaryTitle {
-    font-size: 14px;
-    font-weight: 700;
-    margin: 0;
-}
-
-.chartSummaryHint {
-    font-size: 12px;
-    color: var(--color-text-secondary, #9ca3af);
-    margin: 2px 0 0 0;
-}
-
 .priorityPills {
     display: flex;
     flex-wrap: wrap;
@@ -518,14 +500,20 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 3px 8px;
-    background: rgba(245, 158, 11, 0.15);
-    color: #f59e0b;
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 12px;
-    font-size: 11px;
+    padding: 4px 10px;
+    background: var(--color-bg-primary, #111827);
+    color: var(--color-text-secondary, #9ca3af);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 14px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+}
+
+.priorityPillActive {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.4);
 }
 
 .chartPanel {
