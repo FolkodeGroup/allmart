@@ -105,6 +105,7 @@ export interface ProductSupplierEntry {
     cost: number | null;
     leadTimeValue?: number | null;
     leadTimeUnit?: string | null;
+    margin?: number | null;
     isActive: boolean;
     isPrimary: boolean;
     createdAt: string;
