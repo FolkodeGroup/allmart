@@ -1,6 +1,7 @@
 // hooks/useOrdersFilters.ts
 import { useState, useMemo } from 'react';
 import type { Order } from '../../../../context/AdminOrdersContext';
+import { formatDateLocal } from '../../../../utils/date';
 
 export interface OrdersFiltersState {
     search: string;
@@ -11,17 +12,17 @@ export interface OrdersFiltersState {
     totalMax: string;
 }
 
-const INITIAL: OrdersFiltersState = {
+const getInitialState = (): OrdersFiltersState => ({
     search: '',
     status: '',
     dateFrom: '',
-    dateTo: '',
+    dateTo: formatDateLocal(new Date()), // Preselección automática de la fecha del día en curso
     totalMin: '',
     totalMax: '',
-};
+});
 
 export function useOrdersFilters(orders: Order[]) {
-    const [filters, setFilters] = useState<OrdersFiltersState>(INITIAL);
+    const [filters, setFilters] = useState<OrdersFiltersState>(getInitialState);
 
     const filtered = useMemo(() => {
         return orders.filter(o => {
@@ -51,11 +52,11 @@ export function useOrdersFilters(orders: Order[]) {
         !!filters.search ||
         !!filters.status ||
         !!filters.dateFrom ||
-        !!filters.dateTo ||
+        (filters.dateTo !== formatDateLocal(new Date()) && !!filters.dateTo) ||
         !!filters.totalMin ||
         !!filters.totalMax;
 
-    const reset = () => setFilters(INITIAL);
+    const reset = () => setFilters(getInitialState());
 
     return { filters, setFilters, filtered, hasActiveFilters, reset };
 }

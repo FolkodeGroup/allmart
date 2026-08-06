@@ -354,6 +354,22 @@ export function AdminReports() {
     return [...map.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 10);
   }, [activeOrders]);
 
+  const topClients = useMemo(() => {
+    const map = new Map<string, { name: string; email: string; total: number; orders: number }>();
+    activeOrders.forEach(o => {
+      const email = o.customer.email || 'sin-email@allmart.com';
+      const name = `${o.customer.firstName || ''} ${o.customer.lastName || ''}`.trim() || 'Cliente sin nombre';
+      const prev = map.get(email) ?? { name, email, total: 0, orders: 0 };
+      map.set(email, {
+        name,
+        email,
+        total: prev.total + o.total,
+        orders: prev.orders + 1,
+      });
+    });
+    return [...map.values()].sort((a, b) => b.total - a.total).slice(0, 5);
+  }, [activeOrders]);
+
   const maxProductRevenue = topProducts[0]?.revenue ?? 1;
 
   const statusSlices = useMemo(() => {
@@ -506,13 +522,9 @@ export function AdminReports() {
           maxDate={maxDate}
         />
         <div className={styles.exportWrap}>
-          <span className={styles.exportLabel}>Descargar resumen:</span>
-          <button
-            type="button"
-            className={styles.exportResumeBtn}
-            style={{ marginLeft: 8 }}
-            disabled={exportingExcel}
-            onClick={async () => {
+          <span className={styles.exportLabel}>Exportar resumen:</span>
+          <ExportButtons
+            onExportExcel={async () => {
               setExportingExcel(true);
               try {
                 if (salesViewMode !== 'chart') {
@@ -540,16 +552,7 @@ export function AdminReports() {
                 setExportingExcel(false);
               }
             }}
-          >
-            {exportingExcel ? 'Generando Excel…' : 'Descargar Excel'}
-          </button>
-
-          <button
-            type="button"
-            className={styles.exportResumeBtn}
-            style={{ marginLeft: 8 }}
-            disabled={pdfLoading}
-            onClick={async () => {
+            onExportPDF={async () => {
               try {
                 if (salesViewMode !== 'chart') {
                   setSalesViewMode('chart');
@@ -561,9 +564,9 @@ export function AdminReports() {
                 toast.error('Error al iniciar exportación PDF.');
               }
             }}
-          >
-            {pdfLoading ? 'Generando PDF…' : 'Descargar PDF'}
-          </button>
+            loading={exportingExcel ? 'xlsx' : pdfLoading ? 'pdf' : null}
+            hide={['csv']}
+          />
         </div>
 
         <div className={styles.mobileExportFilters}>
@@ -627,6 +630,8 @@ export function AdminReports() {
               statusSlices={statusSlices}
               periodLabel={filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado'}
               ordersTableProps={{ orders: filteredOrdersTable }}
+              topProducts={topProducts}
+              topClients={topClients}
             />
           </div>
         )}
