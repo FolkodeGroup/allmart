@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, DollarSign } from 'lucide-react';
+import { X, DollarSign, Clock } from 'lucide-react';
 import styles from './PriceUpdateModal.module.css';
 
 interface PriceUpdateModalProps {
@@ -10,7 +10,7 @@ interface PriceUpdateModalProps {
     currentLeadTimeValue?: number | null;
     currentLeadTimeUnit?: string | null;
     onClose: () => void;
-    onSave: (data: { cost: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason: string }) => Promise<void>;
+    onSave: (data: { cost: number; leadTimeValue: number; leadTimeUnit: string; changeReason: string }) => Promise<void>;
 }
 
 const REASON_OPTIONS = [
@@ -21,34 +21,39 @@ const REASON_OPTIONS = [
     { value: 'adjustment', label: 'Ajuste' },
 ];
 
+const UNIT_OPTIONS = [
+    { value: 'dias', label: 'Días' },
+    { value: 'horas', label: 'Horas' },
+];
+
 const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
-export function PriceUpdateModal({ 
-    productName, 
-    currentPrice, 
-    currentCost, 
+export function PriceUpdateModal({
+    productName,
+    currentPrice,
+    currentCost,
     currentLeadTimeValue,
     currentLeadTimeUnit,
-    onClose, 
-    onSave 
+    onClose,
+    onSave,
 }: PriceUpdateModalProps) {
     const [cost, setCost] = useState(currentCost != null ? String(currentCost) : '');
-    const [leadTimeValue, setLeadTimeValue] = useState(currentLeadTimeValue != null ? String(currentLeadTimeValue) : '');
-    const [leadTimeUnit, setLeadTimeUnit] = useState(currentLeadTimeUnit ?? 'days');
+    const [leadTimeValue, setLeadTimeValue] = useState(currentLeadTimeValue != null ? String(currentLeadTimeValue) : '3');
+    const [leadTimeUnit, setLeadTimeUnit] = useState(currentLeadTimeUnit ?? 'dias');
     const [reason, setReason] = useState('market_adjustment');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
-    
+
     const costNum = cost ? parseFloat(cost) : 0;
-    const leadTimeNum = leadTimeValue ? parseInt(leadTimeValue, 10) : undefined;
+    const leadTimeNum = leadTimeValue ? parseInt(leadTimeValue, 10) : 0;
 
     useEffect(() => {
         setCost(currentCost != null ? String(currentCost) : '');
-        setLeadTimeValue(currentLeadTimeValue != null ? String(currentLeadTimeValue) : '');
-        setLeadTimeUnit(currentLeadTimeUnit ?? 'days');
+        setLeadTimeValue(currentLeadTimeValue != null ? String(currentLeadTimeValue) : '3');
+        setLeadTimeUnit(currentLeadTimeUnit ?? 'dias');
         setReason('market_adjustment');
         setErrors({});
-    }, [currentCost, currentPrice, productName, currentLeadTimeValue, currentLeadTimeUnit]);
+    }, [currentCost, currentLeadTimeValue, currentLeadTimeUnit, currentPrice, productName]);
 
     const priceNum = currentPrice;
     const margin = priceNum > 0 && costNum > 0
@@ -57,9 +62,15 @@ export function PriceUpdateModal({
 
     function validate(): boolean {
         const errs: Record<string, string> = {};
-        if (!cost || isNaN(costNum) || costNum <= 0) errs.cost = 'El costo debe ser mayor a 0';
-        if (costNum > priceNum) errs.cost = 'El costo no puede ser mayor al precio de venta';
-        if (leadTimeValue && (isNaN(leadTimeNum!) || leadTimeNum! < 0)) errs.leadTime = 'El tiempo debe ser válido';
+        if (!cost || isNaN(costNum) || costNum <= 0) {
+            errs.cost = 'El costo debe ser mayor a 0';
+        }
+        if (costNum > priceNum) {
+            errs.cost = 'El costo no puede ser mayor al precio de venta';
+        }
+        if (isNaN(leadTimeNum) || leadTimeNum < 0) {
+            errs.leadTime = 'El tiempo de entrega no puede ser negativo';
+        }
         setErrors(errs);
         return Object.keys(errs).length === 0;
     }
@@ -69,11 +80,11 @@ export function PriceUpdateModal({
         if (!validate()) return;
         setSaving(true);
         try {
-            await onSave({ 
-                cost: costNum, 
-                leadTimeValue: leadTimeNum, 
-                leadTimeUnit, 
-                changeReason: reason 
+            await onSave({
+                cost: costNum,
+                leadTimeValue: leadTimeNum,
+                leadTimeUnit,
+                changeReason: reason,
             });
             onClose();
         } catch (err: unknown) {
@@ -95,18 +106,26 @@ export function PriceUpdateModal({
             />
             <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="price-update-modal-title">
                 <div className={styles.header}>
-                    <div id="price-update-modal-title" className={styles.headerTitle}><DollarSign size={16} /> Condiciones Comerciales</div>
-                    <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
+                    <div id="price-update-modal-title" className={styles.headerTitle}>
+                        <DollarSign size={16} />
+                        <span>Condiciones Comerciales</span>
+                    </div>
+                    <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
+                        <X size={18} />
+                    </button>
                 </div>
+
                 <div className={styles.productName}>{productName}</div>
+
                 <div className={styles.formContainer}>
                     <div className={styles.infoRow}>
                         <div className={styles.infoField}>
-                            <label htmlFor="precio">Precio de Venta</label>
+                            <label htmlFor="precio-venta">PRECIO DE VENTA (PÚBLICO)</label>
                             <div className={styles.infoValue}>{fmt.format(currentPrice)}</div>
                         </div>
                     </div>
-                    
+
+                    {/* Campo Costo */}
                     <div className={styles.row}>
                         <div className={styles.field}>
                             <label htmlFor="price-update-cost-input">Costo *</label>
@@ -118,6 +137,7 @@ export function PriceUpdateModal({
                                 value={cost}
                                 onChange={e => setCost(e.target.value)}
                                 className={errors.cost ? styles.inputError : ''}
+                                placeholder="Ej: 8500"
                             />
                             {errors.cost && <span className={styles.errorMsg}>{errors.cost}</span>}
                             {!errors.cost && currentCost !== costNum && costNum > 0 && (
@@ -129,48 +149,55 @@ export function PriceUpdateModal({
                         </div>
                     </div>
 
+                    {/* Campo Tiempo de entrega (Lead Time) */}
+                    <div className={styles.field}>
+                        <label htmlFor="price-update-leadtime-input">
+                            <Clock size={13} style={{ display: 'inline', marginRight: 4 }} />
+                            Tiempo de entrega (Lead Time)
+                        </label>
+                        <div className={styles.leadTimeGroup}>
+                            <input
+                                id="price-update-leadtime-input"
+                                type="number"
+                                min="0"
+                                value={leadTimeValue}
+                                onChange={e => setLeadTimeValue(e.target.value)}
+                                className={`${styles.leadTimeInput} ${errors.leadTime ? styles.inputError : ''}`}
+                                placeholder="Ej: 3"
+                            />
+                            <select
+                                id="price-update-leadunit-select"
+                                value={leadTimeUnit}
+                                onChange={e => setLeadTimeUnit(e.target.value)}
+                                className={styles.leadTimeUnitSelect}
+                            >
+                                {UNIT_OPTIONS.map(u => (
+                                    <option key={u.value} value={u.value}>{u.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        {errors.leadTime && <span className={styles.errorMsg}>{errors.leadTime}</span>}
+                    </div>
+
+                    {/* Margen estimado */}
                     {margin !== null && (
                         <div className={`${styles.marginBadge} ${margin < 10 ? styles.low : margin < 15 ? styles.mid : styles.ok}`}>
                             Margen estimado: {margin.toFixed(1)}%
                         </div>
                     )}
 
-                    <div className={styles.row}>
-                        <div className={styles.field}>
-                            <label htmlFor="price-update-leadtime-input">Tiempo de entrega (Lead Time)</label>
-                            <div className={styles.compositeInput}>
-                                <input
-                                    id="price-update-leadtime-input"
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    placeholder="Ej: 3"
-                                    value={leadTimeValue}
-                                    onChange={e => setLeadTimeValue(e.target.value)}
-                                    className={errors.leadTime ? styles.inputError : ''}
-                                />
-                                <select 
-                                    value={leadTimeUnit} 
-                                    onChange={e => setLeadTimeUnit(e.target.value)}
-                                    aria-label="Unidad de tiempo"
-                                >
-                                    <option value="days">Días</option>
-                                    <option value="hours">Horas</option>
-                                </select>
-                            </div>
-                            {errors.leadTime && <span className={styles.errorMsg}>{errors.leadTime}</span>}
-                        </div>
-                    </div>
-
+                    {/* Razón del cambio */}
                     <div className={styles.field}>
                         <label htmlFor="price-update-reason-select">Razón del cambio</label>
                         <select id="price-update-reason-select" value={reason} onChange={e => setReason(e.target.value)}>
                             {REASON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                     </div>
-                    
+
                     <div className={styles.actions}>
-                        <button type="button" className={styles.btnCancel} onClick={onClose}>Cancelar</button>
+                        <button type="button" className={styles.btnCancel} onClick={onClose}>
+                            Cancelar
+                        </button>
                         <button
                             type="button"
                             className={styles.btnSave}

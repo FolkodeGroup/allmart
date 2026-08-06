@@ -73,8 +73,8 @@ export interface SupplierProductEntry {
     sku: string | null;
     currentPrice: number;
     cost: number | null;
-    leadTimeValue: number | null;
-    leadTimeUnit: string | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
     margin: number | null;
     lastPriceChange: string | null;
     priceChangePercent: number | null;
@@ -87,6 +87,8 @@ export interface PriceHistoryEntry {
     sku: string | null;
     price: number;
     cost: number | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
     changeReason: string;
     changedBy: string | null;
     createdAt: string;
@@ -101,8 +103,8 @@ export interface ProductSupplierEntry {
     supplierIsActive: boolean;
     currentPrice: number;
     cost: number | null;
-    leadTimeValue: number | null;
-    leadTimeUnit: string | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
     isActive: boolean;
     isPrimary: boolean;
     createdAt: string;
@@ -115,6 +117,8 @@ export interface ProductPriceHistoryDetailEntry {
     supplierName: string;
     price: number;
     cost: number | null;
+    leadTimeValue?: number | null;
+    leadTimeUnit?: string | null;
     margin: number | null;
     changeReason: string;
     changedBy: string | null;
@@ -256,7 +260,7 @@ export const suppliersAdminService = {
         const result = await suppliersAdminService.listSuppliers({ limit: 200 });
         return (result?.data ?? []).map(s => ({
             id: s.id, name: s.name, url: s.url, phone: s.phone,
-            address: s.address, products: '', // Se hardcodea vacío ya que V2 no posee 'products'
+            address: s.address, products: '',
             createdAt: s.createdAt, updatedAt: s.updatedAt,
         }));
     },

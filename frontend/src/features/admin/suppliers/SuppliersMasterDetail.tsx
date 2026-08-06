@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle, Clock } from 'lucide-react';
 import { readSelectedProductIds, toggleSelectedProductId, writeSelectedProductIds } from './prioritySelection';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -29,7 +29,7 @@ function fmtDateShort(iso: string) {
     const [, m, d] = iso.split('-');
     return `${d}/${m}`;
 }
-// ── Date helpers ────────────────────────────────────────────────────────────
+
 function daysAgoISO(days: number) {
     const d = new Date(); d.setDate(d.getDate() - days); return d.toISOString().slice(0, 10);
 }
@@ -68,7 +68,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     const isMobile = useIsMobile();
 
     // Right panel state
-    const [activeTab, setActiveTab] = useState<TabId>('chart');
+    const [activeTab, setActiveTab] = useState<TabId>('table');
     const [products, setProducts] = useState<SupplierProductEntry[]>([]);
     const [history, setHistory] = useState<PriceHistoryEntry[]>([]);
     const [rightLoading, setRightLoading] = useState(false);
@@ -104,8 +104,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         }
     }, [suppliers, selectedId]);
 
-    // ── Load right panel data when supplier/tab changes ─────────────────────
-    const loadRightPanelData = useCallback(() => {
+    // ── Load right panel data ───────────────────────────────────────────────
+    const loadRightData = useCallback(() => {
         if (!selectedId) return;
         setRightLoading(true);
         const startDate = daysAgoISO(rangedays);
@@ -122,8 +122,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     }, [selectedId, rangedays]);
 
     useEffect(() => {
-        loadRightPanelData();
-    }, [loadRightPanelData]);
+        loadRightData();
+    }, [loadRightData]);
 
     useEffect(() => {
         if (!selectedId) {
@@ -140,7 +140,6 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
     // ── Filtered supplier list ──────────────────────────────────────────────
     const filteredSuppliers = useMemo(() => {
         let list = suppliers;
-        // Filter by status based on selected tab
         list = filterTab === 'active' ? list.filter(s => s.isActive) : list.filter(s => !s.isActive);
         if (search.trim()) {
             const q = search.toLowerCase();
@@ -163,9 +162,9 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         }
     }, [selectedSupplier?.id]);
 
-    // ── Chart data: pivot history into { date, [productName]: price } ──────
+    // ── Chart data ──────────────────────────────────────────────────────────
     const selectedHistory = useMemo(() => {
-        if (selectedProductIds.length === 0) return [];
+        if (selectedProductIds.length === 0) return history;
         return history.filter(h => selectedProductIds.includes(h.productId));
     }, [history, selectedProductIds]);
 
@@ -187,7 +186,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         return Array.from(names).slice(0, 8);
     }, [selectedHistory]);
 
-    const LINE_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#0ea5e9', '#14b8a6'];
+    const LINE_COLORS = ['#f59e0b', '#6366f1', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#0ea5e9', '#14b8a6'];
 
     // ── Sort products table ─────────────────────────────────────────────────
     const filteredProducts = useMemo(() => {
@@ -247,17 +246,21 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             .sort((a, b) => (b.margin ?? 0) - (a.margin ?? 0))
             .slice(0, 3);
         const lowMarginAlerts = products.filter(p => p.margin !== null && (p.margin as number) < 15);
-        const inventoryHealth = products.length ? Math.max(92, 100 - Math.min(20, lowMarginAlerts.length * 3)) : 100;
-        return { avgMargin, volatility, recentChanges, topByMargin, lowMarginAlerts, inventoryHealth };
+        return { avgMargin, volatility, recentChanges, topByMargin, lowMarginAlerts };
     }, [products, history]);
 
     // ── CSV Export ──────────────────────────────────────────────────────────
     function exportCsv() {
         const header = ['SKU', 'Producto', 'Precio', 'Costo', 'Margen %', 'Entrega', 'Cambio 7d %', 'Última actualización'];
         const rows = products.map(p => [
-            p.sku ?? '', p.productName, p.currentPrice, p.cost ?? '', p.margin ?? '',
-            p.leadTimeValue != null ? `${p.leadTimeValue} ${p.leadTimeUnit === 'hours' ? 'hs' : 'días'}` : '',
-            p.priceChangePercent ?? '', p.lastPriceChange ? new Date(p.lastPriceChange).toLocaleDateString('es-AR') : '',
+            p.sku ?? '',
+            p.productName,
+            p.currentPrice,
+            p.cost ?? '',
+            p.margin ?? '',
+            p.leadTimeValue ? `${p.leadTimeValue} ${p.leadTimeUnit ?? 'días'}` : '3 días',
+            p.priceChangePercent ?? '',
+            p.lastPriceChange ? new Date(p.lastPriceChange).toLocaleDateString('es-AR') : '',
         ]);
         const csv = [header, ...rows].map(r => r.join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -274,10 +277,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             if (!supplier) return;
 
             if (supplier.isActive) {
-                // Desactivar
                 await suppliersAdminService.deleteSupplierV2(deleteId);
             } else {
-                // Reactivar
                 await suppliersAdminService.updateSupplierV2(deleteId, { name: supplier.name, isActive: true });
             }
             if (selectedId === deleteId) setSelectedId(null);
@@ -287,22 +288,16 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         }
     }
 
-    // ── Price Update ────────────────────────────────────────────────────────
-    async function handlePriceSave(data: { cost: number; leadTimeValue?: number; leadTimeUnit?: string; changeReason: string }) {
+    // ── Save Conditions ─────────────────────────────────────────────────────
+    async function handleSaveConditions(data: { cost: number; leadTimeValue: number; leadTimeUnit: string; changeReason: string }) {
         if (!selectedId || !updatingSupplier) return;
-        try {
-            await suppliersAdminService.updateProductSupplierPrice(updatingSupplier.productId, selectedId, {
-                cost: data.cost,
-                leadTimeValue: data.leadTimeValue,
-                leadTimeUnit: data.leadTimeUnit,
-                changeReason: data.changeReason,
-            });
-            loadRightPanelData();
-        } catch (e) {
-            console.error('Error al actualizar condiciones:', e);
-        } finally {
-            setUpdatingSupplier(null);
-        }
+        await suppliersAdminService.updateProductSupplierPrice(updatingSupplier.productId, selectedId, {
+            cost: data.cost,
+            leadTimeValue: data.leadTimeValue,
+            leadTimeUnit: data.leadTimeUnit,
+            changeReason: data.changeReason,
+        });
+        loadRightData();
     }
 
     // ── Render helpers ──────────────────────────────────────────────────────
@@ -317,7 +312,6 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         <div className={styles.layout}>
             {/* ── LEFT COLUMN ── */}
             <aside className={styles.leftCol}>
-                {/* Search & filter */}
                 <div className={styles.leftHeader}>
                     <div className={styles.searchRow}>
                         <Search size={14} className={styles.searchIcon} />
@@ -354,7 +348,6 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                     </button>
                 </div>
 
-                {/* Supplier list */}
                 <div className={styles.supplierList}>
                     {loadingList ? (
                         Array.from({ length: 5 }).map((_, i) => (
@@ -412,7 +405,6 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                     </div>
                 ) : (
                     <>
-                        {/* Supplier header */}
                         <div className={styles.supplierHeader}>
                             <span className={styles.headerAvatar}>{selectedSupplier.name.charAt(0).toUpperCase()}</span>
                             <div>
@@ -434,15 +426,15 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
                         {/* Tabs */}
                         <div className={styles.tabs}>
-                            {(['chart', 'table', 'analysis'] as TabId[]).map(t => (
+                            {(['table', 'chart', 'analysis'] as TabId[]).map(t => (
                                 <button
                                     key={t}
                                     type="button"
                                     className={`${styles.tab} ${activeTab === t ? styles.tabActive : ''}`}
                                     onClick={() => setActiveTab(t)}
                                 >
-                                    {t === 'chart' && <><TrendingUp size={13} /> Fluctuación</>}
                                     {t === 'table' && <><Table size={13} /> Productos</>}
+                                    {t === 'chart' && <><TrendingUp size={13} /> Fluctuación</>}
                                     {t === 'analysis' && <><BarChart2 size={13} /> Análisis</>}
                                 </button>
                             ))}
@@ -455,130 +447,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                             </div>
                         ) : (
                             <div className={styles.tabContent}>
-                                {/* ── TAB: CHART ── */}
-                                {activeTab === 'chart' && (
-                                    <div className={styles.chartTab}>
-                                        <div className={styles.chartControls}>
-                                            <span className={styles.controlLabel}>Rango:</span>
-                                            {([7, 30, 90] as RangeId[]).map(d => (
-                                                <button
-                                                    key={d}
-                                                    type="button"
-                                                    className={`${styles.rangeBtn} ${rangedays === d ? styles.rangeBtnActive : ''}`}
-                                                    onClick={() => setRangeDays(d)}
-                                                >
-                                                    {d}d
-                                                </button>
-                                            ))}
-                                        </div>
-                                        {selectedProductIds.length === 0 ? (
-                                            <div className={styles.emptyChart}>
-                                                <Package size={36} />
-                                                <p>Marcá productos como prioridad para compararlos en el gráfico.</p>
-                                            </div>
-                                        ) : chartData.length === 0 ? (
-                                            <div className={styles.emptyChart}>
-                                                <TrendingUp size={36} />
-                                                <p>Sin historial de precios para los productos priorizados en el período elegido.</p>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <div className={styles.chartSummary}>
-                                                    <div>
-                                                        <p className={styles.chartSummaryTitle}>Comparando {selectedProductIds.length} producto{selectedProductIds.length === 1 ? '' : 's'}</p>
-                                                        <p className={styles.chartSummaryHint}>Los productos marcados con checkbox aparecen aquí en tiempo real.</p>
-                                                    </div>
-                                                    <div className={styles.priorityPills}>
-                                                        {selectedProductIds.map((productId) => {
-                                                            const product = products.find(p => p.productId === productId);
-                                                            if (!product) return null;
-                                                            return (
-                                                                <button key={productId} type="button" className={styles.priorityPill} onClick={() => togglePriority(productId)}>
-                                                                    {product.productName}
-                                                                    <XCircle size={12} />
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                                <div className={styles.chartPanel}>
-                                                    <ResponsiveContainer width="100%" height={isMobile ? 240 : 320}>
-                                                        <AreaChart
-                                                            data={chartData}
-                                                            margin={isMobile
-                                                                ? { top: 12, right: 8, left: 0, bottom: 0 }
-                                                                : { top: 20, right: 30, left: 20, bottom: 10 }
-                                                            }>
-                                                            <defs>
-                                                                {chartProducts.map((name, i) => (
-                                                                    <linearGradient key={name} id={`color${name.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                                                                        <stop offset="5%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.8} />
-                                                                        <stop offset="95%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.05} />
-                                                                    </linearGradient>
-                                                                ))}
-                                                            </defs>
-                                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e0e0e0)" />
-                                                            <XAxis
-                                                                dataKey="date"
-                                                                tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 500 }}
-                                                                tickFormatter={isMobile ? fmtDateShort : undefined}
-                                                                stroke="var(--color-text-tertiary, #6b7280)"
-                                                            />
-                                                            <YAxis
-                                                                tick={{ fontSize: isMobile ? 10 : 12 }}
-                                                                tickFormatter={(v: number) => (isMobile ? fmtCompact : fmt).format(v)}
-                                                                stroke="var(--color-text-tertiary, #6b7280)"
-                                                                width={isMobile ? 42 : 90}
-                                                                label={isMobile ? undefined : {
-                                                                    value: 'Costo', angle: -90, position: 'insideLeft', offset: -5,
-                                                                    fontSize: 12, fill: 'var(--color-text-tertiary, #6b7280)'
-                                                                }}
-                                                            />
-                                                            <Tooltip
-                                                                formatter={(v: number) => fmt.format(v)}
-                                                                cursor={{ fill: 'rgba(118, 146, 130, 0.12)' }}
-                                                                wrapperStyle={{
-                                                                    border: '1px solid var(--color-border)',
-                                                                    borderRadius: 12,
-                                                                    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.12)',
-                                                                }}
-                                                                contentStyle={{
-                                                                    backgroundColor: 'var(--color-bg-card)',
-                                                                    border: 'none',
-                                                                    borderRadius: 12,
-                                                                    color: 'var(--color-text-primary)',
-                                                                    padding: '10px 12px',
-                                                                }}
-                                                                labelStyle={{
-                                                                    color: 'var(--color-text-secondary)',
-                                                                    fontSize: '0.82rem',
-                                                                }}
-                                                                itemStyle={{
-                                                                    color: 'var(--color-text-primary)',
-                                                                    fontSize: '0.82rem',
-                                                                }}
-                                                            />
-                                                            <Legend wrapperStyle={{ fontSize: isMobile ? 10 : 12, paddingTop: isMobile ? 8 : 16 }} />
-                                                            {chartProducts.map((name, i) => (
-                                                                <Area
-                                                                    key={name}
-                                                                    type="monotone"
-                                                                    dataKey={name}
-                                                                    stroke={LINE_COLORS[i % LINE_COLORS.length]}
-                                                                    strokeWidth={2}
-                                                                    fill={`url(#color${name.replace(/\s+/g, '')})`}
-                                                                    isAnimationActive={true}
-                                                                />
-                                                            ))}
-                                                        </AreaChart>
-                                                    </ResponsiveContainer>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* ── TAB: TABLE ── */}
+                                {/* ── TAB: TABLE (PRODUCTOS & ENTREGAS) ── */}
                                 {activeTab === 'table' && (
                                     <div className={styles.tableTab}>
                                         <div className={styles.tableActions}>
@@ -587,13 +456,12 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                     <Search size={14} />
                                                     <input
                                                         type="text"
-                                                        placeholder="Buscar producto..."
+                                                        placeholder="Buscar producto o SKU..."
                                                         value={productSearch}
                                                         onChange={e => setProductSearch(e.target.value)}
                                                     />
                                                 </label>
                                                 <span className={styles.tableCount}>{filteredProducts.length} de {products.length} producto{products.length !== 1 ? 's' : ''}</span>
-
                                             </div>
                                             <div className={styles.tableToolbarRight}>
                                                 <label className={styles.inlineCheckbox}>
@@ -609,6 +477,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                 </button>
                                             </div>
                                         </div>
+
                                         {products.length === 0 ? (
                                             <div className={styles.emptyTable}>Sin productos asignados a este proveedor</div>
                                         ) : (
@@ -627,12 +496,12 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                             {([
                                                                 ['sku', 'SKU'],
                                                                 ['productName', 'Nombre'],
-                                                                ['currentPrice', 'Precio'],
+                                                                ['currentPrice', 'Precio Venta'],
                                                                 ['cost', 'Costo'],
                                                                 ['margin', 'Margen %'],
                                                                 ['leadTimeValue', 'Entrega'],
                                                                 ['priceChangePercent', 'Cambio 7d'],
-                                                                ['lastPriceChange', 'Última actualización'],
+                                                                ['lastPriceChange', 'Última act.'],
                                                             ] as [keyof SupplierProductEntry, string][]).map(([key, label]) => (
                                                                 <th key={key} onClick={() => toggleSort(key)} className={styles.thSortable}>
                                                                     {label} {sortKey === key ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -664,14 +533,15 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                     />
                                                                 </td>
                                                                 <td className={styles.tdSku}>{p.sku ?? '—'}</td>
-                                                                <td>{p.productName}</td>
-                                                                <td>{fmtN(p.currentPrice)}</td>
-                                                                <td>{fmtN(p.cost)}</td>
+                                                                <td className={styles.tdName}>{p.productName}</td>
+                                                                <td className={styles.tdPrice}>{fmtN(p.currentPrice)}</td>
+                                                                <td className={styles.tdCost}>{p.cost ? fmtN(p.cost) : '—'}</td>
                                                                 <td>{getMarginBadge(p.margin)}</td>
                                                                 <td>
-                                                                    {p.leadTimeValue != null 
-                                                                        ? `${p.leadTimeValue} ${p.leadTimeUnit === 'hours' ? 'hs' : 'días'}` 
-                                                                        : '—'}
+                                                                    <span className={styles.leadTimePill}>
+                                                                        <Clock size={11} />
+                                                                        {p.leadTimeValue ? `${p.leadTimeValue} ${p.leadTimeUnit ?? 'días'}` : '3 días'}
+                                                                    </span>
                                                                 </td>
                                                                 <td className={p.priceChangePercent && p.priceChangePercent > 15 ? styles.tdWarn : ''}>
                                                                     {fmtPct(p.priceChangePercent)}
@@ -679,18 +549,15 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                 <td className={styles.tdDate}>
                                                                     {p.lastPriceChange ? new Date(p.lastPriceChange).toLocaleDateString('es-AR') : '—'}
                                                                 </td>
-                                                                <td>
-                                                                    <div className={styles.rowActions}>
+                                                                <td className={styles.tdActions}>
+                                                                    <div className={styles.actionBtnsGroup}>
                                                                         <button
                                                                             type="button"
-                                                                            className={styles.historyBtn}
-                                                                            onClick={e => {
-                                                                                e.stopPropagation();
-                                                                                setUpdatingSupplier(p);
-                                                                            }}
-                                                                            title="Editar condiciones"
+                                                                            className={styles.miniBtn}
+                                                                            onClick={e => { e.stopPropagation(); setUpdatingSupplier(p); }}
+                                                                            title="Actualizar costo y tiempo de entrega"
                                                                         >
-                                                                            <i className="bi bi-pencil-square"></i>
+                                                                            <i className="bi bi-pencil-square" />
                                                                         </button>
                                                                         <button
                                                                             type="button"
@@ -699,9 +566,8 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                                                 e.stopPropagation();
                                                                                 setHistoryProduct({ productId: p.productId, productName: p.productName });
                                                                             }}
-                                                                            title="Ver historial"
                                                                         >
-                                                                            <i className="bi bi-clock-history"></i>
+                                                                            Historial
                                                                         </button>
                                                                     </div>
                                                                 </td>
@@ -714,10 +580,114 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                     </div>
                                 )}
 
+                                {/* ── TAB: CHART (FLUCTUACIÓN DE COSTO PROVEEDOR) ── */}
+                                {activeTab === 'chart' && (
+                                    <div className={styles.chartTab}>
+                                        <div className={styles.chartControls}>
+                                            <span className={styles.controlLabel}>Período:</span>
+                                            {([7, 30, 90] as RangeId[]).map(d => (
+                                                <button
+                                                    key={d}
+                                                    type="button"
+                                                    className={`${styles.rangeBtn} ${rangedays === d ? styles.rangeBtnActive : ''}`}
+                                                    onClick={() => setRangeDays(d)}
+                                                >
+                                                    {d} días
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {chartData.length === 0 ? (
+                                            <div className={styles.emptyChart}>
+                                                <TrendingUp size={36} />
+                                                <p>Sin historial de fluctuación registrado para este proveedor en el período seleccionado.</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className={styles.chartSummary}>
+                                                    <div>
+                                                        <p className={styles.chartSummaryTitle}>Evolución de Costos del Proveedor</p>
+                                                        <p className={styles.chartSummaryHint}>
+                                                            Curva comparativa de costos de reposición. Marcá productos en la pestaña "Productos" para filtrar la comparación.
+                                                        </p>
+                                                    </div>
+                                                    {selectedProductIds.length > 0 && (
+                                                        <div className={styles.priorityPills}>
+                                                            {selectedProductIds.map((productId) => {
+                                                                const product = products.find(p => p.productId === productId);
+                                                                if (!product) return null;
+                                                                return (
+                                                                    <button key={productId} type="button" className={styles.priorityPill} onClick={() => togglePriority(productId)}>
+                                                                        {product.productName}
+                                                                        <XCircle size={12} />
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className={styles.chartPanel}>
+                                                    <ResponsiveContainer width="100%" height={isMobile ? 240 : 320}>
+                                                        <AreaChart
+                                                            data={chartData}
+                                                            margin={isMobile
+                                                                ? { top: 12, right: 8, left: 0, bottom: 0 }
+                                                                : { top: 20, right: 30, left: 20, bottom: 10 }
+                                                            }>
+                                                            <defs>
+                                                                {chartProducts.map((name, i) => (
+                                                                    <linearGradient key={name} id={`color${name.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+                                                                        <stop offset="5%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.8} />
+                                                                        <stop offset="95%" stopColor={LINE_COLORS[i % LINE_COLORS.length]} stopOpacity={0.05} />
+                                                                    </linearGradient>
+                                                                ))}
+                                                            </defs>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #374151)" />
+                                                            <XAxis
+                                                                dataKey="date"
+                                                                tick={{ fontSize: isMobile ? 10 : 12, fill: '#9ca3af' }}
+                                                                tickFormatter={isMobile ? fmtDateShort : undefined}
+                                                                stroke="var(--color-text-tertiary, #6b7280)"
+                                                            />
+                                                            <YAxis
+                                                                tick={{ fontSize: isMobile ? 10 : 12, fill: '#9ca3af' }}
+                                                                tickFormatter={(v: number) => (isMobile ? fmtCompact : fmt).format(v)}
+                                                                stroke="var(--color-text-tertiary, #6b7280)"
+                                                                width={isMobile ? 42 : 90}
+                                                            />
+                                                            <Tooltip
+                                                                formatter={(v: number) => [fmt.format(v), 'Costo']}
+                                                                contentStyle={{
+                                                                    backgroundColor: '#1f2937',
+                                                                    border: '1px solid #374151',
+                                                                    borderRadius: 8,
+                                                                    color: '#fff',
+                                                                }}
+                                                            />
+                                                            <Legend wrapperStyle={{ fontSize: isMobile ? 10 : 12, paddingTop: isMobile ? 8 : 16 }} />
+                                                            {chartProducts.map((name, i) => (
+                                                                <Area
+                                                                    key={name}
+                                                                    type="monotone"
+                                                                    dataKey={name}
+                                                                    stroke={LINE_COLORS[i % LINE_COLORS.length]}
+                                                                    strokeWidth={2.5}
+                                                                    fill={`url(#color${name.replace(/\s+/g, '')})`}
+                                                                    isAnimationActive={true}
+                                                                />
+                                                            ))}
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
                                 {/* ── TAB: ANALYSIS ── */}
                                 {activeTab === 'analysis' && (
                                     <div className={styles.analysisTab}>
-                                        {/* Metric cards */}
                                         <div className={styles.metricCards}>
                                             <div className={styles.metricCard}>
                                                 <span className={styles.metricLabel}>Margen Promedio</span>
@@ -726,23 +696,22 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                 </span>
                                             </div>
                                             <div className={styles.metricCard}>
-                                                <span className={styles.metricLabel}>Volatilidad</span>
+                                                <span className={styles.metricLabel}>Volatilidad de Costo</span>
                                                 <span className={styles.metricValue}>{fmt.format(analysisMetrics.volatility)}</span>
                                             </div>
                                             <div className={styles.metricCard}>
-                                                <span className={styles.metricLabel}>Productos</span>
+                                                <span className={styles.metricLabel}>Productos Asignados</span>
                                                 <span className={styles.metricValue}>{products.length}</span>
                                             </div>
                                             <div className={styles.metricCard}>
-                                                <span className={styles.metricLabel}>Cambios 24h</span>
+                                                <span className={styles.metricLabel}>Aumentos 24h</span>
                                                 <span className={styles.metricValue}>{analysisMetrics.recentChanges}</span>
                                             </div>
                                         </div>
 
-                                        {/* Margin histogram */}
                                         {products.length > 0 && (
                                             <div className={styles.histogramSection}>
-                                                <h4 className={styles.sectionTitle}>Distribución de Márgenes</h4>
+                                                <h4 className={styles.sectionTitle}>Distribución de Márgenes por Producto</h4>
                                                 <ResponsiveContainer width="100%" height={160}>
                                                     <BarChart
                                                         data={products.filter(p => p.margin !== null).map(p => ({ name: p.productName.slice(0, 12), margin: p.margin }))}
@@ -751,20 +720,19 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                                             : { top: 5, right: 8, left: 0, bottom: 0 }
                                                         }
                                                     >
-                                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #e5e7eb)" />
-                                                        <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                                                        <YAxis tick={{ fontSize: 10 }} width={isMobile ? 26 : 36} />
+                                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border, #374151)" />
+                                                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9ca3af' }} />
+                                                        <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} width={isMobile ? 26 : 36} />
                                                         <Tooltip formatter={(v: number) => `${v.toFixed(1)}%`} />
-                                                        <Bar dataKey="margin" fill="#6366f1" radius={[3, 3, 0, 0]} />
+                                                        <Bar dataKey="margin" fill="#769282" radius={[3, 3, 0, 0]} />
                                                     </BarChart>
                                                 </ResponsiveContainer>
                                             </div>
                                         )}
 
-                                        {/* Top 3 by margin */}
                                         {analysisMetrics.topByMargin.length > 0 && (
                                             <div className={styles.top3Section}>
-                                                <h4 className={styles.sectionTitle}>Top 3 por Margen</h4>
+                                                <h4 className={styles.sectionTitle}>Top 3 por Margen Comercial</h4>
                                                 {analysisMetrics.topByMargin.map((p, i) => (
                                                     <div key={p.productId} className={styles.top3Row}>
                                                         <span className={styles.top3Rank}>#{i + 1}</span>
@@ -775,10 +743,9 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                             </div>
                                         )}
 
-                                        {/* Alerts */}
                                         {analysisMetrics.lowMarginAlerts.length > 0 && (
                                             <div className={styles.alertsSection}>
-                                                <h4 className={styles.sectionTitle}><AlertTriangle size={14} /> Alertas de Margen</h4>
+                                                <h4 className={styles.sectionTitle}><AlertTriangle size={14} /> Alertas de Margen Bajo (&lt;15%)</h4>
                                                 {analysisMetrics.lowMarginAlerts.map(p => (
                                                     <div key={p.productId} className={styles.alertRow}>
                                                         <span>{p.productName}</span>
@@ -816,14 +783,13 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
             {updatingSupplier && (
                 <PriceUpdateModal
-                    key={updatingSupplier.productId}
                     productName={updatingSupplier.productName}
                     currentPrice={updatingSupplier.currentPrice}
                     currentCost={updatingSupplier.cost}
                     currentLeadTimeValue={updatingSupplier.leadTimeValue}
                     currentLeadTimeUnit={updatingSupplier.leadTimeUnit}
                     onClose={() => setUpdatingSupplier(null)}
-                    onSave={handlePriceSave}
+                    onSave={handleSaveConditions}
                 />
             )}
 
