@@ -41,26 +41,20 @@ export function Dropdown({
   const selectedOption = options.find((opt) => opt.value === value);
 
   /**
-     * Calcula la posición del menú en coordenadas de viewport, ya que ahora
-     * se renderiza vía portal en document.body (position: fixed) para
-     * escapar del overflow de contenedores ancestros (ej: .tableWrapper).
-     * Además decide si abrir hacia abajo o hacia arriba (flip) según el
-     * espacio disponible en cada dirección, y limita max-height al espacio
-     * real para que el overflow-y: auto interno del menú sea navegable
-     * (un position: fixed que se sale del viewport no es scrolleable).
-    
-     */
+   * Calcula la posición del menú en coordenadas de viewport, ya que se renderiza
+   * vía portal en document.body (position: fixed) para escapar del overflow
+   * de contenedores ancestros (como modales o tablas).
+   */
   const updateMenuPosition = useCallback(() => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const GAP = 6;
-    const MARGIN = 8; // separación mínima del borde de la ventana
-    const PREFERRED_MAX_HEIGHT = 260; // debe matchear .menu { max-height } en el CSS
+    const MARGIN = 8;
+    const PREFERRED_MAX_HEIGHT = 260;
 
     const spaceBelow = window.innerHeight - rect.bottom - GAP - MARGIN;
     const spaceAbove = rect.top - GAP - MARGIN;
 
-    // Preferir abajo; solo abrir arriba si abajo no entra pero arriba sí hay más lugar
     const openUpwards = spaceBelow < PREFERRED_MAX_HEIGHT && spaceAbove > spaceBelow;
 
     if (openUpwards) {
@@ -99,8 +93,7 @@ export function Dropdown({
     };
   }, [isOpen]);
 
-  // Reposicionar mientras el menú esté abierto (capture:true para detectar
-  // scroll de contenedores internos, que no burbujean el evento)
+  // Reposicionar mientras el menú esté abierto
   useEffect(() => {
     if (!isOpen) return;
     updateMenuPosition();
@@ -208,7 +201,9 @@ export function Dropdown({
             left: menuPos.left,
             width: menuPos.width,
             maxHeight: menuPos.maxHeight,
-          }}        >
+            zIndex: 100000,
+          }}
+        >
           {options.map((option, index) => {
             const isSelected = option.value === value;
             const isFocused = index === focusedIndex;
@@ -219,8 +214,7 @@ export function Dropdown({
                 role="option"
                 aria-selected={isSelected}
                 tabIndex={-1}
-                className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${isFocused ? styles.optionFocused : ''
-                  }`}
+                className={`${styles.option} ${isSelected ? styles.optionSelected : ''} ${isFocused ? styles.optionFocused : ''}`}
                 onClick={() => handleSelect(option.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -237,7 +231,6 @@ export function Dropdown({
         document.body
       )}
 
-      {/* Select de respaldo invisible para pruebas de Testing Library, autocompletado y soporte nativo de formularios */}
       <select
         id={id}
         value={value}

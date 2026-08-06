@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, DollarSign, Clock } from 'lucide-react';
+import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import styles from './PriceUpdateModal.module.css';
 
 interface PriceUpdateModalProps {
@@ -165,16 +166,15 @@ export function PriceUpdateModal({
                                 className={`${styles.leadTimeInput} ${errors.leadTime ? styles.inputError : ''}`}
                                 placeholder="Ej: 3"
                             />
-                            <select
-                                id="price-update-leadunit-select"
-                                value={leadTimeUnit}
-                                onChange={e => setLeadTimeUnit(e.target.value)}
-                                className={styles.leadTimeUnitSelect}
-                            >
-                                {UNIT_OPTIONS.map(u => (
-                                    <option key={u.value} value={u.value}>{u.label}</option>
-                                ))}
-                            </select>
+                            <div className={styles.leadTimeDropdown}>
+                                <Dropdown
+                                    id="price-update-leadunit-select"
+                                    options={UNIT_OPTIONS}
+                                    value={leadTimeUnit}
+                                    onChange={setLeadTimeUnit}
+                                    placeholder="Unidad"
+                                />
+                            </div>
                         </div>
                         {errors.leadTime && <span className={styles.errorMsg}>{errors.leadTime}</span>}
                     </div>
@@ -189,9 +189,13 @@ export function PriceUpdateModal({
                     {/* Razón del cambio */}
                     <div className={styles.field}>
                         <label htmlFor="price-update-reason-select">Razón del cambio</label>
-                        <select id="price-update-reason-select" value={reason} onChange={e => setReason(e.target.value)}>
-                            {REASON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                        </select>
+                        <Dropdown
+                            id="price-update-reason-select"
+                            options={REASON_OPTIONS}
+                            value={reason}
+                            onChange={setReason}
+                            placeholder="Seleccionar razón..."
+                        />
                     </div>
 
                     <div className={styles.actions}>
