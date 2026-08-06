@@ -30,7 +30,6 @@ const AdminCollections: React.FC = () => {
   const [pages, setPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Bulk delete state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   const [deleting, setDeleting] = useState(false);
@@ -47,7 +46,6 @@ const AdminCollections: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, filterActive, displayPosition]);
 
-  // after loading collections, fetch products for those missing products (one call per collection)
   useEffect(() => {
     if (!collections || collections.length === 0) return;
     const missing = collections.filter((c) => !c.products || c.products.length === 0);
@@ -61,7 +59,7 @@ const AdminCollections: React.FC = () => {
           if (cancelled) return;
           setCollections((prev) => prev.map((p) => (p.id === full.id ? full : p)));
         } catch {
-          // ignore per-card errors
+          // ignore
         }
       }
     })();
@@ -89,7 +87,6 @@ const AdminCollections: React.FC = () => {
     }
   }
 
-  // Close action menu on outside click
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!openMenuId) return;
@@ -201,8 +198,7 @@ const AdminCollections: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>Gestionar Colecciones</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
           {selectedIds.length > 0 && (
             <button
               className={styles.btnSmallDanger}

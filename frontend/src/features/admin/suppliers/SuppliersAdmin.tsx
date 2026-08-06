@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { SuppliersMasterDetail } from './SuppliersMasterDetail';
 import { SupplierModal } from './SupplierModal';
 import styles from './SuppliersAdmin.module.css';
-import sectionStyles from '../shared/AdminSection.module.css';
 
 export function SuppliersAdmin() {
     const [modalSupplierId, setModalSupplierId] = useState<string | null | undefined>(undefined);
@@ -17,7 +16,6 @@ export function SuppliersAdmin() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <div>
-                    <h2 className={sectionStyles.title}>Proveedores</h2>
                     <p className={styles.description}>Administrá los proveedores y sus precios</p>
                 </div>
             </div>
