@@ -109,14 +109,13 @@ export function ProductSupplierSection({
     // Datos derivados
     const primaryLink = productLinks.find(l => l.isPrimary)
         ?? productLinks.find(l => l.supplierId === primarySupplierId)
-        ?? null;
-    const otherLinks = productLinks.filter(l => !l.isPrimary);
+        ?? (primarySupplierId ? { ...createLocalLink(primarySupplierId), isPrimary: true } : null);
 
-    const selectedSupplierName = primaryLink
-        ? primaryLink.supplierName
-        : primarySupplierId
-            ? allSuppliers.find(s => s.id === primarySupplierId)?.name ?? 'Proveedor seleccionado'
-            : null;
+    const visibleProductLinks = primaryLink
+        ? [primaryLink, ...productLinks.filter(l => l.supplierId !== primaryLink.supplierId)]
+        : productLinks;
+
+    const selectedSupplierName = null;
 
     const filtered = allSuppliers.filter(s =>
         !search || s.name.toLowerCase().includes(search.toLowerCase())
@@ -127,66 +126,31 @@ export function ProductSupplierSection({
         setOpen(false);
         setSearch('');
         if (!supplierId) {
-            onPrimaryChange(null);
-            if (!productId) {
-                setProductLinks(prev => prev.map(link => ({ ...link, isPrimary: false })));
-            }
             return;
         }
 
         const alreadyPrimary = supplierId === primarySupplierId;
-        const hasPrimary = Boolean(primarySupplierId);
 
         if (!productId) {
             setProductLinks(prev => {
-                if (!hasPrimary) {
-                    return [
-                        ...prev.map(link => ({ ...link, isPrimary: false })),
-                        { ...createLocalLink(supplierId), isPrimary: true },
-                    ];
-                }
-
-                if (alreadyPrimary) {
-                    return prev;
-                }
-
-                const alreadyAdded = prev.some(link => link.supplierId === supplierId);
-                if (alreadyAdded) return prev;
-
+                if (prev.some(link => link.supplierId === supplierId)) return prev;
                 return [
                     ...prev,
                     createLocalLink(supplierId),
                 ];
             });
-
-            if (!hasPrimary) {
-                onPrimaryChange(supplierId);
-            }
             return;
         }
 
         setActionLoading('select');
         try {
-            if (!hasPrimary) {
-                const alreadyLinked = productLinks.some(l => l.supplierId === supplierId);
-                if (!alreadyLinked) {
-                    await suppliersAdminService.assignSupplier(productId, {
-                        supplierId,
-                        currentPrice: currentProductPrice || 1,
-                        changeReason: 'regular',
-                    });
-                }
-                await suppliersAdminService.setPrimarySupplier(productId, supplierId);
-                onPrimaryChange(supplierId);
-            } else if (!alreadyPrimary) {
-                const alreadyLinked = productLinks.some(l => l.supplierId === supplierId);
-                if (!alreadyLinked) {
-                    await suppliersAdminService.assignSupplier(productId, {
-                        supplierId,
-                        currentPrice: currentProductPrice || 1,
-                        changeReason: 'regular',
-                    });
-                }
+            const alreadyLinked = productLinks.some(l => l.supplierId === supplierId);
+            if (!alreadyLinked) {
+                await suppliersAdminService.assignSupplier(productId, {
+                    supplierId,
+                    currentPrice: currentProductPrice || 1,
+                    changeReason: 'regular',
+                });
             }
             loadLinks();
         } finally {
@@ -228,6 +192,10 @@ export function ProductSupplierSection({
         setActionLoading(`remove-${supplierId}`);
         try {
             await suppliersAdminService.removeProductSupplier(productId, supplierId);
+            setProductLinks(prev => prev.filter(link => link.supplierId !== supplierId));
+            if (updatingSupplier?.supplierId === supplierId) {
+                setUpdatingSupplier(null);
+            }
             if (primarySupplierId === supplierId) onPrimaryChange(null);
             loadLinks();
         } finally {
@@ -270,7 +238,10 @@ export function ProductSupplierSection({
                             </tr>
                         </thead>
                         <tbody>
-                            {productLinks.map(link => (
+                            {visibleProductLinks
+                                .slice()
+                                .sort((a, b) => a.supplierName.localeCompare(b.supplierName, 'es', { sensitivity: 'base' }))
+                                .map(link => (
                                 <tr key={link.supplierId}>
                                     <td>{link.supplierName}</td>
                                     <td>{fmt.format(link.currentPrice)}</td>
@@ -395,7 +366,7 @@ export function ProductSupplierSection({
                 <button
                     id="primary-supplier-select"
                     type="button"
-                    className={styles.dropdownTrigger}
+                    className={`${styles.dropdownTrigger} ${open ? styles.triggerActive : ''}`}
                     onClick={() => setOpen(v => !v)}
                     disabled={suppliersLoading || actionLoading === 'select'}
                     style={{ minHeight: '44px' }}
@@ -403,20 +374,8 @@ export function ProductSupplierSection({
                     <span className={selectedSupplierName ? styles.selectedName : styles.placeholder}>
                         {suppliersLoading ? 'Cargando proveedores...'
                             : actionLoading === 'select' ? 'Asignando...'
-                                : selectedSupplierName ?? 'Sin proveedor'}
+                                : selectedSupplierName ?? 'Seleccione un proveedor'}
                     </span>
-                    {primarySupplierId && (
-                        <div
-                            className={styles.clearBtn}
-                            onClick={e => { e.stopPropagation(); handleSelect(null); }}
-                            title="Quitar proveedor principal"
-                            role="button"
-                            tabIndex={0}
-                            style={{ minWidth: '32px', minHeight: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                            <i className="bi bi-x-circle"></i>
-                        </div>
-                    )}
                     <i className={`bi bi-chevron-down ${styles.chevron} ${open ? styles.chevronOpen : ''}`}></i>
                 </button>
                 {open && (
@@ -445,7 +404,7 @@ export function ProductSupplierSection({
                                     className={`${styles.option} supplierOptionMobile ${s.id === primarySupplierId ? styles.optionActive : ''}`}
                                     onClick={() => handleSelect(s.id)}
                                 >
-                                    <span className={styles.optionName}>{s.name}</span>
+                                    <span className={styles.optionName}>{s.name} </span>
                                     {s.id === primarySupplierId && (
                                         <i className="bi bi-star-fill" style={{ color: 'var(--color-accent)', fontSize: '1rem' }}></i>
                                     )}
@@ -465,14 +424,14 @@ export function ProductSupplierSection({
                     {linksLoading && <span className={styles.loadingLabel}>Cargando...</span>}
                 </div>
 
-                {linksLoading && productLinks.length === 0 ? (
+                {linksLoading && visibleProductLinks.length === 0 ? (
                     <div className={styles.cardLoading}>
                         <div className={styles.spinner}></div>
                         <span>Cargando proveedores asignados...</span>
                     </div>
-                ) : productLinks.length > 0 ? (
+                ) : visibleProductLinks.length > 0 ? (
                     <div className={styles.cardsGrid}>
-                        {productLinks.map(link => {
+                        {visibleProductLinks.map(link => {
                             const marginValue = link.cost != null && link.currentPrice > 0
                                 ? `${(((link.currentPrice - link.cost) / link.cost) * 100).toFixed(1)}%`
                                 : '—';

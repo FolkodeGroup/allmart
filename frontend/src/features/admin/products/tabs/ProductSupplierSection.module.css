@@ -63,12 +63,13 @@
     width: 100%;
 }
 
+/* Trigger: usar la misma identidad visual que el Dropdown global */
 .dropdownTrigger {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* separa el texto del chevron hacia los extremos */
     width: 100%;
+    min-width: 0;
     height: 42px;
     padding: 0 var(--space-4, 16px);
     background-color: var(--control-bg);
@@ -86,14 +87,21 @@
     text-align: left;
 }
 
-.dropdownTrigger:hover {
+.dropdownTrigger:hover:not(:disabled) {
     border-color: var(--control-border-hover);
     background-color: var(--control-bg-hover);
 }
 
 .dropdownTrigger:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    background-color: var(--color-bg-secondary);
+}
+
+/* foco/activo */
+.triggerActive {
+    border-color: var(--control-border-focus);
+    box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.22);
 }
 
 .selectedName {
@@ -102,34 +110,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
 }
 
 .placeholder {
-    flex: 1;
-    color: var(--color-text-tertiary);
-}
-
-.clearBtn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-text-tertiary);
-    padding: 2px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    transition: color 0.12s;
-    flex-shrink: 0;
-}
-
-.clearBtn:hover {
-    color: #ef4444;
+    color: var(--control-text-muted, var(--color-text-tertiary));
 }
 
 .chevron {
+    color: var(--color-primary, var(--color-accent));
+    transition: transform var(--transition-fast), color var(--transition-fast);
     flex-shrink: 0;
-    color: var(--color-text-tertiary);
-    transition: transform 0.15s;
 }
 
 .chevronOpen {
@@ -138,35 +129,42 @@
 
 .dropdownList {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% + 6px);
     left: 0;
     right: 0;
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    z-index: 500;
-    overflow: hidden;
+    z-index: var(--z-dropdown, 500);
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background-color: var(--control-overlay-bg, var(--color-bg-primary));
+    border: 1.5px solid var(--control-border);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--control-shadow, 0 8px 30px rgba(0,0,0,0.12));
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .searchBox {
     padding: 8px;
-    border-bottom: 1px solid var(--color-border);
 }
 
 .searchInput {
     width: 100%;
     padding: 6px 10px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--control-border);
     border-radius: 7px;
     font-size: 0.82rem;
     background: var(--color-bg-secondary);
     color: var(--color-text-primary);
     outline: none;
+    box-sizing: border-box;
 }
 
 .searchInput:focus {
-    border-color: var(--color-accent, #6366f1);
+    border-color: var(--control-border-focus);
 }
 
 .options {
@@ -175,25 +173,31 @@
 }
 
 .option {
+    display: block;
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 9px 14px;
-    background: none;
-    border: none;
+    box-sizing: border-box;
     text-align: left;
+    padding: 9px 16px;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm, 14px);
+    font-weight: 500;
+    color: var(--control-text);
+    border-radius: var(--radius-sm, 6px);
     cursor: pointer;
-    font-size: 0.83rem;
-    transition: background 0.1s;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .option:hover {
-    background: var(--color-bg-secondary);
+    background-color: var(--color-bg-secondary);
+    color: var(--control-hover-text);
 }
 
 .optionActive {
-    background: var(--color-accent-bg, #f0f1fe);
+    background-color: var(--control-bg-hover);
+    font-weight: 600;
 }
 
 .optionName {
@@ -203,10 +207,6 @@
 .optionNone {
     color: var(--color-text-tertiary);
     font-style: italic;
-}
-
-.activeStar {
-    color: var(--color-accent, #6366f1);
 }
 
 .noOptions {
@@ -504,7 +504,7 @@
     justify-content: center;
     padding: 4px 10px;
     border-radius: 9999px;
-    background: rgba(99, 102, 241, 0.1);
+    background: var(--color-bg-primary);
     color: var(--color-accent);
     font-size: 0.72rem;
     font-weight: 600;

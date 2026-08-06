@@ -145,8 +145,7 @@ body[data-admin-theme='dark'] .chevron,
 /* ── Hover unificado con identidad de marca y legibilidad accesible ── */
 .option:hover,
 .optionFocused {
-  background-color: var(--control-hover-bg) !important;
-  color: var(--control-hover-text) !important;
+  background-color: var(--color-bg-secondary) !important;
   outline: none;
 }
 

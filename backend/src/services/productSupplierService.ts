@@ -25,7 +25,7 @@ export const productSupplierService = {
   // ── List suppliers for a product ────────────────────────────────────────────
   async listForProduct(productId: string) {
     const rows = await prisma.productSupplier.findMany({
-      where: { productId },
+      where: { productId, isActive: true },
       include: {
         supplier: { select: { id: true, name: true, email: true, phone: true, isActive: true } },
       },
@@ -108,7 +108,7 @@ export const productSupplierService = {
     if (input.price !== undefined && input.price <= 0) throw createError('El precio debe ser mayor a 0', 400);
     if (input.cost !== undefined && input.cost < 0)
       throw createError('El costo no puede ser negativo', 400);
-    
+
     // If both price and cost are provided, validate relationship
     if (input.price !== undefined && input.cost !== undefined && input.cost > input.price)
       throw createError('El costo no puede ser mayor al precio', 400);
