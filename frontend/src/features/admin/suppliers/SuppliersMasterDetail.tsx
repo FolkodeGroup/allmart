@@ -170,7 +170,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
     const LINE_COLORS = ['#f59e0b', '#6366f1', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#0ea5e9', '#14b8a6'];
 
-    // ── Table Filtering & Bulk Selection ────────────────────────────────────
+    // ── Sort products table ─────────────────────────────────────────────────
     const filteredProducts = useMemo(() => {
         const q = productSearch.trim().toLowerCase();
         if (!q) return products;
@@ -216,7 +216,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
         );
     }
 
-    // ── Analysis metrics ────────────────────────────────────────────────────
+    // ── Analysis & Lead Time metrics ────────────────────────────────────────
     const analysisMetrics = useMemo(() => {
         const margins = products.filter(p => p.margin !== null).map(p => p.margin as number);
         const avgMargin = margins.length ? margins.reduce((a, b) => a + b, 0) / margins.length : null;
@@ -228,12 +228,30 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
             const d = new Date(h.createdAt);
             return (Date.now() - d.getTime()) < 24 * 3600 * 1000;
         }).length;
+
+        // 🟢 NUEVO: Cálculo del Tiempo de Entrega Promedio (Lead Time)
+        const leadTimesInDays = products.map(p => {
+            const val = p.leadTimeValue ?? 3;
+            const unit = (p.leadTimeUnit ?? 'dias').toLowerCase();
+            return unit === 'horas' || unit === 'hs' ? val / 24 : val;
+        });
+        const avgLeadDays = leadTimesInDays.length
+            ? leadTimesInDays.reduce((a, b) => a + b, 0) / leadTimesInDays.length
+            : null;
+
+        const avgLeadTimeDisplay = avgLeadDays !== null
+            ? (avgLeadDays < 1
+                ? `${Math.round(avgLeadDays * 24)} hs`
+                : `${avgLeadDays.toFixed(1)} días`)
+            : '—';
+
         const topByMargin = [...products]
             .filter(p => p.margin !== null)
             .sort((a, b) => (b.margin ?? 0) - (a.margin ?? 0))
             .slice(0, 3);
         const lowMarginAlerts = products.filter(p => p.margin !== null && (p.margin as number) < 15);
-        return { avgMargin, volatility, recentChanges, topByMargin, lowMarginAlerts };
+
+        return { avgMargin, volatility, recentChanges, avgLeadTimeDisplay, topByMargin, lowMarginAlerts };
     }, [products, history]);
 
     // ── CSV Export ──────────────────────────────────────────────────────────
@@ -582,7 +600,12 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
 
                                         {/* Selector directo de productos dentro de la pestaña de gráfico */}
                                         <div className={styles.chartFilterBar}>
-                                            <span className={styles.controlLabel}>Comparar en gráfico:</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span className={styles.controlLabel}>Comparar en gráfico:</span>
+                                                <span className={styles.chartLeadTimeBadge} title="Tiempo de entrega promedio de los productos del proveedor">
+                                                    <Clock size={12} /> Entrega Promedio: {analysisMetrics.avgLeadTimeDisplay}
+                                                </span>
+                                            </div>
                                             <div className={styles.priorityPills}>
                                                 {products.map(p => {
                                                     const isSelected = selectedProductIds.includes(p.productId);
@@ -656,7 +679,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                     </div>
                                 )}
 
-                                {/* ── TAB: ANALYSIS ── */}
+                                {/* ── TAB: ANALYSIS (CON KPI DE ENTREGA PROMEDIO) ── */}
                                 {activeTab === 'analysis' && (
                                     <div className={styles.analysisTab}>
                                         <div className={styles.metricCards}>
@@ -677,6 +700,17 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                                             <div className={styles.metricCard}>
                                                 <span className={styles.metricLabel}>Aumentos 24h</span>
                                                 <span className={styles.metricValue}>{analysisMetrics.recentChanges}</span>
+                                            </div>
+
+                                            {/* 🟢 NUEVA KPI CARD DE ENTREGA PROMEDIO */}
+                                            <div className={styles.metricCard}>
+                                                <span className={styles.metricLabel}>
+                                                    <Clock size={11} style={{ display: 'inline', marginRight: 4 }} />
+                                                    Entrega Promedio
+                                                </span>
+                                                <span className={styles.metricValue} style={{ color: 'var(--color-primary, #769282)' }}>
+                                                    {analysisMetrics.avgLeadTimeDisplay}
+                                                </span>
                                             </div>
                                         </div>
 
