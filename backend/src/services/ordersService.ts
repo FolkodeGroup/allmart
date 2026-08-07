@@ -23,6 +23,8 @@ function prismaStatusToOrderStatus(s: string): OrderStatus {
     pendiente: OrderStatus.PENDING,
     confirmado: OrderStatus.CONFIRMED,
     en_preparacion: OrderStatus.PROCESSING,
+    'en-preparacion': OrderStatus.PROCESSING,
+    preparado: OrderStatus.PREPARED,
     enviado: OrderStatus.SHIPPED,
     entregado: OrderStatus.DELIVERED,
     cancelado: OrderStatus.CANCELLED,
@@ -43,6 +45,7 @@ function orderStatusToPrismaStatus(s: OrderStatus): any {
     [OrderStatus.PENDING]: 'pendiente',
     [OrderStatus.CONFIRMED]: 'confirmado',
     [OrderStatus.PROCESSING]: 'en_preparacion',
+    [OrderStatus.PREPARED]: 'en_preparacion',
     [OrderStatus.SHIPPED]: 'enviado',
     [OrderStatus.DELIVERED]: 'entregado',
     [OrderStatus.CANCELLED]: 'cancelado',
@@ -132,10 +135,6 @@ function toOrder(row: any): Order {
   };
 }
 
-/**
- * Ajusta métricas agregadas del CRM del cliente al cambiar el estado del pedido,
- * mitigando de raíz la deriva de datos (Data Drift) al cancelar u omitir transacciones.
- */
 async function handleCustomerMetricsOnStatusChange(
   tx: any,
   customerId: string | null,
@@ -149,7 +148,6 @@ async function handleCustomerMetricsOnStatusChange(
   const isActive = newStatus !== 'cancelado';
 
   if (wasActive && !isActive) {
-    // Se canceló un pedido activo: restamos de los acumulados
     await tx.customer.update({
       where: { id: customerId },
       data: {
@@ -158,7 +156,6 @@ async function handleCustomerMetricsOnStatusChange(
       }
     });
   } else if (!wasActive && isActive) {
-    // Se reactivó un pedido cancelado: incrementamos
     await tx.customer.update({
       where: { id: customerId },
       data: {
@@ -278,7 +275,6 @@ export async function updateOrderStatus(id: string, dto: { status: OrderStatus; 
       }
     });
 
-    // Ajustar métricas del cliente dentro del contexto transaccional
     await handleCustomerMetricsOnStatusChange(tx, order.customerId, order.status, newStatus, Number(order.total));
 
     return getOrderById(id);
@@ -299,9 +295,6 @@ export async function updateOrderPaymentStatus(id: string, dto: { paymentStatus:
   return toOrder(updated);
 }
 
-/**
- * Alterna el estado de la seña del 50% para reservar un producto
- */
 export async function toggleOrderDeposit(id: string): Promise<Order> {
   const order = await prisma.order.findUnique({ where: { id } });
   if (!order) throw createError('Pedido no encontrado', 404);
@@ -316,10 +309,6 @@ export async function toggleOrderDeposit(id: string): Promise<Order> {
   return toOrder(updated);
 }
 
-/**
- * Eliminación lógica (Soft Delete) del pedido para no perder trazabilidad contable
- * ni distorsionar los balances financieros históricos.
- */
 export async function deleteOrder(id: string): Promise<void> {
   const order = await prisma.order.findUnique({ where: { id } });
   if (!order) throw createError('Pedido no encontrado', 404);
@@ -338,7 +327,6 @@ export async function deleteOrder(id: string): Promise<void> {
       }
     });
 
-    // Ajustar métricas de CRM del cliente restando el pedido cancelado
     await handleCustomerMetricsOnStatusChange(tx, order.customerId, order.status, 'cancelado', Number(order.total));
   });
 }
@@ -372,7 +360,6 @@ export async function bulkUpdateOrderStatus(dto: AdminBulkUpdateOrderStatusDTO):
       await tx.order.update({ where: { id: orderId }, data: { status: targetPrismaStatus } });
       await tx.orderStatusHistory.create({ data: { orderId, status: targetPrismaStatus, note: note ?? null } });
 
-      // Ajustar métricas del cliente para cada pedido modificado en bloque
       await handleCustomerMetricsOnStatusChange(tx, row.customerId, row.status, targetPrismaStatus, Number(row.total));
 
       itemResults.push({ id: orderId, success: true });

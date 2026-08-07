@@ -460,7 +460,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   return (
     <div className={`${styles.detailContent} orderDetailContentDesktopGrid`}>
       <style>{`
-        /* 📱 MÓVIL / TABLET (<1024px): Mantener 1 sola columna apilada */
+        /* 📱 MÓVIL / TABLET (<1024px) */
         @media (max-width: 1023px) {
           .orderDetailContentDesktopGrid {
             display: flex !important;
@@ -476,7 +476,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           }
         }
 
-        /* 💻 ESCRITORIO (>=1024px): Aprovechar todo el ancho disponible */
+        /* 💻 ESCRITORIO (>=1024px) */
         @media (min-width: 1024px) {
           .orderDetailContentDesktopGrid {
             display: grid !important;
@@ -1333,7 +1333,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         </div>
       </Modal>
 
-      {/* ── MODAL 4: DESPACHO Y LOGÍSTICA (Preparado ➔ Enviado) ── */}
+      {/* ── MODAL 4: DESPACHO Y LOGÍSTICA (Preparado / En preparación ➔ Enviado) ── */}
       <Modal
         open={dispatchModalOpen}
         onClose={() => setDispatchModalOpen(false)}

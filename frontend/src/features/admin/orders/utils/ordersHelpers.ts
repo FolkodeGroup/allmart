@@ -27,11 +27,11 @@ export const STATUS_OPTIONS: OrderStatus[] = [
 export const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 	pendiente: ['confirmado', 'cancelado'],
 	confirmado: ['en-preparacion', 'cancelado'],
-	'en-preparacion': ['preparado', 'enviado', 'cancelado'],
-	preparado: ['enviado', 'entregado', 'cancelado'],
+	'en-preparacion': ['enviado', 'cancelado'],
+	preparado: ['enviado', 'cancelado'],
 	enviado: ['entregado', 'cancelado'],
-	entregado: [], // Estado terminal
-	cancelado: [], // Estado terminal
+	entregado: [],
+	cancelado: [],
 };
 
 // Configuración del botón de Siguiente Paso sugerido
@@ -41,7 +41,7 @@ export const NEXT_STEP_CONFIG: Record<
 > = {
 	pendiente: { nextStatus: 'confirmado', label: 'Confirmar Pedido', icon: '✓' },
 	confirmado: { nextStatus: 'en-preparacion', label: 'Pasar a Embalaje / Preparación', icon: '📦' },
-	'en-preparacion': { nextStatus: 'preparado', label: 'Marcar como Bulto Preparado', icon: '🏷️' },
+	'en-preparacion': { nextStatus: 'enviado', label: 'Despachar / Enviar', icon: '🚚' },
 	preparado: { nextStatus: 'enviado', label: 'Despachar / Enviar', icon: '🚚' },
 	enviado: { nextStatus: 'entregado', label: 'Marcar como Entregado', icon: '✅' },
 	entregado: { nextStatus: null, label: 'Pedido Entregado', icon: '🎉' },
@@ -53,7 +53,6 @@ export const HAPPY_PATH_STEPS: OrderStatus[] = [
 	'pendiente',
 	'confirmado',
 	'en-preparacion',
-	'preparado',
 	'enviado',
 	'entregado',
 ];
