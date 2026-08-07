@@ -15,7 +15,8 @@ interface ProductImageProps {
 }
 
 /**
- * Imagen de producto optimizada: lazy, progresiva, WebP, placeholder, layout shift safe
+ * Imagen de producto optimizada: lazy, progresiva, WebP, placeholder, layout shift safe.
+ * Garantiza el llenado del 100% del contenedor padre sin franjas o bordes blancos laterales.
  */
 export const ProductImage: React.FC<ProductImageProps> = ({
   src,
@@ -28,7 +29,7 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   loading = 'lazy',
   fetchPriority = 'auto',
   sizes,
-  objectFit = 'contain', // 🟢 RESTAURADO: 'contain' para mostrar la imagen 100% completa sin recortar los productos
+  objectFit = 'cover',
 }) => {
   const [loaded, setLoaded] = useState(false);
   const safeSrc = typeof src === 'string' ? src : '';
@@ -42,8 +43,8 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         width={width}
         height={height}
         style={{ 
-          width: width ? width : '100%', 
-          height: height ? height : '100%', 
+          width: '100%', 
+          height: '100%', 
           objectFit: objectFit,
           ...style 
         }}
@@ -59,7 +60,16 @@ export const ProductImage: React.FC<ProductImageProps> = ({
       : undefined;
 
   return (
-    <div style={{ position: 'relative', width: width || '100%', height: height || '100%', overflow: 'hidden', ...style }} className={className}>
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        ...style,
+      }}
+      className={className}
+    >
       <img
         src={placeholder}
         alt=""
