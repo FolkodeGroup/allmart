@@ -23,43 +23,32 @@ export async function upsertShipment(
       throw new Error('Order not found');
     }
 
-    // 2️⃣ Upsert shipment
+    // 2️⃣ Upsert shipment manteniendo la dirección sin alterar intencionalmente el estado del pedido
     const shipment = await tx.shipment.upsert({
       where: {
         orderId: orderId,
       },
       create: {
         orderId,
-        addressStreet: data.addressStreet,
-        addressCity: data.addressCity,
-        addressProvince: data.addressProvince,
-        addressZip: data.addressZip,
-        carrier: data.carrier,
-        trackingNumber: data.trackingNumber,
-        status: 'enviado',
-        shippedAt: new Date(),
+        addressStreet: data.addressStreet ?? 'Dirección no especificada',
+        addressCity: data.addressCity ?? 'CABA',
+        addressProvince: data.addressProvince ?? 'Buenos Aires',
+        addressZip: data.addressZip ?? '1000',
+        carrier: data.carrier ?? null,
+        trackingNumber: data.trackingNumber ?? null,
+        status: 'pendiente',
+        shippedAt: data.carrier || data.trackingNumber ? new Date() : null,
       },
       update: {
-        addressStreet: data.addressStreet,
-        addressCity: data.addressCity,
-        addressProvince: data.addressProvince,
-        addressZip: data.addressZip,
-        carrier: data.carrier,
-        trackingNumber: data.trackingNumber,
-        status: 'enviado',
-        shippedAt: new Date(),
+        ...(data.addressStreet ? { addressStreet: data.addressStreet } : {}),
+        ...(data.addressCity ? { addressCity: data.addressCity } : {}),
+        ...(data.addressProvince ? { addressProvince: data.addressProvince } : {}),
+        ...(data.addressZip ? { addressZip: data.addressZip } : {}),
+        ...(data.carrier !== undefined ? { carrier: data.carrier } : {}),
+        ...(data.trackingNumber !== undefined ? { trackingNumber: data.trackingNumber } : {}),
+        ...(data.carrier || data.trackingNumber ? { shippedAt: new Date(), status: 'enviado' } : {}),
       },
     });
-
-    // 3️⃣ Actualizar estado del pedido si no está enviado
-    if (order.status !== 'enviado') {
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          status: 'enviado' as any,
-        },
-      });
-    }
 
     return shipment;
   });

@@ -46,8 +46,35 @@ const WAREHOUSE_OPTIONS = [
   { value: 'Sucursal Principal', label: 'Sucursal Principal' },
 ];
 
+const PROVINCES_ARGENTINA = [
+  { value: 'CABA', label: 'Ciudad Autónoma de Buenos Aires (CABA)' },
+  { value: 'Buenos Aires', label: 'Buenos Aires' },
+  { value: 'Catamarca', label: 'Catamarca' },
+  { value: 'Chaco', label: 'Chaco' },
+  { value: 'Chubut', label: 'Chubut' },
+  { value: 'Córdoba', label: 'Córdoba' },
+  { value: 'Corrientes', label: 'Corrientes' },
+  { value: 'Entre Ríos', label: 'Entre Ríos' },
+  { value: 'Formosa', label: 'Formosa' },
+  { value: 'Jujuy', label: 'Jujuy' },
+  { value: 'La Pampa', label: 'La Pampa' },
+  { value: 'La Rioja', label: 'La Rioja' },
+  { value: 'Mendoza', label: 'Mendoza' },
+  { value: 'Misiones', label: 'Misiones' },
+  { value: 'Neuquén', label: 'Neuquén' },
+  { value: 'Río Negro', label: 'Río Negro' },
+  { value: 'Salta', label: 'Salta' },
+  { value: 'San Juan', label: 'San Juan' },
+  { value: 'San Luis', label: 'San Luis' },
+  { value: 'Santa Cruz', label: 'Santa Cruz' },
+  { value: 'Santa Fe', label: 'Santa Fe' },
+  { value: 'Santiago del Estero', label: 'Santiago del Estero' },
+  { value: 'Tierra del Fuego', label: 'Tierra del Fuego' },
+  { value: 'Tucumán', label: 'Tucumán' },
+];
+
 export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) => {
-  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid, toggleDeposit } = useAdminOrders();
+  const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid, toggleDeposit, refreshOrders } = useAdminOrders();
   const { can, token } = useAdminAuth();
 
   const [notes, setNotes] = useState(order.notes ?? '');
@@ -65,7 +92,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [addrStreet, setAddrStreet] = useState('');
   const [addrCity, setAddrCity] = useState('');
-  const [addrProvince, setAddrProvince] = useState('');
+  const [addrProvince, setAddrProvince] = useState('Buenos Aires');
   const [addrZip, setAddrZip] = useState('');
 
   // ── Modales de Transición Guiada ──
@@ -111,7 +138,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     originalNotesRef.current = order.notes ?? '';
   }, [order]);
 
-  // Pre-completar dirección si ya existía en shipment
   useEffect(() => {
     if (order.shipment) {
       setPrepAddressStreet(order.shipment.addressStreet ?? '');
@@ -199,6 +225,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         carrier: order.shipment?.carrier,
         trackingNumber: order.shipment?.trackingNumber,
       });
+      await refreshOrders();
       toast.success('Dirección de envío guardada correctamente');
       setAddressModalOpen(false);
     } catch (err) {
@@ -281,6 +308,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       const combinedNote = `Pedido confirmado. ${modeText}${refNote}${confirmCustomNote.trim() ? `. ${confirmCustomNote.trim()}` : ''}`;
 
       await updateOrderStatus(order.id, 'confirmado', combinedNote);
+      await refreshOrders();
       originalStatusRef.current = 'confirmado';
       setPendingStatus('confirmado');
 
@@ -328,6 +356,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       const combinedNote = `Iniciada preparación en ${prepWarehouse}. Método: ${prepShippingMethod}. Dirección: ${street}, ${city}. ${packingSummary.length > 0 ? `[Embalaje: ${packingSummary.join(', ')}]. ` : ''}${prepNote.trim() ? `Nota: ${prepNote.trim()}` : ''}`;
 
       await updateOrderStatus(order.id, 'en-preparacion', combinedNote);
+      await refreshOrders();
       originalStatusRef.current = 'en-preparacion';
       setPendingStatus('en-preparacion');
 
@@ -358,6 +387,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       const combinedNote = `Bulto preparado (${pkgs} caja/s) en ${loc}. ${readyNote.trim() ? `Nota: ${readyNote.trim()}` : ''}`;
 
       await updateOrderStatus(order.id, 'preparado', combinedNote);
+      await refreshOrders();
       originalStatusRef.current = 'preparado';
       setPendingStatus('preparado');
 
@@ -395,6 +425,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         });
       }
 
+      await refreshOrders();
       originalStatusRef.current = 'enviado';
       setPendingStatus('enviado');
 
@@ -428,6 +459,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       const combinedNote = `Pedido entregado y completado${receiverText}${deliveryNote.trim() ? `. ${deliveryNote.trim()}` : ''}`;
 
       await updateOrderStatus(order.id, 'entregado', combinedNote);
+      await refreshOrders();
       originalStatusRef.current = 'entregado';
       setPendingStatus('entregado');
 
@@ -1191,14 +1223,13 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               />
             </div>
             <div>
-              <label className={styles.detailSectionTitle} htmlFor="addr-province-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Provincia *</label>
-              <input
-                id="addr-province-input"
-                type="text"
-                className={styles.statusNoteInput}
-                placeholder="Ej: Buenos Aires"
+              <label className={styles.detailSectionTitle} htmlFor="addr-province-select" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Provincia *</label>
+              <Dropdown
+                id="addr-province-select"
+                options={PROVINCES_ARGENTINA}
                 value={addrProvince}
-                onChange={e => setAddrProvince(e.target.value)}
+                onChange={setAddrProvince}
+                placeholder="Seleccionar provincia..."
               />
             </div>
           </div>
@@ -1439,13 +1470,12 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                 </div>
                 <div>
                   <label className={styles.detailSectionTitle} htmlFor="prep-address-province" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Provincia</label>
-                  <input
+                  <Dropdown
                     id="prep-address-province"
-                    type="text"
-                    className={styles.statusNoteInput}
-                    placeholder="Ej: Buenos Aires"
+                    options={PROVINCES_ARGENTINA}
                     value={prepAddressProvince}
-                    onChange={e => setPrepAddressProvince(e.target.value)}
+                    onChange={setPrepAddressProvince}
+                    placeholder="Seleccionar provincia..."
                   />
                 </div>
               </div>

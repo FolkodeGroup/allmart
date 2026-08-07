@@ -27,6 +27,6 @@ router.patch("/:id/status", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.u
 router.patch('/bulk-status', requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.bulkUpdateStatus);
 router.patch("/:id/payment", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.updatePayment);
 router.patch("/:id/deposit", requireRole(UserRole.ADMIN, UserRole.EDITOR), ctrl.toggleDeposit);
-router.post("/:id/shipment",requireRole(UserRole.ADMIN),shipmentCtrl.upsertShipment);
+router.post("/:id/shipment", requireRole(UserRole.ADMIN, UserRole.EDITOR), shipmentCtrl.upsertShipment);
 
 export default router;
