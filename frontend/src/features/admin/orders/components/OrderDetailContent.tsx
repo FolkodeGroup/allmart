@@ -2,7 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { useAdminOrders } from '../../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../../context/AdminAuthContext';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
-import { paymentClass, formatDateTime, formatPrice, PAYMENT_LABELS } from '../utils/ordersHelpers';
+import {
+  paymentClass,
+  formatDateTime,
+  formatPrice,
+  PAYMENT_LABELS,
+  NEXT_STEP_CONFIG,
+  HAPPY_PATH_STEPS,
+  STATUS_LABELS,
+} from '../utils/ordersHelpers';
 import toast from 'react-hot-toast';
 import type { Order, OrderStatus, PaymentStatus } from '../../../../context/AdminOrdersContext';
 import styles from './OrderDetailContent.module.css';
@@ -11,7 +19,7 @@ import { useUnsavedChanges } from '../../../../hooks/useUnsavedChanges';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderStatusSelector } from './OrderStatusSelector';
 import { OrderTimeline } from './OrderTimeline';
-import { MessageSquare, Phone, Mail } from 'lucide-react';
+import { MessageSquare, Phone, Mail, Check, ArrowRight } from 'lucide-react';
 import { formatOrderLabel } from '../../../../utils/orders';
 
 interface OrderDetailContentProps {
@@ -33,11 +41,11 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [statusError, setStatusError] = useState<string | null>(null);
   const [depositLoading, setDepositLoading] = useState(false);
   const [saveNotesLoading, setSaveNotesLoading] = useState(false);
+  const [confirmDeliveryWithCash, setConfirmDeliveryWithCash] = useState(false);
 
   const originalStatusRef = useRef(order.status);
   const originalNotesRef = useRef(order.notes ?? '');
 
-  // Sincronizar estado cuando la prop order cambie externamente
   useEffect(() => {
     setNotes(order.notes ?? '');
     setSavedNotesDisplay(order.notes ?? '');
@@ -63,30 +71,45 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const auth = useAdminAuth();
   const userEmail = (auth && (auth.user as string)) || 'desconocido';
 
-  const handleStatusApply = async () => {
+  const handleStatusApply = async (targetStatus?: OrderStatus, markPaidTogether = false) => {
+    const finalStatus = targetStatus ?? pendingStatus;
     setStatusLoading(true);
     setStatusError(null);
     const prev = order.status;
     try {
-      await updateOrderStatus(order.id, pendingStatus, statusNote.trim() || undefined);
+      await updateOrderStatus(order.id, finalStatus, statusNote.trim() || undefined);
+      if (markPaidTogether && !isAbonado) {
+        await markAsPaid(order.id);
+      }
       logAdminActivity({
         timestamp: new Date().toISOString(),
         user: userEmail,
         action: 'update-status',
         entity: 'order',
         entityId: order.id,
-        details: { from: prev, to: pendingStatus, note: statusNote },
+        details: { from: prev, to: finalStatus, note: statusNote, markedPaid: markPaidTogether },
       });
-      toast.success('Estado del pedido actualizado con éxito');
-      originalStatusRef.current = pendingStatus;
+      toast.success(`Pedido actualizado a ${STATUS_LABELS[finalStatus]}`);
+      originalStatusRef.current = finalStatus;
+      setPendingStatus(finalStatus);
       setStatusNote('');
+      setConfirmDeliveryWithCash(false);
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : 'Error desconocido');
-      toast.error(`No se pudo actualizar el pedido`);
+      toast.error('No se pudo actualizar el pedido');
       setPendingStatus(prev);
     } finally {
       setStatusLoading(false);
     }
+  };
+
+  const handleQuickNextStep = (nextStatus: OrderStatus) => {
+    if (nextStatus === 'entregado' && !isAbonado) {
+      setConfirmDeliveryWithCash(true);
+      return;
+    }
+    setPendingStatus(nextStatus);
+    handleStatusApply(nextStatus);
   };
 
   const currentStatus = order.status;
@@ -151,10 +174,12 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
 
   const initials = `${order.customer?.firstName?.[0] ?? ''}${order.customer?.lastName?.[0] ?? ''}`;
 
-  // Cálculos financieros para el Resumen
   const halfTotal = order.total / 2;
   const isDepositActive = order.has50PercentDeposit ?? false;
   const remainingAmount = isAbonado ? 0 : isDepositActive ? halfTotal : order.total;
+
+  const nextStepInfo = NEXT_STEP_CONFIG[order.status];
+  const currentStepIndex = HAPPY_PATH_STEPS.indexOf(order.status);
 
   return (
     <div className={`${styles.detailContent} orderDetailContentDesktopGrid`}>
@@ -196,17 +221,189 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           }
         }
 
-        /* 🖥️ ESCRITORIO ANCHO (>=1400px): Ajustar proporción para monitores ultra-wide */
+        /* 🖥️ ESCRITORIO ANCHO (>=1400px) */
         @media (min-width: 1400px) {
           .orderDetailContentDesktopGrid {
             grid-template-columns: 1fr 420px !important;
             gap: 28px !important;
           }
         }
+
+        /* Estilos del Pipeline Stepper */
+        .orderStepperBar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: var(--color-bg-secondary, #28353d);
+          border: 1px solid var(--color-border, #374151);
+          border-radius: 12px;
+          padding: 12px 16px;
+          margin-bottom: 16px;
+          overflow-x: auto;
+          box-sizing: border-box;
+        }
+        .orderStepItem {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--color-text-secondary, #9ca3af);
+          white-space: nowrap;
+        }
+        .orderStepItemCompleted {
+          color: var(--color-primary, #769282);
+        }
+        .orderStepItemActive {
+          color: var(--color-accent, #DDB08C);
+          font-weight: 700;
+        }
+        .orderStepDot {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid var(--color-border, #374151);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+        }
+        .orderStepDotCompleted {
+          background: var(--color-primary, #769282);
+          color: #ffffff;
+          border-color: var(--color-primary, #769282);
+        }
+        .orderStepDotActive {
+          background: var(--color-accent, #DDB08C);
+          color: #111827;
+          border-color: var(--color-accent, #DDB08C);
+        }
+        .orderStepDivider {
+          flex: 1;
+          height: 2px;
+          background: var(--color-border, #374151);
+          margin: 0 10px;
+          min-width: 16px;
+        }
+        .orderStepDividerCompleted {
+          background: var(--color-primary, #769282);
+        }
+
+        /* Botón Táctico de Siguiente Paso */
+        .smartNextStepBar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: rgba(118, 146, 130, 0.12);
+          border: 1px solid var(--color-primary, #769282);
+          border-radius: 12px;
+          padding: 12px 16px;
+          margin-bottom: 16px;
+        }
+        .smartNextStepBtn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: var(--color-primary, #769282);
+          color: #ffffff;
+          border: none;
+          border-radius: 8px;
+          padding: 10px 18px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background-color 0.15s ease;
+        }
+        .smartNextStepBtn:hover:not(:disabled) {
+          background: var(--color-primary-dark, #5d7568);
+        }
       `}</style>
 
       {/* ── COLUMNA PRINCIPAL (65% en Desktop) ── */}
       <div className={`${styles.mainColumn} orderDetailMainCol`}>
+        {/* Pipeline Stepper del Ciclo de Vida */}
+        {order.status !== 'cancelado' && (
+          <div className="orderStepperBar">
+            {HAPPY_PATH_STEPS.map((step, idx) => {
+              const isCompleted = currentStepIndex > idx;
+              const isActive = currentStepIndex === idx;
+
+              return (
+                <div key={step} style={{ display: 'flex', alignItems: 'center', flex: idx < HAPPY_PATH_STEPS.length - 1 ? 1 : 'none' }}>
+                  <div className={`orderStepItem ${isCompleted ? 'orderStepItemCompleted' : ''} ${isActive ? 'orderStepItemActive' : ''}`}>
+                    <span className={`orderStepDot ${isCompleted ? 'orderStepDotCompleted' : ''} ${isActive ? 'orderStepDotActive' : ''}`}>
+                      {isCompleted ? <Check size={12} /> : idx + 1}
+                    </span>
+                    <span>{STATUS_LABELS[step]}</span>
+                  </div>
+                  {idx < HAPPY_PATH_STEPS.length - 1 && (
+                    <div className={`orderStepDivider ${isCompleted ? 'orderStepDividerCompleted' : ''}`} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Smart Next Step Call-to-Action Bar */}
+        {can('orders.edit') && nextStepInfo?.nextStatus && (
+          <div className="smartNextStepBar">
+            <div>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block' }}>
+                Siguiente paso sugerido:
+              </span>
+              <strong style={{ fontSize: '15px', color: 'var(--color-text-primary)' }}>
+                {nextStepInfo.icon} {nextStepInfo.label}
+              </strong>
+            </div>
+            <button
+              type="button"
+              className="smartNextStepBtn"
+              onClick={() => handleQuickNextStep(nextStepInfo.nextStatus!)}
+              disabled={statusLoading}
+            >
+              <span>Avanzar pedido</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* Modal/Prompt de Confirmación para Entrega y Cobro simultáneo */}
+        {confirmDeliveryWithCash && (
+          <div className={styles.statusChangeBox} style={{ borderColor: 'var(--color-accent)' }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)', display: 'block', marginBottom: '8px' }}>
+              El pedido pasará a "Entregado". El cobro actual figura como "{PAYMENT_LABELS[paymentStatus]}". ¿Registrar cobro completo en efectivo?
+            </span>
+            <div className={styles.statusChangeActions}>
+              <button
+                className={styles.applyStatusBtn}
+                type="button"
+                onClick={() => handleStatusApply('entregado', true)}
+                disabled={statusLoading}
+              >
+                ✓ Entregado y Cobrado
+              </button>
+              <button
+                className={styles.cancelBtn}
+                type="button"
+                onClick={() => handleStatusApply('entregado', false)}
+                disabled={statusLoading}
+              >
+                Solo Entregado
+              </button>
+              <button
+                className={styles.cancelBtn}
+                type="button"
+                onClick={() => setConfirmDeliveryWithCash(false)}
+                disabled={statusLoading}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ── Sección 1: Estado del Pedido ── */}
         <section className={styles.detailSection}>
           <h3 className={styles.detailSectionTitle}>Estado del Pedido</h3>
@@ -241,7 +438,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                 <button
                   className={styles.applyStatusBtn}
                   type="button"
-                  onClick={handleStatusApply}
+                  onClick={() => handleStatusApply()}
                   disabled={statusLoading}
                 >
                   {statusLoading ? 'Guardando...' : 'Guardar cambio'}

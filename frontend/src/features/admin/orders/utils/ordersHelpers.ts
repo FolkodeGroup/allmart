@@ -1,4 +1,3 @@
-
 import type { OrderStatus, PaymentStatus } from '../../../../context/AdminOrdersContext';
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -22,6 +21,41 @@ export function paymentClass(status: PaymentStatus, styles: Record<string, strin
 
 export const STATUS_OPTIONS: OrderStatus[] = [
 	'pendiente', 'confirmado', 'en-preparacion', 'preparado', 'enviado', 'entregado', 'cancelado',
+];
+
+// Matriz de transiciones permitidas según el Happy Path e-commerce
+export const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+	pendiente: ['confirmado', 'cancelado'],
+	confirmado: ['en-preparacion', 'cancelado'],
+	'en-preparacion': ['preparado', 'enviado', 'cancelado'],
+	preparado: ['enviado', 'entregado', 'cancelado'],
+	enviado: ['entregado', 'cancelado'],
+	entregado: [], // Estado terminal
+	cancelado: [], // Estado terminal
+};
+
+// Configuración del botón de Siguiente Paso sugerido
+export const NEXT_STEP_CONFIG: Record<
+	OrderStatus,
+	{ nextStatus: OrderStatus | null; label: string; icon: string }
+> = {
+	pendiente: { nextStatus: 'confirmado', label: 'Confirmar Pedido', icon: '✓' },
+	confirmado: { nextStatus: 'en-preparacion', label: 'Pasar a Embalaje / Preparación', icon: '📦' },
+	'en-preparacion': { nextStatus: 'preparado', label: 'Marcar como Bulto Preparado', icon: '🏷️' },
+	preparado: { nextStatus: 'enviado', label: 'Despachar / Enviar', icon: '🚚' },
+	enviado: { nextStatus: 'entregado', label: 'Marcar como Entregado', icon: '✅' },
+	entregado: { nextStatus: null, label: 'Pedido Entregado', icon: '🎉' },
+	cancelado: { nextStatus: null, label: 'Pedido Cancelado', icon: '❌' },
+};
+
+// Pasos secuenciales del Happy Path
+export const HAPPY_PATH_STEPS: OrderStatus[] = [
+	'pendiente',
+	'confirmado',
+	'en-preparacion',
+	'preparado',
+	'enviado',
+	'entregado',
 ];
 
 export function statusClass(status: OrderStatus, styles: Record<string, string>): string {
