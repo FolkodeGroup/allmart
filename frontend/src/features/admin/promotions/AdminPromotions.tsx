@@ -5,7 +5,7 @@
  *   Pestaña 2: Matriz de Productos (vista de qué productos cubre cada promo)
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { Promotion } from './promotionsService';
 import { promotionsService } from './promotionsService';
 import AdminPromotionForm from './AdminPromotionForm';
@@ -13,14 +13,29 @@ import AdminPromotionMatrix from './AdminPromotionMatrix';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
-import { Search } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Calendar, Tag } from 'lucide-react';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
 type ViewMode = 'list' | 'form';
 type MainTab = 'campaigns' | 'matrix';
 
-const AdminPromotions: React.FC = () => {
+function getPromotionStatusInfo(promo: Promotion): { label: string; className: string } {
+  if (!promo.isActive) return { label: 'Inactiva', className: styles.badgeInactive };
+  const now = new Date();
+  if (new Date(promo.endDate) < now) return { label: 'Vencida', className: styles.badgeExpired };
+  if (new Date(promo.startDate) > now) return { label: 'Próxima', className: styles.badgeUpcoming };
+  return { label: 'Activa', className: styles.badgeActive };
+}
+
+function formatValueDisplay(type: string, value: number): string {
+  if (type === 'percentage') return `${value}% OFF`;
+  if (type === 'fixed') return `$${value.toLocaleString('es-AR')} OFF`;
+  if (type === 'bogo') return 'Lleva 1 Gratis (BOGO)';
+  return `$${value}`;
+}
+
+export function AdminPromotions() {
   const [mainTab, setMainTab] = useState<MainTab>('campaigns');
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -135,7 +150,7 @@ const AdminPromotions: React.FC = () => {
   }
 
   const filterActiveOptions = useMemo(() => [
-    { value: '', label: 'Todas' },
+    { value: '', label: 'Todas las promociones' },
     { value: 'true', label: 'Activas' },
     { value: 'false', label: 'Inactivas' }
   ], []);
@@ -163,37 +178,40 @@ const AdminPromotions: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div style={{ flex: 1 }} />
-        <button className={styles.btnPrimary} onClick={handleNew}>
-          + Nueva Promoción
-        </button>
-      </div>
+      {/* Header Unificado: Pestañas + Botón 'Nueva Promoción' al mismo nivel en Escritorio */}
+      <div className={styles.topHeaderBar}>
+        <div className={styles.mainTabs}>
+          <button
+            type="button"
+            className={mainTab === 'campaigns' ? styles.mainTabActive : styles.mainTab}
+            onClick={() => setMainTab('campaigns')}
+          >
+            Campañas
+          </button>
+          <button
+            type="button"
+            className={mainTab === 'matrix' ? styles.mainTabActive : styles.mainTab}
+            onClick={() => setMainTab('matrix')}
+          >
+            Matriz de Productos
+          </button>
+        </div>
 
-      <div className={styles.mainTabs}>
-        <button
-          className={mainTab === 'campaigns' ? styles.mainTabActive : styles.mainTab}
-          onClick={() => setMainTab('campaigns')}
-        >
-          Campañas
-        </button>
-        <button
-          className={mainTab === 'matrix' ? styles.mainTabActive : styles.mainTab}
-          onClick={() => setMainTab('matrix')}
-        >
-          Matriz de Productos
+        <button type="button" className={styles.btnPrimary} onClick={handleNew}>
+          <Plus size={18} />
+          <span>Nueva Promoción</span>
         </button>
       </div>
 
       {mainTab === 'campaigns' && (
         <>
-          <div className={styles.filters} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div className={styles.filters}>
             <div className={styles.searchWrap}>
               <Search size={16} className={styles.searchIcon} />
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder="Buscar promociones..."
+                placeholder="Buscar promociones por nombre..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -205,7 +223,7 @@ const AdminPromotions: React.FC = () => {
                 autoCapitalize="off"
               />
             </div>
-            <div style={{ flex: '0 0 160px', minWidth: '160px' }}>
+            <div className={styles.filterDropdownWrap}>
               <Dropdown
                 options={filterActiveOptions}
                 value={activeFilterValue}
@@ -217,7 +235,8 @@ const AdminPromotions: React.FC = () => {
 
           {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.tableWrapper}>
+          {/* 💻 VISTA ESCRITORIO (>= 768px): Tabla tradicional estilizada */}
+          <div className={styles.tableWrapperDesktop}>
             <table className={styles.table}>
               <thead>
                 <tr>
@@ -227,32 +246,105 @@ const AdminPromotions: React.FC = () => {
                   <th>INICIO</th>
                   <th>FIN</th>
                   <th>ESTADO</th>
-                  <th>ACCIONES</th>
+                  <th className={styles.thActions}>ACCIONES</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
                     <td colSpan={7} className={styles.loading}>
-                      Cargando...
+                      Cargando promociones...
                     </td>
                   </tr>
                 ) : promotions.length === 0 ? (
                   <tr>
                     <td colSpan={7} className={styles.empty}>
-                      No hay promociones
+                      No hay promociones registradas
                     </td>
                   </tr>
                 ) : (
-                  promotions.map((promo) => (
-                    <tr key={promo.id}>
-                      <td>
-                        <strong>{promo.name}</strong>
-                        {promo.description && (
-                          <div className={styles.tableSubtext}>{promo.description}</div>
-                        )}
-                      </td>
-                      <td>
+                  promotions.map((promo) => {
+                    const statusInfo = getPromotionStatusInfo(promo);
+                    return (
+                      <tr key={promo.id}>
+                        <td>
+                          <strong className={styles.promoNameText}>{promo.name}</strong>
+                          {promo.description && (
+                            <div className={styles.tableSubtext}>{promo.description}</div>
+                          )}
+                        </td>
+                        <td>
+                          <Badge
+                            variant={
+                              promo.type === 'percentage'
+                                ? 'discount'
+                                : promo.type === 'fixed'
+                                  ? 'new'
+                                  : 'limited'
+                            }
+                          >
+                            {promo.type === 'percentage'
+                              ? '%'
+                              : promo.type === 'fixed'
+                                ? '$'
+                                : 'BOGO'}
+                          </Badge>
+                        </td>
+                        <td className={styles.tdValue}>
+                          {formatValueDisplay(promo.type, promo.value)}
+                        </td>
+                        <td className={styles.tdDate}>
+                          {new Date(promo.startDate).toLocaleDateString('es-AR')}
+                        </td>
+                        <td className={styles.tdDate}>
+                          {new Date(promo.endDate).toLocaleDateString('es-AR')}
+                        </td>
+                        <td>
+                          <span className={statusInfo.className}>
+                            {statusInfo.label}
+                          </span>
+                        </td>
+                        <td className={styles.actions}>
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(promo)}
+                            className={styles.btnSmall}
+                            title="Editar promoción"
+                          >
+                            EDITAR
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteClick(promo.id, promo.name)}
+                            className={styles.btnSmallDanger}
+                            title="Eliminar promoción"
+                          >
+                            ELIMINAR
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 📱 VISTA MÓVIL (< 768px): Tarjetas táctiles sin scroll horizontal */}
+          <div className={styles.mobileCardsList}>
+            {loading ? (
+              <div className={styles.loading}>Cargando promociones...</div>
+            ) : promotions.length === 0 ? (
+              <div className={styles.empty}>No hay promociones registradas</div>
+            ) : (
+              promotions.map((promo) => {
+                const statusInfo = getPromotionStatusInfo(promo);
+                return (
+                  <div key={promo.id} className={styles.mobileCard}>
+                    {/* Header de la tarjeta */}
+                    <div className={styles.mobileCardHeader}>
+                      <div className={styles.mobileCardTitleGroup}>
+                        <h3 className={styles.mobileCardTitle}>{promo.name}</h3>
                         <Badge
                           variant={
                             promo.type === 'percentage'
@@ -262,41 +354,70 @@ const AdminPromotions: React.FC = () => {
                                 : 'limited'
                           }
                         >
-                          {promo.type === 'percentage'
-                            ? '%'
-                            : promo.type === 'fixed'
-                              ? '$'
-                              : 'BOGO'}
+                          {promo.type === 'percentage' ? '%' : promo.type === 'fixed' ? '$' : 'BOGO'}
                         </Badge>
-                      </td>
-                      <td className={styles.tdValue}> {promo.value} </td>
-                      <td className={styles.tdDate}>
-                        {new Date(promo.startDate).toLocaleDateString()}
-                      </td>
-                      <td className={styles.tdDate}>
-                        {new Date(promo.endDate).toLocaleDateString()}
-                      </td>
-                      <td>
-                        <span className={promo.isActive ? styles.badgeActive : styles.badgeInactive}>
-                          {promo.isActive ? 'Activa' : 'Inactiva'}
-                        </span>
-                      </td>
-                      <td className={styles.actions}>
-                        <button onClick={() => handleEdit(promo)} className={styles.btnSmall}>
-                          EDITAR
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(promo.id, promo.name)}
-                          className={styles.btnSmallDanger}
-                        >
-                          ELIMINAR
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                      </div>
+                      <span className={statusInfo.className}>
+                        {statusInfo.label}
+                      </span>
+                    </div>
+
+                    {/* Descripción si existe */}
+                    {promo.description && (
+                      <p className={styles.mobileCardDescription}>{promo.description}</p>
+                    )}
+
+                    {/* Detalles de la tarjeta */}
+                    <div className={styles.mobileCardBody}>
+                      <div className={styles.mobileCardValueRow}>
+                        <span className={styles.mobileCardValueLabel}>Descuento:</span>
+                        <strong className={styles.mobileCardValueHighlight}>
+                          {formatValueDisplay(promo.type, promo.value)}
+                        </strong>
+                      </div>
+
+                      <div className={styles.mobileCardMetaRow}>
+                        <div className={styles.mobileCardMetaItem}>
+                          <Calendar size={14} className={styles.mobileCardMetaIcon} />
+                          <span>
+                            {new Date(promo.startDate).toLocaleDateString('es-AR')} al {new Date(promo.endDate).toLocaleDateString('es-AR')}
+                          </span>
+                        </div>
+
+                        {promo.rules && (promo.rules.productIds?.length > 0 || promo.rules.categoryIds?.length > 0) && (
+                          <div className={styles.mobileCardMetaItem}>
+                            <Tag size={14} className={styles.mobileCardMetaIcon} />
+                            <span>
+                              {promo.rules.productIds?.length ?? 0} prods / {promo.rules.categoryIds?.length ?? 0} cats
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Acciones Táctiles de 44px+ */}
+                    <div className={styles.mobileCardActions}>
+                      <button
+                        type="button"
+                        className={styles.mobileCardBtnEdit}
+                        onClick={() => handleEdit(promo)}
+                      >
+                        <Edit2 size={15} />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.mobileCardBtnDelete}
+                        onClick={() => handleDeleteClick(promo.id, promo.name)}
+                      >
+                        <Trash2 size={15} />
+                        <span>Eliminar</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           <AdminPagination
@@ -333,6 +454,6 @@ const AdminPromotions: React.FC = () => {
       />
     </div>
   );
-};
+}
 
 export default AdminPromotions;
