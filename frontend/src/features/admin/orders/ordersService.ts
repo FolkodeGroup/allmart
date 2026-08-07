@@ -1,5 +1,5 @@
 import { apiFetch } from '../../../utils/apiClient';
-import type { OrderStatus, PaymentStatus } from '../../../context/AdminOrdersContext';
+import type { OrderStatus, PaymentStatus, OrderShipment } from '../../../context/AdminOrdersContext';
 
 export interface Order {
   id: string;
@@ -10,6 +10,7 @@ export interface Order {
     email: string;
     phone?: string;
   };
+  shipment?: OrderShipment;
   items: Array<{
     productId: string;
     productName: string;
@@ -59,6 +60,7 @@ interface ApiOrder {
     email: string;
     phone?: string;
   };
+  shipment?: OrderShipment;
   items?: ApiOrderItem[];
   total: number;
   status: string;
@@ -120,6 +122,16 @@ export function mapApiOrderToOrder(api: ApiOrder): Order {
       email: api.customer.email,
       phone: api.customer.phone,
     },
+    shipment: api.shipment ? {
+      id: api.shipment.id,
+      addressStreet: api.shipment.addressStreet,
+      addressCity: api.shipment.addressCity,
+      addressProvince: api.shipment.addressProvince,
+      addressZip: api.shipment.addressZip,
+      carrier: api.shipment.carrier ?? undefined,
+      trackingNumber: api.shipment.trackingNumber ?? undefined,
+      status: api.shipment.status,
+    } : undefined,
     items: (api.items ?? []).map((item) => ({
       productId: item.productId,
       productSkuId: item.productSkuId,
@@ -241,22 +253,20 @@ export async function upsertAdminOrderShipment(
     carrier?: string;
     trackingNumber?: string;
   }
-): Promise<void> {
-  try {
-    await apiFetch(`/api/admin/orders/${id}/shipment`, {
-      method: 'POST',
-      body: JSON.stringify({
-        addressStreet: shipmentData.addressStreet ?? 'Local / Depósito',
-        addressCity: shipmentData.addressCity ?? 'CABA',
-        addressProvince: shipmentData.addressProvince ?? 'Buenos Aires',
-        addressZip: shipmentData.addressZip ?? '1000',
-        carrier: shipmentData.carrier,
-        trackingNumber: shipmentData.trackingNumber,
-      }),
-    }, token);
-  } catch (err) {
-    console.warn('[Shipment API] No se pudo guardar el envío vía endpoint dedicado:', err);
-  }
+): Promise<OrderShipment> {
+  const body = await apiFetch<ApiSuccess<OrderShipment>>(`/api/admin/orders/${id}/shipment`, {
+    method: 'POST',
+    body: JSON.stringify({
+      addressStreet: shipmentData.addressStreet ?? 'Local / Depósito',
+      addressCity: shipmentData.addressCity ?? 'CABA',
+      addressProvince: shipmentData.addressProvince ?? 'Buenos Aires',
+      addressZip: shipmentData.addressZip ?? '1000',
+      carrier: shipmentData.carrier,
+      trackingNumber: shipmentData.trackingNumber,
+    }),
+  }, token);
+
+  return body.data;
 }
 
 export async function deleteAdminOrder(token: string, id: string): Promise<void> {

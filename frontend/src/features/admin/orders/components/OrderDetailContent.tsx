@@ -217,14 +217,24 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     if (!token) return;
     setStatusLoading(true);
     try {
-      await upsertAdminOrderShipment(token, order.id, {
-        addressStreet: addrStreet.trim() || 'Dirección acordada',
-        addressCity: addrCity.trim() || 'CABA',
-        addressProvince: addrProvince.trim() || 'Buenos Aires',
-        addressZip: addrZip.trim() || '1000',
+      const street = addrStreet.trim() || 'Dirección acordada';
+      const city = addrCity.trim() || 'CABA';
+      const province = addrProvince.trim() || 'Buenos Aires';
+      const zip = addrZip.trim() || '1000';
+
+      const savedShipment = await upsertAdminOrderShipment(token, order.id, {
+        addressStreet: street,
+        addressCity: city,
+        addressProvince: province,
+        addressZip: zip,
         carrier: order.shipment?.carrier,
         trackingNumber: order.shipment?.trackingNumber,
       });
+
+      if (savedShipment) {
+        order.shipment = savedShipment;
+      }
+
       await refreshOrders();
       toast.success('Dirección de envío guardada correctamente');
       setAddressModalOpen(false);
@@ -340,13 +350,16 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       const zip = prepAddressZip.trim() || '1000';
 
       if (token) {
-        await upsertAdminOrderShipment(token, order.id, {
+        const savedShipment = await upsertAdminOrderShipment(token, order.id, {
           addressStreet: street,
           addressCity: city,
           addressProvince: province,
           addressZip: zip,
           carrier: prepShippingMethod,
         });
+        if (savedShipment) {
+          order.shipment = savedShipment;
+        }
       }
 
       const packingSummary = [];
@@ -419,10 +432,13 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       await updateOrderStatus(order.id, 'enviado', combinedNote);
 
       if (token && (dispatchCarrier || dispatchTracking)) {
-        await upsertAdminOrderShipment(token, order.id, {
+        const savedShipment = await upsertAdminOrderShipment(token, order.id, {
           carrier: dispatchCarrier,
           trackingNumber: dispatchTracking.trim() || undefined,
         });
+        if (savedShipment) {
+          order.shipment = savedShipment;
+        }
       }
 
       await refreshOrders();
