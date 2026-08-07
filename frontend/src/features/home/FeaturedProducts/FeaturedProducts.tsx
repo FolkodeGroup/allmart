@@ -34,7 +34,6 @@ export function FeaturedProducts({
 
   useEffect(() => {
     Promise.all([
-      // 🟢 OPTIMIZACIÓN: Solo consultamos los productos y las categorías necesarias
       fetchPublicProducts({ sort: 'newest', limit, isFeatured: true }),
       fetchPublicCategories(),
     ])
@@ -149,7 +148,6 @@ export function FeaturedProducts({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {/* 🟢 SOLUCIÓN CLS: Si está cargando, renderizamos tarjetas con altura reservada para mantener el layout estable */}
           {isLoading ? (
             Array.from({ length: cardsPerView }).map((_, idx) => (
               <div

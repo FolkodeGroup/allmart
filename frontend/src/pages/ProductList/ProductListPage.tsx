@@ -97,6 +97,7 @@ export function ProductListPage() {
   const [error, setError] = useState<string | null>(null);
   const [categoryCollections, setCategoryCollections] = useState<PublicCollection[]>([]);
   const [activeCollection, setActiveCollection] = useState<PublicCollection | null>(null);
+  const [collectionFullProducts, setCollectionFullProducts] = useState<Product[]>([]);
   const [collectionLoading, setCollectionLoading] = useState(false);
 
   const urlSlugs = searchParams.get('slugs') ?? '';
@@ -208,19 +209,67 @@ export function ProductListPage() {
     };
   }, []);
 
-  /* Cargar colección específica cuando viene ?coleccion= en la URL */
+  /* Cargar colección específica y sus productos completos cuando viene ?coleccion= en la URL */
   useEffect(() => {
     if (!urlColeccion) {
       setActiveCollection(null);
+      setCollectionFullProducts([]);
       return;
     }
     setCollectionLoading(true);
     publicCollectionsService
       .getCollectionBySlug(urlColeccion)
-      .then((col) => setActiveCollection(col))
-      .catch(() => setActiveCollection(null))
+      .then(async (col) => {
+        setActiveCollection(col);
+        const colProds = col.products ?? [];
+        const slugs = colProds.map((p) => p.slug).filter(Boolean);
+
+        const liveMap = new Map<string, Product>();
+        if (slugs.length > 0) {
+          try {
+            const { data } = await fetchPublicProducts({ slugs: slugs.join(','), limit: 50 });
+            data.forEach((p) => {
+              const mapped = mapApiProductToProduct(p, categories);
+              liveMap.set(p.id, mapped);
+              liveMap.set(p.slug, mapped);
+            });
+          } catch {
+            // fallback silencioso
+          }
+        }
+
+        const mappedFull = colProds.map((p) => {
+          const live = liveMap.get(p.id) || liveMap.get(p.slug);
+          if (live) return live;
+
+          const imageUrl = getCollectionProductImage(p, products);
+          const priceNum = typeof p.price === 'string' ? parseFloat(p.price) : p.price;
+
+          return {
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            price: Number.isFinite(priceNum) ? priceNum : 0,
+            images: [imageUrl],
+            category: categories[0] ?? { id: '', name: 'Categoría', slug: 'categoria', isVisible: true },
+            description: '',
+            shortDescription: '',
+            tags: [],
+            rating: 0,
+            reviewCount: 0,
+            inStock: true,
+            sku: '',
+          } as Product;
+        });
+
+        setCollectionFullProducts(mappedFull);
+      })
+      .catch(() => {
+        setActiveCollection(null);
+        setCollectionFullProducts([]);
+      })
       .finally(() => setCollectionLoading(false));
-  }, [urlColeccion]);
+  }, [urlColeccion, categories, products]);
 
   /* Cargar productos cuando cambian los filtros */
   useEffect(() => {
@@ -482,7 +531,6 @@ export function ProductListPage() {
 
   /* Vista de colección específica */
   if (isCollectionView) {
-    const colProducts = activeCollection?.products ?? [];
     return (
       <main className={styles.page}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
@@ -495,11 +543,20 @@ export function ProductListPage() {
           </span>
         </nav>
 
-        <div style={{ maxWidth: 'var(--container-2xl)', margin: '0 auto', padding: '0 var(--space-6)' }}>
+        <div style={{ maxWidth: 'var(--container-2xl)', margin: '0 auto', padding: '0 var(--space-2)' }}>
           {collectionLoading ? (
-            <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Cargando colección...</p>
+            <div className={styles.emptyState}>
+              <p className={styles.emptyText}>Cargando colección...</p>
+            </div>
           ) : !activeCollection ? (
-            <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Colección no encontrada.</p>
+            <div className={styles.emptyState}>
+              <span className={styles.emptyIcon}>🔍</span>
+              <h3 className={styles.emptyTitle}>Colección no encontrada</h3>
+              <p className={styles.emptyText}>La colección seleccionada no existe o fue removida.</p>
+              <Link to="/productos" className={styles.loadMoreBtn} style={{ textDecoration: 'none', display: 'inline-block', marginTop: '12px' }}>
+                Ver todos los productos
+              </Link>
+            </div>
           ) : (
             <>
               <div className={styles.collectionViewHeader}>
@@ -512,46 +569,20 @@ export function ProductListPage() {
                     <p className={styles.collectionViewDesc}>{activeCollection.description}</p>
                   )}
                   <span className={styles.collectionViewCount}>
-                    {colProducts.length} {colProducts.length === 1 ? 'producto' : 'productos'}
+                    {collectionFullProducts.length} {collectionFullProducts.length === 1 ? 'producto' : 'productos'}
                   </span>
                 </div>
               </div>
 
-              {colProducts.length === 0 ? (
-                <p style={{ color: 'var(--color-text-secondary)', padding: 'var(--space-8) 0' }}>Esta colección aún no tiene productos.</p>
+              {collectionFullProducts.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p className={styles.emptyText}>Esta colección aún no tiene productos.</p>
+                </div>
               ) : (
                 <div className={styles.collectionViewGrid}>
-                  {colProducts.map((product) => {
-                    const imageUrl = getCollectionProductImage(product, products);
-                    return (
-                      <button
-                        key={product.id}
-                        type="button"
-                        className={styles.collectionViewCard}
-                        onClick={() => { window.location.href = `/producto/${product.slug}`; }}
-                      >
-                        <div className={styles.collectionViewImg}>
-                          <img
-                            src={imageUrl}
-                            alt={product.name}
-                            loading="lazy"
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              if (target.src !== DEFAULT_IMAGE_PLACEHOLDER) {
-                                target.src = DEFAULT_IMAGE_PLACEHOLDER;
-                              }
-                            }}
-                          />
-                        </div>
-                        <div className={styles.collectionViewCardInfo}>
-                          <p className={styles.collectionViewCardName}>{product.name}</p>
-                          <p className={styles.collectionViewCardPrice}>
-                            ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                  {collectionFullProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
                 </div>
               )}
             </>
