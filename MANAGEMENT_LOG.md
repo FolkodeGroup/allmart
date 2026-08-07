@@ -2291,3 +2291,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1414: 1216 evitar pérdida de contenido al descargar pdfs confirmación del navegador o flujo incorrecto | 2026-08-06 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1320: Agregar campo de tiempo de entrega en ABM de Productos y Tabla Informativa | 2026-08-06 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1434: 1399 ajustar posición del botón nueva colección en mobile responsive | 2026-08-07 |
