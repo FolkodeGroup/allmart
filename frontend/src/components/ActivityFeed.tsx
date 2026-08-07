@@ -1,4 +1,3 @@
-//src/components/ActivityFeed.tsx
 import { useState, useEffect, useCallback } from "react";
 import {
   getAdminActivityLogs,
@@ -7,8 +6,6 @@ import {
 } from "../services/adminActivityLogService";
 import type { AdminActivityLog } from "../services/adminActivityLogService";
 import "./activityFeed.css";
-
-// ── Configuración visual por tipo de acción ───────────────────────────────────
 
 const ACTION_CONFIG: Record<
   string,
@@ -35,8 +32,6 @@ function timeAgo(timestamp: string): string {
   return new Date(timestamp).toLocaleDateString("es-AR");
 }
 
-// ── Opciones de filtro ────────────────────────────────────────────────────────
-
 const FILTER_OPTIONS = [
   { label: "Todos", value: "all" },
   { label: "Nuevos", value: "create" },
@@ -46,14 +41,10 @@ const FILTER_OPTIONS = [
   { label: "Alertas", value: "alert" },
 ];
 
-// ── Props ─────────────────────────────────────────────────────────────────────
-
 interface ActivityFeedProps {
   pollInterval?: number;
   maxEvents?: number;
 }
-
-// ── Componente ────────────────────────────────────────────────────────────────
 
 export function ActivityFeed({
   pollInterval = 10000,
@@ -62,7 +53,6 @@ export function ActivityFeed({
   const [logs, setLogs] = useState<AdminActivityLog[]>([]);
   const [filter, setFilter] = useState<string>("all");
 
-  // Fetch asíncrono para carga inicial y polling
   useEffect(() => {
     const fetchLogs = async () => {
       try {
@@ -73,7 +63,7 @@ export function ActivityFeed({
       }
     };
 
-    fetchLogs(); // Carga inicial
+    fetchLogs();
 
     const interval = setInterval(fetchLogs, pollInterval);
     return () => clearInterval(interval);
@@ -104,7 +94,6 @@ export function ActivityFeed({
     return (l.action || "").toLowerCase().trim() === filter.toLowerCase().trim();
   });
 
-  // Description builder
   const describe = (log: AdminActivityLog): string => {
     const actionMap: Record<string, string> = {
       create: "Creó", edit: "Editó", delete: "Eliminó",
@@ -124,7 +113,7 @@ export function ActivityFeed({
       {/* Header */}
       <div className="af-header">
         <div className="af-header-actions">
-          <button className="af-btn-clear" onClick={handleClear} aria-label="Limpiar historial">
+          <button className="af-btn-clear" onClick={handleClear} aria-label="Limpiar historial" type="button">
             Limpiar todo
           </button>
           <span className="af-live-badge" aria-live="polite">
@@ -143,14 +132,15 @@ export function ActivityFeed({
             onClick={() => setFilter(f.value)}
             role="tab"
             aria-selected={filter === f.value}
+            type="button"
           >
             {f.label}
           </button>
         ))}
       </div>
 
-      {/* Table with scroll */}
-      <div className="af-table-scroll">
+      {/* Tabla Escritorio (>= 768px) */}
+      <div className="af-table-scroll af-desktop-only">
         {filtered.length === 0 ? (
           <div className="af-empty">Sin actividad para este filtro.</div>
         ) : (
@@ -186,6 +176,7 @@ export function ActivityFeed({
                         onClick={() => handleDelete(log)}
                         aria-label="Eliminar este evento"
                         title="Eliminar"
+                        type="button"
                       >
                         ELIMINAR
                       </button>
@@ -195,6 +186,43 @@ export function ActivityFeed({
               })}
             </tbody>
           </table>
+        )}
+      </div>
+
+      {/* Tarjetas Móviles (< 768px) */}
+      <div className="af-mobile-cards-list">
+        {filtered.length === 0 ? (
+          <div className="af-empty">Sin actividad para este filtro.</div>
+        ) : (
+          filtered.map((log, i) => {
+            const cfg = getConfig(log.action);
+            return (
+              <div key={log.id || `${log.timestamp}-${i}`} className="af-mobile-card">
+                <div className="af-mobile-card-header">
+                  <span
+                    className="af-tag"
+                    style={{ backgroundColor: cfg.tagBg, color: cfg.tagColor }}
+                  >
+                    {cfg.label}
+                  </span>
+                  <span className="af-mobile-time">{timeAgo(log.timestamp)}</span>
+                </div>
+                <div className="af-mobile-card-body">
+                  <p className="af-mobile-desc">{describe(log)}</p>
+                  <span className="af-mobile-user">Por: {log.user || "desconocido"}</span>
+                </div>
+                <div className="af-mobile-card-footer">
+                  <button
+                    className="af-delete-btn-mobile"
+                    onClick={() => handleDelete(log)}
+                    type="button"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

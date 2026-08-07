@@ -1,4 +1,3 @@
-
 import styles from './MetricCard.module.css';
 
 interface MetricCardProps {
@@ -24,7 +23,7 @@ export function MetricCard({ title, value, variation }: MetricCardProps) {
           <span className={isPositive ? styles.positive : styles.negative}>
             {Math.abs(variation!).toFixed(1)}%
           </span>
-          <span className={styles.label}>vs mes anterior</span>
+          <span className={styles.label}>vs mes ant.</span>
         </div>
       )}
     </div>

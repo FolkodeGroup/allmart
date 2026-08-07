@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from './CategoryDistributionChart.module.css';
 
@@ -24,12 +24,9 @@ interface PieLabelProps {
   percent: number;
 }
 
-// Helper to get CSS variable value
-
 const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent }: PieLabelProps) => {
   const RADIAN = Math.PI / 180;
-  // Posicionar etiqueta fuera del gráfico para mayor legibilidad
-  const radius = outerRadius + 60;
+  const radius = outerRadius + 30;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -40,10 +37,11 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent }: PieLa
       className={styles.pieText}
       textAnchor={x > cx ? 'start' : 'end'}
       dominantBaseline="central"
-      fontSize={13}
+      fontSize={12}
       fontWeight={600}
+      fill="var(--color-text-primary, #ffffff)"
     >
-      {percent > 0 ? `${(percent * 100).toFixed(1)}%` : ''}
+      {percent > 0 ? `${(percent * 100).toFixed(0)}%` : ''}
     </text>
   );
 };
@@ -66,25 +64,40 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Toolti
 };
 
 const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   if (!data || data.length === 0) {
     return <div className={styles.empty}>No hay datos para mostrar.</div>;
   }
+
+  const totalValue = data.reduce((sum, item) => sum + item.value, 0);
+
   return (
     <div className={styles.card}>
       <h2 className={styles.title}>Distribución por Categoría</h2>
-      <ResponsiveContainer width="100%" height={480}>
+
+      <ResponsiveContainer width="100%" height={isMobile ? 240 : 380}>
         <PieChart>
           <Pie
             data={data}
             dataKey="value"
             nameKey="category"
-            cx="45%"
+            cx={isMobile ? '50%' : '45%'}
             cy="50%"
-            innerRadius={70}
-            outerRadius={110}
-            labelLine={true}
-            label={renderCustomizedLabel}
+            innerRadius={isMobile ? 50 : 70}
+            outerRadius={isMobile ? 80 : 110}
+            labelLine={!isMobile}
+            label={!isMobile ? renderCustomizedLabel : false}
             isAnimationActive={true}
           >
             {data.map((entry, idx) => (
@@ -92,19 +105,40 @@ const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            layout="vertical"
-            align="right"
-            verticalAlign="middle"
-            formatter={(value: string) => (
-              <span className={styles.legendText}>
-                {value}
-              </span>
-            )}
-            wrapperStyle={{ paddingLeft: '10px' }}
-          />
+          {!isMobile && (
+            <Legend
+              layout="vertical"
+              align="right"
+              verticalAlign="middle"
+              formatter={(value: string) => (
+                <span className={styles.legendText}>
+                  {value}
+                </span>
+              )}
+              wrapperStyle={{ paddingLeft: '10px' }}
+            />
+          )}
         </PieChart>
       </ResponsiveContainer>
+
+      {/* Leyenda vertical ordenada debajo en móvil */}
+      {isMobile && (
+        <div className={styles.mobileLegendList}>
+          {data.map((item, idx) => {
+            const percent = totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0';
+            return (
+              <div key={item.category} className={styles.mobileLegendItem}>
+                <span
+                  className={styles.mobileLegendDot}
+                  style={{ backgroundColor: item.color || COLORS[idx % COLORS.length] }}
+                />
+                <span className={styles.mobileLegendName}>{item.category}</span>
+                <span className={styles.mobileLegendVal}>{item.value} ({percent}%)</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

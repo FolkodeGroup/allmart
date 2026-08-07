@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useMonthlyGoal } from '../../features/admin/goals/hooks/useMonthlyGoal';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
@@ -24,6 +24,7 @@ import StaffNotes from '../../components/StaffNotes';
 import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 import { MonthlyGoalCard } from '../../components/ui/MonthlyGoalCard';
+import { MobileDashboardTabs, type DashboardMobileTab } from '../../components/ui/MobileDashboardTabs';
 
 import styles from './AdminDashboard.module.css';
 
@@ -53,6 +54,20 @@ export function AdminDashboard() {
   const { monthlyGoal, setMonthlyGoal } = useMonthlyGoal();
   const { greeting } = getAdminGreeting();
 
+  // Detección responsive de vista móvil (< 768px)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+  const [mobileTab, setMobileTab] = useState<DashboardMobileTab>('resumen');
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
   // Métricas y agregaciones centralizadas
   const {
     ingresos, totalPedidos, clientesUnicos, tasaConversion, ticketPromedio,
@@ -67,7 +82,7 @@ export function AdminDashboard() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
-  // Orden actual de widgets para drag & drop
+  // Orden actual de widgets para drag & drop (Escritorio)
   const sortedWidgets = useMemo(
     () => [...widgets].sort((a, b) => a.order - b.order).filter((w) => w.enabled),
     [widgets],
@@ -79,7 +94,7 @@ export function AdminDashboard() {
   });
   const { draggedId, dragOverId, isDragging } = dragState;
 
-  // ─── Widget renderers ───────────────────────────────────────────────────────
+  // ─── Widget renderers para Escritorio ────────────────────────────────────────
 
   const renderWidget = (id: WidgetId) => {
     switch (id) {
@@ -98,14 +113,11 @@ export function AdminDashboard() {
       case 'critical_stock':
         return (
           <div className={styles.criticalStockContainer}>
-            {/* Acordeón de Acciones Requeridas (ancho completo) */}
             {can('orders.view') && (
               <div className={styles.requiredActionsWrapper}>
                 <RequiredActionsAccordion />
               </div>
             )}
-
-            {/* Alertas de Stock y Productos (2 columnas) */}
             {can('products.view') && (
               <div className={styles.alertsSplit}>
                 <div className={styles.alertsColumn}>
@@ -127,7 +139,6 @@ export function AdminDashboard() {
         if (!can('reports.view')) return null;
         return (
           <div className={styles.analyticsLayout}>
-            {/* Row 1: Goal + Clients */}
             <div className={styles.analyticsTopRow}>
               <MonthlyGoalCard
                 currentMonthRevenue={currentMonthRevenue}
@@ -135,7 +146,6 @@ export function AdminDashboard() {
                 onSaveGoal={setMonthlyGoal}
                 styles={styles}
               />
-              {/* Top Clients */}
               <div className={styles.clientsCard}>
                 <h4 className={styles.chartTitle}>Mejores Clientes</h4>
                 <div className={styles.clientsList}>
@@ -157,7 +167,6 @@ export function AdminDashboard() {
                 </div>
               </div>
             </div>
-            {/* Row 2: Category + Top Products charts */}
             <div className={styles.chartsGrid}>
               <div className={styles.chartCard}>
                 <h4 className={styles.chartTitle}>Distribución por Categoría</h4>
@@ -187,10 +196,9 @@ export function AdminDashboard() {
             ]
               .filter((s) => s.ok)
               .map((s) => (
-                <Link 
-                  key={s.to} 
-                  to={s.to} 
-                  /* Agregamos dinámicamente la clase correspondiente al color de Allmart */
+                <Link
+                  key={s.to}
+                  to={s.to}
                   className={`${styles.quickCard} ${styles[s.color]}`}
                 >
                   <span className={styles.quickIcon}>
@@ -221,15 +229,154 @@ export function AdminDashboard() {
     }
   };
 
-  // ─── Sorted, enabled widgets ────────────────────────────────────────────────
+  // ─── RENDERIZADO VISTA MÓVIL (< 768px) ──────────────────────────────────────
 
-  // (sortedWidgets y widgetOrder ya calculados arriba, junto a useDragAndDropWidgets)
+  if (isMobile) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.mobileBanner}>
+          <div className={styles.mobileBannerTop}>
+            <div>
+              <h1 className={styles.mobileGreeting}>{greeting}, admin</h1>
+              <p className={styles.mobileSub}>Resumen táctico de tienda</p>
+            </div>
+            <button
+              className={styles.settingsBtnMobile}
+              onClick={() => setSettingsOpen(true)}
+              aria-label="Personalizar dashboard"
+              type="button"
+            >
+              ⚙️
+            </button>
+          </div>
+        </header>
 
-  // ─── Render ─────────────────────────────────────────────────────────────────
+        <MobileDashboardTabs
+          activeTab={mobileTab}
+          onTabChange={setMobileTab}
+          pendingOrdersCount={pendientes}
+          lowStockCount={lowStock}
+        />
+
+        <DashboardWidgetSettings
+          ref={settingsRef}
+          widgets={widgets.map((w) => ({ id: w.id, label: WIDGET_LABELS[w.id], enabled: w.enabled }))}
+          onToggleWidget={toggleWidget}
+          onResetLayout={resetLayout}
+          onReorderWidgets={reorderWidgets}
+          isOpen={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+        />
+
+        <div className={styles.mobileTabPanel}>
+          {mobileTab === 'resumen' && (
+            <div className={styles.mobileSectionStack}>
+              <section className={styles.mobileKpiGrid}>
+                <MetricCard title="Ingresos" value={fmtCurrency(ingresos)} variation={variaciones.ingresos} />
+                <MetricCard title="Pedidos" value={totalPedidos} variation={variaciones.pedidos} />
+                <MetricCard title="Clientes" value={clientesUnicos} variation={variaciones.clientes} />
+                <MetricCard title="Ticket Prom." value={fmtCurrency(ticketPromedio)} variation={variaciones.ticketPromedio} />
+              </section>
+
+              <section className={styles.mobileBlock}>
+                <h3 className={styles.mobileBlockTitle}>Acceso Rápido</h3>
+                <div className={styles.quickGridMobile}>
+                  {[
+                    { icon: 'bi bi-box-seam', title: 'Productos', to: '/admin/productos', color: 'primary', ok: can('products.view') },
+                    { icon: 'bi bi-cart3', title: 'Pedidos', to: '/admin/pedidos', color: 'accent', ok: can('orders.view') },
+                    { icon: 'bi bi-bar-chart-line', title: 'Reportes', to: '/admin/reportes', color: 'warm', ok: can('reports.view') },
+                    { icon: 'bi bi-tags', title: 'Categorías', to: '/admin/categorias', color: 'secondary', ok: can('products.view') },
+                    { icon: 'bi bi-image', title: 'Banners', to: '/admin/banners', color: 'primary', ok: true },
+                    { icon: 'bi bi-gear', title: 'Ajustes', to: '/admin/configuracion', color: 'secondary', ok: true },
+                  ]
+                    .filter((s) => s.ok)
+                    .map((s) => (
+                      <Link key={s.to} to={s.to} className={`${styles.quickCardMobile} ${styles[s.color]}`}>
+                        <span className={styles.quickIconMobile}>
+                          <i className={s.icon}></i>
+                        </span>
+                        <span className={styles.quickTitleMobile}>{s.title}</span>
+                      </Link>
+                    ))}
+                </div>
+              </section>
+
+              {can('reports.view') && (
+                <section className={styles.mobileBlock}>
+                  <WeeklySalesWidget data={weeklySalesData} totalSales={weeklyTotalSales} />
+                </section>
+              )}
+            </div>
+          )}
+
+          {mobileTab === 'pedidos' && (
+            <div className={styles.mobileSectionStack}>
+              {can('orders.view') && <RequiredActionsAccordion />}
+              {can('orders.view') && <RecentOrdersWidget />}
+            </div>
+          )}
+
+          {mobileTab === 'alertas' && (
+            <div className={styles.mobileSectionStack}>
+              {can('products.view') && (
+                <CriticalStockAlert products={products.map((p) => ({ id: p.id, name: p.name, stock: typeof p.stock === 'number' ? p.stock : 0 }))} />
+              )}
+              {can('products.view') && <IncompleteProductsWidget />}
+            </div>
+          )}
+
+          {mobileTab === 'analitica' && (
+            <div className={styles.mobileSectionStack}>
+              <MonthlyGoalCard
+                currentMonthRevenue={currentMonthRevenue}
+                monthlyGoal={monthlyGoal}
+                onSaveGoal={setMonthlyGoal}
+                styles={styles}
+              />
+              {can('reports.view') && (
+                <div className={styles.mobileBlock}>
+                  <CategoryDistributionChart data={categoryData} />
+                </div>
+              )}
+              {can('reports.view') && (
+                <div className={styles.mobileBlock}>
+                  <BarChartTopProducts data={topProducts} />
+                </div>
+              )}
+              <div className={styles.mobileBlock}>
+                <h3 className={styles.mobileBlockTitle}>Actividad Reciente</h3>
+                <ActivityFeed />
+              </div>
+              <div className={styles.mobileBlock}>
+                <h3 className={styles.mobileBlockTitle}>Notas del Equipo</h3>
+                <StaffNotes />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <footer className={styles.statusBar}>
+          <div className={styles.statusItem}>
+            <span className={styles.statusDot} style={{ backgroundColor: statusColor }} />
+            <span className={styles.statusText}>{statusLabel}</span>
+          </div>
+          <div className={styles.statusItem}>
+            <span className={styles.statusText}>{latency}ms</span>
+          </div>
+          <div className={styles.statusItem}>
+            <span className={styles.statusText}>
+              {new Date().toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
+            </span>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // ─── RENDERIZADO VISTA ESCRITORIO (>= 768px) INTACTA ────────────────────────
 
   return (
     <div className={styles.page}>
-      {/* ── Welcome Banner ── */}
       <header className={styles.banner}>
         <div className={styles.bannerLeft}>
           <h1 className={styles.bannerGreeting}>
@@ -266,13 +413,13 @@ export function AdminDashboard() {
             onClick={() => setSettingsOpen(true)}
             aria-label="Personalizar dashboard"
             title="Personalizar widgets"
+            type="button"
           >
             ⚙️ Personalizar
           </button>
         </div>
       </header>
 
-      {/* ── Settings Panel ── */}
       <DashboardWidgetSettings
         ref={settingsRef}
         widgets={widgets.map((w) => ({ id: w.id, label: WIDGET_LABELS[w.id], enabled: w.enabled }))}
@@ -283,7 +430,6 @@ export function AdminDashboard() {
         onClose={() => setSettingsOpen(false)}
       />
 
-      {/* ── Draggable Widgets ── */}
       <div className={styles.widgetsContainer} data-dashboard-container>
         {sortedWidgets.map((widget) => {
           const content = renderWidget(widget.id);
@@ -318,7 +464,6 @@ export function AdminDashboard() {
         })}
       </div>
 
-      {/* ── Status Bar ── */}
       <footer className={styles.statusBar}>
         <div className={styles.statusItem}>
           <span className={styles.statusDot} style={{ backgroundColor: statusColor }} />

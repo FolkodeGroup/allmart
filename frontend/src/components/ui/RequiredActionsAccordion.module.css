@@ -1,304 +1,245 @@
-/* ─── Accordion Container ─────────────────────────────────────────────────── */
+/* =============================================================================
+   Allmart Bazar — RequiredActionsAccordion CSS Module
+   ============================================================================= */
 
 .accordion {
-  background: var(--color-bg-card, #fff);
-  border-radius: 12px;
-  border: 2px solid var(--color-border, #f0f0f0);
+  background-color: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 14px;
   overflow: hidden;
-  transition: all 0.3s ease;
 }
-
-.accordion:hover {
-  border-color: var(--color-border, #e0e0e0);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.06));
-}
-
-/* ─── Accordion Header ────────────────────────────────────────────────────── */
 
 .accordionHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 1rem 1.5rem;
-  background: var(--color-bg-secondary, #f5f7fa);
+  padding: 16px 20px;
+  background-color: var(--color-bg-secondary, #1f2937);
   border: none;
-  border-bottom: 1px solid var(--color-border, #e0e0e0);
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: var(--font-body);
-  text-align: left;
+  color: var(--color-text-primary, #ffffff);
+  transition: background-color 0.2s ease;
 }
 
 .accordionHeader:hover {
-  background: var(--color-bg-tertiary, #f0f3f7);
+  background-color: var(--color-bg-tertiary, #28353d);
 }
 
 .accordionHeaderLeft {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex: 1;
+  gap: 12px;
 }
 
 .accordionIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  color: var(--color-text-tertiary, #666);
-  font-size: 0.75rem;
-  transition: transform 0.2s ease;
+  font-size: 12px;
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .accordionTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-size: 16px;
+  font-weight: 700;
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--color-text-primary, #1a1a1a);
-}
-
-.titleIcon {
-  font-size: 1.25rem;
+  color: var(--color-text-primary, #ffffff);
 }
 
 .accordionBadges {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 8px;
-  background: var(--color-bg-tertiary, #e8e8e8);
-  color: var(--color-text-tertiary, #666);
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .badgeAlert {
-  background: #fee2e2;
-  color: #b91c1c;
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.75;
-  }
-}
-
-/* ─── Accordion Content ───────────────────────────────────────────────────── */
 
 .accordionContent {
-  padding: 1.5rem;
-  animation: slideDown 0.3s ease-out;
+  padding: 16px 20px 20px 20px;
+  border-top: 1px solid var(--color-border, #374151);
 }
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ─── Tab Content ─────────────────────────────────────────────────────────── */
 
 .tabContent {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
 }
-
-/* ─── Table Styles ────────────────────────────────────────────────────────── */
-
-.tableWrapper {
-  width: 100%;
-  overflow-x: auto;
-  margin-top: 1rem;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.tableHeader {
-  background: var(--color-bg-secondary, #f5f5f5);
-  border-bottom: 1px solid var(--color-border, #e0e0e0);
-}
-
-.tableHeaderCell {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-weight: 800;
-  color: var(--color-text-tertiary, #666);
-  white-space: nowrap;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.tableRow {
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border, #e0e0e0);
-  transition: background-color 0.15s ease;
-}
-
-.tableRow:hover {
-  background: var(--color-bg-secondary, #fafafa);
-}
-
-.tableCellClient {
-  padding: 0.75rem 1rem;
-  color: var(--color-text-primary, #333);
-}
-
-.tableCellDate {
-  padding: 0.75rem 1rem;
-  color: var(--color-normal-gray, #333);
-}
-
-.tableCellAmount {
-  padding: 0.75rem 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary, #1a1a1a);
-}
-
-.tableCellAction {
-  padding: 0.75rem 1rem;
-  text-align: left;
-}
-
-.tableCellAction a {
-  display: inline-block;
-}
-
-/* ─── Empty State ─────────────────────────────────────────────────────────── */
-
-.emptyState {
-  padding: 2rem 1rem;
-  text-align: center;
-  color: var(--color-text-tertiary, #666);
-  background: var(--color-bg-secondary, #fafafa);
-  border-radius: 8px;
-  margin-top: 1rem;
-}
-
-.emptyState p {
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-/* ─── Total Bar ───────────────────────────────────────────────────────────── */
 
 .totalBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: var(--color-bg-secondary, #f0f9ff);
-  border: 1px solid var(--color-border, #bfdbfe);
+  padding: 10px 14px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
   border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
-}
-
-.totalBar span {
-  color: var(--color-text-tertiary, #666);
+  font-size: 13px;
+  color: var(--color-text-secondary, #9ca3af);
+  margin-bottom: 8px;
 }
 
 .totalBar strong {
-  color: var(--color-text-primary, #1a1a1a);
-  font-size: 1.1rem;
+  color: var(--color-text-primary, #ffffff);
+  font-size: 15px;
 }
 
-/* ─── Responsive Design ───────────────────────────────────────────────────── */
+.emptyState {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-secondary, #9ca3af);
+  font-size: 14px;
+}
 
-@media (max-width: 768px) {
+.tableWrapperDesktop {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tableHeaderCell {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary, #9ca3af);
+  border-bottom: 1px solid var(--color-border, #374151);
+  text-transform: uppercase;
+}
+
+.tableRow td {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border, #374151);
+  vertical-align: middle;
+}
+
+.tableCellClient {
+  font-weight: 600;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.tableCellDate {
+  color: var(--color-text-secondary, #9ca3af);
+  white-space: nowrap;
+}
+
+.tableCellAmount {
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.tableCellAction {
+  text-align: right;
+}
+
+/* ── Tarjetas Móviles (< 768px) ── */
+.mobileCardsList {
+  display: none;
+}
+
+@media (max-width: 767px) {
   .accordionHeader {
-    padding: 0.75rem 1rem;
-  }
-
-  .accordionTitle {
-    font-size: 1rem;
+    padding: 12px 14px;
   }
 
   .accordionContent {
-    padding: 1rem;
+    padding: 12px 14px;
   }
 
-  .tableHeaderCell {
-    padding: 0.5rem 0.75rem;
+  .tableWrapperDesktop {
+    display: none !important;
   }
 
-  .tableCell {
-    padding: 0.5rem 0.75rem;
+  .mobileCardsList {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .tableCellAmount {
-    padding: 0.5rem 0.75rem;
+  .mobileCard {
+    background-color: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .tableCellAction {
-    padding: 0.5rem 0.75rem;
+  .mobileCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .tableWrapper {
-    margin-top: 0.75rem;
+  .mobileClientName {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
   }
 
-  .table {
-    font-size: 0.8rem;
+  .mobileCardBody {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobileMetaRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .mobileDate {
+    color: var(--color-text-secondary, #9ca3af);
+  }
+
+  .mobileAmount {
+    font-weight: 700;
+    color: var(--color-primary, #769282);
+    font-size: 15px;
+  }
+
+  .mobileCardFooter {
+    display: flex;
+    border-top: 1px solid var(--color-border, #374151);
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+
+  .mobileDetailBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    background-color: rgba(118, 146, 130, 0.15);
+    border: 1px solid var(--color-primary, #769282);
+    border-radius: 8px;
+    color: var(--color-primary-light, #8fa99a);
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+  }
+
+  .mobileDetailBtn:active {
+    background-color: var(--color-primary, #769282);
+    color: #ffffff;
   }
 }
-
-@media (max-width: 480px) {
-  .accordionHeader {
-    padding: 0.75rem;
-  }
-
-  .accordionTitle {
-    font-size: 0.95rem;
-  }
-
-  .titleIcon {
-    font-size: 1rem;
-  }
-
-  .accordionContent {
-    padding: 0.75rem;
-  }
-
-  .tableHeaderCell {
-    padding: 0.5rem;
-    font-size: 0.75rem;
-  }
-
-  .tableCell,
-  .tableCellAmount,
-  .tableCellAction {
-    padding: 0.5rem;
-  }
-
-  .table {
-    font-size: 0.75rem;
-  }
-}
-

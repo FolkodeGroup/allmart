@@ -1,103 +1,103 @@
+/* =============================================================================
+   Allmart Bazar — MetricCard CSS Module
+   ============================================================================= */
+
 .card {
-  background: var(--color-bg-card, #fff);
-  border-radius: 1rem;
-  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.06));
-  padding: 1.2rem 1.4rem;
+  background-color: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
-  min-width: 0;
-  border: 1px solid var(--color-border, #f0f0f0);
-  transition: background 0.3s, border-color 0.3s;
-  container-type: inline-size;
-  min-width: 0;
-  overflow: hidden;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(118, 146, 130, 0.4);
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.95rem;
-  font-weight: 600;
 }
 
 .title {
-  color: var(--color-text-primary, #1a1a1a);
-}
-
-.icon {
-  font-size: 1.6rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .value {
-  font-size: clamp(1.1rem, 8cqi, 2.2rem);
+  font-size: 22px;
   font-weight: 700;
-  color: var(--color-accent, #ff9800);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  min-width: 0;
+  color: var(--color-text-primary, #ffffff);
+  line-height: 1.2;
+  word-break: break-word;
 }
 
 .variation {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.95rem;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 2px;
 }
 
 .arrowUp {
-  color: #22c55e;
-  font-size: 1.1rem;
+  color: #10b981;
+  font-size: 10px;
 }
 
 .arrowDown {
   color: #ef4444;
-  font-size: 1.1rem;
+  font-size: 10px;
 }
 
 .positive {
-  color: #22c55e;
-  font-weight: 600;
+  color: #10b981;
 }
 
 .negative {
   color: #ef4444;
-  font-weight: 600;
 }
 
 .label {
-  color: var(--color-text-tertiary, #999);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-secondary, #9ca3af);
+  margin-left: 2px;
 }
 
-@media (max-width: 900px) {
+/* =============================================================================
+   MOBILE RESPONSIVE ADJUSTMENTS (< 768px)
+   ============================================================================= */
+@media (max-width: 767px) {
   .card {
-    padding: 1rem;
+    padding: 12px;
+    border-radius: 12px;
+    gap: 4px;
   }
 
-}
-
-@media (max-width: 600px) {
-  .card {
-    padding: 0.8rem;
-    border-radius: 0.8rem;
+  .title {
+    font-size: 11px;
   }
 
-  .header {
-    font-size: 0.9rem;
-  }
-}
-
-@container (max-width: 180px) {
   .value {
-    font-size: 1.5rem;
+    font-size: 18px;
   }
-}
 
-@container (max-width: 140px) {
-  .value {
-    font-size: 1.2rem;
+  .variation {
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+
+  .label {
+    font-size: 10px;
   }
 }

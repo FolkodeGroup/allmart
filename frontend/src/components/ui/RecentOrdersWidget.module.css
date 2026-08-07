@@ -1,70 +1,230 @@
+/* =============================================================================
+   Allmart Bazar — RecentOrdersWidget CSS Module
+   ============================================================================= */
+
 .card {
-  padding: 1.5rem;
-  background: var(--color-bg-card, #fff);
-  border: 1px solid var(--color-border, transparent);
-  border-radius: 1rem;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 2rem;
-  transition: background 0.3s;
+  background-color: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
+
 .title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--color-text-tertiary, #9ca3af);
+  gap: 8px;
+}
+
+.tableWrapperDesktop {
+  display: block;
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
-  font-size: 0.98rem;
-  border: 1px solid var(--color-border);
   border-collapse: collapse;
+  font-size: 13px;
+  color: var(--color-text-primary, #ffffff);
 }
-.table th, .table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-}
+
 .table th {
-  color: var(--color-text-tertiary);
-  font-weight: 800;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
-}
-.table tr:not(:last-child) td {
-  border-bottom: 1px solid var(--color-border);
-}
-
-.table tr:hover {
-  background: var(--color-bg-secondary);
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary, #9ca3af);
+  border-bottom: 1px solid var(--color-border, #374151);
+  text-transform: uppercase;
 }
 
-.email {
-  font-size: 0.85em;
-  color: var(--color-text-tertiary);
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border, #374151);
+  vertical-align: middle;
 }
-.emptyState {
-  text-align: center;
-  color: var(--color-text-tertiary);
-  padding: 2rem 0;
+
+.table tr:last-child td {
+  border-bottom: none;
 }
 
 .idTd {
-  color: var(--color-dif-mode);
-  font-weight: 600;
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--color-accent, #DDB08C);
 }
 
 .dateTd {
-  color: var(--color-normal-gray);
+  color: var(--color-text-secondary, #9ca3af);
+  white-space: nowrap;
 }
 
 .nameTd {
-  font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text-primary, #ffffff);
+}
+
+.email {
+  font-size: 11px;
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .quantityTd {
-  color: var(--color-normal-gray);;
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .priceTd {
-  color: var(--color-text-primary);
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.desktopActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  color: var(--color-text-primary, #ffffff);
+  font-size: 12px;
   font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.desktopActionBtn:hover {
+  background-color: var(--color-primary, #769282);
+  border-color: var(--color-primary, #769282);
+}
+
+/* ── Tarjetas Móviles (< 768px) ── */
+.mobileCardsList {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .tableWrapperDesktop {
+    display: none !important;
+  }
+
+  .mobileCardsList {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobileCard {
+    background-color: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobileCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobileCode {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--color-accent, #DDB08C);
+  }
+
+  .mobileCardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mobileClientInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mobileName {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
+  }
+
+  .mobileEmail {
+    font-size: 12px;
+    color: var(--color-text-secondary, #9ca3af);
+  }
+
+  .mobileMetaRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-secondary, #9ca3af);
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  .mobileDot {
+    color: var(--color-border, #374151);
+  }
+
+  .mobileTotal {
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--color-primary, #769282);
+  }
+
+  .mobileCardFooter {
+    display: flex;
+    border-top: 1px solid var(--color-border, #374151);
+    padding-top: 8px;
+    margin-top: 2px;
+  }
+
+  .mobileActionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    background-color: rgba(118, 146, 130, 0.15);
+    border: 1px solid var(--color-primary, #769282);
+    border-radius: 8px;
+    color: var(--color-primary-light, #8fa99a);
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .mobileActionBtn:active {
+    background-color: var(--color-primary, #769282);
+    color: #ffffff;
+  }
 }

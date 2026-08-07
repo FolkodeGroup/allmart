@@ -1,50 +1,90 @@
+/* =============================================================================
+   Allmart Bazar — CategoryDistributionChart CSS Module
+   ============================================================================= */
+
 .card {
-  background: var(--color-bg-card, #fff);
-  border-radius: 16px;
-  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
-  border: 1px solid var(--color-border, transparent);
-  padding: 1.5rem 1rem 1rem 1rem;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 14px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 280px;
-  min-height: 360px;
-  transition: background 0.3s;
-}
-.title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--color-text-primary, #222);
-  font-family: inherit;
-}
-.empty {
-  text-align: center;
-  color: var(--color-text-tertiary, #888);
-  font-size: 1rem;
-  padding: 2rem;
-}
-.tooltip {
-  background: var(--color-bg-card, #ffffff);
-  border: 2px solid var(--color-accent, #ff9800);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  color: var(--color-text-primary, #1a1a1a);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.12));
-  backdrop-filter: blur(8px);
+  gap: 16px;
 }
 
-.pieText {
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-text-secondary, #9ca3af);
   font-size: 14px;
-  font-weight: 600;
-  fill: var(--color-text-primary);
 }
 
 .legendText {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--color-text-primary, #ffffff);
+  font-size: 12px;
 }
 
+.tooltip {
+  background-color: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--color-text-primary, #ffffff);
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mobileLegendList {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .mobileLegendList {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border, #374151);
+  }
+
+  .mobileLegendItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--color-text-primary, #ffffff);
+  }
+
+  .mobileLegendDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .mobileLegendName {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobileLegendVal {
+    font-weight: 600;
+    color: var(--color-text-secondary, #9ca3af);
+  }
+}

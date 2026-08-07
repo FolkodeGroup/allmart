@@ -14,21 +14,18 @@ export default function RequiredActionsAccordion() {
 
   // ─── Filter data for each tab ───────────────────────────────────────────────
 
-  // Tab 1: Órdenes Pendientes de Acción
   const pendingOrders = useMemo(() => {
     return orders
       .filter(o => o.status === 'pendiente' || o.status === 'confirmado')
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [orders]);
 
-  // Tab 2: Preparadas para Envío
   const readyToShip = useMemo(() => {
     return orders
       .filter(o => o.status === 'confirmado' || o.status === 'en-preparacion')
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [orders]);
 
-  // Tab 3: Pagos Pendientes
   const unpaidOrders = useMemo(() => {
     return orders
       .filter(o => !o.paymentStatus || o.paymentStatus === 'no-abonado')
@@ -39,47 +36,33 @@ export default function RequiredActionsAccordion() {
     return unpaidOrders.reduce((acc, o) => acc + o.total, 0);
   }, [unpaidOrders]);
 
-  // ─── Tab definitions ───────────────────────────────────────────────────────
-
   const tabs: TabDefinition[] = [
-    {
-      id: 'pending',
-      label: 'Órdenes Pendientes',
-    },
-    {
-      id: 'shipping',
-      label: 'Preparadas para Envío',
-    },
-    {
-      id: 'payment',
-      label: 'Pagos Pendientes',
-    },
+    { id: 'pending', label: 'Órdenes Pendientes' },
+    { id: 'shipping', label: 'Preparadas para Envío' },
+    { id: 'payment', label: 'Pagos Pendientes' },
   ];
 
-  // ─── Render table row ───────────────────────────────────────────────────────
+  const statusBadgeVariantMap: Record<string, 'discount' | 'new' | 'outOfStock'> = {
+    'pendiente': 'discount',
+    'confirmado': 'new',
+    'en-preparacion': 'new',
+    'enviado': 'new',
+    'entregado': 'new',
+    'cancelado': 'outOfStock',
+  };
+
+  const statusLabelMap: Record<string, string> = {
+    'pendiente': 'Pendiente',
+    'confirmado': 'Confirmado',
+    'en-preparacion': 'En Preparación',
+    'enviado': 'Enviado',
+    'entregado': 'Entregado',
+    'cancelado': 'Cancelado',
+  };
 
   const renderTableRow = (order: Order) => {
-    const statusBadgeVariantMap: Record<string, 'discount' | 'new' | 'outOfStock'> = {
-      'pendiente': 'discount',
-      'confirmado': 'new',
-      'en-preparacion': 'new',
-      'enviado': 'new',
-      'entregado': 'new',
-      'cancelado': 'outOfStock',
-    };
-
-    const statusLabelMap: Record<string, string> = {
-      'pendiente': 'Pendiente',
-      'confirmado': 'Confirmado',
-      'en-preparacion': 'En Preparación',
-      'enviado': 'Enviado',
-      'entregado': 'Entregado',
-      'cancelado': 'Cancelado',
-    };
-
-    const statusBadgeVariant: 'discount' | 'new' | 'outOfStock' = statusBadgeVariantMap[order.status] || 'new';
+    const statusBadgeVariant = statusBadgeVariantMap[order.status] || 'new';
     const statusLabel = statusLabelMap[order.status] || order.status;
-
     const customerName = `${order.customer.firstName} ${order.customer.lastName}`;
 
     return (
@@ -99,20 +82,45 @@ export default function RequiredActionsAccordion() {
     );
   };
 
-  // ─── Tab content renderers ──────────────────────────────────────────────────
+  const renderMobileCard = (order: Order) => {
+    const statusBadgeVariant = statusBadgeVariantMap[order.status] || 'new';
+    const statusLabel = statusLabelMap[order.status] || order.status;
+    const customerName = `${order.customer.firstName} ${order.customer.lastName}`;
 
-  const renderPendingTab = () => {
-    if (pendingOrders.length === 0) {
+    return (
+      <div key={order.id} className={styles.mobileCard}>
+        <div className={styles.mobileCardHeader}>
+          <span className={styles.mobileClientName}>{customerName}</span>
+          <Badge variant={statusBadgeVariant}>{statusLabel}</Badge>
+        </div>
+        <div className={styles.mobileCardBody}>
+          <div className={styles.mobileMetaRow}>
+            <span className={styles.mobileDate}>{formatDate(order.createdAt)}</span>
+            <span className={styles.mobileAmount}>{formatCurrency(order.total)}</span>
+          </div>
+        </div>
+        <div className={styles.mobileCardFooter}>
+          <Link to={`/admin/pedidos/${order.id}`} className={styles.mobileDetailBtn}>
+            Ver Detalles →
+          </Link>
+        </div>
+      </div>
+    );
+  };
+
+  const renderOrdersList = (ordersList: Order[], emptyMsg: string) => {
+    if (ordersList.length === 0) {
       return (
         <div className={styles.emptyState}>
-          <p>✅ No hay órdenes pendientes de acción.</p>
+          <p>{emptyMsg}</p>
         </div>
       );
     }
 
     return (
       <div className={styles.tabContent}>
-        <div className={styles.tableWrapper}>
+        {/* Vista de Tabla Escritorio (>= 768px) */}
+        <div className={styles.tableWrapperDesktop}>
           <table className={styles.table}>
             <thead>
               <tr className={styles.tableHeader}>
@@ -124,92 +132,26 @@ export default function RequiredActionsAccordion() {
               </tr>
             </thead>
             <tbody>
-              {pendingOrders.map((order) => renderTableRow(order))}
+              {ordersList.map((order) => renderTableRow(order))}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista de Tarjetas Móviles (< 768px) */}
+        <div className={styles.mobileCardsList}>
+          {ordersList.map((order) => renderMobileCard(order))}
         </div>
       </div>
     );
   };
-
-  const renderShippingTab = () => {
-    if (readyToShip.length === 0) {
-      return (
-        <div className={styles.emptyState}>
-          <p>✅ No hay órdenes pendientes de envío.</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className={styles.tabContent}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr className={styles.tableHeader}>
-                <th className={styles.tableHeaderCell}>Cliente</th>
-                <th className={styles.tableHeaderCell}>Fecha</th>
-                <th className={styles.tableHeaderCell}>Estado</th>
-                <th className={styles.tableHeaderCell}>Monto</th>
-                <th className={styles.tableHeaderCell}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {readyToShip.map((order) => renderTableRow(order))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  const renderPaymentTab = () => {
-    if (unpaidOrders.length === 0) {
-      return (
-        <div className={styles.emptyState}>
-          <p>✅ Todos los pagos están al día.</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className={styles.tabContent}>
-        <div className={styles.totalBar}>
-          <span>Total pendiente:</span>
-          <strong>{formatCurrency(totalUnpaid)}</strong>
-        </div>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr className={styles.tableHeader}>
-                <th className={styles.tableHeaderCell}>Cliente</th>
-                <th className={styles.tableHeaderCell}>Fecha</th>
-                <th className={styles.tableHeaderCell}>Estado</th>
-                <th className={styles.tableHeaderCell}>Monto</th>
-                <th className={styles.tableHeaderCell}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {unpaidOrders.map((order) => renderTableRow(order))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  // ─── Counts ─────────────────────────────────────────────────────────────────
 
   const pendingCount = pendingOrders.length;
   const shippingCount = readyToShip.length;
   const paymentCount = unpaidOrders.length;
   const totalCount = pendingCount + shippingCount + paymentCount;
 
-  // ─── Render ─────────────────────────────────────────────────────────────────
-
   return (
     <section className={styles.accordion}>
-      {/* Accordion Header */}
       <button
         className={styles.accordionHeader}
         onClick={() => setIsExpanded(!isExpanded)}
@@ -233,13 +175,20 @@ export default function RequiredActionsAccordion() {
         </div>
       </button>
 
-      {/* Accordion Content */}
       {isExpanded && (
         <div className={styles.accordionContent}>
           <TabsWrapper tabs={tabs} defaultTab="pending">
-            {renderPendingTab()}
-            {renderShippingTab()}
-            {renderPaymentTab()}
+            {renderOrdersList(pendingOrders, '✅ No hay órdenes pendientes de acción.')}
+            {renderOrdersList(readyToShip, '✅ No hay órdenes pendientes de envío.')}
+            <div>
+              {unpaidOrders.length > 0 && (
+                <div className={styles.totalBar}>
+                  <span>Total pendiente:</span>
+                  <strong>{formatCurrency(totalUnpaid)}</strong>
+                </div>
+              )}
+              {renderOrdersList(unpaidOrders, '✅ Todos los pagos están al día.')}
+            </div>
           </TabsWrapper>
         </div>
       )}
