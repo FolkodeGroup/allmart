@@ -10,7 +10,7 @@
   min-height: 100vh;
   background: var(--color-bg-primary, #111827);
   padding: 24px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   box-sizing: border-box;
 }

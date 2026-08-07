@@ -15,12 +15,21 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { token } = useAdminAuth();
-  const { getOrder } = useAdminOrders();
+  const { getOrder, orders } = useAdminOrders();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+
+  // Mantener actualizado el pedido si cambia en el contexto global de pedidos
+  useEffect(() => {
+    if (!id) return;
+    const currentContextOrder = getOrder(id);
+    if (currentContextOrder) {
+      setOrder(currentContextOrder);
+    }
+  }, [id, orders, getOrder]);
 
   useEffect(() => {
     if (!id || !token) {
@@ -112,7 +121,7 @@ export default function OrderDetailPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header de la página con botón Volver y Metadatos del Pedido */}
+      {/* Header con navegación y metadatos */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <button
@@ -147,9 +156,9 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Contenido principal */}
+      {/* Contenido principal en 2 columnas (Desktop) / 1 columna (Móvil) */}
       <div className={styles.content}>
-        <OrderDetailContent order={order} />
+        <OrderDetailContent order={order} onClose={() => navigate('/admin/pedidos')} />
       </div>
     </div>
   );

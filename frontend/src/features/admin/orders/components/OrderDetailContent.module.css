@@ -1,747 +1,624 @@
-/* ─────────────────────────────────────────────────────────────────────────────
-   OrderDetailContent.module.css
-   Estilos mejorados para presentación clara del contenido de pedidos.
-   Optimizado para páginas dedicadas y una mejor experiencia visual.
-   ───────────────────────────────────────────────────────────────────────────── */
+/* =============================================================================
+   Allmart Bazar — OrderDetailContent CSS Module
+   Diseño de 2 Columnas para Escritorio (>= 1024px) y 1 Columna para Móvil
+   ============================================================================= */
 
 .detailContent {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  background: var(--color-bg-primary);
-  padding: 2rem;
+  gap: 20px;
+  width: 100%;
   box-sizing: border-box;
 }
 
-/* ── Secciones del detalle ── */
+/* ── Layout de 2 Columnas para Escritorio (>= 1024px) ── */
+@media (min-width: 1024px) {
+  .detailContent {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+  }
+}
 
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ── Tarjetas de Sección ── */
 .detailSection {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  animation: fadeIn 0.3s ease;
-  box-sizing: border-box;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.detailSection:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  background: var(--color-bg-secondary);
+  background-color: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .detailSectionTitle {
-  font-size: 0.85rem;
+  font-size: 13px;
   font-weight: 700;
+  color: var(--color-text-secondary, #9ca3af);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-text-secondary, #64748b);
-  margin: 0 0 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  letter-spacing: 0.05em;
+  margin: 0;
 }
 
-.itemVariant {
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-}
-
-/* ── Estado del pedido ── */
-
+/* ── Estado del Pedido ── */
 .statusRow {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .statusLoading {
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  font-size: 14px;
 }
 
 .statusChangeBox {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: 1rem;
-  background: var(--color-bg-tertiary, #1f2937);
+  gap: 10px;
+  padding: 12px;
+  background-color: var(--color-bg-primary, #111827);
   border: 1px solid var(--color-border, #374151);
-  border-radius: 8px;
+  border-radius: 10px;
+  margin-top: 6px;
 }
 
 .statusNoteInput {
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  outline: none;
-  transition: border-color 0.2s ease;
-  min-height: 44px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  background-color: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 8px;
+  color: var(--color-text-primary, #ffffff);
+  font-size: 13px;
   box-sizing: border-box;
 }
 
 .statusNoteInput:focus {
+  outline: none;
   border-color: var(--color-primary, #769282);
-  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.15);
-}
-
-.statusNoteInput:disabled {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
-  cursor: not-allowed;
 }
 
 .statusChangeActions {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.applyStatusBtn,
-.whatsappBtnConfirm,
-.saveNotesBtn,
-.deleteConfirmBtn {
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0.65rem 1.25rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 44px;
+  gap: 10px;
 }
 
 .applyStatusBtn {
-  background: var(--color-primary, #769282);
-  color: white;
-  box-shadow: 0 2px 6px rgba(118, 146, 130, 0.2);
+  padding: 8px 16px;
+  min-height: 38px;
+  background-color: var(--color-primary, #769282);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.applyStatusBtn:hover:not(:disabled) {
-  background: var(--color-primary-dark, #5d7568);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(118, 146, 130, 0.3);
-}
-
-.applyStatusBtn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.applyStatusBtn:disabled {
-  background: var(--color-border, #cbd5e1);
-  color: var(--color-text-secondary, #94a3b8);
-  cursor: not-allowed;
+.applyStatusBtn:hover {
+  background-color: var(--color-primary-dark, #5d7568);
 }
 
 .cancelBtn {
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0.65rem 1.25rem;
-  background: transparent;
-  color: var(--color-text-secondary, #9ca3af);
+  padding: 8px 16px;
+  min-height: 38px;
+  background-color: transparent;
   border: 1px solid var(--color-border, #374151);
   border-radius: 8px;
+  color: var(--color-text-secondary, #9ca3af);
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 44px;
 }
 
-.cancelBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--color-text-secondary, #94a3b8);
+.cancelBtn:hover {
+  background-color: var(--color-bg-tertiary, #28353d);
+  color: var(--color-text-primary, #ffffff);
 }
 
-.cancelBtn:disabled {
-  background: transparent;
-  color: var(--color-text-secondary, #94a3b8);
-  border-color: var(--color-border, #e2e8f0);
-  cursor: not-allowed;
+/* ── Resumen Financiero & Pago (Columna Lateral) ── */
+.financialGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-/* ── Pago ── */
+.financialRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.financialLabel {
+  color: var(--color-text-secondary, #9ca3af);
+}
+
+.financialValue {
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.financialHighlight {
+  color: var(--color-accent, #DDB08C);
+  font-size: 15px;
+}
+
+.financialDivider {
+  height: 1px;
+  background-color: var(--color-border, #374151);
+  margin: 4px 0;
+}
 
 .paymentRow {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .paymentBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .paymentAbonado {
-  background: rgba(16, 185, 129, 0.15);
+  background-color: rgba(16, 185, 129, 0.15);
   color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .paymentNoAbonado {
-  background: rgba(156, 163, 175, 0.15);
-  color: var(--color-text-secondary, #9ca3af);
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .paidAt {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary, #64748b);
+  font-size: 11px;
+  color: var(--color-text-tertiary, #9ca3af);
+}
+
+.depositBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 10px;
+}
+
+.depositLabelGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.depositLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.depositActiveBadge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.depositBtn {
+  padding: 6px 12px;
+  min-height: 36px;
+  background-color: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 8px;
+  color: var(--color-text-primary, #ffffff);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.depositBtnActive {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #10b981;
 }
 
 .whatsappActions {
-  margin-top: 1rem;
+  margin-top: 4px;
 }
 
 .whatsappBtn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  background: var(--color-primary, #769282);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  gap: 8px;
+  width: 100%;
   min-height: 44px;
-  box-shadow: 0 2px 8px rgba(118, 146, 130, 0.25);
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+  border-radius: 10px;
+  color: #10b981;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .whatsappBtn:hover {
-  background: var(--color-primary-dark, #5d7568);
+  background-color: #10b981;
+  color: #ffffff;
 }
 
 .confirmPaidBox {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: 1rem;
-  background: var(--color-bg-primary, #111827);
-  border: 1px solid var(--color-primary, #769282);
-  border-radius: 8px;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 10px;
 }
 
 .confirmPaidText {
-  font-size: 0.95rem;
-  color: var(--color-text-primary, #ffffff);
-  font-weight: 500;
+  font-size: 12px;
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .confirmPaidActions {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .whatsappBtnConfirm {
-  background: #10b981;
-  color: white;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
   flex: 1;
-  min-width: 150px;
+  min-height: 38px;
+  background-color: #10b981;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.whatsappBtnConfirm:hover:not(:disabled) {
-  background: #059669;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-}
-
-/* ── Cliente ── */
-
+/* ── Datos del Cliente (Columna Lateral) ── */
 .customerCard {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--color-bg-primary, #111827);
+  gap: 14px;
+  padding: 12px;
+  background-color: var(--color-bg-primary, #111827);
   border: 1px solid var(--color-border, #374151);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .customerAvatar {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--color-primary, #769282);
-  color: white;
-  font-family: var(--font-heading, 'Montserrat', sans-serif);
-  font-size: 1.15rem;
-  font-weight: 700;
+  background-color: rgba(118, 146, 130, 0.2);
+  border: 1px solid var(--color-primary, #769282);
+  color: var(--color-primary-light, #8fa99a);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
   flex-shrink: 0;
 }
 
 .customerInfo {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 2px;
   min-width: 0;
   flex: 1;
 }
 
 .customerFullName {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  overflow-wrap: anywhere;
-  word-break: break-all;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
 }
 
 .customerEmailText {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary, #9ca3af);
-  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: var(--color-primary-light, #8fa99a);
+  text-decoration: none;
   word-break: break-all;
 }
 
-/* ── Productos ── */
+.customerPhoneText {
+  font-size: 12px;
+  color: var(--color-text-secondary, #9ca3af);
+  text-decoration: none;
+}
 
+.customerActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.customerActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  color: var(--color-text-primary, #ffffff);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 38px;
+}
+
+/* ── Tabla de Productos ── */
 .itemsTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
-  border: 1px solid var(--color-border);
-}
-
-.itemsTable thead {
-  background: var(--color-bg-secondary);
+  font-size: 13px;
+  color: var(--color-text-primary, #ffffff);
 }
 
 .itemsTable th {
-  padding: 0.75rem 1rem;
-  font-weight: 800;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
   color: var(--color-text-secondary, #9ca3af);
-  font-size: 0.85rem;
+  border-bottom: 1px solid var(--color-border, #374151);
   text-transform: uppercase;
-  letter-spacing: 0.02rem;
-}
-
-.tdProduct {
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-.tdProductName {
-  font-weight: bold;
 }
 
 .itemsTable td {
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary) !important;
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border, #374151);
+  vertical-align: middle;
 }
 
-.itemsTable tbody tr:hover {
-  background: var(--color-bg-primary) !important;
+.tdLeft { text-align: left; }
+.tdCenter { text-align: center; }
+.tdRight { text-align: right; }
+
+.tdProduct {
+  font-weight: 600;
 }
 
-.tdLeft {
-  text-align: left;
+.tdProductName {
+  color: var(--color-text-primary, #ffffff);
 }
 
-.tdCenter {
-  text-align: center;
-}
-
-.tdRight {
-  text-align: right;
+.itemVariant {
+  font-size: 11px;
+  color: var(--color-text-secondary, #9ca3af);
+  margin-top: 2px;
 }
 
 .totalLabel {
-  font-weight: 600;
-  text-align: right;
-  padding-top: 1rem;
-  background: var(--color-bg-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .totalValue {
-  font-size: 1.1rem;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--color-accent, #ddb08c);
-  background: var(--color-bg-secondary);
+  color: var(--color-accent, #DDB08C);
 }
 
-.halfpaid {
-  display: inline-flex;
+/* ── Notas Internas ── */
+.savedNotesBox {
+  padding: 12px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.savedNotesHeader {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
-  background: #10b981;
-  border-radius: 12px;
-  padding: 2px 8px;
+  justify-content: space-between;
 }
 
-/* ── Notas ── */
+.savedNotesTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary, #9ca3af);
+  text-transform: uppercase;
+}
+
+.savedNotesText {
+  font-size: 13px;
+  color: var(--color-text-primary, #ffffff);
+  white-space: pre-wrap;
+  margin: 0;
+  line-height: 1.4;
+}
 
 .notesInput {
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  outline: none;
   width: 100%;
-  box-sizing: border-box;
+  padding: 10px 12px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 10px;
+  color: var(--color-text-primary, #ffffff);
+  font-size: 13px;
   resize: vertical;
-  min-height: 90px;
-  transition: border-color 0.2s ease;
-  margin-bottom: 12px;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
 .notesInput:focus {
+  outline: none;
   border-color: var(--color-primary, #769282);
-  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.15);
-}
-
-.notesInput:disabled {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
-  cursor: not-allowed;
 }
 
 .saveNotesBtn {
-  background: var(--color-primary, #769282);
-  color: white;
-  box-shadow: 0 2px 6px rgba(118, 146, 130, 0.2);
-  min-height: 44px;
+  padding: 10px 16px;
+  min-height: 40px;
+  background-color: var(--color-primary, #769282);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background-color 0.2s ease;
 }
 
-.saveNotesBtn:hover:not(:disabled) {
-  background: var(--color-primary-dark, #5d7568);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(118, 146, 130, 0.3);
+.saveNotesBtn:hover {
+  background-color: var(--color-primary-dark, #5d7568);
 }
 
-.saveNotesBtn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.saveNotesBtn:disabled {
-  background: var(--color-border, #cbd5e1);
-  color: var(--color-text-secondary, #94a3b8);
-  cursor: not-allowed;
-}
-
-/* ── Zona peligrosa ── */
-
+/* ── Zona Peligrosa ── */
 .dangerSection {
-  padding: 1rem;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .deleteBtn {
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  background: transparent;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 14px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
   color: #ef4444;
-  border: 1px solid #ef4444;
-  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-height: 44px;
-  width: 100%;
 }
 
 .deleteBtn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  transform: translateY(-1px);
-}
-
-.deleteBtn:active {
-  transform: translateY(0);
+  background-color: #ef4444;
+  color: #ffffff;
 }
 
 .confirmDelete {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background: rgba(239, 68, 68, 0.12);
-  border-radius: 8px;
-}
-
-.confirmDelete span {
-  font-size: 0.95rem;
-  color: var(--color-text-primary, #ffffff);
-  font-weight: 500;
+  gap: 10px;
+  padding: 12px;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .confirmActions {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .deleteConfirmBtn {
-  background: #ef4444;
-  color: white;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
   flex: 1;
-  min-width: 120px;
-  min-height: 44px;
+  min-height: 38px;
+  background-color: #ef4444;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.deleteConfirmBtn:hover:not(:disabled) {
-  background: #dc2626;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
-}
-
-.deleteConfirmBtn:disabled {
-  background: var(--color-border, #cbd5e1);
-  color: var(--color-text-secondary, #94a3b8);
-  cursor: not-allowed;
-}
-
-/* =============================================================================
-   REAJUSTE MÓVIL AISLADO (< 768px y < 640px)
-   ============================================================================= */
-
-@media (max-width: 768px) {
-  .detailContent {
-    gap: 10px;
-    padding: 0;
-  }
-
+/* ── Ajustes Móviles (< 1024px) ── */
+@media (max-width: 1023px) {
   .detailSection {
-    padding: 12px 14px;
-    border-radius: 10px;
+    padding: 14px;
+    gap: 12px;
   }
 
-  .detailSectionTitle {
-    font-size: 11px;
-    margin-bottom: 10px;
+  .itemsTable th,
+  .itemsTable td {
+    padding: 8px 10px;
   }
 
-  .statusChangeBox,
-  .confirmPaidBox {
-    padding: 10px;
-  }
-
-  .statusNoteInput,
-  .notesInput {
-    font-size: 16px; /* 16px previene el zoom automático de iOS al enfocar */
-    padding: 10px;
-  }
-
-  .applyStatusBtn,
-  .whatsappBtn,
-  .whatsappBtnConfirm,
-  .saveNotesBtn,
-  .deleteBtn,
-  .deleteConfirmBtn,
-  .cancelBtn {
-    font-size: 14px;
-    padding: 10px 14px;
-    min-height: 44px;
-    width: 100%;
-  }
-
-  .customerCard {
-    padding: 10px;
-    gap: 10px;
-  }
-
-  .customerAvatar {
-    width: 40px;
-    height: 40px;
-    font-size: 14px;
-  }
-
-  .customerFullName {
-    font-size: 14px;
-  }
-
-  .customerEmailText {
-    font-size: 12px;
-  }
-}
-
-/* ── Productos en móvil (< 640px): Tabla → Lista de Tarjetas Táctiles ── */
-@media (max-width: 640px) {
   .itemsTable {
-    border: none;
-    background: transparent;
+    display: block;
   }
 
   .itemsTable thead {
     display: none;
   }
 
-  .itemsTable,
   .itemsTable tbody,
-  .itemsTable tfoot,
-  .itemsTable tr,
-  .itemsTable td {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .itemsTable tbody tr {
-    margin-bottom: 8px;
-    padding: 10px 12px;
-    background: var(--color-bg-primary, #111827);
-    border: 1px solid var(--color-border, #374151);
-    border-radius: 8px;
+  .itemsTable tr {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    width: 100%;
   }
 
-  .itemsTable tbody tr:last-child {
-    margin-bottom: 0;
+  .itemsTable tr {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--color-border, #374151);
+    gap: 4px;
   }
 
-  .itemsTable tbody tr:hover {
-    background: var(--color-bg-primary, #111827) !important;
-  }
-
-  .itemsTable tbody td {
-    padding: 0;
+  .itemsTable td {
     border-bottom: none;
-    background: transparent !important;
-  }
-
-  .tdProduct {
-    padding-bottom: 6px !important;
-    margin-bottom: 4px;
-    border-bottom: 1px dashed var(--color-border, #374151) !important;
-  }
-
-  .tdProductName {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--color-text-primary, #ffffff);
-  }
-
-  .itemVariant {
-    font-size: 12px;
-    color: var(--color-text-secondary, #9ca3af);
-    margin-top: 2px;
-  }
-
-  .itemsTable tbody td[data-label]:not(.tdProduct) {
+    padding: 2px 0;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    text-align: right;
-    font-size: 13px;
-    color: var(--color-text-secondary, #9ca3af);
+    text-align: left !important;
   }
 
-  .itemsTable tbody td[data-label]:not(.tdProduct)::before {
+  .itemsTable td::before {
     content: attr(data-label);
     font-size: 11px;
     font-weight: 700;
     color: var(--color-text-secondary, #9ca3af);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    text-align: left;
-  }
-
-  .itemsTable tbody td[data-label="Subtotal"] {
-    color: var(--color-text-primary, #ffffff);
-    font-weight: 700;
   }
 
   .itemsTable tfoot tr {
     display: flex;
-    align-items: center;
+    flex-direction: row;
     justify-content: space-between;
-    gap: 8px;
-    margin-top: 8px;
-    padding: 12px;
-    background: var(--color-bg-primary, #111827);
-    border: 1px solid var(--color-primary, #769282);
-    border-radius: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border, #374151);
   }
 
-  .totalLabel,
-  .totalValue {
-    padding: 0 !important;
-    width: auto;
-  }
-
-  .totalLabel {
-    text-align: left !important;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--color-text-primary, #ffffff);
-  }
-
-  .totalValue {
-    text-align: right !important;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--color-accent, #ddb08c);
-  }
-}
-
-@media (max-width: 480px) {
-  .statusChangeActions,
-  .confirmPaidActions,
-  .confirmActions {
-    flex-direction: column;
-  }
-
-  .applyStatusBtn,
-  .whatsappBtnConfirm,
-  .saveNotesBtn,
-  .deleteConfirmBtn,
-  .cancelBtn {
-    width: 100%;
+  .itemsTable tfoot td {
+    padding: 0;
   }
 }
