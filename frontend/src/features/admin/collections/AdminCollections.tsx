@@ -1,6 +1,6 @@
 /**
  * features/admin/collections/AdminCollections.tsx
- * Página principal de gestión de colecciones con vista WYSIWYG.
+ * Página principal de gestión de colecciones con vista Acordeón WYSIWYG.
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -10,7 +10,7 @@ import AdminCollectionForm from './AdminCollectionForm';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import CollectionSlider from '../../../components/CollectionSlider';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-import { Search, Plus, RotateCcw } from 'lucide-react';
+import { Search, Plus, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import toast from 'react-hot-toast';
 import styles from './AdminCollections.module.css';
@@ -34,6 +34,9 @@ const AdminCollections: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncingAll, setSyncingAll] = useState(false);
+
+  // Estado del Acordeón: id de la colección expandida (por defecto la primera)
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const limit = 10;
 
@@ -61,6 +64,18 @@ const AdminCollections: React.FC = () => {
     loadCollections();
   }, [loadCollections]);
 
+  // Al cargar o cambiar lista, expandir por defecto la primera colección
+  useEffect(() => {
+    if (collections.length > 0) {
+      setExpandedId((prev) => {
+        const exists = collections.some((c) => c.id === prev);
+        return exists ? prev : collections[0].id;
+      });
+    } else {
+      setExpandedId(null);
+    }
+  }, [collections]);
+
   // Cargar productos completos de cada colección si faltaran
   useEffect(() => {
     if (!collections || collections.length === 0) return;
@@ -83,7 +98,12 @@ const AdminCollections: React.FC = () => {
     return () => { cancelled = true; };
   }, [collections]);
 
-  async function toggleActive(collection: Collection) {
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }, []);
+
+  async function toggleActive(collection: Collection, e?: React.MouseEvent) {
+    e?.stopPropagation();
     const id = collection.id;
     const next = !collection.isActive;
     setCollections((prev) => prev.map((c) => (c.id === id ? { ...c, isActive: next } : c)));
@@ -96,7 +116,8 @@ const AdminCollections: React.FC = () => {
     }
   }
 
-  async function handleSyncSingle(id: string) {
+  async function handleSyncSingle(id: string, e?: React.MouseEvent) {
+    e?.stopPropagation();
     setSyncingId(id);
     try {
       await collectionsService.sync(id);
@@ -122,7 +143,8 @@ const AdminCollections: React.FC = () => {
     }
   }
 
-  function handleDelete(id: string) {
+  function handleDelete(id: string, e?: React.MouseEvent) {
+    e?.stopPropagation();
     setIdsToDelete([id]);
     setDeleteModalOpen(true);
   }
@@ -157,7 +179,8 @@ const AdminCollections: React.FC = () => {
     setDeleting(false);
   }
 
-  function handleEdit(collection: Collection) {
+  function handleEdit(collection: Collection, e?: React.MouseEvent) {
+    e?.stopPropagation();
     setSelectedCollection(collection);
     setViewMode('form');
   }
@@ -231,7 +254,7 @@ const AdminCollections: React.FC = () => {
       </div>
 
       {/* ── Filtros ── */}
-      <div className={styles.filters}>
+      <div className={styles.filters} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
         <div className={styles.searchWrap}>
           <Search size={16} className={styles.searchIcon} />
           <input
@@ -279,7 +302,7 @@ const AdminCollections: React.FC = () => {
 
       {error && <div className={styles.error}>{error}</div>}
 
-      {/* ── Vista WYSIWYG de Colecciones ── */}
+      {/* ── Vista Acordeón WYSIWYG de Colecciones ── */}
       <div className={styles.tableWrapper}>
         {loading ? (
           <div className={styles.loading}>Cargando colecciones...</div>
@@ -295,33 +318,60 @@ const AdminCollections: React.FC = () => {
                 const isHome = collection.displayPosition === 'home';
                 const isCategory = collection.displayPosition === 'category';
                 const isAutoSales = collection.type === 'auto_sales';
+                const isExpanded = expandedId === collection.id;
 
                 return (
                   <div
                     key={collection.id}
-                    className={`${styles.adminCollectionWrapper} ${
-                      isHome ? styles.wrapperHome : styles.wrapperCategory
+                    className={`${styles.collectionAccordionCard} ${
+                      isHome ? styles.cardHome : styles.cardCategory
                     }`}
                   >
-                    {/* BARRA SUPERIOR DE CONTROL DEL ADMIN */}
-                    <div className={styles.adminControlBar}>
+                    {/* BARRA SUPERIOR CLICKABLE (CABECERA DEL ACORDEÓN) */}
+                    <div
+                      className={`${styles.cardHeaderClickable} ${
+                        isExpanded ? styles.cardHeaderExpanded : ''
+                      }`}
+                      onClick={() => toggleExpand(collection.id)}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isExpanded}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleExpand(collection.id);
+                        }
+                      }}
+                    >
                       <div className={styles.adminControlLeft}>
+                        <span className={styles.expandChevron}>
+                          {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                        </span>
+
                         <input
                           type="checkbox"
                           aria-label={`Seleccionar colección ${collection.name}`}
                           checked={checked}
                           onChange={(e) => {
+                            e.stopPropagation();
                             if (e.target.checked) {
                               setSelectedIds((prev) => [...prev, collection.id]);
                             } else {
                               setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
                             }
                           }}
+                          onClick={(e) => e.stopPropagation()}
                           className={styles.adminCheckbox}
                         />
+
                         <span className={styles.orderBadge} title="Orden de visualización">
                           #{collection.displayOrder}
                         </span>
+
+                        <h3 className={styles.collectionTitleText}>
+                          {collection.name}
+                        </h3>
+
                         <span
                           className={`${styles.positionBadge} ${
                             isHome ? styles.posHome : styles.posCategory
@@ -329,6 +379,7 @@ const AdminCollections: React.FC = () => {
                         >
                           {isHome ? '🏠 Home' : '🏷️ Categoría'}
                         </span>
+
                         <span
                           className={`${styles.typeBadge} ${
                             isAutoSales ? styles.typeAuto : styles.typeManual
@@ -336,9 +387,10 @@ const AdminCollections: React.FC = () => {
                         >
                           {isAutoSales ? '⚡ Auto ventas' : '📝 Manual'}
                         </span>
+
                         <button
                           type="button"
-                          onClick={() => toggleActive(collection)}
+                          onClick={(e) => toggleActive(collection, e)}
                           className={`${styles.statusBadge} ${
                             collection.isActive ? styles.statusActive : styles.statusInactive
                           }`}
@@ -353,7 +405,7 @@ const AdminCollections: React.FC = () => {
                           <button
                             type="button"
                             className={styles.btnSync}
-                            onClick={() => handleSyncSingle(collection.id)}
+                            onClick={(e) => handleSyncSingle(collection.id, e)}
                             disabled={syncingId === collection.id}
                             title="Sincronizar productos top ventas"
                           >
@@ -363,62 +415,64 @@ const AdminCollections: React.FC = () => {
                         <button
                           type="button"
                           className={styles.btnEdit}
-                          onClick={() => handleEdit(collection)}
+                          onClick={(e) => handleEdit(collection, e)}
                         >
                           Editar
                         </button>
                         <button
                           type="button"
                           className={styles.btnDelete}
-                          onClick={() => handleDelete(collection.id)}
+                          onClick={(e) => handleDelete(collection.id, e)}
                         >
                           Eliminar
                         </button>
                       </div>
                     </div>
 
-                    {/* CUERPO WYSIWYG DE LA COLECCIÓN */}
-                    <div
-                      className={`${styles.wysiwygContainer} ${
-                        isHome ? styles.wysiwygHome : styles.wysiwygCategory
-                      }`}
-                    >
-                      {/* Distintivo de tipo categoría en el cuerpo de la colección */}
-                      {isCategory && (
-                        <div className={styles.categoryDistinctiveBanner}>
-                          <span className={styles.categoryDistinctiveTag}>
-                            🏷️ COLECCIÓN DE CATEGORÍA
-                          </span>
-                          <span className={styles.categoryDistinctiveNote}>
-                            Aparece destacada en la grilla/sección de categoría correspondiente
-                          </span>
-                        </div>
-                      )}
+                    {/* CUERPO WYSIWYG DESPLEGABLE (CUANDO ESTÁ EXPANDIDO) */}
+                    {isExpanded && (
+                      <div
+                        className={`${styles.wysiwygContainer} ${
+                          isHome ? styles.wysiwygHome : styles.wysiwygCategory
+                        }`}
+                      >
+                        {/* Distintivo de tipo categoría en el cuerpo de la colección */}
+                        {isCategory && (
+                          <div className={styles.categoryDistinctiveBanner}>
+                            <span className={styles.categoryDistinctiveTag}>
+                              🏷️ COLECCIÓN DE CATEGORÍA
+                            </span>
+                            <span className={styles.categoryDistinctiveNote}>
+                              Aparece destacada en la grilla/sección de categoría correspondiente
+                            </span>
+                          </div>
+                        )}
 
-                      {collection.products && collection.products.length > 0 ? (
-                        <CollectionSlider
-                          title={collection.name}
-                          slug={collection.slug}
-                          description={collection.description}
-                          products={collection.products}
-                          bannerUrl={collection.imageUrl}
-                          previewMode={true}
-                          showViewAll={true}
-                          variant={collection.displayPosition}
-                        />
-                      ) : (
-                        <div className={styles.wysiwygEmpty}>
-                          <p>Sin productos asignados aún a esta colección.</p>
-                          <button
-                            type="button"
-                            className={styles.btnSecondary}
-                            onClick={() => handleEdit(collection)}
-                          >
-                            + Agregar productos
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                        {collection.products && collection.products.length > 0 ? (
+                          <CollectionSlider
+                            title={collection.name}
+                            slug={collection.slug}
+                            description={collection.description}
+                            products={collection.products}
+                            bannerUrl={collection.imageUrl}
+                            previewMode={true}
+                            showViewAll={true}
+                            variant={collection.displayPosition}
+                          />
+                        ) : (
+                          <div className={styles.wysiwygEmpty}>
+                            <p>Sin productos asignados aún a esta colección.</p>
+                            <button
+                              type="button"
+                              className={styles.btnSecondary}
+                              onClick={(e) => handleEdit(collection, e)}
+                            >
+                              + Agregar productos
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

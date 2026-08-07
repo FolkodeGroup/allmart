@@ -112,13 +112,18 @@
   transform: translateY(0);
 }
 
-/* AdminCollections.module.css */
+/* ── CONTENEDOR Y ENCABEZADOS PRINCIPALES ── */
 
 .container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
   padding: var(--space-5);
   background: var(--color-bg-primary);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
 .header {
@@ -130,6 +135,7 @@
   margin-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--space-3);
+  width: 100%;
 }
 
 .header h1 {
@@ -144,44 +150,46 @@
   gap: var(--space-3);
   margin-bottom: var(--space-4);
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .searchWrap {
   display: flex;
   flex-direction: column;
   position: relative;
-  min-width: 30%;
-  flex: 1;
+  min-width: 240px;
+  flex: 1 1 280px;
 }
 
 .searchIcon {
   position: absolute;
   left: 12px;
-  transform: translateY(80%);
-  color: var(--color-soft-gray);
-  z-index: 1;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary, #9ca3af);
   pointer-events: none;
+  z-index: 1;
 }
 
 .searchInput {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   color: var(--color-text-primary);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   padding: 10px 12px 10px 36px !important;
-  /* espacio para la lupa */
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
+  min-height: 40px;
 }
 
 .selectFilter {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   color: var(--color-text-primary);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   transition: border-color 0.2s;
   padding: 8px 12px;
@@ -199,6 +207,7 @@
 .tableWrapper {
   overflow-x: auto;
   margin-bottom: var(--space-4);
+  width: 100%;
 }
 
 .table {
@@ -249,7 +258,274 @@
   padding: var(--space-5) !important;
   color: var(--color-normal-gray) !important;
   font-style: italic;
+  font-size: 15px;
 }
+
+/* ── LISTA DE TARJETAS ACORDEÓN WYSIWYG ── */
+
+.collectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.collectionAccordionCard {
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #374151);
+  background: var(--color-bg-secondary, #1f2937);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.cardHome {
+  border-left: 4px solid var(--color-primary, #769282);
+}
+
+.cardCategory {
+  border-left: 4px solid #ddb08c;
+}
+
+/* ── CABECERA CLICKABLE DEL ACORDEÓN ── */
+
+.cardHeaderClickable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--color-bg-primary, #111827);
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  gap: 12px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.cardHeaderClickable:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.cardHeaderExpanded {
+  border-bottom-color: var(--color-border, #374151);
+}
+
+.expandChevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary, #9ca3af);
+  transition: transform 0.2s ease;
+}
+
+.adminControlLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adminCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary, #769282);
+  cursor: pointer;
+}
+
+.orderBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.collectionTitleText {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.positionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.posHome {
+  background: rgba(118, 146, 130, 0.2);
+  color: #769282;
+  border: 1px solid rgba(118, 146, 130, 0.4);
+}
+
+.posCategory {
+  background: rgba(221, 176, 140, 0.2);
+  color: #ddb08c;
+  border: 1px solid rgba(221, 176, 140, 0.4);
+}
+
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.typeAuto {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.typeManual {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.statusActive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.statusInactive {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.adminControlRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.btnSync {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnEdit {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #374151);
+  background: var(--color-bg-secondary, #28353d);
+  color: var(--color-text-primary, #ffffff);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnDelete {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── CUERPO WYSIWYG DE LA COLECCIÓN ── */
+
+.wysiwygContainer {
+  padding: 16px 20px 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wysiwygHome {
+  background: linear-gradient(180deg, rgba(118, 146, 130, 0.15) 0%, rgba(118, 146, 130, 0.05) 100%);
+}
+
+.wysiwygCategory {
+  background: var(--color-bg-secondary, #1f2937);
+  border-top: 1px dashed rgba(221, 176, 140, 0.3);
+}
+
+.categoryDistinctiveBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: rgba(221, 176, 140, 0.12);
+  border: 1px solid rgba(221, 176, 140, 0.3);
+  font-size: 12px;
+}
+
+.categoryDistinctiveTag {
+  font-weight: 700;
+  color: #ddb08c;
+  letter-spacing: 0.04em;
+}
+
+.categoryDistinctiveNote {
+  color: var(--color-text-secondary, #9ca3af);
+  font-size: 11px;
+}
+
+.wysiwygEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--color-text-secondary, #9ca3af);
+  gap: 12px;
+}
+
+/* ── COMPONENTES LEGACY Y COMPATIBILIDAD ── */
 
 .collectionsGrid {
   display: grid;
@@ -458,27 +734,6 @@
   min-width: 100px;
 }
 
-@media (max-width: 900px) {
-  .collectionsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .collectionCard {
-    min-height: auto;
-  }
-
-  .collectionCardHeader {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .collectionProductsPreview {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 .badgeActive {
   display: inline-block;
   padding: 0.75rem 1rem;
@@ -635,7 +890,7 @@ button:disabled {
   font-size: 14px;
 }
 
-/* Form Styles */
+/* ── ESTILOS DEL FORMULARIO DE COLECCIONES ── */
 
 .formHeader {
   margin-bottom: var(--space-4);
@@ -658,20 +913,6 @@ button:disabled {
 .formGroup {
   display: flex;
   flex-direction: column;
-}
-
-@media (max-width: 400px) {
-  .form {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .formRow {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .autoParamsFielset .formRow {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
 }
 
 .formGroup label {
@@ -707,18 +948,6 @@ button:disabled {
   transition: border-color 0.2s;
   box-sizing: border-box;
   width: 100%;
-}
-
-@media (max-width: 400px) {
-  .isActiveBtn {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .isActiveBtn input {
-    width: fit-content;
-    transform: scale(1.5);
-  }
 }
 
 .formGroup input:focus,
@@ -791,22 +1020,6 @@ button:disabled {
   text-align: center;
 }
 
-@media (max-width: 640px) {
-  .formRow {
-    grid-template-columns: 1fr;
-  }
-
-  .actions {
-    flex-direction: column;
-  }
-
-  .btnSmall,
-  .btnSmallSecondary,
-  .btnSmallDanger {
-    width: 100%;
-  }
-}
-
 .formActions {
   display: flex;
   gap: var(--space-3);
@@ -822,7 +1035,7 @@ button:disabled {
   padding: 10px 16px;
 }
 
-/* ── Auto Sales Params ─────────────────────────────────────────────────── */
+/* ── PARÁMETROS DE AUTO SALES ── */
 
 .autoParamsFieldset {
   border: 1px solid var(--color-border);
@@ -841,18 +1054,6 @@ button:disabled {
 
 .autoParamsFieldset .formRow {
   grid-template-columns: 1fr 1fr 1fr;
-}
-
-@media (max-width: 900px) {
-  .autoParamsFieldset .formRow {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .autoParamsFieldset .formRow {
-    grid-template-columns: 1fr;
-  }
 }
 
 .syncRow {
@@ -903,13 +1104,86 @@ button:disabled {
   font-weight: 500;
 }
 
-/* Controles exclusivos de mobile: ocultos por defecto (desktop) */
+/* ── CONTROLES Y RESPONSIVIDAD MÓVIL (<768px) ── */
+
 .expandToggle,
 .mobileActionsMenu {
   display: none;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
+  .collectionsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .autoParamsFieldset .formRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .cardHeaderClickable {
+    padding: 12px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .adminControlLeft {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .adminControlRight {
+    width: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+    margin-top: 4px;
+  }
+  .adminControlRight button {
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .wysiwygContainer {
+    padding: 12px;
+  }
+  .categoryDistinctiveBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 640px) {
+  .collectionCard {
+    min-height: auto;
+  }
+
+  .collectionCardHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .collectionProductsPreview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .autoParamsFieldset .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .btnSmall,
+  .btnSmallSecondary,
+  .btnSmallDanger {
+    width: 100%;
+  }
+
   .tableWrapper {
     overflow-x: visible;
   }
@@ -961,15 +1235,12 @@ button:disabled {
     border-bottom: none;
   }
 
-  /* Orden visual de la cabecera de la card: checkbox → nombre → flecha → menú */
-  /* Checkbox de selección */
   .table td.selectColCell {
     grid-area: checkbox;
     width: auto;
     padding: 0;
   }
 
-  /* Nombre: encabezado de la tarjeta, clickeable para expandir/colapsar */
   .table td.tdCollectionName {
     grid-area: name;
     display: flex !important;
@@ -1004,7 +1275,6 @@ button:disabled {
     padding: 0;
   }
 
-  /* Menú de acciones (3 puntos) */
   .table td.actionsCell {
     grid-area: menu;
     width: auto;
@@ -1020,9 +1290,6 @@ button:disabled {
     position: relative;
   }
 
-  /* Detalles: no forman parte de las áreas nombradas, así que el grid los
-     ubica automáticamente en filas nuevas debajo de la cabecera, ocupando
-     todo el ancho. */
   .table td.detailCell {
     display: none;
     grid-column: 1 / -1;
@@ -1055,21 +1322,11 @@ button:disabled {
     margin-top: 0.6rem;
   }
 
-  /* Acciones: se ocultan los botones de escritorio, aparece el menú de 3 puntos */
-  .desktopActions {
-    display: none;
-  }
-
   .actionsCell {
     order: 3;
     width: auto;
     flex: 0 0 auto;
     padding: 0 !important;
-  }
-
-  .mobileActionsMenu {
-    display: inline-block;
-    position: relative;
   }
 
   .kebabBtn {
@@ -1120,390 +1377,28 @@ button:disabled {
   .kebabMenuItemDanger {
     color: var(--color-error-mode);
   }
+}
 
-  /* Checkbox de selección: se ancla arriba a la derecha de la tarjeta */
-  .table td.selectColCell {
-    padding: 0;
+@media (max-width: 400px) {
+  .form {
+    grid-template-columns: minmax(0, 1fr);
   }
-}
 
-/* ── MÓDULO DE COLECCIONES ADMIN (WYSIWYG) ── */
-
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.filters {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.searchWrap {
-  position: relative;
-  flex: 1 1 280px;
-  min-width: 240px;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-secondary, #9ca3af);
-  pointer-events: none;
-}
-
-.searchInput {
-  width: 100%;
-  min-height: 40px;
-  padding: 8px 12px 8px 36px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border, #374151);
-  background: var(--color-bg-secondary, #1f2937);
-  color: var(--color-text-primary, #ffffff);
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.btnPrimary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  background: var(--color-primary, #769282);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.btnPrimary:hover {
-  opacity: 0.9;
-}
-
-.btnSecondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 38px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border, #374151);
-  background: var(--color-bg-secondary, #28353d);
-  color: var(--color-text-primary, #ffffff);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btnSmallDanger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 38px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: none;
-  background: var(--color-error, #ef4444);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.error {
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: var(--color-error, #ef4444);
-  font-size: 14px;
-}
-
-.successMsg {
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
-  font-size: 14px;
-}
-
-.loading,
-.empty {
-  padding: 48px;
-  text-align: center;
-  color: var(--color-text-secondary, #9ca3af);
-  font-size: 15px;
-}
-
-/* ── LISTA DE COLECCIONES WYSIWYG ── */
-.collectionsList {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  width: 100%;
-}
-
-.adminCollectionWrapper {
-  border-radius: 16px;
-  border: 1px solid var(--color-border, #374151);
-  background: var(--color-bg-secondary, #1f2937);
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.wrapperHome {
-  border-color: rgba(118, 146, 130, 0.4);
-}
-
-.wrapperCategory {
-  border-color: rgba(221, 176, 140, 0.5);
-}
-
-/* ── BARRA SUPERIOR DE CONTROL EN ADMIN ── */
-.adminControlBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 18px;
-  background: var(--color-bg-primary, #111827);
-  border-bottom: 1px solid var(--color-border, #374151);
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.adminControlLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.adminCheckbox {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--color-primary, #769282);
-  cursor: pointer;
-}
-
-.orderBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-text-primary, #ffffff);
-}
-
-.positionBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.posHome {
-  background: rgba(118, 146, 130, 0.2);
-  color: #769282;
-  border: 1px solid rgba(118, 146, 130, 0.4);
-}
-
-.posCategory {
-  background: rgba(221, 176, 140, 0.2);
-  color: #ddb08c;
-  border: 1px solid rgba(221, 176, 140, 0.4);
-}
-
-.typeBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.typeAuto {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.typeManual {
-  background: rgba(59, 130, 246, 0.15);
-  color: #3b82f6;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-}
-
-.statusActive {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-}
-
-.statusInactive {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-.adminControlRight {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-}
-
-.btnSync {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btnEdit {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--color-border, #374151);
-  background: var(--color-bg-secondary, #28353d);
-  color: var(--color-text-primary, #ffffff);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btnDelete {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* ── CUERPO WYSIWYG DE LA COLECCIÓN ── */
-.wysiwygContainer {
-  padding: 16px 20px 24px;
-  border-radius: 0 0 16px 16px;
-}
-
-.wysiwygHome {
-  background: linear-gradient(180deg, rgba(118, 146, 130, 0.15) 0%, rgba(118, 146, 130, 0.05) 100%);
-}
-
-.wysiwygCategory {
-  background: var(--color-bg-secondary, #1f2937);
-  border-top: 1px dashed rgba(221, 176, 140, 0.3);
-}
-
-.categoryDistinctiveBanner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
-  margin-bottom: 12px;
-  border-radius: 8px;
-  background: rgba(221, 176, 140, 0.12);
-  border: 1px solid rgba(221, 176, 140, 0.3);
-  font-size: 12px;
-}
-
-.categoryDistinctiveTag {
-  font-weight: 700;
-  color: #ddb08c;
-  letter-spacing: 0.04em;
-}
-
-.categoryDistinctiveNote {
-  color: var(--color-text-secondary, #9ca3af);
-  font-size: 11px;
-}
-
-.wysiwygEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 36px 20px;
-  text-align: center;
-  color: var(--color-text-secondary, #9ca3af);
-  gap: 12px;
-}
-
-/* 📱 RESPONSIVIDAD MÓVIL (<768px) */
-@media (max-width: 767px) {
-  .adminControlBar {
-    padding: 10px 12px;
-    gap: 8px;
+  .formRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .adminControlLeft {
+
+  .autoParamsFieldset .formRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .isActiveBtn {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
-  .adminControlRight {
-    width: 100%;
-    justify-content: flex-end;
-    margin-left: 0;
-    margin-top: 4px;
-  }
-  .adminControlRight button {
-    min-height: 44px;
-    padding: 8px 14px;
-    font-size: 13px;
-  }
-  .wysiwygContainer {
-    padding: 12px;
-  }
-  .categoryDistinctiveBanner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+
+  .isActiveBtn input {
+    width: fit-content;
+    transform: scale(1.5);
   }
 }
