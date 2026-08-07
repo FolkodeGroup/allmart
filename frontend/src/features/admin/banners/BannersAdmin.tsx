@@ -8,7 +8,7 @@ import { useBlocker } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
-import { Trash2, Plus, Edit2, Eye, EyeOff } from 'lucide-react';
+import { Trash2, Plus, Edit2, Eye, EyeOff, ArrowLeft, Image as ImageIcon, Layers, CheckCircle2 } from 'lucide-react';
 import { bannersAdminService, type AdminBanner } from './bannersAdminService';
 import { publicBannersService } from '../../../services/publicBannersService';
 import { Button } from '../../../components/ui/Button/Button';
@@ -330,133 +330,202 @@ export function BannersAdmin() {
       </div>
 
       {showForm && (
-        <div className={styles.formContainer}>
-          <h2 className={styles.formTitle}>{editingId ? 'Editar Banner' : 'Nuevo Banner'}</h2>
-          <form onSubmit={handleSubmit} className={styles.form} noValidate>
-            <div className={styles.formGroup}>
-              <label htmlFor="banner-title">Título *</label>
-              <input
-                id="banner-title"
-                name="bannerTitle"
-                type="text"
-                placeholder="Título del banner"
-                value={formData.title}
-                onChange={handleTitleChange}
-                className={`${fieldErrors.title ? styles.inputError : ''}`}
-                aria-invalid={!!fieldErrors.title}
-                aria-describedby={fieldErrors.title ? 'title-error' : undefined}
-              />
-              {fieldErrors.title && (
-                <span id="title-error" className={styles.errorMsg} role="alert">
-                  {fieldErrors.title}
-                </span>
-              )}
+        <div className={styles.formPageWrapper}>
+          {/* ── Encabezado Unificado de Página / Formulario ── */}
+          <header className={styles.pageHeader}>
+            <div className={styles.pageHeaderInner}>
+              <button
+                type="button"
+                onClick={handleCancelForm}
+                className={styles.backBtn}
+                aria-label="Volver al listado de banners"
+              >
+                <ArrowLeft size={14} />
+                Banners
+              </button>
+              <h1 className={styles.pageTitle}>
+                {editingId ? `Editar banner: ${formData.title || 'Sin título'}` : 'Nuevo banner'}
+              </h1>
             </div>
+            <div className={styles.pageHeaderActions}>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={handleCancelForm}
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear banner'}
+              </button>
+            </div>
+          </header>
 
-            <fieldset className={styles.formFieldset}>
-              <legend className={styles.legend}>Destino del banner</legend>
+          <form onSubmit={handleSubmit} className={styles.formUnified} noValidate>
+            {/* ── SECCIÓN 1: INFORMACIÓN BÁSICA ── */}
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}>
+                <Layers size={18} />
+                Información del Banner
+              </h2>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="banner-title">Título *</label>
+                <input
+                  id="banner-title"
+                  name="bannerTitle"
+                  type="text"
+                  placeholder="Título del banner (ej: Cocina, Ofertas de Invierno...)"
+                  value={formData.title}
+                  onChange={handleTitleChange}
+                  className={`${fieldErrors.title ? styles.inputError : ''}`}
+                  aria-invalid={!!fieldErrors.title}
+                  aria-describedby={fieldErrors.title ? 'title-error' : undefined}
+                />
+                {fieldErrors.title && (
+                  <span id="title-error" className={styles.errorMsg} role="alert">
+                    {fieldErrors.title}
+                  </span>
+                )}
+              </div>
+            </section>
+
+            {/* ── SECCIÓN 2: DESTINO Y REGLAS ── */}
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}>
+                <Layers size={18} />
+                Destino y Navegación
+              </h2>
               <BannerFilterBuilder
                 value={formData.filterConfig}
                 onChange={filterConfig => setFormData(prev => ({ ...prev, filterConfig }))}
                 categories={categories}
               />
-            </fieldset>
+            </section>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="banner-image">Imagen del Banner {!editingId && '*'}</label>
-              <input
-                id="banner-image"
-                name="bannerImage"
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp,image/tiff"
-                onChange={handleImageChange}
-                className={`${fieldErrors.imageFile ? styles.inputError : ''}`}
-                aria-invalid={!!fieldErrors.imageFile}
-                aria-describedby={fieldErrors.imageFile ? 'image-error' : undefined}
-              />
+            {/* ── SECCIÓN 3: ARCHIVO DE IMAGEN Y ACCESIBILIDAD ── */}
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}>
+                <ImageIcon size={18} />
+                Imagen y Accesibilidad
+              </h2>
 
-              {fieldErrors.imageFile && (
-                <span id="image-error" className={styles.errorMsg} role="alert">
-                  {fieldErrors.imageFile}
-                </span>
-              )}
-              {previewUrl && (
-                <img
-                  src={previewUrl}
-                  alt="preview"
-                  className={styles.preview}
+              <div className={styles.formGroup}>
+                <label htmlFor="banner-image">Imagen del Banner {!editingId && '*'}</label>
+                <input
+                  id="banner-image"
+                  name="bannerImage"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp,image/tiff"
+                  onChange={handleImageChange}
+                  className={`${fieldErrors.imageFile ? styles.inputError : ''}`}
+                  aria-invalid={!!fieldErrors.imageFile}
+                  aria-describedby={fieldErrors.imageFile ? 'image-error' : undefined}
                 />
-              )}
-              {!previewUrl && editingId && !formData.imageFile && (
-                <div className={styles.currentImageInfo}>
-                  <p>Imagen actual cargada</p>
+
+                {fieldErrors.imageFile && (
+                  <span id="image-error" className={styles.errorMsg} role="alert">
+                    {fieldErrors.imageFile}
+                  </span>
+                )}
+                {previewUrl && (
                   <img
-                    src={appendCacheBusting(
-                      banners.find((b) => b.id === editingId)?.thumbUrl ?? '',
-                      banners.find((b) => b.id === editingId)?.updatedAt
-                    )}
-                    alt="current"
+                    src={previewUrl}
+                    alt="vista previa"
                     className={styles.preview}
                   />
+                )}
+                {!previewUrl && editingId && !formData.imageFile && (
+                  <div className={styles.currentImageInfo}>
+                    <p>Imagen actual cargada</p>
+                    <img
+                      src={appendCacheBusting(
+                        banners.find((b) => b.id === editingId)?.thumbUrl ?? '',
+                        banners.find((b) => b.id === editingId)?.updatedAt
+                      )}
+                      alt="actual"
+                      className={styles.preview}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="banner-alt-text">Texto Alternativo de Imagen</label>
+                <input
+                  id="banner-alt-text"
+                  name="bannerAltText"
+                  type="text"
+                  placeholder="Descripción del contenido de la imagen para lectores de pantalla"
+                  value={formData.altText}
+                  onChange={(e) => {
+                    setIsAltManuallyEdited(true);
+                    setFormData({ ...formData, altText: e.target.value });
+                  }}
+                />
+              </div>
+            </section>
+
+            {/* ── SECCIÓN 4: PUBLICACIÓN Y FIJADO ── */}
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}>
+                <CheckCircle2 size={18} />
+                Estado de Publicación
+              </h2>
+
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.checkboxLabel} htmlFor="banner-is-pinned">
+                    <input
+                      id="banner-is-pinned"
+                      name="bannerIsPinned"
+                      type="checkbox"
+                      className={styles.checkboxInput}
+                      checked={formData.isPinned}
+                      onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
+                    />
+                    <span>Fijar al inicio 📌</span>
+                  </label>
                 </div>
-              )}
-            </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="banner-alt-text">Texto Alternativo de Imagen</label>
-              <input
-                id="banner-alt-text"
-                name="bannerAltText"
-                type="text"
-                placeholder="Descripción para accesibilidad"
-                value={formData.altText}
-                onChange={(e) => {
-                  setIsAltManuallyEdited(true);
-                  setFormData({ ...formData, altText: e.target.value });
-                }}
-              />
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label className={styles.checkboxLabel} htmlFor="banner-is-pinned">
-                  <input
-                    id="banner-is-pinned"
-                    name="bannerIsPinned"
-                    type="checkbox"
-                    checked={formData.isPinned}
-                    onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
-                  />
-                  Fijar al inicio 📌
-                </label>
+                <div className={styles.formGroup}>
+                  <label className={styles.checkboxLabel} htmlFor="banner-is-active">
+                    <input
+                      id="banner-is-active"
+                      name="bannerIsActive"
+                      type="checkbox"
+                      className={styles.checkboxInput}
+                      checked={formData.isActive}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    />
+                    <span>Banner activo (visible en la plataforma)</span>
+                  </label>
+                </div>
               </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.checkboxLabel} htmlFor="banner-is-active">
-                  <input
-                    id="banner-is-active"
-                    name="bannerIsActive"
-                    type="checkbox"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  />
-                  Activo
-                </label>
-              </div>
-            </div>
+            </section>
 
             <div className={styles.formActions}>
-              <Button type="button" className={styles.btnSecondary} onClick={handleCancelForm}>
-                Cancelar
-              </Button>
-              <Button
+              <button
                 type="submit"
-                className={styles.btnPrimary}
-                isLoading={isSubmitting}
-                loadingText={editingId ? 'Actualizando...' : 'Creando...'}
+                className={styles.submitBtn}
+                disabled={isSubmitting}
               >
-                {editingId ? 'Actualizar' : 'Crear'} Banner
-              </Button>
+                {isSubmitting ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear banner'}
+              </button>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={handleCancelForm}
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </button>
             </div>
           </form>
         </div>
