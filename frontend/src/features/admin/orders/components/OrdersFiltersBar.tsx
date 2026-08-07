@@ -19,7 +19,7 @@ interface Props {
 export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters, disabled }: Props) {
     const isDisabled = disabled ?? false;
 
-    // ── Mapeo de opciones para el Dropdown unificado de Estados ──
+    // Mapeo de opciones para el Dropdown unificado (con Bottom Sheet Modal en móvil)
     const dropdownOptions = useMemo(() => [
         { value: '', label: 'Todos los estados' },
         ...STATUS_OPTIONS.map(s => ({
@@ -51,7 +51,7 @@ export function OrdersFiltersBar({ filters, onChange, onReset, hasActiveFilters,
                     </div>
                 </div>
 
-                {/* Dropdown Unificado de Estado */}
+                {/* Dropdown Unificado de Estado con Bottom Sheet Modal en Móvil */}
                 <div className={styles.filterSelectWrap} style={{ minWidth: '180px' }}>
                     <span className={styles.dateLabel}>Estado</span>
                     <Dropdown

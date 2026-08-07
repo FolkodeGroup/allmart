@@ -1,103 +1,189 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// OrderList.tsx
-// Lista de tarjetas de pedidos para vistas mobile (oculta en desktop via CSS).
-// Equivalente móvil de OrdersTable; misma lógica, distinta presentación.
-//
-// Componentes:
-//  - OrderList:        contenedor; itera pedidos y renderiza tarjetas
-//  - OrderStatusMobile: sub-componente interno para cambio de estado en mobile
-// ─────────────────────────────────────────────────────────────────────────────
-
+import { useState, useCallback, useEffect } from 'react';
+import { ChevronDown, ChevronUp, Mail, Phone, ShoppingBag, Eye } from 'lucide-react';
 import { formatDate, formatPrice } from '../utils/ordersHelpers';
 import { OrderStatusTag } from './OrderStatusTag';
 import { OrderStatusSelector } from './OrderStatusSelector';
 import styles from '../AdminOrders.module.css';
 import type { Order } from '../../../../context/AdminOrdersContext';
 import { useAdminOrders } from '../../../../context/AdminOrdersContext';
-import { useState } from 'react';
-import React from 'react';
 import toast from 'react-hot-toast';
-import { formatOrderCode, formatOrderLabel } from '../../../../utils/orders';
+import { formatOrderCode } from '../../../../utils/orders';
 
-/** Props de OrderList. Recibe la lista ya filtrada desde AdminOrders. */
 interface OrderListProps {
   orders: Order[];
-  selectedIds: string[];
-  onSelect: (id: string) => void;
+  selectedIds?: string[];
+  onSelect?: (id: string) => void;
   onDetail: (order: Order) => void;
 }
 
-/**
- * OrderList — lista de tarjetas para mobile.
- *
- * Solo visible en pantallas < 640px (controlado por CSS `.mobileList`).
- * Cada tarjeta muestra los datos clave del pedido y permite:
- *  - Seleccionar para acciones masivas (checkbox)
- *  - Cambiar el estado inline (OrderStatusMobile)
- *  - Abrir el modal de detalle (click en la tarjeta)
- *
- * La animación de entrada es escalonada: cada tarjeta aparece 40ms después
- * de la anterior, usando `animationDelay` en el style inline.
- */
-export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderListProps) {
+export function OrderList({ orders, onDetail }: OrderListProps) {
+  // Estado local del acordeón: ID del pedido actualmente expandido (null si ninguno)
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const toggleExpand = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedId((prev) => (prev === id ? null : id));
+  }, []);
+
   return (
     <div className={styles.mobileList}>
       {orders.map((order, index) => {
-        // Iniciales del cliente para el avatar (ej: "JP" para Juan Pérez)
-        const initials = `${order.customer.firstName[0] ?? ''}${order.customer.lastName[0] ?? ''}`;
         const totalQty = order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0);
+        const hasDeposit = order.has50PercentDeposit ?? false;
+        const isExpanded = expandedId === order.id;
+
         return (
           <div
             key={order.id}
-            className={styles.mobileCard}
-            onClick={() => onDetail(order)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
+            className={`${styles.mobileAccordionCard} ${isExpanded ? styles.mobileAccordionCardExpanded : ''}`}
             style={{
-              marginBottom: 16,
-              background: 'var(--color-bg-primary)',
-              animationDelay: `${index * 40}ms`,   // ← añadir index al .map()
+              animationDelay: `${index * 35}ms`,
             }}
           >
-            {/* ── Top: checkbox + ID + fecha ── */}
-            <div className={styles.mobileCardTop}>
-              <input
-                type="checkbox"
-                checked={selectedIds.includes(order.id)}
-                onChange={e => { e.stopPropagation(); onSelect(order.id); }}
-                aria-label={`Seleccionar ${formatOrderLabel(order.id)}`}
-                onClick={e => e.stopPropagation()}
-                style={{ marginRight: 8, minWidth: 24, minHeight: 24 }}
-              />
-              <span className={styles.mobileCardId}>
-                #{formatOrderCode(order.id)}
-              </span>
-              <span className={styles.mobileCardDate}>{formatDate(order.createdAt)}</span>
-            </div>
+            {/* ── Cabecera Colapsada: Nombre Cliente + Total / Estado + Chevron ── */}
+            <div
+              className={styles.mobileAccordionHeader}
+              onClick={(e) => toggleExpand(order.id, e)}
+              role="button"
+              tabIndex={0}
+              aria-expanded={isExpanded}
+              aria-label={`Pedido de ${order.customer.firstName} ${order.customer.lastName}, Total ${formatPrice(order.total)}, Estado ${order.status}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleExpand(order.id, e as unknown as React.MouseEvent);
+                }
+              }}
+            >
+              <div className={styles.mobileHeaderMainContainer}>
+                <div className={styles.mobileHeaderTopRow}>
+                  {/* Lado Izquierdo: Nombre de Cliente + Total */}
+                  <div className={styles.mobileHeaderLeft}>
+                    <span className={styles.mobileCardCustomerName}>
+                      {order.customer.firstName} {order.customer.lastName}
+                    </span>
+                    <span className={styles.mobileCardTotalCompact}>
+                      {formatPrice(order.total)}
+                    </span>
+                  </div>
 
-            {/* ── Mid: avatar + nombre + email ── */}
-            <div className={styles.mobileCardMid}>
-              <div className={styles.mobileCardCustomer}>
-                <div className={styles.mobileCardAvatar}>{initials}</div>
-                <div style={{ minWidth: 0 }}>
-                  <div className={styles.mobileCardName}>{order.customer.firstName} {order.customer.lastName}</div>
-                  <div className={styles.mobileCardEmail}>{order.customer.email}</div>
+                  {/* Lado Derecho: Estado + Chevron */}
+                  <div className={styles.mobileHeaderRight}>
+                    <OrderStatusTag status={order.status} />
+                    <span className={styles.mobileAccordionChevron}>
+                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* ── Bottom: ítems + total + estado (con cambio inline) ── */}
-            <div className={styles.mobileCardBottom}>
-              <span className={styles.mobileCardItems}>{totalQty} ítem{totalQty !== 1 ? 's' : ''}</span>
-              <span className={styles.mobileCardTotal}>{formatPrice(order.total)}</span>
+            {/* ── Cuerpo Expandido: ID, Seña, Fecha, Ítems, Contacto, Productos, Acciones ── */}
+            {isExpanded && (
+              <div className={styles.mobileAccordionBody}>
+                {/* 1. Bar de Metadatos del Pedido (ID, Seña, Fecha, Cantidad de Ítems) */}
+                <div className={styles.mobileMetaRowExpanded}>
+                  <div className={styles.mobileMetaGroupLeft}>
+                    <span className={styles.mobileCardIdExpanded}>
+                      #{formatOrderCode(order.id)}
+                    </span>
+                    <span
+                      className={`${styles.depositBadge} ${
+                        hasDeposit ? styles.depositActive : styles.depositNone
+                      }`}
+                    >
+                      {hasDeposit ? '50% seña' : 'Sin seña'}
+                    </span>
+                  </div>
 
-              {/*
-                OrderStatusMobile maneja su propio estado local para el cambio inline.
-                stopPropagation se aplica dentro del componente para no abrir el modal.
-              */}
-              <OrderStatusMobile order={order} />
-            </div>
+                  <div className={styles.mobileMetaGroupRight}>
+                    <span className={styles.mobileCardDateExpanded}>
+                      {formatDate(order.createdAt)}
+                    </span>
+                    <span className={styles.mobileMetaDot}>•</span>
+                    <span className={styles.mobileCardItemsCountExpanded}>
+                      {totalQty} {totalQty === 1 ? 'ítem' : 'ítems'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Datos de Contacto del Cliente */}
+                <div className={styles.mobileCustomerBox}>
+                  <div className={styles.mobileCustomerRow}>
+                    <Mail size={14} className={styles.mobileCustomerIcon} />
+                    <a
+                      href={`mailto:${order.customer.email}`}
+                      className={styles.mobileCustomerLink}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {order.customer.email}
+                    </a>
+                  </div>
+                  {order.customer.phone && (
+                    <div className={styles.mobileCustomerRow}>
+                      <Phone size={14} className={styles.mobileCustomerIcon} />
+                      <a
+                        href={`tel:${order.customer.phone}`}
+                        className={styles.mobileCustomerLink}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {order.customer.phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Detalle de Productos */}
+                <div className={styles.mobileItemsBox}>
+                  <div className={styles.mobileItemsTitle}>
+                    <ShoppingBag size={14} />
+                    <span>DETALLE DE PRODUCTOS ({order.items.length})</span>
+                  </div>
+                  <ul className={styles.mobileItemsList}>
+                    {order.items.map((item, i) => (
+                      <li key={`${item.productId}-${i}`} className={styles.mobileItemRow}>
+                        <div className={styles.mobileItemInfo}>
+                          <span className={styles.mobileItemName}>{item.productName}</span>
+                          {item.variant && (
+                            <span className={styles.mobileItemVariant}>{item.variant}</span>
+                          )}
+                        </div>
+                        <div className={styles.mobileItemQtyPrice}>
+                          <span className={styles.mobileItemQty}>x{item.quantity}</span>
+                          <span className={styles.mobileItemSubtotal}>
+                            {formatPrice(item.unitPrice * item.quantity)}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* 4. Acciones Inferiores */}
+                <div className={styles.mobileAccordionActions}>
+                  <button
+                    type="button"
+                    className={styles.mobileFullDetailBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDetail(order);
+                    }}
+                  >
+                    <Eye size={16} />
+                    <span>Ver detalle completo</span>
+                  </button>
+
+                  <div
+                    className={styles.mobileStatusSelectorWrap}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    role="presentation"
+                  >
+                    <OrderStatusMobile order={order} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
       })}
@@ -105,28 +191,15 @@ export function OrderList({ orders, selectedIds, onSelect, onDetail }: OrderList
   );
 }
 
-/**
- * OrderStatusMobile — control de cambio de estado para tarjetas mobile.
- *
- * Lógica idéntica a la celda de estado en OrderItem (tabla desktop):
- *  1. Muestra OrderStatusTag en modo lectura.
- *  2. Al hacer clic → muestra OrderStatusSelector.
- *  3. Aplica optimistic update: actualiza `localStatus` antes de la API.
- *  4. Si la API falla → revierte `localStatus` al valor anterior.
- *
- * Es un componente interno; no se exporta fuera de este archivo.
- */
 function OrderStatusMobile({ order }: { order: Order }) {
   const { updateOrderStatus } = useAdminOrders();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Estado local para optimistic update (misma lógica que OrderItem en tabla)
   const [localStatus, setLocalStatus] = useState(order.status);
   const [error, setError] = useState<string | null>(null);
 
-  // Sincroniza si el estado del pedido cambia externamente (ej: acción masiva)
-  React.useEffect(() => {
+  useEffect(() => {
     setLocalStatus(order.status);
   }, [order.status]);
 
@@ -150,7 +223,7 @@ function OrderStatusMobile({ order }: { order: Order }) {
   };
 
   return (
-    <span style={{ position: 'relative', minWidth: 90, display: 'inline-block' }}>
+    <div style={{ position: 'relative', minWidth: 120 }}>
       {editing ? (
         <OrderStatusSelector
           value={localStatus}
@@ -158,19 +231,20 @@ function OrderStatusMobile({ order }: { order: Order }) {
           disabled={loading}
         />
       ) : (
-        <span
-          tabIndex={0}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-          onClick={e => { e.stopPropagation(); setEditing(true); }}
-          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setEditing(true); } }}
-          aria-label="Cambiar estado"
-          role="button"
+        <button
+          type="button"
+          className={styles.statusTagTriggerBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditing(true);
+          }}
+          aria-label="Cambiar estado de pedido"
         >
           <OrderStatusTag status={localStatus} />
-          {loading && <span className={styles.statusLoading} style={{ marginLeft: 6 }}>⏳</span>}
-        </span>
+          {loading && <span className={styles.statusLoading}>⏳</span>}
+        </button>
       )}
       {error && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</div>}
-    </span>
+    </div>
   );
 }
