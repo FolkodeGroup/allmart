@@ -227,7 +227,7 @@ const AdminCollections: React.FC = () => {
             disabled={syncingAll}
             title="Sincronizar todas las colecciones automáticas por ventas"
           >
-            <RotateCcw size={14} />
+            <RotateCcw size={16} />
             <span>{syncingAll ? 'Sincronizando...' : 'Sincronizar todo'}</span>
           </button>
           <button type="button" className={styles.btnPrimary} onClick={handleNew}>
@@ -257,30 +257,33 @@ const AdminCollections: React.FC = () => {
           />
         </div>
 
-        <div className={styles.filterDropdownPos}>
-          <Dropdown
-            options={positionOptions}
-            value={displayPosition}
-            onChange={(val) => {
-              setDisplayPosition(val);
-              setPage(1);
-            }}
-            placeholder="Todas las posiciones"
-          />
-        </div>
+        {/* Contenedor flexible para los dos desplegables */}
+        <div className={styles.filterDropdownsRow}>
+          <div className={styles.filterDropdownPos}>
+            <Dropdown
+              options={positionOptions}
+              value={displayPosition}
+              onChange={(val) => {
+                setDisplayPosition(val);
+                setPage(1);
+              }}
+              placeholder="Todas las posiciones"
+            />
+          </div>
 
-        <div className={styles.filterDropdownStatus}>
-          <Dropdown
-            options={activeOptions}
-            value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
-            onChange={(val) => {
-              setFilterActive(
-                val === '' ? undefined : val === 'true'
-              );
-              setPage(1);
-            }}
-            placeholder="Todas"
-          />
+          <div className={styles.filterDropdownStatus}>
+            <Dropdown
+              options={activeOptions}
+              value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
+              onChange={(val) => {
+                setFilterActive(
+                  val === '' ? undefined : val === 'true'
+                );
+                setPage(1);
+              }}
+              placeholder="Todas"
+            />
+          </div>
         </div>
       </div>
 
