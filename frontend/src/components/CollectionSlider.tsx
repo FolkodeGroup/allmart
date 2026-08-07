@@ -1,5 +1,3 @@
-// frontend/src/components/CollectionSlider.tsx
-
 /**
  * components/CollectionSlider.tsx
  * Carrusel de productos estilo MercadoLibre — identidad visual Allmart.
@@ -8,7 +6,6 @@
 import React, { useEffect, useId, useRef, useState, useCallback } from 'react';
 import styles from './CollectionSlider.module.css';
 import '../styles/collections.css';
-// 🟢 OPTIMIZACIÓN IMÁGENES: Importamos la función de redimensión del CDN de Cloudflare
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, getOptimizedImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
 import { resolveImageUrl } from '../utils/imageHelpers';
 
@@ -180,17 +177,26 @@ const CollectionSlider: React.FC<Props> = ({
 
       <div className={styles.header}>
         <h2 id={titleId} className={styles.title}>{title}</h2>
-        {showViewAll && !previewMode && (
-          <a
-            href={`/productos?coleccion=${encodeURIComponent(slug)}`}
-            className={styles.viewAll}
-            aria-label={`Ver todos los productos de ${title}`}
-          >
-            Ver todos
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
+        {showViewAll && (
+          previewMode ? (
+            <span className={styles.viewAll} style={{ opacity: 0.85, cursor: 'default' }}>
+              Ver todos
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          ) : (
+            <a
+              href={`/productos?coleccion=${encodeURIComponent(slug)}`}
+              className={styles.viewAll}
+              aria-label={`Ver todos los productos de ${title}`}
+            >
+              Ver todos
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          )
         )}
       </div>
 
@@ -315,8 +321,6 @@ const ProductCard: React.FC<CardProps> = ({
   onImageError,
 }) => {
   const imageUrl = getCollectionProductImage(product);
-
-  // 🟢 OPTIMIZACIÓN IMÁGENES: Redimensionamos la miniatura a 320px de ancho
   const optimizedUrl = getOptimizedImageUrl(imageUrl, 320);
 
   return (
