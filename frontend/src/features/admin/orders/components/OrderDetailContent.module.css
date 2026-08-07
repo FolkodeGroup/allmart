@@ -10,6 +10,7 @@
   gap: 2rem;
   background: var(--color-bg-primary);
   padding: 2rem;
+  box-sizing: border-box;
 }
 
 /* ── Secciones del detalle ── */
@@ -21,6 +22,7 @@
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   animation: fadeIn 0.3s ease;
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -45,7 +47,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
   margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
@@ -62,7 +64,7 @@
 
 .statusRow {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
@@ -83,8 +85,8 @@
   gap: 1rem;
   margin-top: 1rem;
   padding: 1rem;
-  background: var(--color-bg-tertiary);
-  border: 1px solid var(--color-border);
+  background: var(--color-bg-tertiary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
   border-radius: 8px;
 }
 
@@ -98,16 +100,18 @@
   color: var(--color-text-primary);
   outline: none;
   transition: border-color 0.2s ease;
+  min-height: 44px;
+  box-sizing: border-box;
 }
 
 .statusNoteInput:focus {
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: var(--color-primary, #769282);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.15);
 }
 
 .statusNoteInput:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
 }
 
@@ -126,25 +130,26 @@
   font-weight: 600;
   padding: 0.65rem 1.25rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 44px;
 }
 
 .applyStatusBtn {
-  background: #10b981;
+  background: var(--color-primary, #769282);
   color: white;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 6px rgba(118, 146, 130, 0.2);
 }
 
 .applyStatusBtn:hover:not(:disabled) {
-  background: #059669;
+  background: var(--color-primary-dark, #5d7568);
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 10px rgba(118, 146, 130, 0.3);
 }
 
 .applyStatusBtn:active:not(:disabled) {
@@ -152,8 +157,8 @@
 }
 
 .applyStatusBtn:disabled {
-  background: #cbd5e1;
-  color: #94a3b8;
+  background: var(--color-border, #cbd5e1);
+  color: var(--color-text-secondary, #94a3b8);
   cursor: not-allowed;
 }
 
@@ -162,23 +167,24 @@
   font-size: 0.9rem;
   font-weight: 600;
   padding: 0.65rem 1.25rem;
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-secondary, #9ca3af);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 44px;
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background: #e2e8f0;
-  border-color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-text-secondary, #94a3b8);
 }
 
 .cancelBtn:disabled {
-  background: #f8fafc;
-  color: #94a3b8;
-  border-color: #e2e8f0;
+  background: transparent;
+  color: var(--color-text-secondary, #94a3b8);
+  border-color: var(--color-border, #e2e8f0);
   cursor: not-allowed;
 }
 
@@ -202,18 +208,18 @@
 }
 
 .paymentAbonado {
-  background: #dcfce7;
-  color: #128c48;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
 }
 
 .paymentNoAbonado {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: rgba(156, 163, 175, 0.15);
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .paidAt {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
 }
 
 .whatsappActions {
@@ -223,24 +229,26 @@
 .whatsappBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
-  background: #25d366;
+  background: var(--color-primary, #769282);
   color: white;
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.2);
+  min-height: 44px;
+  box-shadow: 0 2px 8px rgba(118, 146, 130, 0.25);
 }
 
 .whatsappBtn:hover {
-  background: #128c48;
+  background: var(--color-primary-dark, #5d7568);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+  box-shadow: 0 4px 12px rgba(118, 146, 130, 0.35);
 }
 
 .whatsappIcon {
@@ -253,14 +261,14 @@
   gap: 1rem;
   margin-top: 1rem;
   padding: 1rem;
-  background: #f0fdf4;
-  border: 1px solid #b7f0cc;
+  background: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-primary, #769282);
   border-radius: 8px;
 }
 
 .confirmPaidText {
   font-size: 0.95rem;
-  color: #1a1a1a;
+  color: var(--color-text-primary, #ffffff);
   font-weight: 500;
 }
 
@@ -271,17 +279,17 @@
 }
 
 .whatsappBtnConfirm {
-  background: #25d366;
+  background: #10b981;
   color: white;
-  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.2);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
   flex: 1;
   min-width: 150px;
 }
 
 .whatsappBtnConfirm:hover:not(:disabled) {
-  background: #128c48;
+  background: #059669;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
 }
 
 /* ── Cliente ── */
@@ -291,19 +299,19 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
   border-radius: 8px;
 }
 
 .customerAvatar {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: var(--color-primary, #769282);
   color: white;
-  font-family: inherit;
-  font-size: 1.25rem;
+  font-family: var(--font-heading, 'Montserrat', sans-serif);
+  font-size: 1.15rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -316,6 +324,7 @@
   flex-direction: column;
   gap: 0.25rem;
   min-width: 0;
+  flex: 1;
 }
 
 .customerFullName {
@@ -323,14 +332,14 @@
   font-weight: 600;
   color: var(--color-text-primary);
   overflow-wrap: anywhere;
-  word-break: break-word;
+  word-break: break-all;
 }
 
 .customerEmailText {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--color-text-secondary, #9ca3af);
   overflow-wrap: anywhere;
-  word-break: break-word;
+  word-break: break-all;
 }
 
 /* ── Productos ── */
@@ -349,7 +358,7 @@
 .itemsTable th {
   padding: 0.75rem 1rem;
   font-weight: 800;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary, #9ca3af);
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.02rem;
@@ -357,23 +366,22 @@
 
 .tdProduct {
   word-break: break-word;
-  overflow-wrap: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .tdProductName {
   font-weight: bold;
-  text-transform: capitalize;
 }
 
 .itemsTable td {
   padding: 0.75rem;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text-primary);
-  background: var(--color-bg-tertiary) !important;
+  background: var(--color-bg-secondary) !important;
 }
 
 .itemsTable tbody tr:hover {
-  background: var(--color-bg-secondary) !important;
+  background: var(--color-bg-primary) !important;
 }
 
 .tdLeft {
@@ -392,26 +400,26 @@
   font-weight: 600;
   text-align: right;
   padding-top: 1rem;
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-secondary);
 }
 
 .totalValue {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #059669;
-  background: var(--color-bg-tertiary);
+  color: var(--color-accent, #ddb08c);
+  background: var(--color-bg-secondary);
 }
 
 .halfpaid {
-  display: 'inline-flex';
-  align-items: 'center';
-  justify-content: 'center';
-  font-size: '12px';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
   font-weight: 600;
-  color: 'white';
-  background: '#10b981';
-  border-radius: '12px';
-  padding: '2px 8px';
+  color: white;
+  background: #10b981;
+  border-radius: 12px;
+  padding: 2px 8px;
 }
 
 /* ── Notas ── */
@@ -421,37 +429,40 @@
   font-size: 0.95rem;
   padding: 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   outline: none;
   width: 100%;
+  box-sizing: border-box;
   resize: vertical;
-  min-height: 100px;
+  min-height: 90px;
   transition: border-color 0.2s ease;
+  margin-bottom: 12px;
 }
 
 .notesInput:focus {
-  border-color: var(--color-accent-dark-inverse);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: var(--color-primary, #769282);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.15);
 }
 
 .notesInput:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
 }
 
 .saveNotesBtn {
-  background: #2563eb;
+  background: var(--color-primary, #769282);
   color: white;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 2px 6px rgba(118, 146, 130, 0.2);
+  min-height: 44px;
 }
 
 .saveNotesBtn:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: var(--color-primary-dark, #5d7568);
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 10px rgba(118, 146, 130, 0.3);
 }
 
 .saveNotesBtn:active:not(:disabled) {
@@ -459,8 +470,8 @@
 }
 
 .saveNotesBtn:disabled {
-  background: #cbd5e1;
-  color: #94a3b8;
+  background: var(--color-border, #cbd5e1);
+  color: var(--color-text-secondary, #94a3b8);
   cursor: not-allowed;
 }
 
@@ -468,8 +479,8 @@
 
 .dangerSection {
   padding: 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
 }
 
@@ -478,19 +489,19 @@
   font-size: 0.95rem;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+  min-height: 44px;
+  width: 100%;
 }
 
 .deleteBtn:hover {
-  background: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
 }
 
 .deleteBtn:active {
@@ -502,13 +513,13 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  background: #fecaca;
-  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.12);
+  border-radius: 8px;
 }
 
 .confirmDelete span {
   font-size: 0.95rem;
-  color: #7f1d1d;
+  color: var(--color-text-primary, #ffffff);
   font-weight: 500;
 }
 
@@ -524,6 +535,7 @@
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
   flex: 1;
   min-width: 120px;
+  min-height: 44px;
 }
 
 .deleteConfirmBtn:hover:not(:disabled) {
@@ -533,37 +545,40 @@
 }
 
 .deleteConfirmBtn:disabled {
-  background: #cbd5e1;
-  color: #94a3b8;
+  background: var(--color-border, #cbd5e1);
+  color: var(--color-text-secondary, #94a3b8);
   cursor: not-allowed;
 }
 
-/* ── Responsive ── */
+/* =============================================================================
+   REAJUSTE MÓVIL AISLADO (< 768px y < 640px)
+   ============================================================================= */
 
 @media (max-width: 768px) {
   .detailContent {
-    gap: 1.5rem;
+    gap: 10px;
+    padding: 0;
   }
 
   .detailSection {
-    padding: 1rem;
+    padding: 12px 14px;
     border-radius: 10px;
   }
 
   .detailSectionTitle {
-    font-size: 0.8rem;
-    margin-bottom: 0.75rem;
+    font-size: 11px;
+    margin-bottom: 10px;
   }
 
   .statusChangeBox,
   .confirmPaidBox {
-    padding: 0.75rem;
+    padding: 10px;
   }
 
   .statusNoteInput,
   .notesInput {
-    font-size: 0.9rem;
-    padding: 0.65rem;
+    font-size: 16px; /* 16px previene el zoom automático de iOS al enfocar */
+    padding: 10px;
   }
 
   .applyStatusBtn,
@@ -573,53 +588,41 @@
   .deleteBtn,
   .deleteConfirmBtn,
   .cancelBtn {
-    font-size: 0.85rem;
-    padding: 0.6rem 1rem;
-  }
-
-  .itemsTable {
-    font-size: 0.85rem;
-  }
-
-  .itemsTable th,
-  .itemsTable td {
-    padding: 0.5rem;
+    font-size: 14px;
+    padding: 10px 14px;
+    min-height: 44px;
+    width: 100%;
   }
 
   .customerCard {
-    padding: 0.75rem;
+    padding: 10px;
+    gap: 10px;
   }
 
   .customerAvatar {
-    width: 44px;
-    height: 44px;
-    font-size: 1rem;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .customerFullName {
+    font-size: 14px;
+  }
+
+  .customerEmailText {
+    font-size: 12px;
   }
 }
 
-/* ── Productos en mobile: tabla → lista de tarjetas ──
-   A partir de este ancho la tabla clásica (4 columnas) deja de tener
-   espacio para respirar y el texto empieza a solaparse/desbordar.
-   Se reemplaza por un patrón de "tarjetas" (cada <tr> es una tarjeta,
-   cada <td> muestra su etiqueta gracias a data-label), que es el
-   approach recomendado de UX para tablas de datos en viewports chicos. */
+/* ── Productos en móvil (< 640px): Tabla → Lista de Tarjetas Táctiles ── */
 @media (max-width: 640px) {
   .itemsTable {
     border: none;
+    background: transparent;
   }
 
   .itemsTable thead {
-    /* Se oculta el header de la tabla: las etiquetas pasan a
-       generarse por celda con ::before + data-label */
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    display: none;
   }
 
   .itemsTable,
@@ -629,14 +632,18 @@
   .itemsTable td {
     display: block;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .itemsTable tbody tr {
-    margin-bottom: 0.75rem;
-    padding: 0.75rem 0.9rem;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    background: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .itemsTable tbody tr:last-child {
@@ -644,55 +651,68 @@
   }
 
   .itemsTable tbody tr:hover {
-    background: var(--color-bg-tertiary) !important;
+    background: var(--color-bg-primary, #111827) !important;
   }
 
   .itemsTable tbody td {
-    padding: 0.35rem 0;
+    padding: 0;
     border-bottom: none;
     background: transparent !important;
   }
 
-  /* Celda del producto: se mantiene como encabezado de la tarjeta */
   .tdProduct {
-    padding-bottom: 0.5rem !important;
-    margin-bottom: 0.35rem;
-    border-bottom: 1px dashed var(--color-border) !important;
-    font-weight: 600;
-    text-align: left;
+    padding-bottom: 6px !important;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed var(--color-border, #374151) !important;
   }
 
-  /* Cant. / P. unit. / Subtotal: fila "etiqueta — valor" */
+  .tdProductName {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
+  }
+
+  .itemVariant {
+    font-size: 12px;
+    color: var(--color-text-secondary, #9ca3af);
+    margin-top: 2px;
+  }
+
   .itemsTable tbody td[data-label]:not(.tdProduct) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: 8px;
     text-align: right;
+    font-size: 13px;
+    color: var(--color-text-secondary, #9ca3af);
   }
 
   .itemsTable tbody td[data-label]:not(.tdProduct)::before {
     content: attr(data-label);
-    font-size: 0.72rem;
+    font-size: 11px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--color-text-secondary, #9ca3af);
     text-transform: uppercase;
-    letter-spacing: 0.03rem;
+    letter-spacing: 0.03em;
     text-align: left;
-    flex-shrink: 0;
   }
 
-  /* Total: tarjeta destacada, label y valor lado a lado */
+  .itemsTable tbody td[data-label="Subtotal"] {
+    color: var(--color-text-primary, #ffffff);
+    font-weight: 700;
+  }
+
   .itemsTable tfoot tr {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    margin-top: 0.75rem;
-    padding: 0.75rem 0.9rem;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 12px;
+    background: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-primary, #769282);
+    border-radius: 8px;
   }
 
   .totalLabel,
@@ -702,24 +722,21 @@
   }
 
   .totalLabel {
-    text-align: left;
+    text-align: left !important;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
   }
 
   .totalValue {
-    text-align: right;
+    text-align: right !important;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-accent, #ddb08c);
   }
 }
 
 @media (max-width: 480px) {
-  .detailContent {
-    gap: 1rem;
-  }
-
-  .detailSection {
-    padding: 0.75rem;
-    border-radius: 8px;
-  }
-
   .statusChangeActions,
   .confirmPaidActions,
   .confirmActions {
@@ -732,32 +749,5 @@
   .deleteConfirmBtn,
   .cancelBtn {
     width: 100%;
-  }
-
-  .itemsTable {
-    font-size: 0.85rem;
-  }
-
-  .itemsTable tfoot tr {
-    background: var(--color-bg-tertiary);
-    border: none;
-  }
-
-  .itemsTable tfoot tr td {
-    border-bottom: none;
-  }
-
-  .customerCard {
-    padding: 0.75rem;
-  }
-
-  .customerAvatar {
-    width: 44px;
-    height: 44px;
-    font-size: 1rem;
-  }
-
-  .customerFullName {
-    font-size: .8rem;
   }
 }

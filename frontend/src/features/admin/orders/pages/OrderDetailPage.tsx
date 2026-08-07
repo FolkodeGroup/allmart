@@ -1,16 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// OrderDetailPage.tsx
-// Página de detalle de un pedido específico, accesible directamente por URL.
-// Ejemplo: /admin/pedidos/550e8400-e29b-41d4-a716-446655440000
-//
-// Responsabilidades:
-//  - Cargar el pedido por ID desde la API
-//  - Mostrar estado de carga y errores (incluyendo 404)
-//  - Renderizar el contenido completo del pedido
-//  - Permitir edición de estado, pago y notas
-//  - Navegar de vuelta a la lista de pedidos
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../../../context/AdminAuthContext';
@@ -35,7 +22,6 @@ export default function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
-  // Cargar el pedido cuando se monta el componente
   useEffect(() => {
     if (!id || !token) {
       return;
@@ -47,10 +33,8 @@ export default function OrderDetailPage() {
         setError(null);
         setNotFound(false);
 
-        // Intentar obtener del contexto primero
         let orderData = getOrder(id);
 
-        // Si no está en el contexto, traer de la API
         if (!orderData) {
           orderData = await fetchAdminOrderById(token, id);
         }
@@ -59,7 +43,6 @@ export default function OrderDetailPage() {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Error desconocido';
 
-        // Detectar error 404
         if (message.includes('404') || message.includes('no encontrado')) {
           setNotFound(true);
           setError(null);
@@ -75,8 +58,6 @@ export default function OrderDetailPage() {
 
     loadOrder();
   }, [id, token, getOrder]);
-
-  // ── Renderizado de estados ──────────────────────────────────────
 
   if (isLoading) {
     return (
@@ -139,6 +120,7 @@ export default function OrderDetailPage() {
             onClick={() => navigate('/admin/pedidos')}
             title="Volver a la lista de pedidos"
             aria-label="Volver a la lista de pedidos"
+            type="button"
           >
             <span className={styles.backIcon}>←</span>
             <span className={styles.backText}>Volver</span>
