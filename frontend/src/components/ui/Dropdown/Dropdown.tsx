@@ -40,11 +40,6 @@ export function Dropdown({
   } | null>(null);
   const selectedOption = options.find((opt) => opt.value === value);
 
-  /**
-   * Calcula la posición del menú en coordenadas de viewport, ya que se renderiza
-   * vía portal en document.body (position: fixed) para escapar del overflow
-   * de contenedores ancestros (como modales o tablas).
-   */
   const updateMenuPosition = useCallback(() => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -74,7 +69,6 @@ export function Dropdown({
     }
   }, []);
 
-  // Cerrar al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
@@ -93,7 +87,6 @@ export function Dropdown({
     };
   }, [isOpen]);
 
-  // Reposicionar mientras el menú esté abierto
   useEffect(() => {
     if (!isOpen) return;
     updateMenuPosition();
@@ -121,7 +114,6 @@ export function Dropdown({
     setFocusedIndex(-1);
   }, [onChange]);
 
-  // Soporte de navegación por teclado accesible (WAI-ARIA)
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
 

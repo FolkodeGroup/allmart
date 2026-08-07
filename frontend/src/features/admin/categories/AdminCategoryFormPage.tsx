@@ -64,6 +64,7 @@ export function AdminCategoryFormPage({
     }, [onBack]);
 
     const { saving, error, isEdit, loading } = formProps;
+    const categoryName = formProps.form.name.trim();
 
     if (loading) {
         return (
@@ -89,7 +90,7 @@ export function AdminCategoryFormPage({
                         Categorías
                     </button>
                     <h1 className={styles.pageTitle}>
-                        {isEdit ? 'Editar categoría' : 'Nueva categoría'}
+                        {isEdit ? `Editar categoría: ${categoryName || '...'}` : 'Nueva categoría'}
                     </h1>
                 </div>
                 <div className={styles.pageHeaderActions}>

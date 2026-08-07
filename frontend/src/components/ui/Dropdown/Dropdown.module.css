@@ -1,157 +1,115 @@
-/* ============================================================
-   CUSTOM DROPDOWN STYLES: src/components/ui/Dropdown/Dropdown.module.css
-   ============================================================ */
-
 .container {
   position: relative;
-  display: inline-block;
   width: 100%;
-  min-width: 0;
+  box-sizing: border-box;
 }
 
-/* ── Botón Disparador (Trigger) ── */
 .trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #374151);
+  background: var(--color-bg-primary, #111827);
+  color: var(--color-text-primary, #ffffff);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* separa el texto del chevron hacia los extremos */
-  width: 100%;
-  min-width: 0;
-  height: 42px;
-  padding: 0 var(--space-4, 16px);
-  background-color: var(--control-bg);
-  border: 1.5px solid var(--control-border);
-  border-radius: var(--radius-md, 8px);
-  color: var(--control-text);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm, 14px);
-  font-weight: 500;
+  gap: 10px;
   cursor: pointer;
-  outline: none;
-  transition: border-color var(--transition-fast),
-    background-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  text-align: left;
 }
 
 .trigger:hover:not(:disabled) {
-  border-color: var(--control-border-hover);
-  background-color: var(--control-bg-hover);
+  border-color: var(--color-primary, #769282);
 }
 
-.trigger:focus-visible,
+.trigger:focus-visible {
+  outline: 2px solid var(--color-primary, #769282);
+  outline-offset: 1px;
+}
+
 .triggerActive {
-  border-color: var(--control-border-focus);
-  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.22);
-}
-
-body[data-admin-theme='dark'] .trigger:focus-visible,
-body[data-admin-theme='dark'] .triggerActive,
-.admin-dark .trigger:focus-visible,
-.admin-dark .triggerActive {
-  box-shadow: 0 0 0 3px rgba(221, 176, 140, 0.25);
+  border-color: var(--color-primary, #769282);
+  background: var(--color-bg-secondary, #28353d);
 }
 
 .trigger:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background-color: var(--color-bg-secondary);
 }
 
 .label {
-  color: var(--control-text);
+  color: var(--color-text-primary, #ffffff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
+  flex: 1;
 }
 
 .placeholder {
-  color: var(--control-text-muted);
+  color: var(--color-text-secondary, #9ca3af);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 .chevron {
-  color: var(--color-primary);
-  transition: transform var(--transition-fast), color var(--transition-fast);
+  color: var(--color-text-secondary, #9ca3af);
+  transition: transform 0.2s ease;
   flex-shrink: 0;
-  margin-left: var(--space-2, 8px);
-}
-
-body[data-admin-theme='dark'] .chevron,
-.admin-dark .chevron {
-  color: var(--color-accent);
 }
 
 .chevronOpen {
   transform: rotate(180deg);
+  color: var(--color-primary, #769282);
 }
 
-/* ── Menú Desplegable (Dropdown Popover) ── */
+/* Menu Portaleado a document.body */
 .menu {
-  z-index: var(--z-dropdown, 100);
+  list-style: none;
   margin: 0;
   padding: 6px;
-  list-style: none !important;
-  background-color: var(--control-overlay-bg);
-  border: 1.5px solid var(--control-border);
-  border-radius: var(--radius-lg, 12px);
-  box-shadow: var(--control-shadow);
-  /* fallback; se sobreescribe inline con el espacio real disponible */
-  max-height: 260px;
+  background: var(--color-bg-secondary, #28353d);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
   overflow-y: auto;
-  animation: popIn 0.16s cubic-bezier(0.4, 0, 0.2, 1) both;
-
-  /* 🟢 AISLAMIENTO CRÍTICO: Anula el flex horizontal heredado del contenedor de filtros */
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 2px !important;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* ── Opción de la Lista ── */
 .option {
-  /* 🟢 APILADO VERTICAL: Asegura que cada item ocupe su propio renglón y se alinee a la izquierda */
-  display: block !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  text-align: left !important;
-
-  padding: 9px var(--space-4, 16px);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm, 14px);
+  padding: 10px 14px;
+  min-height: 40px;
+  border-radius: 6px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--control-text);
-  border-radius: var(--radius-sm, 6px);
+  color: var(--color-text-primary, #ffffff);
   cursor: pointer;
-  transition: background-color var(--transition-fast),
-    color var(--transition-fast);
-  user-select: none;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.12s ease, color 0.12s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  user-select: none;
 }
 
-/* ── Hover unificado con identidad de marca y legibilidad accesible ── */
 .option:hover,
 .optionFocused {
-  background-color: var(--control-hover-bg) !important;
-  color: var(--control-hover-text) !important;
-  outline: none;
+  background-color: var(--color-primary, #769282);
+  color: #ffffff;
 }
 
-/* Conservar un indicador sutil de opción seleccionada en la lista */
 .optionSelected {
-  background-color: var(--control-bg-hover);
+  background-color: rgba(118, 146, 130, 0.25);
+  color: var(--color-primary-light, #cbe7c9);
   font-weight: 600;
 }
