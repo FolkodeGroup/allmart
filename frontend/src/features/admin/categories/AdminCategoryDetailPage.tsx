@@ -198,7 +198,7 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
                 onTouchEnd={handleTouchEnd}
             >
                 {activeSection === 'info' && (
-                    <div id="panel-info" role="tabpanel" aria-labelledby="tab-info">
+                    <div id="panel-info" role="tabpanel" aria-labelledby="tab-info" className={styles.tabPanel}>
                         <div className={styles.statsRow}>
                             <div className={styles.statCard}>
                                 <Layers size={16} />
@@ -236,14 +236,16 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
                 )}
 
                 {activeSection === 'imagen' && (
-                    <div className={styles.section} id="panel-imagen" role="tabpanel" aria-labelledby="tab-imagen">
-                        {category.image && !imgError ? (
-                            <div className={styles.imagePreview}>
-                                <img src={category.image} alt={displayName} onError={() => setImgError(true)} />
-                            </div>
-                        ) : (
-                            <p className={styles.emptyDescription}>Esta categoría no tiene imagen cargada.</p>
-                        )}
+                    <div id="panel-imagen" role="tabpanel" aria-labelledby="tab-imagen" className={styles.tabPanel}>
+                        <div className={styles.section}>
+                            {category.image && !imgError ? (
+                                <div className={styles.imagePreview}>
+                                    <img src={category.image} alt={displayName} onError={() => setImgError(true)} />
+                                </div>
+                            ) : (
+                                <p className={styles.emptyDescription}>Esta categoría no tiene imagen cargada.</p>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

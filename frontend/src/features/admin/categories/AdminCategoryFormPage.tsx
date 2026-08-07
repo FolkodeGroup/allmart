@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import { ArrowLeft, Upload, X } from 'lucide-react';
 import { useBlocker } from 'react-router-dom';
 import type { Category } from '../../../types';
