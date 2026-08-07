@@ -41,6 +41,8 @@ const WIDGET_LABELS: Record<WidgetId, string> = {
   weekly_sales: 'Ventas Semanales',
 };
 
+const MOBILE_TABS_ORDER: DashboardMobileTab[] = ['resumen', 'pedidos', 'alertas', 'analitica'];
+
 const fmtCurrency = (n: number) =>
   n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 });
 
@@ -59,6 +61,10 @@ export function AdminDashboard() {
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
   const [mobileTab, setMobileTab] = useState<DashboardMobileTab>('resumen');
+
+  // Gestos táctiles de deslizamiento (Swipe left / right)
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -93,6 +99,35 @@ export function AdminDashboard() {
     onReorder: reorderWidgets,
   });
   const { draggedId, dragOverId, isDragging } = dragState;
+
+  // Handlers para Swipe táctil (Umbral optimizado a 35px)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+
+    // Umbral ergonómico de deslizamiento horizontal (mínimo 35px y mayor movimiento X que Y)
+    if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > deltaY) {
+      const currentIndex = MOBILE_TABS_ORDER.indexOf(mobileTab);
+
+      if (deltaX < 0 && currentIndex < MOBILE_TABS_ORDER.length - 1) {
+        // Swipe izquierda -> Avanzar pestaña
+        setMobileTab(MOBILE_TABS_ORDER[currentIndex + 1]);
+      } else if (deltaX > 0 && currentIndex > 0) {
+        // Swipe derecha -> Retroceder pestaña
+        setMobileTab(MOBILE_TABS_ORDER[currentIndex - 1]);
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
 
   // ─── Widget renderers para Escritorio ────────────────────────────────────────
 
@@ -229,11 +264,14 @@ export function AdminDashboard() {
     }
   };
 
-  // ─── RENDERIZADO VISTA MÓVIL (< 768px) ──────────────────────────────────────
+  // ─── RENDERIZADO VISTA MÓVIL (< 768px) CON SWIPE GESTURES ────────────────────
 
   if (isMobile) {
+    const currentTabIndex = MOBILE_TABS_ORDER.indexOf(mobileTab);
+
     return (
       <div className={styles.page}>
+        {/* Banner de Bienvenida Mapeado con Mismo Ancho y Estilo que el Contenido */}
         <header className={styles.mobileBanner}>
           <div className={styles.mobileBannerTop}>
             <div>
@@ -251,12 +289,20 @@ export function AdminDashboard() {
           </div>
         </header>
 
+        {/* Botonera de Pestañas Fluyendo Naturalmente en el Documento (Sin Flotación) */}
         <MobileDashboardTabs
           activeTab={mobileTab}
           onTabChange={setMobileTab}
           pendingOrdersCount={pendientes}
           lowStockCount={lowStock}
         />
+
+        {/* Indicador de Deslizamiento Táctil */}
+        <div className={styles.swipeHintBar}>
+          {currentTabIndex > 0 ? '‹ ' : ''}
+          Deslizá para cambiar de pestaña
+          {currentTabIndex < MOBILE_TABS_ORDER.length - 1 ? ' ›' : ''}
+        </div>
 
         <DashboardWidgetSettings
           ref={settingsRef}
@@ -268,7 +314,12 @@ export function AdminDashboard() {
           onClose={() => setSettingsOpen(false)}
         />
 
-        <div className={styles.mobileTabPanel}>
+        {/* Panel Contenedor con Detección de Gestos Swipe */}
+        <div
+          className={styles.mobileTabPanel}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           {mobileTab === 'resumen' && (
             <div className={styles.mobileSectionStack}>
               <section className={styles.mobileKpiGrid}>

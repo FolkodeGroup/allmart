@@ -132,11 +132,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.settingsBtn:focus-visible {
-  outline: 2px solid var(--color-primary, #769282);
-  outline-offset: 2px;
-}
-
 /* ── Widgets Container Desktop ───────────────────────────────── */
 
 .widgetsContainer {
@@ -144,8 +139,6 @@
   flex-direction: column;
   gap: var(--space-5, 20px);
 }
-
-/* ── Widget Section (Draggable) ──────────────────────────────── */
 
 .widgetSection {
   background: var(--color-bg-card, #1f2937);
@@ -642,8 +635,21 @@
 .mobileBlock,
 .mobileBlockTitle,
 .mobileKpiGrid,
-.mobileSectionStack {
+.mobileSectionStack,
+.swipeHintBar,
+.mobileTabPanel {
   display: none;
+}
+
+@keyframes fadeInTab {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 767px) {
@@ -652,17 +658,21 @@
     gap: 12px;
   }
 
-  /* Ocultar el contenedor drag-and-drop pesado de escritorio */
   .widgetsContainer {
     display: none;
   }
 
-  /* Mostrar elementos específicos de la vista móvil */
   .mobileBanner,
   .mobileBlock,
-  .mobileSectionStack {
+  .mobileSectionStack,
+  .mobileTabPanel {
     display: flex;
     flex-direction: column;
+  }
+
+  .mobileTabPanel {
+    touch-action: pan-y; /* Permite scroll vertical nativo y habilita captura horizontal */
+    animation: fadeInTab 0.25s ease-out;
   }
 
   .mobileBanner {
@@ -671,6 +681,9 @@
     border-radius: 14px;
     padding: 14px 16px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 4px;
   }
 
   .mobileBannerTop {
@@ -707,18 +720,33 @@
     cursor: pointer;
   }
 
+  /* Indicador elegante de Swipe en Móvil */
+  .swipeHintBar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    background-color: rgba(118, 146, 130, 0.1);
+    border: 1px solid rgba(118, 146, 130, 0.2);
+    border-radius: 20px;
+    color: var(--color-primary-light, #8fa99a);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    user-select: none;
+  }
+
   .mobileSectionStack {
     gap: 14px;
   }
 
-  /* Grilla 2x2 para KPIs en móvil */
   .mobileKpiGrid {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
   }
 
-  /* Accesos rápidos compactos en móvil */
   .quickGridMobile {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
