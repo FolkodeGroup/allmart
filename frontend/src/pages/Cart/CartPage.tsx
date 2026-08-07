@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 import { CartPriceDisplay } from '../../components/ui/CartPriceDisplay/CartPriceDisplay';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
+import { X } from 'lucide-react';
 import styles from './CartPage.module.css';
 import type { Product } from '../../types';
 
@@ -24,15 +25,8 @@ function formatPrice(price: number): string {
 }
 
 export function CartPage() {
-  const { items, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } =
-    useCart();
-
+  const { items, totalItems, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
   const [showForm, setShowForm] = useState(false);
-
-
-
-
-
 
   if (items.length === 0) {
     return (
@@ -61,6 +55,7 @@ export function CartPage() {
 
   // Monto total ahorrado con descuentos
   const totalSavings = totalWithoutDiscount - totalPrice;
+
   return (
     <main className={styles.page}>
       <h1 className={styles.heading}>
@@ -77,100 +72,100 @@ export function CartPage() {
             const detailUrl = buildProductDetailUrl(product);
             return (
               <li key={product.id} className={styles.item}>
-                <Link to={detailUrl}>
+                <Link to={detailUrl} className={styles.itemImageLink}>
                   <ProductImage
                     src={product.images[0]}
                     alt={product.name}
                     className={styles.itemImage}
-                    width={64}
-                    height={64}
-                    placeholder={'data:image/svg+xml,%3Csvg width="64" height="64" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="64" height="64" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                    width={80}
+                    height={80}
+                    placeholder={'data:image/svg+xml,%3Csvg width="80" height="80" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="80" height="80" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                   />
                 </Link>
 
-                <div className={styles.itemInfo}>
-                  <Link to={detailUrl} className={styles.itemName}>
-                    {product.name}
-                  </Link>
-                {/* Variantes seleccionadas estilo Mercado Libre */}
-                {product.selectedAttributes && Object.keys(product.selectedAttributes).length > 0 ? (
-                  <div className={styles.itemVariants}>
-                    {Object.entries(product.selectedAttributes).map(([key, value], idx, arr) => (
-                      <span key={key} className={styles.itemVariantChip}>
-                        <span className={styles.itemVariantKey}>
-                          {key.charAt(0).toUpperCase() + key.slice(1)}:
-                        </span>{' '}
-                        <span className={styles.itemVariantVal}>{value}</span>
-                        {idx < arr.length - 1 && <span className={styles.itemVariantSep}>, </span>}
-                      </span>
-                    ))}
+                <div className={styles.itemMain}>
+                  <div className={styles.itemHeader}>
+                    <div className={styles.itemTitleBlock}>
+                      <Link to={detailUrl} className={styles.itemName}>
+                        {product.name}
+                      </Link>
+                      {product.selectedAttributes && Object.keys(product.selectedAttributes).length > 0 ? (
+                        <div className={styles.itemVariants}>
+                          {Object.entries(product.selectedAttributes).map(([key, value], idx, arr) => (
+                            <span key={key} className={styles.itemVariantChip}>
+                              <span className={styles.itemVariantKey}>
+                                {key.charAt(0).toUpperCase() + key.slice(1)}:
+                              </span>{' '}
+                              <span className={styles.itemVariantVal}>{value}</span>
+                              {idx < arr.length - 1 && <span className={styles.itemVariantSep}>, </span>}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className={styles.itemCategory}>{product.category.name}</span>
+                      )}
+                    </div>
+
+                    <button
+                      className={styles.removeBtn}
+                      onClick={() => removeFromCart(product.id)}
+                      aria-label={`Quitar ${product.name} del carrito`}
+                      title={`Quitar ${product.name}`}
+                      type="button"
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
-                ) : (
-                  <span className={styles.itemCategory}>{product.category.name}</span>
-                )}
 
-                {/* Mostrar precio unitario simple */}
-                <span className={styles.itemUnitPrice}>
-                  {formatPrice(product.price)} c/u
-                </span>
+                  <div className={styles.itemFooter}>
+                    <div className={styles.qtyControl} role="group" aria-label={`Cantidad de ${product.name}`}>
+                      <button
+                        className={styles.qtyBtn}
+                        onClick={() => updateQuantity(product.id, quantity - 1)}
+                        aria-label="Reducir cantidad"
+                        type="button"
+                      >
+                        −
+                      </button>
+                      <input
+                        className={styles.qtyValue}
+                        type="number"
+                        min={1}
+                        value={quantity}
+                        onChange={(e) =>
+                          updateQuantity(product.id, Math.max(1, parseInt(e.target.value) || 1))
+                        }
+                        aria-label={`Cantidad de ${product.name}`}
+                      />
+                      <button
+                        className={styles.qtyBtn}
+                        onClick={() => updateQuantity(product.id, quantity + 1)}
+                        aria-label="Aumentar cantidad"
+                        type="button"
+                      >
+                        +
+                      </button>
+                    </div>
 
-                <div className={styles.qtyControl} role="group" aria-label={`Cantidad de ${product.name}`}>
-                  <button
-                    className={styles.qtyBtn}
-                    onClick={() => updateQuantity(product.id, quantity - 1)}
-                    aria-label="Reducir cantidad"
-                    type="button"
-                  >
-                    −
-                  </button>
-                  <input
-                    className={styles.qtyValue}
-                    type="number"
-                    min={1}
-                    value={quantity}
-                    onChange={(e) =>
-                      updateQuantity(product.id, Math.max(1, parseInt(e.target.value) || 1))
-                    }
-                    aria-label={`Cantidad de ${product.name}`}
-                  />
-                  <button
-                    className={styles.qtyBtn}
-                    onClick={() => updateQuantity(product.id, quantity + 1)}
-                    aria-label="Aumentar cantidad"
-                    type="button"
-                  >
-                    +
-                  </button>
+                    <div className={styles.itemSubtotalContainer}>
+                      {discount ? (
+                        <CartPriceDisplay
+                          originalPrice={product.price}
+                          discount={discount}
+                          quantity={quantity}
+                          showDiscountBadge={true}
+                        />
+                      ) : (
+                        <span className={styles.itemSubtotal}>
+                          {formatPrice(product.price * quantity)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              <div className={styles.itemRight}>
-                <div className={styles.itemSubtotalContainer}>
-                  {discount ? (
-                    <CartPriceDisplay
-                      originalPrice={product.price}
-                      discount={discount}
-                      quantity={quantity}
-                      showDiscountBadge={true}
-                    />
-                  ) : (
-                    <span className={styles.itemSubtotal}>
-                      {formatPrice(product.price * quantity)}
-                    </span>
-                  )}
-                </div>
-                <button
-                  className={styles.removeBtn}
-                  onClick={() => removeFromCart(product.id)}
-                  aria-label={`Quitar ${product.name} del carrito`}
-                  type="button"
-                >
-                  ✕ Quitar
-                </button>
-              </div>
-            </li>
-          );
-        })}
+              </li>
+            );
+          })}
         </ul>
 
         {/* ── Resumen ── */}

@@ -16,7 +16,7 @@ interface ProductImageProps {
 
 /**
  * Imagen de producto optimizada: lazy, progresiva, WebP, placeholder, layout shift safe.
- * Garantiza el llenado del 100% del contenedor padre sin franjas o bordes blancos laterales.
+ * Garantiza el llenado del 100% del contenedor padre de forma acotada sin desbordes.
  */
 export const ProductImage: React.FC<ProductImageProps> = ({
   src,
@@ -34,6 +34,9 @@ export const ProductImage: React.FC<ProductImageProps> = ({
   const [loaded, setLoaded] = useState(false);
   const safeSrc = typeof src === 'string' ? src : '';
 
+  const parsedWidth = typeof width === 'number' ? `${width}px` : (width ?? '100%');
+  const parsedHeight = typeof height === 'number' ? `${height}px` : (height ?? '100%');
+
   if (!safeSrc) {
     return (
       <img
@@ -45,6 +48,8 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         style={{ 
           width: '100%', 
           height: '100%', 
+          maxWidth: parsedWidth,
+          maxHeight: parsedHeight,
           objectFit: objectFit,
           ...style 
         }}
@@ -65,6 +70,8 @@ export const ProductImage: React.FC<ProductImageProps> = ({
         position: 'relative',
         width: '100%',
         height: '100%',
+        maxWidth: parsedWidth,
+        maxHeight: parsedHeight,
         overflow: 'hidden',
         ...style,
       }}
