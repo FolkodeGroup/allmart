@@ -2290,3 +2290,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1412: feat(frontend): permitir crear variantes y combinaciones durante el a… | 2026-08-05 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1414: 1216 evitar pérdida de contenido al descargar pdfs confirmación del navegador o flujo incorrecto | 2026-08-06 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1320: Agregar campo de tiempo de entrega en ABM de Productos y Tabla Informativa | 2026-08-06 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
