@@ -41,41 +41,41 @@ export function CategoryDetailPanel({
         <div className={styles.panel}>
             <style>{`
                 .catDetailCompactHeader {
-                    padding: 14px 18px !important;
-                    border-radius: 12px !important;
+                    padding: 12px 14px !important;
+                    border-radius: 10px !important;
                     background: var(--color-bg-primary, #ffffff) !important;
                     border: 1px solid var(--color-border, #e5e2dd) !important;
-                    margin-bottom: 14px !important;
+                    margin-bottom: 12px !important;
                 }
                 .catDetailTitle {
-                    font-size: 16px !important;
+                    font-size: 15px !important;
                     font-weight: 700 !important;
                     margin: 0 !important;
                     color: var(--color-text-primary, #111827) !important;
                 }
                 .catDetailSlug {
-                    font-size: 12px !important;
+                    font-size: 11px !important;
                     font-family: monospace !important;
                     color: var(--color-text-secondary, #6b7280) !important;
                 }
                 .catDetailStatVal {
-                    font-size: 18px !important;
+                    font-size: 16px !important;
                     font-weight: 700 !important;
                 }
                 .catDetailSectionTitle {
-                    font-size: 13px !important;
+                    font-size: 12px !important;
                     font-weight: 700 !important;
                     text-transform: uppercase !important;
                     letter-spacing: 0.04em !important;
                     color: var(--color-text-secondary, #6b7280) !important;
-                    margin-bottom: 8px !important;
+                    margin-bottom: 6px !important;
                     display: flex !important;
                     align-items: center !important;
                     gap: 6px !important;
                 }
                 .catDetailDesc {
                     font-size: 13px !important;
-                    line-height: 1.5 !important;
+                    line-height: 1.45 !important;
                     color: var(--color-text-primary, #111827) !important;
                 }
             `}</style>
@@ -100,13 +100,13 @@ export function CategoryDetailPanel({
                                     src={category.image}
                                     alt={displayName}
                                     className={styles.avatarImg}
-                                    width={48}
-                                    height={48}
+                                    width={40}
+                                    height={40}
                                     onError={() => setImgError(true)}
                                 />
                             ) : (
                                 <div className={styles.avatarPlaceholder} aria-hidden="true">
-                                    <ImageIcon size={22} />
+                                    <ImageIcon size={20} />
                                 </div>
                             )}
                         </div>
@@ -121,7 +121,7 @@ export function CategoryDetailPanel({
                                     onClick={() => canEdit && onToggleVisibility?.(category.id, !category.isVisible)}
                                     disabled={!canEdit}
                                 >
-                                    {category.isVisible ? <><Eye size={13} /> Visible</> : <><EyeOff size={13} /> Oculta</>}
+                                    {category.isVisible ? <><Eye size={12} /> Visible</> : <><EyeOff size={12} /> Oculta</>}
                                 </button>
                             </div>
                         </div>
@@ -157,7 +157,7 @@ export function CategoryDetailPanel({
             {/* ── Stats row ───────────────────────────────────────────── */}
             <div className={styles.statsRow}>
                 <div className={styles.statCard}>
-                    <Layers size={16} className={styles.statIcon} />
+                    <Layers size={15} className={styles.statIcon} />
                     <div>
                         <span className="catDetailStatVal">
                             {productCount !== undefined ? productCount : '—'}
@@ -168,15 +168,15 @@ export function CategoryDetailPanel({
 
                 {productCount === 0 && (
                     <div className={`${styles.statCard} ${styles.statWarn}`}>
-                        <AlertTriangle size={16} className={styles.statIconWarn} />
+                        <AlertTriangle size={15} className={styles.statIconWarn} />
                         <span className={styles.statLabel}>Sin productos asignados</span>
                     </div>
                 )}
 
                 <div className={styles.statCard}>
-                    <Hash size={16} className={styles.statIcon} />
+                    <Hash size={15} className={styles.statIcon} />
                     <div>
-                        <span className="catDetailStatVal" style={{ fontSize: 12, fontFamily: 'monospace' }}>
+                        <span className="catDetailStatVal" style={{ fontSize: 11, fontFamily: 'monospace' }}>
                             {category.id.slice(0, 8)}…
                         </span>
                         <span className={styles.statLabel}>ID</span>
@@ -187,7 +187,7 @@ export function CategoryDetailPanel({
             {/* ── Description ─────────────────────────────────────────── */}
             <div className={styles.section}>
                 <h3 className="catDetailSectionTitle">
-                    <Tag size={14} /> Descripción
+                    <Tag size={13} /> Descripción
                 </h3>
                 {category.description ? (
                     <p className="catDetailDesc">{category.description}</p>
@@ -200,7 +200,7 @@ export function CategoryDetailPanel({
             {category.image && !imgError && (
                 <div className={styles.section}>
                     <h3 className="catDetailSectionTitle">
-                        <ImageIcon size={14} /> Imagen
+                        <ImageIcon size={13} /> Imagen
                     </h3>
                     <div className={styles.imagePreview}>
                         <img

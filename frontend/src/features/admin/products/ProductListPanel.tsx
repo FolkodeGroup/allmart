@@ -122,26 +122,36 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
       <aside ref={ref || containerRef} className={styles.panel} onScroll={handleScroll}>
         <style>{`
           .prodListCompactRow {
-            padding: 10px 12px !important;
-            border-radius: 10px !important;
-            margin-bottom: 6px !important;
+            padding: 8px 10px !important;
+            border-radius: 8px !important;
+            margin-bottom: 4px !important;
             transition: all 0.15s ease !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
           }
           .prodListCompactThumb {
-            width: 40px !important;
-            height: 40px !important;
-            min-width: 40px !important;
-            border-radius: 8px !important;
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            border-radius: 6px !important;
             object-fit: cover !important;
           }
           .prodListCompactTitle {
-            font-size: 14px !important;
+            font-size: 13px !important;
             font-weight: 600 !important;
-            line-height: 1.3 !important;
+            line-height: 1.25 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
           }
           .prodListCompactMeta {
-            font-size: 12px !important;
+            font-size: 11px !important;
             color: var(--color-text-secondary, #9ca3af) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
           }
         `}</style>
         <div className={styles.listContainer} role="listbox" aria-label="Lista de productos">

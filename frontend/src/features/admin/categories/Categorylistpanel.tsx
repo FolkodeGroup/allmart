@@ -126,21 +126,21 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
             <aside ref={ref ?? containerRef} className={styles.panel} onScroll={handleScroll}>
                 <style>{`
                     .catListCompactItem {
-                        padding: 10px 12px !important;
-                        border-radius: 10px !important;
-                        margin-bottom: 6px !important;
+                        padding: 8px 10px !important;
+                        border-radius: 8px !important;
+                        margin-bottom: 4px !important;
                         transition: all 0.15s ease !important;
                     }
                     .catListCompactThumb {
-                        width: 40px !important;
-                        height: 40px !important;
-                        min-width: 40px !important;
-                        border-radius: 8px !important;
+                        width: 36px !important;
+                        height: 36px !important;
+                        min-width: 36px !important;
+                        border-radius: 6px !important;
                     }
                     .catListCompactTitle {
-                        font-size: 14px !important;
+                        font-size: 13px !important;
                         font-weight: 600 !important;
-                        line-height: 1.3 !important;
+                        line-height: 1.25 !important;
                     }
                     .catListCompactSlug {
                         font-size: 11px !important;
@@ -148,7 +148,7 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                         color: var(--color-text-secondary, #9ca3af) !important;
                     }
                     .catListCompactMeta {
-                        font-size: 12px !important;
+                        font-size: 11px !important;
                         color: var(--color-text-secondary, #9ca3af) !important;
                     }
                 `}</style>
@@ -183,8 +183,8 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                             src={cat.image}
                                             alt={displayName}
                                             className={`${styles.thumbnail} catListCompactThumb`}
-                                            width={40}
-                                            height={40}
+                                            width={36}
+                                            height={36}
                                         />
                                     ) : (
                                         <div className={`${styles.thumbnailPlaceholder} catListCompactThumb`} aria-hidden="true">

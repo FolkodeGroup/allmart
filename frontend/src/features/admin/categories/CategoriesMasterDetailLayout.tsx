@@ -70,24 +70,59 @@ export function CategoriesMasterDetailLayout({
     }, []);
 
     return (
-        <div className={`${styles.container} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailGridContainer`}>
+        <div className={`${styles.container} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailFlexContainer`}>
             <style>{`
-                .masterDetailGridContainer {
-                    display: grid !important;
-                    grid-template-columns: 1fr !important;
-                    gap: 16px !important;
-                    width: 100% !important;
-                    align-items: start !important;
+                /* 📱 MÓVIL Y TABLET (<1024px) */
+                @media (max-width: 1023px) {
+                    .masterDetailFlexContainer {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    .masterDetailFlexContainer .listPaneWrapper {
+                        display: ${mobileView === 'detail' ? 'none !important' : 'block !important'};
+                        width: 100% !important;
+                    }
+                    .masterDetailFlexContainer .detailPaneWrapper {
+                        display: ${mobileView === 'detail' ? 'block !important' : 'none !important'};
+                        width: 100% !important;
+                        height: auto !important;
+                        max-height: none !important;
+                        overflow-y: visible !important;
+                    }
                 }
+
+                /* 💻 ESCRITORIO (>=1024px) */
                 @media (min-width: 1024px) {
-                    .masterDetailGridContainer {
-                        grid-template-columns: 350px minmax(0, 1fr) !important;
+                    .masterDetailFlexContainer {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        gap: 16px !important;
+                        align-items: flex-start !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    .masterDetailFlexContainer .listPaneWrapper {
+                        display: block !important;
+                        flex: 0 0 340px !important;
+                        width: 340px !important;
+                        max-width: 340px !important;
+                        min-width: 340px !important;
+                        box-sizing: border-box !important;
+                    }
+                    .masterDetailFlexContainer .detailPaneWrapper {
+                        display: block !important;
+                        flex: 1 1 0% !important;
+                        min-width: 0 !important;
+                        width: auto !important;
+                        box-sizing: border-box !important;
                     }
                 }
             `}</style>
 
             {/* ── Left: scrollable category list ──────────────────────── */}
-            <div className={styles.listPane}>
+            <div className={`${styles.listPane} listPaneWrapper`}>
                 <CategoryListPanel
                     categories={categories}
                     loading={loading}
@@ -104,7 +139,7 @@ export function CategoriesMasterDetailLayout({
             </div>
 
             {/* ── Right: detail panel ──────────────────────────────────── */}
-            <div className={styles.detailWrapper}>
+            <div className={`${styles.detailWrapper} detailPaneWrapper`}>
                 {selectedCategory ? (
                     <CategoryDetailPanel
                         category={selectedCategory}
