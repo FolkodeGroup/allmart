@@ -157,9 +157,56 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const remainingAmount = isAbonado ? 0 : isDepositActive ? halfTotal : order.total;
 
   return (
-    <div className={styles.detailContent}>
+    <div className={`${styles.detailContent} orderDetailContentDesktopGrid`}>
+      <style>{`
+        /* 📱 MÓVIL / TABLET (<1024px): Mantener 1 sola columna apilada */
+        @media (max-width: 1023px) {
+          .orderDetailContentDesktopGrid {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .orderDetailContentDesktopGrid .orderDetailMainCol,
+          .orderDetailContentDesktopGrid .orderDetailSideCol {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+        }
+
+        /* 💻 ESCRITORIO (>=1024px): Aprovechar todo el ancho disponible */
+        @media (min-width: 1024px) {
+          .orderDetailContentDesktopGrid {
+            display: grid !important;
+            grid-template-columns: 1fr 380px !important;
+            gap: 24px !important;
+            align-items: start !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .orderDetailContentDesktopGrid .orderDetailMainCol {
+            min-width: 0 !important;
+            width: 100% !important;
+          }
+          .orderDetailContentDesktopGrid .orderDetailSideCol {
+            width: 100% !important;
+            max-width: 420px !important;
+          }
+        }
+
+        /* 🖥️ ESCRITORIO ANCHO (>=1400px): Ajustar proporción para monitores ultra-wide */
+        @media (min-width: 1400px) {
+          .orderDetailContentDesktopGrid {
+            grid-template-columns: 1fr 420px !important;
+            gap: 28px !important;
+          }
+        }
+      `}</style>
+
       {/* ── COLUMNA PRINCIPAL (65% en Desktop) ── */}
-      <div className={styles.mainColumn}>
+      <div className={`${styles.mainColumn} orderDetailMainCol`}>
         {/* ── Sección 1: Estado del Pedido ── */}
         <section className={styles.detailSection}>
           <h3 className={styles.detailSectionTitle}>Estado del Pedido</h3>
@@ -295,7 +342,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       </div>
 
       {/* ── COLUMNA LATERAL (35% en Desktop) ── */}
-      <div className={styles.sideColumn}>
+      <div className={`${styles.sideColumn} orderDetailSideCol`}>
         {/* ── Tarjeta CRM: Datos del Cliente ── */}
         <section className={styles.detailSection}>
           <h3 className={styles.detailSectionTitle}>Datos del Cliente</h3>

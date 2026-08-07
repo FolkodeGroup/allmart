@@ -120,9 +120,24 @@ export default function OrderDetailPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} orderDetailPageDesktopExpanded`}>
+      <style>{`
+        @media (min-width: 1024px) {
+          .orderDetailPageDesktopExpanded {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 8px 32px 8px !important;
+            box-sizing: border-box !important;
+          }
+          .orderDetailPageDesktopExpanded .orderDetailHeaderCard {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
+        }
+      `}</style>
       {/* Header con navegación y metadatos */}
-      <div className={styles.header}>
+      <div className={`${styles.header} orderDetailHeaderCard`}>
         <div className={styles.headerContent}>
           <button
             className={styles.backButton}
