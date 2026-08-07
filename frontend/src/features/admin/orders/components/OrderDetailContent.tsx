@@ -1,14 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// OrderDetailContent.tsx
-// Componente reutilizable que renderiza el contenido detallado de un pedido.
-// Utilizado tanto en OrderDetailPage como en OrderDetailModal.
-//
-// Responsabilidades:
-//  - Renderizar todas las secciones del pedido (estado, pago, cliente, productos, etc.)
-//  - Manejar la edición de estado, pago y notas
-//  - Gestionar los handlers de actualización
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useState, useEffect, useRef } from 'react';
 import { useAdminOrders } from '../../../../context/AdminOrdersContext';
 import { useAdminAuth } from '../../../../context/AdminAuthContext';
@@ -32,7 +21,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid, toggleDeposit } = useAdminOrders();
   const { can } = useAdminAuth();
 
-  // ── Estado local ────────────────────────────────────────────────────
   const [notes, setNotes] = useState(order.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmPaid, setConfirmPaid] = useState(false);
@@ -42,7 +30,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [statusError, setStatusError] = useState<string | null>(null);
   const [depositLoading, setDepositLoading] = useState(false);
 
-  // ── Refs para detectar cambios sin guardar ──────────────────────────
   const originalStatusRef = useRef(order.status);
   const originalNotesRef = useRef(order.notes ?? '');
 
@@ -63,8 +50,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const auth = useAdminAuth();
   const userEmail = (auth && (auth.user as string)) || 'desconocido';
 
-  // ── Handlers ────────────────────────────────────────────────────────
-
   const handleStatusApply = async () => {
     setStatusLoading(true);
     setStatusError(null);
@@ -84,7 +69,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       setStatusNote('');
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : 'Error desconocido');
-      toast.error(`No se pudo actualizar el pedido: ${statusError}`);
+      toast.error(`No se pudo actualizar el pedido`);
       setPendingStatus(prev);
     } finally {
       setStatusLoading(false);
@@ -146,7 +131,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
-  // Iniciales del cliente para el avatar
   const initials = `${order.customer?.firstName?.[0] ?? ''}${order.customer?.lastName?.[0] ?? ''}`;
 
   return (
@@ -225,10 +209,9 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             )}
           </div>
 
-          {/* 🆕 Seña del 50% */}
           <div className={styles.depositSection} style={{ marginTop: '12px' }}>
             <div className={styles.depositHeader} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 500, color: '#666' }}>Seña del 50%</span>
+              <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-secondary, #9ca3af)' }}>Seña del 50%</span>
               {order.has50PercentDeposit && (
                 <span
                   style={{
@@ -252,17 +235,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               type="button"
               onClick={handleToggleDeposit}
               disabled={depositLoading}
-              style={{
-                padding: '8px 12px',
-                fontSize: '13px',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: depositLoading ? 'not-allowed' : 'pointer',
-                backgroundColor: order.has50PercentDeposit ? '#f3f4f6' : '#e0fdf4',
-                color: order.has50PercentDeposit ? '#6b7280' : '#059669',
-                fontWeight: 500,
-                transition: 'all 0.2s ease',
-              }}
             >
               {depositLoading ? '...' : (order.has50PercentDeposit ? '✓ Seña activada' : 'Activar seña')}
             </button>
@@ -281,7 +253,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               ) : (
                 <div className={styles.confirmPaidBox}>
                   <span className={styles.confirmPaidText}>
-                    ¿Confirmar que el cliente abonó este pedido vía WhatsApp?
+                    ¿Confirmar que el cliente abonó este pedido?
                   </span>
                   <div className={styles.confirmPaidActions}>
                     <button
