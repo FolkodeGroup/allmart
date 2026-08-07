@@ -25,7 +25,6 @@ export function CategoryTabBasico({
     const handleNameChange = useCallback((newName: string) => {
         setField('name', newName);
 
-        // Auto-generar slug si está vacío o si el usuario aún no lo ha modificado manualmente
         if (!form.slug || !touched.slug) {
             const autoSlug = generateSlug(newName);
             setField('slug', autoSlug);
@@ -36,7 +35,6 @@ export function CategoryTabBasico({
         setTouched(prev => ({ ...prev, [fieldName]: true }));
     }, []);
 
-    // Formateo de las opciones de categorías padre disponibles para el Dropdown
     const parentOptions = useMemo(() => {
         return [
             { value: '', label: '-- Sin categoría padre (Principal) --' },
@@ -48,36 +46,14 @@ export function CategoryTabBasico({
     }, [parentCategories]);
 
     return (
-        <fieldset className={styles.fieldset}>
-            <style>{`
-                .categoryBasicoInput {
-                    min-height: 44px !important;
-                    font-size: 16px !important;
-                    box-sizing: border-box !important;
-                }
-                .categoryCheckboxRow {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    min-height: 48px;
-                    cursor: pointer;
-                    user-select: none;
-                }
-                .categoryCheckboxInput {
-                    width: 22px;
-                    height: 22px;
-                    accent-color: var(--color-primary, #769282);
-                    cursor: pointer;
-                }
-            `}</style>
-
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div className={styles.row}>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="category-name">
                         Nombre *
                     </label>
                     <input
-                        className={`${styles.input} categoryBasicoInput ${
+                        className={`${styles.input} ${
                             touched.name && errors.name ? styles.inputError : ''
                         }`}
                         id="category-name"
@@ -97,7 +73,7 @@ export function CategoryTabBasico({
                         Slug (URL amigable)
                     </label>
                     <input
-                        className={`${styles.input} categoryBasicoInput ${
+                        className={`${styles.input} ${
                             touched.slug && errors.slug ? styles.inputError : ''
                         }`}
                         id="category-slug"
@@ -131,17 +107,19 @@ export function CategoryTabBasico({
             )}
 
             <div className={styles.field}>
-                <label className="categoryCheckboxRow" htmlFor="category-visibility-check">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none', minHeight: '44px' }} htmlFor="category-visibility-check">
                     <input
                         id="category-visibility-check"
                         type="checkbox"
-                        className="categoryCheckboxInput"
+                        style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary, #769282)', cursor: 'pointer' }}
                         checked={form.isVisible}
                         onChange={e => setField('isVisible', e.target.checked)}
                     />
-                    <span className={styles.checkboxLabel}>Visible en el catálogo público</span>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary, #ffffff)' }}>
+                        Visible en el catálogo público
+                    </span>
                 </label>
             </div>
-        </fieldset>
+        </div>
     );
 }

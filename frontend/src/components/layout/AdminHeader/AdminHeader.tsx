@@ -1,7 +1,7 @@
 // src/components/layout/AdminHeader/AdminHeader.tsx
 import { useLocation } from "react-router-dom";
+import { useCallback, useMemo } from "react";
 import { useAdminCategories } from "../../../context/AdminCategoriesContext";
-import { formatOrderLabel } from "../../../utils/orders";
 import { Menu } from "lucide-react";
 import styles from "./AdminHeader.module.css";
 
@@ -28,90 +28,83 @@ const ROUTE_NAMES: Record<string, string> = {
   colecciones: "Colecciones",
   promociones: "Promociones",
   configuracion: "Configuración",
+  editar: "Editar",
+  detalle: "Detalle",
+  nueva: "Nueva",
 };
 
-function generateBreadcrumbs(pathname: string): Breadcrumb[] {
-  const segments = pathname
-    .split("/")
-    .filter((segment) => segment && segment !== "admin");
-
-  const breadcrumbs: Breadcrumb[] = [
-    {
-      label: "Admin",
-      path: "/admin",
-      isActive: segments.length === 0,
-    },
-  ];
-
-  let currentPath = "/admin";
-
-  segments.forEach((segment, index) => {
-    const isActive = index === segments.length - 1;
-    const label =
-      ROUTE_NAMES[segment] ||
-      segment.charAt(0).toUpperCase() + segment.slice(1);
-    currentPath += `/${segment}`;
-
-    breadcrumbs.push({
-      label,
-      path: currentPath,
-      isActive,
-    });
-  });
-
-  return breadcrumbs;
-}
+const isUUID = (str: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
   const location = useLocation();
   const { categories } = useAdminCategories();
 
-  const categoryNameForPath = (() => {
-    const match = location.pathname.match(/^\/admin\/categorias\/([^/]+)$/i);
-    if (!match) return null;
-
-    const rawParam = decodeURIComponent(match[1]);
-    const category = categories.find(
+  const resolveCategoryName = useCallback((segment: string): string | null => {
+    const rawParam = decodeURIComponent(segment).trim();
+    const found = categories.find(
       (item) =>
         item.id === rawParam ||
         item.slug?.toLowerCase() === rawParam.toLowerCase()
     );
+    return found?.name ?? null;
+  }, [categories]);
 
-    return category?.name ?? null;
-  })();
+  const breadcrumbs = useMemo(() => {
+    const segments = location.pathname
+      .split("/")
+      .filter((segment) => segment && segment !== "admin");
 
-  const orderLabelForPath = (() => {
-    const match = location.pathname.match(/^\/admin\/pedidos\/([^/]+)$/i);
-    if (!match) return null;
+    const list: Breadcrumb[] = [
+      {
+        label: "Admin",
+        path: "/admin",
+        isActive: segments.length === 0,
+      },
+    ];
 
-    return formatOrderLabel(decodeURIComponent(match[1]));
-  })();
+    let currentPath = "/admin";
 
-  const breadcrumbs = generateBreadcrumbs(location.pathname).map((crumb, index, all) => {
-    const isLast = index === all.length - 1;
-    if (!isLast) return crumb;
+    segments.forEach((segment, index) => {
+      const isActive = index === segments.length - 1;
+      currentPath += `/${segment}`;
 
-    if (categoryNameForPath && crumb.path.startsWith('/admin/categorias/')) {
-      return {
-        ...crumb,
-        label: categoryNameForPath,
-      };
+      const catName = resolveCategoryName(segment);
+      let label = catName || ROUTE_NAMES[segment] || (segment.charAt(0).toUpperCase() + segment.slice(1));
+
+      // Si es un UUID no resuelto directamente en la lista de categorías
+      if (!catName && isUUID(segment)) {
+        label = "Detalle";
+      }
+
+      list.push({
+        label,
+        path: currentPath,
+        isActive,
+      });
+    });
+
+    return list;
+  }, [location.pathname, resolveCategoryName]);
+
+  const currentSection = useMemo(() => {
+    const segments = location.pathname.split("/").filter(Boolean);
+    const catSegment = segments.find(s => resolveCategoryName(s) !== null);
+    if (catSegment) {
+      const name = resolveCategoryName(catSegment);
+      if (location.pathname.endsWith("/editar")) {
+        return `Editar — ${name}`;
+      }
+      if (location.pathname.endsWith("/detalle")) {
+        return `Detalle — ${name}`;
+      }
+      return name;
     }
 
-    if (orderLabelForPath && crumb.path.startsWith('/admin/pedidos/')) {
-      return {
-        ...crumb,
-        label: orderLabelForPath,
-      };
-    }
+    return breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard";
+  }, [breadcrumbs, location.pathname, resolveCategoryName]);
 
-    return crumb;
-  });
-
-  const currentSection =
-    breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard";
-
-  const todayLabel = new Intl.DateTimeFormat("es-CO", {
+  const todayLabel = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
     day: "numeric",
     month: "long",

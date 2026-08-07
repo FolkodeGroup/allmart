@@ -39,6 +39,10 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
     const [toggleConfirm, setToggleConfirm] = useState<{ newVisible: boolean } | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
 
+    // Touch swipe refs
+    const touchStartX = useRef<number | null>(null);
+    const touchStartY = useRef<number | null>(null);
+
     const category = useMemo(
         () => categories.find(
             (c) => c.id === categoryParam || c.slug?.toLowerCase() === categoryParam.toLowerCase()
@@ -46,7 +50,6 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
         [categories, categoryParam]
     );
 
-    // Si todavía no cargó la lista (entrada directa por URL), pedila
     useEffect(() => {
         if (!category) {
             refreshCategories({ page: 1, limit: 50 });
@@ -54,14 +57,11 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
     }, [category, refreshCategories]);
 
     useEffect(() => {
-        if (!category) return; // esperá a que el contenido real esté montado
-
-        // 1) scroll del documento
+        if (!category) return;
         window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
 
-        // 2) por si el que scrollea es un contenedor interno del admin layout
         let el = pageRef.current?.parentElement ?? null;
         while (el) {
             const style = window.getComputedStyle(el);
@@ -109,6 +109,28 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
         }
     };
 
+    // Gestos táctiles de deslizamiento (Swipe left / right) en móvil
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (touchStartX.current === null || touchStartY.current === null) return;
+        const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+        const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+
+        if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > deltaY * 1.2) {
+            if (deltaX < 0 && activeSection === 'info') {
+                setActiveSection('imagen');
+            } else if (deltaX > 0 && activeSection === 'imagen') {
+                setActiveSection('info');
+            }
+        }
+        touchStartX.current = null;
+        touchStartY.current = null;
+    };
+
     if (isLoading && !category) {
         return <LoadingSpinner message="Cargando categoría..." size="lg" />;
     }
@@ -125,7 +147,7 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
     }
 
     return (
-        <div className={styles.page} ref={pageRef}>
+        <div className={`${styles.page} detailPageContainerMobile`} ref={pageRef}>
             <header className={styles.header}>
                 <button type="button" className={styles.backBtn} onClick={onBack} aria-label="Volver a la lista">
                     <ArrowLeft size={16} /> Categorías
@@ -169,9 +191,14 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
                 ))}
             </div>
 
-            <div className={styles.content}>
+            {/* ── Contenido de las pestañas con soporte Swipe en móvil ── */}
+            <div
+                className={styles.content}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+            >
                 {activeSection === 'info' && (
-                    <div id="panel-info" role="tabpanel" aria-labelledby="tab-info">
+                    <div id="panel-info" role="tabpanel" aria-labelledby="tab-info" className={styles.tabPanel}>
                         <div className={styles.statsRow}>
                             <div className={styles.statCard}>
                                 <Layers size={16} />
@@ -209,14 +236,16 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
                 )}
 
                 {activeSection === 'imagen' && (
-                    <div className={styles.section} id="panel-imagen" role="tabpanel" aria-labelledby="tab-imagen">
-                        {category.image && !imgError ? (
-                            <div className={styles.imagePreview}>
-                                <img src={category.image} alt={displayName} onError={() => setImgError(true)} />
-                            </div>
-                        ) : (
-                            <p className={styles.emptyDescription}>Esta categoría no tiene imagen cargada.</p>
-                        )}
+                    <div id="panel-imagen" role="tabpanel" aria-labelledby="tab-imagen" className={styles.tabPanel}>
+                        <div className={styles.section}>
+                            {category.image && !imgError ? (
+                                <div className={styles.imagePreview}>
+                                    <img src={category.image} alt={displayName} onError={() => setImgError(true)} />
+                                </div>
+                            ) : (
+                                <p className={styles.emptyDescription}>Esta categoría no tiene imagen cargada.</p>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

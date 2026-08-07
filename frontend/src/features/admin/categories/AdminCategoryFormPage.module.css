@@ -2,26 +2,28 @@
 .page {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    min-height: 0;
-    background: var(--color-bg-primary);
-    font-family: inherit;
-    /* Quitar overflow para que sticky funcione con el scroll del body/html */
+    gap: 16px;
+    padding: 0 0 32px 0;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* ── Sticky page header ──────────────────────────────────────────────────── */
+/* ── Sticky page header opaco ────────────────────────────────────────────── */
 .pageHeader {
     position: sticky;
     top: 0;
-    z-index: 40;
+    z-index: 100;
+    background: var(--color-bg-tertiary, #1f2937); /* Fondo opaco que previene traslucidez */
+    border-bottom: 1px solid var(--color-border, #374151);
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 12px 24px;
-    background: var(--color-bg-primary);
-    border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    margin-bottom: 8px;
 }
 
 .pageHeaderInner {
@@ -32,55 +34,59 @@
 }
 
 .pageTitle {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text-primary, #1e293b);
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
+    margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .backBtn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--color-border, #e2e8f0);
-    border-radius: 6px;
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
-    font-size: 0.95rem;
+    background: transparent;
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 8px;
+    color: var(--color-primary, #769282);
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    min-height: 38px;
+    transition: all 0.15s ease;
     white-space: nowrap;
 }
 
 .backBtn:hover {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-border);
-    transform: translateX(-2px);
+    background: rgba(118, 146, 130, 0.12);
 }
 
 .pageHeaderActions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .cancelBtn {
-    padding: 8px 18px;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    background: var(--color-bg-secondary);
-    color: var(--color-text-muted, #64748b);
-    font-size: 0.9rem;
-    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--color-border, #374151);
+    color: var(--color-text-secondary, #9ca3af);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s;
+    min-height: 40px;
+    transition: all 0.15s ease;
 }
 
 .cancelBtn:hover:not(:disabled) {
-    background: var(--color-bg-tertiary);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-primary, #ffffff);
 }
 
 .cancelBtn:disabled {
@@ -88,384 +94,215 @@
     cursor: not-allowed;
 }
 
-
-
 .submitBtn {
-    font-family: var(--font-ui);
-    font-size: 0.9rem;
-    font-weight: 600;
-    background: var(--color-primary);
-    color: var(--color-neutral-light);
+    background: var(--color-primary, #769282);
+    color: #ffffff;
     border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.15s;
+    min-height: 40px;
+    transition: background-color 0.15s ease;
 }
 
 .submitBtn:hover:not(:disabled) {
-    background: var(--color-primary-dark, #1e40af);
+    background: var(--color-primary-dark, #5d7568);
 }
 
 .submitBtn:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* ── Main layout: sidebar + scrollable content ───────────────────────────── */
-.layout {
-    display: flex;
-    align-items: flex-start;
-    flex: 1;
-    max-width: 1280px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 24px 24px 0;
-    gap: 24px;
-    background: var(--color-bg-primary);
-}
-
-/* ── Sticky sidebar ──────────────────────────────────────────────────────── */
-.sidebar {
-    position: sticky;
-    top: 135px;
-    /* Ajusta este valor según el alto real del navbar/header */
-    align-self: flex-start;
-    width: 188px;
-    flex-shrink: 0;
+/* ── Form content (sin sidebar ni menús anidados) ─────────────────────────── */
+.formContent {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 8px;
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
+    gap: 16px;
+    padding: 0 16px;
+}
+
+/* ── Card de sección plana (sin cajas dentro de cajas) ────────────────────── */
+.cardSection {
+    background: var(--color-bg-secondary, #28353d);
+    border: 1px solid var(--color-border, #374151);
     border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    /* overflow eliminado para no romper sticky */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.sidebarList {
-    list-style: none;
+.cardSectionTitle {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.sidebarItem {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    width: 100%;
-    padding: 9px 10px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--color-text-primary);
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.15s, color 0.15s;
-}
-
-.sidebarItem:hover {
-    background: var(--color-primary-dark);
-    color: var(--color-neutral-light);
-}
-
-.sidebarItemActive {
-    background: var(--color-primary-dark, #eff6ff);
-    color: var(--color-neutral-light);
-    font-weight: 600;
-}
-
-.sidebarIcon {
-    flex-shrink: 0;
-    opacity: 0.8;
-}
-
-.sidebarItemActive .sidebarIcon {
-    opacity: 1;
-}
-
-.sidebarLabel {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.errorDotIcon {
-    flex-shrink: 0;
-    color: var(--color-error, #ef4444);
-    margin-left: auto;
-}
-
-.sidebarProgress {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 3px;
-    height: 100%;
-    background: var(--color-border, #e2e8f0);
-    border-radius: 0 10px 10px 0;
-}
-
-.sidebarProgressBar {
-    width: 100%;
-    background: var(--color-primary, #2563eb);
-    border-radius: inherit;
-    transition: height 0.3s ease;
-}
-
-/* ── Scrollable form content ─────────────────────────────────────────────── */
-.content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding-bottom: 80px;
-    height: calc(100vh - 141px);
-    overflow-y: auto;
-}
-
-/* ── Individual section card ─────────────────────────────────────────────── */
-.section {
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    padding: 24px;
-    margin-bottom: 20px;
-    scroll-margin-top: 80px;
-    transition: box-shadow 0.2s;
-}
-
-.section:focus-within {
-    box-shadow: 0 0 0 2px var(--color-primary-light, #bfdbfe);
-}
-
-.sectionTitle {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--color-text-primary, #1e293b);
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    border-bottom: 1px solid var(--color-border, #374151);
+    padding-bottom: 10px;
 }
 
-/* ── Fieldsets ── */
-.fieldset {
-    border: 1px solid var(--color-border-light);
-    border-radius: 12px;
-    padding: var(--space-5, 16px) var(--space-6, 20px);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4, 12px);
+.cardSectionTitle i {
+    color: var(--color-primary, #769282);
 }
 
-.legend {
-    font-family: var(--font-ui);
-    font-size: var(--text-xs, 12px);
-    font-weight: var(--font-semibold, 600);
-    color: var(--color-primary);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-widest, 0.05em);
-    padding: 0 var(--space-2, 8px);
-}
-
-/* ── Fields ── */
+/* ── Form Rows & Fields ──────────────────────────────────────────────────── */
 .row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: var(--space-4, 12px);
-    align-items: start;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .field {
+    flex: 1;
+    min-width: 240px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1, 4px);
-    position: relative;
+    gap: 6px;
 }
 
 .label {
-    font-family: var(--font-ui);
-    font-size: var(--text-xs, 12px);
-    font-weight: var(--font-semibold, 600);
-    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary, #ffffff);
 }
 
 .input,
 .textarea,
 .select {
-    font-family: var(--font-ui);
-    font-size: var(--text-sm, 14px);
-    padding: var(--space-2, 8px) var(--space-3, 12px);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
-    outline: none;
-    transition: border-color 0.15s;
     width: 100%;
+    min-height: 42px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border, #374151);
+    background: var(--color-bg-primary, #111827);
+    color: var(--color-text-primary, #ffffff);
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
 .input:focus,
 .textarea:focus,
 .select:focus {
-    border-color: var(--color-primary);
-    background: var(--color-bg-primary);
+    outline: none;
+    border-color: var(--color-primary, #769282);
 }
 
 .textarea {
     resize: vertical;
-    font-family: var(--font-ui);
-}
-
-.select {
-    cursor: pointer;
-}
-
-.checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.checkbox input[type="checkbox"] {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
 }
 
 .inputError {
-    border-color: var(--color-error, #ef4444) !important;
+    border-color: #ef4444 !important;
 }
 
 .errorText {
-    color: var(--color-error, #ef4444);
-    font-size: var(--text-xs, 12px);
-    margin-top: var(--space-1, 4px);
+    color: #ef4444;
+    font-size: 12px;
 }
 
 .fieldHint {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-text-tertiary);
-    margin-top: 4px;
+    font-size: 13px;
+    color: var(--color-text-secondary, #9ca3af);
+    margin: 0;
     line-height: 1.4;
 }
 
 .checkboxLabel {
-    color: var(--color-text-primary);
+    color: var(--color-text-primary, #ffffff);
 }
 
-/* ── Image upload section ────────────────────────────────────────────────── */
+/* ── Image upload ────────────────────────────────────────────────────────── */
 .imageUploadSection {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.imagePreview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 8px;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    position: relative;
-}
-
-.imagePreviewImg {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 6px;
-}
-
-.deleteImageBtn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: none;
-    border-radius: 6px;
-    background: var(--color-error, #ef4444);
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.deleteImageBtn:hover {
-    background: var(--color-error-dark, #dc2626);
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-.deleteImageBtn:active {
-    transform: scale(0.95);
+    border: 2px dashed var(--color-border, #374151);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    background: var(--color-bg-primary, #111827);
 }
 
 .imageUploadTrigger {
-    width: 100%;
-    padding: 16px;
-    border: 2px dashed var(--color-border);
-    border-radius: 12px;
-    background: var(--color-bg-secondary);
-    color: var(--color-text-secondary);
-    font-family: var(--font-ui);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    color: var(--color-primary, #769282);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
 }
 
-.imageUploadTrigger:hover {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-primary-light);
-    color: var(--color-primary);
+.imagePreview {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 10px;
+    padding: 12px;
 }
 
-.uploadIcon {
-    font-size: 24px;
+.imagePreviewImg {
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.imagePreviewInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.imagePreviewLabel {
+    font-size: 12px;
+    color: var(--color-text-secondary, #9ca3af);
+}
+
+.deleteImageBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.deleteImageBtn:hover {
+    background: #ef4444;
+    color: #ffffff;
 }
 
 .imgError {
-    color: var(--color-error, #ef4444);
-    font-size: var(--text-sm, 14px);
-    margin-bottom: 8px;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 /* ── Global error ────────────────────────────────────────────────────────── */
 .globalError {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid var(--color-error, #ef4444);
-    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
     padding: 12px 16px;
-    color: var(--color-error, #ef4444);
+    border-radius: 10px;
     font-size: 14px;
-    margin: 16px 0;
+    font-weight: 600;
 }
 
 /* ── Loading state ───────────────────────────────────────────────────────── */
@@ -474,15 +311,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    padding: 48px 24px;
     gap: 16px;
 }
 
 .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-primary);
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--color-primary, #769282);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -493,122 +330,48 @@
     }
 }
 
-/* ── Footer de acciones mobile (oculto en desktop) ───────────────────────── */
-.mobileFooter {
+.fixedBottomBarMobile {
     display: none;
 }
 
-/* ── Responsive: mobile ───────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+/* ── Responsividad Móvil (<768px) ───────────────────────────────────────── */
+@media (max-width: 767px) {
     .page {
-        padding-bottom: 76px;
-        /* deja espacio para el footer fijo */
+        padding-bottom: 90px;
     }
 
-    .fieldHint {
-        text-align: center;
-    }
-
-    .imageUploadTrigger span {
-        text-align: center;
-    }
-
-    .pageHeader {
-        padding: 10px 14px;
-    }
-
-    .pageTitle {
-        font-size: 0.95rem;
-    }
-
-    /* Ocultamos las acciones del header: se muestran abajo en .mobileFooter */
     .pageHeaderActions {
         display: none;
     }
 
-    .layout {
-        flex-direction: column;
-        padding: 12px 12px 0;
-        gap: 12px;
+    .formContent {
+        padding: 0 12px;
     }
 
-    /* Sidebar → tabs horizontales sticky debajo del header */
-    .sidebar {
-        position: relative;
-        top: 0;
-        /* alto aprox. del pageHeader en mobile; ajustá si hace falta */
-        z-index: 30;
-        width: 100%;
-        flex-direction: row;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 6px;
-        gap: 6px;
-        scrollbar-width: none;
+    .cardSection {
+        padding: 14px 16px;
+        border-radius: 10px;
     }
 
-    .sidebar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .sidebarList {
-        flex-direction: row;
-        gap: 6px;
-        flex: 1;
-    }
-
-    .sidebarItem {
-        white-space: nowrap;
-        padding: 8px 12px;
-    }
-
-    /* La barra de progreso vertical no aplica en modo horizontal */
-    .sidebarProgress {
-        display: none;
-    }
-
-    /* El content deja de tener su propio scroll: scrollea la página */
-    .content {
-        width: 100%;
-        height: auto;
-        overflow-y: visible;
-        padding-bottom: 24px;
-    }
-
-    .section {
-        padding: 16px;
-        scroll-margin-top: 100px;
-        /* para que el scroll-spy no tape el título bajo los tabs sticky */
-    }
-
-    .row {
-        grid-template-columns: 1fr;
-        /* un campo por fila en mobile */
-    }
-
-    /* Footer fijo con las acciones, visible solo en mobile */
-    .mobileFooter {
-        display: flex;
-        gap: 8px;
+    .fixedBottomBarMobile {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 10px 14px;
-        background: var(--color-bg-primary);
-        border-top: 1px solid var(--color-border);
-        z-index: 50;
+        z-index: 9999;
+        background: var(--color-bg-primary, #111827);
+        border-top: 1px solid var(--color-border, #374151);
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) 16px;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+        display: flex;
+        gap: 10px;
     }
 
-    .mobileFooter .cancelBtn,
-    .mobileFooter .submitBtn {
+    .fixedBottomBarMobile button {
         flex: 1;
-        padding: 12px 0;
-    }
-}
-
-@media (max-width: 1200px) {
-    .imageUploadTrigger span {
-        text-align: center;
+        min-height: 48px;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 10px;
     }
 }
