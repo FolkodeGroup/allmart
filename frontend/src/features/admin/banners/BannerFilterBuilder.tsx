@@ -51,7 +51,6 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
     }, [query, token]);
 
     function handleDestinationChange(type: BannerDestinationType) {
-        // Limpiar el otro tipo al cambiar
         onChange({
             ...value,
             destinationType: type,

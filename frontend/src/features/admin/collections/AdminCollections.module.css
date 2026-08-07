@@ -890,218 +890,212 @@ button:disabled {
   font-size: 14px;
 }
 
-/* ── ESTILOS DEL FORMULARIO DE COLECCIONES ── */
+/* ── ESTILOS DEL FORMULARIO UNIFICADO DE COLECCIONES ── */
 
-.formHeader {
-  margin-bottom: var(--space-4);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.formHeader h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.form {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.formGroup {
+.formPageWrapper {
   display: flex;
   flex-direction: column;
-}
-
-.formGroup label {
-  font-weight: 500;
-  color: var(--color-text-primary);
-  font-size: 14px;
-  display: flex;
-}
-
-.isActiveBtn {
-  display: flex;
-  align-items: center;
-  width: fit-content;
-  gap: 1rem;
-}
-
-.formGroup small {
-  margin-top: 4px;
-  color: #9ca3af;
-  font-size: 12px;
-}
-
-.formGroup input,
-.formGroup select,
-.formGroup textarea {
-  padding: 10px 12px;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-primary);
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
+  gap: 20px;
   width: 100%;
 }
 
-.formGroup input:focus,
-.formGroup input:hover {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.1);
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--color-bg-primary, #111827);
+  border-bottom: 1px solid var(--color-border, #374151);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pageHeaderInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #374151);
+  background: var(--color-bg-secondary, #1f2937);
+  color: var(--color-text-primary, #ffffff);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.pageHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.formUnified {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.formCardSection {
+  background: var(--color-bg-secondary, #1f2937);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.formCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border, #374151);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary, #769282);
 }
 
 .formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+  gap: 16px;
 }
 
-.dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 10;
+.formRow3Col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary, #ffffff);
+}
+
+.formGroup small {
+  font-size: 12px;
+  color: var(--color-text-secondary, #9ca3af);
   margin-top: 4px;
 }
 
-.dropdownItem {
+.formGroup input[type="text"],
+.formGroup input[type="number"],
+.formGroup select,
+.formGroup textarea {
   width: 100%;
-  background: var(--color-bg-primary);
-  border: none;
-  border-bottom: 1px solid var(--color-border);
-  cursor: pointer;
-  text-align: left;
-  padding: 0;
-}
-
-.selectedProducts {
-  border: 1px solid var(--color-border);
-  color: var(--color-text-primary);
-  border-radius: 4px;
-  overflow: hidden;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.formGroup .selectedProducts>div {
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-}
-
-.selectedProductsHeader {
-  background: var(--color-bg-secondary);
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-muted, #666);
-}
-
-.selectedProductsEmpty {
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  color: var(--color-text-secondary);
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #374151);
+  background: var(--color-bg-primary, #111827);
+  color: var(--color-text-primary, #ffffff);
   font-size: 14px;
-  text-align: center;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup input[type="number"]:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-primary, #769282);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.15);
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxInput {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary, #769282);
+  cursor: pointer;
+}
+
+.checkboxLabelText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary, #ffffff);
 }
 
 .formActions {
   display: flex;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border);
+  gap: 12px;
   justify-content: flex-start;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #374151);
+  margin-top: 8px;
 }
 
-.btnPrimary,
-.btnSecondary {
-  width: auto;
-  padding: 10px 16px;
-}
-
-/* ── PARÁMETROS DE AUTO SALES ── */
-
-.autoParamsFieldset {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: var(--space-4);
-  margin: 0;
-  background: var(--color-bg-tertiary);
-}
-
-.autoParamsFieldset legend {
-  padding: 0 var(--space-2);
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--color-primary);
-}
-
-.autoParamsFieldset .formRow {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.syncRow {
-  display: flex;
+.submitBtn {
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border);
-  flex-wrap: wrap;
-}
-
-.btnSync {
-  padding: 8px 16px;
-  border: 1px solid var(--color-primary);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--color-primary);
+  justify-content: center;
+  padding: 10px 20px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-primary, #769282);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  white-space: nowrap;
+  transition: opacity 0.2s ease;
 }
 
-.btnSync:hover:not(:disabled) {
-  background: var(--color-primary);
-  color: white;
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
 }
 
-.btnSync:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.syncInfo {
-  font-size: 12px;
-  color: var(--color-text-tertiary);
-}
-
-.successMsg {
-  padding: var(--space-3);
-  background-color: #d1fae5;
-  color: #065f46;
-  border-radius: 6px;
-  margin-bottom: var(--space-3);
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #374151);
+  background: var(--color-bg-secondary, #28353d);
+  color: var(--color-text-primary, #ffffff);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* ── CONTROLES Y RESPONSIVIDAD MÓVIL (<768px) ── */
@@ -1150,6 +1144,25 @@ button:disabled {
     align-items: flex-start;
     gap: 4px;
   }
+  .pageHeader {
+    padding: 10px 12px;
+  }
+  .pageHeaderActions {
+    width: 100%;
+    margin-left: 0;
+  }
+  .pageHeaderActions button {
+    flex: 1;
+    min-height: 44px;
+  }
+  .formCardSection {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .formRow,
+  .formRow3Col {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1164,14 +1177,6 @@ button:disabled {
 
   .collectionProductsPreview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .formRow {
-    grid-template-columns: 1fr;
-  }
-
-  .autoParamsFieldset .formRow {
-    grid-template-columns: 1fr;
   }
 
   .actions {

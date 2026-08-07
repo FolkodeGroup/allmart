@@ -1,6 +1,6 @@
 /**
  * features/admin/collections/AdminCollectionForm.tsx
- * Formulario para crear/editar colecciones (manual y auto_sales).
+ * Formulario estandarizado y homogenizado para crear/editar colecciones.
  */
 
 import React, { useState, useEffect, useCallback, useId, useMemo } from 'react';
@@ -15,6 +15,7 @@ import { apiFetch } from '../../../utils/apiClient';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { normalizeImageUrl } from '../../../utils/imageUrl';
+import { ArrowLeft, Layers, Zap, CheckCircle2, RotateCcw } from 'lucide-react';
 import styles from './AdminCollections.module.css';
 
 type RequiredFieldKey = 'name' | 'slug' | 'displayPosition' | 'productIds';
@@ -42,7 +43,6 @@ function getMissingRequiredFields(formData: {
   if (!formData.name.trim()) missingFields.push('name');
   if (!formData.slug.trim()) missingFields.push('slug');
   if (!formData.displayPosition) missingFields.push('displayPosition');
-  // Solo requerir productos para colecciones manuales
   if (formData.type === 'manual' && !formData.productIds.length) {
     missingFields.push('productIds');
   }
@@ -148,7 +148,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       .catch(() => setCategories([]));
   }, []);
 
-  // ─── Initial state snapshot (for dirty detection) ────────────────────────
   const [initialFormData] = useState(() =>
     collection
       ? {
@@ -289,7 +288,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         return;
       }
 
-      // Construir params solo para auto_sales
       const paramsPayload =
         formData.type === 'auto_sales'
           ? {
@@ -310,7 +308,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         isActive: formData.isActive,
         type: formData.type,
         params: paramsPayload,
-        // Para manuales enviar productIds; para auto_sales no (el job lo gestiona)
         ...(formData.type === 'manual' && { productIds: formData.productIds }),
       };
 
@@ -342,119 +339,161 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   const isAutoSales = formData.type === 'auto_sales';
 
   return (
-    <div className={styles.container}>
-      <div className={styles.formHeader}>
-        <h1>{collection ? 'Editar Colección' : 'Nueva Colección'}</h1>
-      </div>
+    <div className={styles.formPageWrapper}>
+      {/* ── Encabezado Unificado de Página / Formulario ── */}
+      <header className={styles.pageHeader}>
+        <div className={styles.pageHeaderInner}>
+          <button
+            type="button"
+            onClick={handleCancel}
+            className={styles.backBtn}
+            aria-label="Volver al listado de colecciones"
+          >
+            <ArrowLeft size={14} />
+            Colecciones
+          </button>
+          <h1 className={styles.pageTitle}>
+            {collection ? `Editar colección: ${collection.name}` : 'Nueva colección'}
+          </h1>
+        </div>
+        <div className={styles.pageHeaderActions}>
+          <button
+            type="button"
+            className={styles.cancelBtn}
+            onClick={handleCancel}
+            disabled={loading}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            className={styles.submitBtn}
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? 'Guardando...' : collection ? 'Guardar cambios' : 'Crear colección'}
+          </button>
+        </div>
+      </header>
 
       {error && <div className={styles.error}>{error}</div>}
       {syncMsg && <div className={styles.successMsg}>{syncMsg}</div>}
 
-      <form onSubmit={handleSubmit} className={styles.form} noValidate>
-        {/* ── Tipo de colección (Selector Unificado) ── */}
-        <div className={styles.formGroup}>
-          <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Tipo de colección</span>
-          <Dropdown
-            id="collection-type"
-            options={typeOptions}
-            value={formData.type}
-            onChange={(val) => setFormData({ ...formData, type: val })}
-            placeholder="Seleccionar tipo..."
-          />
-          <small style={{ marginTop: '6px' }}>
-            {isAutoSales
-              ? 'Los productos se calculan automáticamente desde las ventas. Podés sincronizar manualmente o esperar el recálculo diario.'
-              : 'Vos elegís qué productos aparecen y en qué orden.'}
-          </small>
-        </div>
+      <form onSubmit={handleSubmit} className={styles.formUnified} noValidate>
 
-        {/* ── Nombre y Slug ── */}
-        <div className={styles.formGroup}>
-          <label htmlFor="collection-name">Nombre *</label>
-          <input
-            id="collection-name"
-            type="text"
-            value={formData.name}
-            onChange={(e) => {
-              const name = e.target.value;
-              setFormData({
-                ...formData,
-                name,
-                slug: !collection ? generateSlug(name) : formData.slug,
-              });
-              setFieldErrors((prev) => ({ ...prev, name: undefined }));
-            }}
-            placeholder={isAutoSales ? 'Ej: Más vendidos en Electrónica' : 'Ej: Ofertas del Mes'}
-            className={fieldErrors.name ? styles.inputError : undefined}
-            aria-invalid={!!fieldErrors.name}
-          />
-          {fieldErrors.name && <span className={styles.fieldError}>{fieldErrors.name}</span>}
-        </div>
+        {/* ── SECCIÓN 1: INFORMACIÓN BÁSICA ── */}
+        <section className={styles.formCardSection}>
+          <h2 className={styles.formCardTitle}>
+            <Layers size={18} />
+            Información Básica
+          </h2>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="collection-slug">Slug *</label>
-          <input
-            id="collection-slug"
-            type="text"
-            value={formData.slug}
-            onChange={(e) => {
-              setFormData({ ...formData, slug: e.target.value });
-              setFieldErrors((prev) => ({ ...prev, slug: undefined }));
-            }}
-            placeholder="Ej: mas-vendidos-electronica"
-            className={fieldErrors.slug ? styles.inputError : undefined}
-            aria-invalid={!!fieldErrors.slug}
-          />
-          <small>URL amigable para acceder a esta colección</small>
-          {fieldErrors.slug && <span className={styles.fieldError}>{fieldErrors.slug}</span>}
-        </div>
-
-        <div className={styles.formRow}>
-          {/* ── Posición de Display (Selector Unificado) ── */}
           <div className={styles.formGroup}>
-            <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Posición de Display *</span>
+            <label htmlFor="collection-type">Tipo de colección</label>
             <Dropdown
-              id="collection-display-pos"
-              options={positionOptions}
-              value={formData.displayPosition}
-              onChange={(val) => {
-                setFormData({
-                  ...formData,
-                  displayPosition: val as Collection['displayPosition'],
-                });
-                setFieldErrors((prev) => ({ ...prev, displayPosition: undefined }));
-              }}
-              placeholder="Seleccionar posición..."
+              id="collection-type"
+              options={typeOptions}
+              value={formData.type}
+              onChange={(val) => setFormData({ ...formData, type: val })}
+              placeholder="Seleccionar tipo..."
             />
-            {fieldErrors.displayPosition && (
-              <span className={styles.fieldError}>{fieldErrors.displayPosition}</span>
-            )}
+            <small>
+              {isAutoSales
+                ? 'Los productos se calculan automáticamente desde las ventas. Podés sincronizar manualmente o esperar el recálculo diario.'
+                : 'Vos elegís qué productos aparecen y en qué orden.'}
+            </small>
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="collection-display-order">Orden de Display</label>
-            <input
-              id="collection-display-order"
-              type="number"
-              value={formData.displayOrder}
-              onChange={(e) =>
-                setFormData({ ...formData, displayOrder: Number(e.target.value) })
-              }
-              placeholder="0"
-            />
-            <small>Menor número aparece primero</small>
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="collection-name">Nombre *</label>
+              <input
+                id="collection-name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => {
+                  const name = e.target.value;
+                  setFormData({
+                    ...formData,
+                    name,
+                    slug: !collection ? generateSlug(name) : formData.slug,
+                  });
+                  setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                }}
+                placeholder={isAutoSales ? 'Ej: Más vendidos en Electrónica' : 'Ej: Ofertas del Mes'}
+                className={fieldErrors.name ? styles.inputError : undefined}
+                aria-invalid={!!fieldErrors.name}
+              />
+              {fieldErrors.name && <span className={styles.fieldError}>{fieldErrors.name}</span>}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="collection-slug">Slug *</label>
+              <input
+                id="collection-slug"
+                type="text"
+                value={formData.slug}
+                onChange={(e) => {
+                  setFormData({ ...formData, slug: e.target.value });
+                  setFieldErrors((prev) => ({ ...prev, slug: undefined }));
+                }}
+                placeholder="Ej: mas-vendidos-electronica"
+                className={fieldErrors.slug ? styles.inputError : undefined}
+                aria-invalid={!!fieldErrors.slug}
+              />
+              <small>URL amigable para acceder a esta colección</small>
+              {fieldErrors.slug && <span className={styles.fieldError}>{fieldErrors.slug}</span>}
+            </div>
           </div>
-        </div>
 
-        {/* ── Parámetros de auto_sales ── */}
-        {isAutoSales && (
-          <fieldset className={styles.autoParamsFieldset}>
-            <legend>Configuración automática por ventas</legend>
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="collection-display-pos">Posición de Display *</label>
+              <Dropdown
+                id="collection-display-pos"
+                options={positionOptions}
+                value={formData.displayPosition}
+                onChange={(val) => {
+                  setFormData({
+                    ...formData,
+                    displayPosition: val as Collection['displayPosition'],
+                  });
+                  setFieldErrors((prev) => ({ ...prev, displayPosition: undefined }));
+                }}
+                placeholder="Seleccionar posición..."
+              />
+              {fieldErrors.displayPosition && (
+                <span className={styles.fieldError}>{fieldErrors.displayPosition}</span>
+              )}
+            </div>
 
-            <div className={styles.formRow}>
-              {/* ── Categoría (Selector Unificado) ── */}
+            <div className={styles.formGroup}>
+              <label htmlFor="collection-display-order">Orden de Display</label>
+              <input
+                id="collection-display-order"
+                type="number"
+                value={formData.displayOrder}
+                onChange={(e) =>
+                  setFormData({ ...formData, displayOrder: Number(e.target.value) })
+                }
+                placeholder="0"
+              />
+              <small>Menor número aparece primero</small>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECCIÓN 2: CONFIGURACIÓN AUTOMÁTICA O PRODUCTOS ── */}
+        {isAutoSales ? (
+          <section className={styles.formCardSection}>
+            <h2 className={styles.formCardTitle}>
+              <Zap size={18} />
+              Configuración Automática por Ventas
+            </h2>
+
+            <div className={styles.formRow3Col}>
               <div className={styles.formGroup}>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Categoría (opcional)</span>
+                <label htmlFor="auto-category">Categoría (opcional)</label>
                 <Dropdown
                   id="auto-category"
                   options={categoryOptions}
@@ -467,12 +506,11 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                   }
                   placeholder="Todas las categorías"
                 />
-                <small style={{ marginTop: '6px' }}>Dejar vacío para mostrar top global de ventas</small>
+                <small>Dejar vacío para mostrar top global de ventas</small>
               </div>
 
-              {/* ── Ventana de tiempo (Selector Unificado) ── */}
               <div className={styles.formGroup}>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block' }}>Ventana de tiempo (días)</span>
+                <label htmlFor="auto-window">Ventana de tiempo (días)</label>
                 <Dropdown
                   id="auto-window"
                   options={windowOptions}
@@ -506,7 +544,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
               </div>
             </div>
 
-            {/* Botón de Sincronización */}
             {collection && (
               <div className={styles.syncRow}>
                 <button
@@ -515,7 +552,8 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                   onClick={handleSyncNow}
                   disabled={syncing}
                 >
-                  {syncing ? 'Sincronizando...' : '⟳ Sincronizar ahora'}
+                  <RotateCcw size={14} />
+                  {syncing ? 'Sincronizando...' : 'Sincronizar ahora'}
                 </button>
                 {collection.snapshotAt && (
                   <span className={styles.syncInfo}>
@@ -530,61 +568,72 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                 )}
               </div>
             )}
-          </fieldset>
+          </section>
+        ) : (
+          <section className={styles.formCardSection}>
+            <h2 className={styles.formCardTitle}>
+              <Layers size={18} />
+              Productos en la Colección
+            </h2>
+
+            <div className={styles.formGroup}>
+              <ProductSelector
+                selectedIds={formData.productIds}
+                onProductsChange={(productIds) => {
+                  setFormData({ ...formData, productIds });
+                  setFieldErrors((prev) => ({ ...prev, productIds: undefined }));
+                }}
+                initialProducts={
+                  collection?.products?.map((p) => {
+                    const liveProduct = liveProducts.find((lp) => lp.id === p.id);
+                    const liveImageUrl = liveProduct?.images?.[0];
+                    return {
+                      id: p.id,
+                      name: p.name,
+                      price: p.price,
+                      imageUrl: liveImageUrl && !liveImageUrl.includes('placeholder.png')
+                        ? liveImageUrl
+                        : (normalizeImageUrl(p.imageUrl) ?? undefined),
+                    };
+                  }) ?? []
+                }
+              />
+              {fieldErrors.productIds && (
+                <span className={styles.fieldError}>{fieldErrors.productIds}</span>
+              )}
+            </div>
+          </section>
         )}
 
-        {/* ── Selector de productos (solo para manual) ── */}
-        {!isAutoSales && (
+        {/* ── SECCIÓN 3: ESTADO Y PUBLICACIÓN ── */}
+        <section className={styles.formCardSection}>
+          <h2 className={styles.formCardTitle}>
+            <CheckCircle2 size={18} />
+            Estado de Publicación
+          </h2>
+
           <div className={styles.formGroup}>
-            <ProductSelector
-              selectedIds={formData.productIds}
-              onProductsChange={(productIds) => {
-                setFormData({ ...formData, productIds });
-                setFieldErrors((prev) => ({ ...prev, productIds: undefined }));
-              }}
-              // 🟢 MEJORA: Realiza la búsqueda cruzada por ID usando los productos cargados en el Admin
-              initialProducts={
-                collection?.products?.map((p) => {
-                  const liveProduct = liveProducts.find((lp) => lp.id === p.id);
-                  const liveImageUrl = liveProduct?.images?.[0];
-                  return {
-                    id: p.id,
-                    name: p.name,
-                    price: p.price,
-                    imageUrl: liveImageUrl && !liveImageUrl.includes('placeholder.png')
-                      ? liveImageUrl
-                      : (normalizeImageUrl(p.imageUrl) ?? undefined),
-                  };
-                }) ?? []
-              }
-            />
-            {fieldErrors.productIds && (
-              <span className={styles.fieldError}>{fieldErrors.productIds}</span>
-            )}
-          </div>
-        )}
-
-        <div className={styles.formGroup}>
-          <div className={styles.isActiveBtn}>
-            <label >
-              {' '}Activo
+            <label className={styles.checkboxRow} htmlFor="collection-active-check">
+              <input
+                id="collection-active-check"
+                type="checkbox"
+                className={styles.checkboxInput}
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              />
+              <span className={styles.checkboxLabelText}>Colección activa (visible en la plataforma)</span>
             </label>
-            <input
-              type="checkbox"
-              checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-            />
           </div>
+        </section>
 
-        </div>
-
+        {/* Acciones del pie de formulario */}
         <div className={styles.formActions}>
-          <button type="submit" className={styles.btnPrimary} disabled={loading}>
-            {loading ? 'Guardando...' : collection ? 'Actualizar' : 'Crear'}
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
+            {loading ? 'Guardando...' : collection ? 'Guardar cambios' : 'Crear colección'}
           </button>
           <button
             type="button"
-            className={styles.btnSecondary}
+            className={styles.cancelBtn}
             onClick={handleCancel}
             disabled={loading}
           >
