@@ -112,7 +112,7 @@ export default function OrderDetailPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
+      {/* Header de la página con botón Volver y Metadatos del Pedido */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <button
@@ -147,7 +147,7 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Main content */}
+      {/* Contenido principal */}
       <div className={styles.content}>
         <OrderDetailContent order={order} />
       </div>

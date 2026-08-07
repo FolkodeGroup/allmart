@@ -247,12 +247,6 @@
 
 .whatsappBtn:hover {
   background: var(--color-primary-dark, #5d7568);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(118, 146, 130, 0.35);
-}
-
-.whatsappIcon {
-  font-size: 1.1rem;
 }
 
 .confirmPaidBox {
