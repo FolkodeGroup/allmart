@@ -1,16 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useAdminOrders } from '../../context/AdminOrdersContext';
 import { TabsWrapper, type TabDefinition } from './TabsWrapper';
 import { Badge } from './Badge/Badge';
 import { Button } from './Button/Button';
 import { Link } from 'react-router-dom';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatOrderCode } from '../../utils/orders';
+import { ChevronDown, ChevronUp, Mail, Phone, ShoppingBag, Eye } from 'lucide-react';
 import styles from './RequiredActionsAccordion.module.css';
 import type { Order } from '../../context/AdminOrdersContext';
 
 export default function RequiredActionsAccordion() {
   const { orders } = useAdminOrders();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [expandedMobileCardId, setExpandedMobileCardId] = useState<string | null>(null);
 
   // ─── Filter data for each tab ───────────────────────────────────────────────
 
@@ -60,6 +63,11 @@ export default function RequiredActionsAccordion() {
     'cancelado': 'Cancelado',
   };
 
+  const toggleMobileCard = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedMobileCardId(prev => (prev === id ? null : id));
+  }, []);
+
   const renderTableRow = (order: Order) => {
     const statusBadgeVariant = statusBadgeVariantMap[order.status] || 'new';
     const statusLabel = statusLabelMap[order.status] || order.status;
@@ -86,24 +94,113 @@ export default function RequiredActionsAccordion() {
     const statusBadgeVariant = statusBadgeVariantMap[order.status] || 'new';
     const statusLabel = statusLabelMap[order.status] || order.status;
     const customerName = `${order.customer.firstName} ${order.customer.lastName}`;
+    const totalQty = order.items.reduce((acc, item) => acc + item.quantity, 0);
+    const hasDeposit = order.has50PercentDeposit ?? false;
+    const isCardExpanded = expandedMobileCardId === order.id;
 
     return (
-      <div key={order.id} className={styles.mobileCard}>
-        <div className={styles.mobileCardHeader}>
-          <span className={styles.mobileClientName}>{customerName}</span>
-          <Badge variant={statusBadgeVariant}>{statusLabel}</Badge>
-        </div>
-        <div className={styles.mobileCardBody}>
-          <div className={styles.mobileMetaRow}>
-            <span className={styles.mobileDate}>{formatDate(order.createdAt)}</span>
-            <span className={styles.mobileAmount}>{formatCurrency(order.total)}</span>
+      <div
+        key={order.id}
+        className={`${styles.mobileAccordionCard} ${isCardExpanded ? styles.mobileAccordionCardExpanded : ''}`}
+      >
+        {/* Cabecera Colapsada: Cliente + Total / Estado + Chevron */}
+        <div
+          className={styles.mobileAccordionHeader}
+          onClick={(e) => toggleMobileCard(order.id, e)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isCardExpanded}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleMobileCard(order.id, e as unknown as React.MouseEvent);
+            }
+          }}
+        >
+          <div className={styles.mobileHeaderMainContainer}>
+            <div className={styles.mobileHeaderTopRow}>
+              <div className={styles.mobileHeaderLeft}>
+                <span className={styles.mobileClientName}>{customerName}</span>
+                <span className={styles.mobileTotal}>{formatCurrency(order.total)}</span>
+              </div>
+              <div className={styles.mobileHeaderRight}>
+                <Badge variant={statusBadgeVariant}>{statusLabel}</Badge>
+                <span className={styles.mobileAccordionChevron}>
+                  {isCardExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-        <div className={styles.mobileCardFooter}>
-          <Link to={`/admin/pedidos/${order.id}`} className={styles.mobileDetailBtn}>
-            Ver Detalles →
-          </Link>
-        </div>
+
+        {/* Cuerpo Expandido: ID, Seña, Fecha, Contacto, Productos, Acciones */}
+        {isCardExpanded && (
+          <div className={styles.mobileAccordionBody}>
+            <div className={styles.mobileMetaRowExpanded}>
+              <div className={styles.mobileMetaGroupLeft}>
+                <span className={styles.mobileCardIdExpanded}>
+                  #{formatOrderCode(order.id)}
+                </span>
+                <span className={`${styles.depositBadge} ${hasDeposit ? styles.depositActive : styles.depositNone}`}>
+                  {hasDeposit ? '50% seña' : 'Sin seña'}
+                </span>
+              </div>
+              <div className={styles.mobileMetaGroupRight}>
+                <span className={styles.mobileCardDateExpanded}>{formatDate(order.createdAt)}</span>
+                <span className={styles.mobileMetaDot}>•</span>
+                <span className={styles.mobileCardItemsCountExpanded}>{totalQty} {totalQty === 1 ? 'ítem' : 'ítems'}</span>
+              </div>
+            </div>
+
+            {/* Datos de Contacto */}
+            <div className={styles.mobileCustomerBox}>
+              <div className={styles.mobileCustomerRow}>
+                <Mail size={14} className={styles.mobileCustomerIcon} />
+                <a href={`mailto:${order.customer.email}`} className={styles.mobileCustomerLink} onClick={e => e.stopPropagation()}>
+                  {order.customer.email}
+                </a>
+              </div>
+              {order.customer.phone && (
+                <div className={styles.mobileCustomerRow}>
+                  <Phone size={14} className={styles.mobileCustomerIcon} />
+                  <a href={`tel:${order.customer.phone}`} className={styles.mobileCustomerLink} onClick={e => e.stopPropagation()}>
+                    {order.customer.phone}
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Productos */}
+            <div className={styles.mobileItemsBox}>
+              <div className={styles.mobileItemsTitle}>
+                <ShoppingBag size={14} />
+                <span>DETALLE DE PRODUCTOS ({order.items.length})</span>
+              </div>
+              <ul className={styles.mobileItemsList}>
+                {order.items.map((item, idx) => (
+                  <li key={`${item.productId}-${idx}`} className={styles.mobileItemRow}>
+                    <div className={styles.mobileItemInfo}>
+                      <span className={styles.mobileItemName}>{item.productName}</span>
+                      {item.variant && <span className={styles.mobileItemVariant}>{item.variant}</span>}
+                    </div>
+                    <div className={styles.mobileItemQtyPrice}>
+                      <span className={styles.mobileItemQty}>x{item.quantity}</span>
+                      <span className={styles.mobileItemSubtotal}>{formatCurrency(item.unitPrice * item.quantity)}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Botón Acción */}
+            <div className={styles.mobileAccordionActions}>
+              <Link to={`/admin/pedidos/${order.id}`} className={styles.mobileFullDetailBtn}>
+                <Eye size={16} />
+                <span>Ver detalle completo</span>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

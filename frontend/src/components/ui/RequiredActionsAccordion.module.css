@@ -172,61 +172,255 @@
     gap: 10px;
   }
 
-  .mobileCard {
+  .mobileAccordionCard {
     background-color: var(--color-bg-primary, #111827);
     border: 1px solid var(--color-border, #374151);
     border-radius: 12px;
-    padding: 12px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .mobileCardHeader {
+  .mobileAccordionCardExpanded {
+    border-color: var(--color-primary, #769282);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobileAccordionHeader {
+    padding: 12px 14px;
+    cursor: pointer;
+    background-color: var(--color-bg-primary, #111827);
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mobileHeaderMainContainer {
+    width: 100%;
+  }
+
+  .mobileHeaderTopRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
+  }
+
+  .mobileHeaderLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
 
   .mobileClientName {
     font-size: 14px;
     font-weight: 700;
     color: var(--color-text-primary, #ffffff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .mobileCardBody {
+  .mobileTotal {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-accent, #DDB08C);
+  }
+
+  .mobileHeaderRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .mobileAccordionChevron {
+    color: var(--color-text-secondary, #9ca3af);
+    display: flex;
+    align-items: center;
+  }
+
+  .mobileAccordionBody {
+    padding: 12px 14px 14px 14px;
+    border-top: 1px solid var(--color-border, #374151);
+    background-color: var(--color-bg-secondary, #1f2937);
     display: flex;
     flex-direction: column;
+    gap: 10px;
   }
 
-  .mobileMetaRow {
+  .mobileMetaRowExpanded {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 13px;
+    font-size: 12px;
   }
 
-  .mobileDate {
+  .mobileMetaGroupLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobileCardIdExpanded {
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--color-accent, #DDB08C);
+  }
+
+  .depositBadge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 999px;
+  }
+
+  .depositActive {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .depositNone {
+    background-color: rgba(156, 163, 175, 0.15);
+    color: #9ca3af;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+  }
+
+  .mobileMetaGroupRight {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     color: var(--color-text-secondary, #9ca3af);
   }
 
-  .mobileAmount {
-    font-weight: 700;
-    color: var(--color-primary, #769282);
-    font-size: 15px;
+  .mobileCardDateExpanded,
+  .mobileCardItemsCountExpanded {
+    font-size: 11px;
   }
 
-  .mobileCardFooter {
+  .mobileMetaDot {
+    color: var(--color-border, #374151);
+  }
+
+  .mobileCustomerBox {
+    background-color: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 8px;
+    padding: 8px 10px;
     display: flex;
-    border-top: 1px solid var(--color-border, #374151);
-    padding-top: 8px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobileCustomerRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .mobileCustomerIcon {
+    color: var(--color-text-tertiary, #9ca3af);
+    flex-shrink: 0;
+  }
+
+  .mobileCustomerLink {
+    color: var(--color-primary-light, #8fa99a);
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .mobileItemsBox {
+    background-color: var(--color-bg-primary, #111827);
+    border: 1px solid var(--color-border, #374151);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mobileItemsTitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-secondary, #9ca3af);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .mobileItemsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mobileItemRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--color-border, #374151);
+  }
+
+  .mobileItemRow:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .mobileItemInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .mobileItemName {
+    font-weight: 600;
+    color: var(--color-text-primary, #ffffff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobileItemVariant {
+    font-size: 10px;
+    color: var(--color-text-secondary, #9ca3af);
+  }
+
+  .mobileItemQtyPrice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .mobileItemQty {
+    color: var(--color-text-secondary, #9ca3af);
+  }
+
+  .mobileItemSubtotal {
+    font-weight: 700;
+    color: var(--color-text-primary, #ffffff);
+  }
+
+  .mobileAccordionActions {
+    display: flex;
     margin-top: 4px;
   }
 
-  .mobileDetailBtn {
+  .mobileFullDetailBtn {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     width: 100%;
     min-height: 44px;
     background-color: rgba(118, 146, 130, 0.15);
@@ -236,9 +430,10 @@
     font-weight: 600;
     font-size: 13px;
     text-decoration: none;
+    transition: background-color 0.2s ease;
   }
 
-  .mobileDetailBtn:active {
+  .mobileFullDetailBtn:active {
     background-color: var(--color-primary, #769282);
     color: #ffffff;
   }
