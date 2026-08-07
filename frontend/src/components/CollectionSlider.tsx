@@ -33,7 +33,7 @@ interface Props {
 const TRANSITION_MS = 480;
 
 function getLayout(vw: number): { visible: number; gap: number } {
-  if (vw < 480) return { visible: 1, gap: 12 };
+  if (vw < 480) return { visible: 2, gap: 12 };
   if (vw < 768) return { visible: 2, gap: 14 };
   if (vw < 1024) return { visible: 3, gap: 16 };
   if (vw < 1400) return { visible: 4, gap: 18 };
@@ -114,8 +114,14 @@ const CollectionSlider: React.FC<Props> = ({
     setIsMobile(mobile);
     setLayout(newLayout);
     if (vpW > 0) {
-      const w = (vpW - newLayout.gap * (newLayout.visible - 1)) / newLayout.visible;
-      setSlideW(w);
+      if (mobile) {
+        // En móvil, se calcula un ancho de ~160px - 175px para permitir ver 2 cards completas + 20% de asomado de la 3ª card (peek effect)
+        const calcWidth = Math.min(175, Math.max(150, Math.floor((vpW - newLayout.gap * 1.5) / 2.2)));
+        setSlideW(calcWidth);
+      } else {
+        const w = (vpW - newLayout.gap * (newLayout.visible - 1)) / newLayout.visible;
+        setSlideW(w);
+      }
     }
   }, []);
 
