@@ -186,7 +186,7 @@ export async function fetchAdminOrderById(token: string, id: string): Promise<Or
 export async function updateAdminOrder(
   token: string,
   id: string,
-  payload: Partial<Pick<Order, 'status' | 'paymentStatus' | 'paidAt' | 'notes'>>
+  payload: Partial<Pick<Order, 'status' | 'paymentStatus' | 'paidAt' | 'notes' | 'has50PercentDeposit'>>
 ): Promise<Order> {
   const body = await apiFetch<ApiSuccess<ApiOrder>>(`/api/admin/orders/${id}`, {
     method: 'PUT',
@@ -230,6 +230,35 @@ export async function toggleAdminOrderDeposit(
   return mapApiOrderToOrder(body.data);
 }
 
+export async function upsertAdminOrderShipment(
+  token: string,
+  id: string,
+  shipmentData: {
+    addressStreet?: string;
+    addressCity?: string;
+    addressProvince?: string;
+    addressZip?: string;
+    carrier?: string;
+    trackingNumber?: string;
+  }
+): Promise<void> {
+  try {
+    await apiFetch(`/api/admin/orders/${id}/shipment`, {
+      method: 'POST',
+      body: JSON.stringify({
+        addressStreet: shipmentData.addressStreet ?? 'Local / Depósito',
+        addressCity: shipmentData.addressCity ?? 'CABA',
+        addressProvince: shipmentData.addressProvince ?? 'Buenos Aires',
+        addressZip: shipmentData.addressZip ?? '1000',
+        carrier: shipmentData.carrier,
+        trackingNumber: shipmentData.trackingNumber,
+      }),
+    }, token);
+  } catch (err) {
+    console.warn('[Shipment API] No se pudo guardar el envío vía endpoint dedicado:', err);
+  }
+}
+
 export async function deleteAdminOrder(token: string, id: string): Promise<void> {
   await apiFetch<unknown>(`/api/admin/orders/${id}`, { method: 'DELETE' }, token);
 }
@@ -252,11 +281,6 @@ export interface OrdersPdfExportParams {
   title?: string;
 }
 
-/**
- * GET /api/admin/orders/export-pdf
- * Genera y descarga el reporte de pedidos en PDF con el estilo visual del catálogo Allmart.
- * La respuesta es un Blob binario (application/pdf).
- */
 export async function exportOrdersPdfFromBackend(
   token: string,
   params: OrdersPdfExportParams = {}

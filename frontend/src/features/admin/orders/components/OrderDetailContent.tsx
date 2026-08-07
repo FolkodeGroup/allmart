@@ -11,6 +11,7 @@ import {
   HAPPY_PATH_STEPS,
   STATUS_LABELS,
 } from '../utils/ordersHelpers';
+import { upsertAdminOrderShipment } from '../ordersService';
 import toast from 'react-hot-toast';
 import type { Order, OrderStatus, PaymentStatus } from '../../../../context/AdminOrdersContext';
 import styles from './OrderDetailContent.module.css';
@@ -19,17 +20,32 @@ import { useUnsavedChanges } from '../../../../hooks/useUnsavedChanges';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderStatusSelector } from './OrderStatusSelector';
 import { OrderTimeline } from './OrderTimeline';
-import { MessageSquare, Phone, Mail, Check, ArrowRight } from 'lucide-react';
-import { formatOrderLabel } from '../../../../utils/orders';
+import { MessageSquare, Phone, Mail, Check, ArrowRight, MapPin, Package } from 'lucide-react';
+import { formatOrderCode, formatOrderLabel } from '../../../../utils/orders';
+import { Modal } from '../../../../components/ui/Modal';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 interface OrderDetailContentProps {
   order: Order;
   onClose?: () => void;
 }
 
+const CARRIER_OPTIONS = [
+  { value: 'OCA', label: 'OCA (Envío Postal)' },
+  { value: 'Andreani', label: 'Andreani' },
+  { value: 'Flete Propio', label: 'Flete / Repartidor Propio' },
+  { value: 'Moto Mensajería', label: 'Moto Mensajería Express' },
+  { value: 'Retiro en local', label: 'Retiro en Sucursal / Depósito' },
+];
+
+const WAREHOUSE_OPTIONS = [
+  { value: 'Depósito Central Allmart', label: 'Depósito Central Allmart' },
+  { value: 'Sucursal Principal', label: 'Sucursal Principal' },
+];
+
 export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) => {
   const { updateOrderStatus, updateOrder, deleteOrder, markAsPaid, toggleDeposit } = useAdminOrders();
-  const { can } = useAdminAuth();
+  const { can, token } = useAdminAuth();
 
   const [notes, setNotes] = useState(order.notes ?? '');
   const [savedNotesDisplay, setSavedNotesDisplay] = useState(order.notes ?? '');
@@ -41,7 +57,40 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [statusError, setStatusError] = useState<string | null>(null);
   const [depositLoading, setDepositLoading] = useState(false);
   const [saveNotesLoading, setSaveNotesLoading] = useState(false);
-  const [confirmDeliveryWithCash, setConfirmDeliveryWithCash] = useState(false);
+
+  // ── Modales de Transición Guiada ──
+  // Paso 1 ➔ 2: Confirmación + Seña/Cobro
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [confirmPaymentMode, setConfirmPaymentMode] = useState<'deposit' | 'full' | 'cod'>('deposit');
+  const [confirmRefNumber, setConfirmRefNumber] = useState('');
+  const [confirmCustomNote, setConfirmCustomNote] = useState('');
+
+  // Paso 2 ➔ 3: En preparación / Dirección de entrega
+  const [preparationModalOpen, setPreparationModalOpen] = useState(false);
+  const [prepAddressStreet, setPrepAddressStreet] = useState('');
+  const [prepAddressCity, setPrepAddressCity] = useState('CABA');
+  const [prepAddressProvince, setPrepAddressProvince] = useState('Buenos Aires');
+  const [prepAddressZip, setPrepAddressZip] = useState('1000');
+  const [prepWarehouse, setPrepWarehouse] = useState('Depósito Central Allmart');
+  const [prepNote, setPrepNote] = useState('');
+
+  // Paso 3 ➔ 4: Bulto Preparado
+  const [readyModalOpen, setReadyModalOpen] = useState(false);
+  const [readyPackagesCount, setReadyPackagesCount] = useState('1');
+  const [readyLocation, setReadyLocation] = useState('Estantería B-04');
+  const [readyNote, setReadyNote] = useState('');
+
+  // Paso 4 ➔ 5: Despacho y Logística
+  const [dispatchModalOpen, setDispatchModalOpen] = useState(false);
+  const [dispatchCarrier, setDispatchCarrier] = useState('OCA');
+  const [dispatchTracking, setDispatchTracking] = useState('');
+  const [dispatchNote, setDispatchNote] = useState('');
+
+  // Paso 5 ➔ 6: Entrega Final y Cobro
+  const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
+  const [deliveryCollectCash, setDeliveryCollectCash] = useState(true);
+  const [deliveryReceiver, setDeliveryReceiver] = useState('');
+  const [deliveryNote, setDeliveryNote] = useState('');
 
   const originalStatusRef = useRef(order.status);
   const originalNotesRef = useRef(order.notes ?? '');
@@ -93,7 +142,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       originalStatusRef.current = finalStatus;
       setPendingStatus(finalStatus);
       setStatusNote('');
-      setConfirmDeliveryWithCash(false);
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : 'Error desconocido');
       toast.error('No se pudo actualizar el pedido');
@@ -103,13 +151,241 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
-  const handleQuickNextStep = (nextStatus: OrderStatus) => {
-    if (nextStatus === 'entregado' && !isAbonado) {
-      setConfirmDeliveryWithCash(true);
+  // ── Interceptor táctico de avance guiado según paso del Happy Path ──
+  const handleTriggerNextStep = (nextStatus: OrderStatus) => {
+    if (nextStatus === 'confirmado') {
+      setConfirmPaymentMode(order.has50PercentDeposit ? 'deposit' : isAbonado ? 'full' : 'deposit');
+      setConfirmRefNumber('');
+      setConfirmCustomNote('');
+      setConfirmModalOpen(true);
       return;
     }
+
+    if (nextStatus === 'en-preparacion') {
+      setPrepAddressStreet('');
+      setPrepAddressCity('CABA');
+      setPrepAddressProvince('Buenos Aires');
+      setPrepAddressZip('1000');
+      setPrepWarehouse('Depósito Central Allmart');
+      setPrepNote('');
+      setPreparationModalOpen(true);
+      return;
+    }
+
+    if (nextStatus === 'preparado') {
+      setReadyPackagesCount('1');
+      setReadyLocation('Zona de Despacho B-04');
+      setReadyNote('');
+      setReadyModalOpen(true);
+      return;
+    }
+
+    if (nextStatus === 'enviado') {
+      setDispatchCarrier('OCA');
+      setDispatchTracking('');
+      setDispatchNote('');
+      setDispatchModalOpen(true);
+      return;
+    }
+
+    if (nextStatus === 'entregado') {
+      setDeliveryCollectCash(!isAbonado);
+      setDeliveryReceiver(`${order.customer.firstName} ${order.customer.lastName}`);
+      setDeliveryNote('');
+      setDeliveryModalOpen(true);
+      return;
+    }
+
     setPendingStatus(nextStatus);
     handleStatusApply(nextStatus);
+  };
+
+  // ── Ejecución 1: Confirmación Guiada (Pendiente ➔ Confirmado) ──
+  const handleExecuteConfirmOrder = async () => {
+    setStatusLoading(true);
+    try {
+      if (confirmPaymentMode === 'deposit' && !order.has50PercentDeposit) {
+        await toggleDeposit(order.id);
+      } else if (confirmPaymentMode === 'full' && !isAbonado) {
+        await markAsPaid(order.id);
+      }
+
+      const refNote = confirmRefNumber.trim() ? ` (Comprobante: ${confirmRefNumber.trim()})` : '';
+      const modeText = confirmPaymentMode === 'deposit'
+        ? 'Seña del 50% acreditada'
+        : confirmPaymentMode === 'full'
+        ? 'Pago 100% acreditado'
+        : 'Efectivo contra entrega aprobado';
+
+      const combinedNote = `Pedido confirmado. ${modeText}${refNote}${confirmCustomNote.trim() ? `. ${confirmCustomNote.trim()}` : ''}`;
+
+      await updateOrderStatus(order.id, 'confirmado', combinedNote);
+      originalStatusRef.current = 'confirmado';
+      setPendingStatus('confirmado');
+
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'confirm-order',
+        entity: 'order',
+        entityId: order.id,
+        details: { paymentMode: confirmPaymentMode, refNumber: confirmRefNumber },
+      });
+
+      toast.success(`Pedido #${formatOrderCode(order.id)} confirmado exitosamente`);
+      setConfirmModalOpen(false);
+    } catch (err) {
+      console.error('Error al confirmar el pedido:', err);
+      toast.error('Error al confirmar el pedido');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  // ── Ejecución 2: Inicio de Embalaje y Dirección (Confirmado ➔ En preparación) ──
+  const handleExecutePreparation = async () => {
+    setStatusLoading(true);
+    try {
+      const street = prepAddressStreet.trim() || 'Dirección acordada con cliente';
+      const city = prepAddressCity.trim() || 'CABA';
+      const province = prepAddressProvince.trim() || 'Buenos Aires';
+      const zip = prepAddressZip.trim() || '1000';
+
+      if (token) {
+        await upsertAdminOrderShipment(token, order.id, {
+          addressStreet: street,
+          addressCity: city,
+          addressProvince: province,
+          addressZip: zip,
+        });
+      }
+
+      const combinedNote = `Iniciada preparación en ${prepWarehouse}. Dirección de entrega: ${street}, ${city}. ${prepNote.trim() ? `Nota: ${prepNote.trim()}` : ''}`;
+
+      await updateOrderStatus(order.id, 'en-preparacion', combinedNote);
+      originalStatusRef.current = 'en-preparacion';
+      setPendingStatus('en-preparacion');
+
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'preparation-order',
+        entity: 'order',
+        entityId: order.id,
+        details: { warehouse: prepWarehouse, street, city },
+      });
+
+      toast.success('Pedido en preparación. Datos de envío registrados.');
+      setPreparationModalOpen(false);
+    } catch (err) {
+      console.error('Error al iniciar preparación:', err);
+      toast.error('Error al iniciar la preparación del pedido');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  // ── Ejecución 3: Bulto Preparado (En preparación ➔ Preparado) ──
+  const handleExecuteReady = async () => {
+    setStatusLoading(true);
+    try {
+      const pkgs = readyPackagesCount.trim() || '1';
+      const loc = readyLocation.trim() || 'Zona de Expedición';
+      const combinedNote = `Bulto preparado (${pkgs} caja/s) en ${loc}. ${readyNote.trim() ? `Nota: ${readyNote.trim()}` : ''}`;
+
+      await updateOrderStatus(order.id, 'preparado', combinedNote);
+      originalStatusRef.current = 'preparado';
+      setPendingStatus('preparado');
+
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'ready-order',
+        entity: 'order',
+        entityId: order.id,
+        details: { packages: pkgs, location: loc },
+      });
+
+      toast.success('Bulto preparado y listo para despacho');
+      setReadyModalOpen(false);
+    } catch (err) {
+      console.error('Error al marcar preparado:', err);
+      toast.error('Error al marcar el paquete como preparado');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  // ── Ejecución 4: Despacho y Logística (Preparado ➔ Enviado) ──
+  const handleExecuteDispatch = async () => {
+    setStatusLoading(true);
+    try {
+      const trackingText = dispatchTracking.trim() ? ` (Guía/Seguimiento: ${dispatchTracking.trim()})` : '';
+      const combinedNote = `Despachado vía ${dispatchCarrier}${trackingText}${dispatchNote.trim() ? `. ${dispatchNote.trim()}` : ''}`;
+
+      await updateOrderStatus(order.id, 'enviado', combinedNote);
+
+      if (token && (dispatchCarrier || dispatchTracking)) {
+        await upsertAdminOrderShipment(token, order.id, {
+          carrier: dispatchCarrier,
+          trackingNumber: dispatchTracking.trim() || undefined,
+        });
+      }
+
+      originalStatusRef.current = 'enviado';
+      setPendingStatus('enviado');
+
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'dispatch-order',
+        entity: 'order',
+        entityId: order.id,
+        details: { carrier: dispatchCarrier, tracking: dispatchTracking },
+      });
+
+      toast.success(`Pedido despachado por ${dispatchCarrier}`);
+      setDispatchModalOpen(false);
+    } catch (err) {
+      console.error('Error al despachar el pedido:', err);
+      toast.error('Error al despachar el pedido');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  // ── Ejecución 5: Entrega Final y Cobro (Enviado ➔ Entregado) ──
+  const handleExecuteDelivery = async () => {
+    setStatusLoading(true);
+    try {
+      if (deliveryCollectCash && !isAbonado) {
+        await markAsPaid(order.id);
+      }
+
+      const receiverText = deliveryReceiver.trim() ? ` (Recibió: ${deliveryReceiver.trim()})` : '';
+      const combinedNote = `Pedido entregado y completado${receiverText}${deliveryNote.trim() ? `. ${deliveryNote.trim()}` : ''}`;
+
+      await updateOrderStatus(order.id, 'entregado', combinedNote);
+      originalStatusRef.current = 'entregado';
+      setPendingStatus('entregado');
+
+      logAdminActivity({
+        timestamp: new Date().toISOString(),
+        user: userEmail,
+        action: 'deliver-order',
+        entity: 'order',
+        entityId: order.id,
+        details: { collectedCash: deliveryCollectCash, receiver: deliveryReceiver },
+      });
+
+      toast.success('Pedido entregado y cerrado');
+      setDeliveryModalOpen(false);
+    } catch (err) {
+      console.error('Error al marcar como entregado:', err);
+      toast.error('Error al marcar como entregado');
+    } finally {
+      setStatusLoading(false);
+    }
   };
 
   const currentStatus = order.status;
@@ -318,6 +594,54 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         .smartNextStepBtn:hover:not(:disabled) {
           background: var(--color-primary-dark, #5d7568);
         }
+
+        /* Modal Styles */
+        .guidedModalForm {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .radioOptionGroup {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .radioOptionCard {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 14px;
+          background: var(--color-bg-secondary, #28353d);
+          border: 1px solid var(--color-border, #374151);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .radioOptionCardActive {
+          border-color: var(--color-primary, #769282);
+          background: rgba(118, 146, 130, 0.15);
+        }
+        .radioOptionInput {
+          width: 18px;
+          height: 18px;
+          accent-color: var(--color-primary, #769282);
+          cursor: pointer;
+        }
+        .radioOptionText {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          cursor: pointer;
+        }
+        .radioOptionTitle {
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--color-text-primary, #ffffff);
+        }
+        .radioOptionSub {
+          font-size: 12px;
+          color: var(--color-text-secondary, #9ca3af);
+        }
       `}</style>
 
       {/* ── COLUMNA PRINCIPAL (65% en Desktop) ── */}
@@ -360,47 +684,12 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             <button
               type="button"
               className="smartNextStepBtn"
-              onClick={() => handleQuickNextStep(nextStepInfo.nextStatus!)}
+              onClick={() => handleTriggerNextStep(nextStepInfo.nextStatus!)}
               disabled={statusLoading}
             >
               <span>Avanzar pedido</span>
               <ArrowRight size={16} />
             </button>
-          </div>
-        )}
-
-        {/* Modal/Prompt de Confirmación para Entrega y Cobro simultáneo */}
-        {confirmDeliveryWithCash && (
-          <div className={styles.statusChangeBox} style={{ borderColor: 'var(--color-accent)' }}>
-            <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)', display: 'block', marginBottom: '8px' }}>
-              El pedido pasará a "Entregado". El cobro actual figura como "{PAYMENT_LABELS[paymentStatus]}". ¿Registrar cobro completo en efectivo?
-            </span>
-            <div className={styles.statusChangeActions}>
-              <button
-                className={styles.applyStatusBtn}
-                type="button"
-                onClick={() => handleStatusApply('entregado', true)}
-                disabled={statusLoading}
-              >
-                ✓ Entregado y Cobrado
-              </button>
-              <button
-                className={styles.cancelBtn}
-                type="button"
-                onClick={() => handleStatusApply('entregado', false)}
-                disabled={statusLoading}
-              >
-                Solo Entregado
-              </button>
-              <button
-                className={styles.cancelBtn}
-                type="button"
-                onClick={() => setConfirmDeliveryWithCash(false)}
-                disabled={statusLoading}
-              >
-                Cancelar
-              </button>
-            </div>
           </div>
         )}
 
@@ -720,6 +1009,480 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           </section>
         )}
       </div>
+
+      {/* ── MODAL 1: CONFIRMACIÓN Y RESPALDO FINANCIERO (Pendiente ➔ Confirmado) ── */}
+      <Modal
+        open={confirmModalOpen}
+        onClose={() => setConfirmModalOpen(false)}
+        title={`Confirmar Pedido #${formatOrderCode(order.id)}`}
+        size="md"
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.applyStatusBtn}
+              onClick={handleExecuteConfirmOrder}
+              disabled={statusLoading}
+            >
+              {statusLoading ? 'Confirmando...' : '✓ Confirmar y Reservar Stock'}
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => setConfirmModalOpen(false)}
+              disabled={statusLoading}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+      >
+        <div className="guidedModalForm">
+          <div style={{ padding: '12px 14px', background: 'rgba(118, 146, 130, 0.12)', borderRadius: '10px', border: '1px solid var(--color-primary)' }}>
+            <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', display: 'block' }}>Total del pedido a respaldar:</span>
+            <strong style={{ fontSize: '20px', color: 'var(--color-text-primary)' }}>{formatPrice(order.total)}</strong>
+          </div>
+
+          <div>
+            <span className={styles.detailSectionTitle} style={{ marginBottom: '8px', display: 'block' }}>
+              Modalidad de Pago / Respaldo *
+            </span>
+            <div className="radioOptionGroup">
+              <div
+                className={`radioOptionCard ${confirmPaymentMode === 'deposit' ? 'radioOptionCardActive' : ''}`}
+                onClick={() => setConfirmPaymentMode('deposit')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setConfirmPaymentMode('deposit')}
+              >
+                <input
+                  id="confirm-mode-deposit"
+                  type="radio"
+                  name="confirmPaymentMode"
+                  className="radioOptionInput"
+                  checked={confirmPaymentMode === 'deposit'}
+                  onChange={() => setConfirmPaymentMode('deposit')}
+                />
+                <label htmlFor="confirm-mode-deposit" className="radioOptionText">
+                  <span className="radioOptionTitle">Seña del 50% ({formatPrice(halfTotal)})</span>
+                  <span className="radioOptionSub">Acredita seña y reserva producto. Cobro restante en entrega: {formatPrice(halfTotal)}.</span>
+                </label>
+              </div>
+
+              <div
+                className={`radioOptionCard ${confirmPaymentMode === 'full' ? 'radioOptionCardActive' : ''}`}
+                onClick={() => setConfirmPaymentMode('full')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setConfirmPaymentMode('full')}
+              >
+                <input
+                  id="confirm-mode-full"
+                  type="radio"
+                  name="confirmPaymentMode"
+                  className="radioOptionInput"
+                  checked={confirmPaymentMode === 'full'}
+                  onChange={() => setConfirmPaymentMode('full')}
+                />
+                <label htmlFor="confirm-mode-full" className="radioOptionText">
+                  <span className="radioOptionTitle">Pago 100% Acreditado ({formatPrice(order.total)})</span>
+                  <span className="radioOptionSub">Registra cobro abonado total con fecha y hora.</span>
+                </label>
+              </div>
+
+              <div
+                className={`radioOptionCard ${confirmPaymentMode === 'cod' ? 'radioOptionCardActive' : ''}`}
+                onClick={() => setConfirmPaymentMode('cod')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setConfirmPaymentMode('cod')}
+              >
+                <input
+                  id="confirm-mode-cod"
+                  type="radio"
+                  name="confirmPaymentMode"
+                  className="radioOptionInput"
+                  checked={confirmPaymentMode === 'cod'}
+                  onChange={() => setConfirmPaymentMode('cod')}
+                />
+                <label htmlFor="confirm-mode-cod" className="radioOptionText">
+                  <span className="radioOptionTitle">Efectivo contra entrega / Cobro en destino</span>
+                  <span className="radioOptionSub">Aprueba el pedido para cobro total en mano al momento de la entrega.</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {confirmPaymentMode !== 'cod' && (
+            <div>
+              <label className={styles.detailSectionTitle} htmlFor="confirm-ref-number" style={{ marginBottom: '6px', display: 'block' }}>
+                N° de Comprobante / Referencia de Transferencia (opcional)
+              </label>
+              <input
+                id="confirm-ref-number"
+                type="text"
+                className={styles.statusNoteInput}
+                placeholder="Ej: Ref. 89412004 / CBU Mercado Pago"
+                value={confirmRefNumber}
+                onChange={e => setConfirmRefNumber(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="confirm-custom-note" style={{ marginBottom: '6px', display: 'block' }}>
+              Nota interna adicional (opcional)
+            </label>
+            <input
+              id="confirm-custom-note"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Cliente confirmó transferencia vía WhatsApp"
+              value={confirmCustomNote}
+              onChange={e => setConfirmCustomNote(e.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── MODAL 2: INICIO DE EMBALAJE Y DIRECCIÓN (Confirmado ➔ En preparación) ── */}
+      <Modal
+        open={preparationModalOpen}
+        onClose={() => setPreparationModalOpen(false)}
+        title={`Iniciar Preparación - Pedido #${formatOrderCode(order.id)}`}
+        size="md"
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.applyStatusBtn}
+              onClick={handleExecutePreparation}
+              disabled={statusLoading}
+            >
+              {statusLoading ? 'Iniciando...' : '📦 Iniciar Embalaje y Guardar Datos'}
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => setPreparationModalOpen(false)}
+              disabled={statusLoading}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+      >
+        <div className="guidedModalForm">
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="prep-warehouse-select" style={{ marginBottom: '6px', display: 'block' }}>
+              Depósito / Sucursal de Armado *
+            </label>
+            <Dropdown
+              id="prep-warehouse-select"
+              options={WAREHOUSE_OPTIONS}
+              value={prepWarehouse}
+              onChange={setPrepWarehouse}
+              placeholder="Seleccionar depósito..."
+            />
+          </div>
+
+          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+            <span className={styles.detailSectionTitle} style={{ marginBottom: '8px', display: 'block' }}>
+              <MapPin size={14} style={{ display: 'inline', marginRight: 4 }} />
+              Dirección de Entrega / Despacho
+            </span>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <label className={styles.detailSectionTitle} htmlFor="prep-address-street" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Calle y Número / Piso / Dpto</label>
+                <input
+                  id="prep-address-street"
+                  type="text"
+                  className={styles.statusNoteInput}
+                  placeholder="Ej: Av. Corrientes 1234, 4° B"
+                  value={prepAddressStreet}
+                  onChange={e => setPrepAddressStreet(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label className={styles.detailSectionTitle} htmlFor="prep-address-city" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Ciudad / Localidad</label>
+                  <input
+                    id="prep-address-city"
+                    type="text"
+                    className={styles.statusNoteInput}
+                    placeholder="Ej: CABA"
+                    value={prepAddressCity}
+                    onChange={e => setPrepAddressCity(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={styles.detailSectionTitle} htmlFor="prep-address-province" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Provincia</label>
+                  <input
+                    id="prep-address-province"
+                    type="text"
+                    className={styles.statusNoteInput}
+                    placeholder="Ej: Buenos Aires"
+                    value={prepAddressProvince}
+                    onChange={e => setPrepAddressProvince(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={styles.detailSectionTitle} htmlFor="prep-address-zip" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Código Postal</label>
+                <input
+                  id="prep-address-zip"
+                  type="text"
+                  className={styles.statusNoteInput}
+                  placeholder="Ej: C1043"
+                  value={prepAddressZip}
+                  onChange={e => setPrepAddressZip(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="prep-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+              Nota de embalaje (opcional)
+            </label>
+            <input
+              id="prep-note-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Embalar con papel de burbuja extra (frágil)"
+              value={prepNote}
+              onChange={e => setPrepNote(e.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── MODAL 3: BULTO PREPARADO (En preparación ➔ Preparado) ── */}
+      <Modal
+        open={readyModalOpen}
+        onClose={() => setReadyModalOpen(false)}
+        title={`Marcar Bulto Preparado - Pedido #${formatOrderCode(order.id)}`}
+        size="md"
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.applyStatusBtn}
+              onClick={handleExecuteReady}
+              disabled={statusLoading}
+            >
+              {statusLoading ? 'Guardando...' : '🏷️ Marcar como Bulto Preparado'}
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => setReadyModalOpen(false)}
+              disabled={statusLoading}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+      >
+        <div className="guidedModalForm">
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="ready-packages-input" style={{ marginBottom: '6px', display: 'block' }}>
+              <Package size={14} style={{ display: 'inline', marginRight: 4 }} />
+              Cantidad de Bultos / Cajas
+            </label>
+            <input
+              id="ready-packages-input"
+              type="number"
+              min="1"
+              className={styles.statusNoteInput}
+              value={readyPackagesCount}
+              onChange={e => setReadyPackagesCount(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="ready-location-input" style={{ marginBottom: '6px', display: 'block' }}>
+              Ubicación en Estantería de Expedición
+            </label>
+            <input
+              id="ready-location-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Estante B-04 / Zona de Retiro"
+              value={readyLocation}
+              onChange={e => setReadyLocation(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="ready-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+              Nota de preparación (opcional)
+            </label>
+            <input
+              id="ready-note-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Verificado control de calidad 100%"
+              value={readyNote}
+              onChange={e => setReadyNote(e.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── MODAL 4: DESPACHO Y LOGÍSTICA (Preparado ➔ Enviado) ── */}
+      <Modal
+        open={dispatchModalOpen}
+        onClose={() => setDispatchModalOpen(false)}
+        title={`Despachar Pedido #${formatOrderCode(order.id)}`}
+        size="md"
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.applyStatusBtn}
+              onClick={handleExecuteDispatch}
+              disabled={statusLoading}
+            >
+              {statusLoading ? 'Despachando...' : '🚚 Confirmar Despacho'}
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => setDispatchModalOpen(false)}
+              disabled={statusLoading}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+      >
+        <div className="guidedModalForm">
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="dispatch-carrier-select" style={{ marginBottom: '6px', display: 'block' }}>
+              Empresa de Logística / Medio de Envío *
+            </label>
+            <Dropdown
+              id="dispatch-carrier-select"
+              options={CARRIER_OPTIONS}
+              value={dispatchCarrier}
+              onChange={setDispatchCarrier}
+              placeholder="Seleccionar medio..."
+            />
+          </div>
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="dispatch-tracking-input" style={{ marginBottom: '6px', display: 'block' }}>
+              N° de Seguimiento / Guía
+            </label>
+            <input
+              id="dispatch-tracking-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: OCA-98410294 / Flete #12"
+              value={dispatchTracking}
+              onChange={e => setDispatchTracking(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="dispatch-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+              Nota de envío (opcional)
+            </label>
+            <input
+              id="dispatch-note-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Entregado a chofer de reparto turno tarde"
+              value={dispatchNote}
+              onChange={e => setDispatchNote(e.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── MODAL 5: ENTREGA FINAL Y COBRO CONTRA ENTREGA (Enviado / Preparado ➔ Entregado) ── */}
+      <Modal
+        open={deliveryModalOpen}
+        onClose={() => setDeliveryModalOpen(false)}
+        title={`Finalizar y Entregar Pedido #${formatOrderCode(order.id)}`}
+        size="md"
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.applyStatusBtn}
+              onClick={handleExecuteDelivery}
+              disabled={statusLoading}
+            >
+              {statusLoading ? 'Finalizando...' : '✅ Marcar como Entregado y Finalizar'}
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => setDeliveryModalOpen(false)}
+              disabled={statusLoading}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+      >
+        <div className="guidedModalForm">
+          {!isAbonado && (
+            <div style={{ padding: '12px 14px', background: 'rgba(239, 68, 68, 0.12)', borderRadius: '10px', border: '1px solid #ef4444' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  id="delivery-collect-cash-check"
+                  type="checkbox"
+                  style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)' }}
+                  checked={deliveryCollectCash}
+                  onChange={e => setDeliveryCollectCash(e.target.checked)}
+                />
+                <label htmlFor="delivery-collect-cash-check" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block' }}>
+                    Registrar cobro de {formatPrice(remainingAmount)} en efectivo / contra entrega
+                  </strong>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                    Al marcar esta casilla, el pedido pasará automáticamente a estado "Abonado".
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="delivery-receiver-input" style={{ marginBottom: '6px', display: 'block' }}>
+              Receptor / DNI (opcional)
+            </label>
+            <input
+              id="delivery-receiver-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Recibió Darío Gimenez (DNI 38.941.200)"
+              value={deliveryReceiver}
+              onChange={e => setDeliveryReceiver(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="delivery-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+              Nota de conformidad (opcional)
+            </label>
+            <input
+              id="delivery-note-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Bulto entregado en perfectas condiciones"
+              value={deliveryNote}
+              onChange={e => setDeliveryNote(e.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
