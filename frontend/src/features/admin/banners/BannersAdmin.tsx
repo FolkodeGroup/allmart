@@ -353,16 +353,14 @@ export function BannersAdmin() {
               )}
             </div>
 
-            <div>
-              <fieldset className={styles.formGroup} style={{ border: "none" }}>
-                <legend className={styles.legend}>Destino del banner</legend>
-                <BannerFilterBuilder
-                  value={formData.filterConfig}
-                  onChange={filterConfig => setFormData(prev => ({ ...prev, filterConfig }))}
-                  categories={categories}
-                />
-              </fieldset>
-            </div>
+            <fieldset className={styles.formFieldset}>
+              <legend className={styles.legend}>Destino del banner</legend>
+              <BannerFilterBuilder
+                value={formData.filterConfig}
+                onChange={filterConfig => setFormData(prev => ({ ...prev, filterConfig }))}
+                categories={categories}
+              />
+            </fieldset>
 
             <div className={styles.formGroup}>
               <label htmlFor="banner-image">Imagen del Banner {!editingId && '*'}</label>
