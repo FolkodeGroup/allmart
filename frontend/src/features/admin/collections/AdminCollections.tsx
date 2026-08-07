@@ -1,21 +1,19 @@
 /**
  * features/admin/collections/AdminCollections.tsx
- * Página principal de gestión de colecciones.
+ * Página principal de gestión de colecciones con vista WYSIWYG.
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Collection } from './collectionsService';
 import { collectionsService } from './collectionsService';
 import AdminCollectionForm from './AdminCollectionForm';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
-import styles from './AdminCollections.module.css';
+import CollectionSlider from '../../../components/CollectionSlider';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-import { Search } from 'lucide-react';
+import { Search, Plus, RotateCcw } from 'lucide-react';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
-import CollectionPreview from '../../../components/CollectionPreview/CollectionPreview';
-import ImageWithFallback from '../../../components/ui/ImageWithFallback';
-import { resolveImageUrl } from '../../../utils/imageHelpers';
-import { normalizeImageUrl, getFirstProductImage } from '../../../utils/imageUrl';
+import toast from 'react-hot-toast';
+import styles from './AdminCollections.module.css';
 
 type ViewMode = 'list' | 'form';
 
@@ -34,18 +32,36 @@ const AdminCollections: React.FC = () => {
   const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
   const [deleting, setDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [previewCollection, setPreviewCollection] = useState<Collection | null>(null);
-  const [previewAnchor, setPreviewAnchor] = useState<DOMRect | null>(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [syncingAll, setSyncingAll] = useState(false);
 
   const limit = 10;
 
+  const loadCollections = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await collectionsService.getAll(
+        page,
+        limit,
+        search,
+        displayPosition,
+        filterActive
+      );
+      setCollections(result.data);
+      setPages(result.pagination.pages);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error cargando colecciones');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit, search, displayPosition, filterActive]);
+
   useEffect(() => {
     loadCollections();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search, filterActive, displayPosition]);
+  }, [loadCollections]);
 
+  // Cargar productos completos de cada colección si faltaran
   useEffect(() => {
     if (!collections || collections.length === 0) return;
     const missing = collections.filter((c) => !c.products || c.products.length === 0);
@@ -67,56 +83,42 @@ const AdminCollections: React.FC = () => {
     return () => { cancelled = true; };
   }, [collections]);
 
-  async function loadCollections() {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await collectionsService.getAll(
-        page,
-        limit,
-        search,
-        displayPosition,
-        filterActive
-      );
-      setCollections(result.data);
-      setPages(result.pagination.pages);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error cargando colecciones');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!openMenuId) return;
-      const el = (e.target as HTMLElement);
-      if (!el.closest) return;
-      if (el.closest(`[data-menu-id="${openMenuId}"]`) || el.closest(`[data-btn-id="${openMenuId}"]`)) {
-        return;
-      }
-      setOpenMenuId(null);
-    }
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [openMenuId]);
-
-  useEffect(() => {
-    if (openMenuId && menuFirstItemRef.current) {
-      menuFirstItemRef.current.focus();
-    }
-  }, [openMenuId]);
-  const menuFirstItemRef = useRef<HTMLDivElement | null>(null);
-
   async function toggleActive(collection: Collection) {
     const id = collection.id;
     const next = !collection.isActive;
     setCollections((prev) => prev.map((c) => (c.id === id ? { ...c, isActive: next } : c)));
     try {
       await collectionsService.update(id, { isActive: next });
+      toast.success(next ? 'Colección activada' : 'Colección desactivada');
     } catch (err) {
       setCollections((prev) => prev.map((c) => (c.id === id ? { ...c, isActive: collection.isActive } : c)));
       setError(err instanceof Error ? err.message : 'Error cambiando estado');
+    }
+  }
+
+  async function handleSyncSingle(id: string) {
+    setSyncingId(id);
+    try {
+      await collectionsService.sync(id);
+      toast.success('Colección sincronizada con el top de ventas');
+      await loadCollections();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al sincronizar');
+    } finally {
+      setSyncingId(null);
+    }
+  }
+
+  async function handleSyncAll() {
+    setSyncingAll(true);
+    try {
+      const res = await collectionsService.syncAll();
+      toast.success(`Sincronizadas ${res.synced} colecciones`);
+      await loadCollections();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al sincronizar colecciones');
+    } finally {
+      setSyncingAll(false);
     }
   }
 
@@ -137,6 +139,7 @@ const AdminCollections: React.FC = () => {
     setError(null);
     try {
       await Promise.all(idsToDelete.map((id) => collectionsService.delete(id)));
+      toast.success('Colección(es) eliminada(s) correctamente');
       setDeleteModalOpen(false);
       setIdsToDelete([]);
       setSelectedIds([]);
@@ -180,7 +183,7 @@ const AdminCollections: React.FC = () => {
   ], []);
 
   const activeOptions = useMemo(() => [
-    { value: '', label: 'Todas las de estado' },
+    { value: '', label: 'Todos los estados' },
     { value: 'true', label: 'Activas' },
     { value: 'false', label: 'Inactivas' }
   ], []);
@@ -197,25 +200,38 @@ const AdminCollections: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      {/* ── Acciones de Encabezado ── */}
       <div className={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto', flexWrap: 'wrap' }}>
           {selectedIds.length > 0 && (
             <button
+              type="button"
               className={styles.btnSmallDanger}
               onClick={handleBulkDelete}
               disabled={deleting}
-              style={{ marginRight: 8 }}
             >
               Eliminar seleccionadas ({selectedIds.length})
             </button>
           )}
-          <button className={styles.btnPrimary} onClick={handleNew}>
-            + Nueva Colección
+          <button
+            type="button"
+            className={styles.btnSecondary}
+            onClick={handleSyncAll}
+            disabled={syncingAll}
+            title="Sincronizar todas las colecciones automáticas por ventas"
+          >
+            <RotateCcw size={14} />
+            {syncingAll ? 'Sincronizando...' : 'Sincronizar todo'}
+          </button>
+          <button type="button" className={styles.btnPrimary} onClick={handleNew}>
+            <Plus size={16} />
+            Nueva Colección
           </button>
         </div>
       </div>
 
-      <div className={styles.filters} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* ── Filtros ── */}
+      <div className={styles.filters}>
         <div className={styles.searchWrap}>
           <Search size={16} className={styles.searchIcon} />
           <input
@@ -263,22 +279,33 @@ const AdminCollections: React.FC = () => {
 
       {error && <div className={styles.error}>{error}</div>}
 
+      {/* ── Vista WYSIWYG de Colecciones ── */}
       <div className={styles.tableWrapper}>
         {loading ? (
-          <div className={styles.loading}>Cargando...</div>
+          <div className={styles.loading}>Cargando colecciones...</div>
         ) : collections.length === 0 ? (
-          <div className={styles.empty}>No hay colecciones</div>
+          <div className={styles.empty}>No hay colecciones para mostrar.</div>
         ) : (
-          <div className={styles.collectionsGrid}>
+          <div className={styles.collectionsList}>
             {collections
               .slice()
               .sort((a, b) => a.displayOrder - b.displayOrder)
               .map((collection) => {
                 const checked = selectedIds.includes(collection.id);
+                const isHome = collection.displayPosition === 'home';
+                const isCategory = collection.displayPosition === 'category';
+                const isAutoSales = collection.type === 'auto_sales';
+
                 return (
-                  <div key={collection.id} className={styles.collectionCard}>
-                    <div className={styles.collectionCardHeader}>
-                      <div className={styles.cardCheckbox}>
+                  <div
+                    key={collection.id}
+                    className={`${styles.adminCollectionWrapper} ${
+                      isHome ? styles.wrapperHome : styles.wrapperCategory
+                    }`}
+                  >
+                    {/* BARRA SUPERIOR DE CONTROL DEL ADMIN */}
+                    <div className={styles.adminControlBar}>
+                      <div className={styles.adminControlLeft}>
                         <input
                           type="checkbox"
                           aria-label={`Seleccionar colección ${collection.name}`}
@@ -290,138 +317,107 @@ const AdminCollections: React.FC = () => {
                               setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
                             }
                           }}
+                          className={styles.adminCheckbox}
                         />
-                        <div className={styles.collectionOrder}>{collection.displayOrder}</div>
-                      </div>
-
-                      <button
-                        type="button"
-                        className={styles.collectionCardTitle}
-                        onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setPreviewAnchor(rect);
-                          setPreviewLoading(true);
-                          collectionsService.getById(collection.id)
-                            .then((full) => setPreviewCollection(full))
-                            .catch(() => setPreviewCollection(null))
-                            .finally(() => setPreviewLoading(false));
-                        }}
-                        title="Ver previsualización"
-                      >
-                        {collection.name}
-                      </button>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span className={collection.type === 'auto_sales' ? styles.badgeAuto : styles.badgeManual}>
-                          {collection.type === 'auto_sales' ? 'Auto ventas' : 'Manual'}
+                        <span className={styles.orderBadge} title="Orden de visualización">
+                          #{collection.displayOrder}
                         </span>
-                        <button
-                          className={`${styles.actionBtn} actionBtn`}
-                          data-btn-id={collection.id}
-                          onClick={() => setOpenMenuId((prev) => (prev === collection.id ? null : collection.id))}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              setOpenMenuId((prev) => (prev === collection.id ? null : collection.id));
-                            }
-                          }}
-                          aria-haspopup="menu"
-                          aria-expanded={openMenuId === collection.id}
-                          aria-controls={`action-menu-${collection.id}`}
-                          aria-label="Más acciones"
-                          title="Acciones"
+                        <span
+                          className={`${styles.positionBadge} ${
+                            isHome ? styles.posHome : styles.posCategory
+                          }`}
                         >
-                          ⋮
-                        </button>
-                        {openMenuId === collection.id && (
-                          <div
-                            id={`action-menu-${collection.id}`}
-                            className={`${styles.actionMenu} actionMenu`}
-                            data-menu-id={collection.id}
-                            role="menu"
-                          >
-                            <div
-                              ref={menuFirstItemRef}
-                              role="menuitem"
-                              tabIndex={0}
-                              className={styles.actionMenuItem}
-                              onClick={() => { setOpenMenuId(null); handleEdit(collection); }}
-                              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { handleEdit(collection); setOpenMenuId(null); } }}
-                            >
-                              Editar
-                            </div>
-                            <div
-                              role="menuitem"
-                              tabIndex={0}
-                              className={styles.actionMenuItem}
-                              onClick={() => { setOpenMenuId(null); handleDelete(collection.id); }}
-                              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { handleDelete(collection.id); setOpenMenuId(null); } }}
-                            >
-                              Eliminar
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {(() => {
-                      const img = normalizeImageUrl(collection.imageUrl) || getFirstProductImage(collection.products?.[0]);
-                      if (img) {
-                        const candidates: (string | undefined | null)[] = [];
-                        if (collection.products && collection.products.length) {
-                          const firstProdImg = getFirstProductImage(collection.products[0]);
-                          if (firstProdImg) {
-                            const prResolved = resolveImageUrl(firstProdImg);
-                            if (prResolved && prResolved !== firstProdImg) candidates.push(prResolved);
-                            candidates.push(firstProdImg);
-                          }
-                        }
-
-                        const resolved = resolveImageUrl(img);
-                        if (resolved && resolved !== img) candidates.push(resolved);
-                        candidates.push(img);
-
-                        return (
-                          <ImageWithFallback
-                            srcCandidates={candidates}
-                            alt={collection.name}
-                            className={styles.collectionCardImage}
-                          />
-                        );
-                      }
-                      return <div className={styles.collectionCardImagePlaceholder}>Sin imagen</div>;
-                    })()}
-
-                    {collection.description && (
-                      <div className={styles.description}>{collection.description}</div>
-                    )}
-
-                    <div className={styles.collectionCardMeta}>
-                      <div>{collection.productCount} productos</div>
-                      <div>
+                          {isHome ? '🏠 Home' : '🏷️ Categoría'}
+                        </span>
+                        <span
+                          className={`${styles.typeBadge} ${
+                            isAutoSales ? styles.typeAuto : styles.typeManual
+                          }`}
+                        >
+                          {isAutoSales ? '⚡ Auto ventas' : '📝 Manual'}
+                        </span>
                         <button
                           type="button"
                           onClick={() => toggleActive(collection)}
-                          className={collection.isActive ? styles.badgeActive : styles.badgeInactive}
-                          aria-pressed={collection.isActive}
-                          style={{ cursor: 'pointer', border: 'none' }}
+                          className={`${styles.statusBadge} ${
+                            collection.isActive ? styles.statusActive : styles.statusInactive
+                          }`}
                           title={collection.isActive ? 'Desactivar colección' : 'Activar colección'}
                         >
-                          {collection.isActive ? 'Activa' : 'Inactiva'}
+                          {collection.isActive ? '● Activa' : '○ Inactiva'}
+                        </button>
+                      </div>
+
+                      <div className={styles.adminControlRight}>
+                        {isAutoSales && (
+                          <button
+                            type="button"
+                            className={styles.btnSync}
+                            onClick={() => handleSyncSingle(collection.id)}
+                            disabled={syncingId === collection.id}
+                            title="Sincronizar productos top ventas"
+                          >
+                            {syncingId === collection.id ? '⟳ Sincronizando...' : '⟳ Sincronizar'}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.btnEdit}
+                          onClick={() => handleEdit(collection)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.btnDelete}
+                          onClick={() => handleDelete(collection.id)}
+                        >
+                          Eliminar
                         </button>
                       </div>
                     </div>
 
-                    <div className={styles.collectionProductsPreview}>
-                      {(collection.products || []).slice(0, 4).map((p) => (
-                        <ImageWithFallback
-                          key={p.id}
-                          srcCandidates={[getFirstProductImage(p)]}
-                          alt={p.name}
-                          className={styles.collectionProductMini}
-                          placeholder=""
+                    {/* CUERPO WYSIWYG DE LA COLECCIÓN */}
+                    <div
+                      className={`${styles.wysiwygContainer} ${
+                        isHome ? styles.wysiwygHome : styles.wysiwygCategory
+                      }`}
+                    >
+                      {/* Distintivo de tipo categoría en el cuerpo de la colección */}
+                      {isCategory && (
+                        <div className={styles.categoryDistinctiveBanner}>
+                          <span className={styles.categoryDistinctiveTag}>
+                            🏷️ COLECCIÓN DE CATEGORÍA
+                          </span>
+                          <span className={styles.categoryDistinctiveNote}>
+                            Aparece destacada en la grilla/sección de categoría correspondiente
+                          </span>
+                        </div>
+                      )}
+
+                      {collection.products && collection.products.length > 0 ? (
+                        <CollectionSlider
+                          title={collection.name}
+                          slug={collection.slug}
+                          description={collection.description}
+                          products={collection.products}
+                          bannerUrl={collection.imageUrl}
+                          previewMode={true}
+                          showViewAll={true}
+                          variant={collection.displayPosition}
                         />
-                      ))}
+                      ) : (
+                        <div className={styles.wysiwygEmpty}>
+                          <p>Sin productos asignados aún a esta colección.</p>
+                          <button
+                            type="button"
+                            className={styles.btnSecondary}
+                            onClick={() => handleEdit(collection)}
+                          >
+                            + Agregar productos
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -429,17 +425,6 @@ const AdminCollections: React.FC = () => {
           </div>
         )}
       </div>
-
-      {previewCollection && previewAnchor && !previewLoading && (
-        <CollectionPreview
-          collection={previewCollection}
-          anchorRect={previewAnchor}
-          onClose={() => {
-            setPreviewCollection(null);
-            setPreviewAnchor(null);
-          }}
-        />
-      )}
 
       {pages > 1 && (
         <AdminPagination
