@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { ChevronDown, X, Search, Check } from 'lucide-react';
 import styles from './Dropdown.module.css';
 import { createPortal } from 'react-dom';
 
@@ -18,6 +18,21 @@ interface DropdownProps {
   className?: string;
 }
 
+function useIsMobile(breakpoint = 767) {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= breakpoint
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 export function Dropdown({
   id,
   options,
@@ -29,8 +44,9 @@ export function Dropdown({
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
+  const menuRef = useRef<HTMLUListElement | HTMLDivElement>(null);
   const [menuPos, setMenuPos] = useState<{
     top?: number;
     bottom?: number;
@@ -38,7 +54,23 @@ export function Dropdown({
     width: number;
     maxHeight: number;
   } | null>(null);
+
+  const isMobile = useIsMobile();
   const selectedOption = options.find((opt) => opt.value === value);
+
+  // Filtrado de opciones para la búsqueda en móvil
+  const filteredOptions = useMemo(() => {
+    if (!searchQuery.trim()) return options;
+    const q = searchQuery.toLowerCase().trim();
+    return options.filter((opt) => opt.label.toLowerCase().includes(q));
+  }, [options, searchQuery]);
+
+  // Resetear búsqueda al cerrar
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery('');
+    }
+  }, [isOpen]);
 
   const updateMenuPosition = useCallback(() => {
     if (!containerRef.current) return;
@@ -88,7 +120,7 @@ export function Dropdown({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isMobile) return;
     updateMenuPosition();
     window.addEventListener('scroll', updateMenuPosition, true);
     window.addEventListener('resize', updateMenuPosition);
@@ -96,12 +128,12 @@ export function Dropdown({
       window.removeEventListener('scroll', updateMenuPosition, true);
       window.removeEventListener('resize', updateMenuPosition);
     };
-  }, [isOpen, updateMenuPosition]);
+  }, [isOpen, isMobile, updateMenuPosition]);
 
   const handleToggle = () => {
     if (!disabled) {
       setIsOpen((prev) => {
-        if (!prev) updateMenuPosition();
+        if (!prev && !isMobile) updateMenuPosition();
         return !prev;
       });
       setFocusedIndex(-1);
@@ -179,9 +211,85 @@ export function Dropdown({
         />
       </button>
 
-      {isOpen && menuPos && createPortal(
+      {/* 🟢 MÓVIL (<768px): Bottom Sheet Modal Emergente vía Portal */}
+      {isOpen && isMobile && createPortal(
+        <div className={styles.mobileSheetOverlay}>
+          <button
+            type="button"
+            className={styles.mobileSheetBackdrop}
+            onClick={() => setIsOpen(false)}
+            aria-label="Cerrar opciones"
+            tabIndex={-1}
+          />
+          <div
+            ref={menuRef as React.RefObject<HTMLDivElement>}
+            className={styles.mobileSheetContent}
+            role="dialog"
+            aria-modal="true"
+            aria-label={placeholder || 'Seleccionar opción'}
+          >
+            <div className={styles.mobileSheetHandle} aria-hidden="true" />
+            <div className={styles.mobileSheetHeader}>
+              <span className={styles.mobileSheetTitle}>
+                {selectedOption ? selectedOption.label : placeholder}
+              </span>
+              <button
+                type="button"
+                className={styles.mobileSheetCloseBtn}
+                onClick={() => setIsOpen(false)}
+                aria-label="Cerrar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {options.length > 5 && (
+              <div className={styles.mobileSheetSearchBox}>
+                <Search size={16} className={styles.mobileSheetSearchIcon} />
+                <input
+                  type="search"
+                  className={styles.mobileSheetSearchInput}
+                  placeholder="Buscar opción..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+            )}
+
+            <ul className={styles.mobileSheetList} role="listbox">
+              {filteredOptions.map((option) => {
+                const isSelected = option.value === value;
+                return (
+                  <li
+                    key={option.value}
+                    role="option"
+                    aria-selected={isSelected}
+                    tabIndex={0}
+                    className={`${styles.mobileSheetOption} ${isSelected ? styles.mobileSheetOptionSelected : ''}`}
+                    onClick={() => handleSelect(option.value)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelect(option.value)}
+                  >
+                    <span>{option.label}</span>
+                    {isSelected && <Check size={18} className={styles.mobileSheetCheck} />}
+                  </li>
+                );
+              })}
+              {filteredOptions.length === 0 && (
+                <li className={styles.mobileSheetEmpty}>
+                  No se encontraron resultados para "{searchQuery}".
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 💻 ESCRITORIO (>=768px): Popover flotante tradicional */}
+      {isOpen && !isMobile && menuPos && createPortal(
         <ul
-          ref={menuRef}
+          ref={menuRef as React.RefObject<HTMLUListElement>}
           className={styles.menu}
           role="listbox"
           tabIndex={-1}
