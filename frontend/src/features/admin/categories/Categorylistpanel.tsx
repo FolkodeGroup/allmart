@@ -124,6 +124,34 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
 
         return (
             <aside ref={ref ?? containerRef} className={styles.panel} onScroll={handleScroll}>
+                <style>{`
+                    .catListCompactItem {
+                        padding: 8px 10px !important;
+                        border-radius: 8px !important;
+                        margin-bottom: 4px !important;
+                        transition: all 0.15s ease !important;
+                    }
+                    .catListCompactThumb {
+                        width: 36px !important;
+                        height: 36px !important;
+                        min-width: 36px !important;
+                        border-radius: 6px !important;
+                    }
+                    .catListCompactTitle {
+                        font-size: 13px !important;
+                        font-weight: 600 !important;
+                        line-height: 1.25 !important;
+                    }
+                    .catListCompactSlug {
+                        font-size: 11px !important;
+                        font-family: monospace !important;
+                        color: var(--color-text-secondary, #9ca3af) !important;
+                    }
+                    .catListCompactMeta {
+                        font-size: 11px !important;
+                        color: var(--color-text-secondary, #9ca3af) !important;
+                    }
+                `}</style>
                 <div className={styles.listContainer} role="listbox" aria-label="Lista de categorías">
                     {categories.map((cat, index) => {
                         const displayName = cat.name?.trim() || cat.slug;
@@ -134,47 +162,45 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                             <div
                                 key={cat.id}
                                 data-category-id={cat.id}
-                                className={`${styles.categoryWrapper} ${isSelected ? styles.selected : ''}`}
+                                className={`${styles.categoryWrapper} catListCompactItem ${isSelected ? styles.selected : ''}`}
                                 role="option"
                                 tabIndex={0}
                                 aria-selected={isSelected}
                                 aria-label={`Seleccionar categoría ${displayName}`}
                                 onClick={() => handleRowActivate(cat.id, cat.slug)}
-
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' || e.key === ' ') {
                                         e.preventDefault();
                                         handleRowActivate(cat.id, cat.slug);
                                     } else {
-                                        handleKeyDown(e, index)
+                                        handleKeyDown(e, index);
                                     }
                                 }}
-
                             >
                                 <div className={styles.mainRow}>
                                     {cat.image ? (
                                         <ProductImage
                                             src={cat.image}
                                             alt={displayName}
-                                            className={styles.thumbnail}
-                                            width={48}
-                                            height={48}
+                                            className={`${styles.thumbnail} catListCompactThumb`}
+                                            width={36}
+                                            height={36}
                                         />
                                     ) : (
-                                        <div className={styles.thumbnailPlaceholder} aria-hidden="true">
+                                        <div className={`${styles.thumbnailPlaceholder} catListCompactThumb`} aria-hidden="true">
                                             {displayName.charAt(0).toUpperCase()}
                                         </div>
                                     )}
 
                                     <div className={styles.content}>
                                         <div className={styles.headerLine}>
-                                            <h3 className={styles.title}>{displayName}</h3>
-                                            <span className={styles.slug} title={`Slug: ${cat.slug}`}>
+                                            <h3 className={`${styles.title} catListCompactTitle`}>{displayName}</h3>
+                                            <span className={`${styles.slug} catListCompactSlug`} title={`Slug: ${cat.slug}`}>
                                                 {cat.slug}
                                             </span>
                                         </div>
 
-                                        <div className={styles.metaLine}>
+                                        <div className={`${styles.metaLine} catListCompactMeta`}>
                                             <span
                                                 className={`${styles.visibilityBadge} ${cat.isVisible ? styles.visible : styles.hidden}`}
                                             >
@@ -183,9 +209,7 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                             {productCount !== undefined && (
                                                 <>
                                                     <span className={styles.separator}>·</span>
-                                                    <span
-                                                        className={`${styles.productCount} }`}
-                                                    >
+                                                    <span className={styles.productCount}>
                                                         Stock: {productCount ?? 0}
                                                     </span>
                                                 </>
@@ -194,7 +218,6 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                     </div>
                                 </div>
 
-                                {/* Quick actions: ocultas en mobile, solo viven en la vista dedicada */}
                                 {!isMobile && (canEdit || canDelete) && (
                                     <div className={styles.quickActions}>
                                         {canEdit && onEdit && (

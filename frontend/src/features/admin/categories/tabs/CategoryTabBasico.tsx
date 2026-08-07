@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import type { Category } from '../../../../types';
 import { generateSlug } from '../../../../utils/productFormUtils';
 import styles from '../AdminCategoryFormPage.module.css';
+import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 export interface CategoryTabBasicoProps {
     form: Omit<Category, 'id'>;
@@ -35,12 +36,15 @@ export function CategoryTabBasico({
         setTouched(prev => ({ ...prev, [fieldName]: true }));
     }, []);
 
-    // Formateo de las opciones de categorías padre disponibles
+    // Formateo de las opciones de categorías padre disponibles para el Dropdown
     const parentOptions = useMemo(() => {
-        return parentCategories.map(cat => ({
-            id: cat.id,
-            label: cat.parentId ? `  └─ ${cat.name}` : cat.name
-        }));
+        return [
+            { value: '', label: '-- Sin categoría padre (Principal) --' },
+            ...parentCategories.map(cat => ({
+                value: cat.id,
+                label: cat.parentId ? `  └─ ${cat.name}` : cat.name
+            }))
+        ];
     }, [parentCategories]);
 
     return (
@@ -49,17 +53,6 @@ export function CategoryTabBasico({
                 .categoryBasicoInput {
                     min-height: 44px !important;
                     font-size: 16px !important;
-                    box-sizing: border-box !important;
-                }
-                .categorySelectResponsive {
-                    width: 100% !important;
-                    min-height: 44px !important;
-                    font-size: 16px !important;
-                    padding: 8px 12px !important;
-                    border-radius: 8px !important;
-                    border: 1px solid var(--color-border, #374151) !important;
-                    background: var(--color-bg-primary, #111827) !important;
-                    color: var(--color-text-primary, #ffffff) !important;
                     box-sizing: border-box !important;
                 }
                 .categoryCheckboxRow {
@@ -127,19 +120,13 @@ export function CategoryTabBasico({
                     <label className={styles.label} htmlFor="category-parent">
                         Categoría padre (opcional)
                     </label>
-                    <select
-                        className="categorySelectResponsive"
+                    <Dropdown
                         id="category-parent"
+                        options={parentOptions}
                         value={form.parentId || ''}
-                        onChange={e => setField('parentId', e.target.value || null)}
-                    >
-                        <option value="">-- Sin categoría padre (Principal) --</option>
-                        {parentOptions.map(cat => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.label}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={val => setField('parentId', val || null)}
+                        placeholder="-- Sin categoría padre (Principal) --"
+                    />
                 </div>
             )}
 

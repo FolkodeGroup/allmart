@@ -81,20 +81,59 @@ function MasterDetailLayoutInner({
   }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete, handleBackToList, mobileView]);
 
   return (
-    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailMobileContainer`}>
+    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailFlexContainer masterDetailMobileContainer`}>
       <style>{`
+        /* 📱 MÓVIL Y TABLET (<1024px) */
         @media (max-width: 1023px) {
-          .masterDetailMobileContainer,
-          .masterDetailMobileContainer .detailWrapper {
+          .masterDetailFlexContainer {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .masterDetailFlexContainer .listPaneWrapper {
+            display: ${mobileView === 'detail' ? 'none !important' : 'block !important'};
+            width: 100% !important;
+          }
+          .masterDetailFlexContainer .detailPaneWrapper {
+            display: ${mobileView === 'detail' ? 'block !important' : 'none !important'};
+            width: 100% !important;
             height: auto !important;
             max-height: none !important;
             overflow-y: visible !important;
           }
         }
+
+        /* 💻 ESCRITORIO (>=1024px) */
+        @media (min-width: 1024px) {
+          .masterDetailFlexContainer {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 16px !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .masterDetailFlexContainer .listPaneWrapper {
+            display: block !important;
+            flex: 0 0 340px !important;
+            width: 340px !important;
+            max-width: 340px !important;
+            min-width: 340px !important;
+            box-sizing: border-box !important;
+          }
+          .masterDetailFlexContainer .detailPaneWrapper {
+            display: block !important;
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            width: auto !important;
+            box-sizing: border-box !important;
+          }
+        }
       `}</style>
 
       {/* List Panel (Left) */}
-      <div className={styles.listPane}>
+      <div className={`${styles.listPane} listPaneWrapper`}>
         <ProductListPanel
           products={products}
           loading={loading}
@@ -109,7 +148,7 @@ function MasterDetailLayoutInner({
       </div>
 
       {/* Detail Panel (Right) */}
-      <div className={`${styles.detailWrapper} masterDetailMobileSingleScroll`}>
+      <div className={`${styles.detailWrapper} detailPaneWrapper`}>
         <AdminVariantsProvider>
           {detailContent}
           {!selectedProduct && !loading && products.length > 0 && (

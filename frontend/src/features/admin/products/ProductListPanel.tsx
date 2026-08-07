@@ -45,7 +45,6 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
       }
     }, [scrollPreserveKey]);
 
-
     const handleSelectProduct = (id: string) => {
       onSelectProduct(id);
     };
@@ -121,12 +120,46 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
 
     return (
       <aside ref={ref || containerRef} className={styles.panel} onScroll={handleScroll}>
+        <style>{`
+          .prodListCompactRow {
+            padding: 8px 10px !important;
+            border-radius: 8px !important;
+            margin-bottom: 4px !important;
+            transition: all 0.15s ease !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+          }
+          .prodListCompactThumb {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            border-radius: 6px !important;
+            object-fit: cover !important;
+          }
+          .prodListCompactTitle {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            line-height: 1.25 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .prodListCompactMeta {
+            font-size: 11px !important;
+            color: var(--color-text-secondary, #9ca3af) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+        `}</style>
         <div className={styles.listContainer} role="listbox" aria-label="Lista de productos">
           {products.map((product, index) => (
             <div
               key={product.id}
               data-product-id={product.id}
-              className={`${styles.productWrapper} ${
+              className={`${styles.productWrapper} prodListCompactRow ${
                 selectedProductId === product.id ? styles.selected : ''
               }`}
               role="option"
@@ -140,7 +173,7 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
                 <img
                   src={normalizeImageUrl(product.images?.[0]) ?? DEFAULT_IMAGE_PLACEHOLDER}
                   alt={product.name}
-                  className={styles.thumbnail}
+                  className={`${styles.thumbnail} prodListCompactThumb`}
                   loading="lazy"
                   onError={(event) => {
                     event.currentTarget.src = DEFAULT_IMAGE_PLACEHOLDER;
@@ -149,10 +182,10 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
 
                 <div className={styles.content}>
                   <div className={styles.headerLine}>
-                    <h3 className={styles.title}>{product.name}</h3>
+                    <h3 className={`${styles.title} prodListCompactTitle`}>{product.name}</h3>
                   </div>
 
-                  <div className={styles.metaLine}>
+                  <div className={`${styles.metaLine} prodListCompactMeta`}>
                     <span className={styles.sku} title={`SKU: ${product.sku || 'Sin SKU'}`}>{product.sku || 'Sin SKU'}</span>
                     <span className={styles.separator}>·</span>
                     <span title={product.category?.name || 'Sin categoría'}>{product.category?.name || 'Sin categoría'}</span>

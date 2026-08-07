@@ -43,23 +43,28 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
   };
 
   return (
-    <nav className={`${styles.pagination} paginationMobileWrapper`} aria-label={ariaLabel} role="navigation">
+    <nav className={`${styles.pagination} paginationIsolatedContainer`} aria-label={ariaLabel} role="navigation">
       <style>{`
+        .paginationIsolatedContainer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          margin-top: 16px;
+        }
+
+        /* 📱 MÓVIL Y TABLET (<768px): Muestra SOLO los controles de navegación táctiles */
         @media (max-width: 767px) {
-          .paginationMobileWrapper {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            gap: 10px !important;
-            width: 100% !important;
-            padding: 12px 0 24px 0 !important;
+          .paginationDesktopOnly {
+            display: none !important;
           }
-          .paginationMobileControls {
+          .paginationMobileOnly {
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
             width: 100% !important;
             gap: 12px !important;
+            padding: 8px 0 !important;
           }
           .paginationNavBtnMobile {
             flex: 1 !important;
@@ -68,10 +73,10 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
             align-items: center !important;
             justify-content: center !important;
             gap: 6px !important;
-            background: var(--color-primary, #28353d) !important;
-            color: var(--color-text-primary, #ffffff) !important;
-            border: 1px solid var(--color-border, #374151) !important;
-            border-radius: 10px !important;
+            background: var(--color-primary, #769282) !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
             font-size: 14px !important;
             font-weight: 600 !important;
             cursor: pointer !important;
@@ -84,14 +89,55 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
             font-size: 13px !important;
             font-weight: 600 !important;
             color: var(--color-text-secondary, #9ca3af) !important;
-          }
-          .pageNumbersDesktop {
-            display: none !important;
+            white-space: nowrap !important;
           }
         }
+
+        /* 💻 ESCRITORIO (>=768px): Oculta completamente los controles móviles */
         @media (min-width: 768px) {
-          .pageNumbersDesktop {
+          .paginationMobileOnly {
+            display: none !important;
+          }
+          .paginationDesktopOnly {
             display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+          }
+          .pageBtnDesktop {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 32px !important;
+            height: 32px !important;
+            padding: 0 10px !important;
+            border-radius: 6px !important;
+            border: 1px solid var(--color-border, #374151) !important;
+            background: var(--color-bg-secondary, #28353d) !important;
+            color: var(--color-text-primary, #ffffff) !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+          }
+          .pageBtnDesktop:hover:not(:disabled) {
+            background: var(--color-primary, #769282) !important;
+            border-color: var(--color-primary, #769282) !important;
+            color: #ffffff !important;
+          }
+          .pageBtnDesktopActive {
+            background: var(--color-primary, #769282) !important;
+            border-color: var(--color-primary, #769282) !important;
+            color: #ffffff !important;
+          }
+          .pageBtnDesktop:disabled {
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+          }
+          .pageEllipsis {
+            padding: 0 4px !important;
+            color: var(--color-text-secondary, #9ca3af) !important;
+            font-size: 13px !important;
           }
         }
       `}</style>
@@ -100,9 +146,10 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
         Página {page} de {totalPages}
       </div>
 
-      <div className="paginationMobileControls">
+      {/* 📱 CONTROLES MÓVIL (<768px) */}
+      <div className="paginationMobileOnly">
         <button
-          className={`${styles.pageBtn} ${styles.navBtn} paginationNavBtnMobile`}
+          className="paginationNavBtnMobile"
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
           onKeyDown={(e) => handleKeyDown(e, page - 1)}
@@ -118,7 +165,7 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
         </span>
 
         <button
-          className={`${styles.pageBtn} ${styles.navBtn} paginationNavBtnMobile`}
+          className="paginationNavBtnMobile"
           disabled={page === totalPages}
           onClick={() => onPageChange(page + 1)}
           onKeyDown={(e) => handleKeyDown(e, page + 1)}
@@ -130,17 +177,29 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
         </button>
       </div>
 
-      {/* Números de página solo para escritorio */}
-      <div className={`${styles.pageNumbers} pageNumbersDesktop`} role="group" aria-label="Números de página">
+      {/* 💻 CONTROLES ESCRITORIO (>=768px) */}
+      <div className="paginationDesktopOnly" role="group" aria-label="Números de página">
+        <button
+          className="pageBtnDesktop"
+          disabled={page === 1}
+          onClick={() => onPageChange(page - 1)}
+          onKeyDown={(e) => handleKeyDown(e, page - 1)}
+          aria-label="Página anterior"
+          type="button"
+        >
+          <ChevronLeft size={15} aria-hidden="true" />
+          <span style={{ marginLeft: 4 }}>Anterior</span>
+        </button>
+
         {getPageNumbers().map((p, idx) =>
           p === 'ellipsis' ? (
-            <span key={`ellipsis-${idx}`} className={styles.ellipsis} aria-hidden="true">
+            <span key={`ellipsis-${idx}`} className="pageEllipsis" aria-hidden="true">
               …
             </span>
           ) : (
             <button
               key={p}
-              className={`${styles.pageBtn} ${page === p ? styles.pageActive : ''}`}
+              className={`pageBtnDesktop ${page === p ? 'pageBtnDesktopActive' : ''}`}
               onClick={() => onPageChange(p)}
               onKeyDown={(e) => handleKeyDown(e, p)}
               aria-current={page === p ? 'page' : undefined}
@@ -151,6 +210,18 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
             </button>
           )
         )}
+
+        <button
+          className="pageBtnDesktop"
+          disabled={page === totalPages}
+          onClick={() => onPageChange(page + 1)}
+          onKeyDown={(e) => handleKeyDown(e, page + 1)}
+          aria-label="Página siguiente"
+          type="button"
+        >
+          <span style={{ marginRight: 4 }}>Siguiente</span>
+          <ChevronRight size={15} aria-hidden="true" />
+        </button>
       </div>
     </nav>
   );
