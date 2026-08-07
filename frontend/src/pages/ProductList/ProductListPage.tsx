@@ -1,5 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useSearchParams } from 'react-router-dom';
+import { X, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import type { Product, Category } from '../../types';
 import {
   fetchPublicProducts,
@@ -100,6 +102,18 @@ export function ProductListPage() {
   const urlSlugs = searchParams.get('slugs') ?? '';
   const isCollectionView = urlColeccion.length > 0;
   const priceRangesStr = selectedPriceRanges.join(',');
+
+  /* Bloqueo de scroll cuando el modal móvil de filtros está abierto */
+  useEffect(() => {
+    if (filtersOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [filtersOpen]);
 
   useEffect(() => {
     const next = urlSubCategory || urlCategory;
@@ -284,6 +298,23 @@ export function ProductListPage() {
     setSearchParams(updated, { replace: true });
   };
 
+  const handleResetFilters = useCallback(() => {
+    const updated = new URLSearchParams(searchParams);
+    updated.delete('tag');
+    updated.delete('tags');
+    updated.delete('priceRanges');
+    setSelectedPriceRanges([]);
+    setSearchParams(updated, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const activeFiltersCount = useMemo(() => {
+    let count = selectedPriceRanges.length;
+    if (showOnlyOnSale) count++;
+    if (showOnlyNovedad) count++;
+    if (showOnlyFeatured) count++;
+    return count;
+  }, [selectedPriceRanges.length, showOnlyOnSale, showOnlyNovedad, showOnlyFeatured]);
+
   const selectedCategoryInfo = useMemo(
     () => categories.find((cat) => cat.slug === selectedCategory),
     [categories, selectedCategory]
@@ -339,6 +370,115 @@ export function ProductListPage() {
     }
     return map;
   }, [categoryCollections]);
+
+  /* Render de Bottom Sheet Modal de Filtros en Móvil vía Portal */
+  const renderMobileFilterModal = () => {
+    if (!filtersOpen) return null;
+
+    const modalContent = (
+      <div className={styles.mobileFilterOverlay}>
+        <button
+          type="button"
+          className={styles.mobileFilterBackdrop}
+          onClick={() => setFiltersOpen(false)}
+          aria-label="Cerrar ventana de filtros"
+          tabIndex={-1}
+        />
+        <div
+          className={styles.mobileFilterContent}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mobile-filter-modal-title"
+        >
+          <div className={styles.mobileFilterHandle} aria-hidden="true" />
+
+          <div className={styles.mobileFilterHeader}>
+            <h3 id="mobile-filter-modal-title" className={styles.mobileFilterTitle}>
+              Filtrar productos
+            </h3>
+            <button
+              type="button"
+              className={styles.mobileFilterCloseBtn}
+              onClick={() => setFiltersOpen(false)}
+              aria-label="Cerrar filtros"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className={styles.mobileFilterBody}>
+            <div className={styles.mobileFilterGroup}>
+              <h4 className={styles.mobileFilterGroupTitle}>Precio</h4>
+              {PRICE_RANGE_OPTIONS.map((option) => (
+                <label className={styles.mobileFilterOption} key={option.id}>
+                  <input
+                    type="checkbox"
+                    className={styles.mobileFilterCheckbox}
+                    checked={selectedPriceRanges.includes(option.id)}
+                    onChange={() => togglePriceRange(option.id)}
+                  />
+                  <span className={styles.mobileFilterOptionLabel}>{option.label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className={styles.mobileFilterGroup}>
+              <h4 className={styles.mobileFilterGroupTitle}>Etiquetas</h4>
+              <label className={styles.mobileFilterOption}>
+                <input
+                  type="checkbox"
+                  className={styles.mobileFilterCheckbox}
+                  checked={showOnlyOnSale}
+                  onChange={() => toggleTag('oferta')}
+                />
+                <span className={styles.mobileFilterOptionLabel}>En oferta</span>
+              </label>
+              <label className={styles.mobileFilterOption}>
+                <input
+                  type="checkbox"
+                  className={styles.mobileFilterCheckbox}
+                  checked={showOnlyNovedad}
+                  onChange={() => toggleTag('novedad')}
+                />
+                <span className={styles.mobileFilterOptionLabel}>Novedades</span>
+              </label>
+              <label className={styles.mobileFilterOption}>
+                <input
+                  type="checkbox"
+                  className={styles.mobileFilterCheckbox}
+                  checked={showOnlyFeatured}
+                  onChange={() => toggleTag('destacado')}
+                />
+                <span className={styles.mobileFilterOptionLabel}>Destacados</span>
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.mobileFilterFooter}>
+            {activeFiltersCount > 0 && (
+              <button
+                type="button"
+                className={styles.mobileFilterResetBtn}
+                onClick={handleResetFilters}
+              >
+                Limpiar todo
+              </button>
+            )}
+            <button
+              type="button"
+              className={styles.mobileFilterApplyBtn}
+              onClick={() => setFiltersOpen(false)}
+            >
+              Ver resultados {totalProducts !== null ? `(${totalProducts})` : ''}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+    if (typeof document === 'undefined') return modalContent;
+    return createPortal(modalContent, document.body);
+  };
 
   /* Vista de colección específica */
   if (isCollectionView) {
@@ -494,8 +634,9 @@ export function ProductListPage() {
       )}
 
       <div className={styles.layout}>
+        {/* Sidebar Desktop (<aside>) */}
         <aside
-          className={`${styles.sidebar} ${filtersOpen ? styles.open : ''}`}
+          className={styles.sidebar}
           aria-label="Filtros de productos"
         >
           <div className={styles.filterGroup}>
@@ -547,14 +688,32 @@ export function ProductListPage() {
 
         <div className={styles.main}>
           <div className={styles.toolbar}>
-            <div>
+            <div className={styles.toolbarLeft}>
               <button
-                className={styles.mobileFilterBtn}
-                onClick={() => setFiltersOpen(!filtersOpen)}
+                className={`${styles.mobileFilterBtn} ${activeFiltersCount > 0 ? styles.mobileFilterBtnActive : ''}`}
+                onClick={() => setFiltersOpen(true)}
                 type="button"
+                aria-label="Abrir filtros"
               >
-                ☰ Filtros
+                <SlidersHorizontal size={16} />
+                <span>Filtros</span>
+                {activeFiltersCount > 0 && (
+                  <span className={styles.activeFilterBadge}>{activeFiltersCount}</span>
+                )}
               </button>
+
+              {activeFiltersCount > 0 && (
+                <button
+                  type="button"
+                  className={styles.mobileResetBtn}
+                  onClick={handleResetFilters}
+                  title="Limpiar filtros"
+                >
+                  <RotateCcw size={14} />
+                  <span>Limpiar</span>
+                </button>
+              )}
+
               <span className={styles.resultCount}>
                 Mostrando{' '}
                 <span className={styles.resultCountBold}>
@@ -685,6 +844,9 @@ export function ProductListPage() {
           )}
         </div>
       </div>
+
+      {/* Bottom Sheet Modal de Filtros para Móvil */}
+      {renderMobileFilterModal()}
     </main>
   );
 }
