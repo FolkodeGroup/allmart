@@ -26,7 +26,6 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
   isVisible,
   setIsVisible,
 }) => {
-  // ── Mapeo de opciones para el Dropdown de Visibilidad ──
   const visibilityOptions = useMemo(() => [
     { value: 'all', label: 'Todas' },
     { value: 'visible', label: 'Visibles' },
@@ -42,7 +41,6 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           onChange={setSearch}
           placeholder="Buscar categoría por nombre o slug..."
         />
-        {/* Cantidad */}
         <span className={styles.count}>{total} categorías</span>
       </div>
 
@@ -59,6 +57,7 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           }
           placeholder="Mín. productos"
           className={styles.filtersRowItem}
+          style={{ minHeight: '38px', fontSize: '13px' }}
         />
 
         {/* Máx productos */}
@@ -73,10 +72,11 @@ export const CategoriesFilters: React.FC<CategoriesFiltersProps> = ({
           }
           placeholder="Máx. productos"
           className={styles.filtersRowItem}
+          style={{ minHeight: '38px', fontSize: '13px' }}
         />
 
         {/* Filtro de Visibilidad Unificado con Custom Dropdown */}
-        <div className={styles.filtersRowItemSelect}>
+        <div className={styles.filtersRowItemSelect} style={{ minWidth: '130px' }}>
           <Dropdown
             id="visibility-filter"
             options={visibilityOptions}

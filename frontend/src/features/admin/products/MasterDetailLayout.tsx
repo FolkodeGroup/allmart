@@ -81,8 +81,20 @@ function MasterDetailLayoutInner({
   }, [selectedProduct, onEdit, onDeleteDirect, onDelete, canEdit, canDelete, handleBackToList, mobileView]);
 
   return (
-    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailMobileContainer`}>
+    <div className={`${styles.container} ${isEmpty ? styles.containerEmpty : ''} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailGridContainer masterDetailMobileContainer`}>
       <style>{`
+        .masterDetailGridContainer {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          gap: 16px !important;
+          width: 100% !important;
+          align-items: start !important;
+        }
+        @media (min-width: 1024px) {
+          .masterDetailGridContainer {
+            grid-template-columns: 350px minmax(0, 1fr) !important;
+          }
+        }
         @media (max-width: 1023px) {
           .masterDetailMobileContainer,
           .masterDetailMobileContainer .detailWrapper {

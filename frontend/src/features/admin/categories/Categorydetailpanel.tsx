@@ -21,6 +21,7 @@ interface CategoryDetailPanelProps {
     canEdit?: boolean;
     canDelete?: boolean;
     onBack?: () => void;
+    isMobileActive?: boolean;
 }
 
 export function CategoryDetailPanel({
@@ -31,15 +32,56 @@ export function CategoryDetailPanel({
     onToggleVisibility,
     canEdit = true,
     canDelete = true,
-    onBack
+    onBack,
 }: CategoryDetailPanelProps) {
     const displayName = category.name?.trim() || category.slug;
     const [imgError, setImgError] = useState(false);
 
     return (
         <div className={styles.panel}>
-            {/* ── Header ──────────────────────────────────────────────── */}
-            <div className={styles.panelHeader}>
+            <style>{`
+                .catDetailCompactHeader {
+                    padding: 14px 18px !important;
+                    border-radius: 12px !important;
+                    background: var(--color-bg-primary, #ffffff) !important;
+                    border: 1px solid var(--color-border, #e5e2dd) !important;
+                    margin-bottom: 14px !important;
+                }
+                .catDetailTitle {
+                    font-size: 16px !important;
+                    font-weight: 700 !important;
+                    margin: 0 !important;
+                    color: var(--color-text-primary, #111827) !important;
+                }
+                .catDetailSlug {
+                    font-size: 12px !important;
+                    font-family: monospace !important;
+                    color: var(--color-text-secondary, #6b7280) !important;
+                }
+                .catDetailStatVal {
+                    font-size: 18px !important;
+                    font-weight: 700 !important;
+                }
+                .catDetailSectionTitle {
+                    font-size: 13px !important;
+                    font-weight: 700 !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.04em !important;
+                    color: var(--color-text-secondary, #6b7280) !important;
+                    margin-bottom: 8px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                }
+                .catDetailDesc {
+                    font-size: 13px !important;
+                    line-height: 1.5 !important;
+                    color: var(--color-text-primary, #111827) !important;
+                }
+            `}</style>
+
+            {/* ── Header Card ─────────────────────────────────────────── */}
+            <div className={`catDetailCompactHeader ${styles.headerCard}`}>
                 {onBack && (
                     <button
                         type="button"
@@ -51,37 +93,64 @@ export function CategoryDetailPanel({
                     </button>
                 )}
                 <div className={styles.headerContent}>
-                    <div className={styles.categoryAvatar}>
-                        {category.image && !imgError ? (
-                            <img
-                                src={category.image}
-                                alt={displayName}
-                                className={styles.avatarImg}
-                                width={64}
-                                height={64}
-                                onError={() => setImgError(true)}
-                            />
-                        ) : (
-                            <div className={styles.avatarPlaceholder} aria-hidden="true">
-                                <ImageIcon size={28} />
+                    <div className={styles.titleGroup}>
+                        <div className={styles.categoryAvatar}>
+                            {category.image && !imgError ? (
+                                <img
+                                    src={category.image}
+                                    alt={displayName}
+                                    className={styles.avatarImg}
+                                    width={48}
+                                    height={48}
+                                    onError={() => setImgError(true)}
+                                />
+                            ) : (
+                                <div className={styles.avatarPlaceholder} aria-hidden="true">
+                                    <ImageIcon size={22} />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className={styles.titleSection}>
+                            <h2 className="catDetailTitle">{displayName}</h2>
+                            <span className="catDetailSlug">{category.slug}</span>
+                            <div className={styles.headerStatus}>
+                                <button
+                                    type="button"
+                                    className={`${styles.statusToggle} ${category.isVisible ? styles.chipVisible : styles.chipHidden}`}
+                                    onClick={() => canEdit && onToggleVisibility?.(category.id, !category.isVisible)}
+                                    disabled={!canEdit}
+                                >
+                                    {category.isVisible ? <><Eye size={13} /> Visible</> : <><EyeOff size={13} /> Oculta</>}
+                                </button>
                             </div>
-                        )}
+                        </div>
                     </div>
 
-                    <div className={styles.titleSection}>
-                        <h2 className={styles.panelTitle}>{displayName}</h2>
-                        <span className={styles.slugBadge}>{category.slug}</span>
-                    </div>
-
-                    <span
-                        className={`${styles.visibilityChip} ${category.isVisible ? styles.chipVisible : styles.chipHidden}`}
-                    >
-                        {category.isVisible ? (
-                            <><Eye size={13} /> Visible</>
-                        ) : (
-                            <><EyeOff size={13} /> Oculta</>
-                        )}
-                    </span>
+                    {(canEdit || canDelete) && (
+                        <div className={styles.desktopActions}>
+                            <div className={styles.actions}>
+                                {canEdit && onEdit && (
+                                    <button
+                                        type="button"
+                                        className={styles.btnEdit}
+                                        onClick={() => onEdit(category.id)}
+                                    >
+                                        Editar
+                                    </button>
+                                )}
+                                {canDelete && onDelete && (
+                                    <button
+                                        type="button"
+                                        className={styles.btnDelete}
+                                        onClick={() => onDelete(category.id)}
+                                    >
+                                        Eliminar
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -90,7 +159,7 @@ export function CategoryDetailPanel({
                 <div className={styles.statCard}>
                     <Layers size={16} className={styles.statIcon} />
                     <div>
-                        <span className={styles.statValue}>
+                        <span className="catDetailStatVal">
                             {productCount !== undefined ? productCount : '—'}
                         </span>
                         <span className={styles.statLabel}>Productos</span>
@@ -107,7 +176,7 @@ export function CategoryDetailPanel({
                 <div className={styles.statCard}>
                     <Hash size={16} className={styles.statIcon} />
                     <div>
-                        <span className={styles.statValue} style={{ fontSize: 11, fontFamily: 'monospace' }}>
+                        <span className="catDetailStatVal" style={{ fontSize: 12, fontFamily: 'monospace' }}>
                             {category.id.slice(0, 8)}…
                         </span>
                         <span className={styles.statLabel}>ID</span>
@@ -116,23 +185,21 @@ export function CategoryDetailPanel({
             </div>
 
             {/* ── Description ─────────────────────────────────────────── */}
-            {category.description ? (
-                <div className={styles.section}>
-                    <h3 className={styles.sectionTitle}>
-                        <Tag size={14} /> Descripción
-                    </h3>
-                    <p className={styles.description}>{category.description}</p>
-                </div>
-            ) : (
-                <div className={styles.section}>
+            <div className={styles.section}>
+                <h3 className="catDetailSectionTitle">
+                    <Tag size={14} /> Descripción
+                </h3>
+                {category.description ? (
+                    <p className="catDetailDesc">{category.description}</p>
+                ) : (
                     <p className={styles.emptyDescription}>Sin descripción</p>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* ── Image preview ───────────────────────────────────────── */}
             {category.image && !imgError && (
                 <div className={styles.section}>
-                    <h3 className={styles.sectionTitle}>
+                    <h3 className="catDetailSectionTitle">
                         <ImageIcon size={14} /> Imagen
                     </h3>
                     <div className={styles.imagePreview}>
@@ -142,47 +209,6 @@ export function CategoryDetailPanel({
                             className={styles.previewImg}
                             onError={() => setImgError(true)}
                         />
-                    </div>
-                </div>
-            )}
-
-            {/* ── Footer actions ───────────────────────────────────────── */}
-            {(canEdit || canDelete) && (
-                <div className={styles.panelFooter}>
-                    <div className={styles.actions}>
-                        {canEdit && onEdit && (
-                            <button
-                                type="button"
-                                className={styles.btnEdit}
-                                onClick={() => onEdit(category.id)}
-                            >
-                                Editar
-                            </button>
-                        )}
-
-                        {canEdit && onToggleVisibility && (
-                            <button
-                                type="button"
-                                className={styles.btnToggle}
-                                onClick={() => onToggleVisibility(category.id, !category.isVisible)}
-                            >
-                                {category.isVisible ? (
-                                    <>Ocultar</>
-                                ) : (
-                                    <>Mostrar</>
-                                )}
-                            </button>
-                        )}
-
-                        {canDelete && onDelete && (
-                            <button
-                                type="button"
-                                className={styles.btnDelete}
-                                onClick={() => onDelete(category.id)}
-                            >
-                                Eliminar
-                            </button>
-                        )}
                     </div>
                 </div>
             )}

@@ -15,11 +15,10 @@ interface CategoriesMasterDetailLayoutProps {
     canDelete: boolean;
     defaultSelectedCategoryId?: string;
     getProductCount?: (category: Category) => number | undefined;
-    // Multi-select props (forwarded to CategoryListPanel via CategoriesGrid — kept for API compat)
     selectedIds?: string[];
     onSelect?: (id: string, checked: boolean) => void;
     allSelected?: boolean;
-    onSelectAll: (checked: boolean) => void;
+    onSelectAll?: (checked: boolean) => void;
 }
 
 export function CategoriesMasterDetailLayout({
@@ -34,16 +33,12 @@ export function CategoriesMasterDetailLayout({
     defaultSelectedCategoryId,
     getProductCount,
 }: CategoriesMasterDetailLayoutProps) {
-    // Track the currently selected category id
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(
         defaultSelectedCategoryId ?? categories[0]?.id
     );
 
-    // controla qué panel se ve en mobile (<=768px)
     const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
 
-
-    // When the list changes (e.g. after a filter), keep selection valid
     React.useEffect(() => {
         if (loading) return;
 
@@ -55,7 +50,6 @@ export function CategoriesMasterDetailLayout({
             }
         }
 
-        // Fall back to first item if current selection disappeared
         if (!categories.some((c) => c.id === selectedCategoryId) && categories.length > 0) {
             setSelectedCategoryId(categories[0].id);
         }
@@ -72,13 +66,26 @@ export function CategoriesMasterDetailLayout({
     }, []);
 
     const handleBackToList = useCallback(() => {
-        setMobileView('list'); // NUEVO
+        setMobileView('list');
     }, []);
 
     return (
-        <div
-            className={`${styles.container} ${mobileView === 'detail' ? styles.showDetail : ''}`}
-        >
+        <div className={`${styles.container} ${mobileView === 'detail' ? styles.showDetail : ''} masterDetailGridContainer`}>
+            <style>{`
+                .masterDetailGridContainer {
+                    display: grid !important;
+                    grid-template-columns: 1fr !important;
+                    gap: 16px !important;
+                    width: 100% !important;
+                    align-items: start !important;
+                }
+                @media (min-width: 1024px) {
+                    .masterDetailGridContainer {
+                        grid-template-columns: 350px minmax(0, 1fr) !important;
+                    }
+                }
+            `}</style>
+
             {/* ── Left: scrollable category list ──────────────────────── */}
             <div className={styles.listPane}>
                 <CategoryListPanel
@@ -107,7 +114,8 @@ export function CategoriesMasterDetailLayout({
                         onToggleVisibility={canEdit ? onToggleVisibility : undefined}
                         canEdit={canEdit}
                         canDelete={canDelete}
-                        onBack={mobileView ? handleBackToList : undefined}
+                        onBack={handleBackToList}
+                        isMobileActive={mobileView === 'detail'}
                     />
                 ) : !loading && categories.length > 0 ? (
                     <div className={styles.emptyDetail}>
