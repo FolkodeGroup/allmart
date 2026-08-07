@@ -5,6 +5,17 @@
 
 import { OrderStatus, PaymentStatus } from '../types';
 
+export interface OrderShipment {
+  id?: string;
+  addressStreet: string;
+  addressCity: string;
+  addressProvince: string;
+  addressZip: string;
+  carrier?: string;
+  trackingNumber?: string;
+  status?: string;
+}
+
 export interface Order {
   id: string;
   customerId?: string; // Vínculo fuerte al cliente CRM
@@ -17,6 +28,7 @@ export interface Order {
     email: string;
     phone?: string;
   };
+  shipment?: OrderShipment;
   total: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;

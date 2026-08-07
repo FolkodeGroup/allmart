@@ -61,14 +61,19 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [depositLoading, setDepositLoading] = useState(false);
   const [saveNotesLoading, setSaveNotesLoading] = useState(false);
 
+  // ── Modal independiente para Carga / Edición Directa de Dirección ──
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [addrStreet, setAddrStreet] = useState('');
+  const [addrCity, setAddrCity] = useState('');
+  const [addrProvince, setAddrProvince] = useState('');
+  const [addrZip, setAddrZip] = useState('');
+
   // ── Modales de Transición Guiada ──
-  // Paso 1 ➔ 2: Confirmación + Seña/Cobro
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [confirmPaymentMode, setConfirmPaymentMode] = useState<'deposit' | 'full' | 'cod'>('deposit');
   const [confirmRefNumber, setConfirmRefNumber] = useState('');
   const [confirmCustomNote, setConfirmCustomNote] = useState('');
 
-  // Paso 2 ➔ 3: En preparación / Dirección de entrega + Opciones de Embalaje
   const [preparationModalOpen, setPreparationModalOpen] = useState(false);
   const [prepAddressStreet, setPrepAddressStreet] = useState('');
   const [prepAddressCity, setPrepAddressCity] = useState('CABA');
@@ -80,19 +85,16 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [prepKraftFill, setPrepKraftFill] = useState(true);
   const [prepNote, setPrepNote] = useState('');
 
-  // Paso 3 ➔ 4: Bulto Preparado
   const [readyModalOpen, setReadyModalOpen] = useState(false);
   const [readyPackagesCount, setReadyPackagesCount] = useState('1');
   const [readyLocation, setReadyLocation] = useState('Estantería B-04');
   const [readyNote, setReadyNote] = useState('');
 
-  // Paso 4 ➔ 5: Despacho y Logística
   const [dispatchModalOpen, setDispatchModalOpen] = useState(false);
   const [dispatchCarrier, setDispatchCarrier] = useState('OCA');
   const [dispatchTracking, setDispatchTracking] = useState('');
   const [dispatchNote, setDispatchNote] = useState('');
 
-  // Paso 5 ➔ 6: Entrega Final y Cobro
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
   const [deliveryCollectCash, setDeliveryCollectCash] = useState(true);
   const [deliveryReceiver, setDeliveryReceiver] = useState('');
@@ -108,6 +110,19 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     originalStatusRef.current = order.status;
     originalNotesRef.current = order.notes ?? '';
   }, [order]);
+
+  // Pre-completar dirección si ya existía en shipment
+  useEffect(() => {
+    if (order.shipment) {
+      setPrepAddressStreet(order.shipment.addressStreet ?? '');
+      setPrepAddressCity(order.shipment.addressCity ?? 'CABA');
+      setPrepAddressProvince(order.shipment.addressProvince ?? 'Buenos Aires');
+      setPrepAddressZip(order.shipment.addressZip ?? '1000');
+      if (order.shipment.carrier) {
+        setPrepShippingMethod(order.shipment.carrier);
+      }
+    }
+  }, [order.shipment]);
 
   const isDirty =
     notes !== originalNotesRef.current ||
@@ -157,7 +172,43 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
-  // ── Interceptor táctico de avance guiado según paso del Happy Path ──
+  const handleOpenAddressModal = () => {
+    if (order.shipment) {
+      setAddrStreet(order.shipment.addressStreet ?? '');
+      setAddrCity(order.shipment.addressCity ?? 'CABA');
+      setAddrProvince(order.shipment.addressProvince ?? 'Buenos Aires');
+      setAddrZip(order.shipment.addressZip ?? '1000');
+    } else {
+      setAddrStreet('');
+      setAddrCity('CABA');
+      setAddrProvince('Buenos Aires');
+      setAddrZip('1000');
+    }
+    setAddressModalOpen(true);
+  };
+
+  const handleSaveAddressOnly = async () => {
+    if (!token) return;
+    setStatusLoading(true);
+    try {
+      await upsertAdminOrderShipment(token, order.id, {
+        addressStreet: addrStreet.trim() || 'Dirección acordada',
+        addressCity: addrCity.trim() || 'CABA',
+        addressProvince: addrProvince.trim() || 'Buenos Aires',
+        addressZip: addrZip.trim() || '1000',
+        carrier: order.shipment?.carrier,
+        trackingNumber: order.shipment?.trackingNumber,
+      });
+      toast.success('Dirección de envío guardada correctamente');
+      setAddressModalOpen(false);
+    } catch (err) {
+      console.error('Error guardando dirección:', err);
+      toast.error('Error al guardar la dirección de envío');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
   const handleTriggerNextStep = (nextStatus: OrderStatus) => {
     if (nextStatus === 'confirmado') {
       setConfirmPaymentMode(order.has50PercentDeposit ? 'deposit' : isAbonado ? 'full' : 'deposit');
@@ -168,12 +219,14 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
 
     if (nextStatus === 'en-preparacion') {
-      setPrepAddressStreet('');
-      setPrepAddressCity('CABA');
-      setPrepAddressProvince('Buenos Aires');
-      setPrepAddressZip('1000');
+      setPrepAddressStreet(order.shipment?.addressStreet ?? '');
+      setPrepAddressCity(order.shipment?.addressCity ?? 'CABA');
+      setPrepAddressProvince(order.shipment?.addressProvince ?? 'Buenos Aires');
+      setPrepAddressZip(order.shipment?.addressZip ?? '1000');
+      if (order.shipment?.carrier) {
+        setPrepShippingMethod(order.shipment.carrier);
+      }
       setPrepWarehouse('Depósito Central Allmart');
-      setPrepShippingMethod('Tarifa Plana Express (AMBA / CABA)');
       setPrepGlassProtection(true);
       setPrepKraftFill(true);
       setPrepNote('');
@@ -190,8 +243,8 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
 
     if (nextStatus === 'enviado') {
-      setDispatchCarrier('OCA');
-      setDispatchTracking('');
+      setDispatchCarrier(order.shipment?.carrier ?? 'OCA');
+      setDispatchTracking(order.shipment?.trackingNumber ?? '');
       setDispatchNote('');
       setDispatchModalOpen(true);
       return;
@@ -209,7 +262,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     handleStatusApply(nextStatus);
   };
 
-  // ── Ejecución 1: Confirmación Guiada (Pendiente ➔ Confirmado) ──
   const handleExecuteConfirmOrder = async () => {
     setStatusLoading(true);
     try {
@@ -251,7 +303,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
-  // ── Ejecución 2: Inicio de Embalaje y Dirección (Confirmado ➔ En preparación) ──
   const handleExecutePreparation = async () => {
     setStatusLoading(true);
     try {
@@ -299,7 +350,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
-  // ── Ejecución 3: Bulto Preparado (En preparación ➔ Preparado) ──
   const handleExecuteReady = async () => {
     setStatusLoading(true);
     try {
@@ -330,7 +380,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
-  // ── Ejecución 4: Despacho y Logística (Preparado ➔ Enviado) ──
   const handleExecuteDispatch = async () => {
     setStatusLoading(true);
     try {
@@ -368,7 +417,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
   };
 
-  // ── Ejecución 5: Entrega Final y Cobro (Enviado ➔ Entregado) ──
   const handleExecuteDelivery = async () => {
     setStatusLoading(true);
     try {
@@ -886,6 +934,68 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           </div>
         </section>
 
+        {/* ── Tarjeta Logística: Datos de Envío ── */}
+        <section className={styles.detailSection}>
+          <h3 className={styles.detailSectionTitle}>
+            <MapPin size={14} style={{ display: 'inline', marginRight: 4 }} />
+            Datos de Envío y Despacho
+          </h3>
+
+          {order.shipment ? (
+            <div className={styles.customerCard} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'block' }}>Dirección de entrega</span>
+                <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block', marginTop: 2 }}>{order.shipment.addressStreet}</strong>
+                <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                  {order.shipment.addressCity}, {order.shipment.addressProvince} ({order.shipment.addressZip})
+                </span>
+              </div>
+
+              {(order.shipment.carrier || order.shipment.trackingNumber) && (
+                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 8, marginTop: 4 }}>
+                  {order.shipment.carrier && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: 4 }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Empresa:</span>
+                      <strong style={{ color: 'var(--color-text-primary)' }}>{order.shipment.carrier}</strong>
+                    </div>
+                  )}
+                  {order.shipment.trackingNumber && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>N° Seguimiento:</span>
+                      <strong style={{ color: 'var(--color-primary)', fontFamily: 'monospace' }}>{order.shipment.trackingNumber}</strong>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {can('orders.edit') && (
+                <button
+                  type="button"
+                  className={styles.saveNotesBtn}
+                  style={{ marginTop: 6, width: '100%', minHeight: '36px', fontSize: '13px' }}
+                  onClick={handleOpenAddressModal}
+                >
+                  ✏️ Editar Dirección de Envío
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className={styles.customerCard} style={{ flexDirection: 'column', alignItems: 'center', padding: '16px 12px', textAlign: 'center' }}>
+              <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: 8 }}>Sin dirección de envío cargada</span>
+              {can('orders.edit') && (
+                <button
+                  type="button"
+                  className={styles.saveNotesBtn}
+                  style={{ width: '100%', minHeight: '36px', fontSize: '13px' }}
+                  onClick={handleOpenAddressModal}
+                >
+                  + Cargar Dirección de Envío
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+
         {/* ── Tarjeta Financiera: Estado del Pago y Seña ── */}
         {can('orders.markPaid') && (
           <section className={styles.detailSection}>
@@ -1027,6 +1137,85 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           </section>
         )}
       </div>
+
+      {/* ── MODAL INDEPENDIENTE: DIRECCIÓN DE ENVÍO ── */}
+      <Modal
+        open={addressModalOpen}
+        onClose={() => setAddressModalOpen(false)}
+        title="Datos de Dirección de Envío"
+        size="md"
+        actions={
+          <>
+            <button
+              type="button"
+              className={styles.applyStatusBtn}
+              onClick={handleSaveAddressOnly}
+              disabled={statusLoading}
+            >
+              {statusLoading ? 'Guardando...' : 'Guardar Dirección'}
+            </button>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={() => setAddressModalOpen(false)}
+              disabled={statusLoading}
+            >
+              Cancelar
+            </button>
+          </>
+        }
+      >
+        <div className="guidedModalForm">
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="addr-street-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Calle y Número / Piso / Dpto *</label>
+            <input
+              id="addr-street-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Av. Corrientes 1234, 4° B"
+              value={addrStreet}
+              onChange={e => setAddrStreet(e.target.value)}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div>
+              <label className={styles.detailSectionTitle} htmlFor="addr-city-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Ciudad / Localidad *</label>
+              <input
+                id="addr-city-input"
+                type="text"
+                className={styles.statusNoteInput}
+                placeholder="Ej: CABA"
+                value={addrCity}
+                onChange={e => setAddrCity(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className={styles.detailSectionTitle} htmlFor="addr-province-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Provincia *</label>
+              <input
+                id="addr-province-input"
+                type="text"
+                className={styles.statusNoteInput}
+                placeholder="Ej: Buenos Aires"
+                value={addrProvince}
+                onChange={e => setAddrProvince(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={styles.detailSectionTitle} htmlFor="addr-zip-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Código Postal</label>
+            <input
+              id="addr-zip-input"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: C1043"
+              value={addrZip}
+              onChange={e => setAddrZip(e.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
 
       {/* ── MODAL 1: CONFIRMACIÓN Y RESPALDO FINANCIERO (Pendiente ➔ Confirmado) ── */}
       <Modal

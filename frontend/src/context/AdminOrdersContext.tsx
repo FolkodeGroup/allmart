@@ -42,6 +42,17 @@ export interface OrderHistoryEntry {
   note?: string;
 }
 
+export interface OrderShipment {
+  id?: string;
+  addressStreet: string;
+  addressCity: string;
+  addressProvince: string;
+  addressZip: string;
+  carrier?: string;
+  trackingNumber?: string;
+  status?: string;
+}
+
 export interface Order {
   id: string;
   createdAt: string;
@@ -51,6 +62,7 @@ export interface Order {
     email: string;
     phone?: string;
   };
+  shipment?: OrderShipment;
   items: OrderItem[];
   total: number;
   status: OrderStatus;
@@ -61,7 +73,6 @@ export interface Order {
   statusHistory?: OrderHistoryEntry[];
 }
 
-// Se conserva por compatibilidad con imports legacy.
 // eslint-disable-next-line react-refresh/only-export-components
 export const ORDERS_STORAGE_KEY = 'allmart_orders';
 
@@ -182,7 +193,6 @@ export function AdminOrdersProvider({ children }: { children: ReactNode }) {
     [orders]
   );
 
-  // 🚀 OPTIMIZACIÓN: Memoizamos el objeto del contexto para evitar re-renders masivos
   const contextValue = useMemo(() => ({
     orders,
     isLoading,

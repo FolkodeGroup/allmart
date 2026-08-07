@@ -109,6 +109,16 @@ function toOrder(row: any): Order {
       email: row.customerEmail,
       phone: row.customerPhone || undefined,
     },
+    shipment: row.shipment ? {
+      id: row.shipment.id,
+      addressStreet: row.shipment.addressStreet,
+      addressCity: row.shipment.addressCity,
+      addressProvince: row.shipment.addressProvince,
+      addressZip: row.shipment.addressZip,
+      carrier: row.shipment.carrier ?? undefined,
+      trackingNumber: row.shipment.trackingNumber ?? undefined,
+      status: row.shipment.status,
+    } : undefined,
     total: typeof row.total === 'object' && row.total.toNumber ? row.total.toNumber() : Number(row.total),
     status: prismaStatusToOrderStatus(row.status),
     paymentStatus: prismaPaymentToPaymentStatus(row.paymentStatus),
@@ -205,7 +215,8 @@ export async function getAllOrders(query: AdminOrdersQueryDTO): Promise<Paginate
             }
           }
         },
-        orderStatusHistory: { orderBy: { changedAt: 'asc' } }
+        orderStatusHistory: { orderBy: { changedAt: 'asc' } },
+        shipment: true
       },
       orderBy: { createdAt: 'desc' }
     }),
@@ -233,7 +244,8 @@ export async function getOrderById(id: string): Promise<AdminOrderDTO> {
           }
         }
       },
-      orderStatusHistory: { orderBy: { changedAt: 'asc' } }
+      orderStatusHistory: { orderBy: { changedAt: 'asc' } },
+      shipment: true
     }
   });
 
