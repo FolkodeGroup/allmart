@@ -20,7 +20,7 @@ import { useUnsavedChanges } from '../../../../hooks/useUnsavedChanges';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderStatusSelector } from './OrderStatusSelector';
 import { OrderTimeline } from './OrderTimeline';
-import { MessageSquare, Phone, Mail, Check, ArrowRight, MapPin, Package } from 'lucide-react';
+import { MessageSquare, Phone, Mail, Check, ArrowRight, MapPin, Package, ShieldCheck } from 'lucide-react';
 import { formatOrderCode, formatOrderLabel } from '../../../../utils/orders';
 import { Modal } from '../../../../components/ui/Modal';
 import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
@@ -31,11 +31,14 @@ interface OrderDetailContentProps {
 }
 
 const CARRIER_OPTIONS = [
-  { value: 'OCA', label: 'OCA (Envío Postal)' },
+  { value: 'Tarifa Plana Express (AMBA / CABA)', label: 'Tarifa Plana Express (AMBA / CABA)' },
+  { value: 'Envío a Domicilio (Correo)', label: 'Envío a Domicilio (Correo Nacional)' },
+  { value: 'Envío a Sucursal de Correo', label: 'Envío a Sucursal de Correo (OCA / Andreani)' },
+  { value: 'Envío Sin Cargo', label: 'Envío Sin Cargo (Monto Mínimo Cumplido)' },
+  { value: 'Retiro en Punto de Entrega (Sin cargo)', label: 'Retiro en Punto de Entrega (Sin cargo)' },
+  { value: 'OCA', label: 'OCA' },
   { value: 'Andreani', label: 'Andreani' },
-  { value: 'Flete Propio', label: 'Flete / Repartidor Propio' },
-  { value: 'Moto Mensajería', label: 'Moto Mensajería Express' },
-  { value: 'Retiro en local', label: 'Retiro en Sucursal / Depósito' },
+  { value: 'Flete / Mensajería Privada', label: 'Flete / Mensajería Privada' },
 ];
 
 const WAREHOUSE_OPTIONS = [
@@ -65,13 +68,16 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [confirmRefNumber, setConfirmRefNumber] = useState('');
   const [confirmCustomNote, setConfirmCustomNote] = useState('');
 
-  // Paso 2 ➔ 3: En preparación / Dirección de entrega
+  // Paso 2 ➔ 3: En preparación / Dirección de entrega + Opciones de Embalaje
   const [preparationModalOpen, setPreparationModalOpen] = useState(false);
   const [prepAddressStreet, setPrepAddressStreet] = useState('');
   const [prepAddressCity, setPrepAddressCity] = useState('CABA');
   const [prepAddressProvince, setPrepAddressProvince] = useState('Buenos Aires');
   const [prepAddressZip, setPrepAddressZip] = useState('1000');
   const [prepWarehouse, setPrepWarehouse] = useState('Depósito Central Allmart');
+  const [prepShippingMethod, setPrepShippingMethod] = useState('Tarifa Plana Express (AMBA / CABA)');
+  const [prepGlassProtection, setPrepGlassProtection] = useState(true);
+  const [prepKraftFill, setPrepKraftFill] = useState(true);
   const [prepNote, setPrepNote] = useState('');
 
   // Paso 3 ➔ 4: Bulto Preparado
@@ -167,6 +173,9 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       setPrepAddressProvince('Buenos Aires');
       setPrepAddressZip('1000');
       setPrepWarehouse('Depósito Central Allmart');
+      setPrepShippingMethod('Tarifa Plana Express (AMBA / CABA)');
+      setPrepGlassProtection(true);
+      setPrepKraftFill(true);
       setPrepNote('');
       setPreparationModalOpen(true);
       return;
@@ -257,10 +266,15 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           addressCity: city,
           addressProvince: province,
           addressZip: zip,
+          carrier: prepShippingMethod,
         });
       }
 
-      const combinedNote = `Iniciada preparación en ${prepWarehouse}. Dirección de entrega: ${street}, ${city}. ${prepNote.trim() ? `Nota: ${prepNote.trim()}` : ''}`;
+      const packingSummary = [];
+      if (prepGlassProtection) packingSummary.push('Protección Vidrio/Cerámica');
+      if (prepKraftFill) packingSummary.push('Relleno Kraft');
+
+      const combinedNote = `Iniciada preparación en ${prepWarehouse}. Método: ${prepShippingMethod}. Dirección: ${street}, ${city}. ${packingSummary.length > 0 ? `[Embalaje: ${packingSummary.join(', ')}]. ` : ''}${prepNote.trim() ? `Nota: ${prepNote.trim()}` : ''}`;
 
       await updateOrderStatus(order.id, 'en-preparacion', combinedNote);
       originalStatusRef.current = 'en-preparacion';
@@ -272,10 +286,10 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         action: 'preparation-order',
         entity: 'order',
         entityId: order.id,
-        details: { warehouse: prepWarehouse, street, city },
+        details: { warehouse: prepWarehouse, street, city, shippingMethod: prepShippingMethod },
       });
 
-      toast.success('Pedido en preparación. Datos de envío registrados.');
+      toast.success('Pedido en preparación. Datos de envío y embalaje registrados.');
       setPreparationModalOpen(false);
     } catch (err) {
       console.error('Error al iniciar preparación:', err);
@@ -929,7 +943,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               </button>
             </div>
 
-            {/* Acción Marcar como Abonado */}
+            {/* Acción Dinámica Marcar como Abonado / Registrar Cobro de Saldo Restante */}
             {!isAbonado && (
               <div className={styles.whatsappActions}>
                 {!confirmPaid ? (
@@ -938,12 +952,16 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     type="button"
                     onClick={() => setConfirmPaid(true)}
                   >
-                    ✓ Marcar como abonado
+                    ✓ {isDepositActive
+                      ? `Registrar Cobro de Saldo Restante (${formatPrice(remainingAmount)})`
+                      : `Marcar como abonado (${formatPrice(order.total)})`}
                   </button>
                 ) : (
                   <div className={styles.confirmPaidBox}>
                     <span className={styles.confirmPaidText}>
-                      ¿Confirmar cobro completo del pedido?
+                      {isDepositActive
+                        ? `¿Confirmar cobro final del saldo restante de ${formatPrice(remainingAmount)}?`
+                        : `¿Confirmar cobro completo de ${formatPrice(order.total)}?`}
                     </span>
                     <div className={styles.confirmPaidActions}>
                       <button
@@ -951,7 +969,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                         type="button"
                         onClick={async () => { await handleMarkAsPaid(order.id); setConfirmPaid(false); }}
                       >
-                        Sí, confirmar
+                        Sí, registrar cobro
                       </button>
                       <button
                         className={styles.cancelBtn}
@@ -1174,6 +1192,19 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       >
         <div className="guidedModalForm">
           <div>
+            <label className={styles.detailSectionTitle} htmlFor="prep-shipping-method-select" style={{ marginBottom: '6px', display: 'block' }}>
+              Opción / Modalidad de Envío del Cliente *
+            </label>
+            <Dropdown
+              id="prep-shipping-method-select"
+              options={CARRIER_OPTIONS}
+              value={prepShippingMethod}
+              onChange={setPrepShippingMethod}
+              placeholder="Seleccionar modalidad de envío..."
+            />
+          </div>
+
+          <div>
             <label className={styles.detailSectionTitle} htmlFor="prep-warehouse-select" style={{ marginBottom: '6px', display: 'block' }}>
               Depósito / Sucursal de Armado *
             </label>
@@ -1244,6 +1275,36 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             </div>
           </div>
 
+          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+            <span className={styles.detailSectionTitle} style={{ marginBottom: '8px', display: 'block' }}>
+              <ShieldCheck size={14} style={{ display: 'inline', marginRight: 4 }} />
+              Guía Interna de Protección y Embalaje
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label htmlFor="prep-glass-check" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--color-text-primary)' }}>
+                <input
+                  id="prep-glass-check"
+                  type="checkbox"
+                  style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary)' }}
+                  checked={prepGlassProtection}
+                  onChange={e => setPrepGlassProtection(e.target.checked)}
+                />
+                <span>Protección para Vidrio/Cerámica (Cartón corrugado + burbuja)</span>
+              </label>
+
+              <label htmlFor="prep-kraft-check" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--color-text-primary)' }}>
+                <input
+                  id="prep-kraft-check"
+                  type="checkbox"
+                  style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary)' }}
+                  checked={prepKraftFill}
+                  onChange={e => setPrepKraftFill(e.target.checked)}
+                />
+                <span>Relleno de estabilización Kraft (sin espacios vacíos)</span>
+              </label>
+            </div>
+          </div>
+
           <div>
             <label className={styles.detailSectionTitle} htmlFor="prep-note-input" style={{ marginBottom: '6px', display: 'block' }}>
               Nota de embalaje (opcional)
@@ -1252,7 +1313,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               id="prep-note-input"
               type="text"
               className={styles.statusNoteInput}
-              placeholder="Ej: Embalar con papel de burbuja extra (frágil)"
+              placeholder="Ej: Embalar con cuidado especial por tratarse de cristalería"
               value={prepNote}
               onChange={e => setPrepNote(e.target.value)}
             />

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, X, Search, Check } from 'lucide-react';
 import styles from './Dropdown.module.css';
 import { createPortal } from 'react-dom';
@@ -119,12 +119,14 @@ export function Dropdown({
     };
   }, [isOpen]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen || isMobile) return;
     updateMenuPosition();
+    const raf = requestAnimationFrame(updateMenuPosition);
     window.addEventListener('scroll', updateMenuPosition, true);
     window.addEventListener('resize', updateMenuPosition);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener('scroll', updateMenuPosition, true);
       window.removeEventListener('resize', updateMenuPosition);
     };
@@ -132,10 +134,10 @@ export function Dropdown({
 
   const handleToggle = () => {
     if (!disabled) {
-      setIsOpen((prev) => {
-        if (!prev && !isMobile) updateMenuPosition();
-        return !prev;
-      });
+      if (!isOpen && !isMobile && containerRef.current) {
+        updateMenuPosition();
+      }
+      setIsOpen((prev) => !prev);
       setFocusedIndex(-1);
     }
   };
@@ -211,9 +213,9 @@ export function Dropdown({
         />
       </button>
 
-      {/* 🟢 MÓVIL (<768px): Bottom Sheet Modal Emergente vía Portal */}
+      {/* 📱 MÓVIL (<768px): Bottom Sheet Modal Emergente vía Portal */}
       {isOpen && isMobile && createPortal(
-        <div className={styles.mobileSheetOverlay}>
+        <div className={styles.mobileSheetOverlay} style={{ zIndex: 2147483647 }}>
           <button
             type="button"
             className={styles.mobileSheetBackdrop}
@@ -301,7 +303,7 @@ export function Dropdown({
             left: menuPos.left,
             width: menuPos.width,
             maxHeight: menuPos.maxHeight,
-            zIndex: 100000,
+            zIndex: 2147483647,
           }}
         >
           {options.map((option, index) => {

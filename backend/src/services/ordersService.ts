@@ -130,6 +130,13 @@ function toOrder(row: any): Order {
         };
       })
       : [],
+    statusHistory: Array.isArray(row.orderStatusHistory)
+      ? row.orderStatusHistory.map((h: any) => ({
+          status: prismaStatusToOrderStatus(h.status),
+          changedAt: h.changedAt,
+          note: h.note ?? undefined,
+        }))
+      : [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -197,7 +204,8 @@ export async function getAllOrders(query: AdminOrdersQueryDTO): Promise<Paginate
               }
             }
           }
-        }
+        },
+        orderStatusHistory: { orderBy: { changedAt: 'asc' } }
       },
       orderBy: { createdAt: 'desc' }
     }),
@@ -248,7 +256,8 @@ export async function getOrderById(id: string): Promise<AdminOrderDTO> {
     }),
     statusHistory: order.orderStatusHistory.map(h => ({
       status: prismaStatusToOrderStatus(h.status),
-      changedAt: h.changedAt
+      changedAt: h.changedAt,
+      note: h.note ?? undefined
     }))
   };
 }
