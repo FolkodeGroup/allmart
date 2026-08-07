@@ -8,6 +8,7 @@ export interface TopProductData {
   sales: number;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function truncateLabel(text: string, maxLength: number = 13): string {
   if (!text) return '';
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
