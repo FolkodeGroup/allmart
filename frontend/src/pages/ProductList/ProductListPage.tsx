@@ -66,8 +66,6 @@ export function ProductListPage() {
   const urlTags = searchParams.get('tags') ?? '';
   const urlPriceRanges = searchParams.get('priceRanges') ?? '';
   const urlColeccion = searchParams.get('coleccion') ?? '';
-
-  // 🟢 FIX: Capturamos el parámetro 'q' de la URL
   const urlQuery = searchParams.get('q') ?? '';
 
   const selectedTags = useMemo(() => {
@@ -100,9 +98,7 @@ export function ProductListPage() {
   const [collectionLoading, setCollectionLoading] = useState(false);
 
   const urlSlugs = searchParams.get('slugs') ?? '';
-
   const isCollectionView = urlColeccion.length > 0;
-
   const priceRangesStr = selectedPriceRanges.join(',');
 
   useEffect(() => {
@@ -181,7 +177,7 @@ export function ProductListPage() {
 
             if (!cancelled) setCategoryCollections(updatedCollections);
           } catch (fetchErr) {
-            console.error('Error fetching live product images for category collections:', fetchErr);
+            console.error('Error loading live images for category collections:', fetchErr);
             if (!cancelled) setCategoryCollections(collections);
           }
         } else {
@@ -220,8 +216,6 @@ export function ProductListPage() {
     if (selectedTags.includes('oferta')) params.isOnSale = true;
     if (selectedTags.includes('novedad')) params.isNovedad = true;
     if (urlSlugs) params.slugs = urlSlugs;
-
-    // 🟢 FIX: Inyectamos el parámetro 'q' a la consulta de la API
     if (urlQuery) params.q = urlQuery;
 
     if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
@@ -247,13 +241,11 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-    // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de actualización
   }, [sortBy, selectedCategory, selectedTags, urlSlugs, page, priceRangesStr, categories, urlQuery]);
 
-  /* Resetear paginación cuando cambian filtros relevantes o el query */
+  /* Resetear paginación cuando cambian filtros */
   useEffect(() => {
     setPage(1);
-    // 🟢 FIX: Añadimos 'urlQuery' a las dependencias de reseteo de página
   }, [sortBy, selectedCategory, selectedTags, priceRangesStr, urlQuery]);
 
   const handleLoadMore = () => {
@@ -435,8 +427,6 @@ export function ProductListPage() {
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
-
-        {/* 🟢 FIX: Si hay una búsqueda activa, lo reflejamos de forma elegante en el breadcrumb */}
         <span className={styles.breadcrumbCurrent}>
           {urlQuery ? `Búsqueda: "${urlQuery}"` : 'Productos'}
         </span>
@@ -447,14 +437,26 @@ export function ProductListPage() {
           <div className={styles.categoryCollections}>
             {categoryCollections.map((collection) => (
               <div key={collection.id} className={styles.categoryBanner}>
-                <div className={styles.categoryBannerLabel}>
-                  <span className={styles.categoryBannerTitle}>{collection.name}</span>
-                  {collection.description && (
-                    <span className={styles.categoryBannerDesc}>{collection.description}</span>
-                  )}
+                <div className={styles.categoryBannerHeader}>
+                  <div className={styles.categoryBannerLabel}>
+                    <span className={styles.categoryBannerTitle}>{collection.name}</span>
+                    {collection.description && (
+                      <span className={styles.categoryBannerDesc}>{collection.description}</span>
+                    )}
+                  </div>
+                  <a
+                    href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}
+                    className={styles.categoryBannerViewAll}
+                  >
+                    Ver todos
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
                 </div>
+
                 <div className={styles.categoryBannerProducts}>
-                  {(collection.products ?? []).slice(0, 5).map((product) => {
+                  {(collection.products ?? []).slice(0, 8).map((product) => {
                     const imageUrl = getCollectionProductImage(product, products);
                     return (
                       <button
@@ -485,15 +487,6 @@ export function ProductListPage() {
                     );
                   })}
                 </div>
-                <a
-                  href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}
-                  className={styles.categoryBannerViewAll}
-                >
-                  Ver todos
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </a>
               </div>
             ))}
           </div>
