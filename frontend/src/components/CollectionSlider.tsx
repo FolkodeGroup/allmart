@@ -62,7 +62,7 @@ const CollectionSlider: React.FC<Props> = ({
   onProductClick,
   showViewAll = true,
   previewMode = false,
-  variant = 'home',
+  variant: _variant = 'home',
 }) => {
   const titleId = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -74,13 +74,11 @@ const CollectionSlider: React.FC<Props> = ({
   const [transitioning, setTransitioning] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  const isCategoryVariant = variant === 'category';
-  const effectiveProducts = isCategoryVariant ? products.slice(0, 5) : products;
+  const effectiveProducts = products;
   const count = effectiveProducts.length;
-  const canLoop = !isCategoryVariant && count > layout.visible;
+  const canLoop = count > layout.visible;
   const clones = canLoop ? Math.min(layout.visible, count) : 0;
-  const categoryCardWidth = 180;
-  const cardWidth = isCategoryVariant ? categoryCardWidth : slideW;
+  const cardWidth = slideW;
 
   type SlideItem = { key: string; product: CollectionProduct; origIdx: number };
   const leadingClones: SlideItem[] = canLoop
@@ -115,7 +113,7 @@ const CollectionSlider: React.FC<Props> = ({
     setLayout(newLayout);
     if (vpW > 0) {
       if (mobile) {
-        // En móvil, se calcula un ancho de ~160px - 175px para permitir ver 2 cards completas + 20% de asomado de la 3ª card (peek effect)
+        // En móvil, se calcula un ancho de ~150px - 175px para permitir ver 2 cards completas + 20% de asomado de la 3ª card
         const calcWidth = Math.min(175, Math.max(150, Math.floor((vpW - newLayout.gap * 1.5) / 2.2)));
         setSlideW(calcWidth);
       } else {
@@ -206,103 +204,86 @@ const CollectionSlider: React.FC<Props> = ({
         )}
       </div>
 
-      {isCategoryVariant ? (
-        <div className={`${styles.carouselWrapper} ${styles.categoryVariant}`} role="region" aria-labelledby={titleId}>
-          <div className={`${styles.categoryTrack} ${isMobile ? styles.mobileScroll : ''}`} style={{ gap: `${layout.gap}px` }}>
-            {effectiveProducts.map((product, i) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={i}
-                total={effectiveProducts.length}
-                width={categoryCardWidth}
-                onImageError={handleImageError}
-              />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div
-          className={styles.carouselWrapper}
-          role="region"
-          aria-roledescription="carrusel"
-          aria-labelledby={titleId}
-        >
-          {canLoop && !isMobile && (
-            <button
-              type="button"
-              className={`${styles.arrow} ${styles.arrowLeft}`}
-              onClick={() => goTo(-1)}
-              aria-label={`Ver productos anteriores de ${title}`}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M12.5 15L7.5 10l5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          )}
-
-          <div
-            ref={viewportRef}
-            className={`${styles.viewport} ${isMobile ? styles.mobileScroll : ''}`}
+      <div
+        className={styles.carouselWrapper}
+        role="region"
+        aria-roledescription="carrusel"
+        aria-labelledby={titleId}
+      >
+        {canLoop && !isMobile && (
+          <button
+            type="button"
+            className={`${styles.arrow} ${styles.arrowLeft}`}
+            onClick={() => goTo(-1)}
+            aria-label={`Ver productos anteriores de ${title}`}
           >
-            {isMobile ? (
-              <div className={styles.mobileTrack} style={{ gap: `${layout.gap}px` }}>
-                {effectiveProducts.map((product, i) => (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M12.5 15L7.5 10l5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
+
+        <div
+          ref={viewportRef}
+          className={`${styles.viewport} ${isMobile ? styles.mobileScroll : ''}`}
+        >
+          {isMobile ? (
+            <div className={styles.mobileTrack} style={{ gap: `${layout.gap}px` }}>
+              {effectiveProducts.map((product, i) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={i}
+                  total={effectiveProducts.length}
+                  width={cardWidth}
+                  onClick={onProductClick}
+                  onImageError={handleImageError}
+                />
+              ))}
+            </div>
+          ) : (
+            <div
+              className={styles.track}
+              style={{
+                gap: `${layout.gap}px`,
+                transform: `translateX(-${translateX}px)`,
+                transition: transitioning ? `transform ${TRANSITION_MS}ms cubic-bezier(0.22,1,0.36,1)` : 'none',
+              }}
+              onTransitionEnd={handleTransitionEnd}
+              aria-live="off"
+            >
+              {slides.map((slide, i) => {
+                const visible = i >= index && i < index + layout.visible;
+                return (
                   <ProductCard
-                    key={product.id}
-                    product={product}
-                    index={i}
-                    total={effectiveProducts.length}
+                    key={slide.key}
+                    product={slide.product}
+                    index={slide.origIdx}
+                    total={count}
                     width={cardWidth}
+                    isHidden={!visible}
                     onClick={onProductClick}
                     onImageError={handleImageError}
                   />
-                ))}
-              </div>
-            ) : (
-              <div
-                className={styles.track}
-                style={{
-                  gap: `${layout.gap}px`,
-                  transform: `translateX(-${translateX}px)`,
-                  transition: transitioning ? `transform ${TRANSITION_MS}ms cubic-bezier(0.22,1,0.36,1)` : 'none',
-                }}
-                onTransitionEnd={handleTransitionEnd}
-                aria-live="off"
-              >
-                {slides.map((slide, i) => {
-                  const visible = i >= index && i < index + layout.visible;
-                  return (
-                    <ProductCard
-                      key={slide.key}
-                      product={slide.product}
-                      index={slide.origIdx}
-                      total={count}
-                      width={cardWidth}
-                      isHidden={!visible}
-                      onClick={onProductClick}
-                      onImageError={handleImageError}
-                    />
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {canLoop && !isMobile && (
-            <button
-              type="button"
-              className={`${styles.arrow} ${styles.arrowRight}`}
-              onClick={() => goTo(1)}
-              aria-label={`Ver más productos de ${title}`}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M7.5 5l5 5-5 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+                );
+              })}
+            </div>
           )}
         </div>
-      )}
+
+        {canLoop && !isMobile && (
+          <button
+            type="button"
+            className={`${styles.arrow} ${styles.arrowRight}`}
+            onClick={() => goTo(1)}
+            aria-label={`Ver más productos de ${title}`}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M7.5 5l5 5-5 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 };

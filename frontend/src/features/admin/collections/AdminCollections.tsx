@@ -29,9 +29,8 @@ const AdminCollections: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [idsToDelete, setIdsToDelete] = useState<string[]>([]);
+  const [idToDelete, setIdToDelete] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncingAll, setSyncingAll] = useState(false);
 
@@ -145,29 +144,22 @@ const AdminCollections: React.FC = () => {
 
   function handleDelete(id: string, e?: React.MouseEvent) {
     e?.stopPropagation();
-    setIdsToDelete([id]);
-    setDeleteModalOpen(true);
-  }
-
-  function handleBulkDelete() {
-    if (selectedIds.length === 0) return;
-    setIdsToDelete([...selectedIds]);
+    setIdToDelete(id);
     setDeleteModalOpen(true);
   }
 
   async function handleConfirmDelete() {
-    if (!idsToDelete.length) return;
+    if (!idToDelete) return;
     setDeleting(true);
     setError(null);
     try {
-      await Promise.all(idsToDelete.map((id) => collectionsService.delete(id)));
-      toast.success('Colección(es) eliminada(s) correctamente');
+      await collectionsService.delete(idToDelete);
+      toast.success('Colección eliminada correctamente');
       setDeleteModalOpen(false);
-      setIdsToDelete([]);
-      setSelectedIds([]);
+      setIdToDelete(null);
       await loadCollections();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando colección(es)');
+      setError(err instanceof Error ? err.message : 'Error eliminando colección');
     } finally {
       setDeleting(false);
     }
@@ -175,7 +167,7 @@ const AdminCollections: React.FC = () => {
 
   function handleCancelDelete() {
     setDeleteModalOpen(false);
-    setIdsToDelete([]);
+    setIdToDelete(null);
     setDeleting(false);
   }
 
@@ -221,21 +213,13 @@ const AdminCollections: React.FC = () => {
     );
   }
 
+  const collectionToDelete = collections.find((c) => c.id === idToDelete);
+
   return (
     <div className={styles.container}>
-      {/* ── Acciones de Encabezado ── */}
+      {/* ── Acciones de Encabezado Contenidas ── */}
       <div className={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          {selectedIds.length > 0 && (
-            <button
-              type="button"
-              className={styles.btnSmallDanger}
-              onClick={handleBulkDelete}
-              disabled={deleting}
-            >
-              Eliminar seleccionadas ({selectedIds.length})
-            </button>
-          )}
+        <div className={styles.headerActions}>
           <button
             type="button"
             className={styles.btnSecondary}
@@ -244,17 +228,17 @@ const AdminCollections: React.FC = () => {
             title="Sincronizar todas las colecciones automáticas por ventas"
           >
             <RotateCcw size={14} />
-            {syncingAll ? 'Sincronizando...' : 'Sincronizar todo'}
+            <span>{syncingAll ? 'Sincronizando...' : 'Sincronizar todo'}</span>
           </button>
           <button type="button" className={styles.btnPrimary} onClick={handleNew}>
             <Plus size={16} />
-            Nueva Colección
+            <span>Nueva Colección</span>
           </button>
         </div>
       </div>
 
       {/* ── Filtros ── */}
-      <div className={styles.filters} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className={styles.filters}>
         <div className={styles.searchWrap}>
           <Search size={16} className={styles.searchIcon} />
           <input
@@ -273,7 +257,7 @@ const AdminCollections: React.FC = () => {
           />
         </div>
 
-        <div style={{ flex: '1 1 180px', minWidth: '180px', maxWidth: '240px' }}>
+        <div className={styles.filterDropdownPos}>
           <Dropdown
             options={positionOptions}
             value={displayPosition}
@@ -285,7 +269,7 @@ const AdminCollections: React.FC = () => {
           />
         </div>
 
-        <div style={{ flex: '1 1 150px', minWidth: '150px', maxWidth: '200px' }}>
+        <div className={styles.filterDropdownStatus}>
           <Dropdown
             options={activeOptions}
             value={filterActive === undefined ? '' : filterActive ? 'true' : 'false'}
@@ -314,7 +298,6 @@ const AdminCollections: React.FC = () => {
               .slice()
               .sort((a, b) => a.displayOrder - b.displayOrder)
               .map((collection) => {
-                const checked = selectedIds.includes(collection.id);
                 const isHome = collection.displayPosition === 'home';
                 const isCategory = collection.displayPosition === 'category';
                 const isAutoSales = collection.type === 'auto_sales';
@@ -347,22 +330,6 @@ const AdminCollections: React.FC = () => {
                         <span className={styles.expandChevron}>
                           {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </span>
-
-                        <input
-                          type="checkbox"
-                          aria-label={`Seleccionar colección ${collection.name}`}
-                          checked={checked}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            if (e.target.checked) {
-                              setSelectedIds((prev) => [...prev, collection.id]);
-                            } else {
-                              setSelectedIds((prev) => prev.filter((id) => id !== collection.id));
-                            }
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          className={styles.adminCheckbox}
-                        />
 
                         <span className={styles.orderBadge} title="Orden de visualización">
                           #{collection.displayOrder}
@@ -457,7 +424,7 @@ const AdminCollections: React.FC = () => {
                             bannerUrl={collection.imageUrl}
                             previewMode={true}
                             showViewAll={true}
-                            variant={collection.displayPosition}
+                            variant="home"
                           />
                         ) : (
                           <div className={styles.wysiwygEmpty}>
@@ -491,11 +458,11 @@ const AdminCollections: React.FC = () => {
 
       <ConfirmModal
         open={deleteModalOpen}
-        title={idsToDelete.length > 1 ? 'Eliminar Colecciones' : 'Eliminar Colección'}
+        title="Eliminar Colección"
         message={
-          idsToDelete.length > 1
-            ? `¿Está seguro de que desea eliminar estas ${idsToDelete.length} colecciones? Esta acción no se puede deshacer.`
-            : '¿Está seguro de que desea eliminar esta colección? Esta acción no se puede deshacer.'
+          collectionToDelete
+            ? `¿Está seguro de que desea eliminar la colección "${collectionToDelete.name}"? Esta acción no se puede deshacer.`
+            : '¿Está seguro de que desea eliminar esta colección?'
         }
         confirmLabel={deleting ? 'Eliminando...' : 'Eliminar'}
         cancelLabel="Cancelar"
