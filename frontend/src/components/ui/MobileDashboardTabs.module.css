@@ -1,6 +1,6 @@
 /* =============================================================================
    Allmart Bazar — Mobile Dashboard Tabs CSS Module
-   Flujo de documento natural (Sin flotación/sticky)
+   Centrado automático y desplazamiento fluido en móvil (< 768px)
    ============================================================================= */
 
 .tabsNav {
@@ -10,7 +10,7 @@
 @media (max-width: 767px) {
   .tabsNav {
     display: block;
-    position: relative; /* Flujo natural en el documento: se desplaza con el scroll de la página */
+    position: relative;
     width: 100%;
     box-sizing: border-box;
     margin: 8px 0 12px 0;
@@ -22,7 +22,8 @@
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding: 4px 2px;
+    padding: 4px 12px;
+    scroll-behavior: smooth;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -34,7 +35,7 @@
   .tabBtn {
     flex: 1 0 auto;
     min-height: 44px;
-    padding: 8px 14px;
+    padding: 8px 16px;
     display: flex;
     align-items: center;
     justify-content: center;

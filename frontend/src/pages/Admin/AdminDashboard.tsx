@@ -25,6 +25,7 @@ import WeeklySalesWidget from '../../components/ui/WeeklySalesWidget';
 import RecentOrdersWidget from '../../components/ui/RecentOrdersWidget';
 import { MonthlyGoalCard } from '../../components/ui/MonthlyGoalCard';
 import { MobileDashboardTabs, type DashboardMobileTab } from '../../components/ui/MobileDashboardTabs';
+import { MobileCollapsibleBlock } from '../../components/ui/MobileCollapsibleBlock';
 
 import styles from './AdminDashboard.module.css';
 
@@ -100,7 +101,7 @@ export function AdminDashboard() {
   });
   const { draggedId, dragOverId, isDragging } = dragState;
 
-  // Handlers para Swipe táctil (Umbral optimizado a 35px)
+  // Handlers para Swipe táctil
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
@@ -112,15 +113,12 @@ export function AdminDashboard() {
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
 
-    // Umbral ergonómico de deslizamiento horizontal (mínimo 35px y mayor movimiento X que Y)
     if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > deltaY) {
       const currentIndex = MOBILE_TABS_ORDER.indexOf(mobileTab);
 
       if (deltaX < 0 && currentIndex < MOBILE_TABS_ORDER.length - 1) {
-        // Swipe izquierda -> Avanzar pestaña
         setMobileTab(MOBILE_TABS_ORDER[currentIndex + 1]);
       } else if (deltaX > 0 && currentIndex > 0) {
-        // Swipe derecha -> Retroceder pestaña
         setMobileTab(MOBILE_TABS_ORDER[currentIndex - 1]);
       }
     }
@@ -264,14 +262,14 @@ export function AdminDashboard() {
     }
   };
 
-  // ─── RENDERIZADO VISTA MÓVIL (< 768px) CON SWIPE GESTURES ────────────────────
+  // ─── RENDERIZADO VISTA MÓVIL (< 768px) CON DESPLEGABLES Y SWIPE ──────────────
 
   if (isMobile) {
     const currentTabIndex = MOBILE_TABS_ORDER.indexOf(mobileTab);
 
     return (
       <div className={styles.page}>
-        {/* Banner de Bienvenida Mapeado con Mismo Ancho y Estilo que el Contenido */}
+        {/* Banner de Bienvenida Mapeado */}
         <header className={styles.mobileBanner}>
           <div className={styles.mobileBannerTop}>
             <div>
@@ -289,7 +287,7 @@ export function AdminDashboard() {
           </div>
         </header>
 
-        {/* Botonera de Pestañas Fluyendo Naturalmente en el Documento (Sin Flotación) */}
+        {/* Botonera de Pestañas Fluyendo Naturalmente */}
         <MobileDashboardTabs
           activeTab={mobileTab}
           onTabChange={setMobileTab}
@@ -314,7 +312,7 @@ export function AdminDashboard() {
           onClose={() => setSettingsOpen(false)}
         />
 
-        {/* Panel Contenedor con Detección de Gestos Swipe */}
+        {/* Panel Contenedor con Desplegables y Detección de Gestos Swipe */}
         <div
           className={styles.mobileTabPanel}
           onTouchStart={handleTouchStart}
@@ -322,6 +320,7 @@ export function AdminDashboard() {
         >
           {mobileTab === 'resumen' && (
             <div className={styles.mobileSectionStack}>
+              {/* Grilla KPI 2x2 Fija */}
               <section className={styles.mobileKpiGrid}>
                 <MetricCard title="Ingresos" value={fmtCurrency(ingresos)} variation={variaciones.ingresos} />
                 <MetricCard title="Pedidos" value={totalPedidos} variation={variaciones.pedidos} />
@@ -329,8 +328,12 @@ export function AdminDashboard() {
                 <MetricCard title="Ticket Prom." value={fmtCurrency(ticketPromedio)} variation={variaciones.ticketPromedio} />
               </section>
 
-              <section className={styles.mobileBlock}>
-                <h3 className={styles.mobileBlockTitle}>Acceso Rápido</h3>
+              {/* Acceso Rápido en Desplegable */}
+              <MobileCollapsibleBlock
+                title="Acceso Rápido"
+                icon={<i className="bi bi-compass" />}
+                defaultExpanded={true}
+              >
                 <div className={styles.quickGridMobile}>
                   {[
                     { icon: 'bi bi-box-seam', title: 'Productos', to: '/admin/productos', color: 'primary', ok: can('products.view') },
@@ -350,12 +353,17 @@ export function AdminDashboard() {
                       </Link>
                     ))}
                 </div>
-              </section>
+              </MobileCollapsibleBlock>
 
+              {/* Ventas Semanales en Desplegable */}
               {can('reports.view') && (
-                <section className={styles.mobileBlock}>
+                <MobileCollapsibleBlock
+                  title="Ventas Semanales"
+                  icon={<i className="bi bi-graph-up-arrow" />}
+                  defaultExpanded={true}
+                >
                   <WeeklySalesWidget data={weeklySalesData} totalSales={weeklyTotalSales} />
-                </section>
+                </MobileCollapsibleBlock>
               )}
             </div>
           )}
@@ -378,30 +386,59 @@ export function AdminDashboard() {
 
           {mobileTab === 'analitica' && (
             <div className={styles.mobileSectionStack}>
-              <MonthlyGoalCard
-                currentMonthRevenue={currentMonthRevenue}
-                monthlyGoal={monthlyGoal}
-                onSaveGoal={setMonthlyGoal}
-                styles={styles}
-              />
+              {/* Objetivo Mensual en Desplegable */}
+              <MobileCollapsibleBlock
+                title="Objetivo Mensual"
+                icon={<i className="bi bi-bullseye" />}
+                defaultExpanded={true}
+              >
+                <MonthlyGoalCard
+                  currentMonthRevenue={currentMonthRevenue}
+                  monthlyGoal={monthlyGoal}
+                  onSaveGoal={setMonthlyGoal}
+                  styles={styles}
+                />
+              </MobileCollapsibleBlock>
+
+              {/* Distribución por Categoría en Desplegable */}
               {can('reports.view') && (
-                <div className={styles.mobileBlock}>
+                <MobileCollapsibleBlock
+                  title="Distribución por Categoría"
+                  icon={<i className="bi bi-pie-chart" />}
+                  defaultExpanded={true}
+                >
                   <CategoryDistributionChart data={categoryData} />
-                </div>
+                </MobileCollapsibleBlock>
               )}
+
+              {/* Top Productos en Desplegable */}
               {can('reports.view') && (
-                <div className={styles.mobileBlock}>
+                <MobileCollapsibleBlock
+                  title="Top Productos Vendidos"
+                  icon={<i className="bi bi-trophy" />}
+                  defaultExpanded={false}
+                >
                   <BarChartTopProducts data={topProducts} />
-                </div>
+                </MobileCollapsibleBlock>
               )}
-              <div className={styles.mobileBlock}>
-                <h3 className={styles.mobileBlockTitle}>Actividad Reciente</h3>
+
+              {/* Actividad Reciente en Desplegable */}
+              <MobileCollapsibleBlock
+                title="Actividad Reciente"
+                icon={<i className="bi bi-activity" />}
+                defaultExpanded={false}
+              >
                 <ActivityFeed />
-              </div>
-              <div className={styles.mobileBlock}>
-                <h3 className={styles.mobileBlockTitle}>Notas del Equipo</h3>
+              </MobileCollapsibleBlock>
+
+              {/* Notas del Equipo en Desplegable */}
+              <MobileCollapsibleBlock
+                title="Notas del Equipo"
+                icon={<i className="bi bi-journal-text" />}
+                defaultExpanded={false}
+              >
                 <StaffNotes />
-              </div>
+              </MobileCollapsibleBlock>
             </div>
           )}
         </div>

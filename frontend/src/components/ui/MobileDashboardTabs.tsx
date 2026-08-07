@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './MobileDashboardTabs.module.css';
 
 export type DashboardMobileTab = 'resumen' | 'pedidos' | 'alertas' | 'analitica';
@@ -16,12 +16,25 @@ export const MobileDashboardTabs: React.FC<MobileDashboardTabsProps> = ({
   pendingOrdersCount = 0,
   lowStockCount = 0,
 }) => {
+  const activeTabBtnRef = useRef<HTMLButtonElement | null>(null);
+
   const tabs: { id: DashboardMobileTab; label: string; icon: string; badge?: number }[] = [
     { id: 'resumen', label: 'Resumen', icon: 'bi-grid-1x2' },
     { id: 'pedidos', label: 'Pedidos', icon: 'bi-cart-check', badge: pendingOrdersCount },
     { id: 'alertas', label: 'Alertas', icon: 'bi-exclamation-triangle', badge: lowStockCount },
     { id: 'analitica', label: 'Analítica', icon: 'bi-bar-chart-line' },
   ];
+
+  // Centra automáticamente el botón de la pestaña activa al cambiar de vista (por tap o swipe)
+  useEffect(() => {
+    if (activeTabBtnRef.current && typeof activeTabBtnRef.current.scrollIntoView === 'function') {
+      activeTabBtnRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [activeTab]);
 
   return (
     <nav className={styles.tabsNav} aria-label="Pestañas del Dashboard Móvil">
@@ -31,6 +44,7 @@ export const MobileDashboardTabs: React.FC<MobileDashboardTabsProps> = ({
           return (
             <button
               key={tab.id}
+              ref={isActive ? activeTabBtnRef : null}
               role="tab"
               type="button"
               aria-selected={isActive}

@@ -110,8 +110,9 @@ export function ActivityFeed({
 
   return (
     <div className="af-wrapper">
-      {/* Header */}
+      {/* Header con título visible */}
       <div className="af-header">
+        <h3 className="af-title">Actividad Reciente</h3>
         <div className="af-header-actions">
           <button className="af-btn-clear" onClick={handleClear} aria-label="Limpiar historial" type="button">
             Limpiar todo
