@@ -26,6 +26,7 @@ export function FeaturedProducts({
   limit = 8,
 }: FeaturedProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true); // 🟢 FIX: Estado de carga real
   const [cardsPerView, setCardsPerView] = useState(4);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
@@ -33,6 +34,7 @@ export function FeaturedProducts({
   const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
       fetchPublicProducts({ sort: 'newest', limit, isFeatured: true }),
       fetchPublicCategories(),
@@ -42,7 +44,8 @@ export function FeaturedProducts({
           data.map((p) => mapApiProductToProduct(p, categories))
         );
       })
-      .catch(() => setProducts([]));
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
   }, [limit]);
 
   useEffect(() => {
@@ -126,7 +129,10 @@ export function FeaturedProducts({
     touchStartY.current = null;
   };
 
-  const isLoading = products.length === 0;
+  // 🟢 FIX: Si ya terminó de cargar y no hay productos, no renderizamos nada.
+  if (!loading && products.length === 0) {
+    return null;
+  }
 
   return (
     <section className={styles.section} aria-label={title}>
@@ -148,7 +154,7 @@ export function FeaturedProducts({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {isLoading ? (
+          {loading ? (
             Array.from({ length: cardsPerView }).map((_, idx) => (
               <div
                 key={`featured-skeleton-${idx}`}

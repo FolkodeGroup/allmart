@@ -6,7 +6,6 @@ import type { PublicBanner } from '../../services/publicBannersService';
 import { publicBannersService } from '../../services/publicBannersService';
 import { fetchPublicProducts } from '../../services/productsService';
 import { bannerFilterToUrl } from '../../utils/bannerFilterToUrl';
-import { DEFAULT_IMAGE_PLACEHOLDER } from '../../utils/imageUrl';
 
 const CategoryGrid = lazy(() => import('../../features/home/CategoryGrid/CategoryGrid').then((m) => ({ default: m.CategoryGrid })));
 const FeaturedProducts = lazy(() => import('../../features/home/FeaturedProducts/FeaturedProducts').then((m) => ({ default: m.FeaturedProducts })));
@@ -104,52 +103,55 @@ export function HomePage() {
   };
 
   const heroBanner = banners[0] ?? null;
-  const heroImageUrl = heroBanner?.thumbUrl || heroBanner?.imageUrl || DEFAULT_IMAGE_PLACEHOLDER;
+  const heroImageUrl = heroBanner?.thumbUrl || heroBanner?.imageUrl;
   const heroTarget = heroBanner ? bannerFilterToUrl(heroBanner.filterConfig ?? {}) : '/productos';
 
   return (
     <main>
-      <section
-        aria-label={heroBanner?.title ?? 'Destacado principal'}
-        style={{
-          maxWidth: '1600px',
-          margin: '0 auto',
-          padding: '0',
-        }}
-      >
-        <Link
-          to={heroTarget}
-          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
-          aria-label={heroBanner?.title ? `Ver promoción ${heroBanner.title}` : 'Ver promociones'}
+      {/* 🟢 FIX: Renderizado condicional estricto. Si no hay banner o imagen, no se renderiza nada y el contenido sube. */}
+      {heroBanner && heroImageUrl && (
+        <section
+          aria-label={heroBanner.title ?? 'Destacado principal'}
+          style={{
+            maxWidth: '1600px',
+            margin: '0 auto',
+            padding: '0',
+          }}
         >
-          <div
-            style={{
-              position: 'relative',
-              width: '100%',
-              aspectRatio: '16 / 6',
-              overflow: 'hidden',
-              background: '#f5f5f5',
-            }}
+          <Link
+            to={heroTarget}
+            style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+            aria-label={heroBanner.title ? `Ver promoción ${heroBanner.title}` : 'Ver promociones'}
           >
-            <img
-              src={heroImageUrl}
-              alt={heroBanner?.altText || heroBanner?.title || 'Promoción destacada'}
-              width="1186"
-              height="667"
-              fetchPriority="high"
-              loading="eager"
-              decoding="async"
-              sizes="(max-width: 768px) 100vw, 1600px"
+            <div
               style={{
-                display: 'block',
+                position: 'relative',
                 width: '100%',
-                height: '100%',
-                objectFit: 'cover',
+                aspectRatio: '16 / 6',
+                overflow: 'hidden',
+                background: '#f5f5f5',
               }}
-            />
-          </div>
-        </Link>
-      </section>
+            >
+              <img
+                src={heroImageUrl}
+                alt={heroBanner.altText || heroBanner.title || 'Promoción destacada'}
+                width="1186"
+                height="667"
+                fetchPriority="high"
+                loading="eager"
+                decoding="async"
+                sizes="(max-width: 768px) 100vw, 1600px"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            </div>
+          </Link>
+        </section>
+      )}
 
       <Suspense fallback={(
         <section aria-label="Cargando secciones destacadas" style={{ minHeight: '980px' }}>
@@ -193,7 +195,6 @@ export function HomePage() {
       {loading && (
         <section className="collection-section collection-section--primary" style={{ minHeight: '480px' }}>
           <div className="section-inner" style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 var(--space-10)' }}>
-            {/* 🟢 Solución CLS: Placeholder sutil para evitar el colapso de altura en carga */}
             <div style={{ height: '32px', width: '280px', background: '#e6e2dd', marginBottom: '24px', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
             <div style={{ display: 'flex', gap: '20px', overflow: 'hidden' }}>
               {[1, 2, 3, 4].map(i => (
