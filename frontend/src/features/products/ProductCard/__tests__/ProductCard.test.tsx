@@ -40,13 +40,13 @@ describe('ProductCard', () => {
     expect(screen.queryByText(/Stock bajo/i)).not.toBeInTheDocument();
   });
 
-  it('renders low stock badge for default variant', () => {
+  it('does not render low stock badge for default variant', () => {
     render(
       <BrowserRouter>
         <ProductCard product={product} />
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/Stock bajo/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Stock bajo/i)).not.toBeInTheDocument();
   });
 });

@@ -83,8 +83,8 @@ describe('AdminPromotionForm', () => {
     const maxDiscountInput = screen.getByLabelText('Descuento Máximo ($)') as HTMLInputElement;
     fireEvent.change(maxDiscountInput, { target: { value: '' } });
 
-    const submitButton = screen.getByRole('button', { name: /actualizar promoción/i });
-    fireEvent.click(submitButton);
+    const submitButton = screen.getByRole('button', { name: /guardar cambios/i });
+    await waitFor(() => { fireEvent.click(submitButton); });
 
     await waitFor(() => {
       expect(updateSpy).toHaveBeenCalledWith(
