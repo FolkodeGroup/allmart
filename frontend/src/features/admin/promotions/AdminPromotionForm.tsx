@@ -2,6 +2,7 @@
  * features/admin/promotions/AdminPromotionForm.tsx
  * Formulario completo para crear/editar promociones con selector
  * de productos y categorías integrado.
+ * Diseño en tarjetas, responsive y compatible con Dark Mode.
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -14,7 +15,7 @@ import { fetchAdminCategories } from '../categories/categoriesService';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { apiFetch } from '../../../utils/apiClient';
 import styles from './AdminPromotions.module.css';
-import { Search } from 'lucide-react';
+import { Search, ArrowLeft, Tag, Percent, Calendar, Settings } from 'lucide-react';
 import { DatePicker } from '../../../components/ui/DatePicker/DatePicker';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
@@ -36,7 +37,7 @@ interface Props {
 const TYPE_LABELS = {
   percentage: 'Porcentaje (%)',
   fixed: 'Monto Fijo ($)',
-  bogo: 'BOGO (Lleva 1 Gratis)',
+  bogo: 'BOGO (Lleva 2 Paga 1)',
 };
 
 const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) => {
@@ -120,14 +121,12 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     interceptNavigation(() => onCancel());
   }, [interceptNavigation, onCancel]);
 
-  // Mapeo de opciones de tipo de descuento para el Dropdown
   const typeOptions = useMemo(() => [
     { value: 'percentage', label: TYPE_LABELS.percentage },
     { value: 'fixed', label: TYPE_LABELS.fixed },
     { value: 'bogo', label: TYPE_LABELS.bogo }
   ], []);
 
-  // ─── Init from existing promotion ────────────────────────────────────────
   useEffect(() => {
     if (promotion) {
       setName(promotion.name);
@@ -145,7 +144,6 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     }
   }, [promotion]);
 
-  // ─── Load selectors ──────────────────────────────────────────────────────
   const loadSelectors = useCallback(async () => {
     setLoadingSelectors(true);
     try {
@@ -167,7 +165,6 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
       setAllCategories(categoriesRes.data.map((c) => ({ id: c.id, name: c.name })));
     } catch (err) {
       console.error('Error loading selectors:', err);
-      // Silencioso: los selectores son opcionales
     } finally {
       setLoadingSelectors(false);
     }
@@ -177,76 +174,69 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     loadSelectors();
   }, [loadSelectors]);
 
-  // ─── Validation function ─────────────────────────────────────────────────
   const validateValue = useCallback((valueToValidate: string, discountType: 'percentage' | 'fixed' | 'bogo'): string | null => {
     if (!valueToValidate) return null;
-
     const numValue = Number(valueToValidate);
-
-    if (isNaN(numValue)) {
-      return 'El valor debe ser un número válido';
-    }
-
-    if (discountType === 'percentage') {
-      if (numValue < 0 || numValue > 100) {
-        return 'El porcentaje debe estar entre 0 y 100';
-      }
-    } else if (discountType === 'fixed') {
-      if (numValue < 0) {
-        return 'El monto debe ser positivo';
-      }
-    }
-
+    if (isNaN(numValue)) return 'El valor debe ser numérico';
+    if (discountType === 'percentage' && (numValue < 0 || numValue > 100)) return 'Debe estar entre 0 y 100';
+    if (discountType === 'fixed' && numValue < 0) return 'Debe ser positivo';
     return null;
   }, []);
 
-  // ─── Real-time validation effect ──────────────────────────────────────────
   useEffect(() => {
-    const error = validateValue(value, type);
-    setValueError(error);
+    setValueError(validateValue(value, type));
   }, [value, type, validateValue]);
 
-  // ─── Force BOGO value ───────────────────────────────────────────────────────
   useEffect(() => {
-    if (type === 'bogo' && value !== '0') {
-      setValue('0');
-    }
+    if (type === 'bogo' && value !== '0') setValue('0');
   }, [type, value]);
 
   const handleTypeChange = useCallback((newType: Promotion['type']) => {
     setType(newType);
-    if (newType === 'bogo') {
-      setValue('0');
-    }
+    if (newType === 'bogo') setValue('0');
   }, []);
 
-  // ─── Handlers ────────────────────────────────────────────────────────────
   function toggleProduct(id: string) {
-    setSelectedProductIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedProductIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
-  
   function toggleCategory(id: string) {
-    setSelectedCategoryIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedCategoryIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!name.trim()) { setError('El nombre es requerido'); return; }
-
-    const valueValidationError = validateValue(value, type);
-    if (valueValidationError) {
-      setError(valueValidationError);
-      return;
+    
+    // 1. Validaciones de campos básicos
+    if (!name.trim()) { 
+      setError('El nombre de la campaña es requerido.'); 
+      setActiveTab('details');
+      return; 
+    }
+    if (validateValue(value, type)) { 
+      setError(validateValue(value, type)); 
+      setActiveTab('details');
+      return; 
+    }
+    if (!startDate || !endDate) { 
+      setError('Las fechas de inicio y fin son requeridas.'); 
+      setActiveTab('details');
+      return; 
+    }
+    if (new Date(startDate) >= new Date(endDate)) { 
+      setError('La fecha de fin debe ser posterior a la de inicio.'); 
+      setActiveTab('details');
+      return; 
     }
 
-    if (!startDate || !endDate) { setError('Las fechas son requeridas'); return; }
-    if (new Date(startDate) >= new Date(endDate)) { setError('La fecha de fin debe ser posterior a la de inicio'); return; }
+    // 🟢 2. VALIDACIÓN DE NEGOCIO: Evitar promociones fantasma
+    if (selectedProductIds.length === 0 && selectedCategoryIds.length === 0) {
+      setError('Debes seleccionar al menos un producto o una categoría para aplicar la promoción.');
+      // Cambiamos a la pestaña de productos para que el usuario vea dónde corregirlo
+      setActiveTab('products');
+      return;
+    }
 
     setSaving(true);
     try {
@@ -264,11 +254,9 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         rules: { productIds: selectedProductIds, categoryIds: selectedCategoryIds },
       };
 
-      if (promotion) {
-        await promotionsService.update(promotion.id, payload);
-      } else {
-        await promotionsService.create(payload);
-      }
+      if (promotion) await promotionsService.update(promotion.id, payload);
+      else await promotionsService.create(payload);
+      
       onSubmit();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error guardando promoción');
@@ -277,30 +265,46 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     }
   }
 
-  // ─── Filtered lists ──────────────────────────────────────────────────────
-  const filteredProducts = allProducts.filter((p) =>
-    p.name.toLowerCase().includes(productSearch.toLowerCase())
-  );
-  const filteredCategories = allCategories.filter((c) =>
-    c.name.toLowerCase().includes(categorySearch.toLowerCase())
-  );
-  const affectedByCategoryCount = allProducts.filter(
-    (p) => p.categoryId && selectedCategoryIds.includes(p.categoryId)
-  ).length;
+  const filteredProducts = allProducts.filter((p) => p.name.toLowerCase().includes(productSearch.toLowerCase()));
+  const filteredCategories = allCategories.filter((c) => c.name.toLowerCase().includes(categorySearch.toLowerCase()));
+  const affectedByCategoryCount = allProducts.filter((p) => p.categoryId && selectedCategoryIds.includes(p.categoryId)).length;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.formHeader}>
-        <h1>{promotion ? 'Editar Promoción' : 'Nueva Promoción'}</h1>
-        <span className={styles.formSubtitle}>
-          {selectedProductIds.length} productos · {selectedCategoryIds.length} categorías
-          {affectedByCategoryCount > 0 && ` · ~${affectedByCategoryCount} via categoría`}
-        </span>
-      </div>
+    <div className={styles.formPageWrapper}>
+      {/* ── Encabezado Unificado ── */}
+      <header className={styles.pageHeader}>
+        <div className={styles.pageHeaderInner}>
+          <button type="button" onClick={handleCancel} className={styles.backBtn} aria-label="Volver">
+            <ArrowLeft size={14} /> Promociones
+          </button>
+          <div>
+            <h1 className={styles.pageTitle}>
+              {promotion ? `Editar promoción: ${promotion.name}` : 'Nueva promoción'}
+            </h1>
+            <span className={styles.formSubtitle}>
+              {selectedProductIds.length} productos directos · {selectedCategoryIds.length} categorías
+              {affectedByCategoryCount > 0 && ` (~${affectedByCategoryCount} prods. heredados)`}
+            </span>
+          </div>
+        </div>
+        <div className={styles.pageHeaderActions}>
+          <button type="button" className={styles.cancelBtn} onClick={handleCancel} disabled={saving}>
+            Cancelar
+          </button>
+          <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={saving || !!valueError}>
+            {saving ? 'Guardando...' : promotion ? 'Guardar cambios' : 'Crear promoción'}
+          </button>
+        </div>
+      </header>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && (
+        <div className={styles.globalError}>
+          <span style={{ fontWeight: 600, display: 'block', marginBottom: '4px' }}>Atención:</span>
+          {error}
+        </div>
+      )}
 
-      {/* ─── Tabs ─────────────────────────────────────────────────────── */}
+      {/* ── Pestañas del Formulario ── */}
       <div className={styles.formTabs}>
         <button type="button" className={activeTab === 'details' ? styles.formTabActive : styles.formTab} onClick={() => setActiveTab('details')}>
           Detalles
@@ -313,213 +317,168 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        {/* ─── TAB: DETALLES ──────────────────────────────────────────── */}
+      <form onSubmit={handleSubmit} className={styles.formUnified} noValidate>
+        {/* ── TAB: DETALLES ── */}
         {activeTab === 'details' && (
           <div className={styles.formBody}>
-            <div className={styles.formGroup}>
-              <label htmlFor="promo-name">Nombre *</label>
-              <input id="promo-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Black Friday 50%, Cyber Week..." />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="promo-desc">Descripción</label>
-              <textarea id="promo-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles para el administrador" rows={2} />
-            </div>
-            <div className={styles.formRow}>
-              {/* Dropdown unificado para el tipo de descuento asociado a un label semántico */}
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}><Tag size={18} /> Información Básica</h2>
               <div className={styles.formGroup}>
-                <label
-                  htmlFor="promo-type"
-                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
-                >
-                  Tipo de Descuento *
-                </label>
-                <Dropdown
-                  id="promo-type"
-                  options={typeOptions}
-                  value={type}
-                  onChange={(val) => handleTypeChange(val as Promotion['type'])}
-                  placeholder="Seleccionar tipo..."
-                />
+                <label htmlFor="promo-name">Nombre de la campaña *</label>
+                <input id="promo-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Black Friday 50%, Cyber Week..." />
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="promo-value">Valor *</label>
-                <input id="promo-value" type="number" value={value} onChange={(e) => setValue(e.target.value)} placeholder={type === 'percentage' ? '0 – 100' : '0'} min="0" step={type === 'percentage' ? '0.01' : '1'} disabled={type === 'bogo'} />
-                <small>{type === 'percentage' ? 'Porcentaje de descuento' : type === 'fixed' ? 'Pesos de descuento' : 'Aplica al 2do artículo'}</small>
-                {valueError && <small style={{ color: '#e74c3c', fontWeight: '500' }}>⚠️ {valueError}</small>}
+                <label htmlFor="promo-desc">Descripción interna</label>
+                <textarea id="promo-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles para el administrador" rows={2} />
               </div>
-            </div>
-            <div className={styles.formRow}>
-              {/* DatePickers customizados unificados con labels semánticos */}
-              <div className={styles.formGroup}>
-                <label
-                  htmlFor="promo-start"
-                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
-                >
-                  Fecha de Inicio *
-                </label>
-                <DatePicker id="promo-start" value={startDate} onChange={setStartDate} />
+            </section>
+
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}><Percent size={18} /> Configuración del Descuento</h2>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="promo-type">Tipo de Descuento *</label>
+                  <Dropdown id="promo-type" options={typeOptions} value={type} onChange={(val) => handleTypeChange(val as Promotion['type'])} placeholder="Seleccionar tipo..." />
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="promo-value">Valor *</label>
+                  <input id="promo-value" type="number" value={value} onChange={(e) => setValue(e.target.value)} placeholder={type === 'percentage' ? '0 – 100' : '0'} min="0" step={type === 'percentage' ? '0.01' : '1'} disabled={type === 'bogo'} />
+                  <small>{type === 'percentage' ? 'Porcentaje de descuento' : type === 'fixed' ? 'Pesos de descuento' : 'Aplica al 2do artículo'}</small>
+                  {valueError && <span className={styles.errorMsg}>{valueError}</span>}
+                </div>
               </div>
-              <div className={styles.formGroup}>
-                <label
-                  htmlFor="promo-end"
-                  style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '8px', display: 'block', cursor: 'pointer' }}
-                >
-                  Fecha de Fin *
-                </label>
-                <DatePicker id="promo-end" value={endDate} onChange={setEndDate} />
+            </section>
+
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}><Calendar size={18} /> Vigencia y Condiciones</h2>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="promo-start">Fecha de Inicio *</label>
+                  <DatePicker id="promo-start" value={startDate} onChange={setStartDate} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="promo-end">Fecha de Fin *</label>
+                  <DatePicker id="promo-end" value={endDate} onChange={setEndDate} />
+                </div>
               </div>
-            </div>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label htmlFor="promo-min">Compra Mínima ($)</label>
-                <input id="promo-min" type="number" value={minPurchase} onChange={(e) => setMinPurchase(e.target.value)} placeholder="Sin mínimo" min="0" step="0.01" />
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="promo-min">Compra Mínima ($)</label>
+                  <input id="promo-min" type="number" value={minPurchase} onChange={(e) => setMinPurchase(e.target.value)} placeholder="Sin mínimo" min="0" step="0.01" />
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="promo-max">Descuento Máximo ($)</label>
+                  <input id="promo-max" type="number" value={maxDiscount} onChange={(e) => setMaxDiscount(e.target.value)} placeholder="Sin tope" min="0" step="0.01" />
+                  <small style={{ color: 'var(--color-primary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
+                    💡 Si el descuento supera este tope, la tienda ajustará automáticamente el porcentaje visible (Badge) para reflejar el descuento real y evitar publicidad engañosa.
+                  </small>
+                </div>
               </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="promo-max">Descuento Máximo ($)</label>
-                <input id="promo-max" type="number" value={maxDiscount} onChange={(e) => setMaxDiscount(e.target.value)} placeholder="Sin tope" min="0" step="0.01" />
+            </section>
+
+            <section className={styles.formCardSection}>
+              <h2 className={styles.formCardTitle}><Settings size={18} /> Avanzado</h2>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="promo-priority">Prioridad de aplicación</label>
+                  <input id="promo-priority" type="number" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="0" />
+                  <small>Mayor número = se aplica primero cuando hay conflictos</small>
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.checkboxLabel} htmlFor="promo-active">
+                    <input id="promo-active" type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+                    <span>Promoción activa en la tienda</span>
+                  </label>
+                </div>
               </div>
-            </div>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label htmlFor="promo-priority">Prioridad</label>
-                <input id="promo-priority" type="number" value={priority} onChange={(e) => setPriority(e.target.value)} placeholder="0" />
-                <small>Mayor número = se aplica primero cuando hay conflictos</small>
-              </div>
-              <div className={styles.formGroup}>
-                <label className={styles.checkboxLabel}>
-                  <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-                  Promoción activa
-                </label>
-              </div>
-            </div>
+            </section>
           </div>
         )}
 
         {/* ─── TAB: PRODUCTOS ─────────────────────────────────────────── */}
         {activeTab === 'products' && (
           <div className={styles.formBody}>
-            <p className={styles.selectorHint}>
-              Seleccioná los productos específicos a los que aplica esta promoción.
-              También podés aplicarla a categorías enteras en la pestaña <strong>Categorías</strong>.
-            </p>
-            <div className={styles.searchWrap}>
-              <Search size={16} className={styles.searchIcon} />
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Buscar producto..."
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                autoComplete="off"
-                spellCheck="false"
-                autoCorrect="off"
-                autoCapitalize="off"
-              />
-            </div>
-            {loadingSelectors ? (
-              <p className={styles.loading}>Cargando productos...</p>
-            ) : allProducts.length === 0 ? (
-              <p className={styles.empty}>No hay productos disponibles</p>
-            ) : (
-              <>
-                <div className={styles.selectorActions}>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds(filteredProducts.map((p) => p.id))}>
-                    ✓ Seleccionar todos
-                  </button>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds([])}>
-                    ✗ Deseleccionar todos
-                  </button>
-                  <span className={styles.selectorCount}>{selectedProductIds.length} seleccionados</span>
-                </div>
-                <div className={styles.selectorList}>
-                  {filteredProducts.map((product) => {
-                    const isSelected = selectedProductIds.includes(product.id);
-                    return (
-                      <label key={product.id} className={`${styles.selectorItem} ${isSelected ? styles.selectorItemSelected : ''}`}>
-                        <input type="checkbox" checked={isSelected} onChange={() => toggleProduct(product.id)} />
-                        <span className={styles.selectorItemName}>{product.name}</span>
-                        <span className={styles.selectorItemMeta}>${product.price.toFixed(2)}</span>
-                      </label>
-                    );
-                  })}
-                  {filteredProducts.length === 0 && allProducts.length > 0 && (
-                    <p className={styles.empty}>No hay resultados de búsqueda</p>
-                  )}
-                </div>
-              </>
-            )}
+            <section className={styles.formCardSection}>
+              <p className={styles.selectorHint}>
+                Seleccioná los productos específicos a los que aplica esta promoción.
+                También podés aplicarla a categorías enteras en la pestaña <strong>Categorías</strong>.
+              </p>
+              <div className={styles.searchWrap}>
+                <Search size={16} className={styles.searchIcon} />
+                <input type="text" className={styles.searchInput} placeholder="Buscar producto..." value={productSearch} onChange={(e) => setProductSearch(e.target.value)} autoComplete="off" />
+              </div>
+              {loadingSelectors ? (
+                <p className={styles.loading}>Cargando productos...</p>
+              ) : allProducts.length === 0 ? (
+                <p className={styles.empty}>No hay productos disponibles</p>
+              ) : (
+                <>
+                  <div className={styles.selectorActions}>
+                    <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds(filteredProducts.map((p) => p.id))}>✓ Seleccionar todos</button>
+                    <button type="button" className={styles.btnLink} onClick={() => setSelectedProductIds([])}>✗ Deseleccionar todos</button>
+                    <span className={styles.selectorCount}>{selectedProductIds.length} seleccionados</span>
+                  </div>
+                  <div className={styles.selectorList}>
+                    {filteredProducts.map((product) => {
+                      const isSelected = selectedProductIds.includes(product.id);
+                      return (
+                        <label key={product.id} className={`${styles.selectorItem} ${isSelected ? styles.selectorItemSelected : ''}`}>
+                          <input type="checkbox" checked={isSelected} onChange={() => toggleProduct(product.id)} />
+                          <span className={styles.selectorItemName}>{product.name}</span>
+                          <span className={styles.selectorItemMeta}>${product.price.toFixed(2)}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </section>
           </div>
         )}
 
         {/* ─── TAB: CATEGORÍAS ────────────────────────────────────────── */}
         {activeTab === 'categories' && (
           <div className={styles.formBody}>
-            <p className={styles.selectorHint}>
-              Al seleccionar una categoría, <strong>todos sus productos actuales y futuros</strong> quedan
-              incluidos en la promoción automáticamente.
-            </p>
-            <div className={styles.searchWrap}>
-              <Search size={16} className={styles.searchIcon} />
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Buscar categoría..."
-                value={categorySearch}
-                onChange={(e) => setCategorySearch(e.target.value)}
-                autoComplete="off"
-                spellCheck="false"
-                autoCorrect="off"
-                autoCapitalize="off"
-              />
-            </div>
-            {loadingSelectors ? (
-              <p className={styles.loading}>Cargando categorías...</p>
-            ) : allCategories.length === 0 ? (
-              <p className={styles.empty}>No hay categorías disponibles</p>
-            ) : (
-              <>
-                <div className={styles.selectorActions}>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds(filteredCategories.map((c) => c.id))}>
-                    ✓ Seleccionar todas
-                  </button>
-                  <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds([])}>
-                    ✗ Deseleccionar todas
-                  </button>
-                  <span className={styles.selectorCount}>{selectedCategoryIds.length} seleccionadas</span>
-                </div>
-                <div className={styles.selectorList}>
-                  {filteredCategories.map((cat) => {
-                    const isSelected = selectedCategoryIds.includes(cat.id);
-                    const productCount = allProducts.filter((p) => p.categoryId === cat.id).length;
-                    return (
-                      <label key={cat.id} className={`${styles.selectorItem} ${isSelected ? styles.selectorItemSelected : ''}`}>
-                        <input type="checkbox" checked={isSelected} onChange={() => toggleCategory(cat.id)} />
-                        <span className={styles.selectorItemName}>{cat.name}</span>
-                        <span className={styles.selectorItemMeta}>{productCount} productos</span>
-                      </label>
-                    );
-                  })}
-                  {filteredCategories.length === 0 && allCategories.length > 0 && (
-                    <p className={styles.empty}>No hay resultados de búsqueda</p>
-                  )}
-                </div>
-              </>
-            )}
+            <section className={styles.formCardSection}>
+              <p className={styles.selectorHint}>
+                Al seleccionar una categoría, <strong>todos sus productos actuales y futuros</strong> quedan
+                incluidos en la promoción automáticamente.
+              </p>
+              <div className={styles.searchWrap}>
+                <Search size={16} className={styles.searchIcon} />
+                <input type="text" className={styles.searchInput} placeholder="Buscar categoría..." value={categorySearch} onChange={(e) => setCategorySearch(e.target.value)} autoComplete="off" />
+              </div>
+              {loadingSelectors ? (
+                <p className={styles.loading}>Cargando categorías...</p>
+              ) : allCategories.length === 0 ? (
+                <p className={styles.empty}>No hay categorías disponibles</p>
+              ) : (
+                <>
+                  <div className={styles.selectorActions}>
+                    <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds(filteredCategories.map((c) => c.id))}>✓ Seleccionar todas</button>
+                    <button type="button" className={styles.btnLink} onClick={() => setSelectedCategoryIds([])}>✗ Deseleccionar todas</button>
+                    <span className={styles.selectorCount}>{selectedCategoryIds.length} seleccionadas</span>
+                  </div>
+                  <div className={styles.selectorList}>
+                    {filteredCategories.map((cat) => {
+                      const isSelected = selectedCategoryIds.includes(cat.id);
+                      const productCount = allProducts.filter((p) => p.categoryId === cat.id).length;
+                      return (
+                        <label key={cat.id} className={`${styles.selectorItem} ${isSelected ? styles.selectorItemSelected : ''}`}>
+                          <input type="checkbox" checked={isSelected} onChange={() => toggleCategory(cat.id)} />
+                          <span className={styles.selectorItemName}>{cat.name}</span>
+                          <span className={styles.selectorItemMeta}>{productCount} productos</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </section>
           </div>
         )}
-
-        <div className={styles.formActions}>
-          <button type="submit" className={styles.btnPrimary} disabled={saving || !!valueError}>
-            {saving ? 'Guardando...' : promotion ? 'Actualizar Promoción' : 'Crear Promoción'}
-          </button>
-          <button type="button" className={styles.btnSecondary} onClick={handleCancel} disabled={saving}>
-            Cancelar
-          </button>
-        </div>
       </form>
 
-      {/* Unsaved changes warning */}
       <ModalConfirm
         open={showWarning || blocker.state === 'blocked'}
         title="¿Abandonar sin guardar?"
