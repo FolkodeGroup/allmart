@@ -1,6 +1,6 @@
 /**
  * controllers/admin/auditLogsController.ts
- * Controlador de solo lectura para la auditoría del panel de administración.
+ * Controlador para la auditoría del panel de administración.
  */
 
 import { Response, NextFunction } from 'express';
@@ -14,15 +14,14 @@ import { AuthenticatedRequest } from '../../types';
  */
 export async function getLogs(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const limit = parseInt(req.query.limit as string, 10) || 50;
-    const safeLimit = Math.min(Math.max(1, limit), 200);
+    const limit = parseInt(req.query.limit as string, 10) || 100;
+    const safeLimit = Math.min(Math.max(1, limit), 500);
 
     const logs = await prisma.auditLog.findMany({
       orderBy: { createdAt: 'desc' },
       take: safeLimit,
     });
 
-    // Formatear para compatibilidad estructural con la interfaz del panel de administración
     const formatted = logs.map(l => ({
       id: l.id,
       timestamp: l.createdAt.toISOString(),
@@ -34,6 +33,33 @@ export async function getLogs(req: AuthenticatedRequest, res: Response, next: Ne
     }));
 
     sendSuccess(res, formatted);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/admin/audit-logs/clear
+ * Elimina todos los registros de auditoría de la base de datos.
+ */
+export async function clearLogs(_req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    await prisma.auditLog.deleteMany({});
+    sendSuccess(res, null, 200, 'Historial de auditoría vaciado correctamente');
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/admin/audit-logs/:id
+ * Elimina un registro individual de auditoría por ID.
+ */
+export async function deleteLog(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    await prisma.auditLog.delete({ where: { id } });
+    sendSuccess(res, { id }, 200, 'Registro de auditoría eliminado');
   } catch (err) {
     next(err);
   }
