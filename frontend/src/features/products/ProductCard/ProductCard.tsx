@@ -8,9 +8,7 @@ import DiscountBadge from '../../../components/DiscountBadge';
 import { publicCollectionsService, type ProductDiscount } from '../../../services/publicCollectionsService';
 import styles from "./ProductCard.module.css";
 import { Button } from "../../../components/ui/Button/Button";
-import { LOW_STOCK_THRESHOLD } from '../../../constants/inventory';
-import { isLowStock } from '../../../utils/inventory';
-import { AlertTriangle, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useFavorites } from '../../../components/layout/context/FavoritesContextUtils';
 import { toThumbnailImageUrl } from '../../../utils/imageUrl';
 
@@ -141,9 +139,9 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                     ' ' +
                     (idx === currentImageIndex ? styles.galleryImageActive : styles.galleryImageInactive)
                   }
-                  width={isFeatured ? 420 : undefined}
-                  height={isFeatured ? 320 : undefined}
-                  placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                  width="100%"
+                  height="100%"
+                  placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                   style={{ position: 'absolute', inset: 0 }}
                   loading="eager"
                   objectFit="contain"
@@ -156,24 +154,30 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
               src={displayImages[currentImageIndex]}
               alt={product.name}
               className={styles.image}
-              width={isFeatured ? 420 : 240}
-              height={isFeatured ? 320 : 240}
-              placeholder={'data:image/svg+xml,%3Csvg width="240" height="180" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="180" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+              width="100%"
+              height="100%"
+              placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
               loading={isFeatured ? 'eager' : 'lazy'}
               fetchPriority={isFeatured ? 'high' : 'auto'}
               objectFit="contain"
-              sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 240px'}
+              sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 300px'}
             />
           )}
         </Link>
 
-        {dynamicDiscount && (
-          <DiscountBadge
-            discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
-            discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
-            promotionType={dynamicDiscount?.promotionType}
-          />
-        )}
+        {/* 🟢 FIX: Agrupamos todos los badges en un solo contenedor Flexbox para evitar superposiciones */}
+        <div className={styles.badges}>
+          {dynamicDiscount && (
+            <DiscountBadge
+              discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
+              discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
+              promotionType={dynamicDiscount?.promotionType}
+              display="inline" /* 🟢 CLAVE: Permite que fluya dentro del flexbox en lugar de usar position: absolute */
+            />
+          )}
+          {isNew && <Badge variant="new">Nuevo</Badge>}
+        </div>
+
         {hasGallery && (
           <>
             <div className={styles.galleryDots} role="group" aria-label="Selector de imagen">
@@ -194,14 +198,6 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           </>
         )}
 
-        <div className={styles.badges}>
-          {isNew && <Badge variant="new">Nuevo</Badge>}
-          {variant !== 'featured' && typeof product.stock === 'number' && isLowStock(product.stock, LOW_STOCK_THRESHOLD) && (
-            <Badge className={`${styles.badge} ${styles.lowStockBadge}`}>
-              <AlertTriangle size={16} style={{ marginRight: 4 }} /> Stock bajo
-            </Badge>
-          )}
-        </div>
         <button
           className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
           aria-label={isFavorito ? `Quitar ${product.name} de favoritos` : `Agregar ${product.name} a favoritos`}

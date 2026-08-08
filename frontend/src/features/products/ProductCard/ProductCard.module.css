@@ -1,26 +1,41 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CONTENEDOR PRINCIPAL DE LA TARJETA
+═══════════════════════════════════════════════════════════════════ */
 .card {
   display: flex;
   flex-direction: column;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border, #e5e2dd);
-  border-radius: var(--radius-xl, 16px);
+  background: var(--color-bg-primary, #ffffff);
+  border-radius: 16px;
   overflow: hidden;
   position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
   height: 100%;
+  border: 1px solid var(--color-border, #e5e2dd);
+  text-decoration: none;
 }
 
 .card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
+.featuredCard {
+  border: 2px solid var(--color-primary, #769282);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONTENEDOR DE IMAGEN (ASPECT RATIO 1:1)
+═══════════════════════════════════════════════════════════════════ */
 .imageWrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  overflow: hidden;
   background-color: var(--color-bg-secondary, #f2efeb);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--color-border, #e5e2dd);
 }
 
 .featuredImageWrapper {
@@ -30,11 +45,14 @@
 .image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  display: block;
+  mix-blend-mode: multiply;
 }
 
 .featuredImageStage {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
 }
@@ -44,128 +62,135 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease-in-out;
 }
 
 .galleryImageActive {
   opacity: 1;
-  z-index: 1;
+  z-index: 2;
 }
 
 .galleryImageInactive {
   opacity: 0;
-  z-index: 0;
+  z-index: 1;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CONTROLES Y BADGES SOBRE LA IMAGEN
+═══════════════════════════════════════════════════════════════════ */
 .galleryDots {
   position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 12px;
+  left: 0;
+  right: 0;
   display: flex;
+  justify-content: center;
   gap: 6px;
-  z-index: 2;
+  z-index: 10;
 }
 
 .galleryDot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  border: none;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   padding: 0;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .galleryDotActive {
-  background: #ffffff;
+  background-color: var(--color-primary, #769282);
   transform: scale(1.2);
 }
 
 .badges {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 12px;
+  left: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  z-index: 2;
+  align-items: flex-start;
+  gap: 6px;
+  z-index: 10;
 }
 
 .lowStockBadge {
-  background-color: #f59e0b !important;
-  color: #ffffff !important;
+  background-color: #fff4e5 !important;
+  color: #92400e !important;
+  border: 1px solid #fcd34d !important;
 }
 
 .wishlistBtn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
-  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border, #e5e2dd);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--color-text-secondary, #767676);
+  z-index: 10;
   transition: all 0.2s ease;
-  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  color: var(--color-text-secondary, #9ca3af);
 }
 
 .wishlistBtn:hover {
-  background: #ffffff;
-  color: #ef4444;
   transform: scale(1.05);
+  color: #ef4444;
 }
 
 .wishlistBtn.activo {
   color: #ef4444;
-  background: #ffffff;
 }
 
 .wishlistBtnIcon {
-  display: block;
+  transition: fill 0.2s ease;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   CUERPO DE LA TARJETA (TEXTOS Y PRECIOS)
+═══════════════════════════════════════════════════════════════════ */
 .body {
-  padding: var(--space-4, 16px);
+  padding: 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 6px;
+  background-color: var(--color-bg-primary, #ffffff);
 }
 
 .category {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-primary, #769282);
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary, #9ca3af);
+  margin-bottom: 6px;
 }
 
 .name {
-  font-family: var(--font-heading, 'Montserrat', sans-serif);
-  font-size: 0.9375rem;
+  font-size: 15px;
   font-weight: 600;
-  margin: 0;
-  line-height: 1.35;
+  color: var(--color-text-primary, #111827);
+  margin: 0 0 8px 0;
+  line-height: 1.3;
   display: -webkit-box;
-  line-clamp: 2;
   -webkit-line-clamp: 2;
+  line-clamp: 2; /* 🟢 FIX: Propiedad estándar agregada para compatibilidad */
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .name a {
-  color: var(--color-text-primary, #1a1a1a);
+  color: inherit;
   text-decoration: none;
-  transition: color 0.15s ease;
 }
 
 .name a:hover {
@@ -175,29 +200,71 @@
 .rating {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary, #767676);
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary, #6b7280);
+  margin-bottom: 12px;
 }
 
 .stars {
   color: #f59e0b;
+  letter-spacing: 2px;
 }
 
 .priceRow {
   margin-top: auto;
-  padding-top: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
 }
 
 .exploreButton {
-  padding: 0 var(--space-4, 16px) var(--space-4, 16px);
+  display: block;
+  padding: 0 16px 16px;
   text-decoration: none;
-}
-
-.featuredExploreButton {
-  padding: 0 var(--space-5, 20px) var(--space-5, 20px);
+  background-color: var(--color-bg-primary, #ffffff);
 }
 
 .ButtonExplore {
   width: 100%;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.featuredExploreButton {
+  padding: 0 20px 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MÓVIL (< 768px)
+═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .card {
+    border-radius: 12px;
+  }
+  
+  .body {
+    padding: 12px;
+  }
+  
+  .name {
+    font-size: 14px;
+  }
+  
+  .exploreButton {
+    padding: 0 12px 12px;
+  }
+
+  .badges {
+    top: 8px;
+    left: 8px;
+    gap: 4px;
+  }
+  
+  .wishlistBtn {
+    width: 40px;
+    height: 40px;
+    top: 8px;
+    right: 8px;
+  }
 }
