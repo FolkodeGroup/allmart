@@ -5,7 +5,7 @@
  * Diseño en tarjetas, responsive y compatible con Dark Mode.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useBlocker } from 'react-router-dom';
 import type { Promotion } from './promotionsService';
 import { promotionsService } from './promotionsService';
@@ -208,7 +208,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     e.preventDefault();
     setError(null);
     
-    // 1. Validaciones de campos básicos
+    // Validaciones de campos básicos
     if (!name.trim()) { 
       setError('El nombre de la campaña es requerido.'); 
       setActiveTab('details');
@@ -228,14 +228,6 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
       setError('La fecha de fin debe ser posterior a la de inicio.'); 
       setActiveTab('details');
       return; 
-    }
-
-    // 🟢 2. VALIDACIÓN DE NEGOCIO: Evitar promociones fantasma
-    if (selectedProductIds.length === 0 && selectedCategoryIds.length === 0) {
-      setError('Debes seleccionar al menos un producto o una categoría para aplicar la promoción.');
-      // Cambiamos a la pestaña de productos para que el usuario vea dónde corregirlo
-      setActiveTab('products');
-      return;
     }
 
     setSaving(true);
