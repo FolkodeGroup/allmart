@@ -119,12 +119,23 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
     }
 
     return (
-      <aside ref={ref || containerRef} className={styles.panel} onScroll={handleScroll}>
+      <aside
+        ref={ref || containerRef}
+        className={`${styles.panel} productListPanelDesktopClean`}
+        onScroll={handleScroll}
+      >
         <style>{`
+          /* 🟢 FIX ESCRITORIO: Tarjetas ultra-compactas sin SKU ni Categoría */
+          .prodListContainerClean {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-bottom: 0 !important;
+          }
           .prodListCompactRow {
             padding: 8px 10px !important;
-            border-radius: 8px !important;
-            margin-bottom: 4px !important;
+            border-radius: 10px !important;
+            margin-bottom: 0 !important;
             transition: all 0.15s ease !important;
             box-sizing: border-box !important;
             width: 100% !important;
@@ -132,29 +143,34 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
             overflow: hidden !important;
           }
           .prodListCompactThumb {
-            width: 36px !important;
-            height: 36px !important;
-            min-width: 36px !important;
+            width: 38px !important;
+            height: 38px !important;
+            min-width: 38px !important;
             border-radius: 6px !important;
             object-fit: cover !important;
           }
           .prodListCompactTitle {
             font-size: 13px !important;
             font-weight: 600 !important;
-            line-height: 1.25 !important;
+            line-height: 1.2 !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
           }
-          .prodListCompactMeta {
-            font-size: 11px !important;
-            color: var(--color-text-secondary, #9ca3af) !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
+
+          /* 💻 ESCRITORIO (>= 1024px): Eliminación de doble barra de scroll */
+          @media (min-width: 1024px) {
+            .productListPanelDesktopClean {
+              height: auto !important;
+              max-height: none !important;
+              overflow: visible !important;
+              box-sizing: border-box !important;
+              padding-right: 0 !important;
+            }
           }
         `}</style>
-        <div className={styles.listContainer} role="listbox" aria-label="Lista de productos">
+
+        <div className={`${styles.listContainer} prodListContainerClean`} role="listbox" aria-label="Lista de productos">
           {products.map((product, index) => (
             <div
               key={product.id}
@@ -185,11 +201,7 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
                     <h3 className={`${styles.title} prodListCompactTitle`}>{product.name}</h3>
                   </div>
 
-                  <div className={`${styles.metaLine} prodListCompactMeta`}>
-                    <span className={styles.sku} title={`SKU: ${product.sku || 'Sin SKU'}`}>{product.sku || 'Sin SKU'}</span>
-                    <span className={styles.separator}>·</span>
-                    <span title={product.category?.name || 'Sin categoría'}>{product.category?.name || 'Sin categoría'}</span>
-                  </div>
+                  {/* 🟢 SKU y Categoría removidos para máxima síntesis visual */}
 
                   <div className={styles.priceLine}>
                     <strong>{currencyFormatter.format(product.price)}</strong>
@@ -214,6 +226,7 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
               <div className={styles.quickActions}>
                 {canEdit && onEdit && (
                   <button
+                    type="button"
                     className={styles.quickBtn}
                     title="Editar"
                     onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
@@ -225,6 +238,7 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
                 )}
                 {canDelete && onDelete && (
                   <button
+                    type="button"
                     className={`${styles.quickBtn} ${styles.quickBtnDanger}`}
                     title="Eliminar"
                     onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}

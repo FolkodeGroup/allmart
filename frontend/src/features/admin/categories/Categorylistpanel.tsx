@@ -123,8 +123,14 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
         }
 
         return (
-            <aside ref={ref ?? containerRef} className={styles.panel} onScroll={handleScroll}>
+            <aside ref={ref ?? containerRef} className={`${styles.panel} categoryListPanelDesktopScroll`} onScroll={handleScroll}>
                 <style>{`
+                    .catListContainerFix {
+                        padding-bottom: 48px !important;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                    }
                     .catListCompactItem {
                         padding: 8px 10px !important;
                         border-radius: 8px !important;
@@ -151,8 +157,31 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                         font-size: 11px !important;
                         color: var(--color-text-secondary, #9ca3af) !important;
                     }
+                    @media (min-width: 1024px) {
+                        .categoryListPanelDesktopScroll {
+                            max-height: calc(100vh - 280px) !important;
+                            min-height: 520px !important;
+                            overflow-y: auto !important;
+                            box-sizing: border-box !important;
+                            padding-right: 6px !important;
+                        }
+                        .categoryListPanelDesktopScroll::-webkit-scrollbar {
+                            width: 6px;
+                        }
+                        .categoryListPanelDesktopScroll::-webkit-scrollbar-track {
+                            background: rgba(0, 0, 0, 0.1);
+                            border-radius: 4px;
+                        }
+                        .categoryListPanelDesktopScroll::-webkit-scrollbar-thumb {
+                            background: var(--color-border, #374151);
+                            border-radius: 4px;
+                        }
+                        .categoryListPanelDesktopScroll::-webkit-scrollbar-thumb:hover {
+                            background: var(--color-primary, #769282);
+                        }
+                    }
                 `}</style>
-                <div className={styles.listContainer} role="listbox" aria-label="Lista de categorías">
+                <div className={`${styles.listContainer} catListContainerFix`} role="listbox" aria-label="Lista de categorías">
                     {categories.map((cat, index) => {
                         const displayName = cat.name?.trim() || cat.slug;
                         const productCount = getProductCount?.(cat);

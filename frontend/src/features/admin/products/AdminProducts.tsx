@@ -34,6 +34,7 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
+// 🟢 FIX: Reducido a 6 productos para que la lista quepa 100% en pantalla sin scroll vertical interno
 const PAGE_LIMIT = 8;
 
 export function AdminProducts() {
@@ -92,7 +93,6 @@ export function AdminProducts() {
     }
   }, [searchParams, editId, setSearchParams]);
 
-  // 🟢 EXPORTACIÓN PDF: Bypassea el backend y usa el generador nativo del cliente
   const handleExportPdf = useCallback(async () => {
     setIsExportingPdf(true);
     setExportLoadingFormat('pdf');

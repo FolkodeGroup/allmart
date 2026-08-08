@@ -116,11 +116,12 @@ function MasterDetailLayoutInner({
           }
           .masterDetailFlexContainer .listPaneWrapper {
             display: block !important;
-            flex: 0 0 340px !important;
-            width: 340px !important;
-            max-width: 340px !important;
-            min-width: 340px !important;
+            flex: 0 0 320px !important;
+            width: 320px !important;
+            max-width: 320px !important;
+            min-width: 320px !important;
             box-sizing: border-box !important;
+            height: auto !important;
           }
           .masterDetailFlexContainer .detailPaneWrapper {
             display: block !important;
