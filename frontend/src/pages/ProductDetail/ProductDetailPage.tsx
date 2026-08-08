@@ -49,6 +49,9 @@ export function ProductDetailPage() {
 
   const selectedSku = useMemo(() => product?.skus?.find(s => s.id === selectedSkuId) ?? null, [product?.skus, selectedSkuId]);
 
+  // 🟢 PRECIO ACTUAL DINÁMICO: Considera el precio de la variante seleccionada o el base
+  const currentPrice = useMemo(() => selectedSku?.price ?? product?.price ?? 0, [selectedSku, product]);
+
   function buildSelectedAttributesKey(attributes: Record<string, string>) {
     const normalizedEntries = Object.entries(attributes || {})
       .map(([key, value]) => [String(key).trim().toLowerCase(), String(value).trim()])
@@ -166,22 +169,18 @@ export function ProductDetailPage() {
 
   const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
 
-  // 🟢 FIX: Autoseleccionar la variante más barata disponible para coincidir con el precio del catálogo
+  // Autoseleccionar la variante más barata disponible
   useEffect(() => {
     if (product && product.skus && product.skus.length > 0 && Object.keys(selectedVariants).length === 0) {
-
-      // Ordenamos las variantes por precio de menor a mayor
       const sortedSkus = [...product.skus].sort((a, b) => {
         const priceA = a.price ?? product.price;
         const priceB = b.price ?? product.price;
         return priceA - priceB;
       });
 
-      // Seleccionamos la más barata que tenga stock (o la más barata en su defecto)
       const defaultSku = sortedSkus.find(s => s.stock > 0) || sortedSkus[0];
 
       if (defaultSku && defaultSku.attributes) {
-        // Normalizamos todas las llaves a minúsculas
         const normalizedAttrs: Record<string, string> = {};
         Object.entries(defaultSku.attributes).forEach(([k, v]) => {
           normalizedAttrs[k.toLowerCase()] = v;
@@ -191,13 +190,15 @@ export function ProductDetailPage() {
     }
   }, [product, selectedVariants]);
 
-  // Cuando se cambia de SKU, volvemos a la primera imagen de la galería
   useEffect(() => {
     setSelectedImage(0);
   }, [selectedSkuId]);
 
+  // 🟢 FIX CRÍTICO: Recalcula el descuento cuando cambia el producto O el precio de la variante seleccionada
   useEffect(() => {
-    if (!product) return;
+    if (!product || currentPrice <= 0) return;
+
+    let active = true;
 
     const loadDiscount = async () => {
       try {
@@ -208,17 +209,23 @@ export function ProductDetailPage() {
             : [];
         const discount = await publicCollectionsService.getProductDiscount(
           product.id,
-          product.price,
+          currentPrice, // 🟢 Evalúa sobre el precio real del SKU seleccionado
           categoryIds
         );
-        setDynamicDiscount(discount);
+        if (active) {
+          setDynamicDiscount(discount);
+        }
       } catch (error) {
         console.error('Error cargando descuento:', error);
       }
     };
 
     loadDiscount();
-  }, [product]);
+
+    return () => {
+      active = false;
+    };
+  }, [product, currentPrice]);
 
   const isNew = product ? product.tags.includes('nuevo') : false;
   const isProductFavorite = product ? isFavorite(product.id) : false;
@@ -363,20 +370,24 @@ export function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
 
-    // 🟢 FIX: Detectar si el producto tiene variantes reales en base a los grupos de variantes o los SKUs.
     const hasVariants = variantGroups.length > 0 || (Array.isArray(product.skus) && product.skus.length > 0);
     const isSimpleProduct = !hasVariants;
 
-    // Antes de agregar, solicitar descuento para la cantidad seleccionada
     const categoryIds = Array.isArray(product.categoryIds)
       ? product.categoryIds
       : product.categoryId
         ? [product.categoryId]
         : [];
 
+    // 🟢 FIX CRÍTICO: Evalúa el descuento del carrito sobre `currentPrice` (precio del SKU)
     const discountForQty = await (async () => {
       try {
-        return await publicCollectionsService.getProductDiscount(product.id, product.price, categoryIds, quantity);
+        return await publicCollectionsService.getProductDiscount(
+          product.id,
+          currentPrice,
+          categoryIds,
+          quantity
+        );
       } catch {
         return dynamicDiscount;
       }
@@ -412,7 +423,7 @@ export function ProductDetailPage() {
           id: cartProductId,
           name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
           sku: selectedSku.sku,
-          price: selectedSku.price ?? product.price,
+          price: currentPrice,
           images: imagesForCart,
           selectedAttributes: selectedSku.attributes ?? {},
         }
@@ -420,6 +431,7 @@ export function ProductDetailPage() {
           ...product,
           id: cartProductId,
           name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
+          price: currentPrice,
           images: imagesForCart,
           selectedAttributes: selectedVariants,
         };
@@ -530,7 +542,6 @@ export function ProductDetailPage() {
             SKU: {variantGroups.length === 0 ? product.sku : (selectedSku?.sku ?? product.sku)}
           </span>
 
-          {/* 🟢 FIX: Eliminamos el bloque que renderizaba el botón "Original" */}
           {Object.keys(variantMap).length > 0 && (
             <div className={styles.variantsBlock}>
               {Object.entries(variantMap).map(([attr, values]) => (
@@ -580,11 +591,10 @@ export function ProductDetailPage() {
 
           <div className={styles.priceBlock}>
             {(() => {
-              const basePrice = selectedSku?.price ?? product.price;
               if (dynamicDiscount) {
-                return <ProductPrice price={basePrice} discount={dynamicDiscount} size="lg" />;
+                return <ProductPrice price={currentPrice} discount={dynamicDiscount} size="lg" />;
               }
-              return <ProductPrice price={basePrice} size="lg" />;
+              return <ProductPrice price={currentPrice} size="lg" />;
             })()}
           </div>
 
