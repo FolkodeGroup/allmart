@@ -125,7 +125,6 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
         onScroll={handleScroll}
       >
         <style>{`
-          /* 🟢 FIX ESCRITORIO: Tarjetas ultra-compactas sin SKU ni Categoría */
           .prodListContainerClean {
             display: flex;
             flex-direction: column;
@@ -158,14 +157,19 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
             text-overflow: ellipsis !important;
           }
 
-          /* 💻 ESCRITORIO (>= 1024px): Eliminación de doble barra de scroll */
           @media (min-width: 1024px) {
             .productListPanelDesktopClean {
-              height: auto !important;
-              max-height: none !important;
+              height: 100% !important;
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: space-between !important;
               overflow: visible !important;
               box-sizing: border-box !important;
               padding-right: 0 !important;
+              background: var(--color-bg-secondary, #1f2937) !important;
+              border: 1px solid var(--color-border, #374151) !important;
+              border-radius: 12px !important;
+              padding: 12px !important;
             }
           }
         `}</style>
@@ -200,8 +204,6 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
                   <div className={styles.headerLine}>
                     <h3 className={`${styles.title} prodListCompactTitle`}>{product.name}</h3>
                   </div>
-
-                  {/* 🟢 SKU y Categoría removidos para máxima síntesis visual */}
 
                   <div className={styles.priceLine}>
                     <strong>{currencyFormatter.format(product.price)}</strong>

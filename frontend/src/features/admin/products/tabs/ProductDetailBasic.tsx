@@ -37,7 +37,7 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
           }
         }
 
-        /* 💻 ESCRITORIO (>=1024px): Grid de 2 columnas para reducir la altura en un 50% */
+        /* 💻 ESCRITORIO (>=1024px): Grid de 2 columnas fluido */
         @media (min-width: 1024px) {
           .basicGridDesktop {
             display: grid !important;
@@ -80,7 +80,7 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
           </div>
         </section>
 
-        {/* 2. Descripción */}
+        {/* 2. Descripción con expansión sin límites de altura */}
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>
             <FileText size={14} /> Descripción
@@ -94,7 +94,18 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
           {fullDescription ? (
             <div className={styles.field}>
               <span className={styles.label}>Descripción Completa</span>
-              <p className={styles.valueText}>{displayedDescription}</p>
+              <p
+                className={styles.valueText}
+                style={{
+                  whiteSpace: 'pre-line',
+                  wordBreak: 'break-word',
+                  maxHeight: 'none',
+                  overflow: 'visible',
+                  margin: '4px 0 8px 0',
+                }}
+              >
+                {displayedDescription}
+              </p>
               {shouldTruncate && (
                 <button
                   type="button"

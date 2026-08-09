@@ -104,30 +104,27 @@ function MasterDetailLayoutInner({
           }
         }
 
-        /* 💻 ESCRITORIO (>=1024px) */
+        /* 💻 ESCRITORIO (>=1024px): Sincronización simétrica de altura en Grid */
         @media (min-width: 1024px) {
           .masterDetailFlexContainer {
-            display: flex !important;
-            flex-direction: row !important;
+            display: grid !important;
+            grid-template-columns: 340px 1fr !important;
             gap: 16px !important;
-            align-items: flex-start !important;
+            align-items: stretch !important;
             width: 100% !important;
             box-sizing: border-box !important;
           }
           .masterDetailFlexContainer .listPaneWrapper {
-            display: block !important;
-            flex: 0 0 320px !important;
-            width: 320px !important;
-            max-width: 320px !important;
-            min-width: 320px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
             box-sizing: border-box !important;
-            height: auto !important;
           }
           .masterDetailFlexContainer .detailPaneWrapper {
-            display: block !important;
-            flex: 1 1 0% !important;
+            display: flex !important;
+            flex-direction: column !important;
             min-width: 0 !important;
-            width: auto !important;
+            height: 100% !important;
             box-sizing: border-box !important;
           }
         }
