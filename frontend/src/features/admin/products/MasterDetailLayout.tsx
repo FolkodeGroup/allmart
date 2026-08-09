@@ -113,6 +113,9 @@ function MasterDetailLayoutInner({
             align-items: stretch !important;
             width: 100% !important;
             box-sizing: border-box !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
           }
           .masterDetailFlexContainer .listPaneWrapper {
             display: block !important;
@@ -122,6 +125,7 @@ function MasterDetailLayoutInner({
             min-width: 320px !important;
             box-sizing: border-box !important;
             height: auto !important;
+            max-height: none !important;
             overflow: visible !important; /* 🟢 Previene el recorte lateral */
           }
           .masterDetailFlexContainer .detailPaneWrapper {
@@ -130,6 +134,9 @@ function MasterDetailLayoutInner({
             min-width: 0 !important;
             width: auto !important;
             box-sizing: border-box !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
           }
         }
       `}</style>

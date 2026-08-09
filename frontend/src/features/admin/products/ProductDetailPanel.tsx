@@ -259,7 +259,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           }
         }
 
-        /* 💻 ESCRITORIO (>=1024px): Panel con cabecera fija y scroll de contenido sin recortes */
+        /* 💻 ESCRITORIO (>=1024px): Panel de altura dinámica con scroll unificado global */
         @media (min-width: 1024px) {
           .stickyMobileBackBar {
             display: none !important;
@@ -268,40 +268,27 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           .pdPanelDesktopFixed {
             display: flex !important;
             flex-direction: column !important;
-            height: 100% !important;
-            max-height: calc(100vh - 270px) !important;
-            min-height: 520px !important;
-            overflow: hidden !important;
+            height: auto !important;
+            max-height: none !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            overflow-y: visible !important;
             box-sizing: border-box !important;
           }
 
           .pdHeaderCardDesktopFixed {
             flex-shrink: 0 !important;
-            position: sticky !important;
-            top: 0 !important;
+            position: relative !important;
             z-index: 10 !important;
           }
 
           .pdTabContentDesktopScroll {
-            flex: 1 !important;
-            overflow-y: auto !important;
-            padding: 16px 16px 36px 16px !important; /* 🟢 Colchón de scroll holgado */
+            flex: 1 1 auto !important;
+            overflow: visible !important;
+            overflow-y: visible !important;
+            max-height: none !important;
+            padding: 16px 16px 36px 16px !important;
             box-sizing: border-box !important;
-          }
-
-          .pdTabContentDesktopScroll::-webkit-scrollbar {
-            width: 6px;
-          }
-          .pdTabContentDesktopScroll::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-          }
-          .pdTabContentDesktopScroll::-webkit-scrollbar-thumb {
-            background: var(--color-border, #374151);
-            border-radius: 4px;
-          }
-          .pdTabContentDesktopScroll::-webkit-scrollbar-thumb:hover {
-            background: var(--color-primary, #769282);
           }
         }
       `}</style>
@@ -321,7 +308,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       )}
 
-      {/* Tarjeta de Cabecera Unificada y Fija en Escritorio */}
+      {/* Tarjeta de Cabecera Unificada */}
       <div className={`${styles.headerCard} pdHeaderCardMobile pdHeaderCardDesktopFixed`}>
         <div className={styles.panelHeader}>
           <div className={styles.headerContent}>
@@ -414,7 +401,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </span>
       </div>
 
-      {/* Contenido de la pestaña con Scroll Fijo */}
+      {/* Contenido de la pestaña */}
       <div
         className={`${styles.tabContent} pdTabContentDesktopScroll`}
         onTouchStart={handleTouchStart}

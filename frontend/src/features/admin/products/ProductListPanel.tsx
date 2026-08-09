@@ -133,6 +133,10 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
             margin: 0 !important;
             width: 100% !important;
             box-sizing: border-box !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            overflow-y: visible !important;
           }
 
           .prodListCompactRow {
@@ -246,10 +250,13 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
           @media (min-width: 1024px) {
             .productListPanelDesktopClean {
               height: 100% !important;
+              min-height: 100% !important;
+              max-height: none !important;
               display: flex !important;
               flex-direction: column !important;
-              justify-content: space-between !important;
+              justify-content: flex-start !important;
               overflow: visible !important;
+              overflow-y: visible !important;
               box-sizing: border-box !important;
               padding: 12px !important;
               background: var(--color-bg-secondary, #1f2937) !important;
