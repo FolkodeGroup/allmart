@@ -2275,20 +2275,132 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1324: Corrección dropdown se ajustó la posición del menú para que se muestre correctamente en la pantalla. | 2026-07-25 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-25 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1321: 🔄 Registrar puntaje de gestión | 2026-07-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1290: 1280 mostrar variante comprada en el detalle de un pedido | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1292: 1282 corregir cálculo del descuento bogo en la vista de promociones | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1296: 1286 validación de datos en formulario de arrepentimiento | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1295: Permitir compras de productos que tengan 0 stock | 2026-07-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1319: 1309 descontar stock de la variante comprada en el admin al comprar desde el home | 2026-07-18 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1356: Agregar proveedor seleccionado al listado de “otros proveedores asignados” | 2026-07-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1323: 🔄 Actualización automática de puntajes semanal | 2026-07-25 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1368: fix en cards de matriz de productos | 2026-07-31 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1359: 🔄 Registrar puntaje de gestión | 2026-07-26 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1358: 🔄 Actualización automática de puntajes semanal | 2026-07-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1358: 🔄 Actualización automática de puntajes semanal | 2026-07-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1357: 🔄 Registrar puntaje de gestión | 2026-07-26 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1368: fix en cards de matriz de productos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1367: 1341 responsive   ajustar marginpadding y agregar icono de lupa en el input de buscar en responsive de la vista pedidos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1366: 1340 responsive   corregir responsive de la vista de categorías para evitar superposiciones y ordenar el layout | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1365: 1338 responsive   corregir el header de la card alerta de stock crítico para que coincida con productos incompletos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1364: 1337 responsive   habilitar arrastre de componentes en responsive dentro del tab vista previa en dashboard   personalizar | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1363: 1336 responsive   reducir altura del header en admin y evitar que el texto quede oculto por el menú hamburguesa | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1362: Se agrega botón de seña 50% en detalle de Pedido y badge en tabla de … | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1361: Agregar modal de fluctuación de precios al hacer clic en productos del ranking de más vendidos | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1360: 1333 agregar previsualización de home en la vista de colecciones al crearse una colección desde admin como en la vista de banners | 2026-07-31 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1359: 🔄 Registrar puntaje de gestión | 2026-07-31 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1370: 🔄 Registrar puntaje de gestión | 2026-08-01 |
+| dgimenezdeveloper | 10 | Revisión de PR — Solicitud de cambios | PR #1369: 1343 responsive   corregir responsive y desbordes en admin colecciones | 2026-08-01 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1371: Exportar PDF del listado de productos en admin falla al generar | 2026-08-01 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1374: 🔄 Actualización automática de puntajes semanal | 2026-08-02 |
+| FedericoPaal | 3 | Creación de issue | Issue #1387: Ajustar estilo del dropdown “Categoría padre” en formulario de Categorías | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1386: Mostrar proveedor agregado inmediatamente en el formulario de producto | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1385: Eliminar títulos duplicados en vistas | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1384: Mejorar contraste del botón "Ver Todos" en la colección del Home | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1383: Homogeneizar hover del botón "Todas las Categorías" en el Navbar del Home | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1382: Ajustar estilos de título y botón "Ver todos" en Productos Destacados del Home | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1381: Mejorar iconos debajo del formulario del Home usando el set actual del proyecto | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1380: Redirigir desde carrito del Home al producto con variantes aplicadas | 2026-08-04 |
+| FedericoPaal | 3 | Creación de issue | Issue #1379: Remover indicador de BAJO STOCK en Productos Destacados del Home | 2026-08-04 |
+| agustin-ovejero | 3 | Creación de issue | Issue #1378: Ajustar imágenes de productos para que cubran toda la tarjeta de producto | 2026-08-04 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1413: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1412: feat(frontend): permitir crear variantes y combinaciones durante el a… | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1411: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1410: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1409: 1180 agregar input de stock crítico para alertas por producto | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1408: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1406: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1404: 1339 responsive   corregir responsive de la vista del formulario de altaedición de productos | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1412: feat(frontend): permitir crear variantes y combinaciones durante el a… | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1411: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1410: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1409: 1180 agregar input de stock crítico para alertas por producto | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1408: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1407: Mejorar contraste del botón "Ver Todos" en la colección del Home | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1406: 🔄 Registrar puntaje de gestión | 2026-08-05 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1405: Homogeneizar hover del botón "Todas las Categorías" en el Navbar del Home | 2026-08-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1374: 🔄 Actualización automática de puntajes semanal | 2026-08-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1407: Mejorar contraste del botón "Ver Todos" en la colección del Home | 2026-08-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1409: 1180 agregar input de stock crítico para alertas por producto | 2026-08-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1412: feat(frontend): permitir crear variantes y combinaciones durante el a… | 2026-08-05 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1414: 1216 evitar pérdida de contenido al descargar pdfs confirmación del navegador o flujo incorrecto | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1404: 1339 responsive   corregir responsive de la vista del formulario de altaedición de productos | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1403: Ajustar estilos de título y botón "Ver todos" en Productos Destacados del Home | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1402: 1381 mejorar iconos debajo del formulario del home usando el set actual del proyecto | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1401: 1380 redirigir desde carrito del home al producto con variantes aplicadas | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1400: Cambios realizados | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1388: Responsive - Corregir responsive y usabilidad en la vista de Consultas | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1377: 1348 responsive   corregir responsive y desbordes en tabs y modal de proveedores | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1376: 1347 responsive   mejorar responsive y estilos de la tabla de últimos pedidos del período | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1375: fix botones del formulario en banners arreglados | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1374: 🔄 Actualización automática de puntajes semanal | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1374: 🔄 Actualización automática de puntajes semanal | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1373: 1346 responsive   mejorar responsive de las cards de productos más vendidos y por estado de pedido | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1372: What I changed | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1370: 🔄 Registrar puntaje de gestión | 2026-08-05 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1369: 1343 responsive   corregir responsive y desbordes en admin colecciones | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1399: Ajustar posición del botón “Nueva Colección” en mobile responsive | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1398: Quitar opción de editar estado de pedido en vista mobile responsive | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1397: Eliminar checkboxes inútiles en cards de Pedidos mobile y mostrar estado de seña | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1396: Arreglar botones de sección en formulario de Categorías mobile responsive y ajustar navbar | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1395: Optimizar tamaño de card de producto en carrito de compras mobile | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1394: Ajustar tamaño de imagen en card de producto de Favoritos para mobile | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1393: Reajustar tamaño de cards de colecciones Home en mobile responsive | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1392: Mejorar cierre de filtros mobile en vista de productos Home sin recargar página | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1391: Ajustar colecciones tipo Home en mobile para mostrar todos los productos y habilitar navegación táctil | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1390: Banners — Unificar estilos de contenedores en el formulario de alta/edición | 2026-08-05 |
+| FedericoPaal | 3 | Creación de issue | Issue #1389: Colecciones — Mostrar en Admin la vista tipo Home y diferenciar Home vs Categorías | 2026-08-05 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1216: Evitar pérdida de contenido al descargar PDFs (confirmación del navegador o flujo incorrecto) | 2026-08-05 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1184: Crear variantes de producto durante la creación (alta) de un nuevo producto | 2026-08-05 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1420: fix(admin): eliminar titulos h1/h2 redundantes en las vistas internas… | 2026-08-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1419: 1378 ajustar imágenes de productos para que cubran toda la tarjeta de producto | 2026-08-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1418: feat(suppliers): integrar kpi de entrega promedio y badge informativo… | 2026-08-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1417: 🔄 Registrar puntaje de gestión | 2026-08-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1416: 1320 agregar campo de tiempo de entrega en abm de productos y tabla informativa | 2026-08-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1415: 🔄 Registrar puntaje de gestión | 2026-08-06 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1414: 1216 evitar pérdida de contenido al descargar pdfs confirmación del navegador o flujo incorrecto | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1420: fix(admin): eliminar titulos h1/h2 redundantes en las vistas internas… | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1419: 1378 ajustar imágenes de productos para que cubran toda la tarjeta de producto | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1418: feat(suppliers): integrar kpi de entrega promedio y badge informativo… | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1416: 1320 agregar campo de tiempo de entrega en abm de productos y tabla informativa | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1415: 🔄 Registrar puntaje de gestión | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1414: 1216 evitar pérdida de contenido al descargar pdfs confirmación del navegador o flujo incorrecto | 2026-08-06 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1413: 🔄 Registrar puntaje de gestión | 2026-08-06 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1387: Ajustar estilo del dropdown “Categoría padre” en formulario de Categorías | 2026-08-06 |
+| dgimenezdeveloper | 3 | Asignación de issue a FolkodeGroup | Issue #1387: Ajustar estilo del dropdown “Categoría padre” en formulario de Categorías | 2026-08-06 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1378: Ajustar imágenes de productos para que cubran toda la tarjeta de producto | 2026-08-06 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1322: Implementar métrica de Tiempo de Entrega Promedio en Vista de Análisis | 2026-08-06 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1320: Agregar campo de tiempo de entrega en ABM de Productos y Tabla Informativa | 2026-08-06 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1434: 1399 ajustar posición del botón nueva colección en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1434: 1399 ajustar posición del botón nueva colección en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1433: 1398 quitar opción de editar estado de pedido en vista mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1432: feat(frontend): remocion de checkboxes en tarjetas moviles de pedidos… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1431: 1396 arreglar botones de sección en formulario de categorías mobile responsive y ajustar navbar | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1430: 🔄 Registrar puntaje de gestión | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1428: fix(frontend): ajustar llenado de imagen con cover y grilla de 2 colu… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1427: feat(frontend): adaptar vista dedicada de colecciones a grilla de 2 c… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1426: feat(frontend): transformar panel de filtros movil en bottom sheet modal | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1425: fix(frontend): optimizar carruseles de colecciones en mobile con scro… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1424: 1390 banners unificar estilos de contenedores en el formulario de altaedición | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1423: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1422: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1434: 1399 ajustar posición del botón nueva colección en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1433: 1398 quitar opción de editar estado de pedido en vista mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1432: feat(frontend): remocion de checkboxes en tarjetas moviles de pedidos… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1431: 1396 arreglar botones de sección en formulario de categorías mobile responsive y ajustar navbar | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1430: 🔄 Registrar puntaje de gestión | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1428: fix(frontend): ajustar llenado de imagen con cover y grilla de 2 colu… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1427: feat(frontend): adaptar vista dedicada de colecciones a grilla de 2 c… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1426: feat(frontend): transformar panel de filtros movil en bottom sheet modal | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1425: fix(frontend): optimizar carruseles de colecciones en mobile con scro… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1424: 1390 banners unificar estilos de contenedores en el formulario de altaedición | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1423: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1422: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1417: 🔄 Registrar puntaje de gestión | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1399: Ajustar posición del botón “Nueva Colección” en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1398: Quitar opción de editar estado de pedido en vista mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1397: Eliminar checkboxes inútiles en cards de Pedidos mobile y mostrar estado de seña | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1396: Arreglar botones de sección en formulario de Categorías mobile responsive y ajustar navbar | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1395: Optimizar tamaño de card de producto en carrito de compras mobile | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a FolkodeGroup | Issue #1395: Optimizar tamaño de card de producto en carrito de compras mobile | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1394: Ajustar tamaño de imagen en card de producto de Favoritos para mobile | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1393: Reajustar tamaño de cards de colecciones Home en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1392: Mejorar cierre de filtros mobile en vista de productos Home sin recargar página | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1391: Ajustar colecciones tipo Home en mobile para mostrar todos los productos y habilitar navegación táctil | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1390: Banners — Unificar estilos de contenedores en el formulario de alta/edición | 2026-08-07 |
