@@ -194,7 +194,7 @@ export function AdminProductFormPage({
                         display: flex !important;
                         align-items: center !important;
                         gap: 10px !important;
-                        padding: 8px 0 !important;
+                        padding: 8px 12px !important;
                         margin: 0 0 8px 0 !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
@@ -247,8 +247,8 @@ export function AdminProductFormPage({
                     .formPageMobileResponsive {
                         background: transparent !important;
                         padding-bottom: 100px !important;
-                        padding-left: 16px !important;
-                        padding-right: 16px !important;
+                        padding-left: 0 !important;
+                        padding-right: 0 !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
                     }
@@ -272,7 +272,9 @@ export function AdminProductFormPage({
 
                     .cardSectionMobile {
                         border: 1px solid var(--color-border, #374151) !important;
-                        border-radius: 10px !important;
+                        border-left: none !important;
+                        border-right: none !important;
+                        border-radius: 0 !important;
                         overflow: hidden !important;
                         background: var(--color-bg-secondary, #1f2937) !important;
                         margin: 0 0 10px 0 !important;
@@ -287,7 +289,7 @@ export function AdminProductFormPage({
                         justify-content: space-between !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
-                        padding: 12px 14px !important;
+                        padding: 12px 16px !important;
                         background: var(--color-bg-secondary, #1f2937) !important;
                         border: none !important;
                         color: var(--color-text-primary, #ffffff) !important;
@@ -322,7 +324,7 @@ export function AdminProductFormPage({
                     .accordionBodyMobile {
                         width: 100% !important;
                         box-sizing: border-box !important;
-                        padding: 14px !important;
+                        padding: 16px !important;
                         border-top: 1px solid var(--color-border, #374151) !important;
                         background: var(--color-bg-secondary, #1f2937) !important;
                     }
@@ -340,7 +342,7 @@ export function AdminProductFormPage({
                         align-items: center !important;
                         justify-content: flex-end !important;
                         gap: 8px !important;
-                        padding: 0 0 6px 0 !important;
+                        padding: 0 16px 6px 16px !important;
                         margin: 0 0 4px 0 !important;
                         width: 100% !important;
                         box-sizing: border-box !important;

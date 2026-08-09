@@ -319,6 +319,14 @@ export function AdminLayout() {
 
       <main className={styles.main}>
         <AdminHeader onOpenMobileMenu={() => setIsMobileOpen(true)} />
+        <style>{`
+          @media (max-width: 768px) {
+            .${styles.content} {
+              padding-top: 6px !important;
+              
+            }
+          }
+        `}</style>
         <div
           className={styles.content}
           style={{ display: "flex", flexDirection: "column" }}

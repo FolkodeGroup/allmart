@@ -34,7 +34,6 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
-
 // 🟢 FIX: Ajustado a 9 productos por página para llenar el panel izquierdo de forma simétrica
 const PAGE_LIMIT = 9;
 
@@ -370,6 +369,15 @@ export function AdminProducts() {
           }
         }
         @media (max-width: 767px) {
+          .${styles.productsPage},
+          .${sectionStyles.page} {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            padding-top: 6px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
           .actionsBarDesktop {
             display: flex !important;
             flex-direction: column !important;
@@ -377,6 +385,9 @@ export function AdminProducts() {
             width: 100% !important;
             gap: 12px !important;
             margin-bottom: 16px !important;
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+            box-sizing: border-box !important;
           }
           .exportBtnContainerDesktop {
             width: 100% !important;
