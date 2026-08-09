@@ -13,6 +13,7 @@ import { TabVariantes } from './tabs/TabVariantes';
 import { TabSEOPublicacion } from './tabs/TabSeoPublicacion';
 import { ProductSupplierSection } from './tabs/ProductSupplierSection';
 
+import { ArrowLeft } from 'lucide-react';
 import styles from './AdminProductFormPage.module.css';
 
 interface Props {
@@ -138,7 +139,7 @@ export function AdminProductFormPage({
         if (!isMobile) return null;
 
         const barMarkup = (
-            <div className={`${styles.fixedBottomBarMobile} fixedBottomBarMobile`}>
+            <div className="fixedBottomBarMobile">
                 <button
                     type="button"
                     className={styles.submitBtn}
@@ -180,29 +181,102 @@ export function AdminProductFormPage({
 
                 @media (max-width: 1023px) {
                     .stickyFormHeaderMobile {
-                        position: relative !important;
-                        top: auto !important;
-                        z-index: 10 !important;
-                        background: transparent !important;
-                        border-bottom: 1px solid var(--color-border, rgba(229, 226, 221, 0.15)) !important;
+                        position: sticky !important;
+                        top: 0 !important;
+                        z-index: 30 !important;
+                        background: rgba(17, 24, 39, 0.95) !important;
+                        backdrop-filter: blur(8px) !important;
+                        -webkit-backdrop-filter: blur(8px) !important;
+                        border: none !important;
+                        border-bottom: 1px solid var(--color-border, #374151) !important;
+                        border-radius: 0 !important;
                         box-shadow: none !important;
-                        padding: 8px 4px 12px 4px !important;
-                        margin: 0 0 12px 0 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 10px !important;
+                        padding: 8px 0 !important;
+                        margin: 0 0 8px 0 !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
                     }
 
+                    .stickyFormHeaderMobile .pageHeaderInner {
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 10px !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+
+                    .mobileBackBtnForm {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        width: 34px !important;
+                        height: 34px !important;
+                        min-width: 34px !important;
+                        min-height: 34px !important;
+                        padding: 0 !important;
+                        background: rgba(255, 255, 255, 0.08) !important;
+                        border: 1px solid var(--color-border, #374151) !important;
+                        border-radius: 8px !important;
+                        color: var(--color-text-primary, #ffffff) !important;
+                        flex-shrink: 0 !important;
+                        border: none !important;
+                        cursor: pointer !important;
+                    }
+
+                    .desktopOnlyText,
+                    .desktopOnlyActions {
+                        display: none !important;
+                    }
+
+                    .stickyFormHeaderMobile .pageTitle {
+                        font-size: 15px !important;
+                        font-weight: 700 !important;
+                        color: var(--color-text-primary, #ffffff) !important;
+                        margin: 0 !important;
+                        white-space: nowrap !important;
+                        overflow: hidden !important;
+                        text-overflow: ellipsis !important;
+                        flex: 1 !important;
+                        line-height: 1.2 !important;
+                    }
+
                     .formPageMobileResponsive {
                         background: transparent !important;
-                        padding-bottom: 120px !important;
+                        padding-bottom: 100px !important;
+                        padding-left: 16px !important;
+                        padding-right: 16px !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+
+                    .formPageMobileResponsive form {
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+
+                    .formPageMobileResponsive [class*="layout"],
+                    .formPageMobileResponsive [class*="mainColumn"],
+                    .formPageMobileResponsive [class*="sideColumn"] {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        gap: 0 !important;
                     }
 
                     .cardSectionMobile {
                         border: 1px solid var(--color-border, #374151) !important;
-                        border-radius: 12px !important;
+                        border-radius: 10px !important;
                         overflow: hidden !important;
                         background: var(--color-bg-secondary, #1f2937) !important;
-                        margin-bottom: 12px !important;
+                        margin: 0 0 10px 0 !important;
+                        padding: 0 !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
                     }
@@ -213,27 +287,42 @@ export function AdminProductFormPage({
                         justify-content: space-between !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
-                        padding: 14px 16px !important;
+                        padding: 12px 14px !important;
                         background: var(--color-bg-secondary, #1f2937) !important;
                         border: none !important;
                         color: var(--color-text-primary, #ffffff) !important;
-                        font-size: 15px !important;
+                        font-size: 14px !important;
                         font-weight: 700 !important;
                         cursor: pointer !important;
-                        min-height: 52px !important;
+                        min-height: 48px !important;
                         text-align: left !important;
                     }
 
                     .accordionHeaderLeft {
                         display: flex !important;
                         align-items: center !important;
-                        gap: 10px !important;
+                        gap: 8px !important;
+                    }
+
+                    /* Transición suave basada en CSS Grid */
+                    .accordionCollapsible {
+                        display: grid !important;
+                        grid-template-rows: 0fr !important;
+                        transition: grid-template-rows 250ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+                    }
+
+                    .accordionCollapsibleOpen {
+                        grid-template-rows: 1fr !important;
+                    }
+
+                    .accordionCollapsibleInner {
+                        overflow: hidden !important;
                     }
 
                     .accordionBodyMobile {
                         width: 100% !important;
                         box-sizing: border-box !important;
-                        padding: 16px !important;
+                        padding: 14px !important;
                         border-top: 1px solid var(--color-border, #374151) !important;
                         background: var(--color-bg-secondary, #1f2937) !important;
                     }
@@ -251,7 +340,8 @@ export function AdminProductFormPage({
                         align-items: center !important;
                         justify-content: flex-end !important;
                         gap: 8px !important;
-                        padding: 0 4px 10px 4px !important;
+                        padding: 0 0 6px 0 !important;
+                        margin: 0 0 4px 0 !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
                     }
@@ -260,15 +350,15 @@ export function AdminProductFormPage({
                         background: transparent !important;
                         border: none !important;
                         color: var(--color-primary, #769282) !important;
-                        font-size: 13px !important;
+                        font-size: 12px !important;
                         font-weight: 600 !important;
                         cursor: pointer !important;
-                        padding: 4px 6px !important;
+                        padding: 2px 4px !important;
                     }
 
                     .accordionToggleSep {
                         color: var(--color-border, #6b7280) !important;
-                        font-size: 12px !important;
+                        font-size: 11px !important;
                     }
 
                     .fixedBottomBarMobile {
@@ -276,21 +366,22 @@ export function AdminProductFormPage({
                         bottom: 0 !important;
                         left: 0 !important;
                         right: 0 !important;
-                        z-index: 99999 !important;
-                        background: var(--color-bg-primary, #111827) !important;
+                        z-index: 50 !important;
+                        background: rgba(15, 23, 42, 0.92) !important;
+                        backdrop-filter: blur(8px) !important;
+                        -webkit-backdrop-filter: blur(8px) !important;
                         border-top: 1px solid var(--color-border, #374151) !important;
-                        padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) 16px !important;
-                        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3) !important;
+                        padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) 16px !important;
                         display: flex !important;
                         gap: 10px !important;
                     }
 
                     .fixedBottomBarMobile button {
                         flex: 1 !important;
-                        min-height: 48px !important;
-                        font-size: 15px !important;
-                        font-weight: 700 !important;
-                        border-radius: 10px !important;
+                        min-height: 44px !important;
+                        border-radius: 8px !important;
+                        font-size: 14px !important;
+                        font-weight: 600 !important;
                     }
                 }
 
@@ -298,12 +389,17 @@ export function AdminProductFormPage({
                     .accordionHeaderButton {
                         display: none !important;
                     }
+                    .accordionCollapsible {
+                        display: block !important;
+                        grid-template-rows: none !important;
+                    }
+                    .accordionCollapsibleInner {
+                        overflow: visible !important;
+                    }
                     .accordionBodyHidden {
                         display: block !important;
                     }
-                    .accordionToggleBarMobile {
-                        display: none !important;
-                    }
+                    .accordionToggleBarMobile,
                     .fixedBottomBarMobile {
                         display: none !important;
                     }
@@ -316,17 +412,17 @@ export function AdminProductFormPage({
                     <button
                         type="button"
                         onClick={handleCancel}
-                        className={styles.backBtn}
+                        className={`${styles.backBtn} mobileBackBtnForm`}
                         aria-label="Volver al listado"
                     >
-                        <i className="bi bi-arrow-left" style={{ fontSize: '0.9rem' }}></i>
-                        Productos
+                        <ArrowLeft size={18} />
+                        <span className="desktopOnlyText">Productos</span>
                     </button>
                     <h1 className={styles.pageTitle}>
-                        {isEdit ? `Editar producto: ${formProps.form.name || 'Sin nombre'}` : 'Nuevo producto'}
+                        {isEdit ? `Editar: ${formProps.form.name || 'Sin nombre'}` : 'Nuevo producto'}
                     </h1>
                 </div>
-                <div className={styles.pageHeaderActions}>
+                <div className={`${styles.pageHeaderActions} desktopOnlyActions`}>
                     <button
                         type="button"
                         className={styles.cancelBtn}
@@ -391,24 +487,28 @@ export function AdminProductFormPage({
                                 <i className={`bi bi-chevron-${accordionsOpen.basico ? 'up' : 'down'}`} />
                             </button>
 
-                            <div className={`accordionBodyMobile ${!accordionsOpen.basico ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-file-earmark-text" /> Información Básica
-                                </h2>
-                                <TabBasico
-                                    form={formProps.form}
-                                    fieldErrors={formProps.fieldErrors}
-                                    isEdit={formProps.isEdit}
-                                    setField={formProps.setField}
-                                    tagInput={formProps.tagInput}
-                                    setTagInput={formProps.setTagInput}
-                                    featureInput={formProps.featureInput}
-                                    setFeatureInput={formProps.setFeatureInput}
-                                    onAddTag={formProps.addTag}
-                                    onRemoveTag={formProps.removeTag}
-                                    onAddFeature={formProps.addFeature}
-                                    onRemoveFeature={formProps.removeFeature}
-                                />
+                            <div className={`accordionCollapsible ${accordionsOpen.basico ? 'accordionCollapsibleOpen' : ''}`}>
+                                <div className="accordionCollapsibleInner">
+                                    <div className="accordionBodyMobile">
+                                        <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                            <i className="bi bi-file-earmark-text" /> Información Básica
+                                        </h2>
+                                        <TabBasico
+                                            form={formProps.form}
+                                            fieldErrors={formProps.fieldErrors}
+                                            isEdit={formProps.isEdit}
+                                            setField={formProps.setField}
+                                            tagInput={formProps.tagInput}
+                                            setTagInput={formProps.setTagInput}
+                                            featureInput={formProps.featureInput}
+                                            setFeatureInput={formProps.setFeatureInput}
+                                            onAddTag={formProps.addTag}
+                                            onRemoveTag={formProps.removeTag}
+                                            onAddFeature={formProps.addFeature}
+                                            onRemoveFeature={formProps.removeFeature}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -430,16 +530,20 @@ export function AdminProductFormPage({
                                 <i className={`bi bi-chevron-${accordionsOpen.precios ? 'up' : 'down'}`} />
                             </button>
 
-                            <div className={`accordionBodyMobile ${!accordionsOpen.precios ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-currency-dollar" /> Precios y Stock
-                                </h2>
-                                <TabPreciosInventario
-                                    form={formProps.form}
-                                    fieldErrors={formProps.fieldErrors}
-                                    isEdit={formProps.isEdit}
-                                    setField={formProps.setField}
-                                />
+                            <div className={`accordionCollapsible ${accordionsOpen.precios ? 'accordionCollapsibleOpen' : ''}`}>
+                                <div className="accordionCollapsibleInner">
+                                    <div className="accordionBodyMobile">
+                                        <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                            <i className="bi bi-currency-dollar" /> Precios y Stock
+                                        </h2>
+                                        <TabPreciosInventario
+                                            form={formProps.form}
+                                            fieldErrors={formProps.fieldErrors}
+                                            isEdit={formProps.isEdit}
+                                            setField={formProps.setField}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -461,34 +565,38 @@ export function AdminProductFormPage({
                                 <i className={`bi bi-chevron-${accordionsOpen.imagenes ? 'up' : 'down'}`} />
                             </button>
 
-                            <div className={`accordionBodyMobile ${!accordionsOpen.imagenes ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-image" /> Galería de Imágenes
-                                </h2>
-                                <TabImagenes
-                                    isEdit={formProps.isEdit}
-                                    productId={productId}
-                                    images={formProps.form.images}
-                                    fieldErrors={formProps.fieldErrors}
-                                    setField={formProps.setField}
-                                    onSetImage={formProps.setImage}
-                                    onAddImageSlot={formProps.addImageSlot}
-                                    onRemoveImageSlot={formProps.removeImageSlot}
-                                    apiImages={formProps.apiImages}
-                                    imagesLoading={formProps.imagesLoading}
-                                    imagesError={formProps.imagesError}
-                                    imgFile={formProps.imgFile}
-                                    setImgFile={formProps.setImgFile}
-                                    imgNewAlt={formProps.imgNewAlt}
-                                    setImgNewAlt={formProps.setImgNewAlt}
-                                    imgError={formProps.imgError}
-                                    showAddImgForm={formProps.showAddImgForm}
-                                    setShowAddImgForm={formProps.setShowAddImgForm}
-                                    deletingImgId={formProps.deletingImgId}
-                                    fileInputRef={formProps.fileInputRef}
-                                    onApiUploadImage={formProps.handleApiUploadImage}
-                                    onApiDeleteImage={formProps.handleApiDeleteImage}
-                                />
+                            <div className={`accordionCollapsible ${accordionsOpen.imagenes ? 'accordionCollapsibleOpen' : ''}`}>
+                                <div className="accordionCollapsibleInner">
+                                    <div className="accordionBodyMobile">
+                                        <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                            <i className="bi bi-image" /> Galería de Imágenes
+                                        </h2>
+                                        <TabImagenes
+                                            isEdit={formProps.isEdit}
+                                            productId={productId}
+                                            images={formProps.form.images}
+                                            fieldErrors={formProps.fieldErrors}
+                                            setField={formProps.setField}
+                                            onSetImage={formProps.setImage}
+                                            onAddImageSlot={formProps.addImageSlot}
+                                            onRemoveImageSlot={formProps.removeImageSlot}
+                                            apiImages={formProps.apiImages}
+                                            imagesLoading={formProps.imagesLoading}
+                                            imagesError={formProps.imagesError}
+                                            imgFile={formProps.imgFile}
+                                            setImgFile={formProps.setImgFile}
+                                            imgNewAlt={formProps.imgNewAlt}
+                                            setImgNewAlt={formProps.setImgNewAlt}
+                                            imgError={formProps.imgError}
+                                            showAddImgForm={formProps.showAddImgForm}
+                                            setShowAddImgForm={formProps.setShowAddImgForm}
+                                            deletingImgId={formProps.deletingImgId}
+                                            fileInputRef={formProps.fileInputRef}
+                                            onApiUploadImage={formProps.handleApiUploadImage}
+                                            onApiDeleteImage={formProps.handleApiDeleteImage}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -507,25 +615,29 @@ export function AdminProductFormPage({
                                 <i className={`bi bi-chevron-${accordionsOpen.variantes ? 'up' : 'down'}`} />
                             </button>
 
-                            <div className={`accordionBodyMobile ${!accordionsOpen.variantes ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-layers" /> Variantes y Combinaciones
-                                </h2>
-                                <TabVariantes
-                                    form={formProps.form}
-                                    fieldErrors={formProps.fieldErrors}
-                                    isEdit={formProps.isEdit}
-                                    productId={productId}
-                                    setField={formProps.setField}
-                                    newGroupName={formProps.newGroupName}
-                                    setNewGroupName={formProps.setNewGroupName}
-                                    newGroupValues={formProps.newGroupValues}
-                                    setNewGroupValues={formProps.setNewGroupValues}
-                                    onAddVariantGroup={formProps.addVariantGroup}
-                                    onRemoveVariantGroup={formProps.removeVariantGroup}
-                                    onAddVariantValue={formProps.addVariantValue}
-                                    onRemoveVariantValue={formProps.removeVariantValue}
-                                />
+                            <div className={`accordionCollapsible ${accordionsOpen.variantes ? 'accordionCollapsibleOpen' : ''}`}>
+                                <div className="accordionCollapsibleInner">
+                                    <div className="accordionBodyMobile">
+                                        <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                            <i className="bi bi-layers" /> Variantes y Combinaciones
+                                        </h2>
+                                        <TabVariantes
+                                            form={formProps.form}
+                                            fieldErrors={formProps.fieldErrors}
+                                            isEdit={formProps.isEdit}
+                                            productId={productId}
+                                            setField={formProps.setField}
+                                            newGroupName={formProps.newGroupName}
+                                            setNewGroupName={formProps.setNewGroupName}
+                                            newGroupValues={formProps.newGroupValues}
+                                            setNewGroupValues={formProps.setNewGroupValues}
+                                            onAddVariantGroup={formProps.addVariantGroup}
+                                            onRemoveVariantGroup={formProps.removeVariantGroup}
+                                            onAddVariantValue={formProps.addVariantValue}
+                                            onRemoveVariantValue={formProps.removeVariantValue}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </section>
                     </div>
@@ -550,21 +662,25 @@ export function AdminProductFormPage({
                                 <i className={`bi bi-chevron-${accordionsOpen.categorias ? 'up' : 'down'}`} />
                             </button>
 
-                            <div className={`accordionBodyMobile ${!accordionsOpen.categorias ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-tags" /> Categorización
-                                </h2>
-                                <TabCategorias
-                                    form={formProps.form}
-                                    fieldErrors={formProps.fieldErrors}
-                                    isEdit={formProps.isEdit}
-                                    setField={formProps.setField}
-                                    categories={formProps.categories}
-                                    additionalCategoryIds={formProps.additionalCategoryIds}
-                                    onPrimaryCategoryChange={formProps.handlePrimaryCategoryChange}
-                                    onAdditionalCategoriesChange={formProps.handleAdditionalCategoriesChange}
-                                    getCategoryLabel={formProps.getCategoryLabel}
-                                />
+                            <div className={`accordionCollapsible ${accordionsOpen.categorias ? 'accordionCollapsibleOpen' : ''}`}>
+                                <div className="accordionCollapsibleInner">
+                                    <div className="accordionBodyMobile">
+                                        <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                            <i className="bi bi-tags" /> Categorización
+                                        </h2>
+                                        <TabCategorias
+                                            form={formProps.form}
+                                            fieldErrors={formProps.fieldErrors}
+                                            isEdit={formProps.isEdit}
+                                            setField={formProps.setField}
+                                            categories={formProps.categories}
+                                            additionalCategoryIds={formProps.additionalCategoryIds}
+                                            onPrimaryCategoryChange={formProps.handlePrimaryCategoryChange}
+                                            onAdditionalCategoriesChange={formProps.handleAdditionalCategoriesChange}
+                                            getCategoryLabel={formProps.getCategoryLabel}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -583,17 +699,21 @@ export function AdminProductFormPage({
                                 <i className={`bi bi-chevron-${accordionsOpen.proveedor ? 'up' : 'down'}`} />
                             </button>
 
-                            <div className={`accordionBodyMobile ${!accordionsOpen.proveedor ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-truck" /> Proveedor Principal
-                                </h2>
-                                <ProductSupplierSection
-                                    productId={productId}
-                                    productName={formProps.form.name}
-                                    currentProductPrice={formProps.form.price}
-                                    primarySupplierId={formProps.form.primarySupplierId}
-                                    onPrimaryChange={(id) => formProps.setField('primarySupplierId', id)}
-                                />
+                            <div className={`accordionCollapsible ${accordionsOpen.proveedor ? 'accordionCollapsibleOpen' : ''}`}>
+                                <div className="accordionCollapsibleInner">
+                                    <div className="accordionBodyMobile">
+                                        <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                            <i className="bi bi-truck" /> Proveedor Principal
+                                        </h2>
+                                        <ProductSupplierSection
+                                            productId={productId}
+                                            productName={formProps.form.name}
+                                            currentProductPrice={formProps.form.price}
+                                            primarySupplierId={formProps.form.primarySupplierId}
+                                            onPrimaryChange={(id) => formProps.setField('primarySupplierId', id)}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -612,16 +732,20 @@ export function AdminProductFormPage({
                                 <i className={`bi bi-chevron-${accordionsOpen.seo ? 'up' : 'down'}`} />
                             </button>
 
-                            <div className={`accordionBodyMobile ${!accordionsOpen.seo ? 'accordionBodyHidden' : ''}`}>
-                                <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
-                                    <i className="bi bi-globe" /> SEO y Vista Previa
-                                </h2>
-                                <TabSEOPublicacion
-                                    form={formProps.form}
-                                    fieldErrors={formProps.fieldErrors}
-                                    isEdit={formProps.isEdit}
-                                    setField={formProps.setField}
-                                />
+                            <div className={`accordionCollapsible ${accordionsOpen.seo ? 'accordionCollapsibleOpen' : ''}`}>
+                                <div className="accordionCollapsibleInner">
+                                    <div className="accordionBodyMobile">
+                                        <h2 className={`${styles.cardSectionTitle} desktopSectionTitle`}>
+                                            <i className="bi bi-globe" /> SEO y Vista Previa
+                                        </h2>
+                                        <TabSEOPublicacion
+                                            form={formProps.form}
+                                            fieldErrors={formProps.fieldErrors}
+                                            isEdit={formProps.isEdit}
+                                            setField={formProps.setField}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </section>
                     </div>

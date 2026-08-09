@@ -206,8 +206,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
     if (!isMobileActive) return null;
 
     const actionsMarkup = (
-      <div className={styles.mobileActionsOverlay}>
-        <div className={styles.mobileActionsContainer}>
+      <div className="mobileActionsOverlay">
+        <div className="mobileActionsContainer">
           {canEdit && onEdit && (
             <button
               type="button"
@@ -242,64 +242,137 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             height: auto !important;
             max-height: none !important;
             overflow-y: visible !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-            padding-bottom: 110px !important;
+            padding: 0 0 100px 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
           }
 
-          .stickyMobileBackBar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            min-height: 48px;
-            padding: 8px 12px;
-            background: var(--color-bg-primary, #111827);
-            border-bottom: 1px solid var(--color-border, #374151);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 12px;
-          }
-
-          .stickyMobileBackBtn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: transparent;
-            border: none;
-            color: var(--color-primary, #769282);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 6px 0;
-            min-height: 44px;
-          }
-
-          .pdHeaderCardMobile {
-            margin-top: 2px !important;
-            padding: 12px !important;
-            background: var(--color-bg-secondary, #1f2937) !important;
-            border: 1px solid var(--color-border, #374151) !important;
-            border-radius: 12px !important;
-            margin-bottom: 12px !important;
-          }
-
-          /* Ocultar elementos de pestañas en móvil */
+          /* Ocultar elementos de escritorio en móvil */
+          .desktopOnlyHeader,
           .desktopTabContainer,
           .desktopTabContent,
           .swipeHintBarMobileHide {
             display: none !important;
           }
 
-          /* Mostrar acordeones y controles en móvil */
+          /* Header Ultra-Compacto sin caja parásita ni espacio sobrante */
+          .mobileOnlyHeader {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 30 !important;
+            background: rgba(17, 24, 39, 0.95) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border-bottom: 1px solid var(--color-border, #374151) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 8px 0 !important;
+            margin: 0 0 8px 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .mobileBackBtn {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 34px !important;
+            height: 34px !important;
+            min-width: 34px !important;
+            min-height: 34px !important;
+            padding: 0 !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid var(--color-border, #374151) !important;
+            border-radius: 8px !important;
+            color: var(--color-text-primary, #ffffff) !important;
+            flex-shrink: 0 !important;
+            cursor: pointer !important;
+          }
+
+          .mobileProductBannerImg {
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            border-radius: 8px !important;
+            object-fit: cover !important;
+            flex-shrink: 0 !important;
+            background: var(--color-bg-secondary, #1f2937) !important;
+            border: 1px solid var(--color-border, #374151) !important;
+          }
+
+          .mobileProductBannerInfo {
+            display: flex !important;
+            flex-direction: column !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+            gap: 2px !important;
+          }
+
+          .mobileProductBannerTopRow {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+
+          .mobileProductBannerTitle {
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            color: var(--color-text-primary, #ffffff) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            margin: 0 !important;
+            line-height: 1.2 !important;
+          }
+
+          .mobileProductBannerMetaRow {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            flex-wrap: wrap !important;
+          }
+
+          .mobileProductBannerSku {
+            font-size: 11px !important;
+            color: var(--color-text-secondary, #9ca3af) !important;
+            margin: 0 !important;
+            font-family: monospace !important;
+          }
+
+          .mobileBadgeCompact {
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            padding: 1px 6px !important;
+            border-radius: 4px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 3px !important;
+          }
+
+          .mobileBadgeActive {
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #10b981 !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+          }
+
+          .mobileBadgeInactive {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #ef4444 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+          }
+
+          /* Mostrar acordeones y controles en móvil con ancho unificado al 100% */
           .accordionToggleBarMobile {
             display: flex !important;
             align-items: center !important;
             justify-content: flex-end !important;
             gap: 8px !important;
-            padding: 0 4px 10px 4px !important;
+            padding: 0 0 6px 0 !important;
+            margin: 0 0 4px 0 !important;
             width: 100% !important;
             box-sizing: border-box !important;
           }
@@ -308,31 +381,33 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             background: transparent !important;
             border: none !important;
             color: var(--color-primary, #769282) !important;
-            font-size: 13px !important;
+            font-size: 12px !important;
             font-weight: 600 !important;
             cursor: pointer !important;
-            padding: 4px 6px !important;
+            padding: 2px 4px !important;
           }
 
           .accordionToggleSep {
             color: var(--color-border, #6b7280) !important;
-            font-size: 12px !important;
+            font-size: 11px !important;
           }
 
           .mobileAccordionsList {
             display: flex !important;
             flex-direction: column !important;
-            gap: 12px !important;
+            gap: 0 !important;
+            padding: 0 !important;
             width: 100% !important;
             box-sizing: border-box !important;
           }
 
           .detailAccordionCard {
             border: 1px solid var(--color-border, #374151) !important;
-            border-radius: 12px !important;
+            border-radius: 10px !important;
             overflow: hidden !important;
             background: var(--color-bg-secondary, #1f2937) !important;
             width: 100% !important;
+            margin: 0 0 8px 0 !important;
             box-sizing: border-box !important;
           }
 
@@ -342,41 +417,81 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             justify-content: space-between !important;
             width: 100% !important;
             box-sizing: border-box !important;
-            padding: 14px 16px !important;
+            padding: 12px 14px !important;
             background: var(--color-bg-secondary, #1f2937) !important;
             border: none !important;
             color: var(--color-text-primary, #ffffff) !important;
-            font-size: 15px !important;
+            font-size: 14px !important;
             font-weight: 700 !important;
             cursor: pointer !important;
-            min-height: 52px !important;
+            min-height: 48px !important;
             text-align: left !important;
           }
 
           .accordionHeaderLeft {
             display: flex !important;
             align-items: center !important;
-            gap: 10px !important;
+            gap: 8px !important;
+          }
+
+          /* Transición suave basada en CSS Grid */
+          .accordionCollapsible {
+            display: grid !important;
+            grid-template-rows: 0fr !important;
+            transition: grid-template-rows 250ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+          }
+
+          .accordionCollapsibleOpen {
+            grid-template-rows: 1fr !important;
+          }
+
+          .accordionCollapsibleInner {
+            overflow: hidden !important;
           }
 
           .accordionBodyMobile {
             width: 100% !important;
             box-sizing: border-box !important;
-            padding: 16px !important;
+            padding: 14px !important;
             border-top: 1px solid var(--color-border, #374151) !important;
             background: var(--color-bg-secondary, #1f2937) !important;
           }
 
-          .accordionBodyHidden {
-            display: none !important;
+          /* Barra inferior pegajosa */
+          .mobileActionsOverlay {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 50 !important;
+            background: rgba(15, 23, 42, 0.92) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border-top: 1px solid var(--color-border, #374151) !important;
+            padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) 16px !important;
+          }
+
+          .mobileActionsContainer {
+            display: flex !important;
+            gap: 10px !important;
+            width: 100% !important;
+          }
+
+          .mobileActionsContainer button {
+            flex: 1 !important;
+            min-height: 44px !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
           }
         }
 
         /* 💻 ESCRITORIO (>=1024px): Pestañas tradicionales */
         @media (min-width: 1024px) {
-          .stickyMobileBackBar,
+          .mobileOnlyHeader,
           .accordionToggleBarMobile,
-          .mobileAccordionsList {
+          .mobileAccordionsList,
+          .mobileActionsOverlay {
             display: none !important;
           }
 
@@ -417,26 +532,45 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           .desktopTabContent {
             display: block !important;
           }
+
+          .desktopOnlyHeader {
+            display: flex !important;
+          }
         }
       `}</style>
 
-      {/* Barra de regreso pegajosa para móvil */}
-      {onBack && (
-        <div className="stickyMobileBackBar">
-          <button
-            type="button"
-            className="stickyMobileBackBtn"
-            onClick={onBack}
-            aria-label="Volver a la lista de productos"
-          >
+      {/* 📱 Banner Compacto Móvil */}
+      <div className="mobileOnlyHeader">
+        {onBack && (
+          <button onClick={onBack} className="mobileBackBtn" aria-label="Volver a Productos" type="button">
             <ArrowLeft size={18} />
-            <span>Volver a Productos</span>
           </button>
+        )}
+        {product.images?.[0] ? (
+          <img src={product.images[0]} alt={product.name} className="mobileProductBannerImg" />
+        ) : (
+          <div className="mobileProductBannerImg" />
+        )}
+        <div className="mobileProductBannerInfo">
+          <div className="mobileProductBannerTopRow">
+            <h2 className="mobileProductBannerTitle">{product.name}</h2>
+          </div>
+          <div className="mobileProductBannerMetaRow">
+            <span className="mobileProductBannerSku">SKU: {product.sku || '—'}</span>
+            <span className={`mobileBadgeCompact ${statusFlags.inStock ? 'mobileBadgeActive' : 'mobileBadgeInactive'}`}>
+              {statusFlags.inStock ? <><Check size={10} /> Stock</> : <><X size={10} /> Agotado</>}
+            </span>
+            {statusFlags.isFeatured && (
+              <span className="mobileBadgeCompact mobileBadgeActive">
+                <Star size={10} fill="currentColor" /> Destacado
+              </span>
+            )}
+          </div>
         </div>
-      )}
+      </div>
 
-      {/* Tarjeta de Cabecera Unificada */}
-      <div className={`${styles.headerCard} pdHeaderCardMobile pdHeaderCardDesktopFixed`}>
+      {/* 💻 Tarjeta de Cabecera Unificada en Escritorio */}
+      <div className={`${styles.headerCard} desktopOnlyHeader pdHeaderCardDesktopFixed`}>
         <div className={styles.panelHeader}>
           <div className={styles.headerContent}>
             <div className={styles.productTitle}>
@@ -540,7 +674,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         {renderTabContent()}
       </div>
 
-      {/* ── VISTA MÓVIL: ACORDEONES VERTICALES FULL-WIDTH ── */}
+      {/* ── VISTA MÓVIL: ACORDEONES VERTICALES FULL-WIDTH CON TRANSIÓN SUAVE ── */}
       <div className="accordionToggleBarMobile">
         <button
           type="button"
@@ -575,10 +709,14 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             {accordionsOpen.basic ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
 
-          <div className={`accordionBodyMobile ${!accordionsOpen.basic ? 'accordionBodyHidden' : ''}`}>
-            <Suspense fallback={<TabLoadingFallback />}>
-              <ProductDetailBasic product={product} />
-            </Suspense>
+          <div className={`accordionCollapsible ${accordionsOpen.basic ? 'accordionCollapsibleOpen' : ''}`}>
+            <div className="accordionCollapsibleInner">
+              <div className="accordionBodyMobile">
+                <Suspense fallback={<TabLoadingFallback />}>
+                  <ProductDetailBasic product={product} />
+                </Suspense>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -597,10 +735,14 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             {accordionsOpen.pricing ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
 
-          <div className={`accordionBodyMobile ${!accordionsOpen.pricing ? 'accordionBodyHidden' : ''}`}>
-            <Suspense fallback={<TabLoadingFallback />}>
-              <ProductDetailPricing product={product} />
-            </Suspense>
+          <div className={`accordionCollapsible ${accordionsOpen.pricing ? 'accordionCollapsibleOpen' : ''}`}>
+            <div className="accordionCollapsibleInner">
+              <div className="accordionBodyMobile">
+                <Suspense fallback={<TabLoadingFallback />}>
+                  <ProductDetailPricing product={product} />
+                </Suspense>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -619,10 +761,14 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             {accordionsOpen.images ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
 
-          <div className={`accordionBodyMobile ${!accordionsOpen.images ? 'accordionBodyHidden' : ''}`}>
-            <Suspense fallback={<TabLoadingFallback />}>
-              <ProductDetailImages productId={product.id} />
-            </Suspense>
+          <div className={`accordionCollapsible ${accordionsOpen.images ? 'accordionCollapsibleOpen' : ''}`}>
+            <div className="accordionCollapsibleInner">
+              <div className="accordionBodyMobile">
+                <Suspense fallback={<TabLoadingFallback />}>
+                  <ProductDetailImages productId={product.id} />
+                </Suspense>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -641,10 +787,14 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             {accordionsOpen.variants ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
 
-          <div className={`accordionBodyMobile ${!accordionsOpen.variants ? 'accordionBodyHidden' : ''}`}>
-            <Suspense fallback={<TabLoadingFallback />}>
-              <ProductDetailVariants productId={product.id} />
-            </Suspense>
+          <div className={`accordionCollapsible ${accordionsOpen.variants ? 'accordionCollapsibleOpen' : ''}`}>
+            <div className="accordionCollapsibleInner">
+              <div className="accordionBodyMobile">
+                <Suspense fallback={<TabLoadingFallback />}>
+                  <ProductDetailVariants productId={product.id} />
+                </Suspense>
+              </div>
+            </div>
           </div>
         </section>
       </div>
