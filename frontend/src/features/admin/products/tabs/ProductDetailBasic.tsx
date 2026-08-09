@@ -53,7 +53,7 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
           display: flex;
           align-items: center;
           gap: 8px;
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -76,7 +76,7 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
         }
 
         .flatLabel {
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.03em;
@@ -84,7 +84,7 @@ export function ProductDetailBasic({ product }: ProductDetailBasicProps) {
         }
 
         .flatValue {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 600;
           color: var(--color-text-primary, #ffffff);
           word-break: break-word;

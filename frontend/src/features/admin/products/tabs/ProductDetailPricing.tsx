@@ -57,7 +57,7 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
           display: flex;
           align-items: center;
           gap: 8px;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -95,7 +95,7 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
         }
 
         .sectionTitleFlat {
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -125,6 +125,7 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
         .dataLabelCell {
           color: var(--color-text-secondary, #9ca3af);
           font-weight: 500;
+          font-size: 13px !important;
         }
 
         .dataValueCell {

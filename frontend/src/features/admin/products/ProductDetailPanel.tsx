@@ -270,10 +270,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             display: flex !important;
             align-items: center !important;
             gap: 10px !important;
-            padding: 8px 0 !important;
+            padding: 8px 8px !important;
             margin: 0 0 8px 0 !important;
             width: 100% !important;
             box-sizing: border-box !important;
+            height: 64px !important;
           }
 
           .mobileBackBtn {
@@ -316,6 +317,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
+            padding: 6px !important;
           }
 
           .mobileProductBannerTitle {
@@ -334,6 +336,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             align-items: center !important;
             gap: 8px !important;
             flex-wrap: wrap !important;
+            padding: 0 6px 6px 6px !important;
           }
 
           .mobileProductBannerSku {
@@ -369,7 +372,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           .accordionToggleBarMobile {
             display: flex !important;
             align-items: center !important;
-            justify-content: flex-end !important;
+            justify-content: center !important;
             gap: 8px !important;
             padding: 0 0 6px 0 !important;
             margin: 0 0 4px 0 !important;
@@ -424,7 +427,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             font-size: 14px !important;
             font-weight: 700 !important;
             cursor: pointer !important;
-            min-height: 48px !important;
+            min-height: 60px !important;
             text-align: left !important;
           }
 
@@ -543,7 +546,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
       <div className="mobileOnlyHeader">
         {onBack && (
           <button onClick={onBack} className="mobileBackBtn" aria-label="Volver a Productos" type="button">
-            <ArrowLeft size={18} />
+            <ArrowLeft size={22} />
           </button>
         )}
         {product.images?.[0] ? (
@@ -555,17 +558,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           <div className="mobileProductBannerTopRow">
             <h2 className="mobileProductBannerTitle">{product.name}</h2>
           </div>
-          <div className="mobileProductBannerMetaRow">
-            <span className="mobileProductBannerSku">SKU: {product.sku || '—'}</span>
-            <span className={`mobileBadgeCompact ${statusFlags.inStock ? 'mobileBadgeActive' : 'mobileBadgeInactive'}`}>
-              {statusFlags.inStock ? <><Check size={10} /> Stock</> : <><X size={10} /> Agotado</>}
-            </span>
-            {statusFlags.isFeatured && (
-              <span className="mobileBadgeCompact mobileBadgeActive">
-                <Star size={10} fill="currentColor" /> Destacado
-              </span>
-            )}
-          </div>
+          
         </div>
       </div>
 
@@ -764,9 +757,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           <div className={`accordionCollapsible ${accordionsOpen.images ? 'accordionCollapsibleOpen' : ''}`}>
             <div className="accordionCollapsibleInner">
               <div className="accordionBodyMobile">
-                <Suspense fallback={<TabLoadingFallback />}>
-                  <ProductDetailImages productId={product.id} />
-                </Suspense>
+                {(accordionsOpen.images || activeTab === 'images') && (
+                  <Suspense fallback={<TabLoadingFallback />}>
+                    <ProductDetailImages productId={product.id} />
+                  </Suspense>
+                )}
               </div>
             </div>
           </div>
@@ -790,9 +785,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           <div className={`accordionCollapsible ${accordionsOpen.variants ? 'accordionCollapsibleOpen' : ''}`}>
             <div className="accordionCollapsibleInner">
               <div className="accordionBodyMobile">
-                <Suspense fallback={<TabLoadingFallback />}>
-                  <ProductDetailVariants productId={product.id} />
-                </Suspense>
+                {(accordionsOpen.variants || activeTab === 'variants') && (
+                  <Suspense fallback={<TabLoadingFallback />}>
+                    <ProductDetailVariants productId={product.id} />
+                  </Suspense>
+                )}
               </div>
             </div>
           </div>

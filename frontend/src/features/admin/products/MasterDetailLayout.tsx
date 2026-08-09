@@ -4,6 +4,7 @@ import { ProductListPanel } from './ProductListPanel';
 import { ProductDetailPanel } from './ProductDetailPanel';
 import styles from './MasterDetailLayout.module.css';
 import { AdminVariantsProvider } from '../../../context/AdminVariantsProvider';
+import { AdminImagesProvider } from '../../../context/AdminImagesContext';
 
 interface MasterDetailLayoutProps {
   products: AdminProduct[];
@@ -158,22 +159,24 @@ function MasterDetailLayoutInner({
 
       {/* Detail Panel (Right) */}
       <div className={`${styles.detailWrapper} detailPaneWrapper`}>
-        <AdminVariantsProvider>
-          {detailContent}
-          {!selectedProduct && !loading && products.length > 0 && (
-            <div className={styles.emptyDetail}>
-              <div className={styles.emptyDetailContent}>
-                <p>Selecciona un producto para ver sus detalles</p>
+        <AdminImagesProvider>
+          <AdminVariantsProvider>
+            {detailContent}
+            {!selectedProduct && !loading && products.length > 0 && (
+              <div className={styles.emptyDetail}>
+                <div className={styles.emptyDetailContent}>
+                  <p>Selecciona un producto para ver sus detalles</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {loading && (
-            <div className={styles.loadingDetail}>
-              <div className={styles.spinner} />
-            </div>
-          )}
-        </AdminVariantsProvider>
+            {loading && (
+              <div className={styles.loadingDetail}>
+                <div className={styles.spinner} />
+              </div>
+            )}
+          </AdminVariantsProvider>
+        </AdminImagesProvider>
       </div>
 
       {children && <div className={styles.toolbarArea}>{children}</div>}

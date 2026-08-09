@@ -173,8 +173,8 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
           }
 
           .prodListCompactThumb {
-            width: 40px !important;
-            height: 40px !important;
+            width: 54px !important;
+            height: 54px !important;
             min-width: 40px !important;
             border-radius: 8px !important;
             object-fit: cover !important;

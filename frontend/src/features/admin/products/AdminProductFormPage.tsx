@@ -197,6 +197,7 @@ export function AdminProductFormPage({
                         padding: 8px 12px !important;
                         margin: 0 0 8px 0 !important;
                         width: 100% !important;
+                        height: 64px !important;
                         box-sizing: border-box !important;
                     }
 
@@ -213,8 +214,8 @@ export function AdminProductFormPage({
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;
-                        width: 34px !important;
-                        height: 34px !important;
+                        width: 44px !important;
+                        height: 44px !important;
                         min-width: 34px !important;
                         min-height: 34px !important;
                         padding: 0 !important;
@@ -340,7 +341,7 @@ export function AdminProductFormPage({
                     .accordionToggleBarMobile {
                         display: flex !important;
                         align-items: center !important;
-                        justify-content: flex-end !important;
+                        justify-content: center !important;
                         gap: 8px !important;
                         padding: 0 16px 6px 16px !important;
                         margin: 0 0 4px 0 !important;

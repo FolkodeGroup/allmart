@@ -355,7 +355,7 @@ export function AdminProducts() {
             justify-content: space-between !important;
             align-items: center !important;
             width: 100% !important;
-            margin-bottom: 16px !important;
+            margin-bottom: 0px !important;
           }
           .exportBtnContainerDesktop {
             display: flex !important;
@@ -384,7 +384,7 @@ export function AdminProducts() {
             align-items: stretch !important;
             width: 100% !important;
             gap: 12px !important;
-            margin-bottom: 16px !important;
+            margin-bottom: 0 !important;
             padding-left: 12px !important;
             padding-right: 12px !important;
             box-sizing: border-box !important;
