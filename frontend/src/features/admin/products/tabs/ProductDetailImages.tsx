@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAdminImages } from '../../../../context/AdminImagesContext';
 import { useAdminProducts } from '../../../../context/useAdminProductsContext';
 import { Upload, Trash2, Image as ImageIcon, Star } from 'lucide-react';
-import styles from './ProductDetailImages.module.css';
+
 
 interface ProductDetailImagesProps {
   productId: string;

@@ -1,6 +1,6 @@
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
 import { PackageOpen, DollarSign, AlertTriangle, ShieldCheck } from 'lucide-react';
-import styles from './ProductDetailPricing.module.css';
+
 
 interface ProductDetailPricingProps {
   product: AdminProduct;

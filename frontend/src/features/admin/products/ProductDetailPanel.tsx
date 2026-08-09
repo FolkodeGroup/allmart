@@ -3,7 +3,10 @@ import { createPortal } from 'react-dom';
 import type { AdminProduct } from '../../../context/AdminProductsContext';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
-import { ArrowLeft, MoveLeft, MoveRight, Check, X, Star } from 'lucide-react';
+import {
+  ArrowLeft, MoveLeft, MoveRight, Check, X, Star,
+  ChevronDown, ChevronUp, FileText, DollarSign, Image as ImageIcon, Layers
+} from 'lucide-react';
 import styles from './ProductDetailPanel.module.css';
 
 // Lazy load tab components
@@ -60,6 +63,14 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
   });
   const [isSavingStatus, setIsSavingStatus] = useState(false);
 
+  // Estado de acordeones móviles
+  const [accordionsOpen, setAccordionsOpen] = useState<Record<string, boolean>>({
+    basic: false,
+    pricing: false,
+    images: false,
+    variants: false,
+  });
+
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -81,6 +92,19 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
       });
     }
   }, [activeTab]);
+
+  const toggleAccordion = useCallback((id: string) => {
+    setAccordionsOpen(prev => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const toggleAllAccordions = useCallback((open: boolean) => {
+    setAccordionsOpen({
+      basic: open,
+      pricing: open,
+      images: open,
+      variants: open,
+    });
+  }, []);
 
   const handleToggleStatus = useCallback(async (field: 'inStock' | 'isFeatured') => {
     if (!canEdit) return;
@@ -233,10 +257,10 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             width: 100%;
             min-height: 48px;
             padding: 8px 12px;
-            background: var(--color-bg-primary, #ffffff);
-            border-bottom: 1px solid var(--color-border, #e5e2dd);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 8px;
+            background: var(--color-bg-primary, #111827);
+            border-bottom: 1px solid var(--color-border, #374151);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 12px;
           }
 
           .stickyMobileBackBtn {
@@ -255,13 +279,104 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
 
           .pdHeaderCardMobile {
             margin-top: 2px !important;
-            padding: 12px 0 !important;
+            padding: 12px !important;
+            background: var(--color-bg-secondary, #1f2937) !important;
+            border: 1px solid var(--color-border, #374151) !important;
+            border-radius: 12px !important;
+            margin-bottom: 12px !important;
+          }
+
+          /* Ocultar elementos de pestañas en móvil */
+          .desktopTabContainer,
+          .desktopTabContent,
+          .swipeHintBarMobileHide {
+            display: none !important;
+          }
+
+          /* Mostrar acordeones y controles en móvil */
+          .accordionToggleBarMobile {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 8px !important;
+            padding: 0 4px 10px 4px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .accordionToggleBtn {
+            background: transparent !important;
+            border: none !important;
+            color: var(--color-primary, #769282) !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            padding: 4px 6px !important;
+          }
+
+          .accordionToggleSep {
+            color: var(--color-border, #6b7280) !important;
+            font-size: 12px !important;
+          }
+
+          .mobileAccordionsList {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .detailAccordionCard {
+            border: 1px solid var(--color-border, #374151) !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            background: var(--color-bg-secondary, #1f2937) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .accordionHeaderButton {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 14px 16px !important;
+            background: var(--color-bg-secondary, #1f2937) !important;
+            border: none !important;
+            color: var(--color-text-primary, #ffffff) !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            min-height: 52px !important;
+            text-align: left !important;
+          }
+
+          .accordionHeaderLeft {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+          }
+
+          .accordionBodyMobile {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 16px !important;
+            border-top: 1px solid var(--color-border, #374151) !important;
+            background: var(--color-bg-secondary, #1f2937) !important;
+          }
+
+          .accordionBodyHidden {
+            display: none !important;
           }
         }
 
-        /* 💻 ESCRITORIO (>=1024px): Lienzo plano con alineación exacta 0px a la izquierda */
+        /* 💻 ESCRITORIO (>=1024px): Pestañas tradicionales */
         @media (min-width: 1024px) {
-          .stickyMobileBackBar {
+          .stickyMobileBackBar,
+          .accordionToggleBarMobile,
+          .mobileAccordionsList {
             display: none !important;
           }
 
@@ -291,8 +406,16 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             overflow: visible !important;
             overflow-y: visible !important;
             max-height: none !important;
-            padding: 20px 0 36px 0 !important; /* 🟢 Alineación exacta 0px con la cabecera */
+            padding: 20px 0 36px 0 !important;
             box-sizing: border-box !important;
+          }
+
+          .desktopTabContainer {
+            display: block !important;
+          }
+
+          .desktopTabContent {
+            display: block !important;
           }
         }
       `}</style>
@@ -312,7 +435,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       )}
 
-      {/* Tarjeta de Cabecera Unificada en Escritorio */}
+      {/* Tarjeta de Cabecera Unificada */}
       <div className={`${styles.headerCard} pdHeaderCardMobile pdHeaderCardDesktopFixed`}>
         <div className={styles.panelHeader}>
           <div className={styles.headerContent}>
@@ -361,6 +484,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
                 <div className={styles.actions}>
                   {canEdit && onEdit && (
                     <button
+                      type="button"
                       onClick={() => onEdit(product.id)}
                       className={styles.btnEdit}
                     >
@@ -369,6 +493,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
                   )}
                   {canDelete && onDelete && (
                     <button
+                      type="button"
                       onClick={handleDeleteClick}
                       className={styles.btnDelete}
                     >
@@ -381,7 +506,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           </div>
         </div>
 
-        <div className={styles.tabsContainer}>
+        {/* Pestañas para Escritorio */}
+        <div className={`${styles.tabsContainer} desktopTabContainer`}>
           <div className={styles.tabsList}>
             {TAB_ORDER.map(tab => (
               <button
@@ -397,7 +523,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       </div>
 
-      <div className={styles.swipeHintBar}>
+      <div className={`${styles.swipeHintBar} swipeHintBarMobileHide`}>
         <span className={styles.swipeHintText}>
           {currentTabIndex > 0 && <MoveLeft size={12} />}
           Deslizá horizontalmente para cambiar de pestaña
@@ -405,13 +531,122 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </span>
       </div>
 
-      {/* Contenido de la pestaña */}
+      {/* Contenido en Escritorio */}
       <div
-        className={`${styles.tabContent} pdTabContentDesktopScroll`}
+        className={`${styles.tabContent} pdTabContentDesktopScroll desktopTabContent`}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         {renderTabContent()}
+      </div>
+
+      {/* ── VISTA MÓVIL: ACORDEONES VERTICALES FULL-WIDTH ── */}
+      <div className="accordionToggleBarMobile">
+        <button
+          type="button"
+          className="accordionToggleBtn"
+          onClick={() => toggleAllAccordions(true)}
+        >
+          Expandir todo
+        </button>
+        <span className="accordionToggleSep">•</span>
+        <button
+          type="button"
+          className="accordionToggleBtn"
+          onClick={() => toggleAllAccordions(false)}
+        >
+          Colapsar todo
+        </button>
+      </div>
+
+      <div className="mobileAccordionsList">
+        {/* 1. Información Básica */}
+        <section className="detailAccordionCard">
+          <button
+            type="button"
+            className="accordionHeaderButton"
+            onClick={() => toggleAccordion('basic')}
+            aria-expanded={accordionsOpen.basic}
+          >
+            <div className="accordionHeaderLeft">
+              <FileText size={18} />
+              <span>Información Básica</span>
+            </div>
+            {accordionsOpen.basic ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          <div className={`accordionBodyMobile ${!accordionsOpen.basic ? 'accordionBodyHidden' : ''}`}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <ProductDetailBasic product={product} />
+            </Suspense>
+          </div>
+        </section>
+
+        {/* 2. Precio y Stock */}
+        <section className="detailAccordionCard">
+          <button
+            type="button"
+            className="accordionHeaderButton"
+            onClick={() => toggleAccordion('pricing')}
+            aria-expanded={accordionsOpen.pricing}
+          >
+            <div className="accordionHeaderLeft">
+              <DollarSign size={18} />
+              <span>Precio y Stock</span>
+            </div>
+            {accordionsOpen.pricing ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          <div className={`accordionBodyMobile ${!accordionsOpen.pricing ? 'accordionBodyHidden' : ''}`}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <ProductDetailPricing product={product} />
+            </Suspense>
+          </div>
+        </section>
+
+        {/* 3. Galería de Imágenes */}
+        <section className="detailAccordionCard">
+          <button
+            type="button"
+            className="accordionHeaderButton"
+            onClick={() => toggleAccordion('images')}
+            aria-expanded={accordionsOpen.images}
+          >
+            <div className="accordionHeaderLeft">
+              <ImageIcon size={18} />
+              <span>Galería de Imágenes</span>
+            </div>
+            {accordionsOpen.images ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          <div className={`accordionBodyMobile ${!accordionsOpen.images ? 'accordionBodyHidden' : ''}`}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <ProductDetailImages productId={product.id} />
+            </Suspense>
+          </div>
+        </section>
+
+        {/* 4. Variantes y Combinaciones */}
+        <section className="detailAccordionCard">
+          <button
+            type="button"
+            className="accordionHeaderButton"
+            onClick={() => toggleAccordion('variants')}
+            aria-expanded={accordionsOpen.variants}
+          >
+            <div className="accordionHeaderLeft">
+              <Layers size={18} />
+              <span>Variantes y Combinaciones</span>
+            </div>
+            {accordionsOpen.variants ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          <div className={`accordionBodyMobile ${!accordionsOpen.variants ? 'accordionBodyHidden' : ''}`}>
+            <Suspense fallback={<TabLoadingFallback />}>
+              <ProductDetailVariants productId={product.id} />
+            </Suspense>
+          </div>
+        </section>
       </div>
 
       {renderMobileActions()}

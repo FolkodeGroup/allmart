@@ -135,7 +135,7 @@ export function AdminProductFormPage({
     const { sectionErrors, saving, error, isEdit, loading } = formProps;
 
     const renderMobileBottomBar = () => {
-        if (!isMobile) return null; // 🟢 AISLAMIENTO ESTRICTO: No renderizar en escritorio bajo ninguna circunstancia
+        if (!isMobile) return null;
 
         const barMarkup = (
             <div className={`${styles.fixedBottomBarMobile} fixedBottomBarMobile`}>
@@ -178,7 +178,7 @@ export function AdminProductFormPage({
                     display: none !important;
                 }
 
-                @media (max-width: 767px) {
+                @media (max-width: 1023px) {
                     .stickyFormHeaderMobile {
                         position: relative !important;
                         top: auto !important;
@@ -197,6 +197,16 @@ export function AdminProductFormPage({
                         padding-bottom: 120px !important;
                     }
 
+                    .cardSectionMobile {
+                        border: 1px solid var(--color-border, #374151) !important;
+                        border-radius: 12px !important;
+                        overflow: hidden !important;
+                        background: var(--color-bg-secondary, #1f2937) !important;
+                        margin-bottom: 12px !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+
                     .accordionHeaderButton {
                         display: flex !important;
                         align-items: center !important;
@@ -204,7 +214,7 @@ export function AdminProductFormPage({
                         width: 100% !important;
                         box-sizing: border-box !important;
                         padding: 14px 16px !important;
-                        background: var(--color-bg-secondary, #28353d) !important;
+                        background: var(--color-bg-secondary, #1f2937) !important;
                         border: none !important;
                         color: var(--color-text-primary, #ffffff) !important;
                         font-size: 15px !important;
@@ -223,9 +233,9 @@ export function AdminProductFormPage({
                     .accordionBodyMobile {
                         width: 100% !important;
                         box-sizing: border-box !important;
-                        padding: 14px 16px 18px 16px !important;
+                        padding: 16px !important;
                         border-top: 1px solid var(--color-border, #374151) !important;
-                        background: var(--color-bg-secondary, #28353d) !important;
+                        background: var(--color-bg-secondary, #1f2937) !important;
                     }
 
                     .accordionBodyHidden {
@@ -284,7 +294,7 @@ export function AdminProductFormPage({
                     }
                 }
 
-                @media (min-width: 768px) {
+                @media (min-width: 1024px) {
                     .accordionHeaderButton {
                         display: none !important;
                     }
@@ -364,7 +374,7 @@ export function AdminProductFormPage({
                     {/* COLUMNA PRINCIPAL (Izquierda - 68% en Desktop) */}
                     <div className={styles.mainColumn}>
                         {/* ── Básico ── */}
-                        <section id="basico" className={styles.cardSection}>
+                        <section id="basico" className={`${styles.cardSection} cardSectionMobile`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -403,7 +413,7 @@ export function AdminProductFormPage({
                         </section>
 
                         {/* ── Precios y Stock ── */}
-                        <section id="precios" className={styles.cardSection}>
+                        <section id="precios" className={`${styles.cardSection} cardSectionMobile`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -434,7 +444,7 @@ export function AdminProductFormPage({
                         </section>
 
                         {/* ── Imágenes ── */}
-                        <section id="imagenes" className={styles.cardSection}>
+                        <section id="imagenes" className={`${styles.cardSection} cardSectionMobile`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -483,7 +493,7 @@ export function AdminProductFormPage({
                         </section>
 
                         {/* ── Variantes y Combinaciones ── */}
-                        <section id="variantes" className={styles.cardSection}>
+                        <section id="variantes" className={`${styles.cardSection} cardSectionMobile`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -523,7 +533,7 @@ export function AdminProductFormPage({
                     {/* COLUMNA SECUNDARIA (Derecha - 32% en Desktop) */}
                     <div className={styles.sideColumn}>
                         {/* ── Categorías ── */}
-                        <section id="categorias" className={styles.cardSection}>
+                        <section id="categorias" className={`${styles.cardSection} cardSectionMobile`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -559,7 +569,7 @@ export function AdminProductFormPage({
                         </section>
 
                         {/* ── Proveedor ── */}
-                        <section id="proveedor" className={styles.cardSection}>
+                        <section id="proveedor" className={`${styles.cardSection} cardSectionMobile`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -588,7 +598,7 @@ export function AdminProductFormPage({
                         </section>
 
                         {/* ── SEO / Publicación ── */}
-                        <section id="seo" className={styles.cardSection}>
+                        <section id="seo" className={`${styles.cardSection} cardSectionMobile`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"

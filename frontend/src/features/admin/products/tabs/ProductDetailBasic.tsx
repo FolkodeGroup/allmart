@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { AdminProduct } from '../../../../context/AdminProductsContext';
 import { AlertCircle, Check, ChevronDown, ChevronUp, Tag as TagIcon, ListChecks, FileText, Info } from 'lucide-react';
-import styles from './ProductDetailBasic.module.css';
 
 interface ProductDetailBasicProps {
   product: AdminProduct;
