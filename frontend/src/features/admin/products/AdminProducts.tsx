@@ -34,8 +34,9 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
-// 🟢 FIX: Reducido a 6 productos para que la lista quepa 100% en pantalla sin scroll vertical interno
-const PAGE_LIMIT = 8;
+
+// 🟢 FIX: Ajustado a 9 productos por página para llenar el panel izquierdo de forma simétrica
+const PAGE_LIMIT = 9;
 
 export function AdminProducts() {
   const [searchParams, setSearchParams] = useSearchParams();

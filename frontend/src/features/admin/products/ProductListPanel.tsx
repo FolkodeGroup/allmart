@@ -26,10 +26,10 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
     error,
     selectedProductId,
     onSelectProduct,
-    onEdit,
-    onDelete,
-    canEdit = true,
-    canDelete = true,
+    onEdit: _onEdit,
+    onDelete: _onDelete,
+    canEdit: _canEdit = true,
+    canDelete: _canDelete = true,
     scrollPreserveKey = 'product-list-scroll',
   }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -128,11 +128,15 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
           .prodListContainerClean {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            padding-bottom: 0 !important;
+            gap: 8px;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
           }
+
           .prodListCompactRow {
-            padding: 8px 10px !important;
+            padding: 10px 12px !important;
             border-radius: 10px !important;
             margin-bottom: 0 !important;
             transition: all 0.15s ease !important;
@@ -140,21 +144,103 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
             width: 100% !important;
             max-width: 100% !important;
             overflow: hidden !important;
+            cursor: pointer;
+            border: 1px solid var(--color-border, #374151) !important;
+            background-color: var(--color-bg-primary, #111827) !important;
           }
+
+          .prodListCompactRow:hover {
+            border-color: var(--color-primary, #769282) !important;
+          }
+
+          .prodListCompactRow.selected {
+            border-color: var(--color-primary, #769282) !important;
+            background-color: rgba(118, 146, 130, 0.15) !important;
+            box-shadow: 0 0 0 1px var(--color-primary, #769282) !important;
+          }
+
+          .prodListMainRow {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+          }
+
           .prodListCompactThumb {
-            width: 38px !important;
-            height: 38px !important;
-            min-width: 38px !important;
-            border-radius: 6px !important;
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            border-radius: 8px !important;
             object-fit: cover !important;
+            flex-shrink: 0 !important;
           }
+
+          .prodListCompactContent {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 4px !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+            overflow: hidden !important;
+          }
+
           .prodListCompactTitle {
             font-size: 13px !important;
-            font-weight: 600 !important;
-            line-height: 1.2 !important;
+            font-weight: 700 !important;
+            line-height: 1.25 !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
+            color: var(--color-text-primary, #ffffff) !important;
+            margin: 0 !important;
+          }
+
+          .prodListCompactMetaGroup {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            flex-wrap: wrap !important;
+            min-width: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          .prodListCompactPrice {
+            font-size: 13px !important;
+            font-weight: 800 !important;
+            color: var(--color-accent, #DDB08C) !important;
+            white-space: nowrap !important;
+          }
+
+          .prodListCompactBadge {
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.02em !important;
+            white-space: nowrap !important;
+          }
+
+          .badgeInStock {
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #10b981 !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+          }
+
+          .badgeOutOfStock {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #ef4444 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+          }
+
+          .prodListCompactStock {
+            font-size: 11px !important;
+            color: var(--color-text-secondary, #9ca3af) !important;
+            white-space: nowrap !important;
+            font-weight: 500 !important;
           }
 
           @media (min-width: 1024px) {
@@ -165,11 +251,10 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
               justify-content: space-between !important;
               overflow: visible !important;
               box-sizing: border-box !important;
-              padding-right: 0 !important;
+              padding: 12px !important;
               background: var(--color-bg-secondary, #1f2937) !important;
               border: 1px solid var(--color-border, #374151) !important;
               border-radius: 12px !important;
-              padding: 12px !important;
             }
           }
         `}</style>
@@ -189,67 +274,38 @@ export const ProductListPanel = React.memo(React.forwardRef<HTMLDivElement, Prod
               onClick={() => handleSelectProduct(product.id)}
               onKeyDown={(event) => handleKeyDown(event, index)}
             >
-              <div className={styles.mainRow}>
+              <div className="prodListMainRow">
                 <img
                   src={normalizeImageUrl(product.images?.[0]) ?? DEFAULT_IMAGE_PLACEHOLDER}
                   alt={product.name}
-                  className={`${styles.thumbnail} prodListCompactThumb`}
+                  className="prodListCompactThumb"
                   loading="lazy"
                   onError={(event) => {
                     event.currentTarget.src = DEFAULT_IMAGE_PLACEHOLDER;
                   }}
                 />
 
-                <div className={styles.content}>
-                  <div className={styles.headerLine}>
-                    <h3 className={`${styles.title} prodListCompactTitle`}>{product.name}</h3>
-                  </div>
+                <div className="prodListCompactContent">
+                  <h3 className="prodListCompactTitle" title={product.name}>
+                    {product.name}
+                  </h3>
 
-                  <div className={styles.priceLine}>
-                    <strong>{currencyFormatter.format(product.price)}</strong>
-                    <div className={styles.stockSection}>
-                      <span
-                        className={`${styles.stockBadge} ${
-                          product.inStock ? styles.inStock : styles.outOfStock
-                        }`}
-                      >
-                        {product.inStock ? 'Disponible' : 'Sin stock'}
-                      </span>
-
-                      <span className={styles.stockText}>
-                        Stock: {product.stock}
-                      </span>
-                    </div>
+                  <div className="prodListCompactMetaGroup">
+                    <span className="prodListCompactPrice">
+                      {currencyFormatter.format(product.price)}
+                    </span>
+                    <span
+                      className={`prodListCompactBadge ${
+                        product.inStock ? 'badgeInStock' : 'badgeOutOfStock'
+                      }`}
+                    >
+                      {product.inStock ? 'Disponible' : 'Sin stock'}
+                    </span>
+                    <span className="prodListCompactStock">
+                      Stock: {product.stock}
+                    </span>
                   </div>
                 </div>
-              </div>
-
-              {/* Quick actions on hover */}
-              <div className={styles.quickActions}>
-                {canEdit && onEdit && (
-                  <button
-                    type="button"
-                    className={styles.quickBtn}
-                    title="Editar"
-                    onClick={(e) => { e.stopPropagation(); onEdit(product.id); }}
-                    aria-label={`Editar ${product.name}`}
-                    style={{ color: 'var(--color-primary)' }}
-                  >
-                    <i className="bi bi-pencil-fill" />
-                  </button>
-                )}
-                {canDelete && onDelete && (
-                  <button
-                    type="button"
-                    className={`${styles.quickBtn} ${styles.quickBtnDanger}`}
-                    title="Eliminar"
-                    onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}
-                    aria-label={`Eliminar ${product.name}`}
-                    style={{ color: 'var(--color-error)' }}
-                  >
-                    <i className="bi bi-trash-fill" />
-                  </button>
-                )}
               </div>
             </div>
           ))}
