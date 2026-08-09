@@ -218,8 +218,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             height: auto !important;
             max-height: none !important;
             overflow-y: visible !important;
-            padding-left: 6px !important;
-            padding-right: 6px !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
             padding-bottom: 110px !important;
           }
 
@@ -255,11 +255,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
 
           .pdHeaderCardMobile {
             margin-top: 2px !important;
-            padding: 12px !important;
+            padding: 12px 0 !important;
           }
         }
 
-        /* 💻 ESCRITORIO (>=1024px): Panel de altura dinámica con scroll unificado global */
+        /* 💻 ESCRITORIO (>=1024px): Lienzo plano con alineación exacta 0px a la izquierda */
         @media (min-width: 1024px) {
           .stickyMobileBackBar {
             display: none !important;
@@ -272,14 +272,18 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             max-height: none !important;
             min-height: 0 !important;
             overflow: visible !important;
-            overflow-y: visible !important;
             box-sizing: border-box !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
           }
 
           .pdHeaderCardDesktopFixed {
             flex-shrink: 0 !important;
             position: relative !important;
             z-index: 10 !important;
+            padding: 0 0 16px 0 !important;
+            border-bottom: 1px solid var(--color-border, rgba(229, 226, 221, 0.15)) !important;
+            background: transparent !important;
           }
 
           .pdTabContentDesktopScroll {
@@ -287,7 +291,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             overflow: visible !important;
             overflow-y: visible !important;
             max-height: none !important;
-            padding: 16px 16px 36px 16px !important;
+            padding: 20px 0 36px 0 !important; /* 🟢 Alineación exacta 0px con la cabecera */
             box-sizing: border-box !important;
           }
         }
@@ -308,7 +312,7 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
         </div>
       )}
 
-      {/* Tarjeta de Cabecera Unificada */}
+      {/* Tarjeta de Cabecera Unificada en Escritorio */}
       <div className={`${styles.headerCard} pdHeaderCardMobile pdHeaderCardDesktopFixed`}>
         <div className={styles.panelHeader}>
           <div className={styles.headerContent}>
