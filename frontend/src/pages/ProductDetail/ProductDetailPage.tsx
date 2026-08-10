@@ -353,13 +353,6 @@ export function ProductDetailPage() {
     return el.style.color || null;
   }
 
-  function formatSelectedAttributes(attributes: Record<string, string>) {
-    return Object.entries(attributes)
-      .filter(([, value]) => value !== undefined && value !== null && value !== '')
-      .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`)
-      .join('; ');
-  }
-
   useEffect(() => {
     if (!product || !isProductFavorite) {
       return;
