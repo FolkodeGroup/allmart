@@ -27,6 +27,7 @@ interface Props {
   description?: string;
   products: CollectionProduct[];
   bannerUrl?: string;
+  onProductClick?: (productSlug: string) => void;
   showViewAll?: boolean;
   previewMode?: boolean;
   variant?: 'home' | 'category';
