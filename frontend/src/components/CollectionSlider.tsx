@@ -6,7 +6,7 @@
 import React, { useEffect, useId, useRef, useState, useCallback } from 'react';
 import styles from './CollectionSlider.module.css';
 import '../styles/collections.css';
-import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, getOptimizedImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
+import { normalizeImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
 import { resolveImageUrl } from '../utils/imageHelpers';
 import { ProductCard as StandardProductCard } from '../features/products/ProductCard/ProductCard';
 import type { Product } from '../types';
@@ -27,7 +27,6 @@ interface Props {
   description?: string;
   products: CollectionProduct[];
   bannerUrl?: string;
-  onProductClick?: (productSlug: string) => void;
   showViewAll?: boolean;
   previewMode?: boolean;
   variant?: 'home' | 'category';
@@ -41,12 +40,6 @@ function getLayout(vw: number): { visible: number; gap: number } {
   if (vw < 1024) return { visible: 3, gap: 16 };
   if (vw < 1400) return { visible: 4, gap: 18 };
   return { visible: 5, gap: 20 };
-}
-
-function formatPrice(price: number | string): string {
-  const num = typeof price === 'string' ? parseFloat(price) : price;
-  if (isNaN(num)) return String(price);
-  return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 function buildProductCardProduct(product: CollectionProduct): Product {
@@ -85,20 +78,11 @@ function buildProductCardProduct(product: CollectionProduct): Product {
   };
 }
 
-function getCollectionProductImage(product: { id: string; imageUrl?: ImageUrlCandidate }) {
-  const url = normalizeImageUrl(product.imageUrl);
-  if (url && !url.includes('placeholder.png')) {
-    return resolveImageUrl(url) ?? url;
-  }
-  return resolveImageUrl(`/api/images/products/${product.id}/thumb`) ?? `/api/images/products/${product.id}/thumb`;
-}
-
 const CollectionSlider: React.FC<Props> = ({
   title,
   slug,
   products,
   bannerUrl,
-  onProductClick,
   showViewAll = true,
   previewMode = false,
   variant: _variant = 'home',
@@ -198,14 +182,6 @@ const CollectionSlider: React.FC<Props> = ({
     }
   }, [canLoop, index, count, clones]);
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const t = e.currentTarget;
-    if (t.src === DEFAULT_IMAGE_PLACEHOLDER || t.src.startsWith('data:image/')) {
-      return;
-    }
-    t.src = DEFAULT_IMAGE_PLACEHOLDER;
-  };
-
   if (!effectiveProducts || effectiveProducts.length === 0) return null;
 
   const translateX = index * (slideW + layout.gap);
@@ -272,7 +248,7 @@ const CollectionSlider: React.FC<Props> = ({
                 <div
                   key={product.id}
                   className={styles.slide}
-                  style={{ width: width > 0 ? `${width}px` : undefined }}
+                  style={{ width: cardWidth > 0 ? `${cardWidth}px` : undefined }}
                   aria-roledescription="slide"
                   aria-label={`${i + 1} de ${effectiveProducts.length}: ${product.name}`}
                 >
