@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useSearchParams } from 'react-router-dom';
-import { X, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { X, SlidersHorizontal, RotateCcw, Search } from 'lucide-react';
 import type { Product, Category } from '../../types';
 import {
   fetchPublicProducts,
@@ -550,7 +550,7 @@ export function ProductListPage() {
             </div>
           ) : !activeCollection ? (
             <div className={styles.emptyState}>
-              <span className={styles.emptyIcon}>🔍</span>
+              <Search className={styles.emptyIcon} size={40} aria-hidden="true" />
               <h3 className={styles.emptyTitle}>Colección no encontrada</h3>
               <p className={styles.emptyText}>La colección seleccionada no existe o fue removida.</p>
               <Link to="/productos" className={styles.loadMoreBtn} style={{ textDecoration: 'none', display: 'inline-block', marginTop: '12px' }}>
@@ -864,7 +864,7 @@ export function ProductListPage() {
 
           {!loading && !error && visibleProducts.length === 0 && (
             <div className={styles.emptyState}>
-              <span className={styles.emptyIcon}>🔍</span>
+              <Search className={styles.emptyIcon} size={40} aria-hidden="true" />
               <h3 className={styles.emptyTitle}>
                 No encontramos productos
               </h3>
