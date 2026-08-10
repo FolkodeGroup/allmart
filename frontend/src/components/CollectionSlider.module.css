@@ -52,7 +52,7 @@
   font-family: var(--font-heading, 'Montserrat', sans-serif);
   font-size: clamp(1.2rem, 2.2vw, 1.6rem);
   font-weight: 700;
-  color: var(--color-text-primary, #1a1a1a);
+  color: #fff;
   letter-spacing: var(--tracking-tight, -0.02em);
   line-height: var(--leading-tight, 1.2);
   /* Subrayado decorativo con color acento Allmart */
@@ -73,7 +73,7 @@
 
 /* En secciones con fondo primario (verde), adaptar color de título */
 :global(.collection-section--primary) .title {
-  color: var(--color-text-instock, #166534);
+  color: #fff;
 }
 
 :global(.collection-section--inverse) .title {
