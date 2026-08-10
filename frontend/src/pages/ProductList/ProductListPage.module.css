@@ -288,15 +288,54 @@
   white-space: nowrap;
 }
 
-.sortSelect {
-  padding: 8px 12px;
-  border: 1px solid var(--color-border, #e5e2dd);
-  border-radius: var(--radius-md, 8px);
+.sortDropdownWrapper {
+  min-width: min(220px, 100%);
+}
+
+.sortDropdownControl {
+  min-width: 210px;
+}
+
+.sortDropdownControl :global(.trigger) {
+  min-height: 38px;
+  border-radius: var(--radius-lg, 12px);
+  border-color: var(--color-border, #e5e2dd);
   background: var(--color-surface, #ffffff);
-  font-family: var(--font-body, serif);
-  font-size: 0.875rem;
   color: var(--color-text-primary, #1a1a1a);
-  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(41, 52, 54, 0.06);
+}
+
+.sortDropdownControl :global(.trigger:hover:not(:disabled)) {
+  border-color: var(--color-primary, #769282);
+  background: var(--color-bg-secondary, #f2efeb);
+}
+
+.sortDropdownControl :global(.triggerActive) {
+  border-color: var(--color-primary, #769282);
+  background: var(--color-bg-secondary, #f2efeb);
+  box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.12), 0 10px 24px rgba(38, 76, 62, 0.06);
+}
+
+.sortDropdownControl :global(.menu) {
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-border, #e5e2dd);
+  background: var(--color-surface, #ffffff);
+  box-shadow: 0 16px 40px rgba(30, 43, 36, 0.12);
+}
+
+.sortDropdownControl :global(.option) {
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.sortDropdownControl :global(.option:hover),
+.sortDropdownControl :global(.optionFocused) {
+  background: var(--color-primary-soft, #ddebe3);
+  color: var(--color-primary-dark, #5d7568);
+}
+
+.sortDropdownControl :global(.optionSelected) {
+  background: var(--color-primary, #769282);
+  color: var(--color-surface, #ffffff);
 }
 
 .productsGrid {
@@ -549,6 +588,7 @@
 }
 
 @media (max-width: 639px) {
+
   .productsGrid,
   .collectionViewGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -612,6 +652,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
