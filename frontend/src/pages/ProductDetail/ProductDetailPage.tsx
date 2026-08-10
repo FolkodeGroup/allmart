@@ -413,15 +413,11 @@ export function ProductDetailPage() {
         ? `${product.id}::${selectedSku.id}`
         : `${product.id}::${buildSelectedAttributesKey(selectedVariants)}`;
 
-      const selectedLabel = selectedSku
-        ? formatSelectedAttributes(selectedSku.attributes ?? {})
-        : formatSelectedAttributes(selectedVariants);
-
       const productForCart = selectedSku
         ? {
           ...product,
           id: cartProductId,
-          name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
+          name: product.name,
           sku: selectedSku.sku,
           price: currentPrice,
           images: imagesForCart,
@@ -430,7 +426,7 @@ export function ProductDetailPage() {
         : {
           ...product,
           id: cartProductId,
-          name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
+          name: product.name,
           price: currentPrice,
           images: imagesForCart,
           selectedAttributes: selectedVariants,
