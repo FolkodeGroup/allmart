@@ -389,12 +389,49 @@ export async function getProductById(id: string): Promise<Product> {
 
 export async function createProduct(dto: CreateProductDTO): Promise<Product> {
   const normalizedCategoryIds = normalizeCategoryIds(dto.categoryId, dto.categoryIds);
-  if (!dto.name || dto.price === undefined || !dto.sku || normalizedCategoryIds.length === 0) {
-    throw createError('Campos requeridos: name, price, categoryId o categoryIds, sku', 400);
+  const fieldErrors: Record<string, string> = {};
+
+  if (!dto.name || !String(dto.name).trim()) {
+    fieldErrors.name = 'El nombre es obligatorio';
+  }
+
+  if (dto.sku === undefined || dto.sku === null || !String(dto.sku).trim()) {
+    fieldErrors.sku = 'El SKU es obligatorio';
+  } else if (!/^[A-Z0-9]+(-[A-Z0-9]+)*$/.test(String(dto.sku))) {
+    fieldErrors.sku = 'Formato inválido del SKU: solo mayúsculas, números y guiones';
+  }
+
+  if (dto.price === undefined || dto.price === null) {
+    fieldErrors.price = 'El precio es obligatorio';
+  } else {
+    const parsedPrice = parseSafePrice(dto.price);
+    if (parsedPrice === undefined) {
+      fieldErrors.price = 'El precio debe ser un número válido';
+    } else if (parsedPrice < 0) {
+      fieldErrors.price = 'El precio de venta no puede ser negativo';
+    }
+  }
+
+  if (normalizedCategoryIds.length === 0) {
+    fieldErrors.category = 'Seleccioná una categoría';
+  }
+
+  if (dto.slug && typeof dto.slug === 'string' && dto.slug.trim().length > 0 && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(dto.slug)) {
+    fieldErrors.slug = 'El slug debe contener solo letras minúsculas, números y guiones';
+  }
+
+  // Nota: permitir stock negativo (ej. -2) intencionalmente, las alertas se calculan contra el umbral crítico.
+
+  if ((dto as any).criticalStockThreshold !== undefined && Number((dto as any).criticalStockThreshold) < 0) {
+    fieldErrors.criticalStockThreshold = 'El umbral de stock crítico no puede ser negativo';
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    throw createError('Datos de producto inválidos', 400, fieldErrors);
   }
 
   const skuExists = await prisma.product.findUnique({ where: { sku: dto.sku } });
-  if (skuExists) throw createError('El SKU ya está en uso', 409, ['sku']);
+  if (skuExists) throw createError('El SKU ya está en uso', 409, { sku: 'Este SKU ya está en uso' });
 
   await ensureCategoriesExist(normalizedCategoryIds);
 
@@ -527,11 +564,55 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
   });
   if (!existing) throw createError('Producto no encontrado', 404);
 
+  const fieldErrors: Record<string, string> = {};
+
+  if (dto.name !== undefined && !String(dto.name).trim()) {
+    fieldErrors.name = 'El nombre es obligatorio';
+  }
+
+  if (dto.sku !== undefined) {
+    if (!String(dto.sku).trim()) {
+      fieldErrors.sku = 'El SKU es obligatorio';
+    } else if (!/^[A-Z0-9]+(-[A-Z0-9]+)*$/.test(String(dto.sku))) {
+      fieldErrors.sku = 'Formato inválido del SKU: solo mayúsculas, números y guiones';
+    }
+  }
+
+  if (dto.price !== undefined) {
+    const parsedPrice = parseSafePrice(dto.price);
+    if (parsedPrice === undefined) {
+      fieldErrors.price = 'El precio debe ser un número válido';
+    } else if (parsedPrice < 0) {
+      fieldErrors.price = 'El precio de venta no puede ser negativo';
+    }
+  }
+
+  if (dto.categoryId !== undefined || dto.categoryIds !== undefined) {
+    const normalizedUpdateCategoryIds = normalizeCategoryIds(dto.categoryId, dto.categoryIds);
+    if (normalizedUpdateCategoryIds.length === 0) {
+      fieldErrors.category = 'Seleccioná una categoría';
+    }
+  }
+
+  if (dto.slug !== undefined && typeof dto.slug === 'string' && dto.slug.trim().length > 0 && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(dto.slug)) {
+    fieldErrors.slug = 'El slug debe contener solo letras minúsculas, números y guiones';
+  }
+
+  // Permitir stock negativo en actualizaciones también
+
+  if ((dto as any).criticalStockThreshold !== undefined && Number((dto as any).criticalStockThreshold) < 0) {
+    fieldErrors.criticalStockThreshold = 'El umbral de stock crítico no puede ser negativo';
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    throw createError('Datos de producto inválidos', 400, fieldErrors);
+  }
+
   if (dto.sku && dto.sku !== existing.sku) {
     const skuExists = await prisma.product.findFirst({
       where: { sku: dto.sku, id: { not: id } },
     });
-    if (skuExists) throw createError(`El SKU "${dto.sku}" ya está en uso por otro producto`, 409);
+    if (skuExists) throw createError(`El SKU "${dto.sku}" ya está en uso por otro producto`, 409, { sku: 'Este SKU ya está en uso por otro producto' });
   }
 
   let slug = existing.slug;

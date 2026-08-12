@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState, useCallback } from 'react';
+import { forwardRef, useImperativeHandle, useState, useCallback, useEffect } from 'react';
 import type { TabPreciosInventarioProps } from '../components/types';
 import { getInlineFieldError } from '../../../../utils/productFormUtils';
 import { ValidationHelper } from '../components/ValidationHelper';
@@ -18,6 +18,10 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
     const [touched, setTouched] = useState<Record<string, boolean>>({});
     const { skus } = useAdminVariants();
 
+    useEffect(() => {
+        setLocalErrors(errors);
+    }, [errors]);
+
     const formValues = form as unknown as {
         price: number;
         stock: number;
@@ -29,12 +33,11 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
     const hasActiveSkus = (skus && skus.length > 0) || (Array.isArray((form as unknown as { skus?: unknown[] }).skus) && (form as unknown as { skus: unknown[] }).skus.length > 0);
 
     useImperativeHandle(ref, () => ({
-        validate: () => {
+            validate: () => {
             const errs: Record<string, string> = {};
             if (!hasActiveSkus) {
                 if (!formValues.price || formValues.price <= 0) errs.price = 'El precio debe ser mayor a 0';
-                if (formValues.stock < 0) errs.stock = 'El stock no puede ser negativo';
-                
+                // Permitimos stock negativo (ej. -2) por diseño; las alertas se calculan contra el umbral crítico
                 if (formValues.criticalStockThreshold !== undefined && formValues.criticalStockThreshold < 0) {
                     errs.criticalStockThreshold = 'El umbral de stock crítico no puede ser negativo';
                 }
@@ -89,7 +92,8 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                     <div className={styles.inputWithIcon} style={{ position: 'relative' }}>
                         <i className="bi bi-currency-dollar" style={iconStyle}></i>
                         <input
-                            className={`${styles.input} ${touched.price && localErrors.price ? styles.inputError : ''}`}
+                            aria-invalid={!!localErrors.price}
+                            className={`${styles.input} ${localErrors.price ? styles.inputError : ''}`}
                             style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasActiveSkus ? 'var(--color-bg-secondary)' : undefined }}
                             id="product-price"
                             type="number"
@@ -108,7 +112,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             disabled={hasActiveSkus}
                         />
                     </div>
-                    {!hasActiveSkus && touched.price && (
+                    {!hasActiveSkus && (touched.price || localErrors.price) && (
                         <ValidationHelper
                             error={localErrors.price}
                             success={!!(formValues.price > 0 && !localErrors.price)}
@@ -121,12 +125,12 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                     <div className={styles.inputWithIcon} style={{ position: 'relative' }}>
                         <i className="bi bi-box-seam" style={iconStyle}></i>
                         <input
-                            className={`${styles.input} ${touched.stock && localErrors.stock ? styles.inputError : ''}`}
+                            aria-invalid={!!localErrors.stock}
+                            className={`${styles.input} ${localErrors.stock ? styles.inputError : ''}`}
                             style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasActiveSkus ? 'var(--color-bg-secondary)' : undefined }}
-                            id="product-stock"
-                            type="number"
-                            min={0}
-                            value={formValues.stock === 0 ? '' : formValues.stock}
+                                id="product-stock"
+                                type="number"
+                                value={formValues.stock === 0 ? '' : formValues.stock}
                             onChange={e => {
                                 const raw = e.target.value;
                                 const val = raw === '' ? 0 : Number(raw);
@@ -138,10 +142,10 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             disabled={hasActiveSkus}
                         />
                     </div>
-                    {!hasActiveSkus && touched.stock && (
+                    {!hasActiveSkus && (touched.stock || localErrors.stock) && (
                         <ValidationHelper
                             error={localErrors.stock}
-                            success={!!(formValues.stock >= 0 && !localErrors.stock)}
+                            success={!!(!localErrors.stock)}
                         />
                     )}
                 </div>
