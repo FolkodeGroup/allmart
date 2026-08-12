@@ -145,7 +145,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                     {!hasActiveSkus && (touched.stock || localErrors.stock) && (
                         <ValidationHelper
                             error={localErrors.stock}
-                            success={!!(!localErrors.stock)}
+                            success={!localErrors.stock}
                         />
                     )}
                 </div>
