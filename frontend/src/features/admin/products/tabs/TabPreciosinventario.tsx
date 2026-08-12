@@ -33,7 +33,7 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
     const hasActiveSkus = (skus && skus.length > 0) || (Array.isArray((form as unknown as { skus?: unknown[] }).skus) && (form as unknown as { skus: unknown[] }).skus.length > 0);
 
     useImperativeHandle(ref, () => ({
-            validate: () => {
+        validate: () => {
             const errs: Record<string, string> = {};
             if (!hasActiveSkus) {
                 if (!formValues.price || formValues.price <= 0) errs.price = 'El precio debe ser mayor a 0';
@@ -128,9 +128,9 @@ export const TabPreciosInventario = forwardRef<TabPreciosInventarioRef, TabPreci
                             aria-invalid={!!localErrors.stock}
                             className={`${styles.input} ${localErrors.stock ? styles.inputError : ''}`}
                             style={{ paddingLeft: '36px', minHeight: '44px', fontSize: '16px', backgroundColor: hasActiveSkus ? 'var(--color-bg-secondary)' : undefined }}
-                                id="product-stock"
-                                type="number"
-                                value={formValues.stock === 0 ? '' : formValues.stock}
+                            id="product-stock"
+                            type="number"
+                            value={formValues.stock === 0 ? '' : formValues.stock}
                             onChange={e => {
                                 const raw = e.target.value;
                                 const val = raw === '' ? 0 : Number(raw);

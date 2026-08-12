@@ -225,7 +225,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
                 const { images: _omitted, ...formWithoutImages } = sanitizedForm;
                 void _omitted;
                 await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
-                
+
                 // 🟢 CORRECCIÓN: Aislamos de forma segura sin usar .catch() ya que logAdminActivity no devuelve un Promise.
                 try {
                     logAdminActivity({
@@ -241,7 +241,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
                 }
             } else {
                 const created = await addProduct(sanitizedForm) as AdminProduct;
-                
+
                 // 🟢 CORRECCIÓN: Aislamos de manera segura aquí también.
                 try {
                     logAdminActivity({
@@ -400,7 +400,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             setDeletingImgId(imageId);
             try {
                 await deleteImage(productId, imageId);
-                
+
                 // 🟢 CORRECCIÓN: Envolvemos en try-catch síncrono en lugar de encadenar .catch().
                 // Esto erradica el error de "Cannot read properties of undefined (reading 'catch')".
                 try {

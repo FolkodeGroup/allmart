@@ -289,7 +289,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         />
                         <span>En Oferta</span>
                     </label>
-                    
+
                     <label className="touchableCheckboxRow">
                         <input
                             type="checkbox"
@@ -298,7 +298,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                         />
                         <span>Novedad</span>
                     </label>
-                    
+
                     <label className="touchableCheckboxRow">
                         <input
                             type="checkbox"

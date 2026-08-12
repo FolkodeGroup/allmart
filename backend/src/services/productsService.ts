@@ -236,7 +236,7 @@ const adminProductSelect = {
   reviewCount: true,
   inStock: true,
   stock: true,
-  criticalStockThreshold: true, 
+  criticalStockThreshold: true,
   sku: true,
   isFeatured: true,
   primarySupplierId: true,
@@ -374,7 +374,7 @@ export async function getProductById(id: string): Promise<Product> {
         id: s.id,
         sku: s.sku,
         attributes,
-        variant, 
+        variant,
         images,
         stock: s.stock,
         price: s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price),
@@ -464,10 +464,10 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
       sku: dto.sku,
       stock: dto.stock ?? 0,
-      criticalStockThreshold: threshold, 
+      criticalStockThreshold: threshold,
       rating: dto.rating ?? 0,
       reviewCount: dto.reviewCount ?? 0,
-      inStock: true, 
+      inStock: true,
       isFeatured: dto.isFeatured ?? false,
       ...(dto.primarySupplierId !== undefined
         ? { primarySupplierId: dto.primarySupplierId ?? null }
@@ -675,12 +675,12 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
       status: dto.status ? (dto.status as unknown as PrismaProductStatus) : existing.status,
       sku: dto.sku !== undefined ? dto.sku : existing.sku,
       stock: dto.stock !== undefined ? dto.stock : existing.stock,
-      
+
       criticalStockThreshold: threshold !== undefined ? threshold : existing.criticalStockThreshold,
 
       rating: dto.rating !== undefined ? dto.rating : existing.rating,
       reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : existing.reviewCount,
-      
+
       inStock: dto.inStock !== undefined ? dto.inStock : true,
 
       novedadSince: (() => {
@@ -905,7 +905,7 @@ export async function getPublicProducts(query: ProductQuery) {
 
   if (tag?.toLowerCase() === 'destacado') {
     effectiveIsFeatured = true;
-    effectiveTag = undefined; 
+    effectiveTag = undefined;
   }
 
   if (typeof effectiveIsFeatured === 'boolean') {
@@ -931,7 +931,7 @@ export async function getPublicProducts(query: ProductQuery) {
       ? { in: (where.id as any).in.filter((id: string) => ids.includes(id)) }
       : { in: ids };
 
-    effectiveTag = undefined; 
+    effectiveTag = undefined;
   }
   else if (isNovedad === true || tag?.toLowerCase() === 'novedad') {
     const novedadProducts = await prisma.productTag.findMany({
@@ -952,7 +952,7 @@ export async function getPublicProducts(query: ProductQuery) {
       ? { in: (where.id as any).in.filter((id: string) => ids.includes(id)) }
       : { in: ids };
 
-    effectiveTag = undefined; 
+    effectiveTag = undefined;
   }
 
   if (effectiveTag) {
@@ -1093,12 +1093,12 @@ export async function getPublicProducts(query: ProductQuery) {
         productCategories: { select: { categoryId: true } },
         productTags: { include: { tag: true } },
         // ❌ NO traemos productFeatures ni productOptions (no se ven en la grilla)
-        
+
         // ✅ De los SKUs, SOLO traemos precio y stock para calcular el "Desde $X"
         productSkus: {
           where: { isActive: true },
-          select: { 
-            price: true, 
+          select: {
+            price: true,
             stock: true,
             isActive: true
           }
@@ -1118,14 +1118,14 @@ export async function getPublicProducts(query: ProductQuery) {
     // 🟢 Calculamos el precio mínimo y stock total usando la data ultra-liviana
     if (Array.isArray((row as any).productSkus) && (row as any).productSkus.length > 0) {
       const skus = (row as any).productSkus;
-      
+
       const activeSkus = skus.filter((s: any) => s.isActive);
       if (activeSkus.length > 0) {
         base.price = Math.min(...activeSkus.map((s: any) => s.price !== null && s.price !== undefined ? Number(s.price) : Number(row.price)));
         base.stock = activeSkus.reduce((sum: number, s: any) => sum + (s.stock || 0), 0);
-        
+
         // 🟢 FIX: Siempre en true ya que habilitamos compras ilimitadas sin importar el stock
-        base.inStock = true; 
+        base.inStock = true;
       }
     }
 
@@ -1223,9 +1223,9 @@ export async function getProductBySlug(slug: string): Promise<Product> {
       if (activeSkus.length > 0) {
         base.price = Math.min(...activeSkus.map((s: any) => s.price));
         base.stock = activeSkus.reduce((sum: number, s: any) => sum + (s.stock || 0), 0);
-        
+
         // 🟢 FIX: Siempre en true ya que habilitamos compras ilimitadas sin importar el stock
-        base.inStock = true; 
+        base.inStock = true;
       }
     }
   }
