@@ -83,8 +83,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  justify-content: space-between;
-  width: 100%;
 }
 
 .variantGroupName {
@@ -140,7 +138,6 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  width: 100%;
   box-sizing: border-box;
 }
 
@@ -225,6 +222,7 @@
 }
 
 @media (max-width: 767px) {
+
   .addCombinationBtn,
   .bulkGenerateBtn {
     width: 100%;
@@ -310,6 +308,7 @@
 }
 
 @media (max-width: 767px) {
+
   .comboModalInput,
   .input {
     font-size: 16px;
