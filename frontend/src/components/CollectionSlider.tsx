@@ -6,8 +6,10 @@
 import React, { useEffect, useId, useRef, useState, useCallback } from 'react';
 import styles from './CollectionSlider.module.css';
 import '../styles/collections.css';
-import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, getOptimizedImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
+import { normalizeImageUrl, type ImageUrlCandidate } from '../utils/imageUrl';
 import { resolveImageUrl } from '../utils/imageHelpers';
+import { ProductCard as StandardProductCard } from '../features/products/ProductCard/ProductCard';
+import type { Product } from '../types';
 
 export interface CollectionProduct {
   id: string;
@@ -16,6 +18,7 @@ export interface CollectionProduct {
   price: number | string;
   imageUrl?: string | { url?: unknown } | null;
   position: number;
+  category?: string | { name?: string; slug?: string } | null;
 }
 
 interface Props {
@@ -40,18 +43,40 @@ function getLayout(vw: number): { visible: number; gap: number } {
   return { visible: 5, gap: 20 };
 }
 
-function formatPrice(price: number | string): string {
-  const num = typeof price === 'string' ? parseFloat(price) : price;
-  if (isNaN(num)) return String(price);
-  return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
+function buildProductCardProduct(product: CollectionProduct): Product {
+  const categoryName = typeof product.category === 'string'
+    ? product.category
+    : product.category && typeof product.category === 'object' && product.category.name
+      ? product.category.name
+      : 'Sin categoría';
 
-function getCollectionProductImage(product: { id: string; imageUrl?: ImageUrlCandidate }) {
-  const url = normalizeImageUrl(product.imageUrl);
-  if (url && !url.includes('placeholder.png')) {
-    return resolveImageUrl(url) ?? url;
-  }
-  return resolveImageUrl(`/api/images/products/${product.id}/thumb`) ?? `/api/images/products/${product.id}/thumb`;
+  const normalizedImage = normalizeImageUrl(product.imageUrl as ImageUrlCandidate | undefined);
+
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    description: product.name,
+    shortDescription: product.name,
+    price: Number(product.price) || 0,
+    images: normalizedImage ? [normalizedImage] : [],
+    category: {
+      id: `collection-${product.id}`,
+      name: categoryName,
+      slug: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'sin-categoria',
+      isVisible: true,
+    },
+    categoryId: undefined,
+    categoryIds: [],
+    categories: [],
+    tags: [],
+    rating: 0,
+    reviewCount: 0,
+    inStock: true,
+    sku: product.id,
+    selectedAttributes: {},
+    appliedDiscount: null,
+  };
 }
 
 const CollectionSlider: React.FC<Props> = ({
@@ -59,7 +84,6 @@ const CollectionSlider: React.FC<Props> = ({
   slug,
   products,
   bannerUrl,
-  onProductClick,
   showViewAll = true,
   previewMode = false,
   variant: _variant = 'home',
@@ -159,14 +183,6 @@ const CollectionSlider: React.FC<Props> = ({
     }
   }, [canLoop, index, count, clones]);
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const t = e.currentTarget;
-    if (t.src === DEFAULT_IMAGE_PLACEHOLDER || t.src.startsWith('data:image/')) {
-      return;
-    }
-    t.src = DEFAULT_IMAGE_PLACEHOLDER;
-  };
-
   if (!effectiveProducts || effectiveProducts.length === 0) return null;
 
   const translateX = index * (slideW + layout.gap);
@@ -230,15 +246,15 @@ const CollectionSlider: React.FC<Props> = ({
           {isMobile ? (
             <div className={styles.mobileTrack} style={{ gap: `${layout.gap}px` }}>
               {effectiveProducts.map((product, i) => (
-                <ProductCard
+                <div
                   key={product.id}
-                  product={product}
-                  index={i}
-                  total={effectiveProducts.length}
-                  width={cardWidth}
-                  onClick={onProductClick}
-                  onImageError={handleImageError}
-                />
+                  className={styles.slide}
+                  style={{ width: cardWidth > 0 ? `${cardWidth}px` : undefined }}
+                  aria-roledescription="slide"
+                  aria-label={`${i + 1} de ${effectiveProducts.length}: ${product.name}`}
+                >
+                  <StandardProductCard product={buildProductCardProduct(product)} variant="featured" />
+                </div>
               ))}
             </div>
           ) : (
@@ -255,16 +271,16 @@ const CollectionSlider: React.FC<Props> = ({
               {slides.map((slide, i) => {
                 const visible = i >= index && i < index + layout.visible;
                 return (
-                  <ProductCard
+                  <div
                     key={slide.key}
-                    product={slide.product}
-                    index={slide.origIdx}
-                    total={count}
-                    width={cardWidth}
-                    isHidden={!visible}
-                    onClick={onProductClick}
-                    onImageError={handleImageError}
-                  />
+                    className={styles.slide}
+                    style={{ width: cardWidth > 0 ? `${cardWidth}px` : undefined }}
+                    aria-roledescription="slide"
+                    aria-label={`${slide.origIdx + 1} de ${count}: ${slide.product.name}`}
+                    aria-hidden={!visible}
+                  >
+                    <StandardProductCard product={buildProductCardProduct(slide.product)} variant="featured" />
+                  </div>
                 );
               })}
             </div>
@@ -285,88 +301,6 @@ const CollectionSlider: React.FC<Props> = ({
         )}
       </div>
     </div>
-  );
-};
-
-interface CardProps {
-  product: CollectionProduct;
-  index: number;
-  total: number;
-  width: number;
-  isHidden?: boolean;
-  onClick?: (slug: string) => void;
-  onImageError: (e: React.SyntheticEvent<HTMLImageElement>) => void;
-}
-
-const ProductCard: React.FC<CardProps> = ({
-  product,
-  index,
-  total,
-  width,
-  isHidden,
-  onClick,
-  onImageError,
-}) => {
-  const imageUrl = getCollectionProductImage(product);
-  const optimizedUrl = getOptimizedImageUrl(imageUrl, 320);
-
-  return (
-    <article
-      className={styles.slide}
-      style={{ width: width > 0 ? `${width}px` : undefined }}
-      role="group"
-      aria-roledescription="slide"
-      aria-label={`${index + 1} de ${total}: ${product.name}`}
-      aria-hidden={isHidden}
-    >
-      {onClick ? (
-        <button
-          type="button"
-          className={styles.card}
-          onClick={() => onClick(product.slug)}
-          tabIndex={isHidden ? -1 : 0}
-          aria-label={`Ver ${product.name}`}
-        >
-          <div className={styles.imgWrapper}>
-            <img
-              src={optimizedUrl}
-              alt={product.name}
-              className={styles.img}
-              loading="lazy"
-              onError={onImageError}
-            />
-          </div>
-
-          <div className={styles.info}>
-            <p className={styles.name}>{product.name}</p>
-            <p className={styles.price}>
-              <span className={styles.priceSymbol}>$</span>
-              {formatPrice(product.price)}
-            </p>
-          </div>
-        </button>
-      ) : (
-        <div className={styles.card}>
-          <div className={styles.imgWrapper}>
-            <img
-              src={optimizedUrl}
-              alt={product.name}
-              className={styles.img}
-              loading="lazy"
-              onError={onImageError}
-            />
-          </div>
-
-          <div className={styles.info}>
-            <p className={styles.name}>{product.name}</p>
-            <p className={styles.price}>
-              <span className={styles.priceSymbol}>$</span>
-              {formatPrice(product.price)}
-            </p>
-          </div>
-        </div>
-      )}
-    </article>
   );
 };
 
