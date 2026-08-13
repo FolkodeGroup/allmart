@@ -12,6 +12,7 @@ import { fetchPublicCategories } from '../../services/categoriesService';
 import { publicCollectionsService, type PublicCollection } from '../../services/publicCollectionsService';
 import { configService, type SortOption } from '../../services/configService';
 import { ProductCard } from '../../features/products/ProductCard/ProductCard';
+import { Dropdown } from '../../components/ui/Dropdown/Dropdown';
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl, type ImageUrlCandidate } from '../../utils/imageUrl';
 import styles from './ProductListPage.module.css';
 
@@ -762,18 +763,16 @@ export function ProductListPage() {
               <label htmlFor="sort" className={styles.sortLabel}>
                 Ordenar por:
               </label>
-              <select
-                id="sort"
-                className={styles.sortSelect}
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className={styles.sortDropdownWrapper}>
+                <Dropdown
+                  id="sort"
+                  className={styles.sortDropdownControl}
+                  options={sortOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
+                  value={sortBy}
+                  onChange={(value) => setSortBy(value)}
+                  placeholder="Relevancia"
+                />
+              </div>
             </div>
           </div>
 
