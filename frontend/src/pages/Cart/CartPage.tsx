@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../../components/layout/context/CartContextUtils';
 import { CartPriceDisplay } from '../../components/ui/CartPriceDisplay/CartPriceDisplay';
 import { OrderConfirmationForm } from '../../components/ui/OrderConfirmationForm';
-import { X } from 'lucide-react';
+import { X, ShoppingCart } from 'lucide-react';
 import styles from './CartPage.module.css';
 import type { Product } from '../../types';
 
@@ -32,7 +32,7 @@ export function CartPage() {
     return (
       <main className={styles.page}>
         <div className={styles.empty}>
-          <span className={styles.emptyIcon} aria-hidden="true">🛒</span>
+          <ShoppingCart className={styles.emptyIcon} size={48} aria-hidden="true" />
           <h1 className={styles.emptyTitle}>Tu carrito está vacío</h1>
           <p className={styles.emptyText}>
             Explorá nuestro catálogo y encontrá los productos que estabas buscando.
