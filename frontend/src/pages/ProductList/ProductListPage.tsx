@@ -599,9 +599,25 @@ export function ProductListPage() {
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
-        <span className={styles.breadcrumbCurrent}>
-          {urlQuery ? `Búsqueda: "${urlQuery}"` : 'Productos'}
-        </span>
+        <Link to="/productos">Productos</Link>
+        {selectedCategoryInfo && (
+          <>
+            <span className={styles.breadcrumbSep}>/</span>
+            <span className={styles.breadcrumbCurrent}>{selectedCategoryInfo.name}</span>
+          </>
+        )}
+        {!selectedCategoryInfo && urlQuery && (
+          <>
+            <span className={styles.breadcrumbSep}>/</span>
+            <span className={styles.breadcrumbCurrent}>{`Búsqueda: "${urlQuery}"`}</span>
+          </>
+        )}
+        {!selectedCategoryInfo && !urlQuery && (
+          <>
+            <span className={styles.breadcrumbSep}>/</span>
+            <span className={styles.breadcrumbCurrent}>Todos los productos</span>
+          </>
+        )}
       </nav>
 
       {categoryCollections.length > 0 && (

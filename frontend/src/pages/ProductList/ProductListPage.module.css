@@ -1,23 +1,25 @@
 .page {
-  max-width: var(--container-2xl, 1600px);
-  margin: 0 auto;
-  padding: 0 var(--space-6, 24px) var(--space-12, 48px);
+  padding-top: var(--space-8, 32px);
+  padding-bottom: var(--space-16, 64px);
 }
 
 .breadcrumb {
   display: flex;
   align-items: center;
   gap: var(--space-2, 8px);
-  font-size: 0.875rem;
-  color: var(--color-text-secondary, #767676);
-  margin-bottom: var(--space-6, 24px);
+  font-family: var(--font-ui, 'Montserrat', sans-serif);
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--color-text-tertiary, #767676);
+  max-width: var(--container-2xl, 1600px);
+  margin: 0 auto var(--space-8, 32px);
+  padding: 0 var(--space-6, 24px);
   flex-wrap: wrap;
 }
 
 .breadcrumb a {
-  color: var(--color-text-secondary, #767676);
+  color: var(--color-text-tertiary, #767676);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color var(--transition-fast, 0.2s ease);
 }
 
 .breadcrumb a:hover {
@@ -25,12 +27,12 @@
 }
 
 .breadcrumbSep {
-  color: var(--color-border, #e5e2dd);
+  color: var(--color-soft-gray, #c4bfb8);
 }
 
 .breadcrumbCurrent {
   color: var(--color-text-primary, #1a1a1a);
-  font-weight: 500;
+  font-weight: var(--font-medium, 500);
 }
 
 /* Category Collections Banner */
@@ -151,6 +153,9 @@
   grid-template-columns: 260px 1fr;
   gap: var(--space-8, 32px);
   align-items: start;
+  max-width: var(--container-2xl, 1600px);
+  margin: 0 auto;
+  padding: 0 var(--space-6, 24px);
 }
 
 .sidebar {
