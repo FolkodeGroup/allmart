@@ -2404,3 +2404,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1392: Mejorar cierre de filtros mobile en vista de productos Home sin recargar página | 2026-08-07 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1391: Ajustar colecciones tipo Home en mobile para mostrar todos los productos y habilitar navegación táctil | 2026-08-07 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1390: Banners — Unificar estilos de contenedores en el formulario de alta/edición | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1435: 🔄 Actualización automática de puntajes semanal | 2026-08-13 |
