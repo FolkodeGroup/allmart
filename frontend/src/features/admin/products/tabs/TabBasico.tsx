@@ -129,13 +129,14 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                     margin: 4px 0;
                     border-radius: 8px;
                     transition: background-color 0.2s;
+                    font-size: 14px;
                 }
                 .touchableCheckboxRow:active {
                     background-color: rgba(255, 255, 255, 0.05);
                 }
                 .touchableCheckboxRow input[type="checkbox"] {
-                    width: 22px;
-                    height: 22px;
+                    width: 20px;
+                    height: 20px;
                     margin-right: 12px;
                     accent-color: var(--color-primary, #769282);
                     cursor: pointer;
@@ -147,7 +148,7 @@ export const TabBasico = forwardRef<TabBasicoRef, TabBasicoProps>(function TabBa
                     font-size: 15px;
                     color: var(--color-text-primary, #ffffff);
                 }
-                
+
                 .primaryActionBtn {
                     min-width: 44px !important;
                     min-height: 44px !important;
