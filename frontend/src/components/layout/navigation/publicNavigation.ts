@@ -3,6 +3,7 @@ import type { Category, NavigationItem } from '../../../types';
 export const baseNavigation: NavigationItem[] = [
   { label: 'Ofertas', href: '/productos?tag=oferta' },
   { label: 'Novedades', href: '/productos?tag=novedad' },
+  { label: 'Destacado', href: '/productos?tag=destacado' },
 ];
 
 export const fallbackNavigation: NavigationItem[] = [
