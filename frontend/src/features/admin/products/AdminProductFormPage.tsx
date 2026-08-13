@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useBlocker } from 'react-router-dom';
+import { useBlocker, useNavigate } from 'react-router-dom';
+
 import { useProductForm } from '../../../hooks/useProductFormPage';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
@@ -46,6 +47,7 @@ export function AdminProductFormPage({
     onSuccess,
     onUnsavedChanges,
 }: Props) {
+    const navigate = useNavigate();
     const formRef = React.useRef<HTMLFormElement | null>(null);
     const isMobile = useIsMobile(767);
 
@@ -60,9 +62,14 @@ export function AdminProductFormPage({
         seo: false,
     });
 
+    const handleFormSuccess = useCallback(() => {
+        onSuccess();
+        navigate('/admin/productos', { replace: true });
+    }, [onSuccess, navigate]);
+
     const formProps = useProductForm({
         productId,
-        onSuccess,
+        onSuccess: handleFormSuccess,
         onUnsavedChanges,
     });
 
@@ -90,6 +97,11 @@ export function AdminProductFormPage({
         return false;
     }, [formProps.form, formProps.initialForm]);
 
+    const handleConfirmExit = useCallback(() => {
+        onBack();
+        navigate('/admin/productos', { replace: true });
+    }, [onBack, navigate]);
+
     const {
         showWarning,
         confirmNavigation,
@@ -98,7 +110,7 @@ export function AdminProductFormPage({
         setIsDirty,
     } = useUnsavedChangesWarning({
         active: isDirty,
-        onConfirmExit: onBack,
+        onConfirmExit: handleConfirmExit,
     });
 
     useEffect(() => {
@@ -111,11 +123,13 @@ export function AdminProductFormPage({
         if (isDirty) {
             interceptNavigation(() => {
                 onBack();
+                navigate('/admin/productos', { replace: true });
             });
         } else {
             onBack();
+            navigate('/admin/productos', { replace: true });
         }
-    }, [isDirty, interceptNavigation, onBack]);
+    }, [isDirty, interceptNavigation, onBack, navigate]);
 
     const toggleAccordion = useCallback((id: SectionId) => {
         setAccordionsOpen(prev => ({ ...prev, [id]: !prev[id] }));

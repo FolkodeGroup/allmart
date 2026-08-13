@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import type { StatusFilter, StockLevelFilter } from './productsService';
 import { exportProductsToCSV, exportProductsToExcel, exportProductsPDF } from '../../../utils/exportProducts';
@@ -34,10 +34,11 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
-// 🟢 FIX: Ajustado a 9 productos por página para llenar el panel izquierdo de forma simétrica
+// Ajustado a 9 productos por página para llenar el panel izquierdo de forma simétrica
 const PAGE_LIMIT = 9;
 
 export function AdminProducts() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
@@ -183,6 +184,9 @@ export function AdminProducts() {
       resetUnsavedChangesFn();
       setUnsavedChanges(false);
       setEditId(null);
+      setIsMobileDetailOpen(false);
+      setViewMode('list');
+      navigate('/admin/productos', { replace: true });
     },
   });
 
@@ -283,20 +287,28 @@ export function AdminProducts() {
       interceptNavigation(() => {
         setEditId(null);
         setViewMode('form');
+        setIsMobileDetailOpen(false);
       });
     } else {
       setEditId(null);
       setViewMode('form');
+      setIsMobileDetailOpen(false);
     }
   }, [unsavedChanges, interceptNavigation]);
 
   const handleEdit = useCallback((id: string) => {
     if (unsavedChanges) {
-      interceptNavigation(() => { setEditId(id); setEditPage(apiPage); setViewMode('form'); });
+      interceptNavigation(() => {
+        setEditId(id);
+        setEditPage(apiPage);
+        setViewMode('form');
+        setIsMobileDetailOpen(false);
+      });
     } else {
       setEditId(id);
       setEditPage(apiPage);
       setViewMode('form');
+      setIsMobileDetailOpen(false);
     }
   }, [unsavedChanges, interceptNavigation, apiPage]);
 
@@ -551,10 +563,15 @@ export function AdminProducts() {
           onBack={() => {
             setViewMode('list');
             setEditId(null);
+            setIsMobileDetailOpen(false);
+            navigate('/admin/productos', { replace: true });
           }}
           onSuccess={() => {
             setViewMode('list');
+            setEditId(null);
+            setIsMobileDetailOpen(false);
             setUnsavedChanges(false);
+            navigate('/admin/productos', { replace: true });
             refreshProducts({
               q: search,
               categoryId: categoryFilter,
