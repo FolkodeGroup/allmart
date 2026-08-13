@@ -15,7 +15,7 @@
 
 .header {
   text-align: center;
-  margin-bottom: var(--space-15);
+  margin-bottom: var(--space-16);
 }
 
 .label {
@@ -159,7 +159,8 @@
 
 .button {
   padding: var(--space-8) var(--space-16);
-  background: #2d5016; /* Usamos el color principal de tu marca */
+  background: #2d5016;
+  /* Usamos el color principal de tu marca */
   color: white;
   border: none;
   border-radius: 6px;
@@ -206,6 +207,10 @@
     min-height: auto;
   }
 
+  .header {
+    margin-bottom: var(--space-12);
+  }
+
   .title {
     font-size: 1.75rem;
   }
@@ -247,6 +252,7 @@
 
   .input,
   .textarea {
-    font-size: 16px; /* Previene zoom en iOS */
+    font-size: 16px;
+    /* Previene zoom en iOS */
   }
 }
