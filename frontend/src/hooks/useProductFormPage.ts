@@ -7,6 +7,8 @@ import { useAdminCategories } from '../context/AdminCategoriesContext';
 import { useAdminImages } from '../context/AdminImagesContext';
 import { useProductDefaults } from '../hooks/useProductDefaults';
 import { sanitizeObject } from '../utils/security';
+import { ApiError } from '../utils/apiErrorHandler';
+import { isValidSlug, isValidSku } from '../utils/productFormUtils';
 import { logAdminActivity } from '../services/adminActivityLogService';
 
 export const EMPTY_FORM: Omit<AdminProduct, 'id'> = {
@@ -167,11 +169,36 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     // ── Validation ─────────────────────────────────────────────────────────
     const validateForm = useCallback((): boolean => {
         const errors: Record<string, string> = {};
-        if (!form.name.trim()) errors.name = 'El nombre es obligatorio';
-        if (!form.sku?.trim()) errors.sku = 'El SKU es obligatorio';
-        if (!form.price || form.price <= 0) errors.price = 'El precio debe ser mayor a 0';
-        if (!form.category.id) errors.category = 'Seleccioná una categoría';
-        if (form.stock < 0) errors.stock = 'El stock no puede ser negativo';
+        const hasVariantOptions = Array.isArray(form.variants) && form.variants.length > 0;
+
+        if (!form.name.trim()) {
+            errors.name = 'El nombre es obligatorio';
+        }
+
+        if (!form.sku?.trim()) {
+            errors.sku = 'El SKU es obligatorio';
+        } else if (!isValidSku(form.sku)) {
+            errors.sku = 'El SKU debe contener solo letras mayúsculas, números y guiones';
+        }
+
+        if (!hasVariantOptions) {
+            if (form.price === undefined || form.price === null) {
+                errors.price = 'El precio es obligatorio';
+            } else if (form.price <= 0) {
+                errors.price = 'El precio debe ser mayor a 0';
+            }
+        }
+
+        if (!form.category.id) {
+            errors.category = 'Seleccioná una categoría';
+        }
+
+        // Permitir stock negativo (ej. -2) — la lógica de alertas se maneja por el umbral crítico
+
+        if (form.slug && !isValidSlug(form.slug)) {
+            errors.slug = 'El slug debe contener solo letras minúsculas, números y guiones';
+        }
+
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
     }, [form]);
@@ -198,7 +225,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
                 const { images: _omitted, ...formWithoutImages } = sanitizedForm;
                 void _omitted;
                 await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
-                
+
                 // 🟢 CORRECCIÓN: Aislamos de forma segura sin usar .catch() ya que logAdminActivity no devuelve un Promise.
                 try {
                     logAdminActivity({
@@ -214,7 +241,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
                 }
             } else {
                 const created = await addProduct(sanitizedForm) as AdminProduct;
-                
+
                 // 🟢 CORRECCIÓN: Aislamos de manera segura aquí también.
                 try {
                     logAdminActivity({
@@ -233,15 +260,27 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
         } catch (err) {
             const message = err instanceof Error ? err.message : '';
 
+            if (err instanceof ApiError) {
+                const responseData = err.data as { errors?: unknown } | undefined;
+                if (responseData?.errors && typeof responseData.errors === 'object' && !Array.isArray(responseData.errors)) {
+                    setFieldErrors(prev => ({
+                        ...prev,
+                        ...(responseData.errors as Record<string, string>),
+                    }));
+                    return;
+                }
+            }
+
             // Detectar error de SKU duplicado
             if (message.toLowerCase().includes('sku') || message.toLowerCase().includes('duplicate')) {
                 setFieldErrors(prev => ({
                     ...prev,
-                    sku: 'Este SKU ya está en uso'
+                    sku: 'Este SKU ya está en uso',
                 }));
-            } else {
-                setError(message || 'Error al guardar el producto');
+                return;
             }
+
+            setError(message || 'Error al guardar el producto');
         } finally {
             setSaving(false);
         }
@@ -361,7 +400,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             setDeletingImgId(imageId);
             try {
                 await deleteImage(productId, imageId);
-                
+
                 // 🟢 CORRECCIÓN: Envolvemos en try-catch síncrono en lugar de encadenar .catch().
                 // Esto erradica el error de "Cannot read properties of undefined (reading 'catch')".
                 try {
@@ -443,11 +482,11 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
 
     // ── Derived error flags per section ───────────────────────────────────
     const sectionErrors = useMemo(() => ({
-        basico: !!(fieldErrors.name || fieldErrors.sku),
-        precios: !!(fieldErrors.price || fieldErrors.stock),
+        basico: !!(fieldErrors.name || fieldErrors.sku || fieldErrors.slug),
+        precios: !!(fieldErrors.price || fieldErrors.stock || fieldErrors.criticalStockThreshold),
         categorias: !!fieldErrors.category,
         imagenes: !!fieldErrors.images,
-        variantes: false,
+        variantes: !!fieldErrors.variants,
         seo: false,
     }), [fieldErrors]);
 

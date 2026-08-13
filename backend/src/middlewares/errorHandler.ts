@@ -8,7 +8,7 @@ import { Request, Response, NextFunction } from 'express';
 
 export interface AppError extends Error {
   statusCode?: number;
-  errors?: string[];
+  errors?: string[] | Record<string, string>;
 }
 
 export function errorHandler(
@@ -30,7 +30,7 @@ export function errorHandler(
 }
 
 /** Helper para crear errores con código HTTP */
-export function createError(message: string, statusCode = 500, errors?: string[]): AppError {
+export function createError(message: string, statusCode = 500, errors?: string[] | Record<string, string>): AppError {
   const error: AppError = new Error(message);
   error.statusCode = statusCode;
   if (errors) error.errors = errors;

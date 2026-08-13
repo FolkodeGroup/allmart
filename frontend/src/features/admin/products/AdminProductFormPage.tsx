@@ -499,6 +499,7 @@ export function AdminProductFormPage({
                                         <TabBasico
                                             form={formProps.form}
                                             fieldErrors={formProps.fieldErrors}
+                                            errors={formProps.fieldErrors}
                                             isEdit={formProps.isEdit}
                                             setField={formProps.setField}
                                             tagInput={formProps.tagInput}
@@ -542,6 +543,7 @@ export function AdminProductFormPage({
                                         <TabPreciosInventario
                                             form={formProps.form}
                                             fieldErrors={formProps.fieldErrors}
+                                            errors={formProps.fieldErrors}
                                             isEdit={formProps.isEdit}
                                             setField={formProps.setField}
                                         />
@@ -627,6 +629,7 @@ export function AdminProductFormPage({
                                         <TabVariantes
                                             form={formProps.form}
                                             fieldErrors={formProps.fieldErrors}
+                                            errors={formProps.fieldErrors}
                                             isEdit={formProps.isEdit}
                                             productId={productId}
                                             setField={formProps.setField}
