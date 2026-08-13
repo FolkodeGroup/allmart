@@ -2290,5 +2290,42 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Merge de PR | PR #1412: feat(frontend): permitir crear variantes y combinaciones durante el a… | 2026-08-05 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1414: 1216 evitar pérdida de contenido al descargar pdfs confirmación del navegador o flujo incorrecto | 2026-08-06 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1320: Agregar campo de tiempo de entrega en ABM de Productos y Tabla Informativa | 2026-08-06 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1434: 1399 ajustar posición del botón nueva colección en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1434: 1399 ajustar posición del botón nueva colección en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1433: 1398 quitar opción de editar estado de pedido en vista mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1432: feat(frontend): remocion de checkboxes en tarjetas moviles de pedidos… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1431: 1396 arreglar botones de sección en formulario de categorías mobile responsive y ajustar navbar | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1430: 🔄 Registrar puntaje de gestión | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1428: fix(frontend): ajustar llenado de imagen con cover y grilla de 2 colu… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1427: feat(frontend): adaptar vista dedicada de colecciones a grilla de 2 c… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1426: feat(frontend): transformar panel de filtros movil en bottom sheet modal | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1425: fix(frontend): optimizar carruseles de colecciones en mobile con scro… | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1424: 1390 banners unificar estilos de contenedores en el formulario de altaedición | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1423: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1422: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1434: 1399 ajustar posición del botón nueva colección en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1433: 1398 quitar opción de editar estado de pedido en vista mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1432: feat(frontend): remocion de checkboxes en tarjetas moviles de pedidos… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1431: 1396 arreglar botones de sección en formulario de categorías mobile responsive y ajustar navbar | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1430: 🔄 Registrar puntaje de gestión | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1429: feat(frontend): optimizar tamano y disposicion de tarjetas de product… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1428: fix(frontend): ajustar llenado de imagen con cover y grilla de 2 colu… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1427: feat(frontend): adaptar vista dedicada de colecciones a grilla de 2 c… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1426: feat(frontend): transformar panel de filtros movil en bottom sheet modal | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1425: fix(frontend): optimizar carruseles de colecciones en mobile con scro… | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1424: 1390 banners unificar estilos de contenedores en el formulario de altaedición | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1423: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1422: 1387 ajustar estilo del dropdown categoría padre en formulario de categorías | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1417: 🔄 Registrar puntaje de gestión | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1399: Ajustar posición del botón “Nueva Colección” en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1398: Quitar opción de editar estado de pedido en vista mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1397: Eliminar checkboxes inútiles en cards de Pedidos mobile y mostrar estado de seña | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1396: Arreglar botones de sección en formulario de Categorías mobile responsive y ajustar navbar | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1395: Optimizar tamaño de card de producto en carrito de compras mobile | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a FolkodeGroup | Issue #1395: Optimizar tamaño de card de producto en carrito de compras mobile | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1394: Ajustar tamaño de imagen en card de producto de Favoritos para mobile | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1393: Reajustar tamaño de cards de colecciones Home en mobile responsive | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1392: Mejorar cierre de filtros mobile en vista de productos Home sin recargar página | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1391: Ajustar colecciones tipo Home en mobile para mostrar todos los productos y habilitar navegación táctil | 2026-08-07 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1390: Banners — Unificar estilos de contenedores en el formulario de alta/edición | 2026-08-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1435: 🔄 Actualización automática de puntajes semanal | 2026-08-13 |
