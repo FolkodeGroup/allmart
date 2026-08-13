@@ -353,13 +353,6 @@ export function ProductDetailPage() {
     return el.style.color || null;
   }
 
-  function formatSelectedAttributes(attributes: Record<string, string>) {
-    return Object.entries(attributes)
-      .filter(([, value]) => value !== undefined && value !== null && value !== '')
-      .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`)
-      .join('; ');
-  }
-
   useEffect(() => {
     if (!product || !isProductFavorite) {
       return;
@@ -413,15 +406,11 @@ export function ProductDetailPage() {
         ? `${product.id}::${selectedSku.id}`
         : `${product.id}::${buildSelectedAttributesKey(selectedVariants)}`;
 
-      const selectedLabel = selectedSku
-        ? formatSelectedAttributes(selectedSku.attributes ?? {})
-        : formatSelectedAttributes(selectedVariants);
-
       const productForCart = selectedSku
         ? {
           ...product,
           id: cartProductId,
-          name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
+          name: product.name,
           sku: selectedSku.sku,
           price: currentPrice,
           images: imagesForCart,
@@ -430,7 +419,7 @@ export function ProductDetailPage() {
         : {
           ...product,
           id: cartProductId,
-          name: `${product.name}${selectedLabel ? ` — ${selectedLabel}` : ''}`,
+          name: product.name,
           price: currentPrice,
           images: imagesForCart,
           selectedAttributes: selectedVariants,

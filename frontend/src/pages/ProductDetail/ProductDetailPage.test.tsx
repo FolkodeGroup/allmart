@@ -247,6 +247,58 @@ describe('ProductDetailPage', () => {
     expect(selectedColor).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('keeps the cart product title as the canonical product name and stores variant details separately', async () => {
+    const mockProduct = {
+      id: 'p1',
+      slug: 'bateria-hudson',
+      name: 'Batería Hudson',
+      description: 'Desc',
+      price: 12800,
+      categoryId: 'cat-1',
+      categoryIds: ['cat-1'],
+      tags: [],
+      rating: 4,
+      reviewCount: 1,
+      inStock: true,
+      sku: 'BAT-001',
+      images: ['img-1.jpg'],
+      skus: [
+        { id: 'sku1', sku: 'BAT-001-N-G', attributes: { Color: 'Negro', Tamaño: 'Grande' }, stock: 10, price: 12800, images: ['img-1.jpg'] },
+        { id: 'sku2', sku: 'BAT-001-V-G', attributes: { Color: 'Verde', Tamaño: 'Grande' }, stock: 8, price: 12800, images: ['img-3.jpg'] },
+      ],
+    };
+
+    mocks.fetchPublicProductBySlugMock.mockResolvedValue(mockProduct);
+
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/producto/:slug',
+          element: <ProductDetailPage />,
+        },
+      ],
+      { initialEntries: ['/producto/bateria-hudson'] }
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByRole('heading', { name: 'Batería Hudson' })).toBeInTheDocument();
+
+    const verdeButton = screen.getAllByRole('button').find(btn => btn.textContent === 'Verde');
+    expect(verdeButton).toBeDefined();
+
+    fireEvent.click(verdeButton!);
+
+    const addToCartBtn = await screen.findByRole('button', { name: /agregar al carrito/i });
+    fireEvent.click(addToCartBtn);
+
+    await waitFor(() => expect(mocks.addToCartMock).toHaveBeenCalledTimes(1));
+
+    const cartPayload = mocks.addToCartMock.mock.calls[0][0];
+    expect(cartPayload.product.name).toBe('Batería Hudson');
+    expect(cartPayload.product.selectedAttributes).toEqual({ Color: 'Verde', Tamaño: 'Grande' });
+  });
+
   it('adds separate cart lines for different variant combinations', async () => {
     const mockProduct = {
       id: 'p1',
