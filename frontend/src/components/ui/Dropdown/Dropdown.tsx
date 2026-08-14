@@ -205,7 +205,6 @@ export function Dropdown({
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-invalid={ariaInvalid}
       >
         <span className={selectedOption ? styles.label : styles.placeholder}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -341,6 +340,7 @@ export function Dropdown({
         value={value}
         onChange={(e) => handleSelect(e.target.value)}
         disabled={disabled}
+        aria-invalid={ariaInvalid}
         style={{
           position: 'absolute',
           width: '1px',
