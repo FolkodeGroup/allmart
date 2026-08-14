@@ -16,6 +16,7 @@ interface DropdownProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  ariaInvalid?: boolean;
 }
 
 function useIsMobile(breakpoint = 767) {
@@ -41,6 +42,7 @@ export function Dropdown({
   placeholder = 'Seleccionar...',
   disabled = false,
   className = '',
+  ariaInvalid = false,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -203,6 +205,7 @@ export function Dropdown({
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-invalid={ariaInvalid}
       >
         <span className={selectedOption ? styles.label : styles.placeholder}>
           {selectedOption ? selectedOption.label : placeholder}

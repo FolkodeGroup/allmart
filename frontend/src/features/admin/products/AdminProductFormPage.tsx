@@ -13,6 +13,7 @@ import { TabImagenes } from './tabs/TabImagenes';
 import { TabVariantes } from './tabs/TabVariantes';
 import { TabSEOPublicacion } from './tabs/TabSeoPublicacion';
 import { ProductSupplierSection } from './tabs/ProductSupplierSection';
+import { getFieldFocusSelector, getFirstErrorKey } from '../../../utils/productFormFocus';
 
 import { ArrowLeft } from 'lucide-react';
 import styles from './AdminProductFormPage.module.css';
@@ -67,10 +68,41 @@ export function AdminProductFormPage({
         navigate('/admin/productos', { replace: true });
     }, [onSuccess, navigate]);
 
+    const focusFirstError = useCallback((fieldKey?: string) => {
+        if (!fieldKey) return;
+
+        const sectionMap: Partial<Record<string, SectionId>> = {
+            name: 'basico',
+            sku: 'basico',
+            slug: 'basico',
+            price: 'precios',
+            stock: 'precios',
+            category: 'categorias',
+            images: 'imagenes',
+            variants: 'variantes',
+        };
+
+        const targetSection = sectionMap[fieldKey];
+        if (targetSection) {
+            setAccordionsOpen(prev => ({ ...prev, [targetSection]: true }));
+        }
+
+        requestAnimationFrame(() => {
+            const selector = getFieldFocusSelector(fieldKey);
+            const element = document.querySelector(selector) as HTMLElement | null;
+            if (!element) return;
+
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.focus({ preventScroll: true });
+            element.setAttribute('aria-invalid', 'true');
+        });
+    }, []);
+
     const formProps = useProductForm({
         productId,
         onSuccess: handleFormSuccess,
         onUnsavedChanges,
+        onValidationError: focusFirstError,
     });
 
     const isDirty = useMemo(() => {
@@ -147,7 +179,13 @@ export function AdminProductFormPage({
         });
     }, []);
 
-    const { sectionErrors, saving, error, isEdit, loading } = formProps;
+    const { sectionErrors, saving, error, isEdit, loading, fieldErrors } = formProps;
+
+    useEffect(() => {
+        const firstErrorKey = getFirstErrorKey(fieldErrors);
+        if (!firstErrorKey || Object.keys(fieldErrors).length === 0) return;
+        focusFirstError(firstErrorKey);
+    }, [fieldErrors, focusFirstError]);
 
     const renderMobileBottomBar = () => {
         if (!isMobile) return null;

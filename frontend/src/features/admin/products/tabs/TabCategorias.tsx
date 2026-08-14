@@ -629,9 +629,10 @@ export const TabCategorias = memo(function TabCategorias({
                         onChange={onPrimaryCategoryChange}
                         placeholder="Seleccioná una categoría..."
                         className={fieldErrors.category ? styles.inputError : ''}
+                        ariaInvalid={Boolean(fieldErrors.category)}
                     />
                     {fieldErrors.category && (
-                        <span className={styles.errorText}>{fieldErrors.category}</span>
+                        <span className={styles.errorText} role="alert">{fieldErrors.category}</span>
                     )}
                 </div>
 
