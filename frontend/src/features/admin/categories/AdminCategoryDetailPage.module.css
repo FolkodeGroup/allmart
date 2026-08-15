@@ -84,12 +84,14 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  gap: 5px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 600;
   margin-left: auto;
+  height: fit-content;
+  white-space: nowrap;
 }
 
 .chipVisible {
