@@ -63,14 +63,9 @@ const AdminCollections: React.FC = () => {
     loadCollections();
   }, [loadCollections]);
 
-  // Al cargar o cambiar lista, expandir por defecto la primera colección
+  // Al cargar o cambiar lista, mantener todos los dropdowns cerrados
   useEffect(() => {
-    if (collections.length > 0) {
-      setExpandedId((prev) => {
-        const exists = collections.some((c) => c.id === prev);
-        return exists ? prev : collections[0].id;
-      });
-    } else {
+    if (collections.length === 0) {
       setExpandedId(null);
     }
   }, [collections]);
