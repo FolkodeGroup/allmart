@@ -1,16 +1,22 @@
-import { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import type { Category } from '../../../types';
 import {
     Eye,
     EyeOff,
     Image as ImageIcon,
-    Tag,
-    Hash,
-    Layers,
-    AlertTriangle,
-    ArrowLeft
+    ArrowLeft,
 } from 'lucide-react';
 import styles from './Categorydetailpanel.module.css';
+
+// Lazy load tab components
+const CategoryDetailBasic = React.lazy(() =>
+  import('./tabs/CategoryDetailBasic').then(m => ({ default: m.CategoryDetailBasic }))
+);
+const CategoryDetailProducts = React.lazy(() =>
+  import('./tabs/CategoryDetailProducts').then(m => ({ default: m.CategoryDetailProducts }))
+);
+
+type TabName = 'basic' | 'products';
 
 interface CategoryDetailPanelProps {
     category: Category;
@@ -24,9 +30,23 @@ interface CategoryDetailPanelProps {
     isMobileActive?: boolean;
 }
 
+const TAB_LABELS: Record<TabName, string> = {
+  basic: 'Básico',
+  products: 'Productos',
+};
+
+const TAB_ORDER: TabName[] = ['basic', 'products'];
+
+function TabLoadingFallback() {
+  return (
+    <div className="tabPanelLoading" style={{ padding: '24px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+      Cargando...
+    </div>
+  );
+}
+
 export function CategoryDetailPanel({
     category,
-    productCount,
     onEdit,
     onDelete,
     onToggleVisibility,
@@ -35,7 +55,27 @@ export function CategoryDetailPanel({
     onBack,
 }: CategoryDetailPanelProps) {
     const displayName = category.name?.trim() || category.slug;
+    const [activeTab, setActiveTab] = useState<TabName>('basic');
     const [imgError, setImgError] = useState(false);
+
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'basic':
+                return (
+                    <Suspense fallback={<TabLoadingFallback />}>
+                        <CategoryDetailBasic category={category} />
+                    </Suspense>
+                );
+            case 'products':
+                return (
+                    <Suspense fallback={<TabLoadingFallback />}>
+                        <CategoryDetailProducts category={category} />
+                    </Suspense>
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
         <div className={styles.panel}>
@@ -58,25 +98,46 @@ export function CategoryDetailPanel({
                     font-family: monospace !important;
                     color: var(--color-text-secondary, #6b7280) !important;
                 }
-                .catDetailStatVal {
-                    font-size: 16px !important;
-                    font-weight: 700 !important;
-                }
-                .catDetailSectionTitle {
-                    font-size: 12px !important;
-                    font-weight: 700 !important;
-                    text-transform: uppercase !important;
-                    letter-spacing: 0.04em !important;
-                    color: var(--color-text-secondary, #6b7280) !important;
-                    margin-bottom: 6px !important;
+                .catDetailTabsContainer {
                     display: flex !important;
-                    align-items: center !important;
-                    gap: 6px !important;
+                    gap: 4px !important;
+                    border-bottom: 1px solid var(--color-border-light, #e5e2dd) !important;
+                    padding: 0 24px !important;
+                    margin-bottom: 16px !important;
+                    overflow-x: auto !important;
+                    -webkit-overflow-scrolling: touch !important;
                 }
-                .catDetailDesc {
+                .catDetailTabBtn {
+                    padding: 10px 16px !important;
+                    background: transparent !important;
+                    border: none !important;
+                    color: var(--color-text-secondary, #6b7280) !important;
                     font-size: 13px !important;
-                    line-height: 1.45 !important;
+                    font-weight: 600 !important;
+                    cursor: pointer !important;
+                    white-space: nowrap !important;
+                    position: relative !important;
+                    transition: color 0.2s ease !important;
+                }
+                .catDetailTabBtn:hover {
                     color: var(--color-text-primary, #111827) !important;
+                }
+                .catDetailTabBtn.active {
+                    color: var(--color-primary, #769282) !important;
+                }
+                .catDetailTabBtn.active::after {
+                    content: '' !important;
+                    position: absolute !important;
+                    bottom: -1px !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    height: 2px !important;
+                    background: var(--color-primary, #769282) !important;
+                }
+                .catDetailTabContent {
+                    padding: 0 24px 24px 24px !important;
+                    overflow-y: auto !important;
+                    flex: 1 !important;
                 }
             `}</style>
 
@@ -154,64 +215,34 @@ export function CategoryDetailPanel({
                 </div>
             </div>
 
-            {/* ── Stats row ───────────────────────────────────────────── */}
-            <div className={styles.statsRow}>
-                <div className={styles.statCard}>
-                    <Layers size={15} className={styles.statIcon} />
-                    <div>
-                        <span className="catDetailStatVal">
-                            {productCount !== undefined ? productCount : '—'}
-                        </span>
-                        <span className={styles.statLabel}>Productos</span>
-                    </div>
-                </div>
-
-                {productCount === 0 && (
-                    <div className={`${styles.statCard} ${styles.statWarn}`}>
-                        <AlertTriangle size={15} className={styles.statIconWarn} />
-                        <span className={styles.statLabel}>Sin productos asignados</span>
-                    </div>
-                )}
-
-                <div className={styles.statCard}>
-                    <Hash size={15} className={styles.statIcon} />
-                    <div>
-                        <span className="catDetailStatVal" style={{ fontSize: 11, fontFamily: 'monospace' }}>
-                            {category.id.slice(0, 8)}…
-                        </span>
-                        <span className={styles.statLabel}>ID</span>
-                    </div>
-                </div>
+            {/* ── Tabs Navigation ─────────────────────────────────────── */}
+            <div className="catDetailTabsContainer" role="tablist" aria-label="Secciones de la categoría">
+                {TAB_ORDER.map((tabId) => (
+                    <button
+                        key={tabId}
+                        type="button"
+                        id={`tab-category-${tabId}`}
+                        role="tab"
+                        aria-selected={activeTab === tabId}
+                        aria-controls={`tabpanel-category-${tabId}`}
+                        tabIndex={activeTab === tabId ? 0 : -1}
+                        className={`catDetailTabBtn ${activeTab === tabId ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tabId)}
+                    >
+                        {TAB_LABELS[tabId]}
+                    </button>
+                ))}
             </div>
 
-            {/* ── Description ─────────────────────────────────────────── */}
-            <div className={styles.section}>
-                <h3 className="catDetailSectionTitle">
-                    <Tag size={13} /> Descripción
-                </h3>
-                {category.description ? (
-                    <p className="catDetailDesc">{category.description}</p>
-                ) : (
-                    <p className={styles.emptyDescription}>Sin descripción</p>
-                )}
+            {/* ── Tab Content ────────────────────────────────────────── */}
+            <div
+                className="catDetailTabContent"
+                id={`tabpanel-category-${activeTab}`}
+                role="tabpanel"
+                aria-labelledby={`tab-category-${activeTab}`}
+            >
+                {renderTabContent()}
             </div>
-
-            {/* ── Image preview ───────────────────────────────────────── */}
-            {category.image && !imgError && (
-                <div className={styles.section}>
-                    <h3 className="catDetailSectionTitle">
-                        <ImageIcon size={13} /> Imagen
-                    </h3>
-                    <div className={styles.imagePreview}>
-                        <img
-                            src={category.image}
-                            alt={displayName}
-                            className={styles.previewImg}
-                            onError={() => setImgError(true)}
-                        />
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
