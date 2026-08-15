@@ -13,7 +13,7 @@ import AdminPromotionMatrix from './AdminPromotionMatrix';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import styles from './AdminPromotions.module.css';
 import { Badge } from '../../../components/ui/Badge/Badge';
-import { Search, Plus, Edit2, Trash2, Calendar, Tag } from 'lucide-react';
+import { Search, Edit2, Trash2, Calendar, Tag } from 'lucide-react';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
@@ -198,7 +198,6 @@ export function AdminPromotions() {
         </div>
 
         <button type="button" className={styles.btnPrimary} onClick={handleNew}>
-          <Plus size={18} />
           <span>Nueva Promoción</span>
         </button>
       </div>
