@@ -122,6 +122,7 @@ export function CategoryDetailBasic({ category }: CategoryDetailBasicProps) {
           border-radius: 6px;
           font-size: 11px;
           font-weight: 700;
+          max-width: fit-content;
         }
 
         .catBasicStatusVisible {
