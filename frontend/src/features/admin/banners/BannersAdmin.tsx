@@ -489,7 +489,7 @@ export function BannersAdmin() {
                       checked={formData.isPinned}
                       onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
                     />
-                    <span>Fijar al inicio 📌</span>
+                    <span>Fijar al inicio</span>
                   </label>
                 </div>
 
@@ -549,7 +549,7 @@ export function BannersAdmin() {
               <div className={styles.bannerInfo}>
                 <h3 className={styles.bannerTitle}>{banner.title}</h3>
                 <div className={styles.bannerMeta}>
-                  {banner.isPinned && <span className={styles.badgePinned}>📌 Fijado</span>}
+                  {banner.isPinned && <span className={styles.badgePinned}>Fijado</span>}
                 </div>
               </div>
 
