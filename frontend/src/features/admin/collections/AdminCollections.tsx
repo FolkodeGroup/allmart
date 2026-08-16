@@ -10,7 +10,7 @@ import AdminCollectionForm from './AdminCollectionForm';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import CollectionSlider from '../../../components/CollectionSlider';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-import { Search, Plus, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import toast from 'react-hot-toast';
 import styles from './AdminCollections.module.css';
@@ -231,7 +231,6 @@ const AdminCollections: React.FC = () => {
             <span>{syncingAll ? 'Sincronizando...' : 'Sincronizar todo'}</span>
           </button>
           <button type="button" className={styles.btnPrimary} onClick={handleNew}>
-            <Plus size={16} />
             <span>Nueva Colección</span>
           </button>
         </div>

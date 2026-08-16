@@ -1,5 +1,4 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
 import sectionStyles from '../../features/admin/shared/AdminSection.module.css';
 import styles from './ProductHeader.module.css';
 
@@ -27,7 +26,6 @@ export const ProductHeader: React.FC<ProductHeaderProps> = ({
               onClick={() => { onNew(); }}
               aria-label="Crear nuevo producto con formulario completo"
             >
-              <Plus size={16} strokeWidth={2.5} />
               Nuevo producto
             </button>
           )}

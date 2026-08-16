@@ -19,7 +19,7 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({ canCreate, o
        <div className={styles.btnContainer}>
         {canCreate && (
           <button className={styles.newBtn} onClick={onNew}>
-            + Nueva categoría
+            Nueva categoría
           </button>
         )}
       </div>

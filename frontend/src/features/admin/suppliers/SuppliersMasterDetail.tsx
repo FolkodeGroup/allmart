@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Plus, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle, Clock } from 'lucide-react';
+import { Search, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle, Clock } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     BarChart, Bar,
@@ -353,7 +353,7 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                         </button>
                     </div>
                     <button className={styles.newBtn} onClick={onNew} type="button">
-                        <Plus size={14} /> Nuevo proveedor
+                        Nuevo proveedor
                     </button>
                 </div>
 
