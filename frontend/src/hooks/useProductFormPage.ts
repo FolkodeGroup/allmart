@@ -191,8 +191,12 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             }
         }
 
+        const additionalSelected = (form.categoryIds ?? []).filter(id => id && id !== form.category.id);
+
         if (!form.category.id) {
-            errors.category = 'Seleccioná una categoría';
+            errors.category = additionalSelected.length > 0
+                ? 'Seleccione primero una categoría principal'
+                : 'Seleccioná una categoría';
         }
 
         // Permitir stock negativo (ej. -2) — la lógica de alertas se maneja por el umbral crítico
@@ -478,9 +482,10 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             const selected = Array.from(event.target.selectedOptions).map(o => o.value);
             setForm(prev => {
                 const primaryId = prev.category.id;
-                const nextIds = primaryId
-                    ? [primaryId, ...selected.filter(id => id !== primaryId)]
-                    : selected;
+                if (!primaryId) {
+                    return { ...prev, categoryIds: [] };
+                }
+                const nextIds = [primaryId, ...selected.filter(id => id !== primaryId)];
                 return { ...prev, categoryIds: nextIds };
             });
         },
