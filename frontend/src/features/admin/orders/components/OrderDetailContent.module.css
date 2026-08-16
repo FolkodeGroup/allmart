@@ -441,34 +441,90 @@
 
 /* ── Notas Internas ── */
 .savedNotesBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   padding: 12px;
   background-color: var(--color-bg-primary, #111827);
   border: 1px solid var(--color-border, #374151);
   border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.savedNotesHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.savedNotesTitle {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-text-secondary, #9ca3af);
-  text-transform: uppercase;
+.savedNotesBoxHover {
+  border-color: var(--color-primary, #769282);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
 }
 
 .savedNotesText {
-  font-size: 13px;
-  color: var(--color-text-primary, #ffffff);
-  white-space: pre-wrap;
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
   margin: 0;
-  line-height: 1.4;
+  background-color: var(--color-bg-primary, #111827);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 10px;
+  color: var(--color-text-primary, #ffffff);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+.noteActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.noteActionBtn,
+.secondaryActionBtn,
+.saveNotesBtn,
+.cancelBtn {
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.2s ease;
+}
+
+.noteActionBtn {
+  min-height: 40px;
+  background-color: var(--color-primary, #769282);
+  border: none;
+  color: #ffffff;
+  border-radius: 10px;
+}
+
+.noteActionDelete {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+
+.secondaryActionBtn {
+  background-color: transparent;
+  border: 1px solid var(--color-border, #374151);
+  color: var(--color-text-primary, #ffffff);
+}
+
+.notesEditorBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editorActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .notesInput {
@@ -505,6 +561,76 @@
 
 .saveNotesBtn:hover {
   background-color: var(--color-primary-dark, #5d7568);
+}
+
+.saveNotesBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.deleteConfirmationBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.deleteConfirmationBox p {
+  margin: 0;
+  color: #fca5a5;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.confirmDeleteBtn {
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background-color: transparent;
+  border: 1px solid var(--color-border, #374151);
+  color: var(--color-text-primary, #ffffff);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+@media (max-width: 767px) {
+  .noteActions,
+  .editorActions,
+  .confirmActions {
+    width: 100%;
+  }
+
+  .noteActionBtn,
+  .saveNotesBtn,
+  .secondaryActionBtn,
+  .cancelBtn,
+  .confirmDeleteBtn {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 /* ── Zona Peligrosa ── */
