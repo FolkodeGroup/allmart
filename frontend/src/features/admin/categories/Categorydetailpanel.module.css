@@ -19,9 +19,11 @@
 
 .headerContent {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ── Avatar ────────────────────────────────────────────────────── */
@@ -101,6 +103,78 @@
 .chipHidden {
     background: #f8d7da;
     color: #721c24;
+}
+
+/* ── Header Card ───────────────────────────────────────────────── */
+.headerCard {
+    padding: 16px 20px !important;
+    border-radius: 12px !important;
+    background: var(--color-bg-secondary) !important;
+    border: 1px solid var(--color-border) !important;
+    margin-bottom: 16px !important;
+}
+
+.titleGroup {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.headerStatus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.statusToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    background: transparent;
+}
+
+.statusToggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.statusToggle.chipVisible {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.statusToggle.chipVisible:hover:not(:disabled) {
+    background: rgba(16, 185, 129, 0.25);
+}
+
+.statusToggle.chipHidden {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.statusToggle.chipHidden:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+.desktopActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 /* ── Stats row ─────────────────────────────────────────────────── */
@@ -217,22 +291,25 @@
 
 .btnEdit,
 .btnToggle {
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-primary);
+    padding: 8px 16px;
+    background: var(--color-primary, #769282);
     color: white;
     border: none;
     border-radius: 8px;
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
     white-space: nowrap;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btnEdit:hover,
 .btnToggle:hover {
-    background: var(--color-primary-dark);
+    background: var(--color-primary-dark, #5a7a6f);
     transform: translateY(-1px);
 }
 
@@ -248,17 +325,20 @@
 }
 
 .btnDelete {
-    padding: var(--space-2) var(--space-4);
+    padding: 8px 16px;
     background: #dc2626;
     color: white;
     border: none;
     border-radius: 8px;
-    font-family: var(--font-ui);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
     white-space: nowrap;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btnDelete:hover {
@@ -301,5 +381,39 @@
 @media (max-width: 768px) {
     .backBtn {
         display: inline-flex;
+    }
+
+    .headerCard {
+        padding: 12px 14px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .headerContent {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .titleGroup {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .desktopActions {
+        display: flex;
+        width: 100%;
+        gap: 8px;
+        margin-left: 0;
+        margin-top: 8px;
+    }
+
+    .actions {
+        display: flex;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .btnEdit,
+    .btnDelete {
+        flex: 1;
     }
 }
