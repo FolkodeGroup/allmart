@@ -280,7 +280,7 @@ const AdminCollections: React.FC = () => {
                 );
                 setPage(1);
               }}
-              placeholder="Todas"
+              placeholder="Todos los estados"
             />
           </div>
         </div>

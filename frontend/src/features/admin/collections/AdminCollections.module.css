@@ -169,6 +169,21 @@
   flex: 1 1 280px;
 }
 
+.filterDropdownsRow {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.filterDropdownPos,
+.filterDropdownStatus {
+  flex: 1 1 180px;
+  min-width: 180px;
+  max-width: 220px;
+}
+
 .searchIcon {
   position: absolute;
   left: 12px;
@@ -191,6 +206,47 @@
   width: 100%;
   min-width: 0;
   min-height: 40px;
+}
+
+@media (max-width: 767px) {
+  .filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .searchWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .filterDropdownsRow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .filterDropdownPos,
+  .filterDropdownStatus {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .searchInput {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 .selectFilter {
