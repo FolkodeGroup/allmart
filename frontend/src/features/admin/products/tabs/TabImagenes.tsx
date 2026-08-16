@@ -78,7 +78,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
         if (e.target.files && e.target.files.length > 0) {
             setUploadProgress(10);
             const files = Array.from(e.target.files);
-            
+
             try {
                 const base64Strings = await Promise.all(files.map(file => {
                     return new Promise<string>((resolve, reject) => {
@@ -95,7 +95,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                 // Limpiamos los strings vacíos que puedan haber quedado por inicialización
                 const cleanImages = images.filter(img => img.trim() !== '');
                 setField('images', [...cleanImages, ...base64Strings]);
-                
+
                 setUploadProgress(100);
                 setTimeout(() => setUploadProgress(0), 1500);
             } catch (error) {
@@ -113,7 +113,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
         return (
             <>
                 <fieldset className={styles.fieldset}>
-                    
+
                     <p className={styles.fieldHint}>
                         Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                     </p>
@@ -198,7 +198,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
     return (
         <>
             <fieldset className={styles.fieldset}>
-                
+
                 <p className={styles.fieldHint}>
                     Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                 </p>
@@ -217,7 +217,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                         </span>
                     </label>
                 </div>
-                {fieldErrors.images && <span className={styles.errorText}>{fieldErrors.images}</span>}
+                {fieldErrors.images && <span className={styles.errorText} role="alert">{fieldErrors.images}</span>}
                 {images.filter(img => img.trim()).length > 0 ? (
                     <div className={styles.imagesGrid}>
                         {images.map((url: string, index: number) =>
