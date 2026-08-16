@@ -8,16 +8,23 @@
 }
 
 .pageHeader {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--color-bg-primary, #111827);
-  border-bottom: 1px solid var(--color-border, #374151);
+  padding: 14px 20px;
+  background: rgba(17, 24, 39, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border, #374151);
   border-radius: 12px;
   margin-bottom: 16px;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
 }
 
 .pageHeaderInner {
