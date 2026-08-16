@@ -94,6 +94,8 @@ export function ProductDetailPage() {
     }
   }, [skuImages, selectedImage]);
 
+  const queryString = searchParams.toString();
+
   useEffect(() => {
     if (!slug) return;
 
@@ -165,7 +167,7 @@ export function ProductDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [slug, searchParams]);
+  }, [slug, queryString]);
 
   const variantGroups: VariantGroup[] = product ? (product as unknown as { variants?: VariantGroup[] }).variants ?? [] : [];
 
