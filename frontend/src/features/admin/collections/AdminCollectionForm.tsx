@@ -341,7 +341,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   return (
     <div className={styles.formPageWrapper}>
       {/* ── Encabezado Unificado de Página / Formulario ── */}
-      <header className={styles.pageHeader}>
+      <header className={styles.pageHeader} data-sticky-header="true">
         <div className={styles.pageHeaderInner}>
           <button
             type="button"
