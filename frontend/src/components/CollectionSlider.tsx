@@ -1,6 +1,6 @@
 /**
  * components/CollectionSlider.tsx
- * Carrusel de productos estilo MercadoLibre — identidad visual Allmart.
+ * Carrusel de productos estilo MercadoLibre — identidad visual Allmart preservada.
  */
 
 import React, { useEffect, useId, useRef, useState, useCallback } from 'react';
@@ -100,6 +100,25 @@ const CollectionSlider: React.FC<Props> = ({
 
   const effectiveProducts = products;
   const count = effectiveProducts.length;
+
+  const syncMetrics = useCallback(() => {
+    const vw = window.innerWidth;
+    const newLayout = getLayout(vw);
+    const vpW = viewportRef.current?.clientWidth ?? 0;
+    const mobile = vw < 768;
+    setIsMobile(mobile);
+    setLayout(newLayout);
+    if (vpW > 0) {
+      if (mobile) {
+        const calcWidth = Math.min(175, Math.max(150, Math.floor((vpW - newLayout.gap * 1.5) / 2.2)));
+        setSlideW(calcWidth);
+      } else {
+        const w = (vpW - newLayout.gap * (newLayout.visible - 1)) / newLayout.visible;
+        setSlideW(w);
+      }
+    }
+  }, []);
+
   const canLoop = count > layout.visible;
   const clones = canLoop ? Math.min(layout.visible, count) : 0;
   const cardWidth = slideW;
@@ -127,25 +146,6 @@ const CollectionSlider: React.FC<Props> = ({
   const slides: SlideItem[] = canLoop
     ? [...leadingClones, ...baseSlides, ...trailingClones]
     : baseSlides;
-
-  const syncMetrics = useCallback(() => {
-    const vw = window.innerWidth;
-    const newLayout = getLayout(vw);
-    const vpW = viewportRef.current?.clientWidth ?? 0;
-    const mobile = vw < 768;
-    setIsMobile(mobile);
-    setLayout(newLayout);
-    if (vpW > 0) {
-      if (mobile) {
-        // En móvil, se calcula un ancho de ~150px - 175px para permitir ver 2 cards completas + 20% de asomado de la 3ª card
-        const calcWidth = Math.min(175, Math.max(150, Math.floor((vpW - newLayout.gap * 1.5) / 2.2)));
-        setSlideW(calcWidth);
-      } else {
-        const w = (vpW - newLayout.gap * (newLayout.visible - 1)) / newLayout.visible;
-        setSlideW(w);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     syncMetrics();
@@ -183,7 +183,10 @@ const CollectionSlider: React.FC<Props> = ({
     }
   }, [canLoop, index, count, clones]);
 
-  if (!effectiveProducts || effectiveProducts.length === 0) return null;
+  // 🟢 CERO MARGEN FANTASMA: Si no hay productos válidos, no renderiza nada (CLS = 0)
+  if (!effectiveProducts || effectiveProducts.length === 0) {
+    return null;
+  }
 
   const translateX = index * (slideW + layout.gap);
 

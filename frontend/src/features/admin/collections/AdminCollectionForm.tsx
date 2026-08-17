@@ -1,6 +1,6 @@
 /**
  * features/admin/collections/AdminCollectionForm.tsx
- * Formulario estandarizado y homogenizado para crear/editar colecciones.
+ * Formulario estandarizado para crear/editar colecciones (Manual, Top Ventas y Reglas Dinámicas).
  */
 
 import React, { useState, useEffect, useCallback, useId, useMemo } from 'react';
@@ -15,7 +15,7 @@ import { apiFetch } from '../../../utils/apiClient';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { normalizeImageUrl } from '../../../utils/imageUrl';
-import { ArrowLeft, Layers, Zap, CheckCircle2, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Layers, Zap, CheckCircle2, RotateCcw, Filter } from 'lucide-react';
 import styles from './AdminCollections.module.css';
 
 type RequiredFieldKey = 'name' | 'slug' | 'displayPosition' | 'productIds';
@@ -84,6 +84,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       limit: number;
       pinnedProductIds: string[];
       excludeProductIds: string[];
+      requiredTag: string;
+      minDiscount: number;
+      inStockOnly: boolean;
     };
   }>({
     name: '',
@@ -100,6 +103,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       limit: 10,
       pinnedProductIds: [],
       excludeProductIds: [],
+      requiredTag: '',
+      minDiscount: 0,
+      inStockOnly: true,
     },
   });
 
@@ -117,19 +123,19 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   const [loading, setLoading] = useState(false);
   const missingFieldsDescriptionId = useId();
 
-  // ─── Opciones para Dropdowns Unificados ─────────────────────────────────────
   const typeOptions = useMemo(() => [
-    { value: 'manual', label: 'Manual — el admin elige los productos' },
-    { value: 'auto_sales', label: 'Automática — top vendidos por categoría' }
+    { value: 'manual', label: 'Manual — El administrador elige los productos' },
+    { value: 'auto_sales', label: 'Automática — Top vendidos por categoría' },
+    { value: 'dynamic_rules', label: 'Reglas Dinámicas — Filtro automático por tags/descuentos' }
   ], []);
 
   const positionOptions = useMemo(() => [
-    { value: 'home', label: 'Home' },
-    { value: 'category', label: 'Categoría' }
+    { value: 'home', label: 'Home (Página de inicio)' },
+    { value: 'category', label: 'Categoría Específica' }
   ], []);
 
   const categoryOptions = useMemo(() => [
-    { value: '', label: 'Todas las categorías' },
+    { value: '', label: '— Todas las categorías —' },
     ...categories.map(cat => ({ value: cat.id, label: cat.name }))
   ], [categories]);
 
@@ -141,7 +147,13 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
     { value: '365', label: 'Último año (365 días)' }
   ], []);
 
-  // Cargar categorías para el selector de auto_sales
+  const tagOptions = useMemo(() => [
+    { value: '', label: 'Cualquier etiqueta' },
+    { value: 'oferta', label: '🏷️ Oferta' },
+    { value: 'destacado', label: '⭐ Destacado' },
+    { value: 'novedad', label: '🆕 Novedad' }
+  ], []);
+
   useEffect(() => {
     apiFetch<{ data: SimpleCategory[] }>('/api/categories')
       .then((res) => setCategories(Array.isArray(res.data) ? res.data : []))
@@ -165,6 +177,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           limit: collection.params?.limit ?? 10,
           pinnedProductIds: collection.params?.pinnedProductIds ?? [],
           excludeProductIds: collection.params?.excludeProductIds ?? [],
+          requiredTag: collection.params?.requiredTag ?? '',
+          minDiscount: collection.params?.minDiscount ?? 0,
+          inStockOnly: collection.params?.inStockOnly ?? true,
         },
       }
       : {
@@ -182,6 +197,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           limit: 10,
           pinnedProductIds: [] as string[],
           excludeProductIds: [] as string[],
+          requiredTag: '',
+          minDiscount: 0,
+          inStockOnly: true,
         },
       }
   );
@@ -226,6 +244,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           limit: collection.params?.limit ?? 10,
           pinnedProductIds: collection.params?.pinnedProductIds ?? [],
           excludeProductIds: collection.params?.excludeProductIds ?? [],
+          requiredTag: collection.params?.requiredTag ?? '',
+          minDiscount: collection.params?.minDiscount ?? 0,
+          inStockOnly: collection.params?.inStockOnly ?? true,
         },
       });
     } else {
@@ -252,7 +273,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
     setError(null);
     try {
       await collectionsService.sync(collection.id);
-      setSyncMsg('✓ Colección sincronizada con el top de ventas actual');
+      setSyncMsg('✓ Colección sincronizada con las reglas actuales');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error sincronizando colección');
     } finally {
@@ -282,7 +303,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
       );
       if (isDuplicateOrder) {
         setError(
-          `El orden de display ${formData.displayOrder} ya está en uso. Por favor, elige otro número.`
+          `El orden de display ${formData.displayOrder} ya está en uso. Por favor, elegí otro número.`
         );
         setLoading(false);
         return;
@@ -297,7 +318,17 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
             pinnedProductIds: formData.params.pinnedProductIds,
             excludeProductIds: formData.params.excludeProductIds,
           }
-          : {};
+          : formData.type === 'dynamic_rules'
+          ? {
+            categoryId: formData.params.categoryId || undefined,
+            requiredTag: formData.params.requiredTag || undefined,
+            minDiscount: Number(formData.params.minDiscount) || undefined,
+            inStockOnly: formData.params.inStockOnly,
+            limit: formData.params.limit,
+          }
+          : {
+            categoryId: formData.displayPosition === 'category' ? (formData.params.categoryId || undefined) : undefined,
+          };
 
       const payload = {
         name: formData.name,
@@ -337,11 +368,11 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
   }, []);
 
   const isAutoSales = formData.type === 'auto_sales';
+  const isDynamicRules = formData.type === 'dynamic_rules';
 
   return (
     <div className={styles.formPageWrapper}>
-      {/* ── Encabezado Unificado de Página / Formulario ── */}
-      <header className={styles.pageHeader} data-sticky-header="true">
+      <header className={styles.pageHeader}>
         <div className={styles.pageHeaderInner}>
           <button
             type="button"
@@ -398,9 +429,9 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
               placeholder="Seleccionar tipo..."
             />
             <small>
-              {isAutoSales
-                ? 'Los productos se calculan automáticamente desde las ventas. Podés sincronizar manualmente o esperar el recálculo diario.'
-                : 'Vos elegís qué productos aparecen y en qué orden.'}
+              {isAutoSales && 'Los productos se calculan automáticamente desde las ventas.'}
+              {isDynamicRules && 'Los productos se filtran automáticamente en base a etiquetas y reglas de descuento.'}
+              {formData.type === 'manual' && 'Vos elegís qué productos aparecen y en qué orden.'}
             </small>
           </div>
 
@@ -420,7 +451,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                   });
                   setFieldErrors((prev) => ({ ...prev, name: undefined }));
                 }}
-                placeholder={isAutoSales ? 'Ej: Más vendidos en Electrónica' : 'Ej: Ofertas del Mes'}
+                placeholder={isAutoSales ? 'Ej: Más vendidos en Cocina' : 'Ej: Ofertas del Mes'}
                 className={fieldErrors.name ? styles.inputError : undefined}
                 aria-invalid={!!fieldErrors.name}
               />
@@ -437,7 +468,7 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                   setFormData({ ...formData, slug: e.target.value });
                   setFieldErrors((prev) => ({ ...prev, slug: undefined }));
                 }}
-                placeholder="Ej: mas-vendidos-electronica"
+                placeholder="Ej: ofertas-del-mes"
                 className={fieldErrors.slug ? styles.inputError : undefined}
                 aria-invalid={!!fieldErrors.slug}
               />
@@ -481,10 +512,31 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
               <small>Menor número aparece primero</small>
             </div>
           </div>
+
+          {formData.displayPosition === 'category' && (
+            <div className={styles.formGroup} style={{ marginTop: '12px' }}>
+              <label htmlFor="collection-category-context">Categoría Destino (Contexto de Filtro) *</label>
+              <Dropdown
+                id="collection-category-context"
+                options={categoryOptions}
+                value={formData.params.categoryId}
+                onChange={(val) =>
+                  setFormData({
+                    ...formData,
+                    params: { ...formData.params, categoryId: val },
+                  })
+                }
+                placeholder="Seleccionar categoría..."
+              />
+              <small>
+                Esta colección solo se mostrará cuando el usuario visite la categoría seleccionada o sus subcategorías.
+              </small>
+            </div>
+          )}
         </section>
 
-        {/* ── SECCIÓN 2: CONFIGURACIÓN AUTOMÁTICA O PRODUCTOS ── */}
-        {isAutoSales ? (
+        {/* ── SECCIÓN 2: TIPO AUTO_SALES ── */}
+        {isAutoSales && (
           <section className={styles.formCardSection}>
             <h2 className={styles.formCardTitle}>
               <Zap size={18} />
@@ -561,15 +613,108 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
                     {new Date(collection.snapshotAt).toLocaleString('es-AR')}
                   </span>
                 )}
-                {!collection.snapshotAt && (
-                  <span className={styles.syncInfo}>
-                    Aún no sincronizada — los productos se calcularán al sincronizar
-                  </span>
-                )}
               </div>
             )}
           </section>
-        ) : (
+        )}
+
+        {/* ── SECCIÓN 2B: TIPO DYNAMIC_RULES ── */}
+        {isDynamicRules && (
+          <section className={styles.formCardSection}>
+            <h2 className={styles.formCardTitle}>
+              <Filter size={18} />
+              Configuración de Reglas Dinámicas
+            </h2>
+
+            <div className={styles.formRow3Col}>
+              <div className={styles.formGroup}>
+                <label htmlFor="dynamic-category">Categoría Filtro (opcional)</label>
+                <Dropdown
+                  id="dynamic-category"
+                  options={categoryOptions}
+                  value={formData.params.categoryId}
+                  onChange={(val) =>
+                    setFormData({
+                      ...formData,
+                      params: { ...formData.params, categoryId: val },
+                    })
+                  }
+                  placeholder="Todas las categorías"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="dynamic-tag">Etiqueta Requerida</label>
+                <Dropdown
+                  id="dynamic-tag"
+                  options={tagOptions}
+                  value={formData.params.requiredTag}
+                  onChange={(val) =>
+                    setFormData({
+                      ...formData,
+                      params: { ...formData.params, requiredTag: val },
+                    })
+                  }
+                  placeholder="Cualquier etiqueta"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="dynamic-limit">Límite de productos</label>
+                <input
+                  id="dynamic-limit"
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={formData.params.limit}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      params: { ...formData.params, limit: Number(e.target.value) },
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.checkboxRow} htmlFor="dynamic-instock-check">
+                  <input
+                    id="dynamic-instock-check"
+                    type="checkbox"
+                    className={styles.checkboxInput}
+                    checked={formData.params.inStockOnly}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        params: { ...formData.params, inStockOnly: e.target.checked },
+                      })
+                    }
+                  />
+                  <span className={styles.checkboxLabelText}>Solo productos con stock disponible</span>
+                </label>
+              </div>
+            </div>
+
+            {collection && (
+              <div className={styles.syncRow}>
+                <button
+                  type="button"
+                  className={styles.btnSync}
+                  onClick={handleSyncNow}
+                  disabled={syncing}
+                >
+                  <RotateCcw size={14} />
+                  {syncing ? 'Sincronizando...' : 'Evaluar reglas ahora'}
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ── SECCIÓN 2C: TIPO MANUAL ── */}
+        {formData.type === 'manual' && (
           <section className={styles.formCardSection}>
             <h2 className={styles.formCardTitle}>
               <Layers size={18} />
@@ -626,7 +771,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
           </div>
         </section>
 
-        {/* Acciones del pie de formulario */}
         <div className={styles.formActions}>
           <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? 'Guardando...' : collection ? 'Guardar cambios' : 'Crear colección'}
@@ -642,7 +786,6 @@ const AdminCollectionForm: React.FC<Props> = ({ collection, onSubmit, onCancel }
         </div>
       </form>
 
-      {/* Unsaved changes warning */}
       <ModalConfirm
         open={showWarning || blocker.state === 'blocked'}
         title="¿Abandonar sin guardar?"
