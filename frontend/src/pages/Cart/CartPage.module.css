@@ -110,20 +110,13 @@
   color: var(--color-primary, #769282);
 }
 
-.itemCategory {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-primary, #769282);
-}
-
 .itemVariants {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   font-size: 0.8125rem;
   color: var(--color-text-secondary, #767676);
+  min-height: 1.25rem;
 }
 
 .itemVariantKey {
@@ -409,12 +402,9 @@
     line-height: 1.25;
   }
 
-  .itemCategory {
-    font-size: 0.6875rem;
-  }
-
   .itemVariants {
     font-size: 0.75rem;
+    min-height: 1rem;
   }
 
   .qtyControl {
