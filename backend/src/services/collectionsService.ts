@@ -56,7 +56,8 @@ export interface CollectionResponseDTO {
     price: number;
     imageUrl?: string;
     position: number;
-    category?: string;
+    category?: { id?: string; name: string; slug: string } | string;
+    categoryName?: string;
     variants?: any[];
     skus?: any[];
   }>;
@@ -121,7 +122,7 @@ function toCollectionDTO(
 ): CollectionResponseDTO {
   const mappedProducts = Array.isArray(products)
     ? products
-        .filter((item: any) => item && item.product && item.product.status === 'active')
+        .filter((item: any) => item && item.product && (!item.product.status || item.product.status === 'active'))
         .map((item: any) => {
           const baseProduct = item.product;
           const variants = Array.isArray(baseProduct.productOptions)
@@ -170,18 +171,25 @@ function toCollectionDTO(
             ? baseProduct.price.toNumber()
             : Number(baseProduct.price ?? 0);
 
-          const primaryCategory = Array.isArray(baseProduct.productCategories) && baseProduct.productCategories.length > 0
-            ? baseProduct.productCategories[0]?.category?.name ?? undefined
-            : undefined;
+          const primaryCategoryObj = Array.isArray(baseProduct.productCategories) && baseProduct.productCategories.length > 0
+            ? baseProduct.productCategories[0]?.category
+            : (baseProduct.category && typeof baseProduct.category === 'object' ? baseProduct.category : undefined);
+
+          const primaryCategoryName = primaryCategoryObj?.name 
+            ?? (typeof baseProduct.category === 'string' ? baseProduct.category : undefined);
+
+          const categoryValue = primaryCategoryObj 
+            ?? (primaryCategoryName ? { name: primaryCategoryName, slug: generateSlug(primaryCategoryName) } : undefined);
 
           return {
             id: baseProduct.id,
             name: baseProduct.name,
             slug: baseProduct.slug,
             price: priceNum,
-            imageUrl: baseImages[0] ?? undefined,
+            imageUrl: baseProduct.imageUrl ?? baseImages[0] ?? undefined,
             position: typeof item.position === 'number' ? item.position : 0,
-            category: primaryCategory,
+            category: categoryValue,
+            categoryName: primaryCategoryName,
             variants,
             skus,
           };
@@ -249,7 +257,7 @@ export async function getAllCollections(
     data: collections.map((c) =>
       toCollectionDTO(
         c,
-        c.collectionItems.length,
+        c.collectionItems?.length ?? 0,
         c.collectionItems
       )
     ),
@@ -271,7 +279,7 @@ export async function getCollectionById(id: string): Promise<CollectionResponseD
 
   return toCollectionDTO(
     collection,
-    collection.collectionItems.length,
+    collection.collectionItems?.length ?? 0,
     collection.collectionItems
   );
 }
@@ -294,7 +302,7 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionRespo
 
   return toCollectionDTO(
     collection,
-    collection.collectionItems.length,
+    collection.collectionItems?.length ?? 0,
     collection.collectionItems
   );
 }
@@ -313,15 +321,13 @@ export async function getCollectionsByDisplayPosition(
     },
   });
 
-  return collections
-    .map((c) =>
-      toCollectionDTO(
-        c,
-        c.collectionItems.length,
-        c.collectionItems.slice(0, 10)
-      )
+  return collections.map((c) =>
+    toCollectionDTO(
+      c,
+      c.collectionItems?.length ?? 0,
+      c.collectionItems?.slice(0, 10)
     )
-    .filter((col) => (col.products?.length ?? 0) > 0);
+  );
 }
 
 export async function getAllCollectionsUnpaginated(): Promise<CollectionResponseDTO[]> {
@@ -335,7 +341,7 @@ export async function getAllCollectionsUnpaginated(): Promise<CollectionResponse
   return collections.map((c) =>
     toCollectionDTO(
       c,
-      c.collectionItems.length,
+      c.collectionItems?.length ?? 0,
       c.collectionItems
     )
   );
