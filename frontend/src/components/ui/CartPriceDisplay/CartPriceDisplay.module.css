@@ -1,3 +1,4 @@
+/* Mobile-first styles */
 .priceContainer {
     display: flex;
     flex-direction: column;
@@ -6,27 +7,28 @@
     position: relative;
 }
 
-.price,
-.discountedPrice {
+/* Precio normal (sin promoción) */
+.price {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--color-text);
 }
 
+/* Precio con promoción: mantener mismo color que el precio normal
+   para conservar la jerarquía visual; destacar el descuento
+   mediante el badge y la línea de ahorro. */
+.discountedPrice {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
 .originalPrice {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     text-decoration: line-through;
     color: var(--color-text-muted);
     font-weight: 400;
-    padding-top: 10px;
-
-}
-
-.discountedPrice {
-    font-size: 1.25rem;
-    color: #10b981;
-    /* Green highlight for discounted price */
-    font-weight: 700;
+    padding-top: 6px;
 }
 
 .discountBadge {
@@ -35,9 +37,9 @@
     right: 0;
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    padding: 2px 6px;
+    padding: 2px 5px;
     border-radius: 4px;
     transform: translate(20%, -50%);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -47,42 +49,33 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: var(--color-text-muted);
     align-items: flex-end;
 }
 
-.promoName {
-    font-weight: 500;
-    color: #10b981;
-}
 
-.savingAmount {
-    color: var(--color-text-muted);
-    font-size: 0.7rem;
-}
-
-/* Mobile optimization */
-@media (max-width: 640px) {
-    .priceContainer {
-        align-items: flex-end;
-        gap: 4px;
-    }
-
-    .discountedPrice {
+/* Desktop adjustments (isolar comportamiento Desktop) */
+@media (min-width: 641px) {
+    .price {
         font-size: 1.125rem;
     }
 
+    .discountedPrice {
+        font-size: 1.25rem;
+    }
+
     .originalPrice {
-        font-size: 0.8rem;
+        font-size: 0.875rem;
+        padding-top: 10px;
     }
 
     .discountBadge {
-        font-size: 0.65rem;
-        padding: 2px 5px;
+        font-size: 0.75rem;
+        padding: 2px 6px;
     }
 
     .discountInfo {
-        font-size: 0.65rem;
+        font-size: 0.75rem;
     }
 }

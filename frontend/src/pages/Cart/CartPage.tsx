@@ -176,7 +176,7 @@ export function CartPage() {
           </div>
 
           {totalSavings > 0 && (
-            <div className={styles.summaryRow} style={{ color: '#10b981', fontWeight: 500 }}>
+            <div className={styles.summaryRow} style={{ fontWeight: 500 }}>
               <span>Descuentos</span>
               <span>-{formatPrice(totalSavings)}</span>
             </div>
