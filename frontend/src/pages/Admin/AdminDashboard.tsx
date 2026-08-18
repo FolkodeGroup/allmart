@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, lazy, Suspense } from 'react';
 import { useMonthlyGoal } from '../../features/admin/goals/hooks/useMonthlyGoal';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../../context/AdminAuthContext';
@@ -16,8 +16,6 @@ import MetricCard from '../../components/ui/MetricCard';
 import CriticalStockAlert from '../../components/ui/CriticalStockAlert';
 import IncompleteProductsWidget from '../../components/ui/IncompleteProductsWidget';
 import RequiredActionsAccordion from '../../components/ui/RequiredActionsAccordion';
-import CategoryDistributionChart from '../../components/ui/CategoryDistributionChart';
-import BarChartTopProducts from '../../components/ui/BarChartTopProducts';
 import { ActivityFeed } from '../../components/ActivityFeed';
 import { DashboardWidgetSettings } from '../../components/ui/DashboardWidgetSettings';
 import StaffNotes from '../../components/StaffNotes';
@@ -28,6 +26,10 @@ import { MobileDashboardTabs, type DashboardMobileTab } from '../../components/u
 import { MobileCollapsibleBlock } from '../../components/ui/MobileCollapsibleBlock';
 
 import styles from './AdminDashboard.module.css';
+
+// 🟢 Carga Diferida (Lazy Loading) de Gráficos Recharts
+const CategoryDistributionChart = lazy(() => import('../../components/ui/CategoryDistributionChart'));
+const BarChartTopProducts = lazy(() => import('../../components/ui/BarChartTopProducts'));
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -202,12 +204,14 @@ export function AdminDashboard() {
             </div>
             <div className={styles.chartsGrid}>
               <div className={styles.chartCard}>
-                <h4 className={styles.chartTitle}>Distribución por Categoría</h4>
-                <CategoryDistributionChart data={categoryData} />
+                <Suspense fallback={<div className={styles.skeletonChartPlaceholder} />}>
+                  <CategoryDistributionChart data={categoryData} />
+                </Suspense>
               </div>
               <div className={styles.chartCard}>
-                <h4 className={styles.chartTitle}>Top Productos Vendidos</h4>
-                <BarChartTopProducts data={topProducts} />
+                <Suspense fallback={<div className={styles.skeletonChartPlaceholder} />}>
+                  <BarChartTopProducts data={topProducts} />
+                </Suspense>
               </div>
             </div>
           </div>
@@ -312,14 +316,14 @@ export function AdminDashboard() {
           onClose={() => setSettingsOpen(false)}
         />
 
-        {/* Panel Contenedor con Desplegables y Detección de Gestos Swipe */}
+        {/* Panel Contenedor con IDs vinculados a aria-controls */}
         <div
           className={styles.mobileTabPanel}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
           {mobileTab === 'resumen' && (
-            <div className={styles.mobileSectionStack}>
+            <div id="panel-resumen" role="tabpanel" aria-labelledby="tab-resumen" className={styles.mobileSectionStack}>
               {/* Grilla KPI 2x2 Fija */}
               <section className={styles.mobileKpiGrid}>
                 <MetricCard title="Ingresos" value={fmtCurrency(ingresos)} variation={variaciones.ingresos} />
@@ -369,14 +373,14 @@ export function AdminDashboard() {
           )}
 
           {mobileTab === 'pedidos' && (
-            <div className={styles.mobileSectionStack}>
+            <div id="panel-pedidos" role="tabpanel" aria-labelledby="tab-pedidos" className={styles.mobileSectionStack}>
               {can('orders.view') && <RequiredActionsAccordion />}
               {can('orders.view') && <RecentOrdersWidget />}
             </div>
           )}
 
           {mobileTab === 'alertas' && (
-            <div className={styles.mobileSectionStack}>
+            <div id="panel-alertas" role="tabpanel" aria-labelledby="tab-alertas" className={styles.mobileSectionStack}>
               {can('products.view') && (
                 <CriticalStockAlert products={products.map((p) => ({ id: p.id, name: p.name, stock: typeof p.stock === 'number' ? p.stock : 0 }))} />
               )}
@@ -385,7 +389,7 @@ export function AdminDashboard() {
           )}
 
           {mobileTab === 'analitica' && (
-            <div className={styles.mobileSectionStack}>
+            <div id="panel-analitica" role="tabpanel" aria-labelledby="tab-analitica" className={styles.mobileSectionStack}>
               {/* Objetivo Mensual en Desplegable */}
               <MobileCollapsibleBlock
                 title="Objetivo Mensual"
@@ -407,7 +411,9 @@ export function AdminDashboard() {
                   icon={<i className="bi bi-pie-chart" />}
                   defaultExpanded={true}
                 >
-                  <CategoryDistributionChart data={categoryData} />
+                  <Suspense fallback={<div className={styles.skeletonChartPlaceholder} />}>
+                    <CategoryDistributionChart data={categoryData} />
+                  </Suspense>
                 </MobileCollapsibleBlock>
               )}
 
@@ -418,7 +424,9 @@ export function AdminDashboard() {
                   icon={<i className="bi bi-trophy" />}
                   defaultExpanded={false}
                 >
-                  <BarChartTopProducts data={topProducts} />
+                  <Suspense fallback={<div className={styles.skeletonChartPlaceholder} />}>
+                    <BarChartTopProducts data={topProducts} />
+                  </Suspense>
                 </MobileCollapsibleBlock>
               )}
 

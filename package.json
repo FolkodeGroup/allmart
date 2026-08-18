@@ -29,6 +29,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/react-beautiful-dnd": "^13.1.8",
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",

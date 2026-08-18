@@ -10,7 +10,7 @@ import AdminCollectionForm from './AdminCollectionForm';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import CollectionSlider from '../../../components/CollectionSlider';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-import { Search, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import toast from 'react-hot-toast';
 import styles from './AdminCollections.module.css';
@@ -34,7 +34,6 @@ const AdminCollections: React.FC = () => {
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncingAll, setSyncingAll] = useState(false);
 
-  // Estado del Acordeón: id de la colección expandida (por defecto la primera)
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const limit = 10;
@@ -63,14 +62,17 @@ const AdminCollections: React.FC = () => {
     loadCollections();
   }, [loadCollections]);
 
-  // Al cargar o cambiar lista, mantener todos los dropdowns cerrados
   useEffect(() => {
-    if (collections.length === 0) {
+    if (collections.length > 0) {
+      setExpandedId((prev) => {
+        const exists = collections.some((c) => c.id === prev);
+        return exists ? prev : collections[0].id;
+      });
+    } else {
       setExpandedId(null);
     }
   }, [collections]);
 
-  // Cargar productos completos de cada colección si faltaran
   useEffect(() => {
     if (!collections || collections.length === 0) return;
     const missing = collections.filter((c) => !c.products || c.products.length === 0);
@@ -115,7 +117,7 @@ const AdminCollections: React.FC = () => {
     setSyncingId(id);
     try {
       await collectionsService.sync(id);
-      toast.success('Colección sincronizada con el top de ventas');
+      toast.success('Colección sincronizada correctamente');
       await loadCollections();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al sincronizar');
@@ -212,7 +214,6 @@ const AdminCollections: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* ── Acciones de Encabezado Contenidas ── */}
       <div className={styles.header}>
         <div className={styles.headerActions}>
           <button
@@ -220,18 +221,18 @@ const AdminCollections: React.FC = () => {
             className={styles.btnSecondary}
             onClick={handleSyncAll}
             disabled={syncingAll}
-            title="Sincronizar todas las colecciones automáticas por ventas"
+            title="Sincronizar todas las colecciones automáticas y dinámicas"
           >
             <RotateCcw size={16} />
             <span>{syncingAll ? 'Sincronizando...' : 'Sincronizar todo'}</span>
           </button>
           <button type="button" className={styles.btnPrimary} onClick={handleNew}>
+            <Plus size={16} />
             <span>Nueva Colección</span>
           </button>
         </div>
       </div>
 
-      {/* ── Filtros ── */}
       <div className={styles.filters}>
         <div className={styles.searchWrap}>
           <Search size={16} className={styles.searchIcon} />
@@ -251,7 +252,6 @@ const AdminCollections: React.FC = () => {
           />
         </div>
 
-        {/* Contenedor flexible para los dos desplegables */}
         <div className={styles.filterDropdownsRow}>
           <div className={styles.filterDropdownPos}>
             <Dropdown
@@ -275,7 +275,7 @@ const AdminCollections: React.FC = () => {
                 );
                 setPage(1);
               }}
-              placeholder="Todos los estados"
+              placeholder="Todas"
             />
           </div>
         </div>
@@ -283,7 +283,6 @@ const AdminCollections: React.FC = () => {
 
       {error && <div className={styles.error}>{error}</div>}
 
-      {/* ── Vista Acordeón WYSIWYG de Colecciones ── */}
       <div className={styles.tableWrapper}>
         {loading ? (
           <div className={styles.loading}>Cargando colecciones...</div>
@@ -296,8 +295,8 @@ const AdminCollections: React.FC = () => {
               .sort((a, b) => a.displayOrder - b.displayOrder)
               .map((collection) => {
                 const isHome = collection.displayPosition === 'home';
-                const isCategory = collection.displayPosition === 'category';
                 const isAutoSales = collection.type === 'auto_sales';
+                const isDynamicRules = collection.type === 'dynamic_rules';
                 const isExpanded = expandedId === collection.id;
 
                 return (
@@ -307,7 +306,6 @@ const AdminCollections: React.FC = () => {
                       isHome ? styles.cardHome : styles.cardCategory
                     }`}
                   >
-                    {/* BARRA SUPERIOR CLICKABLE (CABECERA DEL ACORDEÓN) */}
                     <div
                       className={`${styles.cardHeaderClickable} ${
                         isExpanded ? styles.cardHeaderExpanded : ''
@@ -346,10 +344,18 @@ const AdminCollections: React.FC = () => {
 
                         <span
                           className={`${styles.typeBadge} ${
-                            isAutoSales ? styles.typeAuto : styles.typeManual
+                            isAutoSales
+                              ? styles.typeAuto
+                              : isDynamicRules
+                              ? styles.typeAuto
+                              : styles.typeManual
                           }`}
                         >
-                          {isAutoSales ? '⚡ Auto ventas' : '📝 Manual'}
+                          {isAutoSales
+                            ? '⚡ Auto ventas'
+                            : isDynamicRules
+                            ? '🎯 Reglas Dinámicas'
+                            : '📝 Manual'}
                         </span>
 
                         <button
@@ -365,13 +371,13 @@ const AdminCollections: React.FC = () => {
                       </div>
 
                       <div className={styles.adminControlRight}>
-                        {isAutoSales && (
+                        {(isAutoSales || isDynamicRules) && (
                           <button
                             type="button"
                             className={styles.btnSync}
                             onClick={(e) => handleSyncSingle(collection.id, e)}
                             disabled={syncingId === collection.id}
-                            title="Sincronizar productos top ventas"
+                            title="Sincronizar regla de productos"
                           >
                             {syncingId === collection.id ? '⟳ Sincronizando...' : '⟳ Sincronizar'}
                           </button>
@@ -393,21 +399,19 @@ const AdminCollections: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* CUERPO WYSIWYG DESPLEGABLE (CUANDO ESTÁ EXPANDIDO) */}
                     {isExpanded && (
                       <div
                         className={`${styles.wysiwygContainer} ${
                           isHome ? styles.wysiwygHome : styles.wysiwygCategory
                         }`}
                       >
-                        {/* Distintivo de tipo categoría en el cuerpo de la colección */}
-                        {isCategory && (
+                        {!isHome && (
                           <div className={styles.categoryDistinctiveBanner}>
                             <span className={styles.categoryDistinctiveTag}>
                               🏷️ COLECCIÓN DE CATEGORÍA
                             </span>
                             <span className={styles.categoryDistinctiveNote}>
-                              Aparece destacada en la grilla/sección de categoría correspondiente
+                              Aparece únicamente si la categoría seleccionada por el usuario coincide con este contexto.
                             </span>
                           </div>
                         )}
@@ -431,7 +435,7 @@ const AdminCollections: React.FC = () => {
                               className={styles.btnSecondary}
                               onClick={(e) => handleEdit(collection, e)}
                             >
-                              + Agregar productos
+                              + Agregar o configurar productos
                             </button>
                           </div>
                         )}

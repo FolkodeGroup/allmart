@@ -65,7 +65,7 @@ const BarChartTopProducts: React.FC<Props> = ({ data }) => {
 
   return (
     <div className={styles.card}>
-      <h2 className={styles.title}>Top Productos Más Vendidos</h2>
+      <h3 className={styles.title}>Top Productos Más Vendidos</h3>
 
       {/* Vista de Gráfico Escritorio (>= 768px) */}
       <div className={styles.chartDesktop}>

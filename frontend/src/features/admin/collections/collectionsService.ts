@@ -1,16 +1,19 @@
 /**
  * features/admin/collections/collectionsService.ts
- * Servicio HTTP para la gestión de colecciones.
+ * Servicio HTTP para la gestión de colecciones en el admin.
  */
 
 import { apiFetch } from '../../../utils/apiClient';
 
-export interface AutoSalesParams {
+export interface CollectionParams {
   categoryId?: string;
   windowDays?: number;
   limit?: number;
   pinnedProductIds?: string[];
   excludeProductIds?: string[];
+  requiredTag?: 'oferta' | 'destacado' | 'novedad' | string;
+  minDiscount?: number;
+  inStockOnly?: boolean;
 }
 
 export interface Collection {
@@ -22,9 +25,9 @@ export interface Collection {
   displayPosition: 'home' | 'category';
   imageUrl?: string;
   isActive: boolean;
-  /** 'manual' | 'auto_sales' */
+  /** 'manual' | 'auto_sales' | 'dynamic_rules' */
   type: string;
-  params: AutoSalesParams;
+  params: CollectionParams;
   snapshotAt?: string;
   productCount: number;
   createdAt: string;
@@ -124,7 +127,6 @@ export const collectionsService = {
     return response.data;
   },
 
-  /** Sincroniza una colección auto_sales con el top de ventas actual */
   async sync(id: string): Promise<Collection> {
     const response = await apiFetch<{ data: Collection }>(`/api/admin/collections/${id}/sync`, {
       method: 'POST',
@@ -132,7 +134,6 @@ export const collectionsService = {
     return response.data;
   },
 
-  /** Sincroniza todas las colecciones auto_sales activas */
   async syncAll(): Promise<{ synced: number; errors: string[] }> {
     const response = await apiFetch<{ data: { synced: number; errors: string[] } }>(
       '/api/admin/collections/sync-all',
@@ -141,23 +142,3 @@ export const collectionsService = {
     return response.data;
   },
 };
-
-
-export interface CollectionProduct {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  imageUrl?: string;
-  position: number;
-}
-
-export interface PaginatedCollections {
-  data: Collection[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
-}

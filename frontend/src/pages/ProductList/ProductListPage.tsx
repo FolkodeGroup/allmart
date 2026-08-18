@@ -1,3 +1,8 @@
+/**
+ * pages/ProductList/ProductListPage.tsx
+ * Catálogo público con filtrado estricto de colecciones por categoría y cero margen fantasma.
+ */
+
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -105,7 +110,6 @@ export function ProductListPage() {
   const isCollectionView = urlColeccion.length > 0;
   const priceRangesStr = selectedPriceRanges.join(',');
 
-  /* Bloqueo de scroll cuando el modal móvil de filtros está abierto */
   useEffect(() => {
     if (filtersOpen) {
       document.body.style.overflow = 'hidden';
@@ -138,14 +142,12 @@ export function ProductListPage() {
     }
   }, [urlPriceRanges, selectedPriceRanges]);
 
-  /* Cargar sort options dinámicas */
   useEffect(() => {
     configService.getSortOptions()
       .then(setSortOptions)
       .catch(() => setSortOptions(FALLBACK_SORT_OPTIONS));
   }, []);
 
-  /* Cargar categorías una sola vez */
   useEffect(() => {
     fetchPublicCategories()
       .then(setCategories)
@@ -210,7 +212,7 @@ export function ProductListPage() {
     };
   }, []);
 
-  /* Cargar colección específica y sus productos completos cuando viene ?coleccion= en la URL */
+  /* Cargar colección específica cuando viene ?coleccion= en la URL */
   useEffect(() => {
     if (!urlColeccion) {
       setActiveCollection(null);
@@ -235,7 +237,7 @@ export function ProductListPage() {
               liveMap.set(p.slug, mapped);
             });
           } catch {
-            // fallback silencioso
+            // fallback
           }
         }
 
@@ -272,7 +274,7 @@ export function ProductListPage() {
       .finally(() => setCollectionLoading(false));
   }, [urlColeccion, categories, products]);
 
-  /* Cargar productos cuando cambian los filtros */
+  /* Cargar productos según filtros */
   useEffect(() => {
     const params: PublicProductsParams = { limit: 9, page };
     if (selectedCategory) params.category = selectedCategory;
@@ -307,7 +309,6 @@ export function ProductListPage() {
       });
   }, [sortBy, selectedCategory, selectedTags, urlSlugs, page, priceRangesStr, categories, urlQuery]);
 
-  /* Resetear paginación cuando cambian filtros */
   useEffect(() => {
     setPage(1);
   }, [sortBy, selectedCategory, selectedTags, priceRangesStr, urlQuery]);
@@ -412,16 +413,47 @@ export function ProductListPage() {
     };
   }, [childCategories, selectedCategoryInfo, visibleProducts]);
 
-  const collectionByCategoryId = useMemo(() => {
-    const map = new Map<string, PublicCollection>();
-    for (const col of categoryCollections) {
-      const catId = col.params && typeof col.params.categoryId === 'string' ? (col.params.categoryId as string) : undefined;
-      if (catId) map.set(catId, col);
-    }
-    return map;
-  }, [categoryCollections]);
+  // 🟢 FILTRADO DETERMINISTA DE CONTEXTO DE CATEGORÍA
+  // Evita mostrar colecciones descontextualizadas cuando los productos aún no fueron completamente cargados
+  const activeCategoryCollections = useMemo(() => {
+    if (!categoryCollections || categoryCollections.length === 0) return [];
 
-  /* Render de Bottom Sheet Modal de Filtros en Móvil vía Portal */
+    return categoryCollections.filter((col) => {
+      const paramCatId = col.params && typeof col.params.categoryId === 'string' ? (col.params.categoryId as string) : undefined;
+
+      // 1. Si no hay categoría seleccionada en la URL, solo mostrar colecciones de posición 'category' sin categoría fija asignada
+      if (!selectedCategoryInfo) {
+        return !paramCatId;
+      }
+
+      // 2. Si la colección tiene una categoría asociada en sus parámetros, debe coincidir exactamente
+      if (paramCatId) {
+        return (
+          paramCatId === selectedCategoryInfo.id ||
+          paramCatId === selectedCategoryInfo.slug ||
+          (selectedParentCategory && paramCatId === selectedParentCategory.id)
+        );
+      }
+
+      // 3. Para colecciones sin paramCatId, verificar si pertenecen al contexto actual
+      if (col.products && col.products.length > 0) {
+        const allowedCatIds = new Set([
+          selectedCategoryInfo.id,
+          ...childCategories.map((c) => c.id),
+        ]);
+
+        return col.products.some((p) => {
+          const liveProd = products.find((lp) => lp.id === p.id);
+          if (!liveProd) return false;
+          const prodCatIds = getProductCategoryIds(liveProd);
+          return prodCatIds.some((catId) => allowedCatIds.has(catId));
+        });
+      }
+
+      return false;
+    });
+  }, [categoryCollections, selectedCategoryInfo, selectedParentCategory, childCategories, products]);
+
   const renderMobileFilterModal = () => {
     if (!filtersOpen) return null;
 
@@ -620,67 +652,6 @@ export function ProductListPage() {
         )}
       </nav>
 
-      {categoryCollections.length > 0 && (
-        <div className={styles.collectionBannerWrapper}>
-          <div className={styles.categoryCollections}>
-            {categoryCollections.map((collection) => (
-              <div key={collection.id} className={styles.categoryBanner}>
-                <div className={styles.categoryBannerHeader}>
-                  <div className={styles.categoryBannerLabel}>
-                    <span className={styles.categoryBannerTitle}>{collection.name}</span>
-                    {collection.description && (
-                      <span className={styles.categoryBannerDesc}>{collection.description}</span>
-                    )}
-                  </div>
-                  <a
-                    href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}
-                    className={styles.categoryBannerViewAll}
-                  >
-                    Ver todos
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                </div>
-
-                <div className={styles.categoryBannerProducts}>
-                  {(collection.products ?? []).slice(0, 8).map((product) => {
-                    const imageUrl = getCollectionProductImage(product, products);
-                    return (
-                      <button
-                        key={product.id}
-                        type="button"
-                        className={styles.categoryBannerCard}
-                        onClick={() => { window.location.href = `/producto/${product.slug}`; }}
-                        title={product.name}
-                      >
-                        <div className={styles.categoryBannerImg}>
-                          <img
-                            src={imageUrl}
-                            alt={product.name}
-                            loading="lazy"
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              if (target.src !== DEFAULT_IMAGE_PLACEHOLDER) {
-                                target.src = DEFAULT_IMAGE_PLACEHOLDER;
-                              }
-                            }}
-                          />
-                        </div>
-                        <p className={styles.categoryBannerProductName}>{product.name}</p>
-                        <p className={styles.categoryBannerPrice}>
-                          ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className={styles.layout}>
         {/* Sidebar Desktop (<aside>) */}
         <aside
@@ -735,6 +706,67 @@ export function ProductListPage() {
         </aside>
 
         <div className={styles.main}>
+          {activeCategoryCollections.length > 0 && (
+            <div className={styles.collectionBannerWrapper}>
+              <div className={styles.categoryCollections}>
+                {activeCategoryCollections.map((collection) => (
+                  <div key={collection.id} className={styles.categoryBanner}>
+                    <div className={styles.categoryBannerHeader}>
+                      <div className={styles.categoryBannerLabel}>
+                        <span className={styles.categoryBannerTitle}>{collection.name}</span>
+                        {collection.description && (
+                          <span className={styles.categoryBannerDesc}>{collection.description}</span>
+                        )}
+                      </div>
+                      <a
+                        href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}
+                        className={styles.categoryBannerViewAll}
+                      >
+                        Ver todos
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </a>
+                    </div>
+
+                    <div className={styles.categoryBannerProducts}>
+                      {(collection.products ?? []).slice(0, 8).map((product) => {
+                        const imageUrl = getCollectionProductImage(product, products);
+                        return (
+                          <button
+                            key={product.id}
+                            type="button"
+                            className={styles.categoryBannerCard}
+                            onClick={() => { window.location.href = `/producto/${product.slug}`; }}
+                            title={product.name}
+                          >
+                            <div className={styles.categoryBannerImg}>
+                              <img
+                                src={imageUrl}
+                                alt={product.name}
+                                loading="lazy"
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== DEFAULT_IMAGE_PLACEHOLDER) {
+                                    target.src = DEFAULT_IMAGE_PLACEHOLDER;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <p className={styles.categoryBannerProductName}>{product.name}</p>
+                            <p className={styles.categoryBannerPrice}>
+                              ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className={styles.toolbar}>
             <div className={styles.toolbarLeft}>
               <button
@@ -811,25 +843,6 @@ export function ProductListPage() {
               <div className={styles.groupedProducts}>
                 {groupedProducts.groups.map((group) => (
                   <section key={group.category.id} className={styles.groupSection}>
-                    {collectionByCategoryId.has(group.category.id) && (
-                      (() => {
-                        const col = collectionByCategoryId.get(group.category.id)!;
-                        return (
-                          <div className={styles.groupCollectionBanner}>
-                            {col.imageUrl && (
-                              <div className={styles.groupCollectionImg}>
-                                <img src={col.imageUrl} alt={col.name} />
-                              </div>
-                            )}
-                            <div className={styles.groupCollectionInfo}>
-                              <div className={styles.groupCollectionTitle}>{col.name}</div>
-                              {col.description && <div className={styles.groupCollectionDesc}>{col.description}</div>}
-                            </div>
-                            <a href={`/productos?coleccion=${encodeURIComponent(col.slug)}`} className={styles.groupCollectionViewAll}>Ver todos</a>
-                          </div>
-                        );
-                      })()
-                    )}
                     <div className={styles.groupHeader}>
                       <h3 className={styles.groupTitle}>{group.category.name}</h3>
                       <span className={styles.groupCount}>{group.products.length}</span>
@@ -844,7 +857,7 @@ export function ProductListPage() {
                 {groupedProducts.uncategorized.length > 0 && (
                   <section className={styles.groupSection}>
                     <div className={styles.groupHeader}>
-                      <h3 className={styles.groupTitle}>Sin subcategoria</h3>
+                      <h3 className={styles.groupTitle}>Sin subcategoría</h3>
                       <span className={styles.groupCount}>{groupedProducts.uncategorized.length}</span>
                     </div>
                     <div className={styles.productsGrid}>
