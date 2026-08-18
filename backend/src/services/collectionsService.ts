@@ -58,6 +58,9 @@ export interface CollectionResponseDTO {
     price: number;
     imageUrl?: string;
     position: number;
+    category?: string | { name?: string; slug?: string } | null;
+    categoryName?: string;
+    categorySlug?: string;
     variants?: any[];
     skus?: any[];
   }>;
@@ -166,13 +169,34 @@ function toCollectionDTO(
         ? baseProduct.productImages.map((img: any) => `/api/images/products/${img.id}`)
         : [];
 
+      const categoryRelation = Array.isArray(baseProduct.productCategories)
+        ? baseProduct.productCategories.find((relation: any) => relation?.category)?.category
+        : undefined;
+
+      const categoryName = typeof categoryRelation?.name === 'string' && categoryRelation.name.trim().length > 0
+        ? categoryRelation.name.trim()
+        : undefined;
+
+      const categorySlug = typeof categoryRelation?.slug === 'string' && categoryRelation.slug.trim().length > 0
+        ? categoryRelation.slug.trim()
+        : undefined;
+
+      const productPrice = typeof baseProduct.price === 'number'
+        ? baseProduct.price
+        : typeof baseProduct.price?.toNumber === 'function'
+          ? baseProduct.price.toNumber()
+          : Number(baseProduct.price ?? 0);
+
       return {
         id: baseProduct.id,
         name: baseProduct.name,
         slug: baseProduct.slug,
-        price: baseProduct.price.toNumber(),
+        price: productPrice,
         imageUrl: baseProduct.imageUrl ?? baseImages[0],
         position: item.position,
+        category: categoryName ? { name: categoryName, slug: categorySlug ?? categoryName } : null,
+        categoryName,
+        categorySlug,
         variants,
         skus,
       };
@@ -220,6 +244,10 @@ export async function getAllCollections(
             product: {
               include: {
                 productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+                productCategories: {
+                  include: { category: true },
+                  orderBy: { createdAt: 'asc' },
+                },
                 productOptions: {
                   where: { isActive: true },
                   include: { values: true }
@@ -271,6 +299,10 @@ export async function getCollectionById(id: string): Promise<CollectionResponseD
           product: {
             include: {
               productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+              productCategories: {
+                include: { category: true },
+                orderBy: { createdAt: 'asc' },
+              },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
@@ -319,6 +351,10 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionRespo
           product: {
             include: {
               productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+              productCategories: {
+                include: { category: true },
+                orderBy: { createdAt: 'asc' },
+              },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
@@ -377,6 +413,10 @@ export async function getCollectionsByDisplayPosition(
           product: {
             include: {
               productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+              productCategories: {
+                include: { category: true },
+                orderBy: { createdAt: 'asc' },
+              },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
@@ -423,6 +463,10 @@ export async function getAllCollectionsUnpaginated(): Promise<CollectionResponse
           product: {
             include: {
               productImages: { select: { id: true }, orderBy: { position: 'asc' } },
+              productCategories: {
+                include: { category: true },
+                orderBy: { createdAt: 'asc' },
+              },
               productOptions: {
                 where: { isActive: true },
                 include: { values: true }
