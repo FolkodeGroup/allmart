@@ -36,8 +36,14 @@ export async function getTopSellingProducts(
   const windowStart = new Date();
   windowStart.setDate(windowStart.getDate() - windowDays);
 
+  // 🟢 FIX CRÍTICO: La relación entre productos y categorías es N:M via product_categories.
+  // Se utiliza una subconsulta EXISTS para evitar consultar una columna inexistente p.category_id.
   const categoryFilter = categoryId
-    ? Prisma.sql`AND p.category_id = ${categoryId}::uuid`
+    ? Prisma.sql`AND EXISTS (
+        SELECT 1 FROM product_categories pc
+        WHERE pc.product_id = p.id
+          AND pc.category_id = ${categoryId}::uuid
+      )`
     : Prisma.empty;
 
   const excludeFilter =

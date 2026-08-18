@@ -413,20 +413,20 @@ export function ProductListPage() {
     };
   }, [childCategories, selectedCategoryInfo, visibleProducts]);
 
-  // 🟢 FILTRADO ESTRICTO DE CONTEXTO DE CATEGORÍA
-  // Una colección solo se muestra si pertenece explícitamente a la categoría actual o si todos sus productos pertenecen a ella.
+  // 🟢 FIX CRÍTICO: FILTRADO DETERMINISTA DE CONTEXTO DE CATEGORÍA
+  // Evita mostrar colecciones descontextualizadas cuando los productos aún no fueron completamente cargados
   const activeCategoryCollections = useMemo(() => {
     if (!categoryCollections || categoryCollections.length === 0) return [];
 
     return categoryCollections.filter((col) => {
       const paramCatId = col.params && typeof col.params.categoryId === 'string' ? (col.params.categoryId as string) : undefined;
 
-      // Si no estamos filtrando por categoría en la URL, solo mostrar las que no estén atadas a una categoría específica
+      // 1. Si no hay categoría seleccionada en la URL, solo mostrar colecciones de posición 'category' sin categoría fija asignada
       if (!selectedCategoryInfo) {
         return !paramCatId;
       }
 
-      // Si la colección especifica una categoría destino en params
+      // 2. Si la colección tiene una categoría asociada en sus parámetros, debe coincidir exactamente
       if (paramCatId) {
         return (
           paramCatId === selectedCategoryInfo.id ||
@@ -435,16 +435,17 @@ export function ProductListPage() {
         );
       }
 
-      // Si no especifica param, validar si sus productos coinciden con la categoría actual o sus hijas
+      // 3. Para colecciones sin paramCatId, verificar si pertenecen al contexto actual
       if (col.products && col.products.length > 0) {
         const allowedCatIds = new Set([
           selectedCategoryInfo.id,
           ...childCategories.map((c) => c.id),
         ]);
 
-        return col.products.every((p) => {
+        // Solo permitir la colección si existe al menos un producto cargado en memoria que pertenezca a la categoría actual
+        return col.products.some((p) => {
           const liveProd = products.find((lp) => lp.id === p.id);
-          if (!liveProd) return true;
+          if (!liveProd) return false; // En lugar de 'true', retornamos 'false' para evitar falsos positivos
           const prodCatIds = getProductCategoryIds(liveProd);
           return prodCatIds.some((catId) => allowedCatIds.has(catId));
         });
