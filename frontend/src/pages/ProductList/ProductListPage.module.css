@@ -37,20 +37,26 @@
 
 /* Category Collections Banner */
 .collectionBannerWrapper {
-  margin-bottom: var(--space-8, 32px);
+  width: 100%;
+  margin: 0 0 var(--space-8, 32px);
+  box-sizing: border-box;
 }
 
 .categoryCollections {
   display: flex;
   flex-direction: column;
   gap: var(--space-6, 24px);
+  width: 100%;
 }
 
 .categoryBanner {
+  width: 100%;
+  max-width: 100%;
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #e5e2dd);
   border-radius: var(--radius-xl, 16px);
   padding: var(--space-5, 20px);
+  box-sizing: border-box;
 }
 
 .categoryBannerHeader {
@@ -558,6 +564,10 @@
     grid-template-columns: 1fr;
   }
 
+  .collectionBannerWrapper {
+    margin-bottom: var(--space-6, 24px);
+  }
+
   .sidebar {
     display: none !important;
   }
@@ -596,6 +606,9 @@
 }
 
 @media (max-width: 639px) {
+  .categoryBanner {
+    padding: var(--space-4, 16px);
+  }
 
   .productsGrid,
   .collectionViewGrid {
