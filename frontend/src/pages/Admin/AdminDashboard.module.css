@@ -180,7 +180,7 @@
   gap: var(--space-3, 12px);
   padding: var(--space-3, 12px) var(--space-4, 16px);
   border-bottom: 1px solid var(--color-border, #374151);
-  background: color-mix(in srgb, var(--color-bg-secondary, #1f2937) 50%, var(--color-bg-card, #1f2937));
+  background: color-mix(in srgb, var(--color-bg-secondary, #1f2937) 50%, var(--color-dif-mode, #1f2937)) !important;
 }
 
 .dragHandle {
@@ -203,7 +203,7 @@
 
 .widgetSection:hover .dragHandle {
   opacity: 1;
-  color: var(--color-primary, #769282);
+  color: var(--color-text-primary, #769282);
 }
 
 .dragDots {
@@ -217,7 +217,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-sm, 14px);
   font-weight: var(--font-semibold, 600);
-  color: var(--color-text-secondary, #9ca3af);
+  color: var(--color-text-primary, #9ca3af);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wider, 0.05em);
   margin: 0;
@@ -227,6 +227,7 @@
   padding: var(--space-4, 16px);
   width: 100%;
   box-sizing: border-box;
+  background: var(--color-bg-primary) !important;
 }
 
 /* ── Metrics Grid Desktop ────────────────────────────────────── */
