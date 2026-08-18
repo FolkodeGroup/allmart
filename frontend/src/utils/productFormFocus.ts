@@ -25,7 +25,7 @@ export function getFieldFocusSelector(fieldKey: string): string {
     price: '#product-price',
     stock: '#product-stock',
     category: '#product-category-trigger',
-    images: '#product-image-upload',
+    images: '#product-image-upload-button',
     variants: '#variantes',
   };
 

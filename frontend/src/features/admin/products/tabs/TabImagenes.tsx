@@ -117,10 +117,10 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                     <p className={styles.fieldHint}>
                         Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                     </p>
-                    <div className={styles.uploadSection}>
-                        <label className={styles.uploadLabel} htmlFor="file-upload-input">
+                    <div className={`${styles.uploadSection} ${fieldErrors.images ? styles.uploadSectionError : ''}`}>
+                        <label className={styles.uploadLabel} htmlFor="product-image-upload">
                             <input
-                                id="file-upload-input"
+                                id="product-image-upload"
                                 type="file"
                                 accept="image/*"
                                 multiple
@@ -137,6 +137,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                                 style={{ display: 'none' }}
                             />
                             <button
+                                id="product-image-upload-button"
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 className={styles.uploadButton}
@@ -146,6 +147,7 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                             </button>
                         </label>
                         {imgError && <div className={styles.errorText}>{imgError}</div>}
+                        {fieldErrors.images && <div className={styles.errorText} role="alert">{fieldErrors.images}</div>}
                     </div>
 
                     {imagesLoading ? (
@@ -202,16 +204,17 @@ export const TabImagenes = forwardRef<TabImagenesRef, TabImagenesProps>(function
                 <p className={styles.fieldHint}>
                     Carga imágenes del producto. Las imágenes serán mostradas en el orden que se carguen.
                 </p>
-                <div className={styles.uploadSection}>
+                <div className={`${styles.uploadSection} ${fieldErrors.images ? styles.uploadSectionError : ''}`}>
                     <label className={styles.uploadLabel}>
                         <input
+                            id="product-image-upload"
                             type="file"
                             multiple
                             accept="image/*"
                             onChange={handleFileClick}
                             style={{ display: 'none' }}
                         />
-                        <span className={styles.uploadButton}>
+                        <span id="product-image-upload-button" className={styles.uploadButton}>
                             <i className="bi bi-cloud-arrow-up-fill" style={{ marginRight: '8px' }}></i>
                             {uploadProgress > 0 && uploadProgress < 100 ? `Cargando... ${uploadProgress}%` : 'Agregar imágenes'}
                         </span>
