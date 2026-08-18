@@ -19,6 +19,8 @@ export interface CollectionProduct {
   imageUrl?: string | { url?: unknown } | null;
   position: number;
   category?: string | { name?: string; slug?: string } | null;
+  categoryName?: string;
+  categorySlug?: string;
 }
 
 interface Props {
@@ -44,11 +46,19 @@ function getLayout(vw: number): { visible: number; gap: number } {
 }
 
 function buildProductCardProduct(product: CollectionProduct): Product {
-  const categoryName = typeof product.category === 'string'
-    ? product.category
-    : product.category && typeof product.category === 'object' && product.category.name
-      ? product.category.name
-      : 'Sin categoría';
+  const categoryName = (typeof product.category === 'string' && product.category.trim())
+    ? product.category.trim()
+    : (product.category && typeof product.category === 'object' && product.category.name?.trim())
+      ? product.category.name.trim()
+      : (typeof product.categoryName === 'string' && product.categoryName.trim())
+        ? product.categoryName.trim()
+        : 'Sin categoría';
+
+  const categorySlug = (typeof product.category === 'object' && product.category && typeof product.category.slug === 'string' && product.category.slug.trim())
+    ? product.category.slug.trim()
+    : (typeof product.categorySlug === 'string' && product.categorySlug.trim())
+      ? product.categorySlug.trim()
+      : categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'sin-categoria';
 
   const normalizedImage = normalizeImageUrl(product.imageUrl as ImageUrlCandidate | undefined);
 
@@ -63,7 +73,7 @@ function buildProductCardProduct(product: CollectionProduct): Product {
     category: {
       id: `collection-${product.id}`,
       name: categoryName,
-      slug: categoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'sin-categoria',
+      slug: categorySlug,
       isVisible: true,
     },
     categoryId: undefined,

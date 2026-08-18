@@ -30,6 +30,9 @@ export interface PublicCollection {
     price: number;
     imageUrl?: string;
     position: number;
+    category?: string | { name?: string; slug?: string } | null;
+    categoryName?: string;
+    categorySlug?: string;
   }[];
 }
 
