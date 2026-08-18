@@ -84,7 +84,7 @@ const CategoryDistributionChart: React.FC<Props> = ({ data }) => {
 
   return (
     <div className={styles.card}>
-      <h2 className={styles.title}>Distribución por Categoría</h2>
+      <h3 className={styles.title}>Distribución por Categoría</h3>
 
       <ResponsiveContainer width="100%" height={isMobile ? 240 : 380}>
         <PieChart>

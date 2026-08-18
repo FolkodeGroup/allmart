@@ -58,7 +58,7 @@ export function HomePage() {
                 ? first 
                 : (first && typeof first === 'object' && typeof first.url === 'string' ? first.url : '');
               if (url) {
-                // 🟢 CLAVE: Guardamos en el mapa usando el ID como clave, que es inmutable
+                // Guardamos en el mapa usando el ID como clave, que es inmutable
                 imageMap.set(p.id, url);
               }
             }
@@ -108,7 +108,9 @@ export function HomePage() {
 
   return (
     <main>
-      {/* 🟢 FIX: Renderizado condicional estricto. Si no hay banner o imagen, no se renderiza nada y el contenido sube. */}
+      {/* 🟢 H1 Semántico accesible para motores de búsqueda */}
+      <h1 className="sr-only">Allmart Bazar — Tu hogar, más práctico</h1>
+
       {heroBanner && heroImageUrl && (
         <section
           aria-label={heroBanner.title ?? 'Destacado principal'}

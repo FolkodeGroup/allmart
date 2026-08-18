@@ -8,21 +8,26 @@
    │  ‹  [card][card][card][card][card]  ›                   │
    └─────────────────────────────────────────────────────────┘
 
-   Flechas: circulares, FUERA del viewport (no superpuestas).
-   Cards:   blancas, borde sutil, hover elevación.
-   Tokens:  usa variables de /styles/tokens.css de Allmart.
+   Flechas: circulares, posicionadas en extremos.
+   Cards:   blancas, borde sutil, hover con elevación.
+   Tokens:  variables unificadas de /styles/tokens.css de Allmart.
    ============================================================= */
 
-/* ── Root wrapper ── */
+/* ── Root wrapper con contención estricta de desbordamiento ── */
 .root {
+  position: relative;
   width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+  box-sizing: border-box;
   padding: var(--space-6, 24px) 0 var(--space-8, 32px);
 }
 
-/* ── Banner opcional arriba ── */
+/* ── Banner opcional superior ── */
 .banner {
   width: 100%;
   max-height: 240px;
+  height: 240px;
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: var(--space-5, 20px);
@@ -35,6 +40,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 /* ── Cabecera: título + "Ver todos" ── */
@@ -52,10 +58,9 @@
   font-family: var(--font-heading, 'Montserrat', sans-serif);
   font-size: clamp(1.2rem, 2.2vw, 1.6rem);
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text-primary, #111827);
   letter-spacing: var(--tracking-tight, -0.02em);
   line-height: var(--leading-tight, 1.2);
-  /* Subrayado decorativo con color acento Allmart */
   position: relative;
   padding-bottom: 10px;
 }
@@ -73,14 +78,14 @@
 
 /* En secciones con fondo primario (verde), adaptar color de título */
 :global(.collection-section--primary) .title {
-  color: #fff;
+  color: #ffffff;
 }
 
 :global(.collection-section--inverse) .title {
   color: var(--color-text-primary, #1a1a1a);
 }
 
-/* "Ver todos" — link estilo MercadoLibre pero con colores Allmart */
+/* "Ver todos" — link estilo e-commerce con colores Allmart */
 .viewAll {
   display: inline-flex;
   align-items: center;
@@ -105,7 +110,6 @@
   border-radius: 4px;
 }
 
-/* ── Sobre fondo verde: texto blanco ── */
 :global(.collection-section--primary) .viewAll {
   color: var(--color-text-inverse, #ffffff);
 }
@@ -115,7 +119,6 @@
   opacity: 0.85;
 }
 
-/* ── Sobre fondo blanco: texto verde oscuro ── */
 :global(.collection-section--inverse) .viewAll {
   color: var(--color-primary, #769282);
 }
@@ -124,12 +127,15 @@
   color: var(--color-primary-dark, #5d7568);
 }
 
-/* ── Wrapper del carrusel: flechas + viewport en línea ── */
+/* ── Wrapper del carrusel: viewport + flechas ── */
 .carouselWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 10px;
-  position: relative;
 }
 
 .categoryVariant {
@@ -147,32 +153,36 @@
   min-width: 180px;
 }
 
-/* ── Flechas circulares — fuera del viewport ── */
+/* ── Flechas circulares de navegación ── */
 .arrow {
-  flex-shrink: 0;
-  width: 42px;
-  height: 42px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.96);
-  color: var(--color-text-primary, #1a1a1a);
-  display: grid;
-  place-items: center;
+  border: 1px solid var(--color-border, #e5e2dd);
+  color: var(--color-text-primary, #111827);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, transform 0.15s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .arrow:hover {
   background: var(--color-primary, #769282);
+  color: #ffffff;
   border-color: var(--color-primary, #769282);
-  border: 1px solid var(--color-accent, #ddb08c);
   box-shadow: 0 6px 20px rgba(118, 146, 130, 0.30);
-  transform: scale(1.06);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .arrow:active {
-  transform: scale(0.96);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .arrow:focus-visible {
@@ -185,53 +195,64 @@
   background: rgba(255, 255, 255, 0.95);
 }
 
+.arrowLeft {
+  left: 4px;
+}
+
+.arrowRight {
+  right: 4px;
+}
+
 /* ── Viewport del carrusel ── */
 .viewport {
+  width: 100%;
   overflow: hidden;
   flex: 1;
   min-width: 0;
   padding: var(--space-2, 8px) 0;
 }
 
-/* ── Track (desktop, transform) ── */
+/* ── Track (desktop con transform suave) ── */
 .track {
   display: flex;
   align-items: stretch;
   will-change: transform;
 }
 
-/* ── Mobile: scroll nativo + snap ── */
+/* ── Mobile: scroll táctil horizontal con snap ── */
 .mobileScroll {
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  /* Ocultar scrollbar visualmente */
-  scrollbar-width: none;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-behavior: smooth !important;
+  scroll-snap-type: x mandatory !important;
+  touch-action: pan-x !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
 }
 
 .mobileScroll::-webkit-scrollbar {
-  display: none;
+  display: none !important;
 }
 
 .mobileTrack {
-  display: flex;
-  align-items: stretch;
-  padding-bottom: var(--space-2, 8px);
+  display: flex !important;
+  align-items: stretch !important;
+  padding-bottom: var(--space-2, 8px) !important;
 }
 
-/* ── Slide ── */
+/* ── Slide contenedor de cada producto ── */
 .slide {
-  flex: 0 0 auto;
-  min-width: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
   scroll-snap-align: start;
 }
 
-/* ── Card de producto — estilo MercadoLibre blanco + Allmart tokens ── */
+/* ── Tarjetas individuales de producto ── */
 .card {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border: none;
+  border: 1px solid var(--color-border, #e5e2dd);
   padding: 0;
   text-align: left;
   cursor: pointer;
@@ -239,8 +260,7 @@
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--color-border, #e5e2dd);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
   height: 100%;
   min-height: 280px;
 }
@@ -256,7 +276,7 @@
   outline-offset: 3px;
 }
 
-/* ── Imagen ── */
+/* ── Contenedor de Imagen de Tarjeta ── */
 .imgWrapper {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -278,7 +298,7 @@
   transform: scale(1.06);
 }
 
-/* ── Info textual ── */
+/* ── Contenido de Información de Tarjeta ── */
 .info {
   padding: 12px 14px 16px;
   display: flex;
@@ -317,7 +337,6 @@
   min-height: calc(1.4em * 2);
 }
 
-/* Precio — fuente heading bold, color primario (verde) */
 .price {
   margin: 0;
   font-family: var(--font-heading, 'Montserrat', sans-serif);
@@ -346,7 +365,7 @@
   padding: 10px 12px;
   border-radius: 8px;
   background: var(--color-primary, #769282);
-  color: #fff;
+  color: #ffffff;
   font-family: var(--font-ui, 'Montserrat', sans-serif);
   font-size: var(--text-sm, 0.875rem);
   font-weight: 700;
@@ -358,23 +377,8 @@
 .ctaButton:hover,
 .ctaButton:focus {
   background: var(--color-primary-dark, #5d7568);
-  color: #fff;
+  color: #ffffff;
   text-decoration: none;
-}
-
-.banner {
-  width: 100%;
-  height: 280px;
-  margin-bottom: var(--space-6);
-  border-radius: 24px;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--color-primary, #769282) 0%, var(--color-accent, #ddb08c) 100%);
-}
-
-.banner img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .titleSection {
@@ -391,7 +395,6 @@
   line-height: 1.02;
 }
 
-/* Decorative underline and brand accent for titles */
 .titleSection h2::after {
   content: '';
   display: block;
@@ -403,7 +406,6 @@
   opacity: 0.98;
 }
 
-/* Adapt title color according to section background (global classes) */
 :global(.collection-section--primary) .titleSection h2 {
   color: var(--color-text-instock);
 }
@@ -530,7 +532,7 @@
 }
 
 .navButton:hover {
-  background: #fff;
+  background: #ffffff;
   box-shadow: 0 16px 30px rgba(15, 23, 42, 0.2);
   color: #1f2937;
   transform: translateY(-50%) scale(1.04);
@@ -553,7 +555,7 @@
   right: 0;
 }
 
-/* ── Responsive ── */
+/* ── Media Queries: Adaptación Responsiva Mobile-First ── */
 @media (max-width: 1024px) {
   .arrow {
     width: 38px;
@@ -602,7 +604,7 @@
   }
 
   .banner {
-    height: 220px;
+    height: 200px;
     margin-bottom: var(--space-5);
   }
 

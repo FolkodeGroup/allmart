@@ -47,6 +47,7 @@ export const MobileDashboardTabs: React.FC<MobileDashboardTabsProps> = ({
               ref={isActive ? activeTabBtnRef : null}
               role="tab"
               type="button"
+              id={`tab-${tab.id}`}
               aria-selected={isActive}
               aria-controls={`panel-${tab.id}`}
               className={`${styles.tabBtn} ${isActive ? styles.tabActive : ''}`}

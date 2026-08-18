@@ -143,7 +143,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                   height="100%"
                   placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
                   style={{ position: 'absolute', inset: 0 }}
-                  loading="eager"
+                  loading={isFeatured ? 'eager' : 'lazy'}
                   objectFit="contain"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
                 />
@@ -165,14 +165,14 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           )}
         </Link>
 
-        {/* 🟢 FIX: Agrupamos todos los badges en un solo contenedor Flexbox para evitar superposiciones */}
+        {/* Agrupación de badges */}
         <div className={styles.badges}>
           {dynamicDiscount && (
             <DiscountBadge
               discountPercentage={dynamicDiscount?.promotionType === 'percentage' ? dynamicDiscount.discountPercentage : undefined}
               discountAmount={dynamicDiscount?.promotionType === 'fixed' ? dynamicDiscount.discountAmount : undefined}
               promotionType={dynamicDiscount?.promotionType}
-              display="inline" /* 🟢 CLAVE: Permite que fluya dentro del flexbox en lugar de usar position: absolute */
+              display="inline"
             />
           )}
           {isNew && <Badge variant="new">Nuevo</Badge>}
