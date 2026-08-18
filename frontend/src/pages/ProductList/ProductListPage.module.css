@@ -1,6 +1,7 @@
 .page {
   padding-top: var(--space-8, 32px);
   padding-bottom: var(--space-16, 64px);
+  overflow-x: hidden;
 }
 
 .breadcrumb {
@@ -37,20 +38,30 @@
 
 /* Category Collections Banner */
 .collectionBannerWrapper {
-  margin-bottom: var(--space-8, 32px);
+  width: 100%;
+  margin: 0 0 var(--space-8, 32px);
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .categoryCollections {
   display: flex;
   flex-direction: column;
   gap: var(--space-6, 24px);
+  width: 100%;
+  min-width: 0;
 }
 
 .categoryBanner {
+  width: 100%;
+  max-width: 100%;
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #e5e2dd);
   border-radius: var(--radius-xl, 16px);
   padding: var(--space-5, 20px);
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .categoryBannerHeader {
@@ -95,11 +106,22 @@
 
 .categoryBannerProducts {
   display: flex;
+  width: 100%;
   gap: var(--space-3, 12px);
   overflow-x: auto;
   padding-bottom: var(--space-2, 8px);
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  /* hide native scrollbars while preserving scrollability */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+}
+
+.categoryBannerProducts::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 .categoryBannerCard {
@@ -156,6 +178,7 @@
   max-width: var(--container-2xl, 1600px);
   margin: 0 auto;
   padding: 0 var(--space-6, 24px);
+  min-width: 0;
 }
 
 .sidebar {
@@ -212,6 +235,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6, 24px);
+  min-width: 0;
 }
 
 .toolbar {
@@ -558,6 +582,10 @@
     grid-template-columns: 1fr;
   }
 
+  .collectionBannerWrapper {
+    margin-bottom: var(--space-6, 24px);
+  }
+
   .sidebar {
     display: none !important;
   }
@@ -596,6 +624,27 @@
 }
 
 @media (max-width: 639px) {
+  .categoryBanner {
+    padding: var(--space-4, 16px);
+  }
+
+  /* Make horizontal scroller more touch friendly on small screens */
+  .categoryBannerProducts {
+    gap: 12px;
+    padding-inline: 8px;
+    /* small inset so first/last cards don't touch edges */
+    scroll-padding-inline: 12px;
+  }
+
+  .categoryBannerProducts::-webkit-scrollbar {
+    display: none;
+  }
+
+  .categoryBannerCard {
+    flex: 0 0 auto;
+    min-width: 120px;
+    width: auto;
+  }
 
   .productsGrid,
   .collectionViewGrid {
