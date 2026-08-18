@@ -1,7 +1,7 @@
 /**
  * jobs/collectionsJob.ts
- * Job que calcula los productos más vendidos por categoría y actualiza
- * las colecciones de tipo 'auto_sales' y 'dynamic_rules'.
+ * Job que calcula los productos más vendidos por categoría (incluyendo subcategorías)
+ * y actualiza las colecciones de tipo 'auto_sales' y 'dynamic_rules'.
  */
 
 import { Prisma } from '@prisma/client';
@@ -9,18 +9,34 @@ import { prisma } from '../config/prisma';
 
 export interface AutoSalesParams {
   categoryId?: string;
-  windowDays?: number;  // Ventana temporal (default 30 días)
-  limit?: number;        // Máx productos (default 10)
-  pinnedProductIds?: string[];   // Siempre al frente
-  excludeProductIds?: string[];  // Nunca mostrar
-  requiredTag?: string;          // Para reglas dinámicas: 'oferta', 'destacado', 'novedad'
+  windowDays?: number;         // Ventana temporal (default 30 días)
+  limit?: number;              // Máx productos (default 10)
+  pinnedProductIds?: string[];  // Siempre al frente
+  excludeProductIds?: string[]; // Nunca mostrar
+  requiredTag?: string;         // Para reglas dinámicas: 'oferta', 'destacado', 'novedad'
   minDiscount?: number;
   inStockOnly?: boolean;
+  startDate?: string;          // Programación de campaña
+  endDate?: string;            // Fin de campaña
 }
 
 /**
- * Calcula los top N productos más vendidos en una categoría dentro
- * de una ventana temporal, respetando stock y visibilidad.
+ * Obtiene el ID de la categoría dada junto con todos los IDs de sus subcategorías hijas.
+ */
+async function getCategoryFamilyIds(categoryId?: string): Promise<string[]> {
+  if (!categoryId) return [];
+
+  const children = await prisma.category.findMany({
+    where: { parentId: categoryId },
+    select: { id: true },
+  });
+
+  return [categoryId, ...children.map((c) => c.id)];
+}
+
+/**
+ * Calcula los top N productos más vendidos en una categoría (y sus subcategorías)
+ * dentro de una ventana temporal, respetando stock y estado activo.
  */
 export async function getTopSellingProducts(
   params: AutoSalesParams
@@ -36,23 +52,23 @@ export async function getTopSellingProducts(
   const windowStart = new Date();
   windowStart.setDate(windowStart.getDate() - windowDays);
 
-  // 🟢 FIX CRÍTICO: La relación entre productos y categorías es N:M via product_categories.
-  // Se utiliza una subconsulta EXISTS para evitar consultar una columna inexistente p.category_id.
-  const categoryFilter = categoryId
+  // 🟢 RESOLUCIÓN JERÁRQUICA: Obtener categoría padre + subcategorías hijas
+  const categoryIds = await getCategoryFamilyIds(categoryId);
+
+  const categoryFilter = categoryIds.length > 0
     ? Prisma.sql`AND EXISTS (
         SELECT 1 FROM product_categories pc
         WHERE pc.product_id = p.id
-          AND pc.category_id = ${categoryId}::uuid
+          AND pc.category_id IN (${Prisma.join(categoryIds.map(id => Prisma.sql`${id}::uuid`), ',')})
       )`
     : Prisma.empty;
 
-  const excludeFilter =
-    excludeProductIds.length > 0
-      ? Prisma.sql`AND oi.product_id NOT IN (${Prisma.join(
-          excludeProductIds.map((id) => Prisma.sql`${id}::uuid`),
-          ','
-        )})`
-      : Prisma.empty;
+  const excludeFilter = excludeProductIds.length > 0
+    ? Prisma.sql`AND oi.product_id NOT IN (${Prisma.join(
+        excludeProductIds.map((id) => Prisma.sql`${id}::uuid`),
+        ','
+      )})`
+    : Prisma.empty;
 
   type TopProduct = { product_id: string; total_sold: bigint };
 
@@ -108,6 +124,12 @@ export async function syncAutoCollection(collectionId: string): Promise<void> {
   }
 
   const params = (collection.params ?? {}) as AutoSalesParams;
+
+  // Validar vigencia de fechas si están configuradas
+  const now = new Date();
+  if (params.startDate && new Date(params.startDate) > now) return;
+  if (params.endDate && new Date(params.endDate) < now) return;
+
   const topIds = await getTopSellingProducts(params);
 
   await prisma.$transaction(async (tx) => {
@@ -146,6 +168,11 @@ export async function syncDynamicCollection(collectionId: string): Promise<void>
   const params = (collection.params ?? {}) as AutoSalesParams;
   const { categoryId, requiredTag, inStockOnly = true, limit = 10 } = params;
 
+  // Validar vigencia de fechas si están configuradas
+  const now = new Date();
+  if (params.startDate && new Date(params.startDate) > now) return;
+  if (params.endDate && new Date(params.endDate) < now) return;
+
   const where: any = { status: 'active' };
 
   if (inStockOnly) {
@@ -154,8 +181,9 @@ export async function syncDynamicCollection(collectionId: string): Promise<void>
   }
 
   if (categoryId) {
+    const familyIds = await getCategoryFamilyIds(categoryId);
     where.productCategories = {
-      some: { categoryId },
+      some: { categoryId: { in: familyIds } },
     };
   }
 

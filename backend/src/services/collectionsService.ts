@@ -1,6 +1,6 @@
 /**
  * services/collectionsService.ts
- * CRUD y lógica de negocio para colecciones.
+ * CRUD y lógica de negocio para colecciones con filtrado de productos activos.
  */
 
 import { Collection, CollectionDisplayPosition, Prisma } from '@prisma/client';
@@ -17,9 +17,7 @@ export interface CreateCollectionDTO {
   imageUrl?: string;
   isActive?: boolean;
   productIds?: string[];
-  /** Tipo de colección: 'manual' (default), 'auto_sales' o 'dynamic_rules' */
   type?: string;
-  /** Configuración para colecciones auto_sales o dynamic_rules */
   params?: AutoSalesParams;
 }
 
@@ -71,6 +69,42 @@ function generateSlug(name: string): string {
     .replace(/[^\w-]+/g, '');
 }
 
+/**
+ * Filtro común para incluir solo productos activos en las colecciones de la tienda pública.
+ */
+const activeProductItemInclude = {
+  include: {
+    product: {
+      include: {
+        productImages: { select: { id: true }, orderBy: { position: 'asc' as const } },
+        productOptions: {
+          where: { isActive: true },
+          include: { values: true }
+        },
+        productSkus: {
+          where: { isActive: true },
+          include: {
+            skuValues: {
+              include: {
+                optionValue: {
+                  include: { option: true }
+                }
+              }
+            },
+            productSkuImages: { select: { id: true } }
+          }
+        }
+      }
+    }
+  },
+  where: {
+    product: {
+      status: 'active' as const
+    }
+  },
+  orderBy: { position: 'asc' as const }
+};
+
 function toCollectionDTO(
   collection: Collection,
   productCount: number,
@@ -91,64 +125,63 @@ function toCollectionDTO(
     productCount,
     createdAt: collection.createdAt.toISOString(),
     updatedAt: collection.updatedAt.toISOString(),
-    products: products?.map((item) => {
-      const baseProduct = item.product;
-      const variants = baseProduct.productOptions?.map((opt: any) => ({
-        id: opt.id,
-        name: opt.name,
-        values: opt.values?.map((val: any) => val.name) ?? [],
-      })) ?? [];
+    products: products
+      ?.filter((item) => item.product && item.product.status === 'active')
+      .map((item) => {
+        const baseProduct = item.product;
+        const variants = baseProduct.productOptions?.map((opt: any) => ({
+          id: opt.id,
+          name: opt.name,
+          values: opt.values?.map((val: any) => val.name) ?? [],
+        })) ?? [];
 
-      const skus = Array.isArray(baseProduct.productSkus)
-        ? baseProduct.productSkus.map((s: any) => {
-          const attributes: Record<string, string> = {};
-          if (Array.isArray(s.skuValues)) {
-            for (const sv of s.skuValues) {
-              if (sv.optionValue && sv.optionValue.option) {
-                attributes[sv.optionValue.option.name] = sv.optionValue.name;
+        const skus = Array.isArray(baseProduct.productSkus)
+          ? baseProduct.productSkus.map((s: any) => {
+            const attributes: Record<string, string> = {};
+            if (Array.isArray(s.skuValues)) {
+              for (const sv of s.skuValues) {
+                if (sv.optionValue && sv.optionValue.option) {
+                  attributes[sv.optionValue.option.name] = sv.optionValue.name;
+                }
               }
             }
-          }
-          const baseImages = Array.isArray(baseProduct.productImages)
-            ? baseProduct.productImages.map((img: any) => `/api/images/products/${img.id}`)
-            : [];
-          const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
-            ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
-            : baseImages;
+            const baseImages = Array.isArray(baseProduct.productImages)
+              ? baseProduct.productImages.map((img: any) => `/api/images/products/${img.id}`)
+              : [];
+            const images = Array.isArray(s.productSkuImages) && s.productSkuImages.length > 0
+              ? s.productSkuImages.map((img: any) => `/api/images/sku/${img.id}`)
+              : baseImages;
 
-          return {
-            id: s.id,
-            sku: s.sku,
-            attributes,
-            images,
-            stock: s.stock,
-            price: s.price ? Number(s.price) : Number(baseProduct.price),
-            isActive: s.isActive,
-          };
-        })
-        : [];
+            return {
+              id: s.id,
+              sku: s.sku,
+              attributes,
+              images,
+              stock: s.stock,
+              price: s.price ? Number(s.price) : Number(baseProduct.price),
+              isActive: s.isActive,
+            };
+          })
+          : [];
 
-      const baseImages = Array.isArray(baseProduct.productImages)
-        ? baseProduct.productImages.map((img: any) => `/api/images/products/${img.id}`)
-        : [];
+        const baseImages = Array.isArray(baseProduct.productImages)
+          ? baseProduct.productImages.map((img: any) => `/api/images/products/${img.id}`)
+          : [];
 
-      return {
-        id: baseProduct.id,
-        name: baseProduct.name,
-        slug: baseProduct.slug,
-        price: baseProduct.price.toNumber(),
-        imageUrl: baseProduct.imageUrl ?? baseImages[0],
-        position: item.position,
-        variants,
-        skus,
-      };
-    }),
+        return {
+          id: baseProduct.id,
+          name: baseProduct.name,
+          slug: baseProduct.slug,
+          price: baseProduct.price.toNumber(),
+          imageUrl: baseProduct.imageUrl ?? baseImages[0],
+          position: item.position,
+          variants,
+          skus,
+        };
+      }),
   };
 }
 
-/**
- * Obtiene todas las colecciones con paginación
- */
 export async function getAllCollections(
   skip = 0,
   take = 10,
@@ -181,33 +214,7 @@ export async function getAllCollections(
       take,
       orderBy: { displayOrder: 'asc' },
       include: {
-        collectionItems: {
-          include: {
-            product: {
-              include: {
-                productImages: { select: { id: true }, orderBy: { position: 'asc' } },
-                productOptions: {
-                  where: { isActive: true },
-                  include: { values: true }
-                },
-                productSkus: {
-                  where: { isActive: true },
-                  include: {
-                    skuValues: {
-                      include: {
-                        optionValue: {
-                          include: { option: true }
-                        }
-                      }
-                    },
-                    productSkuImages: { select: { id: true } }
-                  }
-                }
-              }
-            }
-          },
-          orderBy: { position: 'asc' },
-        },
+        collectionItems: activeProductItemInclude,
       },
     }),
     prisma.collection.count({ where }),
@@ -225,40 +232,11 @@ export async function getAllCollections(
   };
 }
 
-/**
- * Obtiene una colección por ID con sus productos
- */
 export async function getCollectionById(id: string): Promise<CollectionResponseDTO> {
   const collection = await prisma.collection.findUnique({
     where: { id },
     include: {
-      collectionItems: {
-        include: {
-          product: {
-            include: {
-              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
-              productOptions: {
-                where: { isActive: true },
-                include: { values: true }
-              },
-              productSkus: {
-                where: { isActive: true },
-                include: {
-                  skuValues: {
-                    include: {
-                      optionValue: {
-                        include: { option: true }
-                      }
-                    }
-                  },
-                  productSkuImages: { select: { id: true } }
-                }
-              }
-            }
-          }
-        },
-        orderBy: { position: 'asc' },
-      },
+      collectionItems: activeProductItemInclude,
     },
   });
 
@@ -273,40 +251,11 @@ export async function getCollectionById(id: string): Promise<CollectionResponseD
   );
 }
 
-/**
- * Obtiene una colección por slug (para uso público)
- */
 export async function getCollectionBySlug(slug: string): Promise<CollectionResponseDTO> {
   const collection = await prisma.collection.findUnique({
     where: { slug },
     include: {
-      collectionItems: {
-        include: {
-          product: {
-            include: {
-              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
-              productOptions: {
-                where: { isActive: true },
-                include: { values: true }
-              },
-              productSkus: {
-                where: { isActive: true },
-                include: {
-                  skuValues: {
-                    include: {
-                      optionValue: {
-                        include: { option: true }
-                      }
-                    }
-                  },
-                  productSkuImages: { select: { id: true } }
-                }
-              }
-            }
-          }
-        },
-        orderBy: { position: 'asc' },
-      },
+      collectionItems: activeProductItemInclude,
     },
   });
 
@@ -325,9 +274,6 @@ export async function getCollectionBySlug(slug: string): Promise<CollectionRespo
   );
 }
 
-/**
- * Obtiene colecciones activas por posición de display
- */
 export async function getCollectionsByDisplayPosition(
   position: CollectionDisplayPosition
 ): Promise<CollectionResponseDTO[]> {
@@ -338,79 +284,26 @@ export async function getCollectionsByDisplayPosition(
     },
     orderBy: { displayOrder: 'asc' },
     include: {
-      collectionItems: {
-        include: {
-          product: {
-            include: {
-              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
-              productOptions: {
-                where: { isActive: true },
-                include: { values: true }
-              },
-              productSkus: {
-                where: { isActive: true },
-                include: {
-                  skuValues: {
-                    include: {
-                      optionValue: {
-                        include: { option: true }
-                      }
-                    }
-                  },
-                  productSkuImages: { select: { id: true } }
-                }
-              }
-            }
-          }
-        },
-        orderBy: { position: 'asc' },
-      },
+      collectionItems: activeProductItemInclude,
     },
   });
 
-  return collections.map((c) =>
-    toCollectionDTO(
-      c,
-      c.collectionItems.length,
-      c.collectionItems.slice(0, 10)
+  return collections
+    .map((c) =>
+      toCollectionDTO(
+        c,
+        c.collectionItems.length,
+        c.collectionItems.slice(0, 10)
+      )
     )
-  );
+    .filter((col) => (col.products?.length ?? 0) > 0); // 🟢 Filtra colecciones que se quedan sin productos
 }
 
-/**
- * Obtiene TODAS las colecciones sin paginación (para admin)
- */
 export async function getAllCollectionsUnpaginated(): Promise<CollectionResponseDTO[]> {
   const collections = await prisma.collection.findMany({
     orderBy: { displayOrder: 'asc' },
     include: {
-      collectionItems: {
-        include: {
-          product: {
-            include: {
-              productImages: { select: { id: true }, orderBy: { position: 'asc' } },
-              productOptions: {
-                where: { isActive: true },
-                include: { values: true }
-              },
-              productSkus: {
-                where: { isActive: true },
-                include: {
-                  skuValues: {
-                    include: {
-                      optionValue: {
-                        include: { option: true }
-                      }
-                    }
-                  },
-                  productSkuImages: { select: { id: true } }
-                }
-              }
-            }
-          }
-        },
-        orderBy: { position: 'asc' },
-      },
+      collectionItems: activeProductItemInclude,
     },
   });
 
@@ -423,9 +316,6 @@ export async function getAllCollectionsUnpaginated(): Promise<CollectionResponse
   );
 }
 
-/**
- * Crea una nueva colección con productos
- */
 export async function createCollection(dto: CreateCollectionDTO): Promise<CollectionResponseDTO> {
   if (!dto.name || !dto.displayPosition) {
     throw createError('Campos requeridos: name, displayPosition', 400);
@@ -436,15 +326,6 @@ export async function createCollection(dto: CreateCollectionDTO): Promise<Collec
   const existingSlug = await prisma.collection.findUnique({ where: { slug } });
   if (existingSlug) {
     throw createError(`El slug "${slug}" ya está en uso`, 409);
-  }
-
-  if (dto.displayOrder !== undefined) {
-    const existingOrder = await prisma.collection.findFirst({
-      where: { displayOrder: dto.displayOrder },
-    });
-    if (existingOrder) {
-      throw createError(`El orden de display ${dto.displayOrder} ya está en uso`, 409);
-    }
   }
 
   const collection = await prisma.collection.create({
@@ -480,9 +361,6 @@ export async function createCollection(dto: CreateCollectionDTO): Promise<Collec
   return getCollectionById(collection.id);
 }
 
-/**
- * Actualiza una colección y sus productos
- */
 export async function updateCollection(
   id: string,
   dto: UpdateCollectionDTO
@@ -498,18 +376,6 @@ export async function updateCollection(
     });
     if (slugExists) {
       throw createError(`El slug "${dto.slug}" ya está en uso`, 409);
-    }
-  }
-
-  if (dto.displayOrder !== undefined && dto.displayOrder !== existing.displayOrder) {
-    const orderExists = await prisma.collection.findFirst({
-      where: {
-        displayOrder: dto.displayOrder,
-        NOT: { id },
-      },
-    });
-    if (orderExists) {
-      throw createError(`El orden de display ${dto.displayOrder} ya está en uso`, 409);
     }
   }
 
@@ -551,9 +417,6 @@ export async function updateCollection(
   return getCollectionById(id);
 }
 
-/**
- * Elimina una colección y sus relaciones
- */
 export async function deleteCollection(id: string): Promise<void> {
   const existing = await prisma.collection.findUnique({ where: { id } });
   if (!existing) {
@@ -564,9 +427,6 @@ export async function deleteCollection(id: string): Promise<void> {
   await prisma.collection.delete({ where: { id } });
 }
 
-/**
- * Reordena los productos dentro de una colección
- */
 export async function reorderCollectionItems(
   collectionId: string,
   productOrder: string[]
@@ -590,9 +450,6 @@ export async function reorderCollectionItems(
   }
 }
 
-/**
- * Agrega un producto a una colección
- */
 export async function addProductToCollection(
   collectionId: string,
   productId: string
@@ -634,9 +491,6 @@ export async function addProductToCollection(
   });
 }
 
-/**
- * Elimina un producto de una colección
- */
 export async function removeProductFromCollection(
   collectionId: string,
   productId: string
