@@ -55,7 +55,9 @@ describe('CartPage', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByRole('link', { name: /camiseta básica/i })).toBeInTheDocument();
+        // There are two links with the product name (image link + name link).
+        // Use text lookup to avoid the ambiguous accessible-name match.
+        expect(screen.getByText(/camiseta básica/i)).toBeInTheDocument();
         expect(screen.queryByText(/ropa/i)).not.toBeInTheDocument();
     });
 });
