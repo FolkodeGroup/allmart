@@ -266,7 +266,7 @@ const CollectionSlider: React.FC<Props> = ({
                   aria-roledescription="slide"
                   aria-label={`${i + 1} de ${effectiveProducts.length}: ${product.name}`}
                 >
-                  <StandardProductCard product={buildProductCardProduct(product)} variant="featured" />
+                  <StandardProductCard product={buildProductCardProduct(product)} variant="featured" disableButtons={previewMode} />
                 </div>
               ))}
             </div>
@@ -292,7 +292,7 @@ const CollectionSlider: React.FC<Props> = ({
                     aria-label={`${slide.origIdx + 1} de ${count}: ${slide.product.name}`}
                     aria-hidden={!visible}
                   >
-                    <StandardProductCard product={buildProductCardProduct(slide.product)} variant="featured" />
+                    <StandardProductCard product={buildProductCardProduct(slide.product)} variant="featured" disableButtons={previewMode} />
                   </div>
                 );
               })}
