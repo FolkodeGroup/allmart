@@ -620,67 +620,6 @@ export function ProductListPage() {
         )}
       </nav>
 
-      {categoryCollections.length > 0 && (
-        <div className={styles.collectionBannerWrapper}>
-          <div className={styles.categoryCollections}>
-            {categoryCollections.map((collection) => (
-              <div key={collection.id} className={styles.categoryBanner}>
-                <div className={styles.categoryBannerHeader}>
-                  <div className={styles.categoryBannerLabel}>
-                    <span className={styles.categoryBannerTitle}>{collection.name}</span>
-                    {collection.description && (
-                      <span className={styles.categoryBannerDesc}>{collection.description}</span>
-                    )}
-                  </div>
-                  <a
-                    href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}
-                    className={styles.categoryBannerViewAll}
-                  >
-                    Ver todos
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                </div>
-
-                <div className={styles.categoryBannerProducts}>
-                  {(collection.products ?? []).slice(0, 8).map((product) => {
-                    const imageUrl = getCollectionProductImage(product, products);
-                    return (
-                      <button
-                        key={product.id}
-                        type="button"
-                        className={styles.categoryBannerCard}
-                        onClick={() => { window.location.href = `/producto/${product.slug}`; }}
-                        title={product.name}
-                      >
-                        <div className={styles.categoryBannerImg}>
-                          <img
-                            src={imageUrl}
-                            alt={product.name}
-                            loading="lazy"
-                            onError={(e) => {
-                              const target = e.currentTarget;
-                              if (target.src !== DEFAULT_IMAGE_PLACEHOLDER) {
-                                target.src = DEFAULT_IMAGE_PLACEHOLDER;
-                              }
-                            }}
-                          />
-                        </div>
-                        <p className={styles.categoryBannerProductName}>{product.name}</p>
-                        <p className={styles.categoryBannerPrice}>
-                          ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className={styles.layout}>
         {/* Sidebar Desktop (<aside>) */}
         <aside
@@ -735,6 +674,67 @@ export function ProductListPage() {
         </aside>
 
         <div className={styles.main}>
+          {categoryCollections.length > 0 && (
+            <div className={styles.collectionBannerWrapper}>
+              <div className={styles.categoryCollections}>
+                {categoryCollections.map((collection) => (
+                  <div key={collection.id} className={styles.categoryBanner}>
+                    <div className={styles.categoryBannerHeader}>
+                      <div className={styles.categoryBannerLabel}>
+                        <span className={styles.categoryBannerTitle}>{collection.name}</span>
+                        {collection.description && (
+                          <span className={styles.categoryBannerDesc}>{collection.description}</span>
+                        )}
+                      </div>
+                      <a
+                        href={`/productos?coleccion=${encodeURIComponent(collection.slug)}`}
+                        className={styles.categoryBannerViewAll}
+                      >
+                        Ver todos
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </a>
+                    </div>
+
+                    <div className={styles.categoryBannerProducts}>
+                      {(collection.products ?? []).slice(0, 8).map((product) => {
+                        const imageUrl = getCollectionProductImage(product, products);
+                        return (
+                          <button
+                            key={product.id}
+                            type="button"
+                            className={styles.categoryBannerCard}
+                            onClick={() => { window.location.href = `/producto/${product.slug}`; }}
+                            title={product.name}
+                          >
+                            <div className={styles.categoryBannerImg}>
+                              <img
+                                src={imageUrl}
+                                alt={product.name}
+                                loading="lazy"
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src !== DEFAULT_IMAGE_PLACEHOLDER) {
+                                    target.src = DEFAULT_IMAGE_PLACEHOLDER;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <p className={styles.categoryBannerProductName}>{product.name}</p>
+                            <p className={styles.categoryBannerPrice}>
+                              ${Number(product.price).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className={styles.toolbar}>
             <div className={styles.toolbarLeft}>
               <button

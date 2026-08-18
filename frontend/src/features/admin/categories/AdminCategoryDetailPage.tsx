@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAdminCategories } from '../../../context/AdminCategoriesContext';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
+import { useAdminProducts } from '../../../context/useAdminProductsContext';
 import { useNotification } from '../../../context';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -13,8 +14,8 @@ import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import styles from './AdminCategoryDetailPage.module.css';
 
 const SECTIONS = [
-    { id: 'info', label: 'Información' },
-    { id: 'imagen', label: 'Imagen' },
+    { id: 'basico', label: 'Básico' },
+    { id: 'productos', label: 'Productos' },
 ] as const;
 type SectionId = typeof SECTIONS[number]['id'];
 
@@ -27,13 +28,14 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
     const navigate = useNavigate();
     const pageRef = useRef<HTMLDivElement>(null);
     const { categories, isLoading, refreshCategories, updateCategory, deleteCategory } = useAdminCategories();
+    const { products } = useAdminProducts();
     const { can } = useAdminAuth();
     const { showNotification } = useNotification();
 
     const canEdit = can('categories.edit');
     const canDelete = can('categories.delete');
 
-    const [activeSection, setActiveSection] = useState<SectionId>('info');
+    const [activeSection, setActiveSection] = useState<SectionId>('basico');
     const [imgError, setImgError] = useState(false);
     const [deleteConfirm, setDeleteConfirm] = useState(false);
     const [toggleConfirm, setToggleConfirm] = useState<{ newVisible: boolean } | null>(null);
@@ -74,6 +76,15 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
 
     const displayName = category?.name?.trim() || category?.slug || '';
     const productCount = category?.itemCount;
+
+    const categoryProducts = useMemo(() => {
+        if (!category) return [];
+
+        return products.filter((product) => {
+            return product.categoryId === category.id ||
+                (Array.isArray(product.categoryIds) && product.categoryIds.includes(category.id));
+        });
+    }, [products, category]);
 
     const handleEdit = () => {
         if (category) navigate(`/admin/categorias/${category.id}/editar`);
@@ -121,10 +132,10 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
         const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
 
         if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > deltaY * 1.2) {
-            if (deltaX < 0 && activeSection === 'info') {
-                setActiveSection('imagen');
-            } else if (deltaX > 0 && activeSection === 'imagen') {
-                setActiveSection('info');
+            if (deltaX < 0 && activeSection === 'basico') {
+                setActiveSection('productos');
+            } else if (deltaX > 0 && activeSection === 'productos') {
+                setActiveSection('basico');
             }
         }
         touchStartX.current = null;
@@ -197,8 +208,8 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
             >
-                {activeSection === 'info' && (
-                    <div id="panel-info" role="tabpanel" aria-labelledby="tab-info" className={styles.tabPanel}>
+                {activeSection === 'basico' && (
+                    <div id="panel-basico" role="tabpanel" aria-labelledby="tab-basico" className={styles.tabPanel}>
                         <div className={styles.statsRow}>
                             <div className={styles.statCard}>
                                 <Layers size={16} />
@@ -232,18 +243,65 @@ export function AdminCategoryDetailPage({ categoryParam, onBack }: Props) {
                                 <p className={styles.emptyDescription}>Sin descripción</p>
                             )}
                         </div>
-                    </div>
-                )}
 
-                {activeSection === 'imagen' && (
-                    <div id="panel-imagen" role="tabpanel" aria-labelledby="tab-imagen" className={styles.tabPanel}>
-                        <div className={styles.section}>
-                            {category.image && !imgError ? (
+                        {category.image && !imgError && (
+                            <div className={styles.section}>
+                                <h3 className={styles.sectionTitle}><ImageIcon size={14} /> Imagen</h3>
                                 <div className={styles.imagePreview}>
                                     <img src={category.image} alt={displayName} onError={() => setImgError(true)} />
                                 </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {activeSection === 'productos' && (
+                    <div id="panel-productos" role="tabpanel" aria-labelledby="tab-productos" className={styles.tabPanel}>
+                        <div className={styles.section}>
+                            <h3 className={styles.sectionTitle}><Layers size={14} /> Productos Asignados</h3>
+                            {categoryProducts.length > 0 ? (
+                                <div className={styles.productsListContainer}>
+                                    <div className={styles.productsSummaryCard}>
+                                        <span className={styles.productCountValue}>{categoryProducts.length}</span>
+                                        <span className={styles.productCountLabel}>{categoryProducts.length === 1 ? 'Producto' : 'Productos'}</span>
+                                    </div>
+
+                                    <div className={styles.productRows}>
+                                        {categoryProducts.map((product) => {
+                                            const stockStatus = product.stock === 0 ? 'critical' : product.stock <= 5 ? 'low' : 'normal';
+
+                                            return (
+                                                <div key={product.id} className={styles.productRow}>
+                                                    <div className={styles.productMainInfo}>
+                                                        <span className={styles.productName}>{product.name}</span>
+                                                    </div>
+
+                                                    <div className={styles.productSideInfo}>
+                                                        <div className={styles.productStockInline}>
+                                                            <span className={styles.productStockLabel}>Stock</span>
+                                                            <span className={`${styles.productStockValue} ${
+                                                                stockStatus === 'critical' ? styles.stockCritical :
+                                                                stockStatus === 'low' ? styles.stockLow : ''
+                                                            }`}>
+                                                                {product.stock}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <span className={`${styles.productAvailability} ${product.inStock ? styles.available : styles.unavailable}`}>
+                                                        {product.inStock ? 'Disponible' : 'Agotado'}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             ) : (
-                                <p className={styles.emptyDescription}>Esta categoría no tiene imagen cargada.</p>
+                                <div className={styles.emptyProducts}>
+                                    <AlertTriangle size={24} />
+                                    <p className={styles.emptyProductsText}>Sin productos asignados</p>
+                                    <p className={styles.emptyProductsDesc}>Considera agregar productos a esta categoría.</p>
+                                </div>
                             )}
                         </div>
                     </div>

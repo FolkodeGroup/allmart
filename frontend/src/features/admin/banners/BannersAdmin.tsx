@@ -8,7 +8,7 @@ import { useBlocker } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUnsavedChangesWarning } from '../../../hooks/useUnsavedChangesWarning';
 import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
-import { Trash2, Plus, Edit2, Eye, EyeOff, ArrowLeft, Image as ImageIcon, Layers, CheckCircle2 } from 'lucide-react';
+import { Trash2, Edit2, Eye, EyeOff, ArrowLeft, Image as ImageIcon, Layers, CheckCircle2 } from 'lucide-react';
 import { bannersAdminService, type AdminBanner } from './bannersAdminService';
 import { publicBannersService } from '../../../services/publicBannersService';
 import { Button } from '../../../components/ui/Button/Button';
@@ -324,7 +324,6 @@ export function BannersAdmin() {
             setShowForm(true);
           }}
         >
-          <Plus size={16} />
           Nuevo Banner
         </Button>
       </div>
@@ -490,7 +489,7 @@ export function BannersAdmin() {
                       checked={formData.isPinned}
                       onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
                     />
-                    <span>Fijar al inicio 📌</span>
+                    <span>Fijar al inicio</span>
                   </label>
                 </div>
 
@@ -550,7 +549,7 @@ export function BannersAdmin() {
               <div className={styles.bannerInfo}>
                 <h3 className={styles.bannerTitle}>{banner.title}</h3>
                 <div className={styles.bannerMeta}>
-                  {banner.isPinned && <span className={styles.badgePinned}>📌 Fijado</span>}
+                  {banner.isPinned && <span className={styles.badgePinned}>Fijado</span>}
                 </div>
               </div>
 

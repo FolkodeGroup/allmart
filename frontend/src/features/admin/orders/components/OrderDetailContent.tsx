@@ -87,6 +87,8 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [statusError, setStatusError] = useState<string | null>(null);
   const [depositLoading, setDepositLoading] = useState(false);
   const [saveNotesLoading, setSaveNotesLoading] = useState(false);
+  const [notesEditing, setNotesEditing] = useState(false);
+  const [deleteNotesConfirm, setDeleteNotesConfirm] = useState(false);
 
   // ── Modal independiente para Carga / Edición Directa de Dirección ──
   const [addressModalOpen, setAddressModalOpen] = useState(false);
@@ -501,16 +503,38 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const currentStatus = order.status;
 
   const handleSaveNotes = async () => {
+    const nextValue = notes.trim();
     if (saveNotesLoading) return;
     setSaveNotesLoading(true);
     try {
-      await updateOrder(order.id, { notes: notes.trim() });
-      originalNotesRef.current = notes.trim();
-      setSavedNotesDisplay(notes.trim());
+      await updateOrder(order.id, { notes: nextValue });
+      originalNotesRef.current = nextValue;
+      setSavedNotesDisplay(nextValue);
+      setNotes(nextValue);
+      setNotesEditing(false);
+      setDeleteNotesConfirm(false);
       toast.success('Notas internas guardadas con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`No se pudieron guardar las notas: ${message}`);
+    } finally {
+      setSaveNotesLoading(false);
+    }
+  };
+
+  const handleDeleteNotes = async () => {
+    try {
+      setSaveNotesLoading(true);
+      await updateOrder(order.id, { notes: '' });
+      originalNotesRef.current = '';
+      setSavedNotesDisplay('');
+      setNotes('');
+      setNotesEditing(false);
+      setDeleteNotesConfirm(false);
+      toast.success('Nota eliminada');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      toast.error(`No se pudo eliminar la nota: ${message}`);
     } finally {
       setSaveNotesLoading(false);
     }
@@ -908,31 +932,119 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           <section className={styles.detailSection}>
             <h3 className={styles.detailSectionTitle}>Notas Internas</h3>
 
-            {savedNotesDisplay ? (
-              <div className={styles.savedNotesBox}>
-                <div className={styles.savedNotesHeader}>
-                  <span className={styles.savedNotesTitle}>Nota guardada actualmente:</span>
-                </div>
+            {savedNotesDisplay && !notesEditing ? (
+              <>
                 <p className={styles.savedNotesText}>{savedNotesDisplay}</p>
-              </div>
+                <div className={styles.editorActions}>
+                  <button
+                    type="button"
+                    className={styles.noteActionBtn}
+                    aria-label="Editar nota"
+                    onClick={() => {
+                      setNotes(savedNotesDisplay);
+                      setNotesEditing(true);
+                      setDeleteNotesConfirm(false);
+                    }}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.noteActionBtn} ${styles.noteActionDelete}`}
+                    aria-label="Eliminar nota"
+                    onClick={() => setDeleteNotesConfirm(true)}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+
+                {deleteNotesConfirm && (
+                  <div className={styles.deleteConfirmationBox}>
+                    <p>¿Eliminar esta nota?</p>
+                    <div className={styles.confirmActions}>
+                      <button
+                        type="button"
+                        className={styles.confirmDeleteBtn}
+                        aria-label="Sí, borrar"
+                        onClick={() => void handleDeleteNotes()}
+                      >
+                        Sí, borrar
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.cancelBtn}
+                        aria-label="Cancelar eliminación"
+                        onClick={() => setDeleteNotesConfirm(false)}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : null}
 
-            <textarea
-              className={styles.notesInput}
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Escribí notas internas sobre este pedido (ej: comprobante de transferencia validado)..."
-            />
+            {notesEditing && (
+              <div className={styles.notesEditorBox}>
+                <textarea
+                  className={styles.notesInput}
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  rows={4}
+                  aria-label="Editar nota interna"
+                  placeholder="Escribí notas internas sobre este pedido..."
+                />
 
-            <button
-              className={styles.saveNotesBtn}
-              type="button"
-              onClick={handleSaveNotes}
-              disabled={saveNotesLoading}
-            >
-              {saveNotesLoading ? 'Guardando...' : 'Guardar notas'}
-            </button>
+                <div className={styles.editorActions}>
+                  <button
+                    className={styles.saveNotesBtn}
+                    type="button"
+                    onClick={() => void handleSaveNotes()}
+                    disabled={saveNotesLoading}
+                    aria-label="Guardar nota"
+                  >
+                    {saveNotesLoading ? 'Guardando...' : 'Guardar'}
+                  </button>
+                  <button
+                    className={styles.cancelBtn}
+                    type="button"
+                    onClick={() => {
+                      setNotes(savedNotesDisplay || '');
+                      setNotesEditing(false);
+                      setDeleteNotesConfirm(false);
+                    }}
+                    aria-label="Cancelar edición"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!savedNotesDisplay && !notesEditing && (
+              <div className={styles.notesEditorBox}>
+                <textarea
+                  className={styles.notesInput}
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  rows={4}
+                  aria-label="Editar nota interna"
+                  placeholder="Escribí notas internas sobre este pedido..."
+                />
+
+                <div className={styles.editorActions}>
+                  <button
+                    className={styles.saveNotesBtn}
+                    type="button"
+                    onClick={() => void handleSaveNotes()}
+                    disabled={saveNotesLoading}
+                    aria-label="Guardar notas"
+                  >
+                    {saveNotesLoading ? 'Guardando...' : 'Guardar notas'}
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
         )}
       </div>

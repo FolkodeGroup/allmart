@@ -27,11 +27,17 @@ export const TabCategorias = memo(function TabCategorias({
     const [searchTerm, setSearchTerm] = useState('');
     const [tempSelectedIds, setTempSelectedIds] = useState<string[]>(additionalCategoryIds);
     const [expandedParents, setExpandedParents] = useState<Record<string, boolean>>({});
+    const hasPrimaryCategory = Boolean(form.category?.id);
 
     // Sincronizar selección temporal cuando cambian las props o se abre el modal
     useEffect(() => {
         setTempSelectedIds(additionalCategoryIds);
     }, [additionalCategoryIds, modalOpen]);
+
+    const openCategoryPicker = useCallback(() => {
+        if (!hasPrimaryCategory) return;
+        setModalOpen(true);
+    }, [hasPrimaryCategory]);
 
     // Opciones para la categoría principal con ruta breadcrumb limpia
     const primaryCategoryOptions = useMemo(() => {
@@ -370,7 +376,14 @@ export const TabCategorias = memo(function TabCategorias({
                     cursor: pointer;
                     transition: all 0.15s ease;
                 }
-                .addCatActionButton:active {
+                .addCatActionButton:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.55;
+                    background: rgba(118, 146, 130, 0.08);
+                    border-color: var(--color-border, #4b5563);
+                    color: var(--color-text-secondary, #9ca3af);
+                }
+                .addCatActionButton:active:not(:disabled) {
                     background: rgba(118, 146, 130, 0.25);
                 }
 
@@ -388,6 +401,16 @@ export const TabCategorias = memo(function TabCategorias({
                     font-size: 13px;
                     font-weight: 600;
                     cursor: pointer;
+                }
+                .addMoreCatBtn:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.55;
+                }
+                .catHintText {
+                    margin: 6px 2px 0;
+                    font-size: 12px;
+                    line-height: 1.4;
+                    color: var(--color-text-secondary, #9ca3af);
                 }
 
                 /* MODAL / BOTTOM SHEET PORTALEADO */
@@ -629,9 +652,10 @@ export const TabCategorias = memo(function TabCategorias({
                         onChange={onPrimaryCategoryChange}
                         placeholder="Seleccioná una categoría..."
                         className={fieldErrors.category ? styles.inputError : ''}
+                        ariaInvalid={Boolean(fieldErrors.category)}
                     />
                     {fieldErrors.category && (
-                        <span className={styles.errorText}>{fieldErrors.category}</span>
+                        <span className={styles.errorText} role="alert">{fieldErrors.category}</span>
                     )}
                 </div>
 
@@ -645,14 +669,24 @@ export const TabCategorias = memo(function TabCategorias({
 
                     {/* Si NO hay categorías seleccionadas, mostramos un botón de acción directo sin caja vacía */}
                     {selectedAdditionalCategories.length === 0 ? (
-                        <button
-                            id="additional-cat-picker-btn"
-                            type="button"
-                            className="addCatActionButton"
-                            onClick={() => setModalOpen(true)}
-                        >
-                            <span>+ Agregar categorías adicionales</span>
-                        </button>
+                        <>
+                            <button
+                                id="additional-cat-picker-btn"
+                                type="button"
+                                className="addCatActionButton"
+                                onClick={openCategoryPicker}
+                                disabled={!hasPrimaryCategory}
+                                title={hasPrimaryCategory ? undefined : 'Seleccione primero una categoría principal'}
+                                aria-label={hasPrimaryCategory ? 'Agregar categorías adicionales' : 'Seleccione primero una categoría principal'}
+                            >
+                                <span>+ Agregar categorías adicionales</span>
+                            </button>
+                            {!hasPrimaryCategory && (
+                                <span className="catHintText" role="status" aria-live="polite">
+                                    Seleccione primero una categoría principal
+                                </span>
+                            )}
+                        </>
                     ) : (
                         /* Si SÍ hay categorías seleccionadas, renderizamos Chips con botón para agregar más */
                         <div className="chipsWrapperFlat">
@@ -674,7 +708,10 @@ export const TabCategorias = memo(function TabCategorias({
                                 id="additional-cat-picker-btn"
                                 type="button"
                                 className="addMoreCatBtn"
-                                onClick={() => setModalOpen(true)}
+                                onClick={openCategoryPicker}
+                                disabled={!hasPrimaryCategory}
+                                title={hasPrimaryCategory ? undefined : 'Seleccione primero una categoría principal'}
+                                aria-label={hasPrimaryCategory ? 'Agregar más categorías' : 'Seleccione primero una categoría principal'}
                             >
                                 + Agregar más
                             </button>

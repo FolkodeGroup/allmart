@@ -10,7 +10,7 @@ import AdminCollectionForm from './AdminCollectionForm';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import CollectionSlider from '../../../components/CollectionSlider';
 import { AdminPagination } from '../../../components/ui/AdminPagination/AdminPagination';
-import { Search, Plus, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 import toast from 'react-hot-toast';
 import styles from './AdminCollections.module.css';
@@ -63,14 +63,9 @@ const AdminCollections: React.FC = () => {
     loadCollections();
   }, [loadCollections]);
 
-  // Al cargar o cambiar lista, expandir por defecto la primera colección
+  // Al cargar o cambiar lista, mantener todos los dropdowns cerrados
   useEffect(() => {
-    if (collections.length > 0) {
-      setExpandedId((prev) => {
-        const exists = collections.some((c) => c.id === prev);
-        return exists ? prev : collections[0].id;
-      });
-    } else {
+    if (collections.length === 0) {
       setExpandedId(null);
     }
   }, [collections]);
@@ -231,7 +226,6 @@ const AdminCollections: React.FC = () => {
             <span>{syncingAll ? 'Sincronizando...' : 'Sincronizar todo'}</span>
           </button>
           <button type="button" className={styles.btnPrimary} onClick={handleNew}>
-            <Plus size={16} />
             <span>Nueva Colección</span>
           </button>
         </div>
@@ -281,7 +275,7 @@ const AdminCollections: React.FC = () => {
                 );
                 setPage(1);
               }}
-              placeholder="Todas"
+              placeholder="Todos los estados"
             />
           </div>
         </div>

@@ -9,6 +9,7 @@ import { useProductDefaults } from '../hooks/useProductDefaults';
 import { sanitizeObject } from '../utils/security';
 import { ApiError } from '../utils/apiErrorHandler';
 import { isValidSlug, isValidSku } from '../utils/productFormUtils';
+import { getFirstErrorKey } from '../utils/productFormFocus';
 import { logAdminActivity } from '../services/adminActivityLogService';
 
 export const EMPTY_FORM: Omit<AdminProduct, 'id'> = {
@@ -36,9 +37,10 @@ export interface UseProductFormOptions {
     productId?: string | null;
     onSuccess: () => void;
     onUnsavedChanges?: (unsaved: boolean) => void;
+    onValidationError?: (fieldKey?: string) => void;
 }
 
-export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UseProductFormOptions) {
+export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValidationError }: UseProductFormOptions) {
     const auth = useAdminAuth();
     const userEmail = (auth.user as { email?: string } | null)?.email ?? 'desconocido';
 
@@ -167,7 +169,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
     }, []);
 
     // ── Validation ─────────────────────────────────────────────────────────
-    const validateForm = useCallback((): boolean => {
+    const validateForm = useCallback((): Record<string, string> => {
         const errors: Record<string, string> = {};
         const hasVariantOptions = Array.isArray(form.variants) && form.variants.length > 0;
 
@@ -189,8 +191,12 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             }
         }
 
+        const additionalSelected = (form.categoryIds ?? []).filter(id => id && id !== form.category.id);
+
         if (!form.category.id) {
-            errors.category = 'Seleccioná una categoría';
+            errors.category = additionalSelected.length > 0
+                ? 'Seleccione primero una categoría principal'
+                : 'Seleccioná una categoría';
         }
 
         // Permitir stock negativo (ej. -2) — la lógica de alertas se maneja por el umbral crítico
@@ -200,13 +206,17 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
         }
 
         setFieldErrors(errors);
-        return Object.keys(errors).length === 0;
-    }, [form]);
+        if (Object.keys(errors).length > 0) {
+            onValidationError?.(getFirstErrorKey(errors));
+        }
+        return errors;
+    }, [form, onValidationError]);
 
     // ── Submit ─────────────────────────────────────────────────────────────
-    const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e?: React.FormEvent): Promise<boolean> => {
         e?.preventDefault();
-        if (!validateForm()) return;
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) return false;
 
         setError('');
         setSaving(true);
@@ -263,28 +273,36 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             if (err instanceof ApiError) {
                 const responseData = err.data as { errors?: unknown } | undefined;
                 if (responseData?.errors && typeof responseData.errors === 'object' && !Array.isArray(responseData.errors)) {
+                    const responseErrors = responseData.errors as Record<string, string>;
                     setFieldErrors(prev => ({
                         ...prev,
-                        ...(responseData.errors as Record<string, string>),
+                        ...responseErrors,
                     }));
-                    return;
+                    onValidationError?.(getFirstErrorKey(responseErrors));
+                    return false;
                 }
             }
 
             // Detectar error de SKU duplicado
             if (message.toLowerCase().includes('sku') || message.toLowerCase().includes('duplicate')) {
+                const duplicateErrors = {
+                    sku: 'Este SKU ya está en uso',
+                };
                 setFieldErrors(prev => ({
                     ...prev,
-                    sku: 'Este SKU ya está en uso',
+                    ...duplicateErrors,
                 }));
-                return;
+                onValidationError?.(getFirstErrorKey(duplicateErrors));
+                return false;
             }
 
             setError(message || 'Error al guardar el producto');
         } finally {
             setSaving(false);
         }
-    }, [form, isEdit, productId, validateForm, addProduct, updateProduct, userEmail, onSuccess, setProductDefaults]);
+
+        return true;
+    }, [form, isEdit, productId, validateForm, addProduct, updateProduct, userEmail, onSuccess, setProductDefaults, onValidationError]);
 
     // ── Tag handlers ───────────────────────────────────────────────────────
     const addTag = useCallback(() => {
@@ -464,9 +482,10 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges }: UsePr
             const selected = Array.from(event.target.selectedOptions).map(o => o.value);
             setForm(prev => {
                 const primaryId = prev.category.id;
-                const nextIds = primaryId
-                    ? [primaryId, ...selected.filter(id => id !== primaryId)]
-                    : selected;
+                if (!primaryId) {
+                    return { ...prev, categoryIds: [] };
+                }
+                const nextIds = [primaryId, ...selected.filter(id => id !== primaryId)];
                 return { ...prev, categoryIds: nextIds };
             });
         },
