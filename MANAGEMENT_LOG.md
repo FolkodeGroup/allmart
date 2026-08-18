@@ -2404,5 +2404,48 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1392: Mejorar cierre de filtros mobile en vista de productos Home sin recargar página | 2026-08-07 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1391: Ajustar colecciones tipo Home en mobile para mostrar todos los productos y habilitar navegación táctil | 2026-08-07 |
 | dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1390: Banners — Unificar estilos de contenedores en el formulario de alta/edición | 2026-08-07 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1437: 🔄 Registrar puntaje de gestión | 2026-08-09 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1435: 🔄 Actualización automática de puntajes semanal | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1446: Reemplazar icono del carrito vacío | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1445: Reemplazar icono de lupa en vista de productos sin resultados | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1444: Aumentar espaciado entre título y formulario en sección de contacto | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1443: Arreglar navegación y padding de categorías/productos por filtro | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1442: Agregar botón "Ver Producto" e información al slider de colección Home | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1441: Cambiar estilos al precio de las cards de productos del Home | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1440: Quitar nombre de variante del título del producto en el carrito del Home | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1439: Mejorar estilo de dropdown de categorías / productos por filtro del Home | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1438: Agregar botón "Destacado" en Navbar y Footer del Home | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1436: Cambiar estilo de color al título de una Colección Home en el Home | 2026-08-09 |
+| FedericoPaal | 3 | Creación de issue | Issue #1466: VALIDAR DATOS EN MODALES AL AVANZAR ESTADO DE PEDIDO | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1465: PERMITIR EDITAR / ELIMINAR NOTAS INTERNAS EN EL DETALLE DE PEDIDO | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1464: REAJUSTAR BADGE DE "VISIBLE" Y POSICIONAMIENTO DE BOTONES EN CATEGORÍAS | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1463: AGREGAR TABS EN LA VISTA DE DETALLE DE CATEGORÍAS | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1462: No permitir agregar categorías adicionales si no hay categoría principal seleccionada | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1461: Auto-scroll al primer error al intentar crear/guardar producto | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1460: Espaciado uniforme entre títulos de secciones, campos y valores en formulario de productos | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1459: Validaciones al crear/editar producto (muchos campos sin validación) | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1458: Tab Variantes: espaciado prolijo en card de grupo (Opciones del producto) | 2026-08-10 |
+| FedericoPaal | 3 | Creación de issue | Issue #1457: Header del Admin: colores por tema (claro = verde, oscuro = naranja | 2026-08-10 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1471: 🔄 Registrar puntaje de gestión | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1469: 1459-validaciones-al-creareditar-producto-muchos-campos-sin-validación | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1468: 1458 tab variantes espaciado prolijo en card de grupo opciones del producto | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1467: Header del Admin: colores por tema (claro = verde, oscuro = naranja | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1456: Reemplazar icono del carrito vacío | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1455: Reemplazar icono de lupa en vista de productos sin resultados | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1454: 1444 aumentar espaciado entre título y formulario en sección de contacto | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1453: Arreglar navegación y padding de categorías/productos por filtro breadcumb | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1452: 1442 agregar botón ver producto e información al slider de colección home | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1451: Cambiar estilos al precio de las cards de productos del Home | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1450: 1440 quitar nombre de variante del título del producto en el carrito del home | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1449: Mejorar estilo de dropdown de categorías / productos por filtro del Home | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1448: Agregar botón "Destacado" en Navbar y Footer del Home | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1447: cambio de color de titulo de collectionSlider a blanco cuando el fondo sea verde en la sección de colecciones en el home | 2026-08-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1437: 🔄 Registrar puntaje de gestión | 2026-08-13 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1435: 🔄 Actualización automática de puntajes semanal | 2026-08-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1517: 1495 alineación correcta de colecciones tipo categoría en vistas de productos | 2026-08-18 |
+| FedericoPaal | 3 | Creación de issue | Issue #1477: Eliminación del icono de fijado en banners | 2026-08-13 |
+| FedericoPaal | 3 | Creación de issue | Issue #1476: Sticky header en el formulario de nuevo banner | 2026-08-13 |
+| FedericoPaal | 3 | Creación de issue | Issue #1475: Sticky header en el formulario de nueva colección | 2026-08-13 |
+| FedericoPaal | 3 | Creación de issue | Issue #1474: Cierre por defecto de todos los desplegables en la vista de Colecciones | 2026-08-13 |
+| FedericoPaal | 3 | Creación de issue | Issue #1473: Corrección de filtros en la vista de Colecciones | 2026-08-13 |
+| FedericoPaal | 3 | Creación de issue | Issue #1472: Alineación y ajuste visual del bloque de acciones en Colecciones | 2026-08-13 |
+| FedericoPaal | 3 | Creación de issue | Issue #1470: Eliminación de iconos de creación en botones de formulario | 2026-08-13 |
