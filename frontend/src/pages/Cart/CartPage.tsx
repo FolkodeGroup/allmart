@@ -89,7 +89,7 @@ export function CartPage() {
                       <Link to={detailUrl} className={styles.itemName}>
                         {product.name}
                       </Link>
-                      {product.selectedAttributes && Object.keys(product.selectedAttributes).length > 0 ? (
+                      {product.selectedAttributes && Object.keys(product.selectedAttributes).length > 0 && (
                         <div className={styles.itemVariants}>
                           {Object.entries(product.selectedAttributes).map(([key, value], idx, arr) => (
                             <span key={key} className={styles.itemVariantChip}>
@@ -101,8 +101,6 @@ export function CartPage() {
                             </span>
                           ))}
                         </div>
-                      ) : (
-                        <span className={styles.itemCategory}>{product.category.name}</span>
                       )}
                     </div>
 
