@@ -146,6 +146,11 @@ export const filterSuggestions = (
  * @param customValidators - Validadores personalizados
  * @returns Mensaje de error o vacío si es válido
  */
+export const hasProductImages = (images: unknown): boolean => {
+  if (!Array.isArray(images)) return false;
+  return images.some(img => typeof img === 'string' && img.trim() !== '');
+};
+
 export const getInlineFieldError = (
   value: unknown,
   fieldName: string,
@@ -165,6 +170,12 @@ export const getInlineFieldError = (
       }
       if (typeof value === 'string' && value.length > 255) {
         return 'El nombre no puede exceder 255 caracteres';
+      }
+      return '';
+
+    case 'images':
+      if (!hasProductImages(value)) {
+        return 'Debes agregar al menos una imagen del producto';
       }
       return '';
 

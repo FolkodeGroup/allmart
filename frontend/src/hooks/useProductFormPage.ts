@@ -8,7 +8,7 @@ import { useAdminImages } from '../context/AdminImagesContext';
 import { useProductDefaults } from '../hooks/useProductDefaults';
 import { sanitizeObject } from '../utils/security';
 import { ApiError } from '../utils/apiErrorHandler';
-import { isValidSlug, isValidSku } from '../utils/productFormUtils';
+import { isValidSlug, isValidSku, hasProductImages } from '../utils/productFormUtils';
 import { getFirstErrorKey } from '../utils/productFormFocus';
 import { logAdminActivity } from '../services/adminActivityLogService';
 
@@ -172,6 +172,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
     const validateForm = useCallback((): Record<string, string> => {
         const errors: Record<string, string> = {};
         const hasVariantOptions = Array.isArray(form.variants) && form.variants.length > 0;
+        const hasImages = isEdit ? (apiImages.length > 0 || hasProductImages(form.images)) : hasProductImages(form.images);
 
         if (!form.name.trim()) {
             errors.name = 'El nombre es obligatorio';
@@ -199,6 +200,10 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
                 : 'Seleccioná una categoría';
         }
 
+        if (!hasImages) {
+            errors.images = 'Debes agregar al menos una imagen del producto';
+        }
+
         // Permitir stock negativo (ej. -2) — la lógica de alertas se maneja por el umbral crítico
 
         if (form.slug && !isValidSlug(form.slug)) {
@@ -210,7 +215,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             onValidationError?.(getFirstErrorKey(errors));
         }
         return errors;
-    }, [form, onValidationError]);
+    }, [apiImages.length, form, isEdit, onValidationError]);
 
     // ── Submit ─────────────────────────────────────────────────────────────
     const handleSubmit = useCallback(async (e?: React.FormEvent): Promise<boolean> => {

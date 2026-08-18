@@ -13,7 +13,7 @@ import { TabImagenes } from './tabs/TabImagenes';
 import { TabVariantes } from './tabs/TabVariantes';
 import { TabSEOPublicacion } from './tabs/TabSeoPublicacion';
 import { ProductSupplierSection } from './tabs/ProductSupplierSection';
-import { getFieldFocusSelector, getFirstErrorKey } from '../../../utils/productFormFocus';
+import { getFieldFocusSelector } from '../../../utils/productFormFocus';
 
 import { ArrowLeft } from 'lucide-react';
 import styles from './AdminProductFormPage.module.css';
@@ -179,13 +179,7 @@ export function AdminProductFormPage({
         });
     }, []);
 
-    const { sectionErrors, saving, error, isEdit, loading, fieldErrors } = formProps;
-
-    useEffect(() => {
-        const firstErrorKey = getFirstErrorKey(fieldErrors);
-        if (!firstErrorKey || Object.keys(fieldErrors).length === 0) return;
-        focusFirstError(firstErrorKey);
-    }, [fieldErrors, focusFirstError]);
+    const { sectionErrors, saving, error, isEdit, loading } = formProps;
 
     const renderMobileBottomBar = () => {
         if (!isMobile) return null;
@@ -525,7 +519,7 @@ export function AdminProductFormPage({
                     {/* COLUMNA PRINCIPAL (Izquierda - 68% en Desktop) */}
                     <div className={styles.mainColumn}>
                         {/* ── Básico ── */}
-                        <section id="basico" className={`${styles.cardSection} cardSectionMobile`}>
+                        <section id="basico" className={`${styles.cardSection} cardSectionMobile ${sectionErrors.basico ? styles.cardSectionError : ''}`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -569,7 +563,7 @@ export function AdminProductFormPage({
                         </section>
 
                         {/* ── Precios y Stock ── */}
-                        <section id="precios" className={`${styles.cardSection} cardSectionMobile`}>
+                        <section id="precios" className={`${styles.cardSection} cardSectionMobile ${sectionErrors.precios ? styles.cardSectionError : ''}`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -605,7 +599,7 @@ export function AdminProductFormPage({
                         </section>
 
                         {/* ── Imágenes ── */}
-                        <section id="imagenes" className={`${styles.cardSection} cardSectionMobile`}>
+                        <section id="imagenes" className={`${styles.cardSection} cardSectionMobile ${sectionErrors.imagenes ? styles.cardSectionError : ''}`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"
@@ -703,7 +697,7 @@ export function AdminProductFormPage({
                     {/* COLUMNA SECUNDARIA (Derecha - 32% en Desktop) */}
                     <div className={styles.sideColumn}>
                         {/* ── Categorías ── */}
-                        <section id="categorias" className={`${styles.cardSection} cardSectionMobile`}>
+                        <section id="categorias" className={`${styles.cardSection} cardSectionMobile ${sectionErrors.categorias ? styles.cardSectionError : ''}`}>
                             <button
                                 type="button"
                                 className="accordionHeaderButton"

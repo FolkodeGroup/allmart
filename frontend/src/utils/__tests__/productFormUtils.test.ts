@@ -10,6 +10,7 @@ import {
   getInlineFieldError,
   calculateNameQualityScore,
   extractUniqueFieldValues,
+  hasProductImages,
 } from '../productFormUtils';
 
 describe('productFormUtils', () => {
@@ -189,6 +190,14 @@ describe('productFormUtils', () => {
       expect(getInlineFieldError('', 'name')).toBe('El nombre es obligatorio');
       expect(getInlineFieldError('   ', 'name')).toBe('El nombre es obligatorio');
       expect(getInlineFieldError('Producto', 'name')).toBe('');
+    });
+
+    it('debería validar que exista al menos una imagen', () => {
+      expect(hasProductImages([''])).toBe(false);
+      expect(hasProductImages([])).toBe(false);
+      expect(hasProductImages(['   '])).toBe(false);
+      expect(hasProductImages(['https://cdn.test/uno.png'])).toBe(true);
+      expect(hasProductImages([' ', 'https://cdn.test/dos.png'])).toBe(true);
     });
 
     it('debería validar campo price correctamente', () => {
