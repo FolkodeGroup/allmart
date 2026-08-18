@@ -56,6 +56,7 @@ export interface CollectionResponseDTO {
     price: number;
     imageUrl?: string;
     position: number;
+    category?: string;
     variants?: any[];
     skus?: any[];
   }>;
@@ -70,12 +71,20 @@ function generateSlug(name: string): string {
 }
 
 /**
- * Filtro común para incluir solo productos activos en las colecciones de la tienda pública.
+ * Filtro común para incluir solo productos activos y sus categorías en las colecciones.
  */
 const activeProductItemInclude = {
   include: {
     product: {
       include: {
+        productCategories: {
+          include: {
+            category: true,
+          },
+          orderBy: {
+            createdAt: 'asc' as const,
+          },
+        },
         productImages: { select: { id: true }, orderBy: { position: 'asc' as const } },
         productOptions: {
           where: { isActive: true },
@@ -161,6 +170,10 @@ function toCollectionDTO(
             ? baseProduct.price.toNumber()
             : Number(baseProduct.price ?? 0);
 
+          const primaryCategory = Array.isArray(baseProduct.productCategories) && baseProduct.productCategories.length > 0
+            ? baseProduct.productCategories[0]?.category?.name ?? undefined
+            : undefined;
+
           return {
             id: baseProduct.id,
             name: baseProduct.name,
@@ -168,6 +181,7 @@ function toCollectionDTO(
             price: priceNum,
             imageUrl: baseImages[0] ?? undefined,
             position: typeof item.position === 'number' ? item.position : 0,
+            category: primaryCategory,
             variants,
             skus,
           };
