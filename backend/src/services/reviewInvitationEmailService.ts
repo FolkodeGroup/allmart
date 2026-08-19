@@ -80,10 +80,6 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function formatOrderCode(orderId: string): string {
-  return orderId.slice(0, 8).toUpperCase();
-}
-
 function formatPrice(value: number): string {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -94,7 +90,6 @@ function formatPrice(value: number): string {
 
 function buildReviewEmailHtml(
   customerName: string,
-  orderId: string,
   productsWithLinks: Array<{
     productName: string;
     unitPrice: number;
@@ -102,8 +97,6 @@ function buildReviewEmailHtml(
     reviewUrl: string;
   }>
 ): string {
-  const orderCode = formatOrderCode(orderId);
-
   const productCardsHtml = productsWithLinks
     .map((item) => {
       const imageTag = item.productImage
@@ -151,7 +144,7 @@ function buildReviewEmailHtml(
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>¿Qué te pareció tu producto en Allmart?</title>
+        <title>¿Qué te pareció tu compra en Allmart?</title>
       </head>
       <body style="margin:0;padding:0;background-color:#f6f4ee;">
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#f6f4ee">
@@ -168,11 +161,11 @@ function buildReviewEmailHtml(
                   <td style="padding:28px 24px 32px;">
                     <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:16px;line-height:24px;color:#64748b;">¡Hola, ${escapeHtml(customerName)}!</p>
                     <p style="margin:0 0 20px;font-family:Arial,sans-serif;font-size:16px;line-height:24px;color:#334155;">
-                      Tu pedido <strong>#${escapeHtml(orderCode)}</strong> fue entregado con éxito. Tu opinión es muy importante para ayudarnos a mejorar y guiar a otros compradores de la comunidad Allmart.
+                      Tu compra fue entregada con éxito. Tu opinión es muy importante para ayudarnos a seguir mejorando y orientar a otros compradores de la comunidad Allmart.
                     </p>
 
                     <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#1f2937;text-transform:uppercase;letter-spacing:0.5px;">
-                      Productos de tu pedido para valorar:
+                      Productos para valorar:
                     </p>
 
                     ${productCardsHtml}
@@ -212,7 +205,8 @@ export async function sendReviewInvitationEmail(input: ReviewInvitationEmailInpu
       customerName: customerFullName,
     });
 
-    const reviewUrl = `${baseUrl}/producto/${encodeURIComponent(item.productSlug)}?review_token=${encodeURIComponent(token)}`;
+    // 🟢 Agrega #opiniones para dirigir el scroll directamente a la sección de reseñas
+    const reviewUrl = `${baseUrl}/producto/${encodeURIComponent(item.productSlug)}?review_token=${encodeURIComponent(token)}#opiniones`;
 
     return {
       productName: item.productName,
@@ -223,9 +217,9 @@ export async function sendReviewInvitationEmail(input: ReviewInvitationEmailInpu
   });
 
   const transporter = getTransporter();
-  const subject = `Allmart: ¿Qué te pareció tu compra? (Pedido #${formatOrderCode(input.orderId)})`;
+  const subject = `Allmart: ¿Qué te pareció tu compra?`;
 
-  const html = buildReviewEmailHtml(customerFullName, input.orderId, productsWithLinks);
+  const html = buildReviewEmailHtml(customerFullName, productsWithLinks);
 
   await transporter.sendMail({
     from: `${env.MAIL_FROM_NAME} <${env.MAIL_FROM_EMAIL}>`,
@@ -250,7 +244,11 @@ export async function triggerReviewInvitationsForOrder(orderId: string): Promise
               id: true,
               name: true,
               slug: true,
-              productImages: { select: { id: true }, orderBy: { position: 'asc' }, take: 1 },
+              productImages: {
+                select: { id: true, storageKey: true, storageThumbKey: true },
+                orderBy: { position: 'asc' },
+                take: 1,
+              },
             },
           },
         },
@@ -263,14 +261,34 @@ export async function triggerReviewInvitationsForOrder(orderId: string): Promise
   const validProducts: ReviewEmailProduct[] = [];
   const seenIds = new Set<string>();
 
+  const cdnBase = env.R2_PUBLIC_URL ? env.R2_PUBLIC_URL.replace(/\/$/, '') : 'https://imagenes.allmartbazar.com.ar';
+  const frontendBase = env.FRONTEND_URL.replace(/\/$/, '');
+
   for (const item of order.orderItems) {
     if (!item.productId || !item.product) continue;
     if (seenIds.has(item.productId)) continue;
     seenIds.add(item.productId);
 
     let imageUrl: string | null = null;
-    if (item.product.productImages && item.product.productImages.length > 0) {
-      imageUrl = `/api/images/products/${item.product.productImages[0].id}`;
+    const firstImg = item.product.productImages?.[0];
+
+    if (firstImg) {
+      const key = firstImg.storageThumbKey || firstImg.storageKey;
+      if (key) {
+        if (key.startsWith('http://') || key.startsWith('https://')) {
+          imageUrl = key;
+        } else {
+          imageUrl = `${cdnBase}/${key.replace(/^\//, '')}`;
+        }
+      } else {
+        imageUrl = `${frontendBase}/api/images/products/${firstImg.id}/thumb`;
+      }
+    } else if (item.productImage) {
+      if (item.productImage.startsWith('http://') || item.productImage.startsWith('https://')) {
+        imageUrl = item.productImage;
+      } else {
+        imageUrl = `${frontendBase}${item.productImage.startsWith('/') ? '' : '/'}${item.productImage}`;
+      }
     }
 
     validProducts.push({

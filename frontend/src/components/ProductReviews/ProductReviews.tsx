@@ -123,7 +123,7 @@ function ReviewCard({ review }: { review: Review }) {
   );
 }
 
-// ─── Formulario de Opinión Tokenizado & Optimizado ────────────────────────────
+// ─── Formulario de Opinión Tokenizado ─────────────────────────────────────────
 
 interface ReviewFormProps {
   tokenInfo: VerifiedTokenInfo | null;
@@ -200,7 +200,7 @@ function ReviewForm({ tokenInfo, tokenString, onSuccess }: ReviewFormProps) {
           <h3 className={styles.verifiedNoticeTitle}>¡Ya dejaste tu opinión!</h3>
         </div>
         <p className={styles.verifiedNoticeText}>
-          Ya registramos tu reseña para este producto con tu pedido <strong>#{tokenInfo.orderId.slice(0, 8).toUpperCase()}</strong>.
+          Ya registramos tu reseña para este producto.
         </p>
         <p className={styles.verifiedNoticeSub}>
           Muchas gracias por ayudar a la comunidad de compradores de Allmart.
@@ -211,11 +211,11 @@ function ReviewForm({ tokenInfo, tokenString, onSuccess }: ReviewFormProps) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      {/* Banner de Compra Verificada con datos autocompletados */}
+      {/* Banner de Compra Verificada sin ID de orden */}
       <div className={styles.tokenVerifiedBanner}>
         <Sparkles size={16} color="#769282" />
         <span>
-          Invitación de compra verificada para el pedido <strong>#{tokenInfo.orderId.slice(0, 8).toUpperCase()}</strong>
+          Invitación de compra verificada para <strong>{tokenInfo.customerName}</strong>
         </span>
       </div>
 
@@ -349,6 +349,20 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
     };
   }, [reviewTokenParam]);
 
+  // 🟢 Auto-scroll hacia la sección de opiniones cuando el usuario llega mediante review_token
+  useEffect(() => {
+    if (!reviewTokenParam) return;
+
+    const timer = setTimeout(() => {
+      const section = document.getElementById('opiniones') || document.querySelector('[aria-label="Opiniones del producto"]');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [reviewTokenParam, tokenInfo]);
+
   const loadReviews = useCallback(
     async (p: number) => {
       setLoading(true);
@@ -392,7 +406,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   const hasMore = reviews.length < total;
 
   return (
-    <section className={styles.root} aria-label="Opiniones del producto">
+    <section id="opiniones" className={styles.root} aria-label="Opiniones del producto">
       <div className={styles.header}>
         <h2 className={styles.title}>Opiniones de clientes</h2>
         <div className={styles.tabs} role="tablist">
