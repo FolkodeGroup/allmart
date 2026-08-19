@@ -665,7 +665,7 @@ export const TabCategorias = memo(function TabCategorias({
                             </button>
                             {!hasPrimaryCategory && (
                                 <p className="catHintNotice">
-                                    ℹ️ Seleccione primero una categoría principal
+                                    Seleccione primero una categoría principal
                                 </p>
                             )}
                         </>
