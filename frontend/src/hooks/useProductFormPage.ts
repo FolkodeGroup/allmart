@@ -124,13 +124,10 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             }
         };
         initForm();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [productId]);
-
+    }, [productId, getProduct, loadProductVariants, loadImages, getMostRecentDefaults, clearImages]);
 
     // ── Optimized isDirty comparison ───────────────────────────────────────
     const shallowCompareRelevantFields = useCallback((a: typeof form, b: typeof form): boolean => {
-        // Solo comparar campos relevantes para el usuario final
         const keys: (keyof typeof form)[] = [
             'name', 'slug', 'description', 'shortDescription', 'price',
             'images', 'category', 'categoryIds', 'tags', 'inStock', 'isFeatured', 'sku', 'features', 'stock', 'variants'
@@ -154,7 +151,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         if (onUnsavedChanges) onUnsavedChanges(isChanged);
     }, [form, initialForm, onUnsavedChanges, shallowCompareRelevantFields]);
 
-    // ── Stable field setter — KEY FIX for focus bug ────────────────────────
+    // ── Stable field setter ────────────────────────────────────────────────
     const setField = useCallback(<K extends keyof Omit<AdminProduct, 'id'>>(
         key: K,
         value: Omit<AdminProduct, 'id'>[K]
@@ -192,19 +189,13 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             }
         }
 
-        const additionalSelected = (form.categoryIds ?? []).filter(id => id && id !== form.category.id);
-
-        if (!form.category.id) {
-            errors.category = additionalSelected.length > 0
-                ? 'Seleccione primero una categoría principal'
-                : 'Seleccioná una categoría';
+        if (!form.category?.id) {
+            errors.category = 'Seleccioná una categoría principal';
         }
 
         if (!hasImages) {
             errors.images = 'Debes agregar al menos una imagen del producto';
         }
-
-        // Permitir stock negativo (ej. -2) — la lógica de alertas se maneja por el umbral crítico
 
         if (form.slug && !isValidSlug(form.slug)) {
             errors.slug = 'El slug debe contener solo letras minúsculas, números y guiones';
@@ -241,7 +232,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
                 void _omitted;
                 await updateProduct(productId, formWithoutImages as Partial<AdminProduct>);
 
-                // 🟢 CORRECCIÓN: Aislamos de forma segura sin usar .catch() ya que logAdminActivity no devuelve un Promise.
                 try {
                     logAdminActivity({
                         timestamp: new Date().toISOString(),
@@ -257,7 +247,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             } else {
                 const created = await addProduct(sanitizedForm) as AdminProduct;
 
-                // 🟢 CORRECCIÓN: Aislamos de manera segura aquí también.
                 try {
                     logAdminActivity({
                         timestamp: new Date().toISOString(),
@@ -288,7 +277,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
                 }
             }
 
-            // Detectar error de SKU duplicado
             if (message.toLowerCase().includes('sku') || message.toLowerCase().includes('duplicate')) {
                 const duplicateErrors = {
                     sku: 'Este SKU ya está en uso',
@@ -415,8 +403,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         }
     }, [imgFile, imgNewAlt, productId, uploadImage, refreshCurrentPage]);
 
-
-
     const handleApiDeleteImage = useCallback(
         async (imageId: string) => {
             if (!productId) return;
@@ -424,8 +410,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             try {
                 await deleteImage(productId, imageId);
 
-                // 🟢 CORRECCIÓN: Envolvemos en try-catch síncrono en lugar de encadenar .catch().
-                // Esto erradica el error de "Cannot read properties of undefined (reading 'catch')".
                 try {
                     logAdminActivity({
                         timestamp: new Date().toISOString(),
@@ -449,7 +433,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         [productId, userEmail, deleteImage, refreshCurrentPage]
     );
 
-    // ── Category handlers ──────────────────────────────────────────────────
+    // ── Category handlers con limpieza de subcategorías huérfanas ──────────
     const getCategoryLabel = useCallback(
         (category: { id: string; name: string; parentId?: string | null }) => {
             if (!category.parentId) return category.name;
@@ -471,11 +455,18 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             }
             const category = categories.find(item => item.id === value);
             if (!category) return;
+
+            // 🛡️ REGLA ARQUITECTÓNICA: Subcategorías válidas solo para el nuevo padre
+            const validSubcategoryIds = new Set(
+                categories.filter(c => c.parentId === category.id).map(c => c.id)
+            );
+
             setForm(prev => {
-                const existing = Array.isArray(prev.categoryIds)
-                    ? prev.categoryIds.filter(id => id !== prev.category.id)
+                // Filtramos y eliminamos subcategorías que pertenecían al padre anterior
+                const existingValidSubcats = Array.isArray(prev.categoryIds)
+                    ? prev.categoryIds.filter(id => id !== prev.category.id && validSubcategoryIds.has(id))
                     : [];
-                const nextIds = [category.id, ...existing.filter(id => id !== category.id)];
+                const nextIds = [category.id, ...existingValidSubcats];
                 return { ...prev, category, categoryIds: nextIds };
             });
         },
@@ -486,7 +477,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         (event: React.ChangeEvent<HTMLSelectElement>) => {
             const selected = Array.from(event.target.selectedOptions).map(o => o.value);
             setForm(prev => {
-                const primaryId = prev.category.id;
+                const primaryId = prev.category?.id;
                 if (!primaryId) {
                     return { ...prev, categoryIds: [] };
                 }
@@ -499,9 +490,9 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
 
     const additionalCategoryIds = useMemo(
         () => Array.isArray(form.categoryIds)
-            ? form.categoryIds.filter(id => id !== form.category.id)
+            ? form.categoryIds.filter(id => id !== form.category?.id)
             : [],
-        [form.categoryIds, form.category.id]
+        [form.categoryIds, form.category?.id]
     );
 
     // ── Derived error flags per section ───────────────────────────────────
@@ -515,7 +506,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
     }), [fieldErrors]);
 
     return {
-        // Form state
         initialForm,
         form,
         fieldErrors,
@@ -524,29 +514,15 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         saving,
         loading,
         isEdit,
-
-        // Core setter
         setField,
-
-        // Submit
         handleSubmit,
-
-        // Tag state + handlers
         tagInput, setTagInput, addTag, removeTag,
-
-        // Feature state + handlers
         featureInput, setFeatureInput, addFeature, removeFeature,
-
-        // Variant state + handlers
         newGroupName, setNewGroupName,
         newGroupValues, setNewGroupValues,
         addVariantGroup, removeVariantGroup,
         addVariantValue, removeVariantValue,
-
-        // Image (URL/creation) handlers
         setImage, addImageSlot, removeImageSlot,
-
-        // Image (API/edit) state + handlers
         apiImages, imagesLoading, imagesError,
         imgFile, setImgFile,
         imgNewAlt, setImgNewAlt,
@@ -556,8 +532,6 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         fileInputRef,
         handleApiUploadImage,
         handleApiDeleteImage,
-
-        // Category state + handlers
         categories,
         additionalCategoryIds,
         getCategoryLabel,

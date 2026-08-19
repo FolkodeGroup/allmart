@@ -33,23 +33,32 @@ type CategorySortDirection = 'asc' | 'desc';
 export function AdminCategories() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { categories, isLoading: loading, error, refreshCategories, totalPages: apiTotalPages, total, addCategory, updateCategory, deleteCategory, uploadCategoryImage } = useAdminCategories();
+  const {
+    categories,
+    isLoading: loading,
+    error,
+    refreshCategories,
+    totalPages: apiTotalPages,
+    total,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    uploadCategoryImage
+  } = useAdminCategories();
 
-  // Estado local para paginación
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
 
   const { can, user } = useAdminAuth();
   const [search, setSearch] = useState('');
 
-  // Para UX: si el usuario selecciona una sugerencia, forzar búsqueda exacta
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [sortField, setSortField] = useState<CategorySortField>('name');
   const [sortDirection, setSortDirection] = useState<CategorySortDirection>('asc');
-  const [_deleting, setDeleting] = useState(false); //deleting ocultado porque no tiene un uso todavia
+  const [_deleting, setDeleting] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -63,21 +72,17 @@ export function AdminCategories() {
   const [formImageFile, setFormImageFile] = useState<File | null>(null);
   const [formImagePreview, setFormImagePreview] = useState<string>('');
 
-  // Estado para cambio de visibilidad
   const [toggleConfirm, setToggleConfirm] = useState<{ id: string; newVisible: boolean } | null>(null);
-  const [_togglingId, setTogglingId] = useState<string | null>(null); //togglingId ocultado porque no tiene un uso todavia
+  const [_togglingId, setTogglingId] = useState<string | null>(null);
   const [optimisticVis, setOptimisticVis] = useState<Record<string, boolean>>({});
   const { showNotification } = useNotification();
 
-  // Filtros avanzados
   const [minProducts, setMinProducts] = useState<number | ''>('');
   const [maxProducts, setMaxProducts] = useState<number | ''>('');
   const [isVisible, setIsVisible] = useState<'all' | 'visible' | 'hidden'>('all');
 
-  // Debounce para búsqueda instantánea
   const debouncedSearch = useDebouncedValue(search, 350);
 
-  // Selección múltiple (extraído a hook personalizado)
   const {
     selectedIds,
     allVisibleSelected,
@@ -86,7 +91,6 @@ export function AdminCategories() {
     clearSelection
   } = useCategorySelection(categories);
 
-  // Estado y lógica para acciones masivas (extraído a hook personalizado)
   const {
     bulkActionLoading,
     setBulkActionLoading,
@@ -97,7 +101,6 @@ export function AdminCategories() {
     closeBulkAction
   } = useCategoryBulkActions();
 
-  // Opciones de ordenamiento para el Dropdown unificado
   const sortOptions = useMemo(() => [
     { value: 'name', label: 'Nombre' },
     { value: 'slug', label: 'Slug' },
@@ -105,7 +108,6 @@ export function AdminCategories() {
     { value: 'isVisible', label: 'Estado' }
   ], []);
 
-  // Fetch categories cuando los filtros cambian
   useEffect(() => {
     refreshCategories({
       q: selectedSuggestion || debouncedSearch,
@@ -118,7 +120,6 @@ export function AdminCategories() {
     if (selectedSuggestion) setSelectedSuggestion(null);
   }, [debouncedSearch, selectedSuggestion, page, limit, minProducts, maxProducts, isVisible, refreshCategories]);
 
-  // Cuando se regresa a la página, refetch para mostrar cambios
   useEffect(() => {
     refreshCategories({
       q: selectedSuggestion || debouncedSearch,
@@ -155,7 +156,7 @@ export function AdminCategories() {
   };
 
   const handleNew = () => {
-    navigate('/admin/categorias/nueva')
+    navigate('/admin/categorias/nueva');
   };
 
   const handleEdit = (id: string) => {
@@ -360,12 +361,12 @@ export function AdminCategories() {
     return ordered;
   }, [categoriesWithOptimism, sortField, sortDirection]);
 
+  // 🛡️ REGLA ARQUITECTÓNICA: Solo categorías raíz son elegibles como padre
   const hasChildren = editId ? categories.some((cat) => cat.parentId === editId) : false;
   const parentOptions = categories.filter((cat) => !cat.parentId && cat.id !== editId);
 
-  // Mapeo de opciones de categoría padre para el Dropdown en el modal
   const parentCategoryOptions = useMemo(() => [
-    { value: '', label: 'Sin categoría padre' },
+    { value: '', label: '-- Sin categoría padre (Principal) --' },
     ...parentOptions.map((cat) => ({ value: cat.id, label: cat.name }))
   ], [parentOptions]);
 
@@ -406,7 +407,7 @@ export function AdminCategories() {
         onNew={handleNew}
       />
 
-      {/* Filtros fuera del header */}
+      {/* Filtros */}
       <motion.div
         variants={fadeSlideIn}
         initial="hidden"
@@ -526,7 +527,6 @@ export function AdminCategories() {
               allSelected={allVisibleSelected}
               onSelectAll={handleSelectAllVisible}
             />
-            {/* Controles de paginación */}
             <AdminPagination
               page={page}
               totalPages={apiTotalPages}
@@ -537,7 +537,6 @@ export function AdminCategories() {
         )}
       </AnimatePresence>
 
-      {/* Modal de confirmación de visibilidad */}
       <ModalConfirm
         open={!!toggleConfirm}
         title={toggleConfirm?.newVisible ? 'Mostrar categoría' : 'Ocultar categoría'}
@@ -550,7 +549,6 @@ export function AdminCategories() {
         onCancel={() => setToggleConfirm(null)}
       />
 
-      {/* Modal de confirmación de eliminación */}
       <ModalConfirm
         open={!!deleteConfirm}
         title="Eliminar categoría"
@@ -561,7 +559,7 @@ export function AdminCategories() {
         onCancel={() => setDeleteConfirm(null)}
       />
 
-      {/* Formulario en modal para creación rápida */}
+      {/* Formulario modal rápido */}
       <Modal
         open={showForm}
         onClose={closeForm}
@@ -605,7 +603,7 @@ export function AdminCategories() {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Ej: Herramientas"
+              placeholder="Ej: Vajilla, Limpieza, Accesorios..."
               disabled={formSubmitting}
               required
               maxLength={80}
@@ -629,18 +627,18 @@ export function AdminCategories() {
           </label>
 
           <div style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontWeight: 600 }}>Categoría padre</span>
+            <span style={{ fontWeight: 600 }}>Categoría Padre</span>
             <Dropdown
               id="modal-category-parent"
               options={parentCategoryOptions}
               value={formData.parentId}
               onChange={(val) => setFormData((prev) => ({ ...prev, parentId: val }))}
               disabled={formSubmitting || hasChildren}
-              placeholder="Sin categoría padre"
+              placeholder="-- Sin categoría padre (Principal) --"
             />
             {hasChildren && (
-              <span style={{ fontSize: 12, color: '#6b7280' }}>
-                Esta categoría ya tiene subcategorías, no puede asignarse como hija.
+              <span style={{ fontSize: 12, color: 'var(--color-accent, #DDB08C)' }}>
+                ℹ️ Esta categoría ya tiene subcategorías, no puede asignarse como hija de otra.
               </span>
             )}
           </div>
@@ -656,10 +654,6 @@ export function AdminCategories() {
               disabled={formSubmitting}
               style={{ borderRadius: 8, border: '1px dashed #9ca3af', padding: 10, background: '#f9fafb' }}
             />
-            <span style={{ fontSize: 12, color: '#6b7280' }}>
-              Formatos permitidos: imagen. Tamaño máximo: 5 MB.
-              {editId ? ' Si cargás un archivo nuevo, reemplaza la imagen actual.' : ''}
-            </span>
           </label>
 
           {formImagePreview && (
