@@ -643,7 +643,7 @@ export const TabCategorias = memo(function TabCategorias({
                     )}
                 </div>
 
-                {/* ── 2. Subcategorías Asociadas (Ubicado inmediatamente abajo) ── */}
+                {/* ── 2. Subcategorías Asociadas ── */}
                 <div className="catFieldBlock">
                     <label className="catFieldLabel" htmlFor="subcat-invoke-btn">
                         <Layers size={14} /> Subcategorías Asociadas
@@ -657,14 +657,15 @@ export const TabCategorias = memo(function TabCategorias({
                                 className="subcatInvokeBtn"
                                 onClick={openSubcategoryPicker}
                                 disabled={!hasPrimaryCategory}
-                                aria-label={hasPrimaryCategory ? 'Asociar subcategorías al producto' : 'Seleccioná primero una categoría principal'}
+                                aria-label={hasPrimaryCategory ? 'Asociar subcategorías al producto' : 'Seleccione primero una categoría principal'}
+                                title={hasPrimaryCategory ? undefined : 'Seleccione primero una categoría principal'}
                             >
                                 <Plus size={16} />
                                 <span>Asociar Subcategorías</span>
                             </button>
                             {!hasPrimaryCategory && (
                                 <p className="catHintNotice">
-                                    ℹ️ Seleccioná primero una Categoría Principal para habilitar sus subcategorías.
+                                    ℹ️ Seleccione primero una categoría principal
                                 </p>
                             )}
                         </>
@@ -689,7 +690,8 @@ export const TabCategorias = memo(function TabCategorias({
                                 className="subcatAddMoreBtn"
                                 onClick={openSubcategoryPicker}
                                 disabled={!hasPrimaryCategory}
-                                aria-label="Gestionar más subcategorías"
+                                aria-label={hasPrimaryCategory ? 'Modificar subcategorías asociadas' : 'Seleccione primero una categoría principal'}
+                                title={hasPrimaryCategory ? undefined : 'Seleccione primero una categoría principal'}
                             >
                                 <Plus size={12} /> Modificar
                             </button>
