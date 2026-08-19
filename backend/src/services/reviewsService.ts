@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma';
 import { createError } from '../middlewares/errorHandler';
+import { verifyReviewToken } from './reviewInvitationEmailService';
 
 export interface CreateGuestReviewInput {
   productId: string;
@@ -8,6 +9,98 @@ export interface CreateGuestReviewInput {
   rating: number;
   title?: string;
   text?: string;
+}
+
+export interface CreateTokenReviewInput {
+  token: string;
+  rating: number;
+  title?: string;
+  text?: string;
+}
+
+export interface VerifiedTokenInfo {
+  isValid: boolean;
+  orderId: string;
+  productId: string;
+  productName: string;
+  productSlug: string;
+  customerName: string;
+  customerEmail: string;
+  alreadyReviewed: boolean;
+}
+
+export async function verifyTokenInfo(token: string): Promise<VerifiedTokenInfo> {
+  const payload = verifyReviewToken(token);
+
+  const [product, order, existingReview] = await Promise.all([
+    prisma.product.findUnique({
+      where: { id: payload.productId },
+      select: { id: true, name: true, slug: true },
+    }),
+    prisma.order.findUnique({
+      where: { id: payload.orderId },
+      select: { id: true, customerFirstName: true, customerLastName: true, customerEmail: true },
+    }),
+    prisma.productReview.findUnique({
+      where: {
+        productId_orderId: {
+          productId: payload.productId,
+          orderId: payload.orderId,
+        },
+      },
+    }),
+  ]);
+
+  if (!product) throw createError('El producto asociado a esta invitación no existe', 404);
+  if (!order) throw createError('El pedido asociado a esta invitación no fue encontrado', 404);
+
+  return {
+    isValid: true,
+    orderId: order.id,
+    productId: product.id,
+    productName: product.name,
+    productSlug: product.slug,
+    customerName: payload.customerName || `${order.customerFirstName} ${order.customerLastName}`.trim(),
+    customerEmail: payload.customerEmail || order.customerEmail,
+    alreadyReviewed: Boolean(existingReview),
+  };
+}
+
+export async function createReviewWithToken(input: CreateTokenReviewInput) {
+  if (input.rating < 1 || input.rating > 5) {
+    throw createError('El rating debe estar entre 1 y 5 estrellas', 400);
+  }
+
+  const tokenInfo = await verifyTokenInfo(input.token);
+
+  if (tokenInfo.alreadyReviewed) {
+    throw createError('Ya enviaste una reseña para este producto con tu pedido.', 409);
+  }
+
+  const review = await prisma.productReview.create({
+    data: {
+      productId: tokenInfo.productId,
+      orderId: tokenInfo.orderId,
+      reviewerName: tokenInfo.customerName,
+      rating: input.rating,
+      title: input.title?.trim() || null,
+      text: input.text?.trim() || null,
+    },
+  });
+
+  await recalculateProductRating(tokenInfo.productId);
+
+  return {
+    id: review.id,
+    productId: review.productId,
+    userName: review.reviewerName,
+    rating: review.rating,
+    title: review.title,
+    text: review.text,
+    helpful: review.helpful,
+    verified: true,
+    createdAt: review.createdAt,
+  };
 }
 
 export async function getProductReviews(productId: string, page = 1, limit = 10) {

@@ -15,6 +15,7 @@ import {
   AdminBulkOrderAction,
   AdminBulkUpdateOrderStatusItemResultDTO,
 } from '../types/admin/order';
+import { triggerReviewInvitationsForOrder } from './reviewInvitationEmailService';
 
 // ─── Helpers de Conversión ──────────────────────────────────────────────────
 
@@ -277,7 +278,7 @@ export async function getOrderById(id: string): Promise<AdminOrderDTO> {
 export async function updateOrderStatus(id: string, dto: { status: OrderStatus; note?: string }): Promise<AdminOrderDTO> {
   if (!Object.values(OrderStatus).includes(dto.status)) throw createError('Estado inválido', 400);
 
-  return prisma.$transaction(async (tx) => {
+  const updatedOrder = await prisma.$transaction(async (tx) => {
     const order = await tx.order.findUnique({ where: { id } });
     if (!order) throw createError('Pedido no encontrado', 404);
 
@@ -298,8 +299,17 @@ export async function updateOrderStatus(id: string, dto: { status: OrderStatus; 
 
     await handleCustomerMetricsOnStatusChange(tx, order.customerId, order.status, newStatus, Number(order.total));
 
-    return getOrderById(id);
+    return { order, newStatus };
   });
+
+  // 🟢 Disparar invitación transaccional al cliente cuando el pedido llega al estado 'entregado'
+  if (updatedOrder.newStatus === 'entregado' && updatedOrder.order.status !== 'entregado') {
+    triggerReviewInvitationsForOrder(id).catch((err) => {
+      console.error('[Reviews] Error al disparar invitación automática por email:', err);
+    });
+  }
+
+  return getOrderById(id);
 }
 
 export async function updateOrderPaymentStatus(id: string, dto: { paymentStatus: PaymentStatus }): Promise<Order> {

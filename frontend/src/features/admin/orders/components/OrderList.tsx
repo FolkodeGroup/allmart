@@ -1,12 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Mail, Phone, ShoppingBag, Eye } from 'lucide-react';
 import { formatDate, formatPrice } from '../utils/ordersHelpers';
 import { OrderStatusTag } from './OrderStatusTag';
-import { OrderStatusSelector } from './OrderStatusSelector';
 import styles from '../AdminOrders.module.css';
 import type { Order } from '../../../../context/AdminOrdersContext';
-import { useAdminOrders } from '../../../../context/AdminOrdersContext';
-import toast from 'react-hot-toast';
 import { formatOrderCode } from '../../../../utils/orders';
 
 interface OrderListProps {
@@ -17,7 +14,6 @@ interface OrderListProps {
 }
 
 export function OrderList({ orders, onDetail }: OrderListProps) {
-  // Estado local del acordeón: ID del pedido actualmente expandido (null si ninguno)
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = useCallback((id: string, e: React.MouseEvent) => {
@@ -40,7 +36,7 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
               animationDelay: `${index * 35}ms`,
             }}
           >
-            {/* ── Cabecera Colapsada: Nombre Cliente + Total / Estado + Chevron ── */}
+            {/* ── Cabecera Colapsada ── */}
             <div
               className={styles.mobileAccordionHeader}
               onClick={(e) => toggleExpand(order.id, e)}
@@ -57,7 +53,6 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
             >
               <div className={styles.mobileHeaderMainContainer}>
                 <div className={styles.mobileHeaderTopRow}>
-                  {/* Lado Izquierdo: Nombre de Cliente + Total */}
                   <div className={styles.mobileHeaderLeft}>
                     <span className={styles.mobileCardCustomerName}>
                       {order.customer.firstName} {order.customer.lastName}
@@ -67,7 +62,6 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
                     </span>
                   </div>
 
-                  {/* Lado Derecho: Estado + Chevron */}
                   <div className={styles.mobileHeaderRight}>
                     <OrderStatusTag status={order.status} />
                     <span className={styles.mobileAccordionChevron}>
@@ -78,10 +72,10 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
               </div>
             </div>
 
-            {/* ── Cuerpo Expandido: ID, Seña, Fecha, Ítems, Contacto, Productos, Acciones ── */}
+            {/* ── Cuerpo Expandido ── */}
             {isExpanded && (
               <div className={styles.mobileAccordionBody}>
-                {/* 1. Bar de Metadatos del Pedido (ID, Seña, Fecha, Cantidad de Ítems) */}
+                {/* Metadatos */}
                 <div className={styles.mobileMetaRowExpanded}>
                   <div className={styles.mobileMetaGroupLeft}>
                     <span className={styles.mobileCardIdExpanded}>
@@ -107,7 +101,7 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
                   </div>
                 </div>
 
-                {/* 2. Datos de Contacto del Cliente */}
+                {/* Datos de Contacto */}
                 <div className={styles.mobileCustomerBox}>
                   <div className={styles.mobileCustomerRow}>
                     <Mail size={14} className={styles.mobileCustomerIcon} />
@@ -133,7 +127,7 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
                   )}
                 </div>
 
-                {/* 3. Detalle de Productos */}
+                {/* Detalle de Productos */}
                 <div className={styles.mobileItemsBox}>
                   <div className={styles.mobileItemsTitle}>
                     <ShoppingBag size={14} />
@@ -159,7 +153,7 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
                   </ul>
                 </div>
 
-                {/* 4. Acciones Inferiores */}
+                {/* Acciones */}
                 <div className={styles.mobileAccordionActions}>
                   <button
                     type="button"
@@ -170,81 +164,14 @@ export function OrderList({ orders, onDetail }: OrderListProps) {
                     }}
                   >
                     <Eye size={16} />
-                    <span>Ver detalle completo</span>
+                    <span>Ver detalle completo y avanzar pedido</span>
                   </button>
-
-                  <div
-                    className={styles.mobileStatusSelectorWrap}
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    role="presentation"
-                  >
-                    <OrderStatusMobile order={order} />
-                  </div>
                 </div>
               </div>
             )}
           </div>
         );
       })}
-    </div>
-  );
-}
-
-function OrderStatusMobile({ order }: { order: Order }) {
-  const { updateOrderStatus } = useAdminOrders();
-  const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const [localStatus, setLocalStatus] = useState(order.status);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLocalStatus(order.status);
-  }, [order.status]);
-
-  const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === localStatus) return;
-    setLoading(true);
-    setError(null);
-    const prev = localStatus;
-    setLocalStatus(newStatus as typeof localStatus);
-    try {
-      await updateOrderStatus(order.id, newStatus as typeof localStatus);
-      toast.success('Estado actualizado');
-    } catch (e: unknown) {
-      setLocalStatus(prev);
-      setError(e instanceof Error ? e.message : 'Error al actualizar');
-      toast.error('No se pudo actualizar el estado');
-    } finally {
-      setLoading(false);
-      setEditing(false);
-    }
-  };
-
-  return (
-    <div style={{ position: 'relative', minWidth: 120 }}>
-      {editing ? (
-        <OrderStatusSelector
-          value={localStatus}
-          onChange={handleStatusChange}
-          disabled={loading}
-        />
-      ) : (
-        <button
-          type="button"
-          className={styles.statusTagTriggerBtn}
-          onClick={(e) => {
-            e.stopPropagation();
-            setEditing(true);
-          }}
-          aria-label="Cambiar estado de pedido"
-        >
-          <OrderStatusTag status={localStatus} />
-          {loading && <span className={styles.statusLoading}>⏳</span>}
-        </button>
-      )}
-      {error && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</div>}
     </div>
   );
 }

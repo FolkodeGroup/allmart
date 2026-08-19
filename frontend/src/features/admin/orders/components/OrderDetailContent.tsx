@@ -20,7 +20,19 @@ import { useUnsavedChanges } from '../../../../hooks/useUnsavedChanges';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import { OrderStatusSelector } from './OrderStatusSelector';
 import { OrderTimeline } from './OrderTimeline';
-import { MessageSquare, Phone, Mail, Check, ArrowRight, MapPin, Package, ShieldCheck } from 'lucide-react';
+import {
+  MessageSquare,
+  Phone,
+  Mail,
+  Check,
+  ArrowRight,
+  MapPin,
+  Package,
+  ShieldCheck,
+  AlertCircle,
+  Truck,
+  DollarSign,
+} from 'lucide-react';
 import { formatOrderCode, formatOrderLabel } from '../../../../utils/orders';
 import { Modal } from '../../../../components/ui/Modal';
 import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
@@ -44,6 +56,7 @@ const CARRIER_OPTIONS = [
 const WAREHOUSE_OPTIONS = [
   { value: 'Depósito Central Allmart', label: 'Depósito Central Allmart' },
   { value: 'Sucursal Principal', label: 'Sucursal Principal' },
+  { value: 'Local Comercial', label: 'Local Comercial' },
 ];
 
 const PROVINCES_ARGENTINA = [
@@ -96,12 +109,14 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [addrCity, setAddrCity] = useState('');
   const [addrProvince, setAddrProvince] = useState('Buenos Aires');
   const [addrZip, setAddrZip] = useState('');
+  const [addrErrors, setAddrErrors] = useState<Record<string, string>>({});
 
   // ── Modales de Transición Guiada ──
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [confirmPaymentMode, setConfirmPaymentMode] = useState<'deposit' | 'full' | 'cod'>('deposit');
   const [confirmRefNumber, setConfirmRefNumber] = useState('');
   const [confirmCustomNote, setConfirmCustomNote] = useState('');
+  const [confirmErrors, setConfirmErrors] = useState<Record<string, string>>({});
 
   const [preparationModalOpen, setPreparationModalOpen] = useState(false);
   const [prepAddressStreet, setPrepAddressStreet] = useState('');
@@ -113,16 +128,19 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [prepGlassProtection, setPrepGlassProtection] = useState(true);
   const [prepKraftFill, setPrepKraftFill] = useState(true);
   const [prepNote, setPrepNote] = useState('');
+  const [prepErrors, setPrepErrors] = useState<Record<string, string>>({});
 
   const [readyModalOpen, setReadyModalOpen] = useState(false);
   const [readyPackagesCount, setReadyPackagesCount] = useState('1');
-  const [readyLocation, setReadyLocation] = useState('Estantería B-04');
+  const [readyLocation, setReadyLocation] = useState('');
   const [readyNote, setReadyNote] = useState('');
+  const [readyErrors, setReadyErrors] = useState<Record<string, string>>({});
 
   const [dispatchModalOpen, setDispatchModalOpen] = useState(false);
-  const [dispatchCarrier, setDispatchCarrier] = useState('OCA');
+  const [dispatchCarrier, setDispatchCarrier] = useState('Tarifa Plana Express (AMBA / CABA)');
   const [dispatchTracking, setDispatchTracking] = useState('');
   const [dispatchNote, setDispatchNote] = useState('');
+  const [dispatchErrors, setDispatchErrors] = useState<Record<string, string>>({});
 
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
   const [deliveryCollectCash, setDeliveryCollectCash] = useState(true);
@@ -169,6 +187,72 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const auth = useAdminAuth();
   const userEmail = (auth && (auth.user as string)) || 'desconocido';
 
+  const halfTotal = order.total / 2;
+  const isDepositActive = order.has50PercentDeposit ?? false;
+  const remainingAmount = isAbonado ? 0 : isDepositActive ? halfTotal : order.total;
+
+  const nextStepInfo = NEXT_STEP_CONFIG[order.status];
+  const currentStepIndex = HAPPY_PATH_STEPS.indexOf(order.status);
+  const currentStatus = order.status;
+
+  // ─── VALIDACIONES PRÁCTICAS Y FLEXIBLES POR MODAL ─────────────────────────
+
+  const validateConfirmModal = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (!confirmPaymentMode) {
+      errs.paymentMode = 'Debe seleccionar una modalidad de pago.';
+    }
+    setConfirmErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const validatePreparationModal = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (!prepShippingMethod || !prepShippingMethod.trim()) {
+      errs.shippingMethod = 'Debe seleccionar una modalidad de envío.';
+    }
+    const isPickup = prepShippingMethod.toLowerCase().includes('retiro');
+    if (!isPickup) {
+      const streetClean = prepAddressStreet.trim();
+      if (!streetClean) {
+        errs.street = 'La dirección de entrega es obligatoria para envíos a domicilio/correo.';
+      }
+    }
+    setPrepErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const validateReadyModal = (): boolean => {
+    const errs: Record<string, string> = {};
+    const countNum = Number(readyPackagesCount);
+    if (!readyPackagesCount || isNaN(countNum) || countNum < 1 || !Number.isInteger(countNum)) {
+      errs.packagesCount = 'Ingrese una cantidad válida de bultos (entero positivo mayor o igual a 1).';
+    }
+    setReadyErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const validateDispatchModal = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (!dispatchCarrier || !dispatchCarrier.trim()) {
+      errs.carrier = 'Debe seleccionar la empresa o medio de envío.';
+    }
+    setDispatchErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const validateAddressModal = (): boolean => {
+    const errs: Record<string, string> = {};
+    const streetClean = addrStreet.trim();
+    if (!streetClean || streetClean.length < 3) {
+      errs.street = 'La calle y número son obligatorios.';
+    }
+    setAddrErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  // ─── HANDLERS DE ACCIONES Y APERTURA DE MODALES ───────────────────────────
+
   const handleStatusApply = async (targetStatus?: OrderStatus, markPaidTogether = false) => {
     const finalStatus = targetStatus ?? pendingStatus;
     setStatusLoading(true);
@@ -201,6 +285,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   };
 
   const handleOpenAddressModal = () => {
+    setAddrErrors({});
     if (order.shipment) {
       setAddrStreet(order.shipment.addressStreet ?? '');
       setAddrCity(order.shipment.addressCity ?? 'CABA');
@@ -217,9 +302,13 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
 
   const handleSaveAddressOnly = async () => {
     if (!token) return;
+    if (!validateAddressModal()) {
+      toast.error('Por favor ingrese al menos la calle y número de entrega.');
+      return;
+    }
     setStatusLoading(true);
     try {
-      const street = addrStreet.trim() || 'Dirección acordada';
+      const street = addrStreet.trim();
       const city = addrCity.trim() || 'CABA';
       const province = addrProvince.trim() || 'Buenos Aires';
       const zip = addrZip.trim() || '1000';
@@ -250,6 +339,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
 
   const handleTriggerNextStep = (nextStatus: OrderStatus) => {
     if (nextStatus === 'confirmado') {
+      setConfirmErrors({});
       setConfirmPaymentMode(order.has50PercentDeposit ? 'deposit' : isAbonado ? 'full' : 'deposit');
       setConfirmRefNumber('');
       setConfirmCustomNote('');
@@ -258,6 +348,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
 
     if (nextStatus === 'en-preparacion') {
+      setPrepErrors({});
       setPrepAddressStreet(order.shipment?.addressStreet ?? '');
       setPrepAddressCity(order.shipment?.addressCity ?? 'CABA');
       setPrepAddressProvince(order.shipment?.addressProvince ?? 'Buenos Aires');
@@ -274,15 +365,17 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     }
 
     if (nextStatus === 'preparado') {
+      setReadyErrors({});
       setReadyPackagesCount('1');
-      setReadyLocation('Zona de Despacho B-04');
+      setReadyLocation('Local / Zona de Despacho');
       setReadyNote('');
       setReadyModalOpen(true);
       return;
     }
 
     if (nextStatus === 'enviado') {
-      setDispatchCarrier(order.shipment?.carrier ?? 'OCA');
+      setDispatchErrors({});
+      setDispatchCarrier(order.shipment?.carrier ?? 'Tarifa Plana Express (AMBA / CABA)');
       setDispatchTracking(order.shipment?.trackingNumber ?? '');
       setDispatchNote('');
       setDispatchModalOpen(true);
@@ -302,6 +395,10 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   };
 
   const handleExecuteConfirmOrder = async () => {
+    if (!validateConfirmModal()) {
+      toast.error('Por favor seleccione una modalidad de cobro.');
+      return;
+    }
     setStatusLoading(true);
     try {
       if (confirmPaymentMode === 'deposit' && !order.has50PercentDeposit) {
@@ -311,13 +408,16 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       }
 
       const refNote = confirmRefNumber.trim() ? ` (Comprobante: ${confirmRefNumber.trim()})` : '';
-      const modeText = confirmPaymentMode === 'deposit'
-        ? 'Seña del 50% acreditada'
-        : confirmPaymentMode === 'full'
-        ? 'Pago 100% acreditado'
-        : 'Efectivo contra entrega aprobado';
+      const modeText =
+        confirmPaymentMode === 'deposit'
+          ? 'Seña del 50% acreditada'
+          : confirmPaymentMode === 'full'
+          ? 'Pago 100% acreditado'
+          : 'Efectivo contra entrega aprobado';
 
-      const combinedNote = `Pedido confirmado. ${modeText}${refNote}${confirmCustomNote.trim() ? `. ${confirmCustomNote.trim()}` : ''}`;
+      const combinedNote = `Pedido confirmado. ${modeText}${refNote}${
+        confirmCustomNote.trim() ? `. ${confirmCustomNote.trim()}` : ''
+      }`;
 
       await updateOrderStatus(order.id, 'confirmado', combinedNote);
       await refreshOrders();
@@ -344,9 +444,13 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   };
 
   const handleExecutePreparation = async () => {
+    if (!validatePreparationModal()) {
+      toast.error('Por favor complete los datos de entrega requeridos.');
+      return;
+    }
     setStatusLoading(true);
     try {
-      const street = prepAddressStreet.trim() || 'Dirección acordada con cliente';
+      const street = prepAddressStreet.trim() || 'Retiro en punto de entrega / Dirección coordinada';
       const city = prepAddressCity.trim() || 'CABA';
       const province = prepAddressProvince.trim() || 'Buenos Aires';
       const zip = prepAddressZip.trim() || '1000';
@@ -364,11 +468,15 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         }
       }
 
-      const packingSummary = [];
+      const packingSummary: string[] = [];
       if (prepGlassProtection) packingSummary.push('Protección Vidrio/Cerámica');
       if (prepKraftFill) packingSummary.push('Relleno Kraft');
 
-      const combinedNote = `Iniciada preparación en ${prepWarehouse}. Método: ${prepShippingMethod}. Dirección: ${street}, ${city}. ${packingSummary.length > 0 ? `[Embalaje: ${packingSummary.join(', ')}]. ` : ''}${prepNote.trim() ? `Nota: ${prepNote.trim()}` : ''}`;
+      const combinedNote = `Iniciada preparación en ${prepWarehouse}. Método: ${prepShippingMethod}.${
+        prepAddressStreet.trim() ? ` Dirección: ${street}, ${city}.` : ''
+      } ${packingSummary.length > 0 ? `[Embalaje: ${packingSummary.join(', ')}]. ` : ''}${
+        prepNote.trim() ? `Nota: ${prepNote.trim()}` : ''
+      }`;
 
       await updateOrderStatus(order.id, 'en-preparacion', combinedNote);
       await refreshOrders();
@@ -384,7 +492,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         details: { warehouse: prepWarehouse, street, city, shippingMethod: prepShippingMethod },
       });
 
-      toast.success('Pedido en preparación. Datos de envío y embalaje registrados.');
+      toast.success('Pedido en preparación.');
       setPreparationModalOpen(false);
     } catch (err) {
       console.error('Error al iniciar preparación:', err);
@@ -395,11 +503,17 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   };
 
   const handleExecuteReady = async () => {
+    if (!validateReadyModal()) {
+      toast.error('Por favor indique una cantidad válida de bultos.');
+      return;
+    }
     setStatusLoading(true);
     try {
       const pkgs = readyPackagesCount.trim() || '1';
-      const loc = readyLocation.trim() || 'Zona de Expedición';
-      const combinedNote = `Bulto preparado (${pkgs} caja/s) en ${loc}. ${readyNote.trim() ? `Nota: ${readyNote.trim()}` : ''}`;
+      const loc = readyLocation.trim();
+      const combinedNote = `Bulto preparado (${pkgs} caja/s)${loc ? ` en ${loc}` : ''}. ${
+        readyNote.trim() ? `Nota: ${readyNote.trim()}` : ''
+      }`;
 
       await updateOrderStatus(order.id, 'preparado', combinedNote);
       await refreshOrders();
@@ -426,10 +540,16 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   };
 
   const handleExecuteDispatch = async () => {
+    if (!validateDispatchModal()) {
+      toast.error('Por favor seleccione la empresa o medio de envío.');
+      return;
+    }
     setStatusLoading(true);
     try {
       const trackingText = dispatchTracking.trim() ? ` (Guía/Seguimiento: ${dispatchTracking.trim()})` : '';
-      const combinedNote = `Despachado vía ${dispatchCarrier}${trackingText}${dispatchNote.trim() ? `. ${dispatchNote.trim()}` : ''}`;
+      const combinedNote = `Despachado vía ${dispatchCarrier}${trackingText}${
+        dispatchNote.trim() ? `. ${dispatchNote.trim()}` : ''
+      }`;
 
       await updateOrderStatus(order.id, 'enviado', combinedNote);
 
@@ -474,7 +594,9 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       }
 
       const receiverText = deliveryReceiver.trim() ? ` (Recibió: ${deliveryReceiver.trim()})` : '';
-      const combinedNote = `Pedido entregado y completado${receiverText}${deliveryNote.trim() ? `. ${deliveryNote.trim()}` : ''}`;
+      const combinedNote = `Pedido entregado y completado${receiverText}${
+        deliveryNote.trim() ? `. ${deliveryNote.trim()}` : ''
+      }`;
 
       await updateOrderStatus(order.id, 'entregado', combinedNote);
       await refreshOrders();
@@ -490,7 +612,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         details: { collectedCash: deliveryCollectCash, receiver: deliveryReceiver },
       });
 
-      toast.success('Pedido entregado y cerrado');
+      toast.success('Pedido entregado y completado exitosamente');
       setDeliveryModalOpen(false);
     } catch (err) {
       console.error('Error al marcar como entregado:', err);
@@ -499,8 +621,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       setStatusLoading(false);
     }
   };
-
-  const currentStatus = order.status;
 
   const handleSaveNotes = async () => {
     const nextValue = notes.trim();
@@ -584,13 +704,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
 
   const initials = `${order.customer?.firstName?.[0] ?? ''}${order.customer?.lastName?.[0] ?? ''}`;
 
-  const halfTotal = order.total / 2;
-  const isDepositActive = order.has50PercentDeposit ?? false;
-  const remainingAmount = isAbonado ? 0 : isDepositActive ? halfTotal : order.total;
-
-  const nextStepInfo = NEXT_STEP_CONFIG[order.status];
-  const currentStepIndex = HAPPY_PATH_STEPS.indexOf(order.status);
-
   return (
     <div className={`${styles.detailContent} orderDetailContentDesktopGrid`}>
       <style>{`
@@ -610,7 +723,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           }
         }
 
-        /* 💻 ESCRITORIO (>=1024px) */
+        /* 💻 ESCRITORIO (>=1024px) - Expansión al 100% */
         @media (min-width: 1024px) {
           .orderDetailContentDesktopGrid {
             display: grid !important;
@@ -624,22 +737,25 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           .orderDetailContentDesktopGrid .orderDetailMainCol {
             min-width: 0 !important;
             width: 100% !important;
+            flex: 1 1 0% !important;
           }
           .orderDetailContentDesktopGrid .orderDetailSideCol {
             width: 100% !important;
-            max-width: 420px !important;
+            max-width: 400px !important;
           }
         }
 
-        /* 🖥️ ESCRITORIO ANCHO (>=1400px) */
+        /* 🖥️ ESCRITORIO PANORÁMICO (>=1400px) */
         @media (min-width: 1400px) {
           .orderDetailContentDesktopGrid {
             grid-template-columns: 1fr 420px !important;
             gap: 28px !important;
           }
+          .orderDetailContentDesktopGrid .orderDetailSideCol {
+            max-width: 440px !important;
+          }
         }
 
-        /* Estilos del Pipeline Stepper */
         .orderStepperBar {
           display: flex;
           align-items: center;
@@ -700,7 +816,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           background: var(--color-primary, #769282);
         }
 
-        /* Botón Táctico de Siguiente Paso */
         .smartNextStepBar {
           display: flex;
           align-items: center;
@@ -729,7 +844,6 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           background: var(--color-primary-dark, #5d7568);
         }
 
-        /* Modal Styles */
         .guidedModalForm {
           display: flex;
           flex-direction: column;
@@ -776,9 +890,24 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           font-size: 12px;
           color: var(--color-text-secondary, #9ca3af);
         }
+
+        .modalFieldErrorText {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          color: #ef4444;
+          font-size: 12px;
+          font-weight: 600;
+          margin-top: 4px;
+        }
+
+        .modalInputError {
+          border-color: #ef4444 !important;
+          box-shadow: 0 0 0 1px #ef4444 !important;
+        }
       `}</style>
 
-      {/* ── COLUMNA PRINCIPAL (65% en Desktop) ── */}
+      {/* ── COLUMNA PRINCIPAL DINÁMICA (1fr) ── */}
       <div className={`${styles.mainColumn} orderDetailMainCol`}>
         {/* Pipeline Stepper del Ciclo de Vida */}
         {order.status !== 'cancelado' && (
@@ -788,9 +917,24 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               const isActive = currentStepIndex === idx;
 
               return (
-                <div key={step} style={{ display: 'flex', alignItems: 'center', flex: idx < HAPPY_PATH_STEPS.length - 1 ? 1 : 'none' }}>
-                  <div className={`orderStepItem ${isCompleted ? 'orderStepItemCompleted' : ''} ${isActive ? 'orderStepItemActive' : ''}`}>
-                    <span className={`orderStepDot ${isCompleted ? 'orderStepDotCompleted' : ''} ${isActive ? 'orderStepDotActive' : ''}`}>
+                <div
+                  key={step}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flex: idx < HAPPY_PATH_STEPS.length - 1 ? 1 : 'none',
+                  }}
+                >
+                  <div
+                    className={`orderStepItem ${isCompleted ? 'orderStepItemCompleted' : ''} ${
+                      isActive ? 'orderStepItemActive' : ''
+                    }`}
+                  >
+                    <span
+                      className={`orderStepDot ${isCompleted ? 'orderStepDotCompleted' : ''} ${
+                        isActive ? 'orderStepDotActive' : ''
+                      }`}
+                    >
                       {isCompleted ? <Check size={12} /> : idx + 1}
                     </span>
                     <span>{STATUS_LABELS[step]}</span>
@@ -835,7 +979,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             {can('orders.edit') && (
               <OrderStatusSelector
                 value={pendingStatus}
-                onChange={s => {
+                onChange={(s) => {
                   const newStatus = s as OrderStatus;
                   setPendingStatus(newStatus);
                   const newIsDirty = newStatus !== originalStatusRef.current || notes !== originalNotesRef.current;
@@ -853,7 +997,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                 type="text"
                 placeholder="Nota del cambio (opcional, ej: enviado por OCA #123)..."
                 value={statusNote}
-                onChange={e => setStatusNote(e.target.value)}
+                onChange={(e) => setStatusNote(e.target.value)}
                 maxLength={120}
                 disabled={statusLoading}
               />
@@ -869,7 +1013,10 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                 <button
                   className={styles.cancelBtn}
                   type="button"
-                  onClick={() => { setPendingStatus(currentStatus); setStatusNote(''); }}
+                  onClick={() => {
+                    setPendingStatus(currentStatus);
+                    setStatusNote('');
+                  }}
                   disabled={statusLoading}
                 >
                   Cancelar
@@ -895,7 +1042,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               </tr>
             </thead>
             <tbody>
-              {order.items.map(item => (
+              {order.items.map((item) => (
                 <tr key={`${item.productId}-${item.productSkuId ?? 'base'}-${item.productName}`}>
                   <td data-label="Producto" className={styles.tdProduct}>
                     <div className={styles.tdProductName}>{item.productName}</div>
@@ -906,15 +1053,23 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                       </div>
                     )}
                   </td>
-                  <td data-label="Cant." className={styles.tdCenter}>{item.quantity}</td>
-                  <td data-label="P. unit." className={styles.tdRight}>{formatPrice(item.unitPrice)}</td>
-                  <td data-label="Subtotal" className={styles.tdRight}>{formatPrice(item.unitPrice * item.quantity)}</td>
+                  <td data-label="Cant." className={styles.tdCenter}>
+                    {item.quantity}
+                  </td>
+                  <td data-label="P. unit." className={styles.tdRight}>
+                    {formatPrice(item.unitPrice)}
+                  </td>
+                  <td data-label="Subtotal" className={styles.tdRight}>
+                    {formatPrice(item.unitPrice * item.quantity)}
+                  </td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={3} className={styles.totalLabel}>Total del Pedido</td>
+                <td colSpan={3} className={styles.totalLabel}>
+                  Total del Pedido
+                </td>
                 <td className={`${styles.tdRight} ${styles.totalValue}`}>{formatPrice(order.total)}</td>
               </tr>
             </tfoot>
@@ -989,7 +1144,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                 <textarea
                   className={styles.notesInput}
                   value={notes}
-                  onChange={e => setNotes(e.target.value)}
+                  onChange={(e) => setNotes(e.target.value)}
                   rows={4}
                   aria-label="Editar nota interna"
                   placeholder="Escribí notas internas sobre este pedido..."
@@ -1026,7 +1181,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                 <textarea
                   className={styles.notesInput}
                   value={notes}
-                  onChange={e => setNotes(e.target.value)}
+                  onChange={(e) => setNotes(e.target.value)}
                   rows={4}
                   aria-label="Editar nota interna"
                   placeholder="Escribí notas internas sobre este pedido..."
@@ -1049,7 +1204,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         )}
       </div>
 
-      {/* ── COLUMNA LATERAL (35% en Desktop) ── */}
+      {/* ── COLUMNA LATERAL FIJA ERGONÓMICA ── */}
       <div className={`${styles.sideColumn} orderDetailSideCol`}>
         {/* ── Tarjeta CRM: Datos del Cliente ── */}
         <section className={styles.detailSection}>
@@ -1104,8 +1259,20 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           {order.shipment ? (
             <div className={styles.customerCard} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
               <div>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', display: 'block' }}>Dirección de entrega</span>
-                <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block', marginTop: 2 }}>{order.shipment.addressStreet}</strong>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: 'var(--color-text-secondary)',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                  }}
+                >
+                  Dirección de entrega
+                </span>
+                <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block', marginTop: 2 }}>
+                  {order.shipment.addressStreet}
+                </strong>
                 <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
                   {order.shipment.addressCity}, {order.shipment.addressProvince} ({order.shipment.addressZip})
                 </span>
@@ -1122,7 +1289,9 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                   {order.shipment.trackingNumber && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                       <span style={{ color: 'var(--color-text-secondary)' }}>N° Seguimiento:</span>
-                      <strong style={{ color: 'var(--color-primary)', fontFamily: 'monospace' }}>{order.shipment.trackingNumber}</strong>
+                      <strong style={{ color: 'var(--color-primary)', fontFamily: 'monospace' }}>
+                        {order.shipment.trackingNumber}
+                      </strong>
                     </div>
                   )}
                 </div>
@@ -1140,8 +1309,13 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               )}
             </div>
           ) : (
-            <div className={styles.customerCard} style={{ flexDirection: 'column', alignItems: 'center', padding: '16px 12px', textAlign: 'center' }}>
-              <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: 8 }}>Sin dirección de envío cargada</span>
+            <div
+              className={styles.customerCard}
+              style={{ flexDirection: 'column', alignItems: 'center', padding: '16px 12px', textAlign: 'center' }}
+            >
+              <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: 8 }}>
+                Sin dirección de envío cargada
+              </span>
               {can('orders.edit') && (
                 <button
                   type="button"
@@ -1197,11 +1371,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             <div className={styles.depositBox}>
               <div className={styles.depositLabelGroup}>
                 <span className={styles.depositLabel}>Seña del 50%</span>
-                {isDepositActive && (
-                  <span className={styles.depositActiveBadge}>
-                    Registrada
-                  </span>
-                )}
+                {isDepositActive && <span className={styles.depositActiveBadge}>Registrada</span>}
               </div>
               <button
                 className={`${styles.depositBtn} ${isDepositActive ? styles.depositBtnActive : ''}`}
@@ -1217,12 +1387,9 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             {!isAbonado && (
               <div className={styles.whatsappActions}>
                 {!confirmPaid ? (
-                  <button
-                    className={styles.whatsappBtn}
-                    type="button"
-                    onClick={() => setConfirmPaid(true)}
-                  >
-                    ✓ {isDepositActive
+                  <button className={styles.whatsappBtn} type="button" onClick={() => setConfirmPaid(true)}>
+                    ✓{' '}
+                    {isDepositActive
                       ? `Registrar Cobro de Saldo Restante (${formatPrice(remainingAmount)})`
                       : `Marcar como abonado (${formatPrice(order.total)})`}
                   </button>
@@ -1237,15 +1404,14 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                       <button
                         className={styles.whatsappBtnConfirm}
                         type="button"
-                        onClick={async () => { await handleMarkAsPaid(order.id); setConfirmPaid(false); }}
+                        onClick={async () => {
+                          await handleMarkAsPaid(order.id);
+                          setConfirmPaid(false);
+                        }}
                       >
                         Sí, registrar cobro
                       </button>
-                      <button
-                        className={styles.cancelBtn}
-                        type="button"
-                        onClick={() => setConfirmPaid(false)}
-                      >
+                      <button className={styles.cancelBtn} type="button" onClick={() => setConfirmPaid(false)}>
                         Cancelar
                       </button>
                     </div>
@@ -1276,18 +1442,10 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                 <div className={styles.confirmDelete}>
                   <span>¿Seguro que querés eliminar este pedido? Esta acción no se puede deshacer.</span>
                   <div className={styles.confirmActions}>
-                    <button
-                      className={styles.deleteConfirmBtn}
-                      type="button"
-                      onClick={handleDelete}
-                    >
+                    <button className={styles.deleteConfirmBtn} type="button" onClick={handleDelete}>
                       Sí, eliminar
                     </button>
-                    <button
-                      className={styles.cancelBtn}
-                      type="button"
-                      onClick={() => setConfirmDelete(false)}
-                    >
+                    <button className={styles.cancelBtn} type="button" onClick={() => setConfirmDelete(false)}>
                       Cancelar
                     </button>
                   </div>
@@ -1327,50 +1485,82 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       >
         <div className="guidedModalForm">
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="addr-street-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Calle y Número / Piso / Dpto *</label>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="addr-street-input"
+              style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}
+            >
+              Calle y Número / Piso / Dpto *
+            </label>
             <input
               id="addr-street-input"
               type="text"
-              className={styles.statusNoteInput}
+              className={`${styles.statusNoteInput} ${addrErrors.street ? 'modalInputError' : ''}`}
               placeholder="Ej: Av. Corrientes 1234, 4° B"
               value={addrStreet}
-              onChange={e => setAddrStreet(e.target.value)}
+              onChange={(e) => {
+                setAddrStreet(e.target.value);
+                if (addrErrors.street) setAddrErrors((prev) => ({ ...prev, street: '' }));
+              }}
             />
+            {addrErrors.street && (
+              <span className="modalFieldErrorText" role="alert">
+                <AlertCircle size={13} /> {addrErrors.street}
+              </span>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div>
-              <label className={styles.detailSectionTitle} htmlFor="addr-city-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Ciudad / Localidad *</label>
+              <label
+                className={styles.detailSectionTitle}
+                htmlFor="addr-city-input"
+                style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}
+              >
+                Ciudad / Localidad (opcional)
+              </label>
               <input
                 id="addr-city-input"
                 type="text"
                 className={styles.statusNoteInput}
                 placeholder="Ej: CABA"
                 value={addrCity}
-                onChange={e => setAddrCity(e.target.value)}
+                onChange={(e) => setAddrCity(e.target.value)}
               />
             </div>
             <div>
-              <label className={styles.detailSectionTitle} htmlFor="addr-province-select" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Provincia *</label>
+              <label
+                className={styles.detailSectionTitle}
+                htmlFor="addr-province-select"
+                style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}
+              >
+                Provincia
+              </label>
               <Dropdown
                 id="addr-province-select"
                 options={PROVINCES_ARGENTINA}
                 value={addrProvince}
-                onChange={setAddrProvince}
+                onChange={(val) => setAddrProvince(val)}
                 placeholder="Seleccionar provincia..."
               />
             </div>
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="addr-zip-input" style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}>Código Postal</label>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="addr-zip-input"
+              style={{ fontSize: '13px', marginBottom: '4px', display: 'block' }}
+            >
+              Código Postal (opcional)
+            </label>
             <input
               id="addr-zip-input"
               type="text"
               className={styles.statusNoteInput}
               placeholder="Ej: C1043"
               value={addrZip}
-              onChange={e => setAddrZip(e.target.value)}
+              onChange={(e) => setAddrZip(e.target.value)}
             />
           </div>
         </div>
@@ -1404,22 +1594,39 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         }
       >
         <div className="guidedModalForm">
-          <div style={{ padding: '12px 14px', background: 'rgba(118, 146, 130, 0.12)', borderRadius: '10px', border: '1px solid var(--color-primary)' }}>
-            <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', display: 'block' }}>Total del pedido a respaldar:</span>
+          <div
+            style={{
+              padding: '12px 14px',
+              background: 'rgba(118, 146, 130, 0.12)',
+              borderRadius: '10px',
+              border: '1px solid var(--color-primary)',
+            }}
+          >
+            <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', display: 'block' }}>
+              Total del pedido a respaldar:
+            </span>
             <strong style={{ fontSize: '20px', color: 'var(--color-text-primary)' }}>{formatPrice(order.total)}</strong>
           </div>
 
           <div>
             <span className={styles.detailSectionTitle} style={{ marginBottom: '8px', display: 'block' }}>
-              Modalidad de Pago / Respaldo *
+              Modalidad de Cobro / Respaldo *
             </span>
             <div className="radioOptionGroup">
               <div
                 className={`radioOptionCard ${confirmPaymentMode === 'deposit' ? 'radioOptionCardActive' : ''}`}
-                onClick={() => setConfirmPaymentMode('deposit')}
+                onClick={() => {
+                  setConfirmPaymentMode('deposit');
+                  if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                }}
                 role="button"
                 tabIndex={0}
-                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setConfirmPaymentMode('deposit')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setConfirmPaymentMode('deposit');
+                    if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                  }
+                }}
               >
                 <input
                   id="confirm-mode-deposit"
@@ -1427,20 +1634,33 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                   name="confirmPaymentMode"
                   className="radioOptionInput"
                   checked={confirmPaymentMode === 'deposit'}
-                  onChange={() => setConfirmPaymentMode('deposit')}
+                  onChange={() => {
+                    setConfirmPaymentMode('deposit');
+                    if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                  }}
                 />
                 <label htmlFor="confirm-mode-deposit" className="radioOptionText">
                   <span className="radioOptionTitle">Seña del 50% ({formatPrice(halfTotal)})</span>
-                  <span className="radioOptionSub">Acredita seña y reserva producto. Cobro restante en entrega: {formatPrice(halfTotal)}.</span>
+                  <span className="radioOptionSub">
+                    Acredita seña y reserva producto. Saldo restante al entregar: {formatPrice(halfTotal)}.
+                  </span>
                 </label>
               </div>
 
               <div
                 className={`radioOptionCard ${confirmPaymentMode === 'full' ? 'radioOptionCardActive' : ''}`}
-                onClick={() => setConfirmPaymentMode('full')}
+                onClick={() => {
+                  setConfirmPaymentMode('full');
+                  if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                }}
                 role="button"
                 tabIndex={0}
-                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setConfirmPaymentMode('full')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setConfirmPaymentMode('full');
+                    if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                  }
+                }}
               >
                 <input
                   id="confirm-mode-full"
@@ -1448,20 +1668,31 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                   name="confirmPaymentMode"
                   className="radioOptionInput"
                   checked={confirmPaymentMode === 'full'}
-                  onChange={() => setConfirmPaymentMode('full')}
+                  onChange={() => {
+                    setConfirmPaymentMode('full');
+                    if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                  }}
                 />
                 <label htmlFor="confirm-mode-full" className="radioOptionText">
                   <span className="radioOptionTitle">Pago 100% Acreditado ({formatPrice(order.total)})</span>
-                  <span className="radioOptionSub">Registra cobro abonado total con fecha y hora.</span>
+                  <span className="radioOptionSub">Registra cobro total con fecha y hora de acreditación.</span>
                 </label>
               </div>
 
               <div
                 className={`radioOptionCard ${confirmPaymentMode === 'cod' ? 'radioOptionCardActive' : ''}`}
-                onClick={() => setConfirmPaymentMode('cod')}
+                onClick={() => {
+                  setConfirmPaymentMode('cod');
+                  if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                }}
                 role="button"
                 tabIndex={0}
-                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setConfirmPaymentMode('cod')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    setConfirmPaymentMode('cod');
+                    if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                  }
+                }}
               >
                 <input
                   id="confirm-mode-cod"
@@ -1469,43 +1700,59 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                   name="confirmPaymentMode"
                   className="radioOptionInput"
                   checked={confirmPaymentMode === 'cod'}
-                  onChange={() => setConfirmPaymentMode('cod')}
+                  onChange={() => {
+                    setConfirmPaymentMode('cod');
+                    if (confirmErrors.paymentMode) setConfirmErrors((prev) => ({ ...prev, paymentMode: '' }));
+                  }}
                 />
                 <label htmlFor="confirm-mode-cod" className="radioOptionText">
                   <span className="radioOptionTitle">Efectivo contra entrega / Cobro en destino</span>
-                  <span className="radioOptionSub">Aprueba el pedido para cobro total en mano al momento de la entrega.</span>
+                  <span className="radioOptionSub">
+                    Aprueba el pedido para cobro total al momento de la entrega física.
+                  </span>
                 </label>
               </div>
             </div>
+            {confirmErrors.paymentMode && (
+              <span className="modalFieldErrorText" role="alert">
+                <AlertCircle size={13} /> {confirmErrors.paymentMode}
+              </span>
+            )}
           </div>
 
-          {confirmPaymentMode !== 'cod' && (
-            <div>
-              <label className={styles.detailSectionTitle} htmlFor="confirm-ref-number" style={{ marginBottom: '6px', display: 'block' }}>
-                N° de Comprobante / Referencia de Transferencia (opcional)
-              </label>
-              <input
-                id="confirm-ref-number"
-                type="text"
-                className={styles.statusNoteInput}
-                placeholder="Ej: Ref. 89412004 / CBU Mercado Pago"
-                value={confirmRefNumber}
-                onChange={e => setConfirmRefNumber(e.target.value)}
-              />
-            </div>
-          )}
+          <div>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="confirm-ref-number"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
+              N° de Comprobante / Referencia (opcional)
+            </label>
+            <input
+              id="confirm-ref-number"
+              type="text"
+              className={styles.statusNoteInput}
+              placeholder="Ej: Ref. 89412004 / Transferencia verificada por WhatsApp"
+              value={confirmRefNumber}
+              onChange={(e) => setConfirmRefNumber(e.target.value)}
+            />
+          </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="confirm-custom-note" style={{ marginBottom: '6px', display: 'block' }}>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="confirm-custom-note"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
               Nota interna adicional (opcional)
             </label>
             <input
               id="confirm-custom-note"
               type="text"
               className={styles.statusNoteInput}
-              placeholder="Ej: Cliente confirmó transferencia vía WhatsApp"
+              placeholder="Ej: Cliente solicitó enviar en horario de tarde"
               value={confirmCustomNote}
-              onChange={e => setConfirmCustomNote(e.target.value)}
+              onChange={(e) => setConfirmCustomNote(e.target.value)}
             />
           </div>
         </div>
@@ -1540,87 +1787,137 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       >
         <div className="guidedModalForm">
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="prep-shipping-method-select" style={{ marginBottom: '6px', display: 'block' }}>
-              Opción / Modalidad de Envío del Cliente *
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="prep-shipping-method-select"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
+              Opción / Modalidad de Envío *
             </label>
             <Dropdown
               id="prep-shipping-method-select"
               options={CARRIER_OPTIONS}
               value={prepShippingMethod}
-              onChange={setPrepShippingMethod}
+              onChange={(val) => {
+                setPrepShippingMethod(val);
+                if (prepErrors.shippingMethod) setPrepErrors((prev) => ({ ...prev, shippingMethod: '' }));
+              }}
               placeholder="Seleccionar modalidad de envío..."
             />
+            {prepErrors.shippingMethod && (
+              <span className="modalFieldErrorText" role="alert">
+                <AlertCircle size={13} /> {prepErrors.shippingMethod}
+              </span>
+            )}
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="prep-warehouse-select" style={{ marginBottom: '6px', display: 'block' }}>
-              Depósito / Sucursal de Armado *
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="prep-warehouse-select"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
+              Punto / Sucursal de Armado (opcional)
             </label>
             <Dropdown
               id="prep-warehouse-select"
               options={WAREHOUSE_OPTIONS}
               value={prepWarehouse}
-              onChange={setPrepWarehouse}
+              onChange={(val) => setPrepWarehouse(val)}
               placeholder="Seleccionar depósito..."
             />
           </div>
 
-          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
-            <span className={styles.detailSectionTitle} style={{ marginBottom: '8px', display: 'block' }}>
-              <MapPin size={14} style={{ display: 'inline', marginRight: 4 }} />
-              Dirección de Entrega / Despacho
-            </span>
+          {!prepShippingMethod.toLowerCase().includes('retiro') && (
+            <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+              <span className={styles.detailSectionTitle} style={{ marginBottom: '8px', display: 'block' }}>
+                <MapPin size={14} style={{ display: 'inline', marginRight: 4 }} />
+                Dirección de Entrega
+              </span>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div>
-                <label className={styles.detailSectionTitle} htmlFor="prep-address-street" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Calle y Número / Piso / Dpto</label>
-                <input
-                  id="prep-address-street"
-                  type="text"
-                  className={styles.statusNoteInput}
-                  placeholder="Ej: Av. Corrientes 1234, 4° B"
-                  value={prepAddressStreet}
-                  onChange={e => setPrepAddressStreet(e.target.value)}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div>
-                  <label className={styles.detailSectionTitle} htmlFor="prep-address-city" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Ciudad / Localidad</label>
+                  <label
+                    className={styles.detailSectionTitle}
+                    htmlFor="prep-address-street"
+                    style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}
+                  >
+                    Calle y Número / Piso / Dpto *
+                  </label>
                   <input
-                    id="prep-address-city"
+                    id="prep-address-street"
+                    type="text"
+                    className={`${styles.statusNoteInput} ${prepErrors.street ? 'modalInputError' : ''}`}
+                    placeholder="Ej: Av. Corrientes 1234, 4° B"
+                    value={prepAddressStreet}
+                    onChange={(e) => {
+                      setPrepAddressStreet(e.target.value);
+                      if (prepErrors.street) setPrepErrors((prev) => ({ ...prev, street: '' }));
+                    }}
+                  />
+                  {prepErrors.street && (
+                    <span className="modalFieldErrorText" role="alert">
+                      <AlertCircle size={13} /> {prepErrors.street}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label
+                      className={styles.detailSectionTitle}
+                      htmlFor="prep-address-city"
+                      style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}
+                    >
+                      Ciudad / Localidad (opcional)
+                    </label>
+                    <input
+                      id="prep-address-city"
+                      type="text"
+                      className={styles.statusNoteInput}
+                      placeholder="Ej: CABA"
+                      value={prepAddressCity}
+                      onChange={(e) => setPrepAddressCity(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className={styles.detailSectionTitle}
+                      htmlFor="prep-address-province"
+                      style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}
+                    >
+                      Provincia
+                    </label>
+                    <Dropdown
+                      id="prep-address-province"
+                      options={PROVINCES_ARGENTINA}
+                      value={prepAddressProvince}
+                      onChange={(val) => setPrepAddressProvince(val)}
+                      placeholder="Seleccionar provincia..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    className={styles.detailSectionTitle}
+                    htmlFor="prep-address-zip"
+                    style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}
+                  >
+                    Código Postal (opcional)
+                  </label>
+                  <input
+                    id="prep-address-zip"
                     type="text"
                     className={styles.statusNoteInput}
-                    placeholder="Ej: CABA"
-                    value={prepAddressCity}
-                    onChange={e => setPrepAddressCity(e.target.value)}
+                    placeholder="Ej: C1043"
+                    value={prepAddressZip}
+                    onChange={(e) => setPrepAddressZip(e.target.value)}
                   />
                 </div>
-                <div>
-                  <label className={styles.detailSectionTitle} htmlFor="prep-address-province" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Provincia</label>
-                  <Dropdown
-                    id="prep-address-province"
-                    options={PROVINCES_ARGENTINA}
-                    value={prepAddressProvince}
-                    onChange={setPrepAddressProvince}
-                    placeholder="Seleccionar provincia..."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className={styles.detailSectionTitle} htmlFor="prep-address-zip" style={{ fontSize: '12px', marginBottom: '4px', display: 'block' }}>Código Postal</label>
-                <input
-                  id="prep-address-zip"
-                  type="text"
-                  className={styles.statusNoteInput}
-                  placeholder="Ej: C1043"
-                  value={prepAddressZip}
-                  onChange={e => setPrepAddressZip(e.target.value)}
-                />
               </div>
             </div>
-          </div>
+          )}
 
           <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
             <span className={styles.detailSectionTitle} style={{ marginBottom: '8px', display: 'block' }}>
@@ -1628,24 +1925,44 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               Guía Interna de Protección y Embalaje
             </span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label htmlFor="prep-glass-check" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--color-text-primary)' }}>
+              <label
+                htmlFor="prep-glass-check"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  color: 'var(--color-text-primary)',
+                }}
+              >
                 <input
                   id="prep-glass-check"
                   type="checkbox"
                   style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary)' }}
                   checked={prepGlassProtection}
-                  onChange={e => setPrepGlassProtection(e.target.checked)}
+                  onChange={(e) => setPrepGlassProtection(e.target.checked)}
                 />
                 <span>Protección para Vidrio/Cerámica (Cartón corrugado + burbuja)</span>
               </label>
 
-              <label htmlFor="prep-kraft-check" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--color-text-primary)' }}>
+              <label
+                htmlFor="prep-kraft-check"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  color: 'var(--color-text-primary)',
+                }}
+              >
                 <input
                   id="prep-kraft-check"
                   type="checkbox"
                   style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary)' }}
                   checked={prepKraftFill}
-                  onChange={e => setPrepKraftFill(e.target.checked)}
+                  onChange={(e) => setPrepKraftFill(e.target.checked)}
                 />
                 <span>Relleno de estabilización Kraft (sin espacios vacíos)</span>
               </label>
@@ -1653,7 +1970,11 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="prep-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="prep-note-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
               Nota de embalaje (opcional)
             </label>
             <input
@@ -1662,7 +1983,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               className={styles.statusNoteInput}
               placeholder="Ej: Embalar con cuidado especial por tratarse de cristalería"
               value={prepNote}
-              onChange={e => setPrepNote(e.target.value)}
+              onChange={(e) => setPrepNote(e.target.value)}
             />
           </div>
         </div>
@@ -1697,45 +2018,66 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       >
         <div className="guidedModalForm">
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="ready-packages-input" style={{ marginBottom: '6px', display: 'block' }}>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="ready-packages-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
               <Package size={14} style={{ display: 'inline', marginRight: 4 }} />
-              Cantidad de Bultos / Cajas
+              Cantidad de Bultos / Cajas *
             </label>
             <input
               id="ready-packages-input"
               type="number"
               min="1"
-              className={styles.statusNoteInput}
+              step="1"
+              className={`${styles.statusNoteInput} ${readyErrors.packagesCount ? 'modalInputError' : ''}`}
               value={readyPackagesCount}
-              onChange={e => setReadyPackagesCount(e.target.value)}
+              onChange={(e) => {
+                setReadyPackagesCount(e.target.value);
+                if (readyErrors.packagesCount) setReadyErrors((prev) => ({ ...prev, packagesCount: '' }));
+              }}
             />
+            {readyErrors.packagesCount && (
+              <span className="modalFieldErrorText" role="alert">
+                <AlertCircle size={13} /> {readyErrors.packagesCount}
+              </span>
+            )}
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="ready-location-input" style={{ marginBottom: '6px', display: 'block' }}>
-              Ubicación en Estantería de Expedición
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="ready-location-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
+              Ubicación o Punto de Despacho (opcional)
             </label>
             <input
               id="ready-location-input"
               type="text"
               className={styles.statusNoteInput}
-              placeholder="Ej: Estante B-04 / Zona de Retiro"
+              placeholder="Ej: Mostrador / Punto de retiro / Estante 1"
               value={readyLocation}
-              onChange={e => setReadyLocation(e.target.value)}
+              onChange={(e) => setReadyLocation(e.target.value)}
             />
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="ready-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="ready-note-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
               Nota de preparación (opcional)
             </label>
             <input
               id="ready-note-input"
               type="text"
               className={styles.statusNoteInput}
-              placeholder="Ej: Verificado control de calidad 100%"
+              placeholder="Ej: Paquete listo y sellado con cinta de seguridad"
               value={readyNote}
-              onChange={e => setReadyNote(e.target.value)}
+              onChange={(e) => setReadyNote(e.target.value)}
             />
           </div>
         </div>
@@ -1770,34 +2112,55 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       >
         <div className="guidedModalForm">
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="dispatch-carrier-select" style={{ marginBottom: '6px', display: 'block' }}>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="dispatch-carrier-select"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
+              <Truck size={14} style={{ display: 'inline', marginRight: 4 }} />
               Empresa de Logística / Medio de Envío *
             </label>
             <Dropdown
               id="dispatch-carrier-select"
               options={CARRIER_OPTIONS}
               value={dispatchCarrier}
-              onChange={setDispatchCarrier}
+              onChange={(val) => {
+                setDispatchCarrier(val);
+                if (dispatchErrors.carrier) setDispatchErrors((prev) => ({ ...prev, carrier: '' }));
+              }}
               placeholder="Seleccionar medio..."
             />
+            {dispatchErrors.carrier && (
+              <span className="modalFieldErrorText" role="alert">
+                <AlertCircle size={13} /> {dispatchErrors.carrier}
+              </span>
+            )}
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="dispatch-tracking-input" style={{ marginBottom: '6px', display: 'block' }}>
-              N° de Seguimiento / Guía
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="dispatch-tracking-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
+              N° de Seguimiento / Guía (opcional)
             </label>
             <input
               id="dispatch-tracking-input"
               type="text"
               className={styles.statusNoteInput}
-              placeholder="Ej: OCA-98410294 / Flete #12"
+              placeholder="Ej: OCA-98410294 / Moto Mensajería"
               value={dispatchTracking}
-              onChange={e => setDispatchTracking(e.target.value)}
+              onChange={(e) => setDispatchTracking(e.target.value)}
             />
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="dispatch-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="dispatch-note-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
               Nota de envío (opcional)
             </label>
             <input
@@ -1806,7 +2169,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
               className={styles.statusNoteInput}
               placeholder="Ej: Entregado a chofer de reparto turno tarde"
               value={dispatchNote}
-              onChange={e => setDispatchNote(e.target.value)}
+              onChange={(e) => setDispatchNote(e.target.value)}
             />
           </div>
         </div>
@@ -1841,52 +2204,70 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       >
         <div className="guidedModalForm">
           {!isAbonado && (
-            <div style={{ padding: '12px 14px', background: 'rgba(239, 68, 68, 0.12)', borderRadius: '10px', border: '1px solid #ef4444' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <input
-                  id="delivery-collect-cash-check"
-                  type="checkbox"
-                  style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)' }}
-                  checked={deliveryCollectCash}
-                  onChange={e => setDeliveryCollectCash(e.target.checked)}
-                />
-                <label htmlFor="delivery-collect-cash-check" style={{ cursor: 'pointer', userSelect: 'none' }}>
-                  <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block' }}>
-                    Registrar cobro de {formatPrice(remainingAmount)} en efectivo / contra entrega
-                  </strong>
-                  <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                    Al marcar esta casilla, el pedido pasará automáticamente a estado "Abonado".
-                  </span>
-                </label>
+            <div>
+              <div
+                style={{
+                  padding: '12px 14px',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    id="delivery-collect-cash-check"
+                    type="checkbox"
+                    style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+                    checked={deliveryCollectCash}
+                    onChange={(e) => setDeliveryCollectCash(e.target.checked)}
+                  />
+                  <label htmlFor="delivery-collect-cash-check" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                    <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block' }}>
+                      <DollarSign size={14} style={{ display: 'inline', marginRight: 2 }} />
+                      Confirmar cobro de {formatPrice(remainingAmount)} en efectivo / contra entrega
+                    </strong>
+                    <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                      Al marcar esta casilla, el pedido pasará automáticamente al estado financiero "Abonado".
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
           )}
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="delivery-receiver-input" style={{ marginBottom: '6px', display: 'block' }}>
-              Receptor / DNI (opcional)
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="delivery-receiver-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
+              Receptor / Nombre y DNI (opcional)
             </label>
             <input
               id="delivery-receiver-input"
               type="text"
               className={styles.statusNoteInput}
-              placeholder="Ej: Recibió Darío Gimenez (DNI 38.941.200)"
+              placeholder="Ej: Recibió el cliente en mano"
               value={deliveryReceiver}
-              onChange={e => setDeliveryReceiver(e.target.value)}
+              onChange={(e) => setDeliveryReceiver(e.target.value)}
             />
           </div>
 
           <div>
-            <label className={styles.detailSectionTitle} htmlFor="delivery-note-input" style={{ marginBottom: '6px', display: 'block' }}>
+            <label
+              className={styles.detailSectionTitle}
+              htmlFor="delivery-note-input"
+              style={{ marginBottom: '6px', display: 'block' }}
+            >
               Nota de conformidad (opcional)
             </label>
             <input
               id="delivery-note-input"
               type="text"
               className={styles.statusNoteInput}
-              placeholder="Ej: Bulto entregado en perfectas condiciones"
+              placeholder="Ej: Paquete entregado en perfectas condiciones"
               value={deliveryNote}
-              onChange={e => setDeliveryNote(e.target.value)}
+              onChange={(e) => setDeliveryNote(e.target.value)}
             />
           </div>
         </div>
