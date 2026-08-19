@@ -12,6 +12,7 @@ export interface CategoryTabBasicoProps {
         value: Omit<Category, 'id'>[K]
     ) => void;
     parentCategories?: Category[];
+    hasChildren?: boolean;
 }
 
 export function CategoryTabBasico({
@@ -19,6 +20,7 @@ export function CategoryTabBasico({
     errors = {},
     setField,
     parentCategories = [],
+    hasChildren = false,
 }: CategoryTabBasicoProps) {
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -35,18 +37,20 @@ export function CategoryTabBasico({
         setTouched(prev => ({ ...prev, [fieldName]: true }));
     }, []);
 
+    // 🛡️ REGLA ARQUITECTÓNICA: Solo categorías raíz pueden ser seleccionadas como padre
     const parentOptions = useMemo(() => {
+        const rootOnly = parentCategories.filter(cat => !cat.parentId);
         return [
-            { value: '', label: '-- Sin categoría padre (Principal) --' },
-            ...parentCategories.map(cat => ({
+            { value: '', label: '-- Sin categoría padre (Categoría Principal) --' },
+            ...rootOnly.map(cat => ({
                 value: cat.id,
-                label: cat.parentId ? `  └─ ${cat.name}` : cat.name
+                label: cat.name,
             }))
         ];
     }, [parentCategories]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div className={styles.row}>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="category-name">
@@ -61,7 +65,7 @@ export function CategoryTabBasico({
                         onChange={e => handleNameChange(e.target.value)}
                         onBlur={() => handleBlur('name')}
                         required
-                        placeholder="Nombre de la categoría..."
+                        placeholder="Ej: Cocina, Bazar, Hogar..."
                     />
                     {touched.name && errors.name && (
                         <span className={styles.errorText}>{errors.name}</span>
@@ -91,20 +95,24 @@ export function CategoryTabBasico({
                 </div>
             </div>
 
-            {parentCategories && parentCategories.length > 0 && (
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="category-parent">
-                        Categoría padre (opcional)
-                    </label>
-                    <Dropdown
-                        id="category-parent"
-                        options={parentOptions}
-                        value={form.parentId || ''}
-                        onChange={val => setField('parentId', val || null)}
-                        placeholder="-- Sin categoría padre (Principal) --"
-                    />
-                </div>
-            )}
+            <div className={styles.field}>
+                <label className={styles.label} htmlFor="category-parent">
+                    Categoría Padre (Jerarquía Máxima: 2 Niveles)
+                </label>
+                <Dropdown
+                    id="category-parent"
+                    options={parentOptions}
+                    value={form.parentId || ''}
+                    onChange={val => setField('parentId', val || null)}
+                    placeholder="-- Sin categoría padre (Categoría Principal) --"
+                    disabled={hasChildren}
+                />
+                {hasChildren && (
+                    <span className={styles.fieldHint} style={{ color: 'var(--color-accent, #DDB08C)', marginTop: '4px', display: 'block' }}>
+                        ℹ️ Esta categoría ya cuenta con subcategorías hijas asociadas y no puede anidarse dentro de otra.
+                    </span>
+                )}
+            </div>
 
             <div className={styles.field}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none', minHeight: '44px' }} htmlFor="category-visibility-check">

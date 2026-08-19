@@ -4,6 +4,7 @@ import type { TabFormState, SetField } from '../components/types';
 import type { Category } from '../../../../types';
 import styles from '../AdminProductFormPage.module.css';
 import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
+import { Layers, Search, X, Check, Plus, AlertCircle } from 'lucide-react';
 
 interface TabCategoriasProps extends TabFormState {
     setField: SetField;
@@ -26,79 +27,47 @@ export const TabCategorias = memo(function TabCategorias({
     const [modalOpen, setModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [tempSelectedIds, setTempSelectedIds] = useState<string[]>(additionalCategoryIds);
-    const [expandedParents, setExpandedParents] = useState<Record<string, boolean>>({});
+
     const hasPrimaryCategory = Boolean(form.category?.id);
+    const primaryCategoryId = form.category?.id;
 
     // Sincronizar selección temporal cuando cambian las props o se abre el modal
     useEffect(() => {
         setTempSelectedIds(additionalCategoryIds);
     }, [additionalCategoryIds, modalOpen]);
 
-    const openCategoryPicker = useCallback(() => {
+    const openSubcategoryPicker = useCallback(() => {
         if (!hasPrimaryCategory) return;
         setModalOpen(true);
     }, [hasPrimaryCategory]);
 
-    // Opciones para la categoría principal con ruta breadcrumb limpia
+    // 🛡️ REGLA ARQUITECTÓNICA: Solo categorías raíz son elegibles como Categoría Principal
     const primaryCategoryOptions = useMemo(() => {
-        return categories.map(c => {
-            const label = getCategoryLabel(c);
-            return {
-                value: c.id,
-                label: label.replace(' > ', ' › ')
-            };
-        });
+        const rootCategories = categories.filter(c => !c.parentId);
+        return rootCategories.map(c => ({
+            value: c.id,
+            label: getCategoryLabel(c),
+        }));
     }, [categories, getCategoryLabel]);
 
-    // Categorías disponibles para adicionales (excluye la principal)
-    const availableCategories = useMemo(() => {
-        return categories.filter(c => c.id !== form.category.id);
-    }, [categories, form.category.id]);
+    // 🛡️ REGLA ARQUITECTÓNICA: Filtrado estricto - Solo subcategorías del padre seleccionado
+    const availableSubcategories = useMemo(() => {
+        if (!primaryCategoryId) return [];
+        return categories.filter(c => c.parentId === primaryCategoryId);
+    }, [categories, primaryCategoryId]);
 
-    // Categorías filtradas por búsqueda
-    const filteredCategories = useMemo(() => {
-        if (!searchTerm.trim()) return availableCategories;
+    // Subcategorías filtradas por término de búsqueda en tiempo real
+    const filteredSubcategories = useMemo(() => {
+        if (!searchTerm.trim()) return availableSubcategories;
         const q = searchTerm.toLowerCase().trim();
-        return availableCategories.filter(c => {
-            const label = getCategoryLabel(c).toLowerCase();
-            return label.includes(q) || c.slug.toLowerCase().includes(q);
+        return availableSubcategories.filter(c => {
+            const nameMatch = c.name.toLowerCase().includes(q);
+            const slugMatch = c.slug.toLowerCase().includes(q);
+            return nameMatch || slugMatch;
         });
-    }, [availableCategories, searchTerm, getCategoryLabel]);
+    }, [availableSubcategories, searchTerm]);
 
-    // Agrupamiento por categorías padre
-    const groupedCategories = useMemo(() => {
-        const parents = availableCategories.filter(c => !c.parentId);
-        const childrenMap = new Map<string, Category[]>();
-
-        availableCategories.forEach(c => {
-            if (c.parentId) {
-                const list = childrenMap.get(c.parentId) || [];
-                list.push(c);
-                childrenMap.set(c.parentId, list);
-            }
-        });
-
-        return { parents, childrenMap };
-    }, [availableCategories]);
-
-    // Auto-expandir carpetas padre cuando hay búsqueda activa
-    useEffect(() => {
-        if (searchTerm.trim()) {
-            const nextExpanded: Record<string, boolean> = {};
-            groupedCategories.parents.forEach(p => {
-                nextExpanded[p.id] = true;
-            });
-            setExpandedParents(nextExpanded);
-        }
-    }, [searchTerm, groupedCategories.parents]);
-
-    // Conmutador de expansión de carpetas padre
-    const toggleParentExpand = useCallback((parentId: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        setExpandedParents(prev => ({ ...prev, [parentId]: !prev[parentId] }));
-    }, []);
-
-    // Simulación de evento de React para actualizar categorías adicionales en el formulario principal
+    // Simulación de evento para actualizar la selección en el formulario principal
     const updateAdditionalCategories = useCallback((nextIds: string[]) => {
         onAdditionalCategoriesChange({
             target: {
@@ -107,12 +76,11 @@ export const TabCategorias = memo(function TabCategorias({
         } as unknown as React.ChangeEvent<HTMLSelectElement>);
     }, [onAdditionalCategoriesChange]);
 
-    // Handlers para el modal
-    const handleToggleTempCategory = useCallback((categoryId: string) => {
+    const handleToggleTempSubcategory = useCallback((subcategoryId: string) => {
         setTempSelectedIds(prev =>
-            prev.includes(categoryId)
-                ? prev.filter(id => id !== categoryId)
-                : [...prev, categoryId]
+            prev.includes(subcategoryId)
+                ? prev.filter(id => id !== subcategoryId)
+                : [...prev, subcategoryId]
         );
     }, []);
 
@@ -122,166 +90,123 @@ export const TabCategorias = memo(function TabCategorias({
         setSearchTerm('');
     }, [tempSelectedIds, updateAdditionalCategories]);
 
-    const handleRemoveChip = useCallback((categoryId: string, e: React.MouseEvent) => {
+    const handleRemoveChip = useCallback((subcategoryId: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        const nextIds = additionalCategoryIds.filter(id => id !== categoryId);
+        const nextIds = additionalCategoryIds.filter(id => id !== subcategoryId);
         updateAdditionalCategories(nextIds);
     }, [additionalCategoryIds, updateAdditionalCategories]);
 
-    // Categorías adicionales seleccionadas para renderizar Chips
-    const selectedAdditionalCategories = useMemo(() => {
+    // Subcategorías actualmente seleccionadas para renderizar los chips
+    const selectedSubcategoryObjects = useMemo(() => {
         return additionalCategoryIds
             .map(id => categories.find(c => c.id === id))
             .filter((c): c is Category => Boolean(c));
     }, [additionalCategoryIds, categories]);
 
-    // Modal / Bottom-Sheet portaleado a document.body con accesibilidad garantizada
+    // Render del Modal / Bottom Sheet portaleado
     const renderModal = () => {
         if (!modalOpen) return null;
 
-        const isSearching = !!searchTerm.trim();
-
         const modalContent = (
-            <div className="catPickerOverlay" role="presentation">
+            <div className="subcatPickerOverlay" role="presentation">
                 <button
                     type="button"
-                    className="catPickerBackdropBtn"
+                    className="subcatPickerBackdrop"
                     onClick={() => setModalOpen(false)}
                     aria-label="Cerrar modal"
                     tabIndex={-1}
                 />
                 <div
-                    className="catPickerSheet"
+                    className="subcatPickerSheet"
                     role="dialog"
                     aria-modal="true"
-                    aria-labelledby="cat-picker-title"
+                    aria-labelledby="subcat-picker-title"
                 >
-                    {/* Header */}
-                    <div className="catPickerHeader">
+                    {/* Encabezado */}
+                    <div className="subcatPickerHeader">
                         <div>
-                            <h3 id="cat-picker-title" className="catPickerTitle">
-                                Categorías adicionales
+                            <h3 id="subcat-picker-title" className="subcatPickerTitle">
+                                Subcategorías de {form.category?.name || 'Categoría'}
                             </h3>
-                            <p className="catPickerSubtitle">
-                                Seleccioná una o más categorías secundarias
+                            <p className="subcatPickerSubtitle">
+                                Seleccioná las subcategorías asociadas para este producto
                             </p>
                         </div>
                         <button
                             type="button"
-                            className="catPickerCloseBtn"
+                            className="subcatPickerCloseBtn"
                             onClick={() => setModalOpen(false)}
-                            aria-label="Cerrar ventana"
+                            aria-label="Cerrar"
                         >
-                            ✕
+                            <X size={18} />
                         </button>
                     </div>
 
-                    {/* Buscador */}
-                    <div className="catPickerSearchBox">
-                        <input
-                            type="search"
-                            className="catPickerSearchInput"
-                            placeholder="Buscar categoría..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            autoComplete="off"
-                            // eslint-disable-next-line jsx-a11y/no-autofocus
-                            autoFocus
-                        />
-                    </div>
+                    {/* Buscador Integrado */}
+                    {availableSubcategories.length > 4 && (
+                        <div className="subcatPickerSearchBox">
+                            <div className="subcatSearchInputWrap">
+                                <Search size={15} className="subcatSearchIcon" />
+                                <input
+                                    type="search"
+                                    className="subcatPickerSearchInput"
+                                    placeholder="Buscar subcategoría..."
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    autoComplete="off"
+                                />
+                            </div>
+                        </div>
+                    )}
 
-                    {/* Cuerpo con árbol jerárquico */}
-                    <div className="catPickerBody">
-                        {isSearching ? (
-                            /* Modo búsqueda: listado plano con breadcrumbs */
-                            filteredCategories.length === 0 ? (
-                                <p className="catPickerEmpty">No se encontraron categorías con "{searchTerm}".</p>
-                            ) : (
-                                <div className="catPickerList">
-                                    {filteredCategories.map(cat => {
-                                        const isChecked = tempSelectedIds.includes(cat.id);
-                                        const breadcrumb = getCategoryLabel(cat).replace(' > ', ' › ');
-                                        return (
-                                            <label key={cat.id} className="catPickerRow">
-                                                <input
-                                                    type="checkbox"
-                                                    className="catPickerCheckbox"
-                                                    checked={isChecked}
-                                                    onChange={() => handleToggleTempCategory(cat.id)}
-                                                />
-                                                <span className="catPickerRowLabel">{breadcrumb}</span>
-                                            </label>
-                                        );
-                                    })}
-                                </div>
-                            )
+                    {/* Lista con Selección Múltiple */}
+                    <div className="subcatPickerBody">
+                        {availableSubcategories.length === 0 ? (
+                            <div className="subcatEmptyState">
+                                <AlertCircle size={28} className="subcatEmptyIcon" />
+                                <p className="subcatEmptyTitle">Sin subcategorías registradas</p>
+                                <p className="subcatEmptyDesc">
+                                    La categoría principal "{form.category?.name}" no tiene subcategorías hijas creadas en el panel de administración.
+                                </p>
+                            </div>
+                        ) : filteredSubcategories.length === 0 ? (
+                            <p className="subcatPickerEmpty">
+                                No se encontraron subcategorías con "{searchTerm}".
+                            </p>
                         ) : (
-                            /* Modo normal: árbol jerárquico colapsable */
-                            <div className="catPickerTree">
-                                {groupedCategories.parents.map(parent => {
-                                    const subcats = groupedCategories.childrenMap.get(parent.id) || [];
-                                    const isParentChecked = tempSelectedIds.includes(parent.id);
-                                    const isExpanded = !!expandedParents[parent.id];
-                                    const hasSubcats = subcats.length > 0;
-
+                            <div className="subcatPickerList" role="group" aria-label="Lista de subcategorías">
+                                {filteredSubcategories.map(sub => {
+                                    const isChecked = tempSelectedIds.includes(sub.id);
                                     return (
-                                        <div key={parent.id} className="catPickerTreeGroup">
-                                            {/* Fila Padre */}
-                                            <div className="catPickerParentRow">
-                                                <label className="catPickerRowLabelWrap">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="catPickerCheckbox"
-                                                        checked={isParentChecked}
-                                                        onChange={() => handleToggleTempCategory(parent.id)}
-                                                    />
-                                                    <span className="catPickerParentName">{parent.name}</span>
-                                                </label>
-
-                                                {hasSubcats && (
-                                                    <button
-                                                        type="button"
-                                                        className="catPickerExpandToggle"
-                                                        onClick={e => toggleParentExpand(parent.id, e)}
-                                                        aria-label={isExpanded ? 'Colapsar subcategorías' : 'Expandir subcategorías'}
-                                                    >
-                                                        {subcats.length} {isExpanded ? '▲' : '▼'}
-                                                    </button>
-                                                )}
+                                        <label
+                                            key={sub.id}
+                                            className={`subcatPickerRow ${isChecked ? 'subcatPickerRowActive' : ''}`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                className="subcatPickerCheckbox"
+                                                checked={isChecked}
+                                                onChange={() => handleToggleTempSubcategory(sub.id)}
+                                            />
+                                            <div className="subcatRowText">
+                                                <span className="subcatRowName">{sub.name}</span>
+                                                <span className="subcatRowSlug">slug: {sub.slug}</span>
                                             </div>
-
-                                            {/* Subcategorías con indentación por borde izquierdo */}
-                                            {hasSubcats && isExpanded && (
-                                                <div className="catPickerSubTree">
-                                                    {subcats.map(sub => {
-                                                        const isSubChecked = tempSelectedIds.includes(sub.id);
-                                                        return (
-                                                            <label key={sub.id} className="catPickerSubRow">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className="catPickerCheckbox"
-                                                                    checked={isSubChecked}
-                                                                    onChange={() => handleToggleTempCategory(sub.id)}
-                                                                />
-                                                                <span className="catPickerSubName">{sub.name}</span>
-                                                            </label>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
+                                            {isChecked && <Check size={16} className="subcatCheckIcon" />}
+                                        </label>
                                     );
                                 })}
                             </div>
                         )}
                     </div>
 
-                    {/* Footer de acciones */}
-                    <div className="catPickerFooter">
+                    {/* Footer de Aplicación */}
+                    <div className="subcatPickerFooter">
                         <button
                             type="button"
-                            className="catPickerApplyBtn"
+                            className="subcatPickerApplyBtn"
                             onClick={handleApplySelection}
+                            disabled={availableSubcategories.length === 0}
                         >
                             Aplicar ({tempSelectedIds.length} seleccionada{tempSelectedIds.length !== 1 ? 's' : ''})
                         </button>
@@ -297,37 +222,74 @@ export const TabCategorias = memo(function TabCategorias({
     return (
         <fieldset className={styles.fieldset} style={{ border: 'none', padding: 0, margin: 0 }}>
             <style>{`
-                /* Contenedor plano sin cajas ni bordes anidados */
                 .tabCatContainer {
                     display: flex;
                     flex-direction: column;
-                    gap: 22px;
-                    padding: 4px 0;
+                    gap: 20px;
+                    padding: 2px 0;
+                    width: 100%;
+                    box-sizing: border-box;
                 }
+
                 .catFieldBlock {
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
+                    width: 100%;
                 }
-                .catFieldHeader {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                }
+
                 .catFieldLabel {
                     font-size: 14px;
                     font-weight: 600;
                     color: var(--color-text-primary, #ffffff);
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
                 }
 
-                /* Chips planos e interactivos */
-                .chipsWrapperFlat {
+                /* Botón Invocador del Modal */
+                .subcatInvokeBtn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    width: 100%;
+                    min-height: 46px;
+                    padding: 10px 16px;
+                    border: 1px solid var(--color-primary, #769282);
+                    background: rgba(118, 146, 130, 0.12);
+                    color: var(--color-text-primary, #ffffff);
+                    border-radius: 10px;
+                    font-size: 14px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.15s ease;
+                    box-sizing: border-box;
+                }
+
+                .subcatInvokeBtn:hover:not(:disabled) {
+                    background: rgba(118, 146, 130, 0.22);
+                    border-color: var(--color-primary-light, #8fa99a);
+                }
+
+                .subcatInvokeBtn:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                    background: rgba(255, 255, 255, 0.03);
+                    border-color: var(--color-border, #374151);
+                    color: var(--color-text-secondary, #9ca3af);
+                }
+
+                /* Chips de Subcategorías */
+                .subcatChipsGrid {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 8px;
                     align-items: center;
+                    margin-top: 4px;
                 }
-                .catChip {
+
+                .subcatChip {
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;
@@ -337,9 +299,16 @@ export const TabCategorias = memo(function TabCategorias({
                     border-radius: 20px;
                     font-size: 13px;
                     font-weight: 600;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                    animation: chipPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
                 }
-                .catChipRemove {
+
+                @keyframes chipPopIn {
+                    from { transform: scale(0.9); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+
+                .subcatChipRemove {
                     background: transparent;
                     border: none;
                     color: #ffffff;
@@ -348,73 +317,47 @@ export const TabCategorias = memo(function TabCategorias({
                     display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    width: 20px;
-                    height: 20px;
+                    width: 18px;
+                    height: 18px;
                     border-radius: 50%;
                     padding: 0;
-                    margin-left: 2px;
-                }
-                .catChipRemove:hover {
-                    background: rgba(0,0,0,0.25);
+                    transition: background 0.15s ease;
                 }
 
-                /* Botón de acción principal limpio */
-                .addCatActionButton {
+                .subcatChipRemove:hover {
+                    background: rgba(0, 0, 0, 0.3);
+                }
+
+                .subcatAddMoreBtn {
                     display: inline-flex;
                     align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    width: 100%;
-                    min-height: 48px;
-                    padding: 12px 16px;
-                    border: 1px solid var(--color-primary, #769282);
-                    background: rgba(118, 146, 130, 0.12);
-                    color: var(--color-text-primary, #ffffff);
-                    border-radius: 10px;
-                    font-size: 15px;
-                    font-weight: 700;
+                    gap: 4px;
+                    min-height: 34px;
+                    padding: 4px 12px;
+                    border: 1px dashed var(--color-primary, #769282);
+                    background: rgba(118, 146, 130, 0.08);
+                    color: var(--color-primary-light, #8fa99a);
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 600;
                     cursor: pointer;
                     transition: all 0.15s ease;
                 }
-                .addCatActionButton:disabled {
-                    cursor: not-allowed;
-                    opacity: 0.55;
-                    background: rgba(118, 146, 130, 0.08);
-                    border-color: var(--color-border, #4b5563);
-                    color: var(--color-text-secondary, #9ca3af);
-                }
-                .addCatActionButton:active:not(:disabled) {
-                    background: rgba(118, 146, 130, 0.25);
+
+                .subcatAddMoreBtn:hover {
+                    background: rgba(118, 146, 130, 0.18);
+                    color: #ffffff;
                 }
 
-                .addMoreCatBtn {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 6px;
-                    min-height: 36px;
-                    padding: 4px 12px;
-                    border: 1px solid var(--color-border, #4b5563);
-                    background: var(--color-bg-secondary, #28353d);
-                    color: var(--color-text-primary, #ffffff);
-                    border-radius: 20px;
-                    font-size: 13px;
-                    font-weight: 600;
-                    cursor: pointer;
-                }
-                .addMoreCatBtn:disabled {
-                    cursor: not-allowed;
-                    opacity: 0.55;
-                }
-                .catHintText {
-                    margin: 6px 2px 0;
+                .catHintNotice {
                     font-size: 12px;
-                    line-height: 1.4;
                     color: var(--color-text-secondary, #9ca3af);
+                    margin: 4px 0 0 0;
+                    line-height: 1.4;
                 }
 
-                /* MODAL / BOTTOM SHEET PORTALEADO */
-                .catPickerOverlay {
+                /* MODAL / BOTTOM SHEET OVERLAY */
+                .subcatPickerOverlay {
                     position: fixed;
                     inset: 0;
                     z-index: 99999;
@@ -422,30 +365,34 @@ export const TabCategorias = memo(function TabCategorias({
                     align-items: flex-end;
                     justify-content: center;
                 }
-                .catPickerBackdropBtn {
+
+                .subcatPickerBackdrop {
                     position: absolute;
                     inset: 0;
                     width: 100%;
                     height: 100%;
-                    background: rgba(0, 0, 0, 0.65);
+                    background: rgba(0, 0, 0, 0.7);
                     backdrop-filter: blur(4px);
+                    -webkit-backdrop-filter: blur(4px);
                     border: none;
                     cursor: pointer;
                     padding: 0;
                     margin: 0;
                 }
+
                 @media (min-width: 768px) {
-                    .catPickerOverlay {
+                    .subcatPickerOverlay {
                         align-items: center;
                         padding: 24px;
                     }
                 }
-                .catPickerSheet {
+
+                .subcatPickerSheet {
                     position: relative;
                     z-index: 1;
                     width: 100%;
-                    max-width: 560px;
-                    max-height: 85vh;
+                    max-width: 520px;
+                    max-height: 82vh;
                     background: var(--color-bg-primary, #111827);
                     border-top-left-radius: 20px;
                     border-top-right-radius: 20px;
@@ -453,194 +400,231 @@ export const TabCategorias = memo(function TabCategorias({
                     display: flex;
                     flex-direction: column;
                     overflow: hidden;
-                    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-                    animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+                    animation: sheetSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
                 }
+
                 @media (min-width: 768px) {
-                    .catPickerSheet {
-                        border-radius: 16px;
-                        max-height: 80vh;
-                        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+                    .subcatPickerSheet {
+                        border-radius: 14px;
+                        max-height: 75vh;
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
                     }
                 }
-                @keyframes slideUpSheet {
+
+                @keyframes sheetSlideUp {
                     from { transform: translateY(100%); }
                     to { transform: translateY(0); }
                 }
-                .catPickerHeader {
+
+                .subcatPickerHeader {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    padding: 16px 20px;
+                    padding: 16px 18px;
                     border-bottom: 1px solid var(--color-border, #374151);
                 }
-                .catPickerTitle {
+
+                .subcatPickerTitle {
                     margin: 0;
-                    font-size: 17px;
+                    font-size: 16px;
                     font-weight: 700;
                     color: var(--color-text-primary, #ffffff);
                 }
-                .catPickerSubtitle {
+
+                .subcatPickerSubtitle {
                     margin: 2px 0 0 0;
-                    font-size: 13px;
+                    font-size: 12px;
                     color: var(--color-text-secondary, #9ca3af);
                 }
-                .catPickerCloseBtn {
+
+                .subcatPickerCloseBtn {
                     background: transparent;
                     border: none;
                     color: var(--color-text-secondary, #9ca3af);
-                    font-size: 18px;
                     cursor: pointer;
-                    width: 36px;
-                    height: 36px;
+                    width: 32px;
+                    height: 32px;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                 }
-                .catPickerSearchBox {
-                    padding: 12px 20px;
+
+                .subcatPickerCloseBtn:hover {
+                    color: var(--color-text-primary, #ffffff);
+                    background: rgba(255, 255, 255, 0.05);
+                }
+
+                .subcatPickerSearchBox {
+                    padding: 10px 18px;
                     background: var(--color-bg-secondary, #1f2937);
                     border-bottom: 1px solid var(--color-border, #374151);
                 }
-                .catPickerSearchInput {
+
+                .subcatSearchInputWrap {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .subcatSearchIcon {
+                    position: absolute;
+                    left: 12px;
+                    color: var(--color-text-secondary, #9ca3af);
+                    pointer-events: none;
+                }
+
+                .subcatPickerSearchInput {
                     width: 100%;
-                    min-height: 44px;
-                    font-size: 16px;
-                    padding: 0 14px;
+                    min-height: 40px;
+                    font-size: 14px;
+                    padding: 0 12px 0 36px;
                     border-radius: 8px;
                     border: 1px solid var(--color-border, #374151);
                     background: var(--color-bg-primary, #111827);
                     color: var(--color-text-primary, #ffffff);
                     box-sizing: border-box;
                 }
-                .catPickerSearchInput:focus {
+
+                .subcatPickerSearchInput:focus {
                     outline: none;
                     border-color: var(--color-primary, #769282);
                 }
-                .catPickerBody {
+
+                .subcatPickerBody {
                     flex: 1;
                     overflow-y: auto;
-                    padding: 12px 16px;
+                    padding: 10px 14px;
                     -webkit-overflow-scrolling: touch;
                 }
-                .catPickerEmpty {
-                    padding: 24px;
-                    text-align: center;
-                    color: var(--color-text-secondary, #9ca3af);
-                    font-size: 14px;
-                }
-                .catPickerList {
+
+                .subcatPickerList {
                     display: flex;
                     flex-direction: column;
-                    gap: 2px;
+                    gap: 6px;
                 }
-                .catPickerTree {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-                .catPickerTreeGroup {
-                    border: 1px solid var(--color-border, rgba(255,255,255,0.08));
-                    border-radius: 10px;
-                    overflow: hidden;
-                    background: var(--color-bg-secondary, rgba(255,255,255,0.02));
-                }
-                .catPickerParentRow {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    min-height: 48px;
-                    padding: 6px 14px;
-                    background: rgba(255,255,255,0.03);
-                }
-                .catPickerRowLabelWrap {
+
+                .subcatPickerRow {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    flex: 1;
+                    min-height: 46px;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.06));
+                    background: var(--color-bg-secondary, rgba(255, 255, 255, 0.02));
                     cursor: pointer;
-                    min-height: 44px;
+                    transition: all 0.15s ease;
                 }
-                .catPickerCheckbox {
-                    width: 22px;
-                    height: 22px;
+
+                .subcatPickerRow:hover {
+                    background: rgba(255, 255, 255, 0.05);
+                }
+
+                .subcatPickerRowActive {
+                    border-color: var(--color-primary, #769282);
+                    background: rgba(118, 146, 130, 0.12);
+                }
+
+                .subcatPickerCheckbox {
+                    width: 20px;
+                    height: 20px;
                     accent-color: var(--color-primary, #769282);
                     cursor: pointer;
                     flex-shrink: 0;
                 }
-                .catPickerParentName {
-                    font-size: 15px;
+
+                .subcatRowText {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1px;
+                    flex: 1;
+                }
+
+                .subcatRowName {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: var(--color-text-primary, #ffffff);
+                }
+
+                .subcatRowSlug {
+                    font-size: 11px;
+                    color: var(--color-text-secondary, #9ca3af);
+                    font-family: monospace;
+                }
+
+                .subcatCheckIcon {
+                    color: var(--color-primary, #769282);
+                    flex-shrink: 0;
+                }
+
+                .subcatEmptyState {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    padding: 30px 16px;
+                    gap: 6px;
+                }
+
+                .subcatEmptyIcon {
+                    color: var(--color-accent, #DDB08C);
+                    margin-bottom: 4px;
+                }
+
+                .subcatEmptyTitle {
+                    margin: 0;
+                    font-size: 14px;
                     font-weight: 700;
                     color: var(--color-text-primary, #ffffff);
                 }
-                .catPickerExpandToggle {
-                    background: rgba(255,255,255,0.08);
-                    border: none;
-                    color: var(--color-text-primary, #ffffff);
+
+                .subcatEmptyDesc {
+                    margin: 0;
                     font-size: 12px;
-                    font-weight: 600;
-                    padding: 6px 10px;
-                    border-radius: 6px;
-                    cursor: pointer;
+                    color: var(--color-text-secondary, #9ca3af);
+                    line-height: 1.4;
                 }
-                .catPickerSubTree {
-                    padding: 4px 12px 8px 24px;
-                    border-left: 2px solid var(--color-primary, #769282);
-                    margin: 4px 12px 8px 16px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2px;
+
+                .subcatPickerEmpty {
+                    padding: 24px;
+                    text-align: center;
+                    color: var(--color-text-secondary, #9ca3af);
+                    font-size: 13px;
                 }
-                .catPickerSubRow {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    min-height: 44px;
-                    padding: 4px 8px;
-                    cursor: pointer;
-                    border-radius: 6px;
-                }
-                .catPickerSubRow:active {
-                    background: rgba(255,255,255,0.05);
-                }
-                .catPickerSubName {
-                    font-size: 14px;
-                    color: var(--color-text-primary, #ffffff);
-                }
-                .catPickerRow {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    min-height: 48px;
-                    padding: 8px 12px;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                    cursor: pointer;
-                }
-                .catPickerRowLabel {
-                    font-size: 15px;
-                    color: var(--color-text-primary, #ffffff);
-                }
-                .catPickerFooter {
-                    padding: 14px 20px;
+
+                .subcatPickerFooter {
+                    padding: 12px 18px;
                     border-top: 1px solid var(--color-border, #374151);
                     background: var(--color-bg-secondary, #1f2937);
                 }
-                .catPickerApplyBtn {
+
+                .subcatPickerApplyBtn {
                     width: 100%;
-                    min-height: 48px;
+                    min-height: 44px;
                     border: none;
-                    border-radius: 10px;
+                    border-radius: 8px;
                     background: var(--color-primary, #769282);
                     color: #ffffff;
-                    font-size: 16px;
+                    font-size: 15px;
                     font-weight: 700;
                     cursor: pointer;
+                    transition: background 0.15s ease;
+                }
+
+                .subcatPickerApplyBtn:hover:not(:disabled) {
+                    background: var(--color-primary-dark, #5d7568);
+                }
+
+                .subcatPickerApplyBtn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
                 }
             `}</style>
 
             <div className="tabCatContainer">
-                {/* Categoría Principal */}
+                {/* ── 1. Categoría Principal ── */}
                 <div className="catFieldBlock">
                     <label className="catFieldLabel" htmlFor="product-category">
                         Categoría Principal *
@@ -648,9 +632,9 @@ export const TabCategorias = memo(function TabCategorias({
                     <Dropdown
                         id="product-category"
                         options={primaryCategoryOptions}
-                        value={form.category.id}
+                        value={form.category?.id || ''}
                         onChange={onPrimaryCategoryChange}
-                        placeholder="Seleccioná una categoría..."
+                        placeholder="Seleccioná la categoría principal..."
                         className={fieldErrors.category ? styles.inputError : ''}
                         ariaInvalid={Boolean(fieldErrors.category)}
                     />
@@ -659,45 +643,41 @@ export const TabCategorias = memo(function TabCategorias({
                     )}
                 </div>
 
-                {/* Categorías Adicionales */}
+                {/* ── 2. Subcategorías Asociadas (Ubicado inmediatamente abajo) ── */}
                 <div className="catFieldBlock">
-                    <div className="catFieldHeader">
-                        <label className="catFieldLabel" htmlFor="additional-cat-picker-btn">
-                            Categorías adicionales
-                        </label>
-                    </div>
+                    <label className="catFieldLabel" htmlFor="subcat-invoke-btn">
+                        <Layers size={14} /> Subcategorías Asociadas
+                    </label>
 
-                    {/* Si NO hay categorías seleccionadas, mostramos un botón de acción directo sin caja vacía */}
-                    {selectedAdditionalCategories.length === 0 ? (
+                    {selectedSubcategoryObjects.length === 0 ? (
                         <>
                             <button
-                                id="additional-cat-picker-btn"
+                                id="subcat-invoke-btn"
                                 type="button"
-                                className="addCatActionButton"
-                                onClick={openCategoryPicker}
+                                className="subcatInvokeBtn"
+                                onClick={openSubcategoryPicker}
                                 disabled={!hasPrimaryCategory}
-                                title={hasPrimaryCategory ? undefined : 'Seleccione primero una categoría principal'}
-                                aria-label={hasPrimaryCategory ? 'Agregar categorías adicionales' : 'Seleccione primero una categoría principal'}
+                                aria-label={hasPrimaryCategory ? 'Asociar subcategorías al producto' : 'Seleccioná primero una categoría principal'}
                             >
-                                <span>+ Agregar categorías adicionales</span>
+                                <Plus size={16} />
+                                <span>Asociar Subcategorías</span>
                             </button>
                             {!hasPrimaryCategory && (
-                                <span className="catHintText" role="status" aria-live="polite">
-                                    Seleccione primero una categoría principal
-                                </span>
+                                <p className="catHintNotice">
+                                    ℹ️ Seleccioná primero una Categoría Principal para habilitar sus subcategorías.
+                                </p>
                             )}
                         </>
                     ) : (
-                        /* Si SÍ hay categorías seleccionadas, renderizamos Chips con botón para agregar más */
-                        <div className="chipsWrapperFlat">
-                            {selectedAdditionalCategories.map(c => (
-                                <span key={c.id} className="catChip">
-                                    {getCategoryLabel(c).replace(' > ', ' › ')}
+                        <div className="subcatChipsGrid">
+                            {selectedSubcategoryObjects.map(sub => (
+                                <span key={sub.id} className="subcatChip">
+                                    {sub.name}
                                     <button
                                         type="button"
-                                        className="catChipRemove"
-                                        onClick={e => handleRemoveChip(c.id, e)}
-                                        aria-label={`Quitar categoría ${c.name}`}
+                                        className="subcatChipRemove"
+                                        onClick={e => handleRemoveChip(sub.id, e)}
+                                        aria-label={`Quitar subcategoría ${sub.name}`}
                                     >
                                         ✕
                                     </button>
@@ -705,22 +685,20 @@ export const TabCategorias = memo(function TabCategorias({
                             ))}
 
                             <button
-                                id="additional-cat-picker-btn"
                                 type="button"
-                                className="addMoreCatBtn"
-                                onClick={openCategoryPicker}
+                                className="subcatAddMoreBtn"
+                                onClick={openSubcategoryPicker}
                                 disabled={!hasPrimaryCategory}
-                                title={hasPrimaryCategory ? undefined : 'Seleccione primero una categoría principal'}
-                                aria-label={hasPrimaryCategory ? 'Agregar más categorías' : 'Seleccione primero una categoría principal'}
+                                aria-label="Gestionar más subcategorías"
                             >
-                                + Agregar más
+                                <Plus size={12} /> Modificar
                             </button>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Portal Modal / Bottom Sheet */}
+            {/* Modal Bottom Sheet Portaleado */}
             {renderModal()}
         </fieldset>
     );

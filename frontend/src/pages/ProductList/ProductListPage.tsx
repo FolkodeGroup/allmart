@@ -1,6 +1,6 @@
 /**
  * pages/ProductList/ProductListPage.tsx
- * Catálogo público con filtrado estricto de colecciones por categoría y cero margen fantasma.
+ * Catálogo público con navegación unificada, barra horizontal de subcategorías y grilla continua.
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -154,7 +154,7 @@ export function ProductListPage() {
       .catch(() => setCategories([]));
   }, []);
 
-  /* Cargar colecciones de categoría */
+  /* Cargar colecciones contextuales */
   useEffect(() => {
     let cancelled = false;
 
@@ -202,8 +202,8 @@ export function ProductListPage() {
           if (!cancelled) setCategoryCollections(collections);
         }
       })
-      .catch((error) => {
-        console.error('Error loading category collections:', error);
+      .catch((err) => {
+        console.error('Error loading category collections:', err);
         if (!cancelled) setCategoryCollections([]);
       });
 
@@ -377,56 +377,25 @@ export function ProductListPage() {
     return categories.find((cat) => cat.id === selectedCategoryInfo.parentId);
   }, [categories, selectedCategoryInfo]);
 
-  const childCategories = useMemo(
-    () => (selectedParentCategory ? categories.filter((cat) => cat.parentId === selectedParentCategory.id) : []),
-    [categories, selectedParentCategory]
-  );
+  // Subcategorías del contexto activo para el carrusel horizontal
+  const subcategoryPills = useMemo(() => {
+    if (!selectedParentCategory) return [];
+    return categories.filter((cat) => cat.parentId === selectedParentCategory.id);
+  }, [categories, selectedParentCategory]);
 
   const visibleProducts = products;
 
-  const groupedProducts = useMemo(() => {
-    const shouldGroup =
-      Boolean(selectedCategoryInfo) && !selectedCategoryInfo?.parentId && childCategories.length > 0;
-    if (!shouldGroup) return null;
-
-    const groups = childCategories.map((category) => ({ category, products: [] as Product[] }));
-    const uncategorized: Product[] = [];
-
-    for (const product of visibleProducts) {
-      const ids = getProductCategoryIds(product);
-      let assigned = false;
-      for (let i = 0; i < childCategories.length; i += 1) {
-        if (ids.includes(childCategories[i].id)) {
-          groups[i].products.push(product);
-          assigned = true;
-          break;
-        }
-      }
-      if (!assigned) {
-        uncategorized.push(product);
-      }
-    }
-
-    return {
-      groups: groups.filter((group) => group.products.length > 0),
-      uncategorized,
-    };
-  }, [childCategories, selectedCategoryInfo, visibleProducts]);
-
-  // 🟢 FILTRADO DETERMINISTA DE CONTEXTO DE CATEGORÍA
-  // Evita mostrar colecciones descontextualizadas cuando los productos aún no fueron completamente cargados
+  // Filtrado determinista de colecciones asociadas
   const activeCategoryCollections = useMemo(() => {
     if (!categoryCollections || categoryCollections.length === 0) return [];
 
     return categoryCollections.filter((col) => {
       const paramCatId = col.params && typeof col.params.categoryId === 'string' ? (col.params.categoryId as string) : undefined;
 
-      // 1. Si no hay categoría seleccionada en la URL, solo mostrar colecciones de posición 'category' sin categoría fija asignada
       if (!selectedCategoryInfo) {
         return !paramCatId;
       }
 
-      // 2. Si la colección tiene una categoría asociada en sus parámetros, debe coincidir exactamente
       if (paramCatId) {
         return (
           paramCatId === selectedCategoryInfo.id ||
@@ -435,11 +404,10 @@ export function ProductListPage() {
         );
       }
 
-      // 3. Para colecciones sin paramCatId, verificar si pertenecen al contexto actual
       if (col.products && col.products.length > 0) {
         const allowedCatIds = new Set([
           selectedCategoryInfo.id,
-          ...childCategories.map((c) => c.id),
+          ...subcategoryPills.map((c) => c.id),
         ]);
 
         return col.products.some((p) => {
@@ -452,7 +420,7 @@ export function ProductListPage() {
 
       return false;
     });
-  }, [categoryCollections, selectedCategoryInfo, selectedParentCategory, childCategories, products]);
+  }, [categoryCollections, selectedCategoryInfo, selectedParentCategory, subcategoryPills, products]);
 
   const renderMobileFilterModal = () => {
     if (!filtersOpen) return null;
@@ -627,11 +595,64 @@ export function ProductListPage() {
 
   return (
     <main className={styles.page}>
+      <style>{`
+        /* Carrusel Horizontal de Subcategorías (Mobile-First) */
+        .subcatScrollableBar {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 8px 2px 14px 2px;
+          margin-bottom: 8px;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+
+        .subcatScrollableBar::-webkit-scrollbar {
+          display: none;
+        }
+
+        .subcatPill {
+          display: inline-flex;
+          align-items: center;
+          white-space: nowrap;
+          padding: 8px 16px;
+          border-radius: 24px;
+          font-size: 13px;
+          font-weight: 600;
+          text-decoration: none;
+          background: var(--color-bg-secondary, #f2efeb);
+          color: var(--color-text-primary, #111827);
+          border: 1px solid var(--color-border, #e5e2dd);
+          transition: all 0.15s ease;
+          flex-shrink: 0;
+        }
+
+        .subcatPill:hover {
+          background: var(--color-primary-light, #8fa99a);
+          color: #ffffff;
+          border-color: var(--color-primary, #769282);
+        }
+
+        .subcatPillActive {
+          background: var(--color-primary, #769282) !important;
+          color: #ffffff !important;
+          border-color: var(--color-primary, #769282) !important;
+          box-shadow: 0 2px 6px rgba(118, 146, 130, 0.3);
+        }
+      `}</style>
+
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
         <Link to="/productos">Productos</Link>
+        {selectedParentCategory && selectedParentCategory.id !== selectedCategoryInfo?.id && (
+          <>
+            <span className={styles.breadcrumbSep}>/</span>
+            <Link to={`/productos?category=${selectedParentCategory.slug}`}>{selectedParentCategory.name}</Link>
+          </>
+        )}
         {selectedCategoryInfo && (
           <>
             <span className={styles.breadcrumbSep}>/</span>
@@ -706,6 +727,28 @@ export function ProductListPage() {
         </aside>
 
         <div className={styles.main}>
+          {/* 🟢 BARRA HORIZONTAL DE SUBCATEGORÍAS (Pills/Chips en Scroll Táctil) */}
+          {selectedParentCategory && subcategoryPills.length > 0 && (
+            <div className="subcatScrollableBar" role="tablist" aria-label="Subcategorías">
+              <Link
+                to={`/productos?category=${selectedParentCategory.slug}`}
+                className={`subcatPill ${selectedCategory === selectedParentCategory.slug ? 'subcatPillActive' : ''}`}
+              >
+                Todas en {selectedParentCategory.name}
+              </Link>
+              {subcategoryPills.map((sub) => (
+                <Link
+                  key={sub.id}
+                  to={`/productos?category=${sub.slug}`}
+                  className={`subcatPill ${selectedCategory === sub.slug ? 'subcatPillActive' : ''}`}
+                >
+                  {sub.name}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Colecciones contextuales */}
           {activeCategoryCollections.length > 0 && (
             <div className={styles.collectionBannerWrapper}>
               <div className={styles.categoryCollections}>
@@ -838,43 +881,13 @@ export function ProductListPage() {
             </div>
           )}
 
+          {/* 🟢 GRILLA UNIFICADA CONTINUA (Cero fragmentación, sorting y paginación 100% consistentes) */}
           {!loading && !error && visibleProducts.length > 0 && (
-            groupedProducts ? (
-              <div className={styles.groupedProducts}>
-                {groupedProducts.groups.map((group) => (
-                  <section key={group.category.id} className={styles.groupSection}>
-                    <div className={styles.groupHeader}>
-                      <h3 className={styles.groupTitle}>{group.category.name}</h3>
-                      <span className={styles.groupCount}>{group.products.length}</span>
-                    </div>
-                    <div className={styles.productsGrid}>
-                      {group.products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                      ))}
-                    </div>
-                  </section>
-                ))}
-                {groupedProducts.uncategorized.length > 0 && (
-                  <section className={styles.groupSection}>
-                    <div className={styles.groupHeader}>
-                      <h3 className={styles.groupTitle}>Sin subcategoría</h3>
-                      <span className={styles.groupCount}>{groupedProducts.uncategorized.length}</span>
-                    </div>
-                    <div className={styles.productsGrid}>
-                      {groupedProducts.uncategorized.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-            ) : (
-              <div className={styles.productsGrid}>
-                {visibleProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )
+            <div className={styles.productsGrid}>
+              {visibleProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           )}
 
           {!loading && !error && totalProducts !== null && products.length < totalProducts && (

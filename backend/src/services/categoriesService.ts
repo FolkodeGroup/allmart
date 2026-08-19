@@ -1,6 +1,7 @@
 /**
- * services/categoriesService.ts
+ * backend/src/services/categoriesService.ts
  * Lógica de negocio para el dominio de categorías usando Prisma Client.
+ * Garantiza una jerarquía estricta a 2 niveles (Categoría Padre -> Subcategoría).
  */
 
 import { prisma } from '../config/prisma';
@@ -18,7 +19,6 @@ function generateSlug(name: string): string {
     .replace(/-+/g, '-');
 }
 
-// 🟢 MAPEADOR ADAPTADO: `itemCount` se maneja como un campo virtual
 function toCategory(row: any, itemCount = 0): Category {
   return {
     id: row.id,
@@ -27,7 +27,7 @@ function toCategory(row: any, itemCount = 0): Category {
     description: row.description,
     imageUrl: row.imageUrl,
     parentId: row.parentId,
-    itemCount, // Asignamos el valor calculado virtual
+    itemCount,
     isVisible: row.isVisible,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -58,6 +58,7 @@ export async function getAdminCategories(query: {
     where.OR = [
       { name: { contains: search, mode: 'insensitive' } },
       { description: { contains: search, mode: 'insensitive' } },
+      { slug: { contains: search, mode: 'insensitive' } },
     ];
   }
   if (typeof isVisible === 'boolean') {
@@ -82,19 +83,18 @@ export async function getAdminCategories(query: {
     filteredRows = filteredRows.filter(row => row._count.productCategories <= maxProducts);
   }
 
-  // Mapeamos pasándole el contador dinámico a la función toCategory
   const data = filteredRows.map(row =>
     toCategory(row, row._count.productCategories)
   );
 
-  const filteredTotal = data.length;
+  const total = await prisma.category.count({ where });
 
   return {
     data,
-    total: filteredTotal,
+    total,
     page,
     limit,
-    totalPages: Math.ceil(filteredTotal / limit),
+    totalPages: Math.max(1, Math.ceil(total / limit)),
   };
 }
 
@@ -149,7 +149,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category> {
   return toCategory(row, row._count?.productCategories ?? 0);
 }
 
-// ─── Mutaciones ────────────────────────────────────────────────────────────────
+// ─── Mutaciones con Regla Estricta a 2 Niveles ─────────────────────────────────
 
 export async function createCategory(dto: CreateCategoryDTO): Promise<Category> {
   const normalizedName = dto.name?.trim();
@@ -169,25 +169,26 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
   }
 
   let parentId: string | null = null;
-  if (dto.parentId) {
+  if (dto.parentId && dto.parentId.trim() !== '') {
     const parent = await prisma.category.findUnique({ where: { id: dto.parentId } });
     if (!parent) {
       throw createError('Categoría padre no encontrada', 404);
     }
+    // 🛡️ REGLA ARQUITECTÓNICA: Solo 2 niveles (Padre -> Subcategoría)
     if (parent.parentId) {
-      throw createError('Solo se permite un nivel de subcategorías', 400);
+      throw createError('Jerarquía estricta a 2 niveles: No se permite anidar subcategorías dentro de otra subcategoría', 400);
     }
     parentId = parent.id;
   }
 
   const row = await prisma.category.create({
     data: {
-      name: dto.name,
+      name: normalizedName,
       slug,
-      description: dto.description ?? null,
+      description: dto.description?.trim() || null,
       imageUrl: dto.imageUrl ?? null,
       parentId,
-      isVisible: dto.isVisible,
+      isVisible: dto.isVisible ?? true,
     },
   });
 
@@ -197,18 +198,68 @@ export async function createCategory(dto: CreateCategoryDTO): Promise<Category> 
 export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promise<Category> {
   const existing = await prisma.category.findUnique({
     where: { id },
-    include: { _count: { select: { productCategories: true } } },
+    include: { _count: { select: { productCategories: true, children: true } } },
   });
   if (!existing) throw createError('Categoría no encontrada', 404);
+
+  let parentId: string | null = existing.parentId;
+
+  // 🛡️ REGLA ARQUITECTÓNICA: Validación de Jerarquía en Modificación
+  if (dto.parentId !== undefined) {
+    if (dto.parentId === id) {
+      throw createError('Una categoría no puede ser su propia categoría padre', 400);
+    }
+
+    if (dto.parentId === null || dto.parentId.trim() === '') {
+      parentId = null;
+    } else {
+      // 1. Si la categoría actual ya tiene subcategorías hijas, no puede convertirse en hija de otra
+      const childrenCount = existing._count?.children ?? (await prisma.category.count({ where: { parentId: id } }));
+      if (childrenCount > 0) {
+        throw createError('Jerarquía estricta a 2 niveles: No se puede convertir en subcategoría una categoría que ya contiene subcategorías hijas', 400);
+      }
+
+      // 2. El padre destino debe existir y ser una categoría raíz (no una subcategoría)
+      const parent = await prisma.category.findUnique({ where: { id: dto.parentId } });
+      if (!parent) {
+        throw createError('Categoría padre no encontrada', 404);
+      }
+      if (parent.parentId) {
+        throw createError('Jerarquía estricta a 2 niveles: No se permite anidar subcategorías dentro de otra subcategoría', 400);
+      }
+      parentId = parent.id;
+    }
+  }
+
+  let slug = existing.slug;
+  if (dto.name && dto.name.trim() !== existing.name) {
+    const sourceForSlug = dto.slug && dto.slug.trim() !== '' ? dto.slug.trim() : dto.name.trim();
+    slug = generateSlug(sourceForSlug);
+    const slugExists = await prisma.category.findFirst({
+      where: { slug, id: { not: id } },
+    });
+    if (slugExists) {
+      throw createError(`El slug "${slug}" ya está en uso por otra categoría`, 409);
+    }
+  } else if (dto.slug && dto.slug.trim() !== existing.slug) {
+    slug = generateSlug(dto.slug.trim());
+    const slugExists = await prisma.category.findFirst({
+      where: { slug, id: { not: id } },
+    });
+    if (slugExists) {
+      throw createError(`El slug "${slug}" ya está en uso por otra categoría`, 409);
+    }
+  }
 
   const row = await prisma.category.update({
     where: { id },
     data: {
-      name: dto.name,
-      description: dto.description,
-      imageUrl: dto.imageUrl,
-      parentId: dto.parentId,
-      isVisible: dto.isVisible,
+      ...(dto.name !== undefined && { name: dto.name.trim() }),
+      slug,
+      ...(dto.description !== undefined && { description: dto.description?.trim() || null }),
+      ...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
+      parentId,
+      ...(dto.isVisible !== undefined && { isVisible: dto.isVisible }),
     },
   });
 
@@ -216,7 +267,19 @@ export async function updateCategory(id: string, dto: UpdateCategoryDTO): Promis
 }
 
 export async function deleteCategory(id: string): Promise<void> {
-  const existing = await prisma.category.findUnique({ where: { id } });
+  const existing = await prisma.category.findUnique({
+    where: { id },
+    include: { _count: { select: { children: true } } },
+  });
   if (!existing) throw createError('Categoría no encontrada', 404);
+
+  // Si tiene subcategorías hijas, desvincularlas (o advertir)
+  if (existing._count.children > 0) {
+    await prisma.category.updateMany({
+      where: { parentId: id },
+      data: { parentId: null },
+    });
+  }
+
   await prisma.category.delete({ where: { id } });
 }
