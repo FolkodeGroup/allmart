@@ -707,6 +707,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   return (
     <div className={`${styles.detailContent} orderDetailContentDesktopGrid`}>
       <style>{`
+        /* 📱 MÓVIL / TABLET (<1024px) */
         @media (max-width: 1023px) {
           .orderDetailContentDesktopGrid {
             display: flex !important;
@@ -722,6 +723,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           }
         }
 
+        /* 💻 ESCRITORIO (>=1024px) - Expansión al 100% */
         @media (min-width: 1024px) {
           .orderDetailContentDesktopGrid {
             display: grid !important;
@@ -735,17 +737,22 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
           .orderDetailContentDesktopGrid .orderDetailMainCol {
             min-width: 0 !important;
             width: 100% !important;
+            flex: 1 1 0% !important;
           }
           .orderDetailContentDesktopGrid .orderDetailSideCol {
             width: 100% !important;
-            max-width: 420px !important;
+            max-width: 400px !important;
           }
         }
 
+        /* 🖥️ ESCRITORIO PANORÁMICO (>=1400px) */
         @media (min-width: 1400px) {
           .orderDetailContentDesktopGrid {
             grid-template-columns: 1fr 420px !important;
             gap: 28px !important;
+          }
+          .orderDetailContentDesktopGrid .orderDetailSideCol {
+            max-width: 440px !important;
           }
         }
 
@@ -900,7 +907,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         }
       `}</style>
 
-      {/* ── COLUMNA PRINCIPAL (65% en Desktop) ── */}
+      {/* ── COLUMNA PRINCIPAL DINÁMICA (1fr) ── */}
       <div className={`${styles.mainColumn} orderDetailMainCol`}>
         {/* Pipeline Stepper del Ciclo de Vida */}
         {order.status !== 'cancelado' && (
@@ -1197,7 +1204,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
         )}
       </div>
 
-      {/* ── COLUMNA LATERAL (35% en Desktop) ── */}
+      {/* ── COLUMNA LATERAL FIJA ERGONÓMICA ── */}
       <div className={`${styles.sideColumn} orderDetailSideCol`}>
         {/* ── Tarjeta CRM: Datos del Cliente ── */}
         <section className={styles.detailSection}>

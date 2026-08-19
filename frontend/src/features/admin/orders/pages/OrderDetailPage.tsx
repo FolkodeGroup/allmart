@@ -10,6 +10,7 @@ import { Button } from '../../../../components/ui/Button/Button';
 import { OrderDetailContent } from '../components/OrderDetailContent';
 import { formatDateTime, formatPrice } from '../utils/ordersHelpers';
 import { formatOrderLabel } from '../../../../utils/orders';
+import { ArrowLeft } from 'lucide-react';
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -135,6 +136,51 @@ export default function OrderDetailPage() {
           max-width: 100% !important;
           box-sizing: border-box !important;
           margin-bottom: 20px !important;
+          background: var(--color-bg-secondary, #1f2937) !important;
+          border: 1px solid var(--color-border, #374151) !important;
+          border-radius: 14px !important;
+          padding: 16px 20px !important;
+        }
+
+        .orderDetailHeaderInner {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 12px !important;
+          width: 100% !important;
+        }
+
+        .orderDetailBackBtn {
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          gap: 6px !important;
+          padding: 6px 14px !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+          border: 1px solid var(--color-border, #374151) !important;
+          border-radius: 8px !important;
+          color: var(--color-text-primary, #ffffff) !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+          min-height: 36px !important;
+          align-self: flex-start !important;
+          text-decoration: none !important;
+        }
+
+        .orderDetailBackBtn:hover {
+          background: rgba(255, 255, 255, 0.12) !important;
+          border-color: var(--color-primary, #769282) !important;
+          color: var(--color-text-primary, #ffffff) !important;
+        }
+
+        .orderDetailHeaderTitleGroup {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 4px !important;
+          width: 100% !important;
         }
 
         .orderDetailPageFullWidth .orderDetailContentWrapper {
@@ -147,24 +193,31 @@ export default function OrderDetailPage() {
           .orderDetailPageFullWidth {
             padding: 0 4px 32px 4px !important;
           }
+
+          .orderDetailHeaderInner {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 16px !important;
+          }
         }
       `}</style>
-      {/* Header con navegación y metadatos */}
+
+      {/* Header con botón Volver alineado a la izquierda */}
       <div className={`${styles.header} orderDetailHeaderCard`}>
-        <div className={styles.headerContent}>
+        <div className="orderDetailHeaderInner">
           <button
-            className={styles.backButton}
+            className="orderDetailBackBtn"
             onClick={() => navigate('/admin/pedidos')}
             title="Volver a la lista de pedidos"
             aria-label="Volver a la lista de pedidos"
             type="button"
           >
-            <span className={styles.backIcon}>←</span>
-            <span className={styles.backText}>Volver</span>
+            <ArrowLeft size={16} />
+            <span>Volver</span>
           </button>
 
-          <div className={styles.headerInfo}>
-            <h1 className={styles.title}>
+          <div className="orderDetailHeaderTitleGroup">
+            <h1 className={styles.title} style={{ margin: 0 }}>
               {formatOrderLabel(order.id)}
             </h1>
             <div className={styles.headerMeta}>
@@ -184,7 +237,7 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Contenido principal en 100% del ancho */}
+      {/* Contenido principal expandido al 100% */}
       <div className={`${styles.content} orderDetailContentWrapper`}>
         <OrderDetailContent order={order} onClose={() => navigate('/admin/pedidos')} />
       </div>
