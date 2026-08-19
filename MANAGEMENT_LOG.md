@@ -2449,3 +2449,4 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1473: Corrección de filtros en la vista de Colecciones | 2026-08-13 |
 | FedericoPaal | 3 | Creación de issue | Issue #1472: Alineación y ajuste visual del bloque de acciones en Colecciones | 2026-08-13 |
 | FedericoPaal | 3 | Creación de issue | Issue #1470: Eliminación de iconos de creación en botones de formulario | 2026-08-13 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1529: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
