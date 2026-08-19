@@ -34,7 +34,6 @@ type ViewMode = 'list' | 'form';
 type ProductSortField = 'name' | 'sku' | 'category';
 type ProductSortDirection = 'asc' | 'desc';
 
-// Ajustado a 9 productos por página para llenar el panel izquierdo de forma simétrica
 const PAGE_LIMIT = 9;
 
 export function AdminProducts() {
@@ -42,43 +41,35 @@ export function AdminProducts() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
-  // Estado para controlar si el detalle está abierto en móvil
   const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
 
-  // Form management
   const [editId, setEditId] = useState<string | null>(null);
   const [editPage, setEditPage] = useState<number>(1);
 
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const resetUnsavedChangesFn = () => { };
 
-  // Filters and search
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [stockLevelFilter, setStockLevelFilter] = useState<StockLevelFilter>('all');
 
-  // Sort state
   const [sortField, setSortField] = useState<ProductSortField>('name');
   const [sortDirection, setSortDirection] = useState<ProductSortDirection>('asc');
 
-  // Delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState<import('../../../context/AdminProductsContext').AdminProduct | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Context and hooks
   const { products, deleteProduct, loading, error, refreshProducts, page: apiPage, totalPages: apiTotalPages, total } = useAdminProducts();
 
   const { can } = useAdminAuth();
   const { categories } = useAdminCategories();
 
-  // PDF export
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [exportLoadingFormat, setExportLoadingFormat] = useState<'csv' | 'xlsx' | 'pdf' | null>(null);
 
-  // Initial Load State
   const isFirstRender = useRef(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
@@ -90,7 +81,7 @@ export function AdminProducts() {
       setSearchParams(prev => {
         prev.delete('edit');
         return prev;
-      });
+      }, { replace: true });
     }
   }, [searchParams, editId, setSearchParams]);
 
@@ -168,11 +159,9 @@ export function AdminProducts() {
     }
   }, [products]);
 
-  // Scroll preservation
   const containerRef = useRef<HTMLElement>(null);
   useScrollPreserver(containerRef as React.RefObject<HTMLElement>, 'products-master-detail', [apiPage, search, categoryFilter, statusFilter, stockLevelFilter, sortField, sortDirection]);
 
-  // Unsaved changes warning
   const {
     showWarning,
     interceptNavigation,
@@ -190,7 +179,6 @@ export function AdminProducts() {
     },
   });
 
-  // Search & filter
   useEffect(() => {
     const executeFetch = async () => {
       if (search && search.trim().length > 0) {
@@ -359,7 +347,6 @@ export function AdminProducts() {
       aria-label="Gestión de productos"
     >
       <style>{`
-        /* AISLAMIENTO ESTRICTO DE ESCRITORIO */
         @media (min-width: 768px) {
           .actionsBarDesktop {
             display: flex !important;
@@ -412,7 +399,6 @@ export function AdminProducts() {
 
       {viewMode === 'list' && (
         <>
-          {/* Contenedor de herramientas de lista */}
           <div className={styles.listToolbarArea}>
             <ProductHeader
               canCreate={can('products.create')}

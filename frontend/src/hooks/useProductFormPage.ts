@@ -8,7 +8,7 @@ import { useAdminImages } from '../context/AdminImagesContext';
 import { useProductDefaults } from '../hooks/useProductDefaults';
 import { sanitizeObject } from '../utils/security';
 import { ApiError } from '../utils/apiErrorHandler';
-import { isValidSlug, isValidSku, hasProductImages } from '../utils/productFormUtils';
+import { isValidSlug, isValidSku } from '../utils/productFormUtils';
 import { getFirstErrorKey } from '../utils/productFormFocus';
 import { logAdminActivity } from '../services/adminActivityLogService';
 
@@ -81,18 +81,32 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
     const [deletingImgId, setDeletingImgId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    // ── Initialise form when productId changes ─────────────────────────────
+    // Bloqueo estricto para evitar re-inicializaciones cíclicas del formulario
+    const initializedProductRef = useRef<string | null>(null);
+
+    // ── Inicialización única y segura del formulario al cambiar productId ──
     useEffect(() => {
+        if (productId && initializedProductRef.current === productId) {
+            return;
+        }
+
+        let isCancelled = false;
+
         const initForm = async () => {
             setLoading(true);
             try {
                 if (productId) {
                     const p = getProduct(productId);
-                    if (p) {
+                    if (p && !isCancelled) {
                         const { id: _id, ...rest } = p;
                         void _id;
                         const variants = await loadProductVariants(productId);
-                        const loadedForm = { ...rest, variants: variants || [] };
+                        if (isCancelled) return;
+
+                        const loadedForm: Omit<AdminProduct, 'id'> = {
+                            ...rest,
+                            variants: variants || [],
+                        };
                         const normalizedCategoryIds =
                             Array.isArray(loadedForm.categoryIds) && loadedForm.categoryIds.length > 0
                                 ? loadedForm.categoryIds
@@ -100,8 +114,10 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
                                     ? [loadedForm.category.id]
                                     : [];
                         const formWithCategories = { ...loadedForm, categoryIds: normalizedCategoryIds };
+
                         setForm(formWithCategories);
                         setInitialForm(formWithCategories);
+                        initializedProductRef.current = productId;
                         loadImages(productId);
                     }
                 } else {
@@ -113,6 +129,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
                     }
                     setForm(newForm);
                     setInitialForm(newForm);
+                    initializedProductRef.current = null;
                     clearImages();
                 }
                 setError('');
@@ -120,13 +137,20 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             } catch (err) {
                 console.error('Error inicializando el formulario de productos:', err);
             } finally {
-                setLoading(false);
+                if (!isCancelled) {
+                    setLoading(false);
+                }
             }
         };
-        initForm();
-    }, [productId, getProduct, loadProductVariants, loadImages, getMostRecentDefaults, clearImages]);
 
-    // ── Optimized isDirty comparison ───────────────────────────────────────
+        initForm();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [productId, getProduct, loadProductVariants, getMostRecentDefaults, loadImages, clearImages]);
+
+    // ── Comparación optimizada de isDirty ───────────────────────────────────
     const shallowCompareRelevantFields = useCallback((a: typeof form, b: typeof form): boolean => {
         const keys: (keyof typeof form)[] = [
             'name', 'slug', 'description', 'shortDescription', 'price',
@@ -151,7 +175,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         if (onUnsavedChanges) onUnsavedChanges(isChanged);
     }, [form, initialForm, onUnsavedChanges, shallowCompareRelevantFields]);
 
-    // ── Stable field setter ────────────────────────────────────────────────
+    // ── Setter de campo estable ────────────────────────────────────────────
     const setField = useCallback(<K extends keyof Omit<AdminProduct, 'id'>>(
         key: K,
         value: Omit<AdminProduct, 'id'>[K]
@@ -165,11 +189,10 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         });
     }, []);
 
-    // ── Validation ─────────────────────────────────────────────────────────
+    // ── Validación ─────────────────────────────────────────────────────────
     const validateForm = useCallback((): Record<string, string> => {
         const errors: Record<string, string> = {};
         const hasVariantOptions = Array.isArray(form.variants) && form.variants.length > 0;
-        const hasImages = isEdit ? (apiImages.length > 0 || hasProductImages(form.images)) : hasProductImages(form.images);
 
         if (!form.name.trim()) {
             errors.name = 'El nombre es obligatorio';
@@ -189,12 +212,12 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             }
         }
 
-        if (!form.category?.id) {
-            errors.category = 'Seleccioná una categoría principal';
-        }
+        const additionalSelected = (form.categoryIds ?? []).filter(id => id && id !== form.category.id);
 
-        if (!hasImages) {
-            errors.images = 'Debes agregar al menos una imagen del producto';
+        if (!form.category.id) {
+            errors.category = additionalSelected.length > 0
+                ? 'Seleccione primero una categoría principal'
+                : 'Seleccioná una categoría';
         }
 
         if (form.slug && !isValidSlug(form.slug)) {
@@ -206,9 +229,9 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             onValidationError?.(getFirstErrorKey(errors));
         }
         return errors;
-    }, [apiImages.length, form, isEdit, onValidationError]);
+    }, [form, onValidationError]);
 
-    // ── Submit ─────────────────────────────────────────────────────────────
+    // ── Submit Ultra Rápido ────────────────────────────────────────────────
     const handleSubmit = useCallback(async (e?: React.FormEvent): Promise<boolean> => {
         e?.preventDefault();
         const errors = validateForm();
@@ -433,7 +456,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         [productId, userEmail, deleteImage, refreshCurrentPage]
     );
 
-    // ── Category handlers con limpieza de subcategorías huérfanas ──────────
+    // ── Category handlers ──────────────────────────────────────────────────
     const getCategoryLabel = useCallback(
         (category: { id: string; name: string; parentId?: string | null }) => {
             if (!category.parentId) return category.name;
@@ -455,18 +478,11 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
             }
             const category = categories.find(item => item.id === value);
             if (!category) return;
-
-            // 🛡️ REGLA ARQUITECTÓNICA: Subcategorías válidas solo para el nuevo padre
-            const validSubcategoryIds = new Set(
-                categories.filter(c => c.parentId === category.id).map(c => c.id)
-            );
-
             setForm(prev => {
-                // Filtramos y eliminamos subcategorías que pertenecían al padre anterior
-                const existingValidSubcats = Array.isArray(prev.categoryIds)
-                    ? prev.categoryIds.filter(id => id !== prev.category.id && validSubcategoryIds.has(id))
+                const existing = Array.isArray(prev.categoryIds)
+                    ? prev.categoryIds.filter(id => id !== prev.category.id)
                     : [];
-                const nextIds = [category.id, ...existingValidSubcats];
+                const nextIds = [category.id, ...existing.filter(id => id !== category.id)];
                 return { ...prev, category, categoryIds: nextIds };
             });
         },
@@ -477,7 +493,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         (event: React.ChangeEvent<HTMLSelectElement>) => {
             const selected = Array.from(event.target.selectedOptions).map(o => o.value);
             setForm(prev => {
-                const primaryId = prev.category?.id;
+                const primaryId = prev.category.id;
                 if (!primaryId) {
                     return { ...prev, categoryIds: [] };
                 }
@@ -490,9 +506,9 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
 
     const additionalCategoryIds = useMemo(
         () => Array.isArray(form.categoryIds)
-            ? form.categoryIds.filter(id => id !== form.category?.id)
+            ? form.categoryIds.filter(id => id !== form.category.id)
             : [],
-        [form.categoryIds, form.category?.id]
+        [form.categoryIds, form.category.id]
     );
 
     // ── Derived error flags per section ───────────────────────────────────
@@ -506,6 +522,7 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
     }), [fieldErrors]);
 
     return {
+        // Form state
         initialForm,
         form,
         fieldErrors,
@@ -514,15 +531,29 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         saving,
         loading,
         isEdit,
+
+        // Core setter
         setField,
+
+        // Submit
         handleSubmit,
+
+        // Tag state + handlers
         tagInput, setTagInput, addTag, removeTag,
+
+        // Feature state + handlers
         featureInput, setFeatureInput, addFeature, removeFeature,
+
+        // Variant state + handlers
         newGroupName, setNewGroupName,
         newGroupValues, setNewGroupValues,
         addVariantGroup, removeVariantGroup,
         addVariantValue, removeVariantValue,
+
+        // Image (URL/creation) handlers
         setImage, addImageSlot, removeImageSlot,
+
+        // Image (API/edit) state + handlers
         apiImages, imagesLoading, imagesError,
         imgFile, setImgFile,
         imgNewAlt, setImgNewAlt,
@@ -532,6 +563,8 @@ export function useProductForm({ productId, onSuccess, onUnsavedChanges, onValid
         fileInputRef,
         handleApiUploadImage,
         handleApiDeleteImage,
+
+        // Category state + handlers
         categories,
         additionalCategoryIds,
         getCategoryLabel,

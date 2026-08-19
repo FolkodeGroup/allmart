@@ -4,7 +4,7 @@
  * Usa llamadas HTTP al backend — sin mocks ni localStorage.
  */
 
-import { createContext, useState, useCallback, useEffect, useRef } from 'react';
+import { createContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { Product, Category } from '../types';
 import { useAdminAuth } from './AdminAuthContext';
@@ -52,7 +52,7 @@ export interface VariantGroup {
   values: string[];
 }
 
-// ─── Mapeador: ApiProduct → AdminProduct ──────────────────────────────────────
+// ─── Mapeador interno: ApiProduct → AdminProduct ──────────────────────────────
 
 function apiToAdminProduct(api: ApiProduct, categories: Category[]): AdminProduct {
   const base = mapApiProductToProduct(api, categories);
@@ -87,7 +87,8 @@ export interface AdminProductsContextType {
 
 // ─── Contexto ─────────────────────────────────────────────────────────────────
 
-const AdminProductsContext = createContext<AdminProductsContextType | undefined>(undefined);
+// eslint-disable-next-line react-refresh/only-export-components
+export const AdminProductsContext = createContext<AdminProductsContextType | undefined>(undefined);
 export default AdminProductsContext;
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
@@ -162,48 +163,50 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
     }
   }, [token, refreshProducts, refreshLowStockCount]);
 
-  // ─── CRUD ────────────────────────────────────────────────────────────────────
+  // ─── CRUD Optimizado ─────────────────────────────────────────────────────────
 
-  const addProduct = async (p: Omit<AdminProduct, 'id'>) => {
-    if (!token) throw new Error('No autenticado');
+  const addProduct = useCallback(async (p: Omit<AdminProduct, 'id'>) => {
+    if (!tokenRef.current) throw new Error('No autenticado');
     try {
       const { variants, skus, ...productBase } = p;
       const payload = mapAdminProductToPayload(productBase);
-      const created = await createAdminProduct(payload, token);
+      const created = await createAdminProduct(payload, tokenRef.current);
 
       // 1. Crear grupos de variantes si existen
       if (variants && variants.length > 0) {
-        for (const v of variants) {
-          await createVariant(token, created.id, { name: v.name, values: v.values });
-        }
+        await Promise.all(
+          variants.map(v => createVariant(tokenRef.current!, created.id, { name: v.name, values: v.values }))
+        );
       }
 
-      // 2. Crear combinaciones/SKUs de variantes si fueron generadas durante el alta inicial
+      // 2. Crear combinaciones/SKUs de variantes en paralelo
       if (skus && skus.length > 0) {
-        for (const s of skus) {
-          await createVariantChild(token, created.id, {
+        await Promise.all(
+          skus.map(s => createVariantChild(tokenRef.current!, created.id, {
             sku: s.sku,
             attributes: s.attributes || {},
             stock: typeof s.stock === 'number' ? s.stock : Number(s.stock ?? 0),
             price: typeof s.price === 'number' ? s.price : s.price ? Number(s.price) : undefined,
             images: s.images,
-          });
-        }
+          }))
+        );
       }
 
       const newProduct = apiToAdminProduct(created, categoriesRef.current);
-      showNotificationRef.current('success', 'Producto creado exitosamente con sus variantes');
-      await Promise.all([refreshCurrentPage(), refreshLowStockCount()]);
+      setProducts(prev => [newProduct, ...prev]);
+      setPagination(prev => ({ ...prev, total: prev.total + 1 }));
+      showNotificationRef.current('success', 'Producto creado exitosamente');
+      void refreshLowStockCount();
       return newProduct;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al crear producto';
       showNotificationRef.current('error', msg);
       throw err;
     }
-  };
+  }, [refreshLowStockCount]);
 
-  const updateProduct = async (id: string, data: Partial<AdminProduct>) => {
-    if (!token) throw new Error('No autenticado');
+  const updateProduct = useCallback(async (id: string, data: Partial<AdminProduct>) => {
+    if (!tokenRef.current) throw new Error('No autenticado');
 
     try {
       const current = products.find((p) => p.id === id);
@@ -212,94 +215,111 @@ export function AdminProductsProvider({ children }: { children: ReactNode }) {
       const { variants, ...updateData } = data;
       const merged = { ...current, ...updateData };
       const payload = mapAdminProductToPayload(merged);
-      await updateAdminProduct(id, payload, token);
+      
+      // Actualización directa y veloz en Backend
+      const updatedApiProduct = await updateAdminProduct(id, payload, tokenRef.current);
+      const updatedAdminProduct = apiToAdminProduct(updatedApiProduct, categoriesRef.current);
 
       if (variants) {
-        const existingVariants = await fetchVariantsByProduct(token, id);
+        const existingVariants = await fetchVariantsByProduct(tokenRef.current, id);
+        const toDelete = existingVariants.filter(ev => !variants.some(v => v.id === ev.id));
+        const toUpsert = variants;
 
-        for (const ev of existingVariants) {
-          const stillExists = variants.find(v => v.id === ev.id);
-          if (!stillExists) {
-            await deleteVariant(token, id, ev.id);
-          }
-        }
-
-        for (const v of variants) {
-          if (v.id.startsWith('g-')) {
-            await createVariant(token, id, { name: v.name, values: v.values });
-          } else {
-            await updateVariant(token, id, v.id, { name: v.name, values: v.values });
-          }
-        }
+        await Promise.all([
+          ...toDelete.map(ev => deleteVariant(tokenRef.current!, id, ev.id)),
+          ...toUpsert.map(v => {
+            if (v.id.startsWith('g-')) {
+              return createVariant(tokenRef.current!, id, { name: v.name, values: v.values });
+            }
+            return updateVariant(tokenRef.current!, id, v.id, { name: v.name, values: v.values });
+          }),
+        ]);
       }
 
+      // Sincronización inmediata del estado en memoria (Optimistic UI)
+      setProducts(prev => prev.map(p => (p.id === id ? { ...updatedAdminProduct, variants: variants || p.variants } : p)));
       showNotificationRef.current('success', 'Producto actualizado exitosamente');
-      await Promise.all([refreshCurrentPage(), refreshLowStockCount()]);
+      void refreshLowStockCount();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al actualizar producto';
       showNotificationRef.current('error', msg);
       throw err;
     }
-  };
+  }, [products, refreshLowStockCount]);
 
-  const deleteProduct = async (id: string) => {
-    if (!token) throw new Error('No autenticado');
+  const deleteProduct = useCallback(async (id: string) => {
+    if (!tokenRef.current) throw new Error('No autenticado');
     try {
-      await deleteAdminProduct(id, tokenRef.current!);
+      await deleteAdminProduct(id, tokenRef.current);
+      setProducts(prev => prev.filter(p => p.id !== id));
+      setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1) }));
       showNotificationRef.current('success', 'Producto eliminado exitosamente');
-      await Promise.all([refreshCurrentPage(), refreshLowStockCount()]);
+      void refreshLowStockCount();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al eliminar producto';
       showNotificationRef.current('error', msg);
       throw err;
     }
-  };
+  }, [refreshLowStockCount]);
 
-  const loadProductVariants = async (productId: string): Promise<VariantGroup[]> => {
-    if (!token) return [];
+  const loadProductVariants = useCallback(async (productId: string): Promise<VariantGroup[]> => {
+    if (!tokenRef.current) return [];
     try {
-      const apiVariants = await fetchVariantsByProduct(token, productId);
+      const apiVariants = await fetchVariantsByProduct(tokenRef.current, productId);
       const variants: VariantGroup[] = apiVariants.map(v => ({
         id: v.id,
         name: v.name,
         values: v.values,
       }));
 
-      setProducts(prev => prev.map(p =>
-        p.id === productId ? { ...p, variants } : p
-      ));
-
       return variants;
     } catch {
       return [];
     }
-  };
+  }, []);
 
-  const getProduct = (id: string) => products.find((p) => p.id === id);
+  const getProduct = useCallback((id: string) => products.find((p) => p.id === id), [products]);
 
-  const getLowStockCount = () => lowStockTotal;
+  const getLowStockCount = useCallback(() => lowStockTotal, [lowStockTotal]);
+
+  const contextValue = useMemo(() => ({
+    products,
+    categories,
+    loading,
+    total: pagination.total,
+    page: pagination.page,
+    totalPages: pagination.totalPages,
+    error,
+    refreshProducts,
+    refreshCurrentPage,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    getProduct,
+    getLowStockCount,
+    loadProductVariants,
+    lowStockTotal,
+  }), [
+    products,
+    categories,
+    loading,
+    pagination.total,
+    pagination.page,
+    pagination.totalPages,
+    error,
+    refreshProducts,
+    refreshCurrentPage,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    getProduct,
+    getLowStockCount,
+    loadProductVariants,
+    lowStockTotal,
+  ]);
 
   return (
-    <AdminProductsContext.Provider
-      value={{
-        products,
-        categories,
-        loading,
-        total: pagination.total,
-        page: pagination.page,
-        totalPages: pagination.totalPages,
-        error,
-        refreshProducts,
-        refreshCurrentPage,
-        addProduct,
-        updateProduct,
-        deleteProduct,
-        getProduct,
-        getLowStockCount,
-        loadProductVariants,
-        lowStockTotal,
-      }}
-    >
+    <AdminProductsContext.Provider value={contextValue}>
       {children}
     </AdminProductsContext.Provider>
   );
