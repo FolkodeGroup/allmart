@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { reviewsService, type Review } from '../../services/reviewsService';
+import { useSearchParams } from 'react-router-dom';
+import { reviewsService, type Review, type VerifiedTokenInfo } from '../../services/reviewsService';
+import { CheckCircle2, AlertCircle, Sparkles, ShieldCheck } from 'lucide-react';
 import styles from './ProductReviews.module.css';
 
 // ─── Star helpers ──────────────────────────────────────────────────────────────
@@ -105,8 +107,8 @@ function ReviewCard({ review }: { review: Review }) {
         <div className={styles.cardMeta}>
           <span className={styles.cardAuthor}>{review.userName}</span>
           {review.verified && (
-            <span className={styles.verifiedBadge} title="Compra verificada">
-              ✓ Compra verificada
+            <span className={styles.verifiedBadge} title="Compra verificada por Allmart">
+              <CheckCircle2 size={13} style={{ display: 'inline', marginRight: 3 }} /> Compra verificada
             </span>
           )}
         </div>
@@ -121,166 +123,172 @@ function ReviewCard({ review }: { review: Review }) {
   );
 }
 
-// ─── Review form ───────────────────────────────────────────────────────────────
+// ─── Formulario de Opinión Tokenizado & Optimizado ────────────────────────────
 
-interface FormState {
-  rating: number;
-  reviewerName: string;
-  orderId: string;
-  title: string;
-  text: string;
+interface ReviewFormProps {
+  tokenInfo: VerifiedTokenInfo | null;
+  tokenString: string | null;
+  onSuccess: (r: Review) => void;
 }
 
-const EMPTY_FORM: FormState = {
-  rating: 0,
-  reviewerName: '',
-  orderId: '',
-  title: '',
-  text: '',
-};
-
-function ReviewForm({
-  productId,
-  onSuccess,
-}: {
-  productId: string;
-  onSuccess: (r: Review) => void;
-}) {
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+function ReviewForm({ tokenInfo, tokenString, onSuccess }: ReviewFormProps) {
+  const [rating, setRating] = useState(0);
+  const [reviewerName, setReviewerName] = useState(tokenInfo?.customerName || '');
+  const [title, setTitle] = useState('');
+  const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const set = (field: keyof FormState, value: string | number) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  useEffect(() => {
+    if (tokenInfo?.customerName) {
+      setReviewerName(tokenInfo.customerName);
+    }
+  }, [tokenInfo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.rating === 0) {
-      setError('Por favor elegí una puntuación.');
-      return;
-    }
-    if (!form.reviewerName.trim()) {
-      setError('Ingresá tu nombre.');
-      return;
-    }
-    if (!form.orderId.trim()) {
-      setError('Ingresá tu número de pedido.');
+    if (rating === 0) {
+      setError('Por favor elegí una puntuación en estrellas.');
       return;
     }
     setError(null);
     setSubmitting(true);
+
     try {
-      const review = await reviewsService.createGuestReview(productId, {
-        orderId: form.orderId.trim(),
-        reviewerName: form.reviewerName.trim(),
-        rating: form.rating,
-        title: form.title.trim() || undefined,
-        text: form.text.trim() || undefined,
-      });
-      setForm(EMPTY_FORM);
-      onSuccess(review);
+      if (tokenString && tokenInfo?.isValid) {
+        const review = await reviewsService.createTokenReview(tokenString, {
+          rating,
+          title: title.trim() || undefined,
+          text: text.trim() || undefined,
+        });
+        onSuccess(review);
+      } else {
+        setError('Para calificar este producto necesitás ingresar desde el enlace que enviamos a tu email tras la entrega.');
+      }
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : 'Error al enviar la reseña. Verificá el número de pedido.';
+      const msg = err instanceof Error ? err.message : 'Error al enviar la reseña.';
       setError(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Si NO tiene token, informar que las opiniones son 100% verificadas por compra
+  if (!tokenString || !tokenInfo?.isValid) {
+    return (
+      <div className={styles.verifiedNoticeCard}>
+        <div className={styles.verifiedNoticeHeader}>
+          <ShieldCheck size={22} color="#769282" />
+          <h3 className={styles.verifiedNoticeTitle}>Opiniones 100% Verificadas</h3>
+        </div>
+        <p className={styles.verifiedNoticeText}>
+          En Allmart garantizamos la transparencia: las valoraciones están reservadas a clientes que recibieron el producto.
+        </p>
+        <p className={styles.verifiedNoticeSub}>
+          Cuando tu pedido sea entregado, recibirás un correo electrónico de Allmart con un botón directo para dejar tu reseña con un solo clic.
+        </p>
+      </div>
+    );
+  }
+
+  // Si el token ya fue utilizado previamente
+  if (tokenInfo.alreadyReviewed) {
+    return (
+      <div className={styles.verifiedNoticeCard} style={{ borderColor: '#769282' }}>
+        <div className={styles.verifiedNoticeHeader}>
+          <CheckCircle2 size={22} color="#769282" />
+          <h3 className={styles.verifiedNoticeTitle}>¡Ya dejaste tu opinión!</h3>
+        </div>
+        <p className={styles.verifiedNoticeText}>
+          Ya registramos tu reseña para este producto con tu pedido <strong>#{tokenInfo.orderId.slice(0, 8).toUpperCase()}</strong>.
+        </p>
+        <p className={styles.verifiedNoticeSub}>
+          Muchas gracias por ayudar a la comunidad de compradores de Allmart.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <p className={styles.formHelp}>
-        Solo podés dejar una reseña si compraste este producto. Ingresá tu número de pedido para
-        verificar la compra.
-      </p>
+      {/* Banner de Compra Verificada con datos autocompletados */}
+      <div className={styles.tokenVerifiedBanner}>
+        <Sparkles size={16} color="#769282" />
+        <span>
+          Invitación de compra verificada para el pedido <strong>#{tokenInfo.orderId.slice(0, 8).toUpperCase()}</strong>
+        </span>
+      </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="rating-picker" className={styles.formLabel}>
+        <label htmlFor="rating-picker-component" className={styles.formLabel}>
           Tu puntuación <span className={styles.required}>*</span>
         </label>
-        <div id="rating-picker">
-          <StarPicker value={form.rating} onChange={(v) => set('rating', v)} />
+        <div id="rating-picker-component">
+          <StarPicker value={rating} onChange={(v) => { setRating(v); if (error) setError(null); }} />
         </div>
       </div>
 
-      <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label htmlFor="rev-name" className={styles.formLabel}>
-            Tu nombre <span className={styles.required}>*</span>
-          </label>
-          <input
-            id="rev-name"
-            className={styles.formInput}
-            type="text"
-            maxLength={100}
-            placeholder="Ej: María G."
-            value={form.reviewerName}
-            onChange={(e) => set('reviewerName', e.target.value)}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="rev-order" className={styles.formLabel}>
-            Número de pedido <span className={styles.required}>*</span>
-          </label>
-          <input
-            id="rev-order"
-            className={styles.formInput}
-            type="text"
-            placeholder="ID de tu pedido"
-            value={form.orderId}
-            onChange={(e) => set('orderId', e.target.value)}
-            required
-          />
-          <span className={styles.formHint}>
-            Lo encontrás en el correo de confirmación de tu compra.
-          </span>
-        </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="rev-name" className={styles.formLabel}>
+          Tu nombre
+        </label>
+        <input
+          id="rev-name"
+          className={styles.formInput}
+          type="text"
+          maxLength={100}
+          value={reviewerName}
+          onChange={(e) => setReviewerName(e.target.value)}
+          placeholder="Nombre visible en la reseña"
+        />
       </div>
 
       <div className={styles.formGroup}>
         <label htmlFor="rev-title" className={styles.formLabel}>
-          Título (opcional)
+          Título de tu opinión (opcional)
         </label>
         <input
           id="rev-title"
           className={styles.formInput}
           type="text"
           maxLength={120}
-          placeholder="Ej: Excelente producto"
-          value={form.title}
-          onChange={(e) => set('title', e.target.value)}
+          placeholder="Ej: Excelente calidad, muy práctico..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
       </div>
 
       <div className={styles.formGroup}>
         <label htmlFor="rev-text" className={styles.formLabel}>
-          Comentario (opcional)
+          Contanos tu experiencia (opcional)
         </label>
         <textarea
           id="rev-text"
           className={styles.formTextarea}
           rows={4}
           maxLength={1000}
-          placeholder="Contanos tu experiencia con el producto..."
-          value={form.text}
-          onChange={(e) => set('text', e.target.value)}
+          placeholder="¿Qué fue lo que más te gustó del producto? ¿Cómo te resultó en el uso diario?"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
         />
-        <span className={styles.formHint}>{form.text.length}/1000 caracteres</span>
+        <div className={styles.charCounter}>
+          {text.length}/1000 caracteres
+        </div>
       </div>
 
-      {error && <p className={styles.formError}>{error}</p>}
+      {error && (
+        <div className={styles.formError} role="alert">
+          <AlertCircle size={15} style={{ display: 'inline', marginRight: 4 }} />
+          {error}
+        </div>
+      )}
 
       <button
         type="submit"
         className={styles.submitBtn}
-        disabled={submitting}
+        disabled={submitting || rating === 0}
       >
-        {submitting ? 'Enviando...' : 'Enviar reseña'}
+        {submitting ? 'Publicando...' : 'Publicar mi opinión'}
       </button>
     </form>
   );
@@ -295,14 +303,51 @@ interface ProductReviewsProps {
 }
 
 export function ProductReviews({ productId }: ProductReviewsProps) {
-  const [tab, setTab] = useState<Tab>('list');
+  const [searchParams] = useSearchParams();
+  const reviewTokenParam = searchParams.get('review_token');
+
+  const [tab, setTab] = useState<Tab>(reviewTokenParam ? 'form' : 'list');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
 
+  const [tokenInfo, setTokenInfo] = useState<VerifiedTokenInfo | null>(null);
+  const [tokenLoading, setTokenLoading] = useState(Boolean(reviewTokenParam));
+
   const LIMIT = 5;
+
+  // Validación del token al ingresar
+  useEffect(() => {
+    if (!reviewTokenParam) {
+      setTokenLoading(false);
+      return;
+    }
+
+    let active = true;
+    setTokenLoading(true);
+
+    reviewsService
+      .verifyReviewToken(reviewTokenParam)
+      .then((info) => {
+        if (!active) return;
+        setTokenInfo(info);
+        if (info.isValid && !info.alreadyReviewed) {
+          setTab('form');
+        }
+      })
+      .catch((err) => {
+        console.error('[Reviews] Error validando token:', err);
+      })
+      .finally(() => {
+        if (active) setTokenLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [reviewTokenParam]);
 
   const loadReviews = useCallback(
     async (p: number) => {
@@ -341,7 +386,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
     setReviews((prev) => [r, ...prev]);
     setTotal((t) => t + 1);
     setTab('list');
-    setTimeout(() => setSuccess(false), 5000);
+    setTimeout(() => setSuccess(false), 6000);
   };
 
   const hasMore = reviews.length < total;
@@ -349,7 +394,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   return (
     <section className={styles.root} aria-label="Opiniones del producto">
       <div className={styles.header}>
-        <h2 className={styles.title}>Opiniones</h2>
+        <h2 className={styles.title}>Opiniones de clientes</h2>
         <div className={styles.tabs} role="tablist">
           <button
             role="tab"
@@ -367,14 +412,15 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             aria-selected={tab === 'form'}
             onClick={() => setTab('form')}
           >
-            Dejar una opinión
+            {reviewTokenParam ? '★ Dejar mi opinión' : '¿Cómo opinar?'}
           </button>
         </div>
       </div>
 
       {success && (
         <div className={styles.successBanner} role="status">
-          ¡Gracias por tu reseña! Ya aparece publicada.
+          <CheckCircle2 size={18} />
+          <span>¡Muchas gracias! Tu opinión ya se encuentra publicada.</span>
         </div>
       )}
 
@@ -388,14 +434,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
 
           {!loading && reviews.length === 0 && (
             <div className={styles.emptyState}>
-              <p className={styles.empty}>Este producto aún no tiene opiniones.</p>
-              <button
-                type="button"
-                className={styles.beFirstBtn}
-                onClick={() => setTab('form')}
-              >
-                Sé el primero en opinar
-              </button>
+              <p className={styles.empty}>Este producto aún no tiene opiniones publicadas.</p>
             </div>
           )}
 
@@ -422,7 +461,15 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
 
       {tab === 'form' && (
         <div className={styles.formPanel}>
-          <ReviewForm productId={productId} onSuccess={handleNewReview} />
+          {tokenLoading ? (
+            <p className={styles.empty}>Verificando invitación de compra...</p>
+          ) : (
+            <ReviewForm
+              tokenInfo={tokenInfo}
+              tokenString={reviewTokenParam}
+              onSuccess={handleNewReview}
+            />
+          )}
         </div>
       )}
     </section>
