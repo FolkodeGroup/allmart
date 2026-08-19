@@ -120,19 +120,32 @@ export default function OrderDetailPage() {
   }
 
   return (
-    <div className={`${styles.container} orderDetailPageDesktopExpanded`}>
+    <div className={`${styles.container} orderDetailPageFullWidth`}>
       <style>{`
-        @media (min-width: 1024px) {
-          .orderDetailPageDesktopExpanded {
-            width: 100% !important;
-            max-width: 100% !important;
-            padding: 0 8px 32px 8px !important;
-            box-sizing: border-box !important;
-          }
-          .orderDetailPageDesktopExpanded .orderDetailHeaderCard {
-            width: 100% !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
+        .orderDetailPageFullWidth {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 0 0 32px 0 !important;
+          box-sizing: border-box !important;
+        }
+
+        .orderDetailPageFullWidth .orderDetailHeaderCard {
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+          margin-bottom: 20px !important;
+        }
+
+        .orderDetailPageFullWidth .orderDetailContentWrapper {
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+
+        @media (min-width: 768px) {
+          .orderDetailPageFullWidth {
+            padding: 0 4px 32px 4px !important;
           }
         }
       `}</style>
@@ -171,8 +184,8 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Contenido principal en 2 columnas (Desktop) / 1 columna (Móvil) */}
-      <div className={styles.content}>
+      {/* Contenido principal en 100% del ancho */}
+      <div className={`${styles.content} orderDetailContentWrapper`}>
         <OrderDetailContent order={order} onClose={() => navigate('/admin/pedidos')} />
       </div>
     </div>

@@ -4,7 +4,7 @@
 // Renderiza una fila por pedido con datos clave, seña y badge de estado de solo lectura.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React from 'react';
+
 import { formatDate, formatPrice } from '../utils/ordersHelpers';
 import { OrderStatusTag } from './OrderStatusTag';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
