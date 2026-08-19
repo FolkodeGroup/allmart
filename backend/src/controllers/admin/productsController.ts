@@ -108,7 +108,8 @@ export async function create(req: AuthenticatedRequest, res: Response, next: Nex
   try {
     const product = await productsService.createProduct(req.body as CreateProductDTO);
 
-    await auditService.recordAction({
+    // Registro de auditoría en background sin demorar la respuesta HTTP
+    void auditService.recordAction({
       userEmail: req.user?.user || 'desconocido',
       action: 'crear',
       entity: 'products',
@@ -124,7 +125,8 @@ export async function update(req: AuthenticatedRequest, res: Response, next: Nex
   try {
     const product = await productsService.updateProduct(req.params.id, req.body as UpdateProductDTO);
 
-    await auditService.recordAction({
+    // Registro de auditoría en background sin demorar la respuesta HTTP
+    void auditService.recordAction({
       userEmail: req.user?.user || 'desconocido',
       action: 'editar',
       entity: 'products',
@@ -141,7 +143,7 @@ export async function remove(req: AuthenticatedRequest, res: Response, next: Nex
     const product = await productsService.getProductById(req.params.id);
     await productsService.deleteProduct(req.params.id);
 
-    await auditService.recordAction({
+    void auditService.recordAction({
       userEmail: req.user?.user || 'desconocido',
       action: 'eliminar',
       entity: 'products',

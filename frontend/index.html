@@ -16,25 +16,6 @@
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <!-- 🟢 FIX LCP Y ADVERTENCIAS: Precarga condicional inteligente. 
-         Solo precarga la imagen si el usuario está en la Home (/), evitando descargarla en vano en la administración. -->
-    <script>
-      (function() {
-        try {
-          var path = window.location.pathname;
-          if (path === '/' || path === '' || path === '/index.html') {
-            var link = document.createElement('link');
-            link.rel = 'preload';
-            link.as = 'image';
-            link.href = 'https://imagenes.allmartbazar.com.ar/banners/019f47c2-c87c-7422-8938-b27e03de41f6/full.webp';
-            link.imageSizes = '(max-width: 768px) 100vw, 1600px';
-            link.setAttribute('fetchpriority', 'high');
-            document.head.appendChild(link);
-          }
-        } catch(e) {}
-      })();
-    </script>
     
     <!-- 🟢 FIX RENDERING: Carga asíncrona no bloqueante de Google Fonts -->
     <link 
@@ -49,13 +30,6 @@
         rel="stylesheet" 
       />
     </noscript>
-
-    <style>
-      @font-face {
-        font-family: 'bootstrap-icons';
-        font-display: swap;
-      }
-    </style>
 
     <title>Allmart — Tu hogar, más práctico</title>
     

@@ -108,7 +108,6 @@ export async function uploadProductImage(productId: string, file: UploadedImageF
         Bucket: env.R2_BUCKET_NAME, Key: s3KeyThumb, Body: processed.thumbnail, ContentType: 'image/webp'
       }))
     ]);
-    console.log(`[R2] Imagen enviada a Cloudflare: ${s3KeyFull}`);
   } catch (error) {
     console.error('[R2] Error crítico en subida a R2:', error);
     throw createError('No se pudo subir la imagen a la nube', 500);
@@ -139,19 +138,42 @@ export async function getProductImages(productId: string) {
     where: { productId },
     orderBy: { position: 'asc' },
   });
-  return rows.map(r => ({ 
-    ...r, 
-    url: `/api/images/products/${r.id}`, 
-    thumbUrl: `/api/images/products/${r.id}/thumb`,
-    cdnUrl: r.storageKey ? (r.storageKey.startsWith('http') ? r.storageKey : `${env.R2_PUBLIC_URL}/${r.storageKey}`) : null
-  }));
+  return rows.map(r => {
+    let fullUrl = `/api/images/products/${r.id}`;
+    let thumbUrl = `/api/images/products/${r.id}/thumb`;
+
+    if (r.storageKey) {
+      if (r.storageKey.startsWith('http://') || r.storageKey.startsWith('https://')) {
+        fullUrl = r.storageKey;
+      } else if (env.R2_PUBLIC_URL && !r.storageKey.startsWith('/api')) {
+        fullUrl = `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${r.storageKey.replace(/^\//, '')}`;
+      }
+    }
+
+    if (r.storageThumbKey) {
+      if (r.storageThumbKey.startsWith('http://') || r.storageThumbKey.startsWith('https://')) {
+        thumbUrl = r.storageThumbKey;
+      } else if (env.R2_PUBLIC_URL && !r.storageThumbKey.startsWith('/api')) {
+        thumbUrl = `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${r.storageThumbKey.replace(/^\//, '')}`;
+      }
+    } else if (fullUrl) {
+      thumbUrl = fullUrl;
+    }
+
+    return { 
+      ...r, 
+      url: fullUrl, 
+      thumbUrl,
+      cdnUrl: r.storageKey ? (r.storageKey.startsWith('http') ? r.storageKey : (env.R2_PUBLIC_URL ? `${env.R2_PUBLIC_URL}/${r.storageKey}` : null)) : null
+    };
+  });
 }
 
 export async function getProductImageMeta(id: string) {
   if (!isUUID(id)) throw createError('Imagen no encontrada (Legacy ID)', 404);
   const row = await prisma.productImageStorage.findUnique({ where: { id } });
   if (!row) throw createError('Imagen no encontrada', 404);
-  return { ...row, url: `/api/images/products/${row.id}`, thumbUrl: `/api/images/products/${row.id}/thumb` };
+  return toImageMeta(row);
 }
 
 export async function updateProductImageMeta(id: string, data: { altText?: string | null; position?: number }) {
@@ -188,8 +210,9 @@ export async function serveProductImage(id: string): Promise<{ data: Buffer; mim
     if (row.storageKey.startsWith('http://') || row.storageKey.startsWith('https://')) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: row.storageKey };
     }
-    if (env.R2_PUBLIC_URL) {
-      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
+    if (env.R2_PUBLIC_URL && !row.storageKey.startsWith('/api')) {
+      const cdnUrl = `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${row.storageKey.replace(/^\//, '')}`;
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: cdnUrl };
     } else {
       try {
         const response = await r2Client.send(new GetObjectCommand({
@@ -224,8 +247,9 @@ export async function serveProductImageThumb(id: string): Promise<{ data: Buffer
     if (key.startsWith('http://') || key.startsWith('https://')) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: key };
     }
-    if (env.R2_PUBLIC_URL) {
-      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${key}` };
+    if (env.R2_PUBLIC_URL && !key.startsWith('/api')) {
+      const cdnUrl = `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${key.replace(/^\//, '')}`;
+      return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: cdnUrl };
     } else {
       try {
         const response = await r2Client.send(new GetObjectCommand({
@@ -295,7 +319,7 @@ export async function serveCategoryImage(id: string): Promise<{ data: Buffer; mi
     if (row.storageKey.startsWith('http://') || row.storageKey.startsWith('https://')) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: row.storageKey };
     }
-    if (env.R2_PUBLIC_URL) {
+    if (env.R2_PUBLIC_URL && !row.storageKey.startsWith('/api')) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${row.storageKey}` };
     } else {
       try {
@@ -322,7 +346,7 @@ export async function serveCategoryImageThumb(id: string): Promise<{ data: Buffe
     if (key.startsWith('http://') || key.startsWith('https://')) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: key };
     }
-    if (env.R2_PUBLIC_URL) {
+    if (env.R2_PUBLIC_URL && !key.startsWith('/api')) {
       return { data: Buffer.alloc(0), mimeType: row.mimeType, redirectUrl: `${env.R2_PUBLIC_URL}/${key}` };
     } else {
       try {
@@ -356,5 +380,24 @@ export async function deleteCategoryImage(categoryId: string): Promise<void> {
 }
 
 function toImageMeta(row: any) {
-  return { ...row, url: `/api/images/products/${row.id}`, thumbUrl: `/api/images/products/${row.id}/thumb` };
+  let fullUrl = `/api/images/products/${row.id}`;
+  let thumbUrl = `/api/images/products/${row.id}/thumb`;
+
+  if (row.storageKey) {
+    if (row.storageKey.startsWith('http://') || row.storageKey.startsWith('https://')) {
+      fullUrl = row.storageKey;
+    } else if (env.R2_PUBLIC_URL && !row.storageKey.startsWith('/api')) {
+      fullUrl = `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${row.storageKey.replace(/^\//, '')}`;
+    }
+  }
+
+  if (row.storageThumbKey) {
+    if (row.storageThumbKey.startsWith('http://') || row.storageThumbKey.startsWith('https://')) {
+      thumbUrl = row.storageThumbKey;
+    } else if (env.R2_PUBLIC_URL && !row.storageThumbKey.startsWith('/api')) {
+      thumbUrl = `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${row.storageThumbKey.replace(/^\//, '')}`;
+    }
+  }
+
+  return { ...row, url: fullUrl, thumbUrl };
 }
