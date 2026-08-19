@@ -1,40 +1,26 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // OrdersTable.tsx
 // Tabla de pedidos para vistas de escritorio (oculta en mobile via CSS).
-// Renderiza una fila por pedido con selección, datos clave y cambio de estado inline.
-//
-// Componentes exportados:
-//  - OrdersTable: contenedor de la tabla; itera y delega a OrderItem
-//  - OrderItem:   fila individual con lógica de estado optimista
+// Renderiza una fila por pedido con datos clave, seña y badge de estado de solo lectura.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import React from 'react';
 import { formatDate, formatPrice } from '../utils/ordersHelpers';
 import { OrderStatusTag } from './OrderStatusTag';
-import { OrderStatusSelector } from './OrderStatusSelector';
-import React, { useState } from 'react';
-import { useAdminOrders } from '../../../../context/AdminOrdersContext';
-import toast from 'react-hot-toast';
-import styles from '../AdminOrders.module.css';
 import { Tooltip } from '../../../../components/ui/Tooltip/Tooltip';
 import type { Order } from '../../../../context/AdminOrdersContext';
 import { Button } from '../../../../components/ui/Button/Button';
 import { formatOrderCode } from '../../../../utils/orders';
+import styles from '../AdminOrders.module.css';
 
-/**
- * Props de OrderItem.
- * @param index - Posición en la lista; se usa para escalonar la animación de entrada.
- */
 interface OrderItemProps {
   order: Order;
   selected: boolean;
   onSelect: (id: string) => void;
   onDetail: (order: Order) => void;
   index: number;
-  editing: boolean;
-  setEditingId: (id: string | null) => void;
 }
 
-/** Props de OrdersTable. Recibe la lista ya filtrada desde AdminOrders. */
 interface OrdersTableProps {
   orders: Order[];
   selectedIds: string[];
@@ -42,18 +28,12 @@ interface OrdersTableProps {
   onDetail: (order: Order) => void;
 }
 
-/**
- * OrdersTable — tabla principal de pedidos para desktop.
- *
- * Delega el renderizado de cada fila a OrderItem, pasando el `index`
- * para que la animación de entrada sea escalonada.
- *
- * Solo visible en pantallas ≥ 640px (controlado por CSS `.tableWrapper`).
- */
 export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersTableProps) {
-  const [editingId, setEditingId] = useState<string | null>(null);
   return (
-    <div className={styles.tableWrapper} style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+    <div
+      className={styles.tableWrapper}
+      style={{ overflowX: 'auto', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
+    >
       <table className={styles.table} style={{ minWidth: 900 }}>
         <thead>
           <tr>
@@ -76,8 +56,6 @@ export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersT
               onSelect={onSelect}
               onDetail={onDetail}
               index={index}
-              editing={editingId === order.id}
-              setEditingId={setEditingId}
             />
           ))}
         </tbody>
@@ -86,98 +64,41 @@ export function OrdersTable({ orders, selectedIds, onSelect, onDetail }: OrdersT
   );
 }
 
-
-/**
- * OrderItem — fila individual de la tabla de pedidos.
- *
- * Gestiona su propio estado de edición de status (optimistic update):
- *  1. El usuario hace clic en el badge de estado → aparece OrderStatusSelector.
- *  2. Al seleccionar un nuevo estado → se llama updateOrderStatus del contexto.
- *  3. Si la API falla → se revierte `localStatus` al valor anterior.
- *
- * El click en la fila completa abre el modal de detalle (onDetail),
- * excepto en la celda del estado donde el click se propaga de forma controlada.
- */
-
-export function OrderItem({ order, onDetail, index, editing, setEditingId }: OrderItemProps) {
-  const totalQty = order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0); // Cantidad total de ítems sumando todas las líneas del pedido
-
-  const { updateOrderStatus } = useAdminOrders();
-
-  const [loading, setLoading] = useState(false);
-
-  /**
-   * `localStatus`: copia local del estado del pedido para optimistic update.
-   * Se sincroniza con `order.status` vía useEffect para mantener consistencia
-   * si el pedido se actualiza desde otro lugar (ej: acción masiva).
-   */
-  const [localStatus, setLocalStatus] = useState(order.status);
-  const [error, setError] = useState<string | null>(null);
-
-  // Sincroniza el estado local si la prop cambia externamente
-  React.useEffect(() => {
-    setLocalStatus(order.status);
-  }, [order.status]);
-
-  /**
-   * handleStatusChange — actualiza el estado del pedido con optimistic update.
-   *
-   * Flujo:
-   *  1. Actualiza `localStatus` inmediatamente (UI responde al instante).
-   *  2. Llama a la API via contexto.
-   *  3. Si falla: revierte `localStatus` y muestra error.
-   */
-  const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === localStatus) return;
-    setLoading(true);
-    setError(null);
-    const prev = localStatus;
-    setLocalStatus(newStatus as typeof localStatus);
-    try {
-      await updateOrderStatus(order.id, newStatus as typeof localStatus);
-      toast.success('Estado actualizado');
-    } catch (e: unknown) {
-      setLocalStatus(prev);
-      setError(e instanceof Error ? e.message : 'Error al actualizar');
-      toast.error('No se pudo actualizar el estado');
-    } finally {
-      setLoading(false);
-      setEditingId(null);
-    }
-  };
+export function OrderItem({ order, onDetail, index }: OrderItemProps) {
+  const totalQty = order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0);
 
   return (
     <tr
       className={styles.row}
       style={{
         cursor: 'pointer',
-        animation: `fadeSlideUp 0.22s ease both`,
+        animation: 'fadeSlideUp 0.22s ease both',
         animationDelay: `${index * 35}ms`,
-        position: `relative`,
-        zIndex: editing ? 10 : 0,
       }}
       onClick={() => onDetail(order)}
       role="button"
       tabIndex={0}
-      onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onDetail(order)}
     >
       {/* ID truncado a 8 caracteres para legibilidad */}
-      < td className={styles.tdOrder} >
+      <td className={styles.tdOrder}>
         #{formatOrderCode(order.id)}
-      </td >
+      </td>
       <td className={styles.tdDate}>{formatDate(order.createdAt)}</td>
       <td className={styles.tdCustomer}>
-        <div className={styles.customerTd}>{order.customer.firstName} {order.customer.lastName}</div>
+        <div className={styles.customerTd}>
+          {order.customer.firstName} {order.customer.lastName}
+        </div>
         <div className={styles.tdEmail}>{order.customer.email}</div>
       </td>
       <td className={styles.tdProducts}>
         {totalQty} ítem{totalQty !== 1 ? 's' : ''}
       </td>
-      <td className={styles.tdTotal} >
+      <td className={styles.tdTotal}>
         {formatPrice(order.total)}
       </td>
 
-      {/* 🆕 Celda de Seña del 50% */}
+      {/* Celda de Seña del 50% */}
       <td style={{ padding: '16px 20px', textAlign: 'center' }}>
         {order.has50PercentDeposit ? (
           <span
@@ -200,47 +121,23 @@ export function OrderItem({ order, onDetail, index, editing, setEditingId }: Ord
         )}
       </td>
 
-      {/*
-        Celda de estado: stopPropagation en la celda evita abrir el modal
-        al hacer clic en el selector o el badge.
-        Alterna entre OrderStatusTag (solo lectura) y OrderStatusSelector (edición).
-      */}
-      <td style={{ padding: '16px 20px', position: 'relative', minWidth: 120 }} onClick={e => e.stopPropagation()}>
-        {editing ? (
-          <OrderStatusSelector
-            value={localStatus}
-            onChange={handleStatusChange}
-            disabled={loading}
-          />
-        ) : (
-          <span
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 90 }}
-            tabIndex={0}
-            onClick={e => {
-              e.stopPropagation();
-              setEditingId(order.id);
-            }}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                setEditingId(order.id);
-              }
-            }}
-            aria-label="Cambiar estado"
-            role="button"
-          >
-            <OrderStatusTag status={localStatus} />
-            {loading && <span className={styles.statusLoading} style={{ marginLeft: 6 }}>⏳</span>}
-          </span>
-        )}
-        {error && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</div>}
+      {/* Celda de Estado (Solo Lectura con Badge Oficial) */}
+      <td style={{ padding: '16px 20px' }}>
+        <OrderStatusTag status={order.status} />
       </td>
 
-      {/* Botón de detalle: stopPropagation para no disparar el onClick del <tr> */}
+      {/* Botón de detalle */}
       <td style={{ padding: '16px 8px', textAlign: 'center' }}>
-        <Tooltip content="Ver detalle del pedido">
-          <Button variant="secondary" size="sm" aria-label="Ver detalle del pedido">Ver →</Button>
+        <Tooltip content="Ver detalle completo del pedido">
+          <Button
+            variant="secondary"
+            size="sm"
+            aria-label={`Ver detalle del pedido #${formatOrderCode(order.id)}`}
+          >
+            Ver →
+          </Button>
         </Tooltip>
       </td>
-    </tr >
+    </tr>
   );
 }
