@@ -1,6 +1,7 @@
 /**
  * pages/ProductList/ProductListPage.tsx
  * Catálogo público con navegación unificada, barra horizontal de subcategorías y grilla continua.
+ * OPTIMIZADO: Eliminación de doble renderizado (Single Source of Truth en URL).
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -68,13 +69,18 @@ function getCollectionProductImage(
 
 export function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // 🟢 OPTIMIZACIÓN: Single Source of Truth. Leemos directamente de la URL.
   const urlCategory = searchParams.get('category') ?? '';
   const urlSubCategory = searchParams.get('sub') ?? '';
+  const selectedCategory = urlSubCategory || urlCategory;
+  
   const urlTag = searchParams.get('tag') ?? '';
   const urlTags = searchParams.get('tags') ?? '';
   const urlPriceRanges = searchParams.get('priceRanges') ?? '';
   const urlColeccion = searchParams.get('coleccion') ?? '';
   const urlQuery = searchParams.get('q') ?? '';
+  const urlSort = searchParams.get('sort') ?? 'relevance';
 
   const selectedTags = useMemo(() => {
     return Array.from(new Set([
@@ -85,14 +91,15 @@ export function ProductListPage() {
       .filter(Boolean)));
   }, [urlTag, urlTags]);
 
+  const selectedPriceRanges = useMemo(() => {
+    return urlPriceRanges.split(',').map(v => v.trim()).filter(Boolean);
+  }, [urlPriceRanges]);
+
   const showOnlyFeatured = selectedTags.includes('destacado');
   const showOnlyOnSale = selectedTags.includes('oferta');
   const showOnlyNovedad = selectedTags.includes('novedad');
-  const [sortBy, setSortBy] = useState('relevance');
-  const [selectedCategory, setSelectedCategory] = useState<string>(urlSubCategory || urlCategory);
-  const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState<number | null>(null);
   const [page, setPage] = useState<number>(1);
@@ -108,7 +115,6 @@ export function ProductListPage() {
 
   const urlSlugs = searchParams.get('slugs') ?? '';
   const isCollectionView = urlColeccion.length > 0;
-  const priceRangesStr = selectedPriceRanges.join(',');
 
   useEffect(() => {
     if (filtersOpen) {
@@ -120,27 +126,6 @@ export function ProductListPage() {
       document.body.style.overflow = '';
     };
   }, [filtersOpen]);
-
-  useEffect(() => {
-    const next = urlSubCategory || urlCategory;
-    setSelectedCategory((prev) => (prev === next ? prev : next));
-  }, [urlCategory, urlSubCategory]);
-
-  useEffect(() => {
-    const nextRanges = urlPriceRanges
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean);
-
-    const sortedCurrent = [...selectedPriceRanges].sort();
-    const sortedNext = [...nextRanges].sort();
-    const hasSameSelection = sortedCurrent.length === sortedNext.length
-      && sortedCurrent.every((value, index) => value === sortedNext[index]);
-
-    if (!hasSameSelection) {
-      setSelectedPriceRanges(nextRanges);
-    }
-  }, [urlPriceRanges, selectedPriceRanges]);
 
   useEffect(() => {
     configService.getSortOptions()
@@ -274,18 +259,18 @@ export function ProductListPage() {
       .finally(() => setCollectionLoading(false));
   }, [urlColeccion, categories, products]);
 
-  /* Cargar productos según filtros */
+  /* Cargar productos según filtros (Depende estrictamente de la URL) */
   useEffect(() => {
     const params: PublicProductsParams = { limit: 9, page };
     if (selectedCategory) params.category = selectedCategory;
-    if (selectedTags.includes('destacado')) params.isFeatured = true;
-    if (selectedTags.includes('oferta')) params.isOnSale = true;
-    if (selectedTags.includes('novedad')) params.isNovedad = true;
+    if (showOnlyFeatured) params.isFeatured = true;
+    if (showOnlyOnSale) params.isOnSale = true;
+    if (showOnlyNovedad) params.isNovedad = true;
     if (urlSlugs) params.slugs = urlSlugs;
     if (urlQuery) params.q = urlQuery;
 
-    if (sortBy !== 'relevance') params.sort = sortBy as PublicProductsParams['sort'];
-    if (priceRangesStr) params.priceRanges = priceRangesStr;
+    if (urlSort !== 'relevance') params.sort = urlSort as PublicProductsParams['sort'];
+    if (urlPriceRanges) params.priceRanges = urlPriceRanges;
 
     setError(null);
     if (page === 1) setLoading(true);
@@ -307,17 +292,19 @@ export function ProductListPage() {
         if (page === 1) setLoading(false);
         else setIsLoadingMore(false);
       });
-  }, [sortBy, selectedCategory, selectedTags, urlSlugs, page, priceRangesStr, categories, urlQuery]);
+  }, [urlSort, selectedCategory, showOnlyFeatured, showOnlyOnSale, showOnlyNovedad, urlSlugs, page, urlPriceRanges, categories, urlQuery]);
 
+  // Resetear página si cambian los filtros en la URL
   useEffect(() => {
     setPage(1);
-  }, [sortBy, selectedCategory, selectedTags, priceRangesStr, urlQuery]);
+  }, [urlSort, selectedCategory, urlTags, urlTag, urlPriceRanges, urlQuery]);
 
   const handleLoadMore = () => {
     if (isLoadingMore) return;
     setPage((p) => p + 1);
   };
 
+  // 🟢 OPTIMIZACIÓN: Actualizar URL directamente
   const toggleTag = (tag: string) => {
     const nextTags = selectedTags.includes(tag)
       ? selectedTags.filter((item) => item !== tag)
@@ -344,8 +331,16 @@ export function ProductListPage() {
     } else {
       updated.delete('priceRanges');
     }
+    setSearchParams(updated, { replace: true });
+  };
 
-    setSelectedPriceRanges(nextRanges);
+  const handleSortChange = (value: string) => {
+    const updated = new URLSearchParams(searchParams);
+    if (value === 'relevance') {
+      updated.delete('sort');
+    } else {
+      updated.set('sort', value);
+    }
     setSearchParams(updated, { replace: true });
   };
 
@@ -354,7 +349,6 @@ export function ProductListPage() {
     updated.delete('tag');
     updated.delete('tags');
     updated.delete('priceRanges');
-    setSelectedPriceRanges([]);
     setSearchParams(updated, { replace: true });
   }, [searchParams, setSearchParams]);
 
@@ -377,7 +371,6 @@ export function ProductListPage() {
     return categories.find((cat) => cat.id === selectedCategoryInfo.parentId);
   }, [categories, selectedCategoryInfo]);
 
-  // Subcategorías del contexto activo para el carrusel horizontal
   const subcategoryPills = useMemo(() => {
     if (!selectedParentCategory) return [];
     return categories.filter((cat) => cat.parentId === selectedParentCategory.id);
@@ -385,7 +378,6 @@ export function ProductListPage() {
 
   const visibleProducts = products;
 
-  // Filtrado determinista de colecciones asociadas
   const activeCategoryCollections = useMemo(() => {
     if (!categoryCollections || categoryCollections.length === 0) return [];
 
@@ -530,7 +522,6 @@ export function ProductListPage() {
     return createPortal(modalContent, document.body);
   };
 
-  /* Vista de colección específica */
   if (isCollectionView) {
     return (
       <main className={styles.page}>
@@ -596,7 +587,6 @@ export function ProductListPage() {
   return (
     <main className={styles.page}>
       <style>{`
-        /* Carrusel Horizontal de Subcategorías (Mobile-First) */
         .subcatScrollableBar {
           display: flex;
           align-items: center;
@@ -642,7 +632,6 @@ export function ProductListPage() {
         }
       `}</style>
 
-      {/* Breadcrumb */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link to="/">Inicio</Link>
         <span className={styles.breadcrumbSep}>/</span>
@@ -674,7 +663,6 @@ export function ProductListPage() {
       </nav>
 
       <div className={styles.layout}>
-        {/* Sidebar Desktop (<aside>) */}
         <aside
           className={styles.sidebar}
           aria-label="Filtros de productos"
@@ -727,7 +715,6 @@ export function ProductListPage() {
         </aside>
 
         <div className={styles.main}>
-          {/* 🟢 BARRA HORIZONTAL DE SUBCATEGORÍAS (Pills/Chips en Scroll Táctil) */}
           {selectedParentCategory && subcategoryPills.length > 0 && (
             <div className="subcatScrollableBar" role="tablist" aria-label="Subcategorías">
               <Link
@@ -748,7 +735,6 @@ export function ProductListPage() {
             </div>
           )}
 
-          {/* Colecciones contextuales */}
           {activeCategoryCollections.length > 0 && (
             <div className={styles.collectionBannerWrapper}>
               <div className={styles.categoryCollections}>
@@ -859,8 +845,8 @@ export function ProductListPage() {
                   id="sort"
                   className={styles.sortDropdownControl}
                   options={sortOptions.map((opt) => ({ value: opt.value, label: opt.label }))}
-                  value={sortBy}
-                  onChange={(value) => setSortBy(value)}
+                  value={urlSort}
+                  onChange={handleSortChange}
                   placeholder="Relevancia"
                 />
               </div>
@@ -881,7 +867,6 @@ export function ProductListPage() {
             </div>
           )}
 
-          {/* 🟢 GRILLA UNIFICADA CONTINUA (Cero fragmentación, sorting y paginación 100% consistentes) */}
           {!loading && !error && visibleProducts.length > 0 && (
             <div className={styles.productsGrid}>
               {visibleProducts.map((product) => (
@@ -917,7 +902,6 @@ export function ProductListPage() {
         </div>
       </div>
 
-      {/* Bottom Sheet Modal de Filtros para Móvil */}
       {renderMobileFilterModal()}
     </main>
   );

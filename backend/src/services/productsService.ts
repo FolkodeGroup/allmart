@@ -1,6 +1,7 @@
 /**
  * services/productsService.ts
  * Lógica de negocio para el dominio de productos usando Prisma Client.
+ * OPTIMIZADO: Transacciones atómicas y resolución en memoria para reducir latencia.
  */
 
 import { Prisma, ProductStatus as PrismaProductStatus } from '@prisma/client';
@@ -49,80 +50,6 @@ async function ensureCategoriesExist(categoryIds: string[]): Promise<void> {
   if (missing.length > 0) {
     throw createError(`Categorías no encontradas: ${missing.join(', ')}`, 404);
   }
-}
-
-async function updateProductCategories(productId: string, categoryIds: string[]): Promise<void> {
-  const uniqueIds = Array.from(new Set(categoryIds.filter(Boolean)));
-
-  if (uniqueIds.length === 0) {
-    await prisma.productCategory.deleteMany({ where: { productId } });
-    return;
-  }
-
-  await prisma.$transaction([
-    prisma.productCategory.deleteMany({ where: { productId } }),
-    prisma.productCategory.createMany({
-      data: uniqueIds.map((categoryId) => ({ productId, categoryId })),
-      skipDuplicates: true,
-    }),
-  ]);
-}
-
-async function updateProductTags(productId: string, tags: string[]): Promise<void> {
-  const uniqueTags = Array.from(new Set(tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
-
-  if (uniqueTags.length === 0) {
-    await prisma.productTag.deleteMany({ where: { productId } });
-    return;
-  }
-
-  const existingTags = await prisma.tag.findMany({
-    where: { name: { in: uniqueTags } },
-    select: { id: true, name: true },
-  });
-
-  const existingTagNames = new Set(existingTags.map(t => t.name));
-  const missingTagNames = uniqueTags.filter(name => !existingTagNames.has(name));
-
-  if (missingTagNames.length > 0) {
-    await prisma.tag.createMany({
-      data: missingTagNames.map(name => ({ name })),
-      skipDuplicates: true,
-    });
-  }
-
-  const allTags = await prisma.tag.findMany({
-    where: { name: { in: uniqueTags } },
-    select: { id: true },
-  });
-
-  await prisma.$transaction([
-    prisma.productTag.deleteMany({ where: { productId } }),
-    prisma.productTag.createMany({
-      data: allTags.map(t => ({ productId, tagId: t.id })),
-      skipDuplicates: true,
-    }),
-  ]);
-}
-
-async function updateProductFeatures(productId: string, features: string[]): Promise<void> {
-  const cleanFeatures = features.map(f => f.trim()).filter(Boolean);
-
-  if (cleanFeatures.length === 0) {
-    await prisma.productFeature.deleteMany({ where: { productId } });
-    return;
-  }
-
-  await prisma.$transaction([
-    prisma.productFeature.deleteMany({ where: { productId } }),
-    prisma.productFeature.createMany({
-      data: cleanFeatures.map((desc, idx) => ({
-        productId,
-        description: desc,
-        displayOrder: idx,
-      })),
-    }),
-  ]);
 }
 
 /**
@@ -190,7 +117,6 @@ function toProduct(row: any): Product {
     ? row.productFeatures.map((pf: any) => pf.description ?? pf)
     : [];
 
-  // Extraemos las imágenes desde R2 o ruta proxy sin romper URLs
   const images = Array.isArray(row.productImages)
     ? row.productImages.map((img: any) => {
         if (img.storageKey && (img.storageKey.startsWith('http://') || img.storageKey.startsWith('https://'))) {
@@ -452,25 +378,59 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
     ? Math.max(0, parseInt(String((dto as any).criticalStockThreshold), 10) || 5)
     : 5;
 
-  const product = await prisma.product.create({
-    data: {
-      name: dto.name,
-      slug,
-      description: dto.description ?? null,
-      shortDescription: dto.shortDescription ?? null,
-      price: parsedPrice,
-      status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
-      sku: dto.sku,
-      stock: dto.stock ?? 0,
-      criticalStockThreshold: threshold,
-      rating: dto.rating ?? 0,
-      reviewCount: dto.reviewCount ?? 0,
-      inStock: true,
-      isFeatured: dto.isFeatured ?? false,
-      ...(dto.primarySupplierId !== undefined
-        ? { primarySupplierId: dto.primarySupplierId ?? null }
-        : {}),
-    },
+  // 🟢 OPTIMIZACIÓN: Transacción atómica para creación
+  const product = await prisma.$transaction(async (tx) => {
+    const newProduct = await tx.product.create({
+      data: {
+        name: dto.name,
+        slug,
+        description: dto.description ?? null,
+        shortDescription: dto.shortDescription ?? null,
+        price: parsedPrice,
+        status: (dto.status ?? ProductStatus.ACTIVE) as unknown as PrismaProductStatus,
+        sku: dto.sku,
+        stock: dto.stock ?? 0,
+        criticalStockThreshold: threshold,
+        rating: dto.rating ?? 0,
+        reviewCount: dto.reviewCount ?? 0,
+        inStock: true,
+        isFeatured: dto.isFeatured ?? false,
+        ...(dto.primarySupplierId !== undefined ? { primarySupplierId: dto.primarySupplierId ?? null } : {}),
+        productCategories: {
+          create: normalizedCategoryIds.map(id => ({ categoryId: id }))
+        }
+      },
+    });
+
+    if (Array.isArray(dto.tags) && dto.tags.length > 0) {
+      const uniqueTags = Array.from(new Set(dto.tags.map(t => t.trim().toLowerCase()).filter(Boolean)));
+      const existingTags = await tx.tag.findMany({ where: { name: { in: uniqueTags } } });
+      const existingTagNames = new Set(existingTags.map(t => t.name));
+      const missingTagNames = uniqueTags.filter(name => !existingTagNames.has(name));
+
+      if (missingTagNames.length > 0) {
+        await tx.tag.createMany({ data: missingTagNames.map(name => ({ name })), skipDuplicates: true });
+      }
+
+      const allTags = await tx.tag.findMany({ where: { name: { in: uniqueTags } } });
+      await tx.productTag.createMany({
+        data: allTags.map(t => ({ productId: newProduct.id, tagId: t.id })),
+        skipDuplicates: true,
+      });
+    }
+
+    if (Array.isArray(dto.features) && dto.features.length > 0) {
+      const cleanFeatures = dto.features.map(f => f.trim()).filter(Boolean);
+      await tx.productFeature.createMany({
+        data: cleanFeatures.map((desc, idx) => ({
+          productId: newProduct.id,
+          description: desc,
+          displayOrder: idx,
+        })),
+      });
+    }
+
+    return newProduct;
   });
 
   if (Array.isArray(dto.images) && dto.images.length > 0) {
@@ -486,43 +446,7 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
             position: index,
           };
         }
-
-        const isLocalImageMatch = url.match(/\/api\/images\/products\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-        if (isLocalImageMatch) {
-          const existingImageId = isLocalImageMatch[1];
-          const existingImg = await prisma.productImageStorage.findUnique({
-            where: { id: existingImageId },
-          });
-          if (existingImg) {
-            return {
-              productId: product.id,
-              storageKey: existingImg.storageKey,
-              storageThumbKey: existingImg.storageThumbKey,
-              width: existingImg.width,
-              height: existingImg.height,
-              thumbWidth: existingImg.thumbWidth,
-              thumbHeight: existingImg.thumbHeight,
-              mimeType: existingImg.mimeType,
-              originalFilename: existingImg.originalFilename,
-              sizeBytes: existingImg.sizeBytes,
-              position: index,
-            };
-          }
-        }
-
-        return {
-          productId: product.id,
-          storageKey: url,
-          storageThumbKey: null,
-          width: 0,
-          height: 0,
-          thumbWidth: null,
-          thumbHeight: null,
-          mimeType: 'image/jpeg',
-          originalFilename: 'external',
-          sizeBytes: 0,
-          position: index,
-        };
+        return null;
       })
     );
 
@@ -533,12 +457,6 @@ export async function createProduct(dto: CreateProductDTO): Promise<Product> {
       });
     }
   }
-
-  await Promise.all([
-    updateProductCategories(product.id, normalizedCategoryIds),
-    updateProductTags(product.id, Array.isArray(dto.tags) ? dto.tags : []),
-    updateProductFeatures(product.id, Array.isArray(dto.features) ? dto.features : []),
-  ]);
 
   const refreshed = await prisma.product.findUnique({
     where: { id: product.id },
@@ -662,79 +580,97 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     ? Math.max(0, parseInt(String((dto as any).criticalStockThreshold), 10) || 0)
     : undefined;
 
-  await prisma.product.update({
-    where: { id },
-    data: {
-      name: dto.name ?? existing.name,
-      slug,
-      description: dto.description !== undefined ? dto.description : undefined,
-      shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : undefined,
-      price: finalPrice !== undefined ? finalPrice : undefined,
-      status: dto.status ? (dto.status as unknown as PrismaProductStatus) : undefined,
-      sku: dto.sku !== undefined ? dto.sku : undefined,
-      stock: dto.stock !== undefined ? dto.stock : undefined,
-      criticalStockThreshold: threshold !== undefined ? threshold : undefined,
-      rating: dto.rating !== undefined ? dto.rating : undefined,
-      reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : undefined,
-      inStock: dto.inStock !== undefined ? dto.inStock : undefined,
-      novedadSince: (() => {
-        const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
-        if (incomingTags === null) return undefined;
+  // 🟢 OPTIMIZACIÓN: Transacción atómica para actualización (Elimina el N+1)
+  await prisma.$transaction(async (tx) => {
+    await tx.product.update({
+      where: { id },
+      data: {
+        name: dto.name ?? existing.name,
+        slug,
+        description: dto.description !== undefined ? dto.description : undefined,
+        shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : undefined,
+        price: finalPrice !== undefined ? finalPrice : undefined,
+        status: dto.status ? (dto.status as unknown as PrismaProductStatus) : undefined,
+        sku: dto.sku !== undefined ? dto.sku : undefined,
+        stock: dto.stock !== undefined ? dto.stock : undefined,
+        criticalStockThreshold: threshold !== undefined ? threshold : undefined,
+        rating: dto.rating !== undefined ? dto.rating : undefined,
+        reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : undefined,
+        inStock: dto.inStock !== undefined ? dto.inStock : undefined,
+        novedadSince: (() => {
+          const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
+          if (incomingTags === null) return undefined;
+          const teniaNovedad = existing.productTags.some(pt => pt.tag.name === 'novedad');
+          const tieneNovedad = incomingTags.includes('novedad');
+          if (tieneNovedad && !teniaNovedad) return new Date();
+          if (!tieneNovedad) return null;
+          return undefined;
+        })(),
+        isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : undefined,
+        ...(dto.primarySupplierId !== undefined ? { primarySupplierId: dto.primarySupplierId ?? null } : {}),
+      },
+    });
 
-        const teniaNovedad = existing.productTags.some(pt => pt.tag.name === 'novedad');
-        const tieneNovedad = incomingTags.includes('novedad');
+    if (shouldUpdateCategories) {
+      await tx.productCategory.deleteMany({ where: { productId: id } });
+      if (normalizedCategoryIds.length > 0) {
+        await tx.productCategory.createMany({
+          data: normalizedCategoryIds.map(categoryId => ({ productId: id, categoryId })),
+          skipDuplicates: true,
+        });
+      }
+    }
 
-        if (tieneNovedad && !teniaNovedad) {
-          return new Date();
+    if (dto.tags !== undefined) {
+      const uniqueTags = Array.from(new Set(Array.isArray(dto.tags) ? dto.tags.map(t => t.trim().toLowerCase()).filter(Boolean) : []));
+      await tx.productTag.deleteMany({ where: { productId: id } });
+      
+      if (uniqueTags.length > 0) {
+        const existingTags = await tx.tag.findMany({ where: { name: { in: uniqueTags } } });
+        const existingTagNames = new Set(existingTags.map(t => t.name));
+        const missingTagNames = uniqueTags.filter(name => !existingTagNames.has(name));
+
+        if (missingTagNames.length > 0) {
+          await tx.tag.createMany({ data: missingTagNames.map(name => ({ name })), skipDuplicates: true });
         }
-        if (!tieneNovedad) {
-          return null;
-        }
-        return undefined;
-      })(),
-      isFeatured: dto.isFeatured !== undefined ? dto.isFeatured : undefined,
-      ...(dto.primarySupplierId !== undefined
-        ? { primarySupplierId: dto.primarySupplierId ?? null }
-        : {}),
-    },
+
+        const allTags = await tx.tag.findMany({ where: { name: { in: uniqueTags } } });
+        await tx.productTag.createMany({
+          data: allTags.map(t => ({ productId: id, tagId: t.id })),
+          skipDuplicates: true,
+        });
+      }
+    }
+
+    if (dto.features !== undefined) {
+      const cleanFeatures = Array.isArray(dto.features) ? dto.features.map(f => f.trim()).filter(Boolean) : [];
+      await tx.productFeature.deleteMany({ where: { productId: id } });
+      if (cleanFeatures.length > 0) {
+        await tx.productFeature.createMany({
+          data: cleanFeatures.map((desc, idx) => ({ productId: id, description: desc, displayOrder: idx })),
+        });
+      }
+    }
   });
-
-  const relationalTasks: Promise<void>[] = [];
-
-  if (shouldUpdateCategories) {
-    relationalTasks.push(updateProductCategories(id, normalizedCategoryIds));
-  }
-  if (dto.tags !== undefined) {
-    relationalTasks.push(updateProductTags(id, Array.isArray(dto.tags) ? dto.tags : []));
-  }
-  if (dto.features !== undefined) {
-    relationalTasks.push(updateProductFeatures(id, Array.isArray(dto.features) ? dto.features : []));
-  }
 
   // 🟢 PROTECCIÓN ESTRICTA DE IMÁGENES R2: Si solo vienen URLs ya subidas, NO borramos ni alteramos las storageKeys
   if (dto.images !== undefined && Array.isArray(dto.images)) {
-    relationalTasks.push((async () => {
-      const base64Images = dto.images!.filter(url => typeof url === 'string' && url.startsWith('data:image/'));
-
-      // Solo si hay nuevas imágenes en Base64 se suben y agregan
-      if (base64Images.length > 0) {
-        for (let i = 0; i < base64Images.length; i++) {
-          const uploaded = await uploadBase64ToR2(id, base64Images[i], i);
-          await prisma.productImageStorage.create({
-            data: {
-              productId: id,
-              ...uploaded,
-              mimeType: 'image/webp',
-              originalFilename: 'wizard_upload',
-              position: i,
-            },
-          });
-        }
+    const base64Images = dto.images.filter(url => typeof url === 'string' && url.startsWith('data:image/'));
+    if (base64Images.length > 0) {
+      for (let i = 0; i < base64Images.length; i++) {
+        const uploaded = await uploadBase64ToR2(id, base64Images[i], i);
+        await prisma.productImageStorage.create({
+          data: {
+            productId: id,
+            ...uploaded,
+            mimeType: 'image/webp',
+            originalFilename: 'wizard_upload',
+            position: i,
+          },
+        });
       }
-    })());
+    }
   }
-
-  await Promise.all(relationalTasks);
 
   const refreshed = await prisma.product.findUnique({
     where: { id },
