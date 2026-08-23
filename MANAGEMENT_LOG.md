@@ -2449,4 +2449,62 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1473: Corrección de filtros en la vista de Colecciones | 2026-08-13 |
 | FedericoPaal | 3 | Creación de issue | Issue #1472: Alineación y ajuste visual del bloque de acciones en Colecciones | 2026-08-13 |
 | FedericoPaal | 3 | Creación de issue | Issue #1470: Eliminación de iconos de creación en botones de formulario | 2026-08-13 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1529: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1491: 🔄 Actualización automática de puntajes semanal | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1490: 1477 eliminación del icono de fijado en banners | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1489: 1476 sticky header en el formulario de nuevo banner | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1488: 1475 sticky header en el formulario de nueva colección | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1487: 1474 cierre por defecto de todos los desplegables en la vista de colecciones | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1486: 1473 corrección de filtros en la vista de colecciones | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1485: 1472 alineación y ajuste visual del bloque de acciones en colecciones | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1484: 1470 eliminación de iconos de creación en botones de formulario | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1483: 1465 permitir editar eliminar notas internas en el detalle de pedido | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1482: 1464 reajustar badge de visible y posicionamiento de botones en categorías | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1481: 1463 agregar tabs en la vista de detalle de categorías | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1480: 1462 no permitir agregar categorías adicionales si no hay categoría principal seleccionada | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1479: 1461 auto scroll al primer error al intentar crearguardar producto | 2026-08-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1478: Se agregan espacios dentro del formulario de productos para mayor esp… | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1513: Unificar el estilo del estado vacío “No se encontraron proveedores” con el de Productos | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1512: Ajustar tamaño y estilos del filtro de orden en Reportes para igualar el de Productos | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1511: Ajustar intensidad de filtro multiply en imágenes de Colecciones preview para asimilarse al modo claro | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1510: Respetar tema claro/oscuro del Admin en título de precio de preview de Colecciones sin afectar Home | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1509: Desactivar botones y navegación en preview de Colecciones desde vista de Colecciones del Admin | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1508: Corregir desposicionamiento del icono de lupa en buscador de Colecciones manuales (desktop y mobile) | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1507: Mostrar productos de búsqueda en lista horizontal (grid desktop) al agregar productos a Colecciones manuales | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1506: Implementar sticky header en vista de formulario de Promociones copiando estructura del formulario de Productos | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1505: Remover Funcionalidad de Hover para Botones de Acciones en Categorías Desktop | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1504: Validar Subcategorías como Categoría Padre | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1503: Hacer Formulario de Categorías Full-Width en Desktop Responsive | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1502: Implementar Desplegables en Tabs de Categoría Mobile | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1501: Agregar Header con Botón Volver en Detalle de Categoría Mobile | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1500: Hacer Obligatorio Campo Imagen en Productos | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1499: Agregar Modal de Subcategorías Asociadas en Formulario de Productos | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1498: Mantener estilos claros y oscuros en la vista Dashboard | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1497: Precio promocional en carrito con estilo visual igual al producto sin promoción | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1496: Omitir categorías en las cards del carrito de compras | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1495: Alineación correcta de colecciones tipo Categoría en vistas de productos | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1494: Hover de flechas del slider de colecciones con estilos de marca | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1493: Corrección del nombre de categoría en cards de colecciones del Home | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1492: Navegación fluida en Home y botones de producto | 2026-08-16 |
+| FedericoPaal | 3 | Creación de issue | Issue #1515: Restricción de jerarquía a 2 niveles en categorías y protección de cambios no guardados | 2026-08-17 |
+| FedericoPaal | 3 | Creación de issue | Issue #1514: Refactorizar PLP - Grilla Unificada de Productos con Chips de Subcategorías | 2026-08-17 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1499: Agregar Modal de Subcategorías Asociadas en Formulario de Productos | 2026-08-17 |
+| dgimenezdeveloper | 3 | Asignación de issue a dgimenezdeveloper | Issue #1466: VALIDAR DATOS EN MODALES AL AVANZAR ESTADO DE PEDIDO | 2026-08-17 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1519: 🔄 Registrar puntaje de gestión | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1525: Hacer Formulario de Categorías Full-Width en Desktop Responsive | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1524: Agregar Header con Botón Volver en Detalle de Categoría Mobile | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1523: Precio promocional en carrito con estilo visual igual al producto sin promoción | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1522: fix(formulario-productos): exigir al menos una imagen en creación y e… | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1521: Se implementa diferencia de estilos claros y oscuros en la vista Dash… | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1520: 1496 omitir categorías en las cards del carrito de compras | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1518: Se corrige el nombre de categorías en cards de productos en las colec… | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1517: 1495 alineación correcta de colecciones tipo categoría en vistas de productos | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1516: Hover de flechas del slider de colecciones con estilos de marca | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1491: 🔄 Actualización automática de puntajes semanal | 2026-08-18 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1471: 🔄 Registrar puntaje de gestión | 2026-08-18 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1529: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1528: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1527: 1499 agregar modal de subcategorías asociadas en formulario de productos | 2026-08-19 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1529: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1528: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1527: 1499 agregar modal de subcategorías asociadas en formulario de productos | 2026-08-19 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1519: 🔄 Registrar puntaje de gestión | 2026-08-19 |
