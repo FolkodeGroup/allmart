@@ -15,7 +15,6 @@ import { toThumbnailImageUrl } from '../../../utils/imageUrl';
 interface ProductCardProps {
   product: Product & { stock?: number; appliedDiscount?: ProductDiscount | null };
   variant?: 'default' | 'featured';
-  disableButtons?: boolean;
 }
 
 const FEATURED_GALLERY_AUTOPLAY_MS = 2800;
@@ -27,7 +26,7 @@ function renderStars(rating: number): string {
   return "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
 }
 
-export function ProductCard({ product, variant = 'default', disableButtons = false }: ProductCardProps) {
+export function ProductCard({ product, variant = 'default' }: ProductCardProps) {
   const galleryImages = product.images?.length ? product.images : [undefined];
   const displayImages = galleryImages.map((image) => toThumbnailImageUrl(image) ?? image);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -191,8 +190,7 @@ export function ProductCard({ product, variant = 'default', disableButtons = fal
                   aria-current={currentImageIndex === index ? 'true' : undefined}
                   onClick={(event) => {
                     event.preventDefault();
-                    event.stopPropagation();
-                    if (!disableButtons) goToImage(index);
+                    goToImage(index);
                   }}
                 />
               ))}
@@ -204,11 +202,7 @@ export function ProductCard({ product, variant = 'default', disableButtons = fal
           className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
           aria-label={isFavorito ? `Quitar ${product.name} de favoritos` : `Agregar ${product.name} a favoritos`}
           type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (!disableButtons) toggleFavorito(e);
-          }}
+          onClick={toggleFavorito}
         >
           <Heart size={18} fill={isFavorito ? 'currentColor' : 'transparent'} className={styles.wishlistBtnIcon} aria-hidden="true" />
         </button>
@@ -241,31 +235,14 @@ export function ProductCard({ product, variant = 'default', disableButtons = fal
           )}
         </div>
       </div>
-      {disableButtons ? (
-        <div className={`${styles.exploreButton} ${isFeatured ? styles.featuredExploreButton : ''}`}>
-          <Button
-            className={styles.ButtonExplore}
-            variant="primary"
-            size="lg"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            aria-disabled="true"
-          >
-            Ver producto
-          </Button>
-        </div>
-      ) : (
-        <Link
-          className={`${styles.exploreButton} ${isFeatured ? styles.featuredExploreButton : ''}`}
-          to={`/producto/${product.slug}`}
-        >
-          <Button className={styles.ButtonExplore} variant="primary" size="lg">
-            Ver producto
-          </Button>
-        </Link>
-      )}
+      <Link
+        className={`${styles.exploreButton} ${isFeatured ? styles.featuredExploreButton : ''}`}
+        to={`/producto/${product.slug}`}
+      >
+        <Button className={styles.ButtonExplore} variant="primary" size="lg">
+          Ver producto
+        </Button>
+      </Link>
     </article>
   );
 }
