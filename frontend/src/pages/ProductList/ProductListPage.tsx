@@ -716,23 +716,56 @@ export function ProductListPage() {
 
         <div className={styles.main}>
           {selectedParentCategory && subcategoryPills.length > 0 && (
-            <div className="subcatScrollableBar" role="tablist" aria-label="Subcategorías">
-              <Link
-                to={`/productos?category=${selectedParentCategory.slug}`}
-                className={`subcatPill ${selectedCategory === selectedParentCategory.slug ? 'subcatPillActive' : ''}`}
-              >
-                Todas en {selectedParentCategory.name}
-              </Link>
-              {subcategoryPills.map((sub) => (
-                <Link
-                  key={sub.id}
-                  to={`/productos?category=${sub.slug}`}
-                  className={`subcatPill ${selectedCategory === sub.slug ? 'subcatPillActive' : ''}`}
-                >
-                  {sub.name}
-                </Link>
-              ))}
-            </div>
+            (() => {
+              const activeSubFromCategory = !urlSubCategory && urlCategory ? urlCategory : null;
+              const isAllActive = !urlSubCategory && (!urlCategory || urlCategory === selectedParentCategory.slug);
+
+              return (
+                <div className="subcatScrollableBar" role="tablist" aria-label="Subcategorías">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={isAllActive}
+                    className={`subcatPill ${isAllActive ? 'subcatPillActive' : ''}`}
+                    onClick={() => {
+                      const updated = new URLSearchParams(searchParams);
+                      // Mostrar todos los productos del padre: eliminar sub y mantener category
+                      updated.delete('sub');
+                      updated.set('category', selectedParentCategory.slug);
+                      setSearchParams(updated, { replace: true });
+                    }}
+                  >
+                    {`Todas (${totalProducts ?? products.length})`}
+                  </button>
+
+                  {subcategoryPills.map((sub) => {
+                    const isActive = urlSubCategory === sub.slug || activeSubFromCategory === sub.slug;
+                    return (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        className={`subcatPill ${isActive ? 'subcatPillActive' : ''}`}
+                        onClick={() => {
+                          const updated = new URLSearchParams(searchParams);
+                          // Mantener category en contexto del padre y aplicar sub como filtro rápido
+                          updated.set('category', selectedParentCategory.slug);
+                          if (isActive) {
+                            updated.delete('sub');
+                          } else {
+                            updated.set('sub', sub.slug);
+                          }
+                          setSearchParams(updated, { replace: true });
+                        }}
+                      >
+                        {`${sub.name} (${sub.itemCount ?? 0})`}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()
           )}
 
           {activeCategoryCollections.length > 0 && (
