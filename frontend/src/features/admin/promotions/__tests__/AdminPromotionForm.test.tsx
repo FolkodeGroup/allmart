@@ -56,6 +56,17 @@ describe('AdminPromotionForm', () => {
     expect(valueInput.value).toBe('0');
   });
 
+  it('applies sticky header behavior to the form header', () => {
+    render(
+      <Wrapper>
+        <AdminPromotionForm {...defaultProps} />
+      </Wrapper>
+    );
+
+    const header = screen.getByRole('banner');
+    expect(header.getAttribute('data-sticky-header')).toBe('true');
+  });
+
   it('should submit null maxDiscount when the field is cleared on edit', async () => {
     const promotion = {
       id: 'promo-1',

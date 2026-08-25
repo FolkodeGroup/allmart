@@ -207,27 +207,27 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    
+
     // Validaciones de campos básicos
-    if (!name.trim()) { 
-      setError('El nombre de la campaña es requerido.'); 
+    if (!name.trim()) {
+      setError('El nombre de la campaña es requerido.');
       setActiveTab('details');
-      return; 
+      return;
     }
-    if (validateValue(value, type)) { 
-      setError(validateValue(value, type)); 
+    if (validateValue(value, type)) {
+      setError(validateValue(value, type));
       setActiveTab('details');
-      return; 
+      return;
     }
-    if (!startDate || !endDate) { 
-      setError('Las fechas de inicio y fin son requeridas.'); 
+    if (!startDate || !endDate) {
+      setError('Las fechas de inicio y fin son requeridas.');
       setActiveTab('details');
-      return; 
+      return;
     }
-    if (new Date(startDate) >= new Date(endDate)) { 
-      setError('La fecha de fin debe ser posterior a la de inicio.'); 
+    if (new Date(startDate) >= new Date(endDate)) {
+      setError('La fecha de fin debe ser posterior a la de inicio.');
       setActiveTab('details');
-      return; 
+      return;
     }
 
     setSaving(true);
@@ -248,7 +248,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
 
       if (promotion) await promotionsService.update(promotion.id, payload);
       else await promotionsService.create(payload);
-      
+
       onSubmit();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error guardando promoción');
@@ -263,8 +263,8 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
 
   return (
     <div className={styles.formPageWrapper}>
-      {/* ── Encabezado Unificado ── */}
-      <header className={styles.pageHeader}>
+      {/* Sticky header pattern aligned with AdminCollectionForm */}
+      <header className={styles.pageHeader} data-sticky-header="true">
         <div className={styles.pageHeaderInner}>
           <button type="button" onClick={handleCancel} className={styles.backBtn} aria-label="Volver">
             <ArrowLeft size={14} /> Promociones
