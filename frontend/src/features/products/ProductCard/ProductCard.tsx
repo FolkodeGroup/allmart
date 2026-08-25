@@ -66,6 +66,7 @@ export function ProductCard({ product, variant = 'default', adminPreview = false
   const isFeatured = variant === 'featured';
   const hasGallery = isFeatured && galleryImages.length > 1;
   const disableButtons = adminPreview;
+  const imageClassName = `${styles.image} ${adminPreview ? styles.adminPreviewImage : ''}`.trim();
 
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -136,7 +137,7 @@ export function ProductCard({ product, variant = 'default', adminPreview = false
                     src={displayImages[idx]}
                     alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
                     className={
-                      styles.image +
+                      imageClassName +
                       ' ' +
                       styles.galleryImage +
                       ' ' +
@@ -156,7 +157,7 @@ export function ProductCard({ product, variant = 'default', adminPreview = false
               <ProductImage
                 src={displayImages[currentImageIndex]}
                 alt={product.name}
-                className={styles.image}
+                className={imageClassName}
                 width="100%"
                 height="100%"
                 placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
@@ -177,7 +178,7 @@ export function ProductCard({ product, variant = 'default', adminPreview = false
                     src={displayImages[idx]}
                     alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
                     className={
-                      styles.image +
+                      imageClassName +
                       ' ' +
                       styles.galleryImage +
                       ' ' +
@@ -197,7 +198,7 @@ export function ProductCard({ product, variant = 'default', adminPreview = false
               <ProductImage
                 src={displayImages[currentImageIndex]}
                 alt={product.name}
-                className={styles.image}
+                className={imageClassName}
                 width="100%"
                 height="100%"
                 placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}

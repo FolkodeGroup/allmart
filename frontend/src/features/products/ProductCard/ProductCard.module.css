@@ -46,6 +46,17 @@
   mix-blend-mode: multiply;
 }
 
+.adminPreviewImage {
+  mix-blend-mode: multiply;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+:global(body[data-admin-theme='dark']) .adminPreviewImage {
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
 .featuredImageStage {
   position: absolute;
   inset: 0;
@@ -134,7 +145,7 @@
   z-index: 10;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  color: var(--color-text-secondary, #9ca3af);
+  color: var(--color-text-tertiary);
 }
 
 .wishlistBtn:hover {
