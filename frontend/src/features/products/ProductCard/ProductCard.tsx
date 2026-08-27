@@ -15,6 +15,7 @@ import { toThumbnailImageUrl } from '../../../utils/imageUrl';
 interface ProductCardProps {
   product: Product & { stock?: number; appliedDiscount?: ProductDiscount | null };
   variant?: 'default' | 'featured';
+  disableButtons?: boolean;
 }
 
 const FEATURED_GALLERY_AUTOPLAY_MS = 2800;
@@ -26,7 +27,7 @@ function renderStars(rating: number): string {
   return "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
 }
 
-export function ProductCard({ product, variant = 'default' }: ProductCardProps) {
+export function ProductCard({ product, variant = 'default', disableButtons = false }: ProductCardProps) {
   const galleryImages = product.images?.length ? product.images : [undefined];
   const displayImages = galleryImages.map((image) => toThumbnailImageUrl(image) ?? image);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -124,47 +125,89 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
         aria-label={hasGallery ? `Galería de imágenes de ${product.name}` : undefined}
         onKeyDown={hasGallery ? handleGalleryKeyDown : undefined}
       >
-        <Link to={`/producto/${product.slug}`}>
-          {hasGallery ? (
-            <div className={styles.featuredImageStage}>
-              {galleryImages.map((_, idx) => (
-                <ProductImage
-                  key={`${product.id}-gallery-${idx}`}
-                  src={displayImages[idx]}
-                  alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
-                  className={
-                    styles.image +
-                    ' ' +
-                    styles.galleryImage +
-                    ' ' +
-                    (idx === currentImageIndex ? styles.galleryImageActive : styles.galleryImageInactive)
-                  }
-                  width="100%"
-                  height="100%"
-                  placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
-                  style={{ position: 'absolute', inset: 0 }}
-                  loading={isFeatured ? 'eager' : 'lazy'}
-                  objectFit="contain"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
-                />
-              ))}
-            </div>
-          ) : (
-            <ProductImage
-              src={displayImages[currentImageIndex]}
-              alt={product.name}
-              className={styles.image}
-              width="100%"
-              height="100%"
-              placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
-              loading={isFeatured ? 'eager' : 'lazy'}
-              fetchPriority={isFeatured ? 'high' : 'auto'}
-              objectFit="contain"
-              sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 300px'}
-            />
-          )}
-        </Link>
-
+        {disableButtons ? (
+          <div aria-disabled="true">
+            {hasGallery ? (
+              <div className={styles.featuredImageStage}>
+                {galleryImages.map((_, idx) => (
+                  <ProductImage
+                    key={`${product.id}-gallery-${idx}`}
+                    src={displayImages[idx]}
+                    alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
+                    className={
+                      styles.image +
+                      ' ' +
+                      styles.galleryImage +
+                      ' ' +
+                      (idx === currentImageIndex ? styles.galleryImageActive : styles.galleryImageInactive)
+                    }
+                    width="100%"
+                    height="100%"
+                    placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                    style={{ position: 'absolute', inset: 0 }}
+                    loading={isFeatured ? 'eager' : 'lazy'}
+                    objectFit="contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
+                  />
+                ))}
+              </div>
+            ) : (
+              <ProductImage
+                src={displayImages[currentImageIndex]}
+                alt={product.name}
+                className={styles.image}
+                width="100%"
+                height="100%"
+                placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                loading={isFeatured ? 'eager' : 'lazy'}
+                fetchPriority={isFeatured ? 'high' : 'auto'}
+                objectFit="contain"
+                sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 300px'}
+              />
+            )}
+          </div>
+        ) : (
+          <Link to={`/producto/${product.slug}`}>
+            {hasGallery ? (
+              <div className={styles.featuredImageStage}>
+                {galleryImages.map((_, idx) => (
+                  <ProductImage
+                    key={`${product.id}-gallery-${idx}`}
+                    src={displayImages[idx]}
+                    alt={`${product.name} - imagen ${idx + 1} de ${galleryImages.length}`}
+                    className={
+                      styles.image +
+                      ' ' +
+                      styles.galleryImage +
+                      ' ' +
+                      (idx === currentImageIndex ? styles.galleryImageActive : styles.galleryImageInactive)
+                    }
+                    width="100%"
+                    height="100%"
+                    placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                    style={{ position: 'absolute', inset: 0 }}
+                    loading={isFeatured ? 'eager' : 'lazy'}
+                    objectFit="contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
+                  />
+                ))}
+              </div>
+            ) : (
+              <ProductImage
+                src={displayImages[currentImageIndex]}
+                alt={product.name}
+                className={styles.image}
+                width="100%"
+                height="100%"
+                placeholder={'data:image/svg+xml,%3Csvg width="240" height="240" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="240" height="240" fill="%23f3f3f3"/%3E%3C/svg%3E'}
+                loading={isFeatured ? 'eager' : 'lazy'}
+                fetchPriority={isFeatured ? 'high' : 'auto'}
+                objectFit="contain"
+                sizes={isFeatured ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px' : '(max-width: 768px) 50vw, 300px'}
+              />
+            )}
+          </Link>
+        )}
         {/* Agrupación de badges */}
         <div className={styles.badges}>
           {dynamicDiscount && (
@@ -190,7 +233,8 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
                   aria-current={currentImageIndex === index ? 'true' : undefined}
                   onClick={(event) => {
                     event.preventDefault();
-                    goToImage(index);
+                    event.stopPropagation();
+                    if (!disableButtons) goToImage(index);
                   }}
                 />
               ))}
@@ -202,7 +246,11 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           className={`${styles.wishlistBtn} ${isFavorito ? styles.activo : ""}`}
           aria-label={isFavorito ? `Quitar ${product.name} de favoritos` : `Agregar ${product.name} a favoritos`}
           type="button"
-          onClick={toggleFavorito}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!disableButtons) toggleFavorito(e);
+          }}
         >
           <Heart size={18} fill={isFavorito ? 'currentColor' : 'transparent'} className={styles.wishlistBtnIcon} aria-hidden="true" />
         </button>
@@ -235,14 +283,31 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
           )}
         </div>
       </div>
-      <Link
-        className={`${styles.exploreButton} ${isFeatured ? styles.featuredExploreButton : ''}`}
-        to={`/producto/${product.slug}`}
-      >
-        <Button className={styles.ButtonExplore} variant="primary" size="lg">
-          Ver producto
-        </Button>
-      </Link>
+      {disableButtons ? (
+        <div className={`${styles.exploreButton} ${isFeatured ? styles.featuredExploreButton : ''}`}>
+          <Button
+            className={styles.ButtonExplore}
+            variant="primary"
+            size="lg"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            aria-disabled="true"
+          >
+            Ver producto
+          </Button>
+        </div>
+      ) : (
+        <Link
+          className={`${styles.exploreButton} ${isFeatured ? styles.featuredExploreButton : ''}`}
+          to={`/producto/${product.slug}`}
+        >
+          <Button className={styles.ButtonExplore} variant="primary" size="lg">
+            Ver producto
+          </Button>
+        </Link>
+      )}
     </article>
   );
 }
