@@ -15,7 +15,7 @@ import { toThumbnailImageUrl } from '../../../utils/imageUrl';
 interface ProductCardProps {
   product: Product & { stock?: number; appliedDiscount?: ProductDiscount | null };
   variant?: 'default' | 'featured';
-  disableButtons?: boolean;
+  adminPreview?: boolean;
 }
 
 const FEATURED_GALLERY_AUTOPLAY_MS = 2800;
@@ -27,7 +27,7 @@ function renderStars(rating: number): string {
   return "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
 }
 
-export function ProductCard({ product, variant = 'default', disableButtons = false }: ProductCardProps) {
+export function ProductCard({ product, variant = 'default', adminPreview = false }: ProductCardProps) {
   const galleryImages = product.images?.length ? product.images : [undefined];
   const displayImages = galleryImages.map((image) => toThumbnailImageUrl(image) ?? image);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -65,6 +65,7 @@ export function ProductCard({ product, variant = 'default', disableButtons = fal
   const isNew = product.tags.includes("nuevo");
   const isFeatured = variant === 'featured';
   const hasGallery = isFeatured && galleryImages.length > 1;
+  const disableButtons = adminPreview;
 
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -274,11 +275,13 @@ export function ProductCard({ product, variant = 'default', disableButtons = fal
               price={product.price}
               discount={dynamicDiscount}
               size="md"
+              adminPreview={adminPreview}
             />
           ) : (
             <ProductPrice
               price={product.price}
               size="md"
+              adminPreview={adminPreview}
             />
           )}
         </div>

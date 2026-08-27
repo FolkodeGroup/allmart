@@ -8,6 +8,7 @@ export interface ProductPriceProps {
   discountPercentage?: number;
   className?: string;
   size?: "sm" | "md" | "lg";
+  adminPreview?: boolean;
 }
 
 function formatPrice(price: number): string {
@@ -24,6 +25,7 @@ export const ProductPrice: React.FC<ProductPriceProps> = ({
   className = "",
   size = "md",
   discountPercentage,
+  adminPreview = false,
 }) => {
   // Determinar si mostrar precio original tachado
   // Solo mostrar tachado para descuentos "percentage" o "fixed", NO para "bogo"
@@ -33,7 +35,7 @@ export const ProductPrice: React.FC<ProductPriceProps> = ({
   // Si hay descuento, mostrar precio original (tachado si aplica) + precio con descuento
   if (discount) {
     return (
-      <div className={`${styles.priceBlock} ${styles[size]} ${className}`.trim()}>
+      <div className={`${styles.priceBlock} ${styles[size]} ${adminPreview ? styles.adminPreview : ''} ${className}`.trim()}>
         {shouldShowStrikethrough && (
           <span className={styles.originalPrice}>{formatPrice(price)}</span>
         )}
@@ -49,7 +51,7 @@ export const ProductPrice: React.FC<ProductPriceProps> = ({
 
   // Sin descuento, mostrar solo el precio
   return (
-    <div className={`${styles.priceBlock} ${styles[size]} ${className}`.trim()}>
+    <div className={`${styles.priceBlock} ${styles[size]} ${adminPreview ? styles.adminPreview : ''} ${className}`.trim()}>
       <span className={styles.currentPrice}>{formatPrice(price)}</span>
     </div>
   );
