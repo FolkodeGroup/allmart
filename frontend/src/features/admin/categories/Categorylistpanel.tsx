@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobileViewport } from './hooks/useIsMobileViewport';
 import type { Category } from '../../../types';
-import { FolderSearch, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { FolderSearch, AlertCircle } from 'lucide-react';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { ProductImage } from '../../../components/ui/ProductImage';
 import styles from './Categorylistpanel.module.css';
@@ -30,11 +30,6 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
             error,
             selectedCategoryId,
             onSelectCategory,
-            onEdit,
-            onDelete,
-            onToggleVisibility,
-            canEdit = true,
-            canDelete = true,
             getProductCount,
             scrollPreserveKey = 'category-list-scroll',
         },
@@ -247,45 +242,7 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                     </div>
                                 </div>
 
-                                {!isMobile && (canEdit || canDelete) && (
-                                    <div className={styles.quickActions}>
-                                        {canEdit && onEdit && (
-                                            <button
-                                                className={styles.quickBtn}
-                                                title="Editar"
-                                                onClick={(e) => { e.stopPropagation(); onEdit(cat.id); }}
-                                                aria-label={`Editar ${displayName}`}
-                                                type="button"
-                                                style={{ color: 'var(--color-primary)' }}
-                                            >
-                                                <i className="bi bi-pencil-fill" />
-                                            </button>
-                                        )}
-                                        {canEdit && onToggleVisibility && (
-                                            <button
-                                                className={styles.quickBtn}
-                                                title={cat.isVisible ? 'Ocultar' : 'Mostrar'}
-                                                onClick={(e) => { e.stopPropagation(); onToggleVisibility(cat.id, !cat.isVisible); }}
-                                                aria-label={`${cat.isVisible ? 'Ocultar' : 'Mostrar'} ${displayName}`}
-                                                type="button"
-                                            >
-                                                {cat.isVisible ? <EyeOff size={14} /> : <Eye size={14} />}
-                                            </button>
-                                        )}
-                                        {canDelete && onDelete && (
-                                            <button
-                                                className={`${styles.quickBtn} ${styles.quickBtnDanger}`}
-                                                title="Eliminar"
-                                                onClick={(e) => { e.stopPropagation(); onDelete(cat.id); }}
-                                                aria-label={`Eliminar ${displayName}`}
-                                                type="button"
-                                                style={{ color: 'var(--color-error)' }}
-                                            >
-                                                <i className="bi bi-trash-fill" />
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
+
                             </div>
                         );
                     })}
