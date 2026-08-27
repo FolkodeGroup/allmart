@@ -800,7 +800,7 @@ export function AdminReports() {
                 <div className={styles.reportSortContainer}>
                   <div className={styles.reportSortControls}>
                     <span className={styles.reportSortLabel}>Ordenar:</span>
-                    <div style={{ width: '140px', display: 'inline-block' }}>
+                    <div className={styles.reportSortDropdownWrapper}>
                       <Dropdown
                         options={orderSortOptions}
                         value={orderSortField}

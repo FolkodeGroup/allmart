@@ -1488,48 +1488,58 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 1;
-  min-width: 220px;
+  min-width: 0;
 }
 
 .reportSortControls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
-  flex-wrap: wrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  flex-wrap: nowrap;
+}
+
+.reportSortDropdownWrapper {
+  width: 140px;
+  display: inline-block;
 }
 
 .reportSortLabel {
   font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 600;
   color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.2;
 }
 
 .sortButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0.5rem 0.8rem;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: 6px;
   border: 1px solid var(--color-border);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-ui);
-  font-size: var(--text-sm);
+  font-size: 0.8rem;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .sortButton:hover {
-  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
 }
 
 @media (max-width: 639px) {
@@ -1539,12 +1549,19 @@
   }
 
   .reportSortContainer {
+    width: 100%;
     justify-content: stretch;
   }
 
   .reportSortControls {
     width: 100%;
     justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .reportSortDropdownWrapper {
+    flex: 1;
+    width: auto;
   }
 }
 
