@@ -93,6 +93,22 @@
     overflow-y: auto;
 }
 
+.emptyList {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    width: 100%;
+    padding: 12px 8px;
+    box-sizing: border-box;
+}
+
+.emptyList > * {
+    width: 100%;
+}
+.emptyList > :global(.emptyState) {
+    background-color: #fff;
+}
 .supplierCard {
     background: var(--color-bg-secondary, #1f2937);
     border: 1px solid var(--color-border, #374151);
@@ -606,11 +622,24 @@
     font-weight: 700;
 }
 
-.badgeOk { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-.badgeWarn { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-.badgeDanger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badgeOk {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
 
-.rightLoading, .emptyChart, .emptyTable {
+.badgeWarn {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.badgeDanger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.rightLoading,
+.emptyChart,
+.emptyTable {
     padding: 40px;
     text-align: center;
     color: var(--color-text-secondary, #9ca3af);
@@ -623,14 +652,16 @@
 .spinner {
     width: 24px;
     height: 24px;
-    border: 3px solid rgba(255,255,255,0.1);
+    border: 3px solid rgba(255, 255, 255, 0.1);
     border-top-color: var(--color-primary, #769282);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @media (max-width: 1100px) {
