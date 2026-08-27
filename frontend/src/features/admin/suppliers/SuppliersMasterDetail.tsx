@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle, Clock } from 'lucide-react';
+import { Search, Globe, Phone, Package, Mail, CheckCircle, XCircle, TrendingUp, Table, BarChart2, AlertTriangle, Clock, Truck } from 'lucide-react';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     BarChart, Bar,
@@ -12,6 +12,7 @@ import {
 } from './suppliersAdminService';
 import { PriceHistoryModal } from './PriceHistoryModal';
 import { PriceUpdateModal } from './PriceUpdateModal';
+import { EmptyState } from '../../../components/ui/EmptyState';
 import styles from './SuppliersMasterDetail.module.css';
 
 const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
@@ -363,7 +364,13 @@ export function SuppliersMasterDetail({ onNew, onEdit }: SuppliersMasterDetailPr
                             <div key={i} className={styles.supplierSkeleton} />
                         ))
                     ) : filteredSuppliers.length === 0 ? (
-                        <div className={styles.emptyList}>No se encontraron proveedores</div>
+                        <div className={styles.emptyList}>
+                            <EmptyState
+                                icon={<Truck size={48} color="#94a3b8" />}
+                                title="No se encontraron proveedores"
+                                description="Ajustá los filtros o la búsqueda para encontrar lo que necesitás."
+                            />
+                        </div>
                     ) : (
                         filteredSuppliers.map(s => (
                             <div
