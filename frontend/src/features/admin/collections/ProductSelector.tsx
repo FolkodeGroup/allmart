@@ -99,21 +99,25 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
 
         {showDropdown && (
           <div className={styles.dropdown}>
-            {loading && <div style={{ padding: '8px' }}>Cargando...</div>}
-            {error && <div style={{ padding: '8px', color: 'red', fontSize: '12px' }}>{error}</div>}
+            {loading && <div className={styles.dropdownMessage}>Cargando...</div>}
+            {error && <div className={styles.dropdownError}>{error}</div>}
             {!loading && availableProducts.length === 0 && searchQuery && (
-              <div style={{ padding: '8px', fontSize: '12px', color: '#666' }}>No hay productos disponibles</div>
+              <div className={styles.dropdownMessage}>No hay productos disponibles</div>
             )}
-            {availableProducts.map((product) => (
-              <button
-                key={product.id}
-                type="button"
-                onClick={() => handleSelectProduct(product)}
-                className={styles.dropdownItem}
-              >
-                <ProductRow product={product} />
-              </button>
-            ))}
+            {availableProducts.length > 0 && (
+              <div className={styles.dropdownResults}>
+                {availableProducts.map((product) => (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => handleSelectProduct(product)}
+                    className={styles.dropdownItem}
+                  >
+                    <ProductRow product={product} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
