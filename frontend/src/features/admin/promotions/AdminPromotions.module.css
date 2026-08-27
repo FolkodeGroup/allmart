@@ -533,49 +533,64 @@
 }
 
 .pageHeader {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-bg-primary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border, #374151);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  margin-bottom: 16px;
   flex-wrap: wrap;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-border, #374151);
+  transition: all 0.2s ease;
 }
 
 .pageHeaderInner {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .backBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #374151);
   background: transparent;
-  border: none;
-  color: var(--color-text-secondary, #9ca3af);
+  color: var(--color-primary, #769282);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  transition: color 0.2s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .backBtn:hover {
-  color: var(--color-text-primary, #ffffff);
+  background: rgba(118, 146, 130, 0.12);
+  color: var(--color-primary-light, #8fa99a);
 }
 
 .pageTitle {
   margin: 0;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--color-text-primary, #ffffff);
 }
 
 .pageHeaderActions {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 }
 
 .cancelBtn {
@@ -584,18 +599,18 @@
   justify-content: center;
   padding: 10px 20px;
   border: 1px solid var(--color-border, #374151);
-  border-radius: 10px;
-  background-color: var(--color-bg-secondary, #1f2937);
+  border-radius: 8px;
+  background: var(--color-bg-secondary, #28353d);
   color: var(--color-text-primary, #ffffff);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: opacity 0.2s ease;
   min-height: 44px;
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background-color: var(--color-border, #374151);
+  opacity: 0.9;
 }
 
 .submitBtn {
@@ -606,11 +621,11 @@
   background-color: var(--color-primary, #769282);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
   min-height: 44px;
 }
 
@@ -620,14 +635,29 @@
 
 @media (max-width: 767px) {
   .pageHeader {
+    padding: 10px 12px;
     flex-direction: column;
     align-items: stretch;
   }
-  .pageHeaderActions {
-    flex-direction: column;
-  }
-  .cancelBtn, .submitBtn {
+
+  .pageHeaderInner {
     width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pageHeaderActions {
+    width: 100%;
+    margin-left: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
   }
 }
 
