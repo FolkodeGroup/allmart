@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { ProductCard } from '../ProductCard';
+import styles from '../ProductCard.module.css';
 import type { Product } from '../../../../types';
 
 vi.mock('../../../../components/layout/context/FavoritesContextUtils', () => ({
@@ -48,5 +49,25 @@ describe('ProductCard', () => {
     );
 
     expect(screen.queryByText(/Stock bajo/i)).not.toBeInTheDocument();
+  });
+
+  it('uses the softened image treatment only in admin preview', () => {
+    const { rerender } = render(
+      <BrowserRouter>
+        <ProductCard product={product} adminPreview />
+      </BrowserRouter>
+    );
+
+    const previewImage = screen.getByRole('img', { name: product.name }).closest('div');
+    expect(previewImage).toHaveClass(styles.adminPreviewImage);
+
+    rerender(
+      <BrowserRouter>
+        <ProductCard product={product} />
+      </BrowserRouter>
+    );
+
+    const publicImage = screen.getByRole('img', { name: product.name }).closest('div');
+    expect(publicImage).not.toHaveClass(styles.adminPreviewImage);
   });
 });
