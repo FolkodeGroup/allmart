@@ -2508,3 +2508,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1528: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1527: 1499 agregar modal de subcategorías asociadas en formulario de productos | 2026-08-19 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1519: 🔄 Registrar puntaje de gestión | 2026-08-19 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1536: Ajustar tamaño y estilos del filtro de orden en Reportes para igualar el de Productos | 2026-08-27 |
