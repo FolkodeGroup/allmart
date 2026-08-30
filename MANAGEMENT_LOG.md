@@ -2508,5 +2508,18 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1528: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1527: 1499 agregar modal de subcategorías asociadas en formulario de productos | 2026-08-19 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1519: 🔄 Registrar puntaje de gestión | 2026-08-19 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1536: Ajustar tamaño y estilos del filtro de orden en Reportes para igualar el de Productos | 2026-08-27 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1535: 1511 ajustar intensidad de filtro multiply en imágenes de colecciones preview para asimilarse al modo claro | 2026-08-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1530: 🔄 Actualización automática de puntajes semanal | 2026-08-23 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1539: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1538: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1539: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1538: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1537: Unificar el estilo del estado vacío “No se encontraron proveedores” con el de Productos | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1536: Ajustar tamaño y estilos del filtro de orden en Reportes para igualar el de Productos | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1535: 1511 ajustar intensidad de filtro multiply en imágenes de colecciones preview para asimilarse al modo claro | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1534: 1510 respetar tema clarooscuro del admin en título de precio de preview de colecciones sin afectar home | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1533: 1507 mostrar productos de búsqueda en lista horizontal grid desktop al agregar productos a colecciones manuales | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1532: Mensaje de commit sugerido | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1531: 1509-desactivar-botones-y-navegación-en-preview-de-colecciones-desde-vista-de-colecciones-del-admin | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1530: 🔄 Actualización automática de puntajes semanal | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1526: Remover Botones de Acciones en Hover de }Categorías Desktop | 2026-08-27 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1524: Agregar Header con Botón Volver en Detalle de Categoría Mobile | 2026-08-27 |
