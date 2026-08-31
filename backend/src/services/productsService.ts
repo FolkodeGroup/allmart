@@ -560,6 +560,13 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
     ? normalizeCategoryIds(dto.categoryId ?? undefined, dto.categoryIds)
     : existingCategoryIds;
 
+  const shouldSyncProductAvailability = dto.stock !== undefined || dto.inStock !== undefined;
+  const nextProductInStock = dto.inStock !== undefined
+    ? dto.inStock
+    : dto.stock !== undefined
+      ? dto.stock > 0
+      : undefined;
+
   let finalPrice = dto.price !== undefined ? parseSafePrice(dto.price) : undefined;
 
   if (finalPrice !== undefined && finalPrice !== null && finalPrice < 0) {
@@ -596,7 +603,9 @@ export async function updateProduct(id: string, dto: UpdateProductDTO): Promise<
         criticalStockThreshold: threshold !== undefined ? threshold : undefined,
         rating: dto.rating !== undefined ? dto.rating : undefined,
         reviewCount: dto.reviewCount !== undefined ? dto.reviewCount : undefined,
-        inStock: dto.inStock !== undefined ? dto.inStock : undefined,
+        inStock: shouldSyncProductAvailability
+          ? (dto.stock !== undefined ? dto.stock > 0 : nextProductInStock ?? existing.inStock)
+          : undefined,
         novedadSince: (() => {
           const incomingTags = Array.isArray(dto.tags) ? dto.tags : null;
           if (incomingTags === null) return undefined;

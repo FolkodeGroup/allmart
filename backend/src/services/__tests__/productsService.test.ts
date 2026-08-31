@@ -28,9 +28,14 @@ vi.mock('../categoriesService', () => ({
   getCategoryBySlug: vi.fn(),
 }));
 
+vi.mock('../orderConfirmationEmailService', () => ({
+  sendOrderConfirmationEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
 const { prisma } = await import('../../config/prisma');
 const { getCategoryBySlug } = await import('../categoriesService');
 const { getPublicProducts } = await import('../productsService');
+const { createPublicOrder } = await import('../publicOrderService');
 
 function decimal(value: number) {
   return { toNumber: () => value };
@@ -160,6 +165,61 @@ describe('productsService.getPublicProducts', () => {
           },
         },
       ],
+    });
+  });
+
+  it('marks the product as out of stock when an order consumes the final stock', async () => {
+    const productUpdateMock = vi.fn()
+      .mockResolvedValueOnce({ stock: 0, inStock: false })
+      .mockResolvedValueOnce({ stock: 0, inStock: false });
+
+    (prisma as any).$transaction = vi.fn(async (callback) => callback({
+      customer: {
+        upsert: vi.fn().mockResolvedValue({ id: 'customer-1' }),
+      },
+      order: {
+        create: vi.fn().mockResolvedValue({ id: 'order-1', createdAt: new Date() }),
+      },
+      product: {
+        update: productUpdateMock,
+      },
+      orderItem: {
+        create: vi.fn().mockResolvedValue({}),
+      },
+      orderStatusHistory: {
+        create: vi.fn().mockResolvedValue({}),
+      },
+      lowStockAlert: {
+        create: vi.fn().mockResolvedValue({}),
+      },
+    }));
+
+    await createPublicOrder({
+      customer: {
+        firstName: 'Ana',
+        lastName: 'García',
+        email: 'ana@test.com',
+        phone: '+5491123456789',
+      },
+      items: [
+        {
+          productId: 'prod-1',
+          productName: 'Producto 1',
+          quantity: 5,
+          unitPrice: 100,
+        },
+      ],
+      total: 500,
+      notes: null,
+    });
+
+    expect(productUpdateMock).toHaveBeenNthCalledWith(1, {
+      where: { id: 'prod-1' },
+      data: { stock: { decrement: 5 } },
+    });
+    expect(productUpdateMock).toHaveBeenNthCalledWith(2, {
+      where: { id: 'prod-1' },
+      data: { inStock: false },
     });
   });
 });

@@ -126,6 +126,13 @@ export async function createPublicOrder(data: CreatePublicOrderDTO): Promise<str
         realSkuId = null; // Asignación explícita
       }
 
+      if (realSkuId === null) {
+        await tx.product.update({
+          where: { id: realProductId },
+          data: { inStock: updatedStock > 0 },
+        });
+      }
+
       await tx.orderItem.create({
         data: {
           orderId: order.id,
