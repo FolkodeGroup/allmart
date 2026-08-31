@@ -2510,3 +2510,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1519: 🔄 Registrar puntaje de gestión | 2026-08-19 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1536: Ajustar tamaño y estilos del filtro de orden en Reportes para igualar el de Productos | 2026-08-27 |
 | dgimenezdeveloper | 15 | Merge de PR | PR #1535: 1511 ajustar intensidad de filtro multiply en imágenes de colecciones preview para asimilarse al modo claro | 2026-08-27 |
+| FedericoPaal | 3 | Creación de issue | Issue #1566: Refactorizar el filtro de estado en "Últimos pedidos del período" para usar Dropdown singular | 2026-08-31 |
