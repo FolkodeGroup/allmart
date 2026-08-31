@@ -82,31 +82,72 @@
 .variantLabelBlock {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  width: fit-content;
 }
 
 .variantGroupName {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-primary, #ffffff);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.variantActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .compactEditBtn,
 .deleteGroupBtn {
-  background: transparent;
-  border: none;
-  color: var(--color-text-secondary, #9ca3af);
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e5e2dd);
+  background: var(--color-bg-primary, #ffffff);
+  color: var(--color-text-primary, #1a1a1a);
   font-size: 14px;
   cursor: pointer;
-  padding: 4px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.compactEditBtn:hover {
+  background: rgba(var(--color-primary-rgb, 118, 146, 130), 0.08);
+  border-color: rgba(var(--color-primary-rgb, 118, 146, 130), 0.36);
+  color: var(--color-primary, #769282);
+  transform: translateY(-1px);
 }
 
 .deleteGroupBtn {
-  color: #ef4444;
+  background: rgba(199, 80, 80, 0.06);
+  border-color: rgba(199, 80, 80, 0.18);
+  color: var(--color-error, #c75050);
+}
+
+.deleteGroupBtn:hover {
+  background: rgba(199, 80, 80, 0.12);
+  border-color: rgba(199, 80, 80, 0.32);
+  color: var(--color-error, #c75050);
+  transform: translateY(-1px);
+}
+
+.compactEditBtn i,
+.deleteGroupBtn i {
+  font-size: 0.9rem;
+  line-height: 1;
 }
 
 .tagsContainer {
   display: flex;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 6px;
   flex: 1;
@@ -164,16 +205,17 @@
   min-height: 38px;
   min-width: 38px;
   padding: 0 14px;
-  border-radius: 6px;
-  border: none;
-  background-color: var(--color-primary, #769282);
-  color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid var(--color-primary, #769282);
+  background: var(--color-primary, #769282);
+  color: var(--color-text-inverse, #ffffff);
   font-weight: 600;
   font-size: 16px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 }
 
 @media (max-width: 767px) {
