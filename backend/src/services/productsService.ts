@@ -200,7 +200,7 @@ function buildAdminProductsWhere(query: Record<string, any>): Record<string, any
 
   if (stockLevel && stockLevel !== 'all') {
     if (stockLevel === 'no_stock') {
-      where.stock = 0;
+      where.stock = { lte: 0 };
     } else if (stockLevel === 'low_stock') {
       where.stock = { gt: 0, lte: 5 };
     } else if (stockLevel === 'in_stock') {
