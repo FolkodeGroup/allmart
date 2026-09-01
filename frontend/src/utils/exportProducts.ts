@@ -308,7 +308,7 @@ export async function exportProductsPDF(products: ExportableProduct[], fileName?
     startY: 46,
     styles: {
       fontSize: 9,
-      cellPadding: 3,
+      cellPadding: 4,
       overflow: 'linebreak',
       valign: 'middle',
     },
@@ -318,12 +318,12 @@ export async function exportProductsPDF(products: ExportableProduct[], fileName?
       textColor: 255,
       fontStyle: 'bold',
       fontSize: 9.5,
-      cellPadding: { top: 2.5, bottom: 2.5, left: 4, right: 4 },
+      cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
       minCellHeight: 8, // Altura reducida para el header
     },
     // 🟢 CUERPO CON ALTURA ADECUADA PARA LAS MINIATURAS DE IMAGEN
     bodyStyles: {
-      minCellHeight: 26, // Mantiene espacio adecuado para la imagen
+      minCellHeight: 28, // Mantiene espacio adecuado para la imagen
     },
     alternateRowStyles: {
       fillColor: [242, 239, 235], // Fondo cálido Allmart #f2efeb
@@ -335,6 +335,16 @@ export async function exportProductsPDF(products: ExportableProduct[], fileName?
       3: { cellWidth: 25, fontStyle: 'bold', textColor: [200, 154, 112] }, // accentDark #c89a70
       4: { cellWidth: 120, textColor: [118, 118, 118] }, // Ancho fijo para forzar el salto de línea
     },
+   didParseCell: (data) => {
+    if (data.section === 'head' && data.column.index === 0) {
+      data.cell.styles.cellPadding = {
+        top: 2.5,
+        bottom: 2.5,
+        left: 5, // más padding solo para el header "Imagen"
+        right: 3,
+      };
+    }
+  },
     didDrawCell: (data) => {
       if (data.section === 'body' && data.column.index === 0) {
         const rowIndex = data.row.index;
