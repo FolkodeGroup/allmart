@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { CartContext, CART_STORAGE_KEY } from './CartContextUtils';
 import type { CartItem, Discount } from '../../../types';
 import { publicCollectionsService } from '../../../services/publicCollectionsService';
+import toast from 'react-hot-toast';
+import { AddToCartToast } from '../../ui/AddToCartToast';
 
 function extractProductId(compositeId: string): string {
   return compositeId.split('::')[0];
@@ -114,6 +116,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, newItem];
     });
+
+    // Mostrar feedback compacto y no intrusivo al usuario (Home / ProductList)
+    try {
+      const img = Array.isArray(newItem.product.images) && newItem.product.images.length > 0 ? newItem.product.images[0] : null;
+      toast.custom((t) => (
+        <div data-enter={!t.visible ? 'true' : 'false'} data-exit={t.visible ? 'false' : 'true'}>
+          <AddToCartToast productName={newItem.product.name} imageUrl={img} quantity={newItem.quantity} />
+        </div>
+      ), {
+        duration: 4000,
+        position: 'top-right',
+      });
+    } catch {
+      // Fallback silencioso si toast falla
+    }
   }, []);
 
   const removeFromCart = useCallback((productId: string) => {
