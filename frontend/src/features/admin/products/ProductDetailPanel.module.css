@@ -322,7 +322,7 @@
     background: var(--color-bg-primary);
     border: none;
     border-radius: 0;
-    overflow: hidden; /* Corta cualquier desbordamiento fuera del contenedor */
+    overflow: visible; /* Permite que elementos sticky funcionen correctamente en mobile */
     padding-bottom: 74px; /* Compensacion para la barra fija inferior */
     box-sizing: border-box;
   }
@@ -400,6 +400,15 @@
     display: none;
   }
 
+  /* Asegurar que el header móvil pueda quedar sticky dentro del flujo */
+  .mobileOnlyHeader {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky, 300);
+    background: var(--color-bg-card, var(--color-bg-secondary));
+    border-bottom: 1px solid var(--color-border);
+  }
+
   /* Barra de acciones fija en el viewport mediante React Portal */
   .mobileActionsOverlay {
     display: flex;
@@ -442,12 +451,12 @@
   }
 
   .btnEdit {
-    background: var(--color-primary-dark, #5d7568);
+    background: var(--color-primary, #769282);
     color: #ffffff;
   }
 
   .btnDelete {
-    background: #ef4444;
+    background: var(--color-error, #ef4444);
     color: #ffffff;
   }
 }
