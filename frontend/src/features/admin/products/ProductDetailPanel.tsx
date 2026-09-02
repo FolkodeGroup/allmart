@@ -262,11 +262,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           .mobileOnlyHeader {
             position: sticky !important;
             top: 0 !important;
-            z-index: 30 !important;
-            background: rgba(17, 24, 39, 0.95) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            border-bottom: 1px solid var(--color-border, #374151) !important;
+            z-index: var(--z-sticky, 30) !important;
+            background: var(--color-bg-card, var(--color-bg-secondary)) !important;
+            backdrop-filter: blur(6px) !important;
+            -webkit-backdrop-filter: blur(6px) !important;
+            border-bottom: 1px solid var(--color-border) !important;
             display: flex !important;
             align-items: center !important;
             gap: 10px !important;
@@ -286,10 +286,10 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             min-width: 34px !important;
             min-height: 34px !important;
             padding: 0 !important;
-            background: rgba(255, 255, 255, 0.08) !important;
-            border: 1px solid var(--color-border, #374151) !important;
+            background: var(--control-bg, transparent) !important;
+            border: 1px solid var(--color-border) !important;
             border-radius: 8px !important;
-            color: var(--color-text-primary, #ffffff) !important;
+            color: var(--color-text-primary) !important;
             flex-shrink: 0 !important;
             cursor: pointer !important;
           }
@@ -466,11 +466,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
             bottom: 0 !important;
             left: 0 !important;
             right: 0 !important;
-            z-index: 50 !important;
-            background: rgba(15, 23, 42, 0.92) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            border-top: 1px solid var(--color-border, #374151) !important;
+            z-index: var(--z-sticky, 50) !important;
+            background: var(--color-bg-card, var(--color-bg-secondary)) !important;
+            backdrop-filter: blur(6px) !important;
+            -webkit-backdrop-filter: blur(6px) !important;
+            border-top: 1px solid var(--color-border) !important;
             padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) 16px !important;
           }
 
