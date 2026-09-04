@@ -287,7 +287,10 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         <button
           type="button"
           className={styles.submitBtn}
-          onClick={() => document.getElementById('promotion-form')?.requestSubmit()}
+          onClick={() => {
+            const form = document.getElementById('promotion-form') as HTMLFormElement | null;
+            form?.requestSubmit();
+          }}
           disabled={saving || !!valueError}
         >
           {saving ? 'Guardando...' : promotion ? 'Guardar cambios' : 'Crear promoción'}
