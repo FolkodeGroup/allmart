@@ -230,14 +230,7 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                                             >
                                                 {cat.isVisible ? 'Visible' : 'Oculta'}
                                             </span>
-                                            {productCount !== undefined && (
-                                                <>
-                                                    <span className={styles.separator}>·</span>
-                                                    <span className={styles.productCount}>
-                                                        Stock: {productCount ?? 0}
-                                                    </span>
-                                                </>
-                                            )}
+                                            {/* Removed stock/product count to simplify UI */}
                                         </div>
                                     </div>
                                 </div>
