@@ -70,4 +70,14 @@ describe('ProductCard', () => {
     const publicImage = screen.getByRole('img', { name: product.name }).closest('div');
     expect(publicImage).not.toHaveClass(styles.adminPreviewImage);
   });
+
+  it('does not render a clickable product name in admin preview', () => {
+    render(
+      <BrowserRouter>
+        <ProductCard product={product} adminPreview />
+      </BrowserRouter>
+    );
+
+    expect(screen.queryByRole('link', { name: product.name })).not.toBeInTheDocument();
+  });
 });

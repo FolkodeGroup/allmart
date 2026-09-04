@@ -205,6 +205,11 @@
   color: var(--color-primary, #769282);
 }
 
+.nameText {
+  color: var(--color-text-primary, #111827);
+  text-decoration: none;
+}
+
 .rating {
   display: flex;
   align-items: center;

@@ -261,7 +261,11 @@ export function ProductCard({ product, variant = 'default', adminPreview = false
       <div className={styles.body}>
         <span className={styles.category}>{product.category.name}</span>
         <h3 className={styles.name}>
-          <Link to={`/producto/${product.slug}`}>{product.name}</Link>
+          {adminPreview ? (
+            <span className={styles.nameText}>{product.name}</span>
+          ) : (
+            <Link to={`/producto/${product.slug}`}>{product.name}</Link>
+          )}
         </h3>
         <div
           className={styles.rating}
