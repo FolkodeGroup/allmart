@@ -145,7 +145,15 @@
   z-index: 10;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-tertiary, #767676);
+}
+
+:global(body[data-admin-theme='dark']) .wishlistBtn,
+:global(.admin-dark) .wishlistBtn {
+  background: rgba(18, 23, 27, 0.82);
+  border-color: var(--color-border, #2d3a3f);
+  color: var(--color-text-secondary, #cbe7c9);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
 }
 
 .wishlistBtn:hover {
@@ -153,8 +161,18 @@
   color: #ef4444;
 }
 
+:global(body[data-admin-theme='dark']) .wishlistBtn:hover,
+:global(.admin-dark) .wishlistBtn:hover {
+  color: #f87171;
+}
+
 .wishlistBtn.activo {
   color: #ef4444;
+}
+
+:global(body[data-admin-theme='dark']) .wishlistBtn.activo,
+:global(.admin-dark) .wishlistBtn.activo {
+  color: #f87171;
 }
 
 .wishlistBtnIcon {
