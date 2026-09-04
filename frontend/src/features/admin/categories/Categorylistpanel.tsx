@@ -30,7 +30,6 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
             error,
             selectedCategoryId,
             onSelectCategory,
-            getProductCount,
             scrollPreserveKey = 'category-list-scroll',
         },
         ref
@@ -179,7 +178,6 @@ export const CategoryListPanel = React.forwardRef<HTMLElement, CategoryListPanel
                 <div className={`${styles.listContainer} catListContainerFix`} role="listbox" aria-label="Lista de categorías">
                     {categories.map((cat, index) => {
                         const displayName = cat.name?.trim() || cat.slug;
-                        const productCount = getProductCount?.(cat);
                         const isSelected = selectedCategoryId === cat.id;
 
                         return (
