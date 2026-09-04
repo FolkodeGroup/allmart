@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useBlocker } from 'react-router-dom';
 import type { Promotion } from './promotionsService';
 import { promotionsService } from './promotionsService';
@@ -32,6 +33,22 @@ interface Props {
   promotion?: Promotion | null;
   onSubmit: () => void;
   onCancel: () => void;
+}
+
+function useIsMobile(breakpoint = 767) {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth <= breakpoint
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handleChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [breakpoint]);
+
+  return isMobile;
 }
 
 const TYPE_LABELS = {
@@ -71,6 +88,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
   const [error, setError] = useState<string | null>(null);
   const [valueError, setValueError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const isMobile = useIsMobile(767);
 
   // ─── Initial state snapshot (for dirty detection) ────────────────────────
   const [initialState] = useState(() => ({
@@ -261,15 +279,45 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
   const filteredCategories = allCategories.filter((c) => c.name.toLowerCase().includes(categorySearch.toLowerCase()));
   const affectedByCategoryCount = allProducts.filter((p) => p.categoryId && selectedCategoryIds.includes(p.categoryId)).length;
 
+  const renderMobileBottomBar = () => {
+    if (!isMobile) return null;
+
+    const bar = (
+      <div className={styles.mobileActionBar} data-mobile-actions="true">
+        <button
+          type="button"
+          className={styles.submitBtn}
+          onClick={() => document.getElementById('promotion-form')?.requestSubmit()}
+          disabled={saving || !!valueError}
+        >
+          {saving ? 'Guardando...' : promotion ? 'Guardar cambios' : 'Crear promoción'}
+        </button>
+        <button
+          type="button"
+          className={styles.cancelBtn}
+          onClick={handleCancel}
+          disabled={saving}
+        >
+          Cancelar
+        </button>
+        
+      </div>
+    );
+
+    if (typeof document === 'undefined') return bar;
+    return createPortal(bar, document.body);
+  };
+
   return (
     <div className={styles.formPageWrapper}>
       {/* Sticky header pattern aligned with AdminCollectionForm */}
       <header className={styles.pageHeader} data-sticky-header="true">
         <div className={styles.pageHeaderInner}>
           <button type="button" onClick={handleCancel} className={styles.backBtn} aria-label="Volver">
-            <ArrowLeft size={14} /> Promociones
+            <ArrowLeft size={14} />
+            {!isMobile && <span>Promociones</span>}
           </button>
-          <div>
+          <div className={styles.pageHeaderText}>
             <h1 className={styles.pageTitle}>
               {promotion ? `Editar promoción: ${promotion.name}` : 'Nueva promoción'}
             </h1>
@@ -279,14 +327,16 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
             </span>
           </div>
         </div>
-        <div className={styles.pageHeaderActions}>
-          <button type="button" className={styles.cancelBtn} onClick={handleCancel} disabled={saving}>
-            Cancelar
-          </button>
-          <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={saving || !!valueError}>
-            {saving ? 'Guardando...' : promotion ? 'Guardar cambios' : 'Crear promoción'}
-          </button>
-        </div>
+        {!isMobile && (
+          <div className={styles.pageHeaderActions}>
+            <button type="button" className={styles.cancelBtn} onClick={handleCancel} disabled={saving}>
+              Cancelar
+            </button>
+            <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={saving || !!valueError}>
+              {saving ? 'Guardando...' : promotion ? 'Guardar cambios' : 'Crear promoción'}
+            </button>
+          </div>
+        )}
       </header>
 
       {error && (
@@ -309,7 +359,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className={styles.formUnified} noValidate>
+      <form id="promotion-form" onSubmit={handleSubmit} className={styles.formUnified} noValidate>
         {/* ── TAB: DETALLES ── */}
         {activeTab === 'details' && (
           <div className={styles.formBody}>
@@ -470,6 +520,8 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
           </div>
         )}
       </form>
+
+      {renderMobileBottomBar()}
 
       <ModalConfirm
         open={showWarning || blocker.state === 'blocked'}
