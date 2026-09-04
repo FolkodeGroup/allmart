@@ -15,7 +15,7 @@ import { fetchAdminCategories } from '../categories/categoriesService';
 import { useAdminAuth } from '../../../context/AdminAuthContext';
 import { apiFetch } from '../../../utils/apiClient';
 import styles from './AdminPromotions.module.css';
-import { Search, ArrowLeft, Tag, Percent, Calendar, Settings } from 'lucide-react';
+import { Search, ArrowLeft, Tag, Percent, Calendar, Settings, X } from 'lucide-react';
 import { DatePicker } from '../../../components/ui/DatePicker/DatePicker';
 import { Dropdown } from '../../../components/ui/Dropdown/Dropdown';
 
@@ -70,6 +70,7 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
   const [activeTab, setActiveTab] = useState<'details' | 'products' | 'categories'>('details');
   const [error, setError] = useState<string | null>(null);
   const [valueError, setValueError] = useState<string | null>(null);
+  const [minPurchaseError, setMinPurchaseError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // ─── Initial state snapshot (for dirty detection) ────────────────────────
@@ -183,9 +184,21 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
     return null;
   }, []);
 
+  const validateOptionalDecimal = useCallback((fieldValue: string, fieldName: string): string | null => {
+    if (fieldValue.trim() === '') return null;
+    const numericValue = Number(fieldValue);
+    if (Number.isNaN(numericValue)) return `El valor de ${fieldName} debe ser numérico`;
+    if (numericValue < 0) return `El valor de ${fieldName} no puede ser negativo`;
+    return null;
+  }, []);
+
   useEffect(() => {
     setValueError(validateValue(value, type));
   }, [value, type, validateValue]);
+
+  useEffect(() => {
+    setMinPurchaseError(validateOptionalDecimal(minPurchase, 'compra mínima'));
+  }, [minPurchase, validateOptionalDecimal]);
 
   useEffect(() => {
     if (type === 'bogo' && value !== '0') setValue('0');
@@ -219,6 +232,11 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
       setActiveTab('details');
       return;
     }
+    if (minPurchaseError) {
+      setError(minPurchaseError);
+      setActiveTab('details');
+      return;
+    }
     if (!startDate || !endDate) {
       setError('Las fechas de inicio y fin son requeridas.');
       setActiveTab('details');
@@ -230,6 +248,9 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
       return;
     }
 
+    const parsedMinPurchase = minPurchase.trim() === '' ? undefined : Number(minPurchase);
+    const parsedMaxDiscount = maxDiscount.trim() === '' ? null : Number(maxDiscount);
+
     setSaving(true);
     try {
       const payload = {
@@ -239,8 +260,8 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
         value: Number(value),
         startDate,
         endDate,
-        minPurchaseAmount: minPurchase !== '' ? Number(minPurchase) : undefined,
-        maxDiscount: maxDiscount === '' ? null : Number(maxDiscount),
+        minPurchaseAmount: parsedMinPurchase,
+        maxDiscount: parsedMaxDiscount,
         priority: Number(priority),
         isActive,
         rules: { productIds: selectedProductIds, categoryIds: selectedCategoryIds },
@@ -356,11 +377,56 @@ const AdminPromotionForm: React.FC<Props> = ({ promotion, onSubmit, onCancel }) 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label htmlFor="promo-min">Compra Mínima ($)</label>
-                  <input id="promo-min" type="number" value={minPurchase} onChange={(e) => setMinPurchase(e.target.value)} placeholder="Sin mínimo" min="0" step="0.01" />
+                  <div className={styles.inputWithAction}>
+                    <input
+                      id="promo-min"
+                      type="number"
+                      value={minPurchase}
+                      onChange={(e) => setMinPurchase(e.target.value)}
+                      placeholder="Sin mínimo"
+                      min="0"
+                      step="0.01"
+                      aria-invalid={!!minPurchaseError}
+                    />
+                    {minPurchase !== '' && (
+                      <button
+                        type="button"
+                        className={styles.clearInputButton}
+                        onClick={() => setMinPurchase('')}
+                        aria-label="Limpiar compra mínima"
+                        title="Limpiar compra mínima"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                  {minPurchaseError && <span className={styles.errorMsg}>{minPurchaseError}</span>}
                 </div>
                 <div className={styles.formGroup}>
                   <label htmlFor="promo-max">Descuento Máximo ($)</label>
-                  <input id="promo-max" type="number" value={maxDiscount} onChange={(e) => setMaxDiscount(e.target.value)} placeholder="Sin tope" min="0" step="0.01" />
+                  <div className={styles.inputWithAction}>
+                    <input
+                      id="promo-max"
+                      type="number"
+                      value={maxDiscount}
+                      onChange={(e) => setMaxDiscount(e.target.value)}
+                      placeholder="Sin tope"
+                      min="0"
+                      step="0.01"
+                      aria-invalid={!!(maxDiscount && Number(maxDiscount) < 0)}
+                    />
+                    {maxDiscount !== '' && (
+                      <button
+                        type="button"
+                        className={styles.clearInputButton}
+                        onClick={() => setMaxDiscount('')}
+                        aria-label="Limpiar descuento máximo"
+                        title="Limpiar descuento máximo"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
                   <small style={{ color: 'var(--color-primary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
                     💡 Si el descuento supera este tope, la tienda ajustará automáticamente el porcentaje visible (Badge) para reflejar el descuento real y evitar publicidad engañosa.
                   </small>

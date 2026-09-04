@@ -104,4 +104,46 @@ describe('AdminPromotionForm', () => {
       );
     });
   });
+
+  it('should allow clearing minPurchase amount from the clear button and submit it as undefined', async () => {
+    const promotion = {
+      id: 'promo-1',
+      name: 'Black Friday',
+      description: 'BF Productos',
+      type: 'fixed' as const,
+      value: 10,
+      startDate: '2026-06-30T00:00:00.000Z',
+      endDate: '2026-07-23T00:00:00.000Z',
+      minPurchaseAmount: 250,
+      maxDiscount: 300,
+      isActive: true,
+      priority: 0,
+      createdAt: '2026-06-01T00:00:00.000Z',
+      updatedAt: '2026-06-15T00:00:00.000Z',
+      rules: { productIds: [], categoryIds: [] },
+    };
+
+    render(
+      <Wrapper>
+        <AdminPromotionForm promotion={promotion} {...defaultProps} />
+      </Wrapper>
+    );
+
+    const minPurchaseInput = screen.getByLabelText('Compra Mínima ($)') as HTMLInputElement;
+    const clearMinButton = screen.getByRole('button', { name: /limpiar compra mínima/i });
+
+    fireEvent.click(clearMinButton);
+
+    expect(minPurchaseInput.value).toBe('');
+
+    const submitButton = screen.getByRole('button', { name: /guardar cambios/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalledWith(
+        'promo-1',
+        expect.objectContaining({ minPurchaseAmount: undefined })
+      );
+    });
+  });
 });
