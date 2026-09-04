@@ -126,7 +126,6 @@ describe('OrderDetailContent internal notes', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: /eliminar nota/i }));
-    fireEvent.click(screen.getByRole('button', { name: /sí, borrar/i }));
 
     await waitFor(() => {
       expect(mockUpdateOrder).toHaveBeenCalledWith('order-123', { notes: '' });

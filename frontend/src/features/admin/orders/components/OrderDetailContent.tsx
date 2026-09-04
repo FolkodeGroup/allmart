@@ -101,7 +101,8 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   const [depositLoading, setDepositLoading] = useState(false);
   const [saveNotesLoading, setSaveNotesLoading] = useState(false);
   const [notesEditing, setNotesEditing] = useState(false);
-  const [deleteNotesConfirm, setDeleteNotesConfirm] = useState(false);
+  const [isRemovingNotes, setIsRemovingNotes] = useState(false);
+  const removalTimerRef = useRef<number | null>(null);
 
   // ── Modal independiente para Carga / Edición Directa de Dirección ──
   const [addressModalOpen, setAddressModalOpen] = useState(false);
@@ -179,6 +180,11 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   useEffect(() => {
     setGlobalDirty(isDirty);
   }, [isDirty, setGlobalDirty]);
+
+  // Control de cuándo permitir guardar notas:
+  // - Si ya existía una nota (`originalNotesRef.current !== ''`) permitimos guardar incluso si queda en blanco (borrar).
+  // - Si no existía nota, solo permitimos guardar cuando el campo `notes` tiene texto.
+  const canSaveNotes = !saveNotesLoading && (originalNotesRef.current !== '' || notes.trim().length > 0);
 
   const paymentStatus: PaymentStatus = order.paymentStatus ?? 'no-abonado';
   const isAbonado = paymentStatus === 'abonado';
@@ -623,7 +629,8 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   };
 
   const handleSaveNotes = async () => {
-    const nextValue = notes.trim();
+    // Allow saving empty/blank notes (do not trim) so users can clear content
+    const nextValue = notes;
     if (saveNotesLoading) return;
     setSaveNotesLoading(true);
     try {
@@ -632,7 +639,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
       setSavedNotesDisplay(nextValue);
       setNotes(nextValue);
       setNotesEditing(false);
-      setDeleteNotesConfirm(false);
+      
       toast.success('Notas internas guardadas con éxito');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido';
@@ -643,16 +650,35 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
   };
 
   const handleDeleteNotes = async () => {
+    // Optimistic deletion with visual fade-out: start animation immediately,
+    // then call API. Revert UI if API fails.
+    if (saveNotesLoading || isRemovingNotes) return;
+    const previous = originalNotesRef.current ?? '';
     try {
+      setIsRemovingNotes(true);
       setSaveNotesLoading(true);
+      
+
+      // start a timer to remove the content from DOM after animation
+      removalTimerRef.current = window.setTimeout(() => {
+        setSavedNotesDisplay('');
+        setNotes('');
+        setIsRemovingNotes(false);
+      }, 260);
+
+      // persist to server concurrently
       await updateOrder(order.id, { notes: '' });
       originalNotesRef.current = '';
-      setSavedNotesDisplay('');
-      setNotes('');
-      setNotesEditing(false);
-      setDeleteNotesConfirm(false);
       toast.success('Nota eliminada');
     } catch (err) {
+      // cancel removal and revert UI
+      if (removalTimerRef.current) {
+        clearTimeout(removalTimerRef.current);
+        removalTimerRef.current = null;
+      }
+      setIsRemovingNotes(false);
+      setSavedNotesDisplay(previous);
+      setNotes(previous);
       const message = err instanceof Error ? err.message : 'Error desconocido';
       toast.error(`No se pudo eliminar la nota: ${message}`);
     } finally {
@@ -1088,7 +1114,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
             <h3 className={styles.detailSectionTitle}>Notas Internas</h3>
 
             {savedNotesDisplay && !notesEditing ? (
-              <>
+              <div className={`${styles.savedNotesBox} ${isRemovingNotes ? styles.notesRemoving : ''}`}>
                 <p className={styles.savedNotesText}>{savedNotesDisplay}</p>
                 <div className={styles.editorActions}>
                   <button
@@ -1098,7 +1124,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     onClick={() => {
                       setNotes(savedNotesDisplay);
                       setNotesEditing(true);
-                      setDeleteNotesConfirm(false);
+                      
                     }}
                   >
                     Editar
@@ -1107,36 +1133,14 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     type="button"
                     className={`${styles.noteActionBtn} ${styles.noteActionDelete}`}
                     aria-label="Eliminar nota"
-                    onClick={() => setDeleteNotesConfirm(true)}
+                    onClick={() => void handleDeleteNotes()}
                   >
                     Eliminar
                   </button>
                 </div>
 
-                {deleteNotesConfirm && (
-                  <div className={styles.deleteConfirmationBox}>
-                    <p>¿Eliminar esta nota?</p>
-                    <div className={styles.confirmActions}>
-                      <button
-                        type="button"
-                        className={styles.confirmDeleteBtn}
-                        aria-label="Sí, borrar"
-                        onClick={() => void handleDeleteNotes()}
-                      >
-                        Sí, borrar
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.cancelBtn}
-                        aria-label="Cancelar eliminación"
-                        onClick={() => setDeleteNotesConfirm(false)}
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
+                {/* Immediate deletion on click — confirmation removed for faster UX */}
+              </div>
             ) : null}
 
             {notesEditing && (
@@ -1155,7 +1159,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     className={styles.saveNotesBtn}
                     type="button"
                     onClick={() => void handleSaveNotes()}
-                    disabled={saveNotesLoading}
+                    disabled={!canSaveNotes}
                     aria-label="Guardar nota"
                   >
                     {saveNotesLoading ? 'Guardando...' : 'Guardar'}
@@ -1166,7 +1170,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     onClick={() => {
                       setNotes(savedNotesDisplay || '');
                       setNotesEditing(false);
-                      setDeleteNotesConfirm(false);
+                      
                     }}
                     aria-label="Cancelar edición"
                   >
@@ -1192,7 +1196,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     className={styles.saveNotesBtn}
                     type="button"
                     onClick={() => void handleSaveNotes()}
-                    disabled={saveNotesLoading}
+                    disabled={!canSaveNotes}
                     aria-label="Guardar notas"
                   >
                     {saveNotesLoading ? 'Guardando...' : 'Guardar notas'}
@@ -1258,28 +1262,26 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
 
           {order.shipment ? (
             <div className={styles.customerCard} style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
-              <div>
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    color: 'var(--color-text-secondary)',
-                    textTransform: 'uppercase',
-                    display: 'block',
-                  }}
-                >
-                  Dirección de entrega
-                </span>
-                <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block', marginTop: 2 }}>
-                  {order.shipment.addressStreet}
-                </strong>
-                <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                  {order.shipment.addressCity}, {order.shipment.addressProvince} ({order.shipment.addressZip})
-                </span>
-              </div>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: 'var(--color-text-secondary)',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                }}
+              >
+                Dirección de entrega
+              </span>
+              <strong style={{ fontSize: '14px', color: 'var(--color-text-primary)', display: 'block', marginTop: 2 }}>
+                {order.shipment.addressStreet}
+              </strong>
+              <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                {order.shipment.addressCity}, {order.shipment.addressProvince} ({order.shipment.addressZip})
+              </span>
 
               {(order.shipment.carrier || order.shipment.trackingNumber) && (
-                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 8, marginTop: 4 }}>
+                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 8, marginTop: 12 }}>
                   {order.shipment.carrier && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: 4 }}>
                       <span style={{ color: 'var(--color-text-secondary)' }}>Empresa:</span>
