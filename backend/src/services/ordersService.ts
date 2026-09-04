@@ -436,7 +436,7 @@ export async function updateOrder(id: string, dto: UpdateOrderDTO): Promise<Orde
   if (dto.status) data.status = orderStatusToPrismaStatus(dto.status);
   if (dto.paymentStatus) data.paymentStatus = paymentStatusToPrismaStatus(dto.paymentStatus);
   if (dto.paidAt) data.paidAt = dto.paidAt;
-  if (dto.notes) data.notes = dto.notes;
+  if (dto.notes !== undefined) data.notes = dto.notes === '' ? null : dto.notes;
   if (dto.has50PercentDeposit !== undefined) data.has50PercentDeposit = dto.has50PercentDeposit;
   if (dto.total !== undefined) data.total = dto.total;
 

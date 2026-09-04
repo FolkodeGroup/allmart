@@ -181,6 +181,11 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
     setGlobalDirty(isDirty);
   }, [isDirty, setGlobalDirty]);
 
+  // Control de cuándo permitir guardar notas:
+  // - Si ya existía una nota (`originalNotesRef.current !== ''`) permitimos guardar incluso si queda en blanco (borrar).
+  // - Si no existía nota, solo permitimos guardar cuando el campo `notes` tiene texto.
+  const canSaveNotes = !saveNotesLoading && (originalNotesRef.current !== '' || notes.trim().length > 0);
+
   const paymentStatus: PaymentStatus = order.paymentStatus ?? 'no-abonado';
   const isAbonado = paymentStatus === 'abonado';
   const hasStatusChange = pendingStatus !== order.status;
@@ -1154,7 +1159,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     className={styles.saveNotesBtn}
                     type="button"
                     onClick={() => void handleSaveNotes()}
-                    disabled={saveNotesLoading}
+                    disabled={!canSaveNotes}
                     aria-label="Guardar nota"
                   >
                     {saveNotesLoading ? 'Guardando...' : 'Guardar'}
@@ -1191,7 +1196,7 @@ export const OrderDetailContent = ({ order, onClose }: OrderDetailContentProps) 
                     className={styles.saveNotesBtn}
                     type="button"
                     onClick={() => void handleSaveNotes()}
-                    disabled={saveNotesLoading}
+                    disabled={!canSaveNotes}
                     aria-label="Guardar notas"
                   >
                     {saveNotesLoading ? 'Guardando...' : 'Guardar notas'}
