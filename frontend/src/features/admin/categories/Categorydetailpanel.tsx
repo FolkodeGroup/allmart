@@ -104,7 +104,6 @@ export function CategoryDetailPanel({
                     border-bottom: 1px solid var(--color-border-light, #e5e2dd) !important;
                     padding: 0 24px !important;
                     margin-bottom: 16px !important;
-                    overflow-x: auto !important;
                     -webkit-overflow-scrolling: touch !important;
                 }
                 .catDetailTabBtn {
