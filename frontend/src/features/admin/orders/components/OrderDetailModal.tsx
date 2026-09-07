@@ -161,6 +161,9 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
     // `currentStatus` se usa para revertir el selector si el usuario cancela
     const currentStatus = order.status;
 
+    // Control de guardado: si no había nota original, no permitir guardar cuando el textarea está vacío.
+    const canSaveNotesModal = !(originalNotesRef.current === '' && notes.trim().length === 0);
+
     /**
      * handleSaveNotes — persiste las notas internas en la API.
      * Actualiza `originalNotesRef` para limpiar el isDirty tras guardar.
@@ -421,7 +424,7 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
                                 rows={3}
                                 placeholder="Agregá notas internas sobre este pedido..."
                             />
-                            <button className={styles.saveNotesBtn} type="button" onClick={handleSaveNotes}>
+                            <button className={styles.saveNotesBtn} type="button" onClick={handleSaveNotes} disabled={!canSaveNotesModal}>
                                 Guardar notas
                             </button>
                         </section>

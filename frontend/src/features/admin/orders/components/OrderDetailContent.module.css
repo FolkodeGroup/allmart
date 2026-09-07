@@ -452,6 +452,16 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+/* Fade/slide animation for optimistic removal */
+.notesRemoving {
+  animation: notesFadeOut 0.26s ease forwards;
+}
+
+@keyframes notesFadeOut {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); height: 0px; margin: 0; padding: 0; }
+}
+
 .savedNotesBoxHover {
   border-color: var(--color-primary, #769282);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
