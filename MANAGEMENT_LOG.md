@@ -2567,3 +2567,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1564: Actualización automática del estado del producto a “Sin stock” cuando el pedido reduce el inventario a 0 o menos | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1553: Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1542: 🔄 Registrar puntaje de gestión | 2026-09-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1540: 🔄 Actualización automática de puntajes semanal | 2026-09-07 |
