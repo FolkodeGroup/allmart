@@ -535,22 +535,26 @@ export function ProductDetailVariants({ productId }: ProductDetailVariantsProps)
                 <span className={styles.variantGroupName}>
                   {group.name}
                 </span>
-                <button
-                  type="button"
-                  className={styles.compactEditBtn}
-                  onClick={() => handleOpenEditModal(group.id)}
-                  title={`Editar grupo ${group.name}`}
-                >
-                  📝
-                </button>
-                <button
-                  type="button"
-                  className={styles.deleteGroupBtn}
-                  onClick={() => handleDelete(group.id)}
-                  aria-label={`Eliminar grupo ${group.name}`}
-                >
-                  ×
-                </button>
+                <div className={styles.variantActions}>
+                  <button
+                    type="button"
+                    className={styles.compactEditBtn}
+                    onClick={() => handleOpenEditModal(group.id)}
+                    title={`Editar grupo ${group.name}`}
+                    aria-label={`Editar grupo ${group.name}`}
+                  >
+                    <i className="bi bi-pencil-fill" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.deleteGroupBtn}
+                    onClick={() => handleDelete(group.id)}
+                    aria-label={`Eliminar grupo ${group.name}`}
+                    title={`Eliminar grupo ${group.name}`}
+                  >
+                    <i className="bi bi-trash3-fill" aria-hidden="true" />
+                  </button>
+                </div>
               </div>
 
               <div className={styles.tagsContainer}>
