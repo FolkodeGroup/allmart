@@ -159,6 +159,46 @@
   box-shadow: 0 0 0 3px rgba(118, 146, 130, 0.2);
 }
 
+.inputWithAction {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputWithAction input {
+  width: 100%;
+  padding-right: 40px !important;
+}
+
+.clearInputButton {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--color-text-secondary, #9ca3af);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.clearInputButton:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-error, #f87171);
+}
+
+.clearInputButton:focus-visible {
+  outline: 2px solid var(--color-primary, #769282);
+  outline-offset: 2px;
+}
+
 .filterDropdownWrap {
   min-width: 180px;
 }
