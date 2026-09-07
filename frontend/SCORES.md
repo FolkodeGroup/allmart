@@ -1,8 +1,8 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 27341 |
-| FedericoPaal | 9948 |
-| Mau-bar-iva | 6945 |
+| dgimenezdeveloper | 27831 |
+| FedericoPaal | 10152 |
+| Mau-bar-iva | 7840 |
 | Nahuel-Dalesio | 1630 |
 | agustin-ovejero | 1481 |
 | CelinaJP | 1378 |
@@ -11,6 +11,93 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1581: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1581: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1580: Quitar navegación por nombre de producto en cards de colección preview | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1579: Permitir limpiar el valor de compra mínima en promociones | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1578: 1556 responsive mobile del formulario de promociones alineado con el formulario de productos | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1577: 1555 eliminar notas internas al instante y permitir edición en blanco | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1576: DESABILITAR SCROLL HORIZONTAL EN TABS DE CATEGORÍAS | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1575: 1552 remover badge de stock en cards de categorías | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1574: Eliminar columnas id y descripción en exportación pdf en categorias | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1573: AGREGAR MODAL DE CONFIRMACIÓN AL CARRITO DE COMPRAS | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1572: Modal de confirmación al eliminar un proveedor en el formulario de alta/edición de Productos | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1571: Ajustar diseño de sticky header y footer de acciones en responsive para detalle de producto y formulario de Productos | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1570: Corregir columnas desalineadas al exportar el PDF de productos | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1569: style(responsive): ajustar botones expandir colapsar en detalle de producto | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1568: style(productos): remover contenedor redundante de acciones | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1567: Rediseño de iconografía y contenedores para grupos de variantes en la vista de Productos | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1564: Actualización automática del estado del producto a “Sin stock” cuando el pedido reduce el inventario a 0 o menos | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1553: Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1542: 🔄 Registrar puntaje de gestión | 2026-09-07 |
+| Mau-bar-iva | 45 | Issue | Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
+| Mau-bar-iva | 40 | Issue | Quitar navegación por nombre de producto en cards de colección preview | 2026-09-07 |
+| Mau-bar-iva | 35 | Issue | Permitir limpiar el valor de compra mínima en promociones | 2026-09-07 |
+| Mau-bar-iva | 70 | Issue | Responsive mobile del formulario de promociones alineado con el formulario de productos | 2026-09-07 |
+| Mau-bar-iva | 45 | Issue | ELIMINAR NOTAS INTERNAS AL INSTANTE Y PERMITIR EDICIÓN EN BLANCO | 2026-09-07 |
+| Mau-bar-iva | 15 | Issue | DESABILITAR SCROLL HORIZONTAL EN TABS DE CATEGORÍAS | 2026-09-07 |
+| Mau-bar-iva | 10 | Issue | REMOVER BADGE DE STOCK EN CARDS DE CATEGORÍAS | 2026-09-07 |
+| Mau-bar-iva | 20 | Issue | ELIMINAR COLUMNAS ID Y DESCRIPCIÓN EN EXPORTACIÓN PDF DE CATEGORÍAS | 2026-09-07 |
+| Mau-bar-iva | 40 | Issue | AGREGAR MODAL DE CONFIRMACIÓN AL CARRITO DE COMPRAS | 2026-09-07 |
+| Mau-bar-iva | 35 | Issue | Modal de confirmación al eliminar un proveedor en el formulario de alta/edición de Productos | 2026-09-07 |
+| Mau-bar-iva | 45 | Issue | Ajustar diseño de sticky header y footer de acciones en responsive para detalle de producto y formulario de Productos | 2026-09-07 |
+| Mau-bar-iva | 40 | Issue | Corregir columnas desalineadas al exportar el PDF de productos | 2026-09-07 |
+| Mau-bar-iva | 30 | Issue | Ajustar diseño responsive de los botones “Expandir Todo” y “Colapsar Todo” en el detalle de producto | 2026-09-07 |
+| Mau-bar-iva | 25 | Issue | Eliminar contenedor redundante de botones “Editar” y “Eliminar” en la columna derecha de Productos | 2026-09-07 |
+| Mau-bar-iva | 45 | Issue | Rediseño de iconografía y contenedores para grupos de variantes en la vista de Productos | 2026-09-07 |
+| Mau-bar-iva | 70 | Issue | Actualización automática del estado del producto a “Sin stock” cuando el pedido reduce el inventario a 0 o menos | 2026-09-07 |
+| Mau-bar-iva | 40 | Issue | Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-09-07 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1542: 🔄 Registrar puntaje de gestión | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1566: Refactorizar el filtro de estado en "Últimos pedidos del período" para usar Dropdown singular | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1565: Eliminar TAB de "Gráfico" en la card de "Ventas - Últimos 30 días | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1563: Unificar selección de etiquetas en Destino y Navegación del formulario de Banners | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1562: Ajuste de color del sticky header en formulario de Banners | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1561: Ajuste de color del sticky header en formulario de Colecciones | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1560: Ajuste del botón de eliminar en productos agregados a una colección | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1559: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1558: Quitar navegación por nombre de producto en cards de colección preview | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1557: Permitir limpiar el valor de compra mínima en promociones | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1556: Responsive mobile del formulario de promociones alineado con el formulario de productos | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1555: ELIMINAR NOTAS INTERNAS AL INSTANTE Y PERMITIR EDICIÓN EN BLANCO | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1554: DESABILITAR SCROLL HORIZONTAL EN TABS DE CATEGORÍAS | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1552: REMOVER BADGE DE STOCK EN CARDS DE CATEGORÍAS | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1551: ELIMINAR COLUMNAS ID Y DESCRIPCIÓN EN EXPORTACIÓN PDF DE CATEGORÍAS | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1550: AGREGAR MODAL DE CONFIRMACIÓN AL CARRITO DE COMPRAS | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1549: Modal de confirmación al eliminar un proveedor en el formulario de alta/edición de Productos | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1548: Ajustar diseño de sticky header y footer de acciones en responsive para detalle de producto y formulario de Productos | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1547: Corregir columnas desalineadas al exportar el PDF de productos | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1546: Ajustar diseño responsive de los botones “Expandir Todo” y “Colapsar Todo” en el detalle de producto | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1545: Eliminar contenedor redundante de botones “Editar” y “Eliminar” en la columna derecha de Productos | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1544: Rediseño de iconografía y contenedores para grupos de variantes en la vista de Productos | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1543: Actualización automática del estado del producto a “Sin stock” cuando el pedido reduce el inventario a 0 o menos | 2026-08-31 |
+| FedericoPaal | 3 | Gestión | Creación de issue — Issue #1541: Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-08-31 |
+| Mau-bar-iva | 50 | Issue | Restricción de jerarquía a 2 niveles en categorías y protección de cambios no guardados | 2026-08-31 |
+| Mau-bar-iva | 55 | Issue | Refactorizar PLP - Grilla Unificada de Productos con Chips de Subcategorías | 2026-08-31 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1540: 🔄 Actualización automática de puntajes semanal | 2026-08-30 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1539: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1538: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1539: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1538: 🔄 Registrar puntaje de gestión | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1537: Unificar el estilo del estado vacío “No se encontraron proveedores” con el de Productos | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1536: Ajustar tamaño y estilos del filtro de orden en Reportes para igualar el de Productos | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1535: 1511 ajustar intensidad de filtro multiply en imágenes de colecciones preview para asimilarse al modo claro | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1534: 1510 respetar tema clarooscuro del admin en título de precio de preview de colecciones sin afectar home | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1533: 1507 mostrar productos de búsqueda en lista horizontal grid desktop al agregar productos a colecciones manuales | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1532: Mensaje de commit sugerido | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1531: 1509-desactivar-botones-y-navegación-en-preview-de-colecciones-desde-vista-de-colecciones-del-admin | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1530: 🔄 Actualización automática de puntajes semanal | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1526: Remover Botones de Acciones en Hover de }Categorías Desktop | 2026-08-27 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1524: Agregar Header con Botón Volver en Detalle de Categoría Mobile | 2026-08-27 |
+| FedericoPaal | 40 | Issue | Ajustar intensidad de filtro multiply en imágenes de Colecciones preview para asimilarse al modo claro | 2026-08-27 |
+| FedericoPaal | 35 | Issue | Respetar tema claro/oscuro del Admin en título de precio de preview de Colecciones sin afectar Home | 2026-08-27 |
+| FedericoPaal | 35 | Issue | Mostrar productos de búsqueda en lista horizontal (grid desktop) al agregar productos a Colecciones manuales | 2026-08-27 |
+| FedericoPaal | 25 | Issue | Implementar sticky header en vista de formulario de Promociones copiando estructura del formulario de Productos | 2026-08-27 |
+| Mau-bar-iva | 20 | Issue | Unificar el estilo del estado vacío “No se encontraron proveedores” con el de Productos | 2026-08-27 |
+| Mau-bar-iva | 25 | Issue | Ajustar tamaño y estilos del filtro de orden en Reportes para igualar el de Productos | 2026-08-27 |
+| Mau-bar-iva | 40 | Issue | Desactivar botones y navegación en preview de Colecciones desde vista de Colecciones del Admin | 2026-08-27 |
+| Mau-bar-iva | 25 | Issue | Remover Funcionalidad de Hover para Botones de Acciones en Categorías Desktop | 2026-08-27 |
+| Mau-bar-iva | 30 | Issue | Agregar Header con Botón Volver en Detalle de Categoría Mobile | 2026-08-27 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1530: 🔄 Actualización automática de puntajes semanal | 2026-08-23 |
 | dgimenezdeveloper | 70 | Issue | Agregar Modal de Subcategorías Asociadas en Formulario de Productos | 2026-08-19 |
 | dgimenezdeveloper | 30 | Issue | VALIDAR DATOS EN MODALES AL AVANZAR ESTADO DE PEDIDO | 2026-08-19 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1529: 1466 validar datos en modales al avanzar estado de pedido | 2026-08-19 |
