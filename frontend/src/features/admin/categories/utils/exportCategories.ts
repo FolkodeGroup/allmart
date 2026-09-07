@@ -81,13 +81,12 @@ export async function exportCategoriesToPDF(categories: Category[]) {
   doc.setTextColor(100);
   doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, 14, 18);
 
+  // Export PDF: omit `ID` and `Descripción` to produce a more compact, focused report
   autoTable(doc, {
-    head: [['ID', 'Nombre', 'Slug', 'Descripción', 'Productos', 'Visible']],
+    head: [['Nombre', 'Slug', 'Productos', 'Visible']],
     body: categories.map(cat => [
-      cat.id.slice(0, 8) + '…',
       cat.name,
       cat.slug,
-      cat.description ?? '',
       String(cat.itemCount ?? 0),
       cat.isVisible ? 'Sí' : 'No',
     ]),
@@ -108,12 +107,10 @@ export async function exportCategoriesToPDF(categories: Category[]) {
       fillColor: [242, 239, 235],
     },
     columnStyles: {
-      0: { cellWidth: 28 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 40 },
-      3: { cellWidth: 80 },
-      4: { cellWidth: 22 },
-      5: { cellWidth: 18 },
+      0: { cellWidth: 70 }, // Nombre
+      1: { cellWidth: 60 }, // Slug
+      2: { cellWidth: 30 }, // Productos
+      3: { cellWidth: 25 }, // Visible
     },
   });
 
