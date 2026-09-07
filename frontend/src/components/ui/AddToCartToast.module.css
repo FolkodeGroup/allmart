@@ -1,0 +1,86 @@
+.toastContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--admin-confirm-modal-bg, #ffffff);
+  color: var(--admin-confirm-modal-text, #111827);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 18px 44px rgba(16,18,20,0.18);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  max-width: 520px;
+  width: 100%;
+  min-width: 320px;
+}
+
+.content {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+.iconBox {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  background: rgba(59,130,246,0.06);
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 64px;
+  overflow: hidden;
+}
+
+.thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.title {
+  display: block;
+  font-size: 16px;
+  color: var(--admin-confirm-modal-text, #111827);
+}
+
+.subtitle {
+  display: block;
+  font-size: 14px;
+  color: var(--admin-confirm-modal-text-muted, #6b6b6b);
+  font-weight: 600;
+}
+
+.closeBtn {
+  margin-left: 12px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+/* Animations: rely on toast mount/unmount but add subtle transform */
+.toastContainer[data-enter='true'] {
+  transform: translateY(0);
+  transition: transform 220ms cubic-bezier(.2,.9,.2,1), opacity 220ms;
+}
+.toastContainer[data-exit='true'] {
+  transform: translateY(-8px);
+  opacity: 0;
+  transition: transform 220ms cubic-bezier(.2,.9,.2,1), opacity 220ms;
+}
+
+/* Responsive tweaks for small screens: make it full-width with side padding */
+@media (max-width: 480px) {
+  .toastContainer {
+    max-width: calc(100% - 24px);
+    margin-right: 12px;
+  }
+  .iconBox { display: none; }
+  .subtitle { display: none; }
+}
