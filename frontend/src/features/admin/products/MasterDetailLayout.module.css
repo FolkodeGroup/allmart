@@ -118,6 +118,6 @@
   .container.showDetail .detailWrapper {
     display: block;
     height: 100%;
-    overflow: hidden;
+    overflow: visible; /* Permitir que elementos sticky dentro del detalle funcionen en mobile */
   }
 }

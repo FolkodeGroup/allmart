@@ -25,9 +25,9 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 20px;
-  background: rgba(17, 24, 39, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-bg-card, var(--color-bg-secondary));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--color-border, #374151);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
@@ -85,8 +85,8 @@
   transition: all 0.2s ease;
 }
 
-.cancelBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
+  .cancelBtn:hover:not(:disabled) {
+  background: var(--control-bg-hover, rgba(118, 146, 130, 0.06));
   border-color: var(--color-text-secondary, #9ca3af);
 }
 
