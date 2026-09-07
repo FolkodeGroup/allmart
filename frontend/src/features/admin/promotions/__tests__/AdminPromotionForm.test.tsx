@@ -67,6 +67,30 @@ describe('AdminPromotionForm', () => {
     expect(header.getAttribute('data-sticky-header')).toBe('true');
   });
 
+  it('renders a mobile sticky action bar and hides desktop header actions on small screens', () => {
+    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 375 });
+    window.matchMedia = vi.fn().mockImplementation((query) => ({
+      matches: query === '(max-width: 767px)',
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    render(
+      <Wrapper>
+        <AdminPromotionForm {...defaultProps} />
+      </Wrapper>
+    );
+
+    expect(document.querySelector('[data-mobile-actions="true"]')).not.toBeNull();
+    expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /crear promoción/i })).toBeInTheDocument();
+  });
+
   it('should submit null maxDiscount when the field is cleared on edit', async () => {
     const promotion = {
       id: 'promo-1',
