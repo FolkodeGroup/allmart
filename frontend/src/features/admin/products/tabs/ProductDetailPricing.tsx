@@ -16,6 +16,7 @@ function formatPrice(price: number): string {
 
 export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
   const threshold = (product as unknown as { criticalStockThreshold?: number }).criticalStockThreshold ?? 5;
+  const isOutOfStock = !product.inStock || product.stock <= 0;
 
   return (
     <div className="pricingContainer">
@@ -209,14 +210,14 @@ export function ProductDetailPricing({ product }: ProductDetailPricingProps) {
           </tbody>
         </table>
 
-        {product.stock <= threshold && product.stock > 0 && (
+        {!isOutOfStock && product.stock <= threshold && product.stock > 0 && (
           <div className="warningBannerFlat">
             <AlertTriangle size={16} />
             <span>Stock bajo: Solo quedan {product.stock} unidades (Umbral crítico: {threshold})</span>
           </div>
         )}
 
-        {product.stock === 0 && (
+        {isOutOfStock && (
           <div className="criticalBannerFlat">
             <AlertTriangle size={16} />
             <span>Producto agotado: No hay stock disponible</span>
