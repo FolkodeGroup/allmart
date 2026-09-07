@@ -201,6 +201,8 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
 
   const currentTabIndex = TAB_ORDER.indexOf(activeTab as Exclude<TabName, 'seo'>);
 
+  const allOpen = Object.values(accordionsOpen).every(Boolean);
+
   const renderMobileActions = () => {
     if (!canEdit && !canDelete) return null;
     if (!isMobileActive) return null;
@@ -372,27 +374,46 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
           .accordionToggleBarMobile {
             display: flex !important;
             align-items: center !important;
-            justify-content: center !important;
-            gap: 8px !important;
-            padding: 0 0 6px 0 !important;
-            margin: 0 0 4px 0 !important;
+            justify-content: space-between !important;
+            gap: 10px !important;
+            padding: 6px 12px 8px 12px !important;
+            margin: 0 0 8px 0 !important;
             width: 100% !important;
             box-sizing: border-box !important;
           }
 
           .accordionToggleBtn {
-            background: transparent !important;
-            border: none !important;
-            color: var(--color-primary, #769282) !important;
-            font-size: 12px !important;
-            font-weight: 600 !important;
+            flex: 1 1 0% !important;
+            min-height: 44px !important;
+            border-radius: 10px !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            padding: 8px 12px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
             cursor: pointer !important;
-            padding: 2px 4px !important;
+            box-sizing: border-box !important;
+            border: 1px solid var(--color-border, #374151) !important;
+            background: var(--color-bg-secondary, #1f2937) !important;
+            color: var(--color-text-primary, #ffffff) !important;
+          }
+
+          .accordionToggleBtnSecondary {
+            background: transparent !important;
+            color: var(--color-primary, #7dd3fc) !important;
+            border: 1px solid rgba(125, 211, 252, 0.12) !important;
+          }
+
+          .accordionToggleBtnActive {
+            color: var(--color-text-primary, #0b1220) !important;
+            border-color: rgba(125, 211, 252, 0.28) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
           }
 
           .accordionToggleSep {
-            color: var(--color-border, #6b7280) !important;
-            font-size: 11px !important;
+            display: none !important;
           }
 
           .mobileAccordionsList {
@@ -671,18 +692,11 @@ export const ProductDetailPanel = React.memo(function ProductDetailPanelComponen
       <div className="accordionToggleBarMobile">
         <button
           type="button"
-          className="accordionToggleBtn"
-          onClick={() => toggleAllAccordions(true)}
+          className={`accordionToggleBtn ${allOpen ? 'accordionToggleBtnActive' : ''}`}
+          onClick={() => toggleAllAccordions(!allOpen)}
+          aria-pressed={allOpen}
         >
-          Expandir todo
-        </button>
-        <span className="accordionToggleSep">•</span>
-        <button
-          type="button"
-          className="accordionToggleBtn"
-          onClick={() => toggleAllAccordions(false)}
-        >
-          Colapsar todo
+          {allOpen ? 'Colapsar todo' : 'Expandir todo'}
         </button>
       </div>
 
