@@ -6,6 +6,7 @@ import {
 } from '../../suppliers/suppliersAdminService';
 import { PriceUpdateModal } from '../../suppliers/PriceUpdateModal';
 import { PriceHistoryModal } from '../../suppliers/PriceHistoryModal';
+import { ModalConfirm } from '../../../../components/ui/ModalConfirm/ModalConfirm';
 import { Award, Zap, Star, Clock, DollarSign, Plus, Trash2, Edit3, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import styles from './ProductSupplierSection.module.css';
 
@@ -57,6 +58,7 @@ export function ProductSupplierSection({
     // ── Modales ──
     const [updatingSupplier, setUpdatingSupplier] = useState<ProductSupplierEntry | null>(null);
     const [viewingHistory, setViewingHistory] = useState<ProductSupplierEntry | null>(null);
+    const [deleteConfirmSupplierId, setDeleteConfirmSupplierId] = useState<string | null>(null);
 
     // ── Cargas en progreso ──
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -229,8 +231,7 @@ export function ProductSupplierSection({
             });
             return;
         }
-
-        if (!confirm('¿Deseás desvincular este proveedor del producto?')) return;
+        // Confirmation handled by ModalConfirm wrapper; proceed to delete
         setActionLoading(`remove-${supplierId}`);
         try {
             await suppliersAdminService.removeProductSupplier(productId, supplierId);
@@ -472,7 +473,7 @@ export function ProductSupplierSection({
                                             <button
                                                 type="button"
                                                 className={`${styles.btnAction} ${styles.btnDanger}`}
-                                                onClick={(e) => { e.stopPropagation(); handleRemove(link.supplierId); }}
+                                                onClick={(e) => { e.stopPropagation(); setDeleteConfirmSupplierId(link.supplierId); }}
                                                 disabled={actionLoading === `remove-${link.supplierId}`}
                                                 title="Desvincular del producto"
                                             >
@@ -508,6 +509,21 @@ export function ProductSupplierSection({
                     onClose={() => setViewingHistory(null)}
                 />
             )}
+
+            <ModalConfirm
+                open={deleteConfirmSupplierId !== null}
+                title="Desvincular proveedor"
+                message="¿Estás seguro de que querés desvincular este proveedor del producto? Esta acción puede revertirse agregando el proveedor nuevamente."
+                confirmText="Desvincular"
+                cancelText="Cancelar"
+                onConfirm={async () => {
+                    if (deleteConfirmSupplierId) {
+                        await handleRemove(deleteConfirmSupplierId);
+                        setDeleteConfirmSupplierId(null);
+                    }
+                }}
+                onCancel={() => setDeleteConfirmSupplierId(null)}
+            />
         </fieldset>
     );
 }
