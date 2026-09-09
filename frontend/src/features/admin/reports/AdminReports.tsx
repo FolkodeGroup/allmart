@@ -15,7 +15,6 @@ import { ModalConfirm } from '../../../components/ui/ModalConfirm/ModalConfirm';
 import { exportOrdersCSV, exportOrdersXLSX, exportOrdersPDF, getExportFileName, exportReportsSummaryXLSX } from '../../../utils/exportHelpers';
 import { ProductRanking } from './components/ReportsProductRanking';
 import { OrdersFilters } from './components/OrdersFilters';
-import { SalesTableView } from './components/SalesTableView';
 import {
   createdAtToMs, parseDateStartLocal, formatDateLocal,
   getDayKeyLocalFromMs,
@@ -97,7 +96,6 @@ export function AdminReports() {
   const hiddenPdfRef = useRef<HTMLDivElement>(null);
   const { generatePdf, loading: pdfLoading } = useReportsPdfExport();
   const [showHiddenPdf, setShowHiddenPdf] = useState(false);
-  const [salesViewMode, setSalesViewMode] = useState<'chart' | 'table'>('chart');
 
   const isGeneratingRef = useRef(false);
   const barChartCaptureRef = useRef<HTMLDivElement>(null);
@@ -457,27 +455,13 @@ export function AdminReports() {
     return result;
   }, [barData]);
 
-  const salesContent = useMemo(() => {
-    if (salesViewMode === 'chart') {
-      return (
-        <ReportsCharts
-          barData={barData}
-          isLoading={isLoading}
-          monthlyGoal={monthlyGoal}
-        />
-      );
-    }
-
-    return (
-      <div className={styles.fadeIn}>
-        <SalesTableView
-          orders={periodOrders}
-          formatPrice={formatPrice}
-          dayKeys={dayKeys}
-        />
-      </div>
-    );
-  }, [barData, salesViewMode, isLoading, monthlyGoal, dayKeys, periodOrders]);
+  const salesContent = (
+    <ReportsCharts
+      barData={barData}
+      isLoading={isLoading}
+      monthlyGoal={monthlyGoal}
+    />
+  );
 
   const from = filteredOrdersTable.length === 0
     ? 0
@@ -527,10 +511,6 @@ export function AdminReports() {
             onExportExcel={async () => {
               setExportingExcel(true);
               try {
-                if (salesViewMode !== 'chart') {
-                  setSalesViewMode('chart');
-                  await new Promise(res => setTimeout(res, 300));
-                }
                 const periodLabel = filters.type === 'predefined' ? PERIOD_LABELS[filters.period] : 'Rango personalizado';
                 const lbl = filters.type === 'predefined' ? filters.period : 'custom';
                 await exportReportsSummaryXLSX({
@@ -554,10 +534,6 @@ export function AdminReports() {
             }}
             onExportPDF={async () => {
               try {
-                if (salesViewMode !== 'chart') {
-                  setSalesViewMode('chart');
-                  await new Promise(res => setTimeout(res, 300));
-                }
                 setShowHiddenPdf(true);
               } catch (err) {
                 console.error(err);
@@ -703,15 +679,6 @@ export function AdminReports() {
                   {filters.type === 'predefined' && filters.period === 'all' ? 'Agrupado por mes' : 'Agrupado por día'}
                   {' · '}ingresos de pedidos activos
                 </span>
-              </div>
-              <div className={styles.viewToggleGroup + ' fadeInFast'}>
-                <span className={styles.viewToggleLabel}>Vista:</span>
-                <button
-                  className={`${styles.toggleBtn} ${salesViewMode === 'chart' ? styles.active : ''}`}
-                  onClick={() => setSalesViewMode('chart')}
-                >
-                  📊 Gráfico
-                </button>
               </div>
               <div ref={barChartCaptureRef}>
                 {salesContent}
