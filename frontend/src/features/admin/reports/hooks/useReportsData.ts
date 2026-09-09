@@ -11,7 +11,7 @@ export function useReportsData(
     orders: Order[],
     filters: ReportsFiltersValue,
     ordersTableFilters: {
-        status: string[];
+        status: string;
         clientQuery: string;
         productQuery: string;
     },
@@ -59,10 +59,8 @@ export function useReportsData(
     const filteredOrdersTable = useMemo(() => {
         let filtered = periodOrders;
 
-        if (ordersTableFilters.status.length) {
-            filtered = filtered.filter(o =>
-                ordersTableFilters.status.includes(o.status)
-            );
+        if (ordersTableFilters.status) {
+            filtered = filtered.filter(o => o.status === ordersTableFilters.status);
         }
 
         if (ordersTableFilters.clientQuery.trim()) {
