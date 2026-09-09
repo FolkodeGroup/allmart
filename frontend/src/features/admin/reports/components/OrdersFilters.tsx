@@ -3,7 +3,7 @@ import styles from '../AdminReports.module.css';
 import { Dropdown } from '../../../../components/ui/Dropdown/Dropdown';
 
 type OrdersTableFilters = {
-    status: string[];
+    status: string;
     clientQuery: string;
     productQuery: string;
 };
@@ -23,25 +23,18 @@ interface OrdersFiltersProps {
 }
 
 export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: OrdersFiltersProps) {
-    const handleAddStatus = (status: string) => {
-        if (!ordersTableFilters.status.includes(status)) {
-            setOrdersTableFilters(f => ({ ...f, status: [...f.status, status] }));
-        }
-    };
-
-    const handleRemoveStatus = (status: string) => {
-        setOrdersTableFilters(f => ({
+    const handleStatusChange = (status: string) => {
+        setOrdersTableFilters((f) => ({
             ...f,
-            status: f.status.filter(s => s !== status),
+            status: status || '',
         }));
     };
 
-    // Mapeo de opciones para el Dropdown unificado
     const statusDropdownOptions = useMemo(() => [
         { value: '', label: 'Seleccionar estado...' },
-        ...STATUS_OPTIONS.map(opt => ({
+        ...STATUS_OPTIONS.map((opt) => ({
             value: opt.value,
-            label: opt.label
+            label: opt.label,
         }))
     ], []);
 
@@ -56,34 +49,10 @@ export function OrdersFilters({ ordersTableFilters, setOrdersTableFilters }: Ord
                 <strong style={{ display: 'block', marginBottom: '8px' }}>Estado</strong>
                 <Dropdown
                     options={statusDropdownOptions}
-                    value=""
-                    onChange={(val) => {
-                        if (val) handleAddStatus(val);
-                    }}
+                    value={ordersTableFilters.status}
+                    onChange={(val) => handleStatusChange(val)}
                     placeholder="Seleccionar estado..."
                 />
-            </div>
-            
-            {/* Chips de estados seleccionados */}
-            <div className={styles.statusChips} style={isMobile ? { width: '100%', flexWrap: 'wrap', gap: 6, marginTop: '8px' } : { marginTop: '8px' }}>
-                {ordersTableFilters.status.map(s => {
-                    const label = STATUS_OPTIONS.find(o => o.value === s)?.label || s;
-                    return (
-                        <span key={s} className={styles.chip}>
-                            {label}
-                            <button
-                                type="button"
-                                className={styles.chipClose}
-                                onClick={e => {
-                                    e.preventDefault();
-                                    handleRemoveStatus(s);
-                                }}
-                            >
-                                ✕
-                            </button>
-                        </span>
-                    );
-                })}
             </div>
         </div>
     );

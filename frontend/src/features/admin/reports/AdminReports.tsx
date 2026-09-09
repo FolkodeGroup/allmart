@@ -84,7 +84,7 @@ export function AdminReports() {
     cancelNavigation,
   } = useUnsavedChangesWarning({ active: false });
 
-  const [ordersTableFilters, setOrdersTableFilters] = useState<{ status: string[]; clientQuery: string; productQuery: string }>({ status: [], clientQuery: '', productQuery: '' });
+  const [ordersTableFilters, setOrdersTableFilters] = useState<{ status: string; clientQuery: string; productQuery: string }>({ status: '', clientQuery: '', productQuery: '' });
   const [orderSortField, setOrderSortField] = useState<'date' | 'customer' | 'total' | 'status'>('date');
   const [orderSortDirection, setOrderSortDirection] = useState<'asc' | 'desc'>('desc');
   const [now, setNow] = useState(() => Date.now());
@@ -870,9 +870,9 @@ export function AdminReports() {
                   <button
                     type="button"
                     className={styles.clearBtn}
-                    onClick={() => setOrdersTableFilters({ status: [], clientQuery: '', productQuery: '' })}
+                    onClick={() => setOrdersTableFilters({ status: '', clientQuery: '', productQuery: '' })}
                     disabled={
-                      !(ordersTableFilters.status.length || ordersTableFilters.clientQuery || ordersTableFilters.productQuery)
+                      !(ordersTableFilters.status || ordersTableFilters.clientQuery || ordersTableFilters.productQuery)
                     }
                     title="Limpiar filtros avanzados"
                   >
