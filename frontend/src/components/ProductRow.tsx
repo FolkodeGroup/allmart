@@ -1,6 +1,5 @@
-// features/admin/collections/ProductRow.tsx
-
 import React from 'react';
+import { Trash2 } from 'lucide-react';
 import { DEFAULT_IMAGE_PLACEHOLDER, normalizeImageUrl } from '../utils/imageUrl';
 import styles from './ProductRow.module.css';
 
@@ -45,14 +44,20 @@ export const ProductRow: React.FC<ProductRowProps> = ({
             )}
         </div>
         {onRemove && (
+            <div className={styles.productRowActionsContainer}>
             <button
                 type="button"
                 className={styles.productRowRemove}
                 onClick={() => onRemove(product.id)}
                 aria-label={`${removeLabel} ${product.name}`}
+                title={`${removeLabel} ${product.name}`}
             >
-                {removeLabel}
+                <Trash2 size={14} aria-hidden="true" />
+                <span className={styles.productRowRemoveLabel} aria-hidden="true">
+                    {removeLabel}
+                </span>
             </button>
+            </div>
         )}
     </div>
 );
