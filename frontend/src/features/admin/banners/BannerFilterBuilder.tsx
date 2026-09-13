@@ -80,10 +80,9 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
 
     function handleTagToggle(tag: BannerTag) {
         const current = value.tags ?? [];
-        const next = current.includes(tag)
-            ? current.filter(t => t !== tag)
-            : [...current, tag];
-        onChange({ ...value, tags: next.length ? next : undefined });
+        const isSelected = current.includes(tag);
+        const nextTags = isSelected ? [] : [tag];
+        onChange({ ...value, tags: nextTags.length ? nextTags : undefined });
     }
 
     // Mapear categorías del backend al formato esperado por el Dropdown
@@ -98,7 +97,7 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
     return (
         <div className={styles.wrapper}>
             <p className={styles.hint}>
-                Seleccioná a dónde lleva este banner. Los filtros se combinan entre sí.
+                Seleccioná a dónde lleva este banner. La etiqueta del contenido es exclusiva: solo puede elegirse una opción a la vez.
             </p>
 
             {/* ── Selector de tipo de destino ─────────────────────────── */}
@@ -199,7 +198,7 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
             {/* ── Tags ────────────────────────────────────────────────── */}
             <div className={styles.field}>
                 <p id="tags-label" className={styles.label}>Etiquetas</p>
-                <div className={styles.tagGrid} role="group" aria-labelledby="tags-label">
+                <div className={styles.tagGrid} role="radiogroup" aria-labelledby="tags-label" aria-label="Etiqueta del banner">
                     {BANNER_TAGS.map(({ value: tag, label }) => {
                         const active = (value.tags ?? []).includes(tag);
                         return (
@@ -208,7 +207,8 @@ export function BannerFilterBuilder({ value, onChange, categories }: Props) {
                                 type="button"
                                 className={`${styles.tagBtn} ${active ? styles.tagBtnActive : ''}`}
                                 onClick={() => handleTagToggle(tag)}
-                                aria-pressed={active}
+                                aria-checked={active}
+                                role="radio"
                             >
                                 {label}
                             </button>
