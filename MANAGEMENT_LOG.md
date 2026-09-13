@@ -2568,3 +2568,4 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1553: Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1542: 🔄 Registrar puntaje de gestión | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1540: 🔄 Actualización automática de puntajes semanal | 2026-09-07 |
+| dgimenezdeveloper | 15 | Merge de PR | PR #1584: Ajuste de color del sticky header en formulario de Colecciones | 2026-09-13 |
