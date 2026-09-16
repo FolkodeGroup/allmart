@@ -18,8 +18,8 @@ export function bannerFilterToUrl(filter: BannerFilterConfig): string {
         params.set('category', filter.categorySlug);
     }
 
-    // Tags se combinan con cualquier destino
-    const tags = filter.tags ?? [];
+    // La etiqueta es exclusiva en la administración para evitar destinos ambiguos.
+    const tags = Array.isArray(filter.tags) ? filter.tags.slice(0, 1) : [];
     if (tags.includes('destacado')) params.set('tag', 'destacado');
     if (tags.includes('oferta')) params.set('tag', 'oferta');
     if (tags.includes('novedad')) params.set('tag', 'novedad');
