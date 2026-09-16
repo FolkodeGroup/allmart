@@ -1,6 +1,6 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 27831 |
+| dgimenezdeveloper | 27866 |
 | FedericoPaal | 10152 |
 | Mau-bar-iva | 7840 |
 | Nahuel-Dalesio | 1630 |
@@ -11,6 +11,8 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1582: 🔄 Registrar puntaje de gestión | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1582: 🔄 Registrar puntaje de gestión | 2026-09-07 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1581: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1581: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1580: Quitar navegación por nombre de producto en cards de colección preview | 2026-09-07 |
@@ -30,6 +32,7 @@
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1564: Actualización automática del estado del producto a “Sin stock” cuando el pedido reduce el inventario a 0 o menos | 2026-09-07 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1553: Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-09-07 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1542: 🔄 Registrar puntaje de gestión | 2026-09-07 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1540: 🔄 Actualización automática de puntajes semanal | 2026-09-07 |
 | Mau-bar-iva | 45 | Issue | Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
 | Mau-bar-iva | 40 | Issue | Quitar navegación por nombre de producto en cards de colección preview | 2026-09-07 |
 | Mau-bar-iva | 35 | Issue | Permitir limpiar el valor de compra mínima en promociones | 2026-09-07 |

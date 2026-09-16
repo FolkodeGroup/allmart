@@ -2548,6 +2548,8 @@ Este archivo es generado y actualizado automáticamente por:
 | FedericoPaal | 3 | Creación de issue | Issue #1544: Rediseño de iconografía y contenedores para grupos de variantes en la vista de Productos | 2026-08-31 |
 | FedericoPaal | 3 | Creación de issue | Issue #1543: Actualización automática del estado del producto a “Sin stock” cuando el pedido reduce el inventario a 0 o menos | 2026-08-31 |
 | FedericoPaal | 3 | Creación de issue | Issue #1541: Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-08-31 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1582: 🔄 Registrar puntaje de gestión | 2026-09-07 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1582: 🔄 Registrar puntaje de gestión | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1581: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1581: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1580: Quitar navegación por nombre de producto en cards de colección preview | 2026-09-07 |
