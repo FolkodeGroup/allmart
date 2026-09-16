@@ -18,7 +18,7 @@ export interface PrintableReportProps {
     periodLabel: string;
     ordersTableProps: OrdersTableProps;
     ordersTableFilters?: {
-        status?: string[];
+        status?: string;
         clientQuery?: string;
         productQuery?: string;
     };
@@ -187,11 +187,11 @@ export const PrintableReport = React.forwardRef<HTMLDivElement, PrintableReportP
                     <section style={{ marginBottom: 16 }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #E5E2DD' }}>
                             <tbody>
-                                {ordersTableFilters?.status && ordersTableFilters.status.length > 0 && (
+                                {ordersTableFilters?.status && ordersTableFilters.status !== '' && (
                                     <tr>
-                                        <td style={cellLabel}>Estados seleccionados</td>
+                                        <td style={cellLabel}>Estado seleccionado</td>
                                         <td style={cellValue}>
-                                            {ordersTableFilters.status.join(', ')}
+                                            {ordersTableFilters.status}
                                         </td>
                                     </tr>
                                 )}
