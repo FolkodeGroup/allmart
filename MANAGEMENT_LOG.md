@@ -2570,4 +2570,16 @@ Este archivo es generado y actualizado automáticamente por:
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1553: Filtro “Sin Stock” debe incluir stock 0 y negativos en la vista de Productos | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1542: 🔄 Registrar puntaje de gestión | 2026-09-07 |
 | dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1540: 🔄 Actualización automática de puntajes semanal | 2026-09-07 |
-| dgimenezdeveloper | 15 | Merge de PR | PR #1588: Refactorizar el filtro de estado en "Últimos pedidos del período" para usar Dropdown singular | 2026-09-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1590: 🔄 Registrar puntaje de gestión | 2026-09-13 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1589: 🔄 Actualización automática de puntajes semanal | 2026-09-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1588: Refactorizar el filtro de estado en "Últimos pedidos del período" para usar Dropdown singular | 2026-09-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1587: Eliminar TAB de "Gráfico" en la card de "Ventas - Últimos 30 días | 2026-09-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1586: Unificar selección de etiquetas en Destino y Navegación del formulario de Banners | 2026-09-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1585: Ajuste de color del sticky header en formulario de Banners | 2026-09-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1584: Ajuste de color del sticky header en formulario de Colecciones | 2026-09-13 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1583: Ajuste del botón de eliminar en productos agregados a una colección | 2026-09-13 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1591: 🔄 Registrar puntaje de gestión | 2026-09-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1590: 🔄 Registrar puntaje de gestión | 2026-09-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1589: 🔄 Actualización automática de puntajes semanal | 2026-09-16 |
+| dgimenezdeveloper | 15 | Revisión de PR — Aprobación | PR #1585: Ajuste de color del sticky header en formulario de Banners | 2026-09-16 |
+| dgimenezdeveloper | 5 | Apertura de PR | PR #1592: 🔄 Actualización automática de puntajes semanal | 2026-09-20 |
