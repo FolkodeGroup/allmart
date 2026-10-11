@@ -1,8 +1,8 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 27866 |
+| dgimenezdeveloper | 28021 |
 | FedericoPaal | 10152 |
-| Mau-bar-iva | 7840 |
+| Mau-bar-iva | 8015 |
 | Nahuel-Dalesio | 1630 |
 | agustin-ovejero | 1481 |
 | CelinaJP | 1378 |
@@ -11,6 +11,25 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1592: 🔄 Actualización automática de puntajes semanal | 2026-09-20 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1591: 🔄 Registrar puntaje de gestión | 2026-09-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1590: 🔄 Registrar puntaje de gestión | 2026-09-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1589: 🔄 Actualización automática de puntajes semanal | 2026-09-16 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1585: Ajuste de color del sticky header en formulario de Banners | 2026-09-16 |
+| Mau-bar-iva | 35 | Issue | Refactorizar el filtro de estado en "Últimos pedidos del período" para usar Dropdown singular | 2026-09-16 |
+| Mau-bar-iva | 15 | Issue | Eliminar TAB de "Gráfico" en la card de "Ventas - Últimos 30 días | 2026-09-16 |
+| Mau-bar-iva | 40 | Issue | Unificar selección de etiquetas en Destino y Navegación del formulario de Banners | 2026-09-16 |
+| Mau-bar-iva | 25 | Issue | Ajuste de color del sticky header en formulario de Banners | 2026-09-16 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1590: 🔄 Registrar puntaje de gestión | 2026-09-13 |
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1589: 🔄 Actualización automática de puntajes semanal | 2026-09-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1588: Refactorizar el filtro de estado en "Últimos pedidos del período" para usar Dropdown singular | 2026-09-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1587: Eliminar TAB de "Gráfico" en la card de "Ventas - Últimos 30 días | 2026-09-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1586: Unificar selección de etiquetas en Destino y Navegación del formulario de Banners | 2026-09-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1585: Ajuste de color del sticky header en formulario de Banners | 2026-09-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1584: Ajuste de color del sticky header en formulario de Colecciones | 2026-09-13 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1583: Ajuste del botón de eliminar en productos agregados a una colección | 2026-09-13 |
+| Mau-bar-iva | 25 | Issue | Ajuste de color del sticky header en formulario de Colecciones | 2026-09-13 |
+| Mau-bar-iva | 35 | Issue | Ajuste del botón de eliminar en productos agregados a una colección | 2026-09-13 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1582: 🔄 Registrar puntaje de gestión | 2026-09-07 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1582: 🔄 Registrar puntaje de gestión | 2026-09-07 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1581: Ajuste visual de flechas del slider de productos en Home y Admin/Colecciones | 2026-09-07 |
