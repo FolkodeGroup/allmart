@@ -1,6 +1,6 @@
 | Dev | Puntaje acumulado |
 |-----|-------------------|
-| dgimenezdeveloper | 28021 |
+| dgimenezdeveloper | 28041 |
 | FedericoPaal | 10152 |
 | Mau-bar-iva | 8015 |
 | Nahuel-Dalesio | 1630 |
@@ -11,6 +11,8 @@
 ## Detalle por actividad
 | Dev | Puntaje | Tipo | Título / Actividad | Fecha |
 |-----|---------|------|--------------------|-------|
+| dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1593: 🔄 Actualización automática de puntajes semanal | 2026-10-18 |
+| dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1592: 🔄 Actualización automática de puntajes semanal | 2026-10-11 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1592: 🔄 Actualización automática de puntajes semanal | 2026-09-20 |
 | dgimenezdeveloper | 5 | Gestión | Apertura de PR — PR #1591: 🔄 Registrar puntaje de gestión | 2026-09-16 |
 | dgimenezdeveloper | 15 | Gestión | Revisión de PR — Aprobación — PR #1590: 🔄 Registrar puntaje de gestión | 2026-09-16 |
